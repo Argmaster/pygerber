@@ -62,6 +62,17 @@ class FormatSpecifierTokenTest(TestCase):
         fs_token = FormatSpecifierToken.match(SOURCE, 0)
         self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
 
+    def test_deprecated_inequal_int_specifiers(self):
+        META = Meta(ignore_deprecated=False)
+        SOURCE = """%FSLIX36Y26*%"""
+        fs_token = FormatSpecifierToken.match(SOURCE, 0)
+        self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
+
+    def test_deprecated_inequal_dec_specifiers(self):
+        META = Meta(ignore_deprecated=False)
+        SOURCE = """%FSLIX36Y35*%"""
+        fs_token = FormatSpecifierToken.match(SOURCE, 0)
+        self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
 
 if __name__ == "__main__":
     main()

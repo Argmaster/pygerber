@@ -45,15 +45,12 @@ class Token(metaclass=ABCMeta):
         )
 
     @classmethod
-    def match(class_: Token, source: str, index: int) -> Token:
-        """
-        Tries matching token regex against source, starting from index. On failure returns False,
-        Token object otherwise. Token object should be dispatched to make it functional.
-        """
+    def match(class_: Token, source: str, index: int=0) -> Token:
         optional_match = class_.regex.match(source, pos=index)
         if optional_match is None:
             return False
         else:
+            # Token object have to be dispatched to make it functional
             return class_(optional_match)
 
     def affect_meta(self):
