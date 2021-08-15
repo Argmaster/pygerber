@@ -8,7 +8,7 @@ from pygerber.tokens import FormatSpecifierToken
 
 class FormatSpecifierTokenTest(TestCase):
 
-    def parse_and_dispatch(self, META, SOURCE, BEIGN):
+    def parse_and_dispatch(self, META, SOURCE, BEIGN) -> FormatSpecifierToken:
         fs_token = FormatSpecifierToken.match(SOURCE, BEIGN)
         self.assertTrue(fs_token)
         fs_token.dispatch(META)
@@ -22,6 +22,12 @@ class FormatSpecifierTokenTest(TestCase):
         self.assertEqual(fs_token.X_dec, 6)
         self.assertEqual(fs_token.Y_int, 3)
         self.assertEqual(fs_token.Y_dec, 6)
+
+    def test_cached_properties(self):
+        fs_token = self.parse_and_dispatch(Meta(), """%FSLAX36Y36*%""", 0)
+        self.assertEqual(fs_token.length, 9)
+        self.assertEqual(fs_token.INT_FORMAT, 3)
+        self.assertEqual(fs_token.DEC_FORMAT, 6)
 
     def test_simple_invalid_match(self):
         SOURCE = """%FSLAXx6Y36*%"""

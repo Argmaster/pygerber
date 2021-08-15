@@ -78,11 +78,15 @@ class FormatSpecifierToken(Token):
 
     @cached_property
     def length(self):
-        return self.X_int + self.X_dec
+        return self.INT_FORMAT + self.DEC_FORMAT
 
     @cached_property
-    def INT_F(self):
+    def INT_FORMAT(self):
         return self.X_int
+
+    @cached_property
+    def DEC_FORMAT(self):
+        return self.X_dec
 
     def affect_meta(self):
         self.meta.coparser.set_format(self)
