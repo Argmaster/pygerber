@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 
 from .token import Token
+from pygerber.exceptions import DeprecatedSyntax
 
 
 class FormatSpecifierToken(Token):
@@ -10,13 +11,18 @@ class FormatSpecifierToken(Token):
         r"%FS(?P<zeros>[LTD])(?P<mode>[AI])X(?P<X_int>[1-6])(?P<X_dec>[1-6])Y(?P<Y_int>[1-6])(?P<Y_dec>[1-6])\*%"
     )
 
-    def zeros(self, value) -> str:
+    def zeros(self, value: str) -> str:
         if value == "L":
             return value
-        elif value == "T" or  value == "D":
-            raise
-    zeros = str
-    mode = str
+        elif not self.meta.ignore_deprecated:
+            raise DeprecatedSyntax(f"Deprecated zeros format specifier '{value}', only 'L' supported.")
+
+    def mode(self, value: str) -> str:
+        if value == 'A':
+            return value
+        elif not self.meta.ignore_deprecated:
+            raise DeprecatedSyntax(f"Deprecated mode format specifier '{value}', only 'A' supported.")
+
     X_int = int
     X_dec = int
     Y_int = int

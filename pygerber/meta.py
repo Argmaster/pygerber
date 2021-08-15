@@ -26,6 +26,7 @@ class Meta:
 
     def __init__(
         self,
+        *,
         ignore_deprecated: bool=True,
         coparser: CoParser=None,
         unit: Unit=Unit.MILIMETERS,

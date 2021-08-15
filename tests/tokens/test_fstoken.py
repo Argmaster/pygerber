@@ -1,19 +1,21 @@
 import re
 from unittest import TestCase, main
 
-from pygerber.exceptions import InvalidCommandFormat
+from pygerber.exceptions import DeprecatedSyntax, InvalidCommandFormat
 from pygerber.meta import Meta
 from pygerber.tokens import FormatSpecifierToken
 
 
-
 class FormatSpecifierTokenTest(TestCase):
-    def test_simple_valid_match(self):
-        META = Meta()
-        SOURCE = """%FSLAX36Y36*%"""
-        fs_token = FormatSpecifierToken.match(SOURCE, 0)
+
+    def parse_and_dispatch(self, META, SOURCE, BEIGN):
+        fs_token = FormatSpecifierToken.match(SOURCE, BEIGN)
         self.assertTrue(fs_token)
         fs_token.dispatch(META)
+        return fs_token
+
+    def test_simple_valid_match(self):
+        fs_token = self.parse_and_dispatch(Meta(), """%FSLAX36Y36*%""", 0)
         self.assertEqual(fs_token.zeros, "L")
         self.assertEqual(fs_token.mode, "A")
         self.assertEqual(fs_token.X_int, 3)
@@ -30,9 +32,7 @@ class FormatSpecifierTokenTest(TestCase):
         SOURCE = """%FSLAXn6Y36*%"""
         self.setUp_forced_invalid_syntax()
         token = FormatSpecifierToken.match(SOURCE, 0)
-        self.assertRaises(
-            InvalidCommandFormat, token.dispatch, None
-        )
+        self.assertRaises(InvalidCommandFormat, token.dispatch, None)
         self.cleanUp_forced_invalid_syntax()
 
     def setUp_forced_invalid_syntax(self):
@@ -46,11 +46,21 @@ class FormatSpecifierTokenTest(TestCase):
 
     def test_affect_meta(self):
         META = Meta()
-        SOURCE = """%FSLAX36Y36*%"""
-        fs_token = FormatSpecifierToken.match(SOURCE, 0)
-        fs_token.dispatch(META)
+        fs_token = self.parse_and_dispatch(META, """%FSLAX36Y36*%""", 0)
         fs_token.affect_meta()
         self.assertEqual(META.coparser.format, fs_token)
+
+    def test_deprecated_syntax_zeros(self):
+        META = Meta(ignore_deprecated=False)
+        SOURCE = """%FSDAX36Y36*%"""
+        fs_token = FormatSpecifierToken.match(SOURCE, 0)
+        self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
+
+    def test_deprecated_syntax_mode(self):
+        META = Meta(ignore_deprecated=False)
+        SOURCE = """%FSLIX36Y36*%"""
+        fs_token = FormatSpecifierToken.match(SOURCE, 0)
+        self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
 
 
 if __name__ == "__main__":
