@@ -45,7 +45,7 @@ class Token(metaclass=ABCMeta):
         )
 
     @classmethod
-    def match(class_: Token, source: str, index: int=0) -> Token:
+    def match(class_: Token, source: str, index: int = 0) -> Token:
         optional_match = class_.regex.match(source, pos=index)
         if optional_match is None:
             return False

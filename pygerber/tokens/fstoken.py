@@ -18,19 +18,21 @@ class FormatSpecifierToken(Token):
 
     def Y_int(self, value: str) -> int:
         Y_int = int(value)
-        if self.X_int != Y_int:
-            self.meta.raise_deprecated_syntax(
-                f"Integer format specifier for X and Y are not equal."
-            )
+        self.raiseDeprecatedIfNotEqual(
+            self.X_int, Y_int, "Integer format specifier for X and Y are not equal."
+        )
         return Y_int
 
     def Y_dec(self, value: str) -> int:
         Y_dec = int(value)
-        if self.X_dec != Y_dec:
-            self.meta.raise_deprecated_syntax(
-                f"Decimal format specifier for X and Y are not equal."
-            )
+        self.raiseDeprecatedIfNotEqual(
+            self.X_dec, Y_dec, f"Decimal format specifier for X and Y are not equal."
+        )
         return Y_dec
+
+    def raiseDeprecatedIfNotEqual(self, value_1, value_2, message) -> None:
+        if value_1 != value_2:
+            self.meta.raise_deprecated_syntax(message)
 
     @cached_property
     def length(self):
