@@ -4,7 +4,6 @@ from functools import cached_property
 import re
 
 from .token import Token
-from pygerber.exceptions import DeprecatedSyntax
 
 
 class FormatSpecifierToken(Token):
@@ -12,66 +11,23 @@ class FormatSpecifierToken(Token):
         r"%FS(?P<zeros>[LTD])(?P<mode>[AI])X(?P<X_int>[1-6])(?P<X_dec>[1-6])Y(?P<Y_int>[1-6])(?P<Y_dec>[1-6])\*%"
     )
 
-    def zeros(self, value: str) -> str:
-        if value == "L":
-            return value
-        elif not self.meta.ignore_deprecated:
-            raise DeprecatedSyntax(
-                f"Deprecated zeros format specifier '{value}', only 'L' supported."
-            )
-
-    def mode(self, value: str) -> str:
-        if value == "A":
-            return value
-        elif not self.meta.ignore_deprecated:
-            raise DeprecatedSyntax(
-                f"Deprecated mode format specifier '{value}', only 'A' supported."
-            )
-
-    def X_int(self, value: str) -> int:
-        X_int = int(value)
-        if (
-            isinstance(self.Y_int, int)
-            and self.Y_int != X_int
-            and not self.meta.ignore_deprecated
-        ):
-            raise DeprecatedSyntax(
-                f"Integer format specifier for X and Y are not equal."
-            )
-        return X_int
-
-    def X_dec(self, value: str) -> int:
-        X_dec = int(value)
-        if (
-            isinstance(self.Y_dec, int)
-            and self.Y_dec != X_dec
-            and not self.meta.ignore_deprecated
-        ):
-            raise DeprecatedSyntax(
-                f"Decimal format specifier for X and Y are not equal."
-            )
-        return X_dec
+    X_int = int
+    X_dec = int
+    zeros = str
+    mode = str
 
     def Y_int(self, value: str) -> int:
         Y_int = int(value)
-        if (
-            isinstance(self.X_int, int)
-            and self.X_int != Y_int
-            and not self.meta.ignore_deprecated
-        ):
-            raise DeprecatedSyntax(
+        if self.X_int != Y_int:
+            self.meta.raise_deprecated_syntax(
                 f"Integer format specifier for X and Y are not equal."
             )
         return Y_int
 
     def Y_dec(self, value: str) -> int:
         Y_dec = int(value)
-        if (
-            isinstance(self.X_dec, int)
-            and self.X_dec != Y_dec
-            and not self.meta.ignore_deprecated
-        ):
-            raise DeprecatedSyntax(
+        if self.X_dec != Y_dec:
+            self.meta.raise_deprecated_syntax(
                 f"Decimal format specifier for X and Y are not equal."
             )
         return Y_dec

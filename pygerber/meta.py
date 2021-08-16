@@ -1,3 +1,4 @@
+from pygerber.exceptions import DeprecatedSyntax
 from unittest.result import TestResult
 from pygerber.coparser import CoParser
 from typing import Tuple
@@ -5,7 +6,7 @@ from typing import Tuple
 
 class Meta:
     class Unit:
-        MILIMETERS = "MM"
+        MILLIMETERS = "MM"
         INCHES = "IN"
 
     class Polarity:
@@ -29,7 +30,7 @@ class Meta:
         *,
         ignore_deprecated: bool=True,
         coparser: CoParser=None,
-        unit: Unit=Unit.MILIMETERS,
+        unit: Unit=Unit.MILLIMETERS,
         current_point: Tuple[float, float] = (0,0),
         current_aperture: object = None,
         interpolation: Interpolation = Interpolation.Linear,
@@ -51,3 +52,7 @@ class Meta:
         self.mirroring = mirroring
         self.rotation = rotation
         self.scaling = scaling
+
+    def raise_deprecated_syntax(self, message: str):
+        if not self.ignore_deprecated:
+            raise DeprecatedSyntax(message)

@@ -56,18 +56,6 @@ class FormatSpecifierTokenTest(TestCase):
         fs_token.affect_meta()
         self.assertEqual(META.coparser.format, fs_token)
 
-    def test_deprecated_syntax_zeros(self):
-        META = Meta(ignore_deprecated=False)
-        SOURCE = """%FSDAX36Y36*%"""
-        fs_token = FormatSpecifierToken.match(SOURCE, 0)
-        self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
-
-    def test_deprecated_syntax_mode(self):
-        META = Meta(ignore_deprecated=False)
-        SOURCE = """%FSLIX36Y36*%"""
-        fs_token = FormatSpecifierToken.match(SOURCE, 0)
-        self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
-
     def test_deprecated_inequal_int_specifiers(self):
         META = Meta(ignore_deprecated=False)
         SOURCE = """%FSLIX36Y26*%"""

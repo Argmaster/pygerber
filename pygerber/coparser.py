@@ -1,16 +1,12 @@
-from typing import TYPE_CHECKING
 from types import SimpleNamespace
 
 from pygerber.tokens import FormatSpecifierToken
-
-if TYPE_CHECKING:
-    from pygerber.meta import Meta
 
 
 class CoParser:
 
     format: FormatSpecifierToken
-    default_format = "%FSDAX36Y36*%"
+    default_format = "%FSLAX36Y36*%"
 
     def __init__(self) -> None:
         self.set_default_format()
@@ -32,8 +28,18 @@ class CoParser:
             float_string = float_string[1:]
         else:
             sign = ""
-        float_with_zeros = f"{float_string:0>{self.format.length}}"
+        # three possible behaviors of zeros
+        float_with_zeros = self.format_zeros(float_string)
         float_int_part = float_with_zeros[: self.format.INT_FORMAT]
         float_dec_part = float_with_zeros[self.format.INT_FORMAT :]
         valid_float = f"{sign}{float_int_part}.{float_dec_part}"
         return float(valid_float)
+
+    def format_zeros(self, float_string):
+        # three possible behaviors of zeros
+        if self.format.zeros == "L":  # skip leading
+            return f"{float_string:0>{self.format.length}}"
+        elif self.format.zeros == "T":  # skip trailing
+            return f"{float_string:0<{self.format.length}}"
+        else:  # D - don't skip, no oder gets through regex
+            return float_string

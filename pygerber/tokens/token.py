@@ -4,7 +4,7 @@ import re
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
-from pygerber.exceptions import DeprecatedSyntax, InvalidCommandFormat, suppress_context
+from pygerber.exceptions import InvalidCommandFormat, suppress_context
 
 if TYPE_CHECKING:
     from pygerber.meta import Meta

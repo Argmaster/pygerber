@@ -19,7 +19,7 @@ class GerberParser:
         self.meta = Meta()
         self.begin_index = 0
         self.char_index = 0
-        self.line_indxe = 0
+        self.line_index = 0
 
     def evaluate(self, backend) -> None:
         pass
