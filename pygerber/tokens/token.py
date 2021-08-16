@@ -35,7 +35,7 @@ class Token(metaclass=ABCMeta):
 
     def set_attribute(self, attribute_name, value):
         validator_function = getattr(self, attribute_name)
-        setattr(self, attribute_name, validator_function(value))
+        setattr(self, attribute_name, validator_function(self, value))
 
     def raise_invalid_format(self, match_object, e):
         raise suppress_context(

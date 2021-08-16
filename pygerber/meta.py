@@ -53,6 +53,6 @@ class Meta:
         self.rotation = rotation
         self.scaling = scaling
 
-    def raise_deprecated_syntax(self, message: str):
+    def raiseDeprecatedSyntax(self, message: str):
         if not self.ignore_deprecated:
             raise DeprecatedSyntax(message)

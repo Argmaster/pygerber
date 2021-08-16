@@ -4,6 +4,7 @@ from functools import cached_property
 import re
 
 from .token import Token
+from .validator import Int, String, CallOnCondition
 
 
 class FormatSpecifierToken(Token):
@@ -11,28 +12,28 @@ class FormatSpecifierToken(Token):
         r"%FS(?P<zeros>[LTD])(?P<mode>[AI])X(?P<X_int>[1-6])(?P<X_dec>[1-6])Y(?P<Y_int>[1-6])(?P<Y_dec>[1-6])\*%"
     )
 
-    X_int = int
-    X_dec = int
-    zeros = str
-    mode = str
-
-    def Y_int(self, value: str) -> int:
-        Y_int = int(value)
-        self.raiseDeprecatedIfNotEqual(
-            self.X_int, Y_int, "Integer format specifier for X and Y are not equal."
-        )
-        return Y_int
-
-    def Y_dec(self, value: str) -> int:
-        Y_dec = int(value)
-        self.raiseDeprecatedIfNotEqual(
-            self.X_dec, Y_dec, f"Decimal format specifier for X and Y are not equal."
-        )
-        return Y_dec
-
+    X_int = Int(3)
+    X_dec = Int(6)
+    Y_int = CallOnCondition(
+        Int(3),
+        lambda token, value: token.X_int != value,
+        lambda token, _: token.meta.raiseDeprecatedSyntax(
+            "Integer format specifier for X and Y are not equal."
+        ),
+    )
+    Y_dec = CallOnCondition(
+        Int(6),
+        lambda token, value: token.X_dec != value,
+        lambda token, _: token.meta.raiseDeprecatedSyntax(
+            "Decimal format specifier for X and Y are not equal."
+        ),
+    )
+    zeros = String("L")
+    mode = String("A")
+    
     def raiseDeprecatedIfNotEqual(self, value_1, value_2, message) -> None:
         if value_1 != value_2:
-            self.meta.raise_deprecated_syntax(message)
+            self.meta.raiseDeprecatedSyntax(message)
 
     @cached_property
     def length(self):
