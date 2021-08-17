@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from types import SimpleNamespace
 
 from pygerber.tokens import FormatSpecifierToken

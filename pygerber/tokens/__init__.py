@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from typing import List, Type
 
 from pygerber.tokens.token import Token

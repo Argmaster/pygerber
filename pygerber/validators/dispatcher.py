@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import re
@@ -29,7 +30,6 @@ class Dispatcher(ValidatorDispatcher, Validator):
         else:
             return self.pattern
 
-
     def __call__(self, token: Token, value: str) -> str:
         if value is not None:
             return self.clean_not_none(token, value)
@@ -40,7 +40,7 @@ class Dispatcher(ValidatorDispatcher, Validator):
         pattern = self.get_pattern(token, value)
         self.re_match = pattern.match(value)
         if self.re_match is None:
-            raise InvalidCommandFormat(f"Invalid set of arguments.")
+            raise InvalidCommandFormat("Invalid set of arguments.")
         return self.dispatch_into_namespace(token.meta)
 
     def clean_none(self, token: Token):

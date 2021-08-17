@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pygerber.exceptions import DeprecatedSyntax
 from pygerber.coparser import CoParser
 from typing import Tuple
@@ -27,10 +28,10 @@ class Meta:
     def __init__(
         self,
         *,
-        ignore_deprecated: bool=True,
-        coparser: CoParser=None,
-        unit: Unit=Unit.MILLIMETERS,
-        current_point: Tuple[float, float] = (0,0),
+        ignore_deprecated: bool = True,
+        coparser: CoParser = None,
+        unit: Unit = Unit.MILLIMETERS,
+        current_point: Tuple[float, float] = (0, 0),
         current_aperture: object = None,
         interpolation: Interpolation = Interpolation.Linear,
         polarity: Polarity = Polarity.DARK,

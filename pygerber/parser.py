@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from collections import deque
 from pygerber.tokens.token import Token
 

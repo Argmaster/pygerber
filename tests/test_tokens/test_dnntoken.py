@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from unittest import TestCase, main
 
 from pygerber.tokens import D01_Token, D02_Token, D03_Token

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 from typing import Dict, TYPE_CHECKING
@@ -12,8 +13,9 @@ if TYPE_CHECKING:
 class ValidatorDispatcher:
     """
     Whenever You subclass ValidatorDispatcher, you have to wrap your class
-    in @load_validators decorator from pygerber.validators to preload validators
-    into class when it is created. If U won't do it, your code will fail.
+    in @load_validators decorator from pygerber.validators to preload
+    validators into class when it is created. If U won't do it, your
+    code will fail.
     """
 
     validators: Dict[str, Validator]
@@ -42,6 +44,7 @@ class ValidatorDispatcher:
     def raise_invalid_format(self, message) -> None:
         raise suppress_context(
             InvalidCommandFormat(
-                f"Failed to dispatch expression `{self.re_match.group()}`, {message}"
+                f"Failed to dispatch expression "
+                f"`{self.re_match.group()}`, {message}"
             )
         )

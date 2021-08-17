@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .basic import Float, String, Int
 from .conditional import CallOnCondition
 from .coordinate import Coordinate

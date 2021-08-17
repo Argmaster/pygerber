@@ -1,4 +1,4 @@
-import re
+# -*- coding: utf-8 -*-
 from types import SimpleNamespace
 from unittest import TestCase, main
 
@@ -13,7 +13,6 @@ class CoordinateTest(TestCase):
 
     def test_coordinate(self):
         token = self.get_dummy_token()
-        test_value = "30100"
 
         @load_validators
         class ARGS_dispatcher(Dispatcher):
@@ -23,8 +22,8 @@ class CoordinateTest(TestCase):
 
         cleaned1 = validator1(token, "foo")
         cleaned2 = validator1(token, "bar")
-        self.assertEqual(cleaned1.VALUE, 'foo')
-        self.assertEqual(cleaned2.VALUE, 'bar')
+        self.assertEqual(cleaned1.VALUE, "foo")
+        self.assertEqual(cleaned2.VALUE, "bar")
 
 
 if __name__ == "__main__":
