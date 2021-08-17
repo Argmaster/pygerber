@@ -60,6 +60,12 @@ class Meta:
     def set_interpolation(self, interpolation: Interpolation):
         self.interpolation = interpolation
 
+    def begin_region(self):
+        self.is_regionmode = True
+
+    def end_region(self):
+        self.is_regionmode = False
+
     def raiseDeprecatedSyntax(self, message: str):
         if not self.ignore_deprecated:
             raise DeprecatedSyntax(message)

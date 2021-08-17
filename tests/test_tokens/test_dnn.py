@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from pygerber.tokens import DNN_Loader_Token
 from unittest import TestCase, main
 
-from pygerber.tokens import D01_Token, D02_Token, D03_Token
 from pygerber.meta import Meta
+from pygerber.tokens import D01_Token, D02_Token, D03_Token, DNN_Loader_Token
 
 
 class D01_TokenText(TestCase):
@@ -87,7 +86,6 @@ class DNN_Loader_Token_Test(TestCase):
         self.assertTrue(token)
         token.dispatch(META)
         self.assertEqual(token.ID, 12)
-
 
 
 if __name__ == "__main__":

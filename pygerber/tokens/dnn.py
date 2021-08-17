@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.validators.basic import Int
 
 import re
 
+from pygerber.validators import Coordinate, Int, load_validators
+
 from .token import Token
-from pygerber.validators import Coordinate, load_validators
 
 CO_PATTERN = r"[-+]?[0-9]+"
 
