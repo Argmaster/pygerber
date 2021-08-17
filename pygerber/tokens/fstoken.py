@@ -4,7 +4,7 @@ from functools import cached_property
 import re
 
 from .token import Token
-from .validator import Int, String, CallOnCondition, load_validators
+from pygerber.validators import Int, String, CallOnCondition, load_validators
 
 
 @load_validators

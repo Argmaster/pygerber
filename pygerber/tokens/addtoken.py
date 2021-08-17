@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from .token import Token
-from .validator import Dispatcher, Float, Int, String, load_validators
+from pygerber.validators import Dispatcher, Float, Int, String, load_validators
 
 
 @load_validators

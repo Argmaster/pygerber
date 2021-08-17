@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pygerber.meta import Meta
 
-import pygerber.tokens.validator as validator
+import pygerber.validators as validator
 
 
 class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):

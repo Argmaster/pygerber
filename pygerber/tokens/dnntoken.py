@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from .token import Token
-from .validator import Coordinate, load_validators
+from pygerber.validators import Coordinate, load_validators
 
 CO_PATTERN = r"[-+]?[0-9]+"
 
