@@ -1,5 +1,4 @@
 from pygerber.exceptions import DeprecatedSyntax
-from unittest.result import TestResult
 from pygerber.coparser import CoParser
 from typing import Tuple
 

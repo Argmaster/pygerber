@@ -4,9 +4,10 @@ from functools import cached_property
 import re
 
 from .token import Token
-from .validator import Int, String, CallOnCondition
+from .validator import Int, String, CallOnCondition, load_validators
 
 
+@load_validators
 class FormatSpecifierToken(Token):
     regex = re.compile(
         r"%FS(?P<zeros>[LTD])(?P<mode>[AI])X(?P<X_int>[1-6])(?P<X_dec>[1-6])Y(?P<Y_int>[1-6])(?P<Y_dec>[1-6])\*%"
@@ -30,7 +31,7 @@ class FormatSpecifierToken(Token):
     )
     zeros = String("L")
     mode = String("A")
-    
+
     def raiseDeprecatedIfNotEqual(self, value_1, value_2, message) -> None:
         if value_1 != value_2:
             self.meta.raiseDeprecatedSyntax(message)

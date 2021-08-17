@@ -23,7 +23,7 @@ class FormatSpecifierTokenTest(TestCase):
         self.assertEqual(fs_token.Y_int, 3)
         self.assertEqual(fs_token.Y_dec, 6)
 
-    def test_cached_properties(self):
+    def test_properties(self):
         fs_token = self.parse_and_dispatch(Meta(), """%FSLAX36Y36*%""", 0)
         self.assertEqual(fs_token.length, 9)
         self.assertEqual(fs_token.INT_FORMAT, 3)

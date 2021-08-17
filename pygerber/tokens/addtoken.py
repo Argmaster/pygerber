@@ -3,41 +3,56 @@ from __future__ import annotations
 import re
 
 from .token import Token
-from .validator import Float, Int, String
+from .validator import Dispatcher, Float, Int, String, load_validators
 
 
+@load_validators
 class ADD_Token(Token):
 
-    FLOAT_PATTERN = r"[-+]?[0-9]*.[0-9]*"
-    HOLE_DIAMETER_PATTERN = r"(X(?P<HOLE_DIAMETER>{0}))?".format(FLOAT_PATTERN)
+    FLOAT_PATTERN = r"[-+]?[0-9]*\.?[0-9]*"
 
-    CIRCLE_PATTERN = r"(?P<DIAMETER>{0})".format(FLOAT_PATTERN)
-    RECTANGLE_PATTERN = r"(?P<X>{0})X(?P<Y>{0})".format(FLOAT_PATTERN)
-    POLYGON_PATTERN = (
-        r"(?P<OUTER_DIAMETER>{0})X(?P<VERTICES>{0})(X(?P<ROTATION>{0}))?".format(
-            FLOAT_PATTERN
+    CIRCLE_PATTERN = re.compile(
+        r"(?P<DIAMETER>{0})(X(?P<HOLE_DIAMETER>{0}))?".format(FLOAT_PATTERN)
+    )
+    RECTANGLE_PATTERN = re.compile(
+        r"(?P<X>{0})X(?P<Y>{0})(X(?P<HOLE_DIAMETER>{0}))?".format(FLOAT_PATTERN)
+    )
+    POLYGON_PATTERN = re.compile(
+        (
+            r"(?P<DIAMETER>{0})X(?P<VERTICES>{0})(X(?P<ROTATION>{0}))?(X(?P<HOLE_DIAMETER>{0}))?"
+        ).format(FLOAT_PATTERN)
+    )
+
+    BASIC_APERTURE = r"(?P<TYPE>[CROP]),(?P<ARGS>({0}X?)+)".format(FLOAT_PATTERN)
+    NAMED_APERTURE = r"(?P<NAME>[a-zA-Z0-9]+)"
+    regex = re.compile(
+        r"%ADD(?P<ID>[0-9]+){0}|{1}\*%".format(
+            BASIC_APERTURE,
+            NAMED_APERTURE,
         )
     )
-    BASIC_APERTURE = r"(?P<TYPE>[CROP]),({0})|({1})|({2}){3}".format(
-        CIRCLE_PATTERN,
-        RECTANGLE_PATTERN,
-        POLYGON_PATTERN,
-        HOLE_DIAMETER_PATTERN,
-    )
-    regex = re.compile(
-        r"%ADD(?P<ID>[0-9]+)({0})|(?P<NAME>[a-zA-Z0-9]+)\*%".format(BASIC_APERTURE)
-    )
 
-    ID = Int(0)
-    TYPE = String("")
-    NAME = String("")
-    X = Float(0.0)
-    Y = Float(0.0)
-    VERTICES = Int(0)
-    DIAMETER = Float(0.0)
-    HOLE_DIAMETER = Float(0.0)
-    OUTER_DIAMETER = Float(0.0)
-    ROTATION = Float(0.0)
+    ID = Int()
+    TYPE = String()
+    NAME = String()
+
+    @load_validators
+    class ARGS_dispatcher(Dispatcher):
+        DIAMETER = Float()
+        X = Float()
+        Y = Float()
+        VERTICES = Int()
+        ROTATION = Float()
+        HOLE_DIAMETER = Float()
+
+    @ARGS_dispatcher
+    def ARGS(self: Token, __: str) -> re.Pattern:
+        if self.TYPE == "C":
+            return self.CIRCLE_PATTERN
+        elif self.TYPE == "R" or self.TYPE == "O":
+            return self.RECTANGLE_PATTERN
+        elif self.TYPE == "P":
+            return self.POLYGON_PATTERN
 
     def __str__(self) -> str:
         return f"ADD_Token<ID={self.ID}, TYPE={self.TYPE}, NAME={self.NAME}>"

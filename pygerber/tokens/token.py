@@ -4,13 +4,13 @@ import re
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING
 
-from pygerber.exceptions import InvalidCommandFormat, suppress_context
-
 if TYPE_CHECKING:
     from pygerber.meta import Meta
 
+import pygerber.tokens.validator as validator
 
-class Token(metaclass=ABCMeta):
+
+class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
     regex: re.Pattern
     re_match: re.Match
     # meta attribute is only available after dispatch
@@ -18,31 +18,6 @@ class Token(metaclass=ABCMeta):
 
     def __init__(self, match_object: re.Match) -> None:
         self.re_match = match_object
-
-    def dispatch(self, meta: Meta) -> None:
-        """
-        Dispatch named groups from match into instance attributes,
-        should be called only once, before affect_meta and evaluate.
-        Sets meta attribute on token instance.
-        """
-        self.meta = meta
-        group_dict = self.re_match.groupdict()
-        for attribute_name, value in group_dict.items():
-            try:
-                self.set_attribute(attribute_name, value)
-            except ValueError as e:
-                self.raise_invalid_format(self.re_match, e)
-
-    def set_attribute(self, attribute_name, value):
-        validator_function = getattr(self, attribute_name)
-        setattr(self, attribute_name, validator_function(self, value))
-
-    def raise_invalid_format(self, match_object, e):
-        raise suppress_context(
-            InvalidCommandFormat(
-                f"Failed to dispatch expression `{match_object.group()}`, {e.__str__()}"
-            )
-        )
 
     @classmethod
     def match(class_: Token, source: str, index: int = 0) -> Token:

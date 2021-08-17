@@ -7,10 +7,10 @@ from pygerber.meta import Meta
 class ADD_TokenTest(TestCase):
     def init_token(self, source):
         META = Meta()
-        dnntoken = ADD_Token.match(source, 0)
-        self.assertTrue(dnntoken)
-        dnntoken.dispatch(META)
-        return dnntoken, META
+        token = ADD_Token.match(source, 0)
+        self.assertTrue(token)
+        token.dispatch(META)
+        return token, META
 
     def assertValues(
         self,
@@ -18,25 +18,23 @@ class ADD_TokenTest(TestCase):
         ID,
         TYPE,
         *,
-        NAME="",
-        X=0.0,
-        Y=0.0,
-        VERTICES=0,
-        DIAMETER=0.0,
-        HOLE_DIAMETER=0.0,
-        OUTER_DIAMETER=0.0,
-        ROTATION=0.0,
+        NAME=None,
+        X=None,
+        Y=None,
+        VERTICES=None,
+        DIAMETER=None,
+        HOLE_DIAMETER=None,
+        ROTATION=None,
     ):
         self.assertTrue(token.ID == ID)
         self.assertTrue(token.TYPE == TYPE)
         self.assertTrue(token.NAME == NAME)
-        self.assertTrue(token.X == X, token.X)
-        self.assertTrue(token.Y == Y)
-        self.assertTrue(token.VERTICES == VERTICES)
-        self.assertTrue(token.DIAMETER == DIAMETER)
-        self.assertTrue(token.HOLE_DIAMETER == HOLE_DIAMETER)
-        self.assertTrue(token.OUTER_DIAMETER == OUTER_DIAMETER)
-        self.assertTrue(token.ROTATION == ROTATION)
+        self.assertTrue(token.ARGS.X == X)
+        self.assertTrue(token.ARGS.Y == Y)
+        self.assertTrue(token.ARGS.VERTICES == VERTICES)
+        self.assertTrue(token.ARGS.DIAMETER == DIAMETER)
+        self.assertTrue(token.ARGS.HOLE_DIAMETER == HOLE_DIAMETER)
+        self.assertTrue(token.ARGS.ROTATION == ROTATION)
 
     def test_valid_circle(self):
         token, meta = self.init_token(r"%ADD10C,0.1*%")
