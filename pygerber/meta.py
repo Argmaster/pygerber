@@ -14,10 +14,9 @@ class Meta:
         CLEAR = "C"
 
     class Interpolation:
-        Linear = "G01"
-        ClockwiseCircular = "G02"
-        CounterclockwiseCircular = "G03"
-        _BeforeCircular = "G75"
+        Linear = 1
+        ClockwiseCircular = 2
+        CounterclockwiseCircular = 3
 
     class Mirroring:
         No = "N"
@@ -38,6 +37,7 @@ class Meta:
         mirroring: Mirroring = Mirroring.No,
         rotation: float = 0,
         scaling: float = 0,
+        is_regionmode: bool=False,
     ) -> None:
         self.ignore_deprecated = ignore_deprecated
         if coparser is None:
@@ -52,9 +52,13 @@ class Meta:
         self.mirroring = mirroring
         self.rotation = rotation
         self.scaling = scaling
+        self.is_regionmode = is_regionmode
 
     def select_aperture(self, id: int):
         self.current_aperture = id
+
+    def set_interpolation(self, interpolation: Interpolation):
+        self.interpolation = interpolation
 
     def raiseDeprecatedSyntax(self, message: str):
         if not self.ignore_deprecated:

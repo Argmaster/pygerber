@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pygerber.tokens.dnntoken import DNN_Loader_Token
+from pygerber.tokens import DNN_Loader_Token
 from unittest import TestCase, main
 
 from pygerber.tokens import D01_Token, D02_Token, D03_Token
