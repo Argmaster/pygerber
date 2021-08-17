@@ -49,3 +49,18 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
         Construct string of Gerber code coresponding to data held in token.
         """
         return self.re_match.group()
+
+
+class Deprecated:
+    def __init__(self, message) -> None:
+        self.message = message
+
+    def __call__(self, class_: Token):
+        message = self.message
+        def deprecated_dispatch(self, meta):
+            meta.raiseDeprecatedSyntax( message)
+            super(class_, self).dispatch(meta)
+
+        class_.dispatch = deprecated_dispatch
+
+        return class_

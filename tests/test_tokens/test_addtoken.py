@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase, main
 
-from pygerber.tokens import ADD_Token
 from pygerber.meta import Meta
+from pygerber.tokens import ADD_Token
 
 
 class ADD_TokenTest(TestCase):
