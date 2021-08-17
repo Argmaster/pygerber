@@ -69,5 +69,10 @@ class FormatSpecifierTokenTest(TestCase):
         fs_token = FormatSpecifierToken.match(SOURCE, 0)
         self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
 
+    def test_stringify(self):
+        META = Meta(ignore_deprecated=False)
+        fs_token = self.parse_and_dispatch(META, r"""%FSLAX36Y36*%""", 0)
+        self.assertEqual(str(fs_token), r"%FSLAX36Y36*%")
+
 if __name__ == "__main__":
     main()

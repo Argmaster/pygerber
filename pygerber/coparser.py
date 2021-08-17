@@ -23,13 +23,16 @@ class CoParser:
     def set_format(self, format: FormatSpecifierToken) -> None:
         self.format = format
 
+    def dump(self, co: float) -> str:
+        # TODO implement some day...
+        return str(co)
+
     def parse(self, float_string: str) -> float:
         if float_string[0] == "-" or float_string[0] == "+":
             sign = float_string[0]
             float_string = float_string[1:]
         else:
             sign = ""
-        # three possible behaviors of zeros
         float_with_zeros = self.format_zeros(float_string)
         float_int_part = float_with_zeros[: self.format.INT_FORMAT]
         float_dec_part = float_with_zeros[self.format.INT_FORMAT :]

@@ -22,9 +22,6 @@ class D01_Token(Token):
     I = Coordinate()
     J = Coordinate()
 
-    def __str__(self) -> str:
-        return f"D01_Token<X{self.X}Y{self.Y}I{self.I}J{self.J}>"
-
 
 @load_validators
 class D02_Token(Token):
@@ -35,9 +32,6 @@ class D02_Token(Token):
     X = Coordinate()
     Y = Coordinate()
 
-    def __str__(self) -> str:
-        return f"D02_Token<X{self.X}Y{self.Y}>"
-
 
 @load_validators
 class D03_Token(Token):
@@ -47,6 +41,3 @@ class D03_Token(Token):
 
     X = Coordinate()
     Y = Coordinate()
-
-    def __str__(self) -> str:
-        return f"D03_Token<X{self.X}Y{self.Y}>"

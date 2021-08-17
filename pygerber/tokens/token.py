@@ -29,18 +29,23 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
             # Token object have to be dispatched to make it functional
             return class_(optional_match)
 
+    def dump_co(self, co: float):
+        return self.meta.coparser.dump(co)
+
     def affect_meta(self):
         """
-        This method should be called only after token is dispatched and before evaluate().
+        This method should be called only after token is dispatched and before render().
         """
         pass
 
-    def evaluate(self):
+    def render(self):
         """
         This method should be called only after token is dispatched and after affect_meta().
         """
         pass
 
-    @abstractmethod
     def __str__(self) -> str:
-        pass
+        """
+        Construct string of Gerber code coresponding to data held in token.
+        """
+        return self.re_match.group()

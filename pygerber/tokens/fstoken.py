@@ -51,6 +51,3 @@ class FormatSpecifierToken(Token):
 
     def affect_meta(self):
         self.meta.coparser.set_format(self)
-
-    def __str__(self) -> str:
-        return f"FS_Token<{self.zeros}{self.mode}X{self.X_int}{self.X_dec}Y{self.Y_int}{self.Y_dec}>"

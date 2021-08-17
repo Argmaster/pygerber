@@ -27,7 +27,7 @@ class ADD_Token(Token):
     BASIC_APERTURE = r"(?P<TYPE>[CROP]),(?P<ARGS>({0}X?)+)".format(FLOAT_PATTERN)
     NAMED_APERTURE = r"(?P<NAME>[a-zA-Z0-9]+)"
     regex = re.compile(
-        r"%ADD(?P<ID>[0-9]+){0}|{1}\*%".format(
+        r"%ADD(?P<ID>[0-9]+)({0}|{1})\*%".format(
             BASIC_APERTURE,
             NAMED_APERTURE,
         )
@@ -43,8 +43,8 @@ class ADD_Token(Token):
         X = Float()
         Y = Float()
         VERTICES = Int()
-        ROTATION = Float()
-        HOLE_DIAMETER = Float()
+        ROTATION = Float(0.0)
+        HOLE_DIAMETER = Float(0.0)
 
     @ARGS_dispatcher
     def ARGS(self: Token, __: str) -> re.Pattern:
@@ -54,6 +54,3 @@ class ADD_Token(Token):
             return self.RECTANGLE_PATTERN
         elif self.TYPE == "P":
             return self.POLYGON_PATTERN
-
-    def __str__(self) -> str:
-        return f"ADD_Token<ID={self.ID}, TYPE={self.TYPE}, NAME={self.NAME}>"
