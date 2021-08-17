@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pygerber.tokens.dnntoken import DNN_Loader_Token
 from unittest import TestCase, main
 
 from pygerber.tokens import D01_Token, D02_Token, D03_Token
@@ -76,6 +77,17 @@ class D03_TokenText(TestCase):
     def test_invalid_match(self):
         dnntoken = D03_Token.match("X1700Y2000D01*", 0)
         self.assertFalse(dnntoken)
+
+
+class DNN_Loader_Token_Test(TestCase):
+    def test_match(self):
+        META = Meta()
+        source = "D12*"
+        token = DNN_Loader_Token.match(source, 0)
+        self.assertTrue(token)
+        token.dispatch(META)
+        self.assertEqual(token.ID, 12)
+
 
 
 if __name__ == "__main__":

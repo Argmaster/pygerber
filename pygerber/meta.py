@@ -53,6 +53,9 @@ class Meta:
         self.rotation = rotation
         self.scaling = scaling
 
+    def select_aperture(self, id: int):
+        self.current_aperture = id
+
     def raiseDeprecatedSyntax(self, message: str):
         if not self.ignore_deprecated:
             raise DeprecatedSyntax(message)

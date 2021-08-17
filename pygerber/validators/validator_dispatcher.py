@@ -32,7 +32,7 @@ class ValidatorDispatcher:
                 cleaned_value = validator(self, value)
                 setattr(namespace, attribute_name, cleaned_value)
             except ValueError as e:
-                self.raise_invalid_format(e.__str__())
+                self.raiseInvalidCommandFormat(e.__str__())
         return namespace
 
     def get_groupdict(self) -> dict:
@@ -41,7 +41,7 @@ class ValidatorDispatcher:
         else:
             return {}
 
-    def raise_invalid_format(self, message) -> None:
+    def raiseInvalidCommandFormat(self, message) -> None:
         raise suppress_context(
             InvalidCommandFormat(
                 f"Failed to dispatch expression "

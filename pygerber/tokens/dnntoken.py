@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pygerber.validators.basic import Int
 
 import re
 
@@ -41,3 +42,12 @@ class D03_Token(Token):
 
     X = Coordinate()
     Y = Coordinate()
+
+
+@load_validators
+class DNN_Loader_Token(Token):
+    regex = re.compile(r"D(?P<ID>[0-9]+)\*")
+    ID = Int()
+
+    def affect_meta(self):
+        self.meta.select_aperture(self.ID)
