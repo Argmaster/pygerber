@@ -11,21 +11,21 @@ class D01_TokenText(TestCase):
         dnntoken = D01_Token.match(source, 0)
         self.assertTrue(dnntoken)
         dnntoken.dispatch(META)
-        return dnntoken, META
+        return dnntoken
 
     def assertValues(self, token, X, Y, I, J):
         self.assertTrue(token.X == X and token.Y == Y and token.I == I and token.J == J)
 
     def test_valid_match_ij_xy(self):
-        dnntoken, meta = self.init_token("I300J100D01*")
+        dnntoken = self.init_token("I300J100D01*")
         self.assertValues(dnntoken, None, None, 0.0003, 0.0001)
-        dnntoken, meta = self.init_token("X1700Y2000D01*")
+        dnntoken = self.init_token("X1700Y2000D01*")
         self.assertValues(dnntoken, 0.0017, 0.002, None, None)
-        dnntoken, meta = self.init_token("Y500000D01*")
+        dnntoken = self.init_token("Y500000D01*")
         self.assertValues(dnntoken, None, 0.5, None, None)
 
     def test_valid_match_xyij(self):
-        dnntoken, meta = self.init_token("X-300Y+200I50J50D01*")
+        dnntoken = self.init_token("X-300Y+200I50J50D01*")
         self.assertValues(dnntoken, -0.0003, 0.0002, 0.00005, 0.00005)
 
     def test_simple_no_match(self):
@@ -86,6 +86,14 @@ class DNN_Loader_Token_Test(TestCase):
         self.assertTrue(token)
         token.dispatch(META)
         self.assertEqual(token.ID, 12)
+
+    def test_fail_on_nn_less_than_10(self):
+        META = Meta()
+        source = "D07*"
+        token = DNN_Loader_Token.match(source, 0)
+        self.assertFalse(token)
+
+
 
 
 if __name__ == "__main__":

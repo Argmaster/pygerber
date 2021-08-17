@@ -46,7 +46,7 @@ class D03_Token(Token):
 
 @load_validators
 class DNN_Loader_Token(Token):
-    regex = re.compile(r"D(?P<ID>[0-9]+)\*")
+    regex = re.compile(r"D(?P<ID>[1-9][0-9]*)\*")
     ID = Int()
 
     def affect_meta(self):
