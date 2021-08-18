@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import Dict, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from pygerber.exceptions import InvalidCommandFormat, suppress_context
 from pygerber.validators.validator import Validator
@@ -18,7 +18,7 @@ class ValidatorDispatcher:
     code will fail.
     """
 
-    validators: Dict[str, Validator]
+    validators: Dict[str, Validator] = {}
 
     def dispatch(self, meta: Meta) -> None:
         self.dispatch_into_namespace(meta, self)

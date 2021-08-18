@@ -3,15 +3,15 @@ from types import SimpleNamespace
 from unittest import TestCase, main
 
 from pygerber.meta import Meta
-from pygerber.validators import Dispatcher
-from pygerber.validators.validator import Validator, load_validators
+from pygerber.validators import Dispatcher, load_validators
+from pygerber.validators.validator import Validator
 
 
-class CoordinateTest(TestCase):
+class DispatcherTest(TestCase):
     def get_dummy_token(self):
         return SimpleNamespace(meta=Meta())
 
-    def test_coordinate(self):
+    def test_dispatcher(self):
         token = self.get_dummy_token()
 
         @load_validators

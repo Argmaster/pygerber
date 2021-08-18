@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from functools import cached_property
 
 import re
+from functools import cached_property
+
+from pygerber.validators import CallOnCondition, Int, String, load_validators
 
 from .token import Token
-from pygerber.validators import Int, String, CallOnCondition, load_validators
 
 
 @load_validators
