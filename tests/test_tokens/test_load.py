@@ -43,11 +43,17 @@ class TestLoaderTokens(TestCase):
         token.affect_meta()
         self.assertEqual(meta.scale, 0.8)
 
-    def test_MO_token(self):
+    def test_MOMM_token(self):
         token, meta = self.init_token(LoadUnitToken, r"%MOMM*%")
         self.assertEqual(token.UNIT, "MM")
         token.affect_meta()
         self.assertEqual(meta.unit, "MM")
+
+    def test_MOIN_token(self):
+        token, meta = self.init_token(LoadUnitToken, r"%MOIN*%")
+        self.assertEqual(token.UNIT, "IN")
+        token.affect_meta()
+        self.assertEqual(meta.unit, "IN")
 
 
 
