@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase, main
 
-from pygerber.coparser import CoParser
+from pygerber.meta.coparser import CoParser
 
 
 class CoParserTest(TestCase):

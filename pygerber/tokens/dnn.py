@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pygerber.meta.data import Vector2D
 
 import re
 
@@ -23,6 +24,17 @@ class D01_Token(Token):
     I = Coordinate()
     J = Coordinate()
 
+    @property
+    def end(self):
+        return Vector2D(self.X, self.Y)
+
+    @property
+    def offset(self):
+        return Vector2D(self.I, self.J)
+
+    def render(self):
+        self.meta.draw_interpolated(self.end, self.offset)
+
 
 @load_validators
 class D02_Token(Token):
@@ -32,6 +44,13 @@ class D02_Token(Token):
 
     X = Coordinate()
     Y = Coordinate()
+
+    @property
+    def point(self):
+        return Vector2D(self.X, self.Y)
+
+    def render(self):
+        self.meta.move_pointer(self.point)
 
 
 @load_validators
@@ -43,6 +62,13 @@ class D03_Token(Token):
     X = Coordinate()
     Y = Coordinate()
 
+    @property
+    def point(self):
+        return Vector2D(self.X, self.Y)
+
+    def render(self):
+        self.meta.draw_flash(self.point)
+
 
 @load_validators
 class DNN_Loader_Token(Token):
@@ -50,4 +76,4 @@ class DNN_Loader_Token(Token):
     ID = Int()
 
     def affect_meta(self):
-        self.meta.select_aperture(self.ID)
+        self.meta.selectAperture(self.ID)
