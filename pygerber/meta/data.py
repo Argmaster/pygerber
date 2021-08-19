@@ -19,55 +19,29 @@ class Vector2D:
         return self.as_tuple()[index]
 
 
-def outer(first, second) -> float:
-    if abs(second) - abs(first) < 0:
-        return second
-    else:
-        return first
-
-
 @dataclass
 class BoundingBox:
 
-    xs: Tuple[float, float]
-    ys: Tuple[float, float]
+    left: float
+    upper: float
+    right: float
+    lower: float
 
-    @property
-    def left_x(self):
-        return min(self.xs)
+    def as_tuple(self) -> Tuple[float]:
+        return self.left, self.upper, self.right, self.lower
 
-    @property
-    def top_y(self):
-        return max(self.ys)
-
-    @property
-    def right_x(self):
-        return max(self.xs)
-
-    @property
-    def bottom_y(self):
-        return min(self.ys)
-
-    def as_vectors(self) -> Tuple[Vector2D]:
+    def contains(self, other: BoundingBox) -> bool:
         return (
-            Vector2D(self.left_x, self.top_y),
-            Vector2D(self.left_x, self.bottom_y),
+            self.left <= other.left
+            and self.upper >= other.upper
+            and self.right >= other.upper
+            and self.lower <= other.lower
         )
 
-    def as_tuples(self) -> Tuple[Tuple[float, float]]:
-        return (
-            (self.left_x, self.top_y),
-            (self.left_x, self.bottom_y),
-        )
-
-    def __add__(self, other: BoundingBox) -> BoundingBox:
+    def __add__(self, other):
         return BoundingBox(
-            (
-                outer(self.left_x, other.left_x),
-                outer(self.top_y, other.top_y),
-            ),
-            (
-                outer(self.right_x, other.right_x),
-                outer(self.left_x, other.bottom_y),
-            ),
+            min(self.left, other.left),
+            max(self.upper, other.upper),
+            max(self.right, other.right),
+            min(self.lower, other.lower),
         )

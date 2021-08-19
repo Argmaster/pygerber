@@ -20,16 +20,22 @@ class DataClassesTest(TestCase):
         self.assertEqual((v1 + v2).as_tuple(), (14, 44))
 
     def test_BoundingBox(self):
-        box = BoundingBox((-2, 4), (-1, 3))
-        self.assertEqual(box.left_x, -2)
-        self.assertEqual(box.top_y, 3)
-        self.assertEqual(box.right_x, 4)
-        self.assertEqual(box.bottom_y, -1)
+        box = BoundingBox(-2, 4, 5, 3)
+        self.assertEqual(box.left, -2)
+        self.assertEqual(box.upper, 4)
+        self.assertEqual(box.right, 5)
+        self.assertEqual(box.lower, 3)
 
     def test_BoundingBox_add(self):
-        box1 = BoundingBox((10, 23), (32, 15))
-        box2 = BoundingBox((-2, 4), (-1, 3))
-        #self.assertEqual((box1 + box2).as_tuples(), ((-2, 4), (-2, -1)))
+        box1 = BoundingBox(10, 23, 32, 15)
+        box2 = BoundingBox(-2, 4, -1, 3)
+        self.assertEqual((box1 + box2).as_tuple(), (-2, 23, 32, 3))
+
+    def test_BoundingBox_contains(self):
+        box1 = BoundingBox(-2, 23, 32, 3)
+        box2 = BoundingBox(-2, 4, -1, 3)
+        self.assertTrue(box1.contains(box2))
+
 
 
 if __name__ == "__main__":
