@@ -38,16 +38,37 @@ class BoundingBox:
             and self.lower <= other.lower
         )
 
-    def pad(self, delta) -> None:
-        self.left -= delta
-        self.upper += delta
-        self.right += delta
-        self.lower -= delta
+    def padded(self, delta) -> None:
+        return BoundingBox(
+            self.left - delta,
+            self.upper + delta,
+            self.right + delta,
+            self.lower - delta,
+        )
+
+    def height(self) -> float:
+        return abs(self.upper - self.lower)
+
+    def width(self) -> float:
+        return abs(self.right - self.left)
+
+    def transform(self, vector: Vector2D) -> BoundingBox:
+        return BoundingBox(
+            self.left + vector.x,
+            self.upper + vector.y,
+            self.right + vector.x,
+            self.lower + vector.y,
+        )
 
     def __add__(self, other):
-        return BoundingBox(
-            min(self.left, other.left),
-            max(self.upper, other.upper),
-            max(self.right, other.right),
-            min(self.lower, other.lower),
-        )
+        if isinstance(other, BoundingBox):
+            return BoundingBox(
+                min(self.left, other.left),
+                max(self.upper, other.upper),
+                max(self.right, other.right),
+                min(self.lower, other.lower),
+            )
+        elif isinstance(other, Vector2D):
+            return self.transform(other)
+        else:
+            raise TypeError(f"Type {type(other).__qualname__} addition not supported.")

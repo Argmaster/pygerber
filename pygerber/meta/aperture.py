@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Type
 
@@ -18,20 +18,94 @@ class Aperture(ABC):
     ) -> None:
         pass
 
+    @abstractmethod
     def flash(self) -> None:
         pass
 
+    @abstractmethod
     def line(self) -> None:
         pass
 
+    @abstractmethod
     def arc(self) -> None:
         pass
 
     def region(self) -> None:
         pass
 
+    @abstractmethod
     def bbox(self) -> BoundingBox:
         pass
+
+
+class CircularAperture(Aperture):
+
+    DIAMETER: float
+    HOLE_DIAMETER: float
+
+    def __init__(
+        self, args: ADD_Token.ARGS, *, _: List[Tuple[Aperture, Spec]] = None
+    ) -> None:
+        self.HOLE_DIAMETER = args.HOLE_DIAMETER
+        self.DIAMETER = args.DIAMETER
+
+    def bbox(self) -> BoundingBox:
+        d_half = self.DIAMETER / 2
+        return BoundingBox(
+            -d_half,
+            d_half,
+            d_half,
+            -d_half,
+        )
+
+
+class RectangularAperture(Aperture):
+
+    X: float
+    Y: float
+    HOLE_DIAMETER: float
+
+    def __init__(
+        self, args: ADD_Token.ARGS, *, _: List[Tuple[Aperture, Spec]] = None
+    ) -> None:
+        self.X = args.X
+        self.Y = args.Y
+        self.HOLE_DIAMETER = args.HOLE_DIAMETER
+
+    def bbox(self) -> BoundingBox:
+        x_half = self.X / 2
+        y_half = self.Y / 2
+        return BoundingBox(
+            -x_half,
+            y_half,
+            x_half,
+            -y_half,
+        )
+
+
+class PolygonAperture(CircularAperture):
+
+    VERTICES: float
+    ROTATION: float
+    DIAMETER: float
+    HOLE_DIAMETER: float
+
+    def __init__(
+        self, args: ADD_Token.ARGS, *, _: List[Tuple[Aperture, Spec]] = None
+    ) -> None:
+        super().__init__(args)
+        self.VERTICES = args.VERTICES
+        self.ROTATION = args.ROTATION
+
+
+class RegionAperture(Aperture):
+
+    STEPS: float
+
+    def __init__(
+        self, _: ADD_Token.ARGS, *, STEPS: List[Tuple[Aperture, Spec]]
+    ) -> None:
+        self.STEPS = STEPS
 
 
 @dataclass

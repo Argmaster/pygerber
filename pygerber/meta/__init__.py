@@ -6,6 +6,7 @@ from .broker import DrawingBroker
 from .data import Vector2D
 from .coparser import CoParser
 from .meta import Interpolation, Mirroring, Polarity, Unit
+from .aperture import Aperture, ApertureSet
 
 
 class Meta(DrawingBroker):
