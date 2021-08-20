@@ -38,6 +38,12 @@ class BoundingBox:
             and self.lower <= other.lower
         )
 
+    def pad(self, delta) -> None:
+        self.left -= delta
+        self.upper += delta
+        self.right += delta
+        self.lower -= delta
+
     def __add__(self, other):
         return BoundingBox(
             min(self.left, other.left),

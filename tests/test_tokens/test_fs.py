@@ -31,12 +31,12 @@ class FormatSpecifierTokenTest(TestCase):
         self.assertEqual(fs_token.DEC_FORMAT, 6)
 
     def test_simple_invalid_match(self):
-        SOURCE = """%FSLAXx6Y36*%"""
+        SOURCE = r"%FSLAXx6Y36*%"
         fs_token = FormatSpecifierToken.match(SOURCE, 0)
         self.assertFalse(fs_token)
 
     def test_forced_invalid_syntax(self):
-        SOURCE = """%FSLAXn6Y36*%"""
+        SOURCE = r"%FSLAXn6Y36*%"
         self.setUp_forced_invalid_syntax()
         token = FormatSpecifierToken.match(SOURCE, 0)
         self.assertRaises(InvalidCommandFormat, token.dispatch, None)
@@ -59,13 +59,13 @@ class FormatSpecifierTokenTest(TestCase):
 
     def test_deprecated_unequal_int_specifiers(self):
         META = Meta(ignore_deprecated=False)
-        SOURCE = """%FSLIX36Y26*%"""
+        SOURCE = r"%FSLIX36Y26*%"
         fs_token = FormatSpecifierToken.match(SOURCE, 0)
         self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
 
     def test_deprecated_unequal_dec_specifiers(self):
         META = Meta(ignore_deprecated=False)
-        SOURCE = """%FSLIX36Y35*%"""
+        SOURCE = r"%FSLIX36Y35*%"
         fs_token = FormatSpecifierToken.match(SOURCE, 0)
         self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
 

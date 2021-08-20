@@ -36,6 +36,12 @@ class DataClassesTest(TestCase):
         box2 = BoundingBox(-2, 4, -1, 3)
         self.assertTrue(box1.contains(box2))
 
+    def test_BoundingBox_pad(self):
+        box = BoundingBox(-2, 23, 32, 3)
+        box.pad(1)
+        self.assertEqual(box.as_tuple(), (-3, 24, 33, 2))
+
+
 
 
 if __name__ == "__main__":
