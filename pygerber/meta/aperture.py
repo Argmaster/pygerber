@@ -100,10 +100,8 @@ class PolygonAperture(CircularAperture):
 class RegionApertureManager(ABC):
     steps: List[Tuple[Aperture, Spec]]
 
-    def __init__(self, steps: List[Tuple[Aperture, Spec]]) -> None:
-        self.steps = steps
-
-    def finish(self) -> None:
+    @abstractmethod
+    def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
         pass
 
 

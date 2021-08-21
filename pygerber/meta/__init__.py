@@ -19,9 +19,9 @@ class Meta(DrawingBroker):
         *,
         ignore_deprecated: bool = True,
     ) -> None:
+        super().__init__(apertureSet)
         self.ignore_deprecated = ignore_deprecated
         self.coparser = CoParser()
-        self.bind_aperture_set(apertureSet)
 
     def raiseDeprecatedSyntax(self, message: str):
         if not self.ignore_deprecated:

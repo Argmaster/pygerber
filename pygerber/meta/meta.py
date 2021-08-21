@@ -31,6 +31,12 @@ class DrawingMeta:
     interpolation: Interpolation
     is_regionmode: bool
 
+    def __init__(self) -> None:
+        self.is_regionmode = False
+        self.unit = Unit.MILLIMETERS
+        self.polarity = Polarity.DARK
+        self.interpolation = Interpolation.Linear
+
     def set_unit(self, unit):
         self.unit = unit
 
@@ -52,6 +58,11 @@ class TransformMeta:
     mirroring: str
     rotation: float
     scale: float
+
+    def __init__(self) -> None:
+        self.mirroring = Mirroring.No
+        self.rotation = 0.0
+        self.scale = 1.0
 
     def set_rotation(self, angle: float):
         self.rotation = angle

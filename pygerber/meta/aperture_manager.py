@@ -15,6 +15,9 @@ class ApertureManager:
     apertures: Dict[int, Aperture]
     apertureSet: ApertureSet
 
+    def __init__(self, apertureSet: ApertureSet) -> None:
+        self.bind_aperture_set(apertureSet)
+
     def bind_aperture_set(self, apSet: ApertureSet):
         self.apertureSet = apSet
         self.apertures = {}

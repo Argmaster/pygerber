@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from typing import List, Tuple
 from pygerber.meta.data import Vector2D
-from pygerber.meta.spec import ArcSpec, LineSpec
+from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from types import SimpleNamespace
 from unittest import TestCase, main
 
 from pygerber.meta.aperture import (
+    Aperture,
     ApertureSet,
     CircularAperture,
     PolygonAperture,
@@ -13,48 +15,53 @@ from pygerber.meta.aperture import (
 )
 
 
-class TestRectangleAperture(RectangularAperture):
-    def flash(self) -> None:
+class ApertureCollector:
+    class Called(Exception):
+        pass
+    class CalledWithSpec(Exception):
+        def __init__(self, spec: Spec) -> None:
+            self.spec = spec
+
+    class CalledFlash(CalledWithSpec):
         pass
 
-    def line(self) -> None:
+    class CalledLine(CalledWithSpec):
         pass
 
-    def arc(self) -> None:
+    class CalledArc(CalledWithSpec):
         pass
 
+    class CalledFinish(Called):
+        def __init__(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
+            self.bounds = bounds
 
-class TestCircleAperture(CircularAperture):
-    def flash(self) -> None:
-        pass
+    def flash(self, spec: FlashSpec) -> None:
+        raise self.CalledFlash(spec)
 
-    def line(self) -> None:
-        pass
+    def line(self, spec: LineSpec) -> None:
+        raise self.CalledLine(spec)
 
-    def arc(self) -> None:
-        pass
+    def arc(self, spec: ArcSpec) -> None:
+        raise self.CalledArc(spec)
 
-
-class TestPolygonAperture(PolygonAperture):
-    def flash(self) -> None:
-        pass
-
-    def line(self) -> None:
-        pass
-
-    def arc(self) -> None:
-        pass
+    def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
+        raise self.CalledFinish(bounds)
 
 
-class TestRegionAperture(RegionApertureManager):
-    def flash(self) -> None:
-        pass
+class RectangleApertureCollector(ApertureCollector, RectangularAperture):
+    pass
 
-    def line(self) -> None:
-        pass
 
-    def arc(self) -> None:
-        pass
+class CircleApertureCollector(ApertureCollector, CircularAperture):
+    pass
+
+
+class PolygonApertureCollector(ApertureCollector, PolygonAperture):
+    pass
+
+
+class RegionApertureCollector(ApertureCollector, RegionApertureManager):
+    pass
 
 
 class RectangularApertureTest(TestCase):
@@ -66,7 +73,7 @@ class RectangularApertureTest(TestCase):
             HOLE_DIAMETER=0.1,
         ),
     ):
-        return TestRectangleAperture(args)
+        return RectangleApertureCollector(args)
 
     def test_create(self):
         aperture = self.create_rectangle_aperture()
@@ -99,7 +106,7 @@ class CircularApertureTest(TestCase):
             HOLE_DIAMETER=0.1,
         ),
     ):
-        return TestCircleAperture(args)
+        return CircleApertureCollector(args)
 
     def test_create(self):
         aperture = self.create_circle_aperture()
@@ -116,7 +123,7 @@ class PolygonApertureTest(TestCase):
         self,
         args=SimpleNamespace(DIAMETER=0.6, HOLE_DIAMETER=0.1, ROTATION=0.3, VERTICES=5),
     ):
-        return TestPolygonAperture(args)
+        return PolygonApertureCollector(args)
 
     def test_create(self):
         aperture = self.create_polygon_aperture()
@@ -134,20 +141,20 @@ class ApertureSetTest(TestCase):
     @staticmethod
     def get_dummy_apertureSet():
         return ApertureSet(
-            TestCircleAperture,
-            TestRectangleAperture,
-            TestRectangleAperture,
-            TestPolygonAperture,
-            TestRegionAperture,
+            CircleApertureCollector,
+            RectangleApertureCollector,
+            RectangleApertureCollector,
+            PolygonApertureCollector,
+            RegionApertureCollector,
         )
 
     def test_getApertureClass(self):
         AS = self.get_dummy_apertureSet()
-        self.assertEqual(AS.getApertureClass("C"), TestCircleAperture)
-        self.assertEqual(AS.getApertureClass("R"), TestRectangleAperture)
-        self.assertEqual(AS.getApertureClass("O"), TestRectangleAperture)
-        self.assertEqual(AS.getApertureClass("P"), TestPolygonAperture)
-        self.assertEqual(AS.getApertureClass(is_region=True), TestRegionAperture)
+        self.assertEqual(AS.getApertureClass("C"), CircleApertureCollector)
+        self.assertEqual(AS.getApertureClass("R"), RectangleApertureCollector)
+        self.assertEqual(AS.getApertureClass("O"), RectangleApertureCollector)
+        self.assertEqual(AS.getApertureClass("P"), PolygonApertureCollector)
+        self.assertEqual(AS.getApertureClass(is_region=True), RegionApertureCollector)
 
 
 if __name__ == "__main__":

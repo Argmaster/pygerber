@@ -1,13 +1,12 @@
 from types import SimpleNamespace
 from pygerber.meta.aperture_manager import ApertureManager
 from unittest import TestCase, main
-from .test_aperture import ApertureSetTest, TestCircleAperture
+from .test_aperture import ApertureSetTest, CircleApertureCollector
 
 
 class ApertureManagerTest(TestCase):
     def get_dummy_bound_aperture_manager(self):
-        am = ApertureManager()
-        am.bind_aperture_set(ApertureSetTest.get_dummy_apertureSet())
+        am = ApertureManager(ApertureSetTest.get_dummy_apertureSet())
         return am
 
     def test_define_aperture(self):
@@ -17,7 +16,7 @@ class ApertureManagerTest(TestCase):
             HOLE_DIAMETER=0,
         )
         am.define_aperture("C", None, 10, args)
-        self.assertEqual(type(am.apertures[10]), TestCircleAperture)
+        self.assertEqual(type(am.apertures[10]), CircleApertureCollector)
         self.assertEqual(am.apertures[10].DIAMETER, args.DIAMETER)
         self.assertEqual(am.apertures[10].HOLE_DIAMETER, args.HOLE_DIAMETER)
 
