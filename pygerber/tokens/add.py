@@ -56,4 +56,4 @@ class ADD_Token(Token):
             return self.POLYGON_PATTERN
 
     def affect_meta(self):
-        self.meta.defineAperture(self)
+        self.meta.define_aperture(self.TYPE, self.NAME, self.ID, self.ARGS)

@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from pygerber.exceptions import ApertureSelectionError
 from pygerber.meta.spec import Spec
@@ -8,26 +8,26 @@ from .aperture import Aperture, ApertureSet
 
 
 class ApertureManager:
+    """
+    Remember to call bindApertureSet(apSet) before later usage.
+    """
+
     apertures: Dict[int, Aperture]
     apertureSet: ApertureSet
-    region_bounds: List[Tuple[Aperture, Spec]]
 
-    def bindApertureSet(self, apSet: ApertureSet):
+    def bind_aperture_set(self, apSet: ApertureSet):
         self.apertureSet = apSet
+        self.apertures = {}
 
-    def defineAperture(self, token: ADD_Token):
-        if token.TYPE is not None:
-            apertureClass = self.apertureSet.getApertureClass(token.TYPE)
+    def define_aperture(self, type: str, name: str, ID: int, args: object):
+        if type is not None:
+            apertureClass = self.apertureSet.getApertureClass(type)
         else:
-            apertureClass = self.apertureSet.getApertureClass(token.NAME)
-        self.apertures[token.ID] = apertureClass(token.ARGS)
+            apertureClass = self.apertureSet.getApertureClass(name)
+        self.apertures[ID] = apertureClass(args)
 
-    def selectAperture(self, id: int):
-        new_aperture = self.apertures.get(id, None)
-        if new_aperture is None:
+    def get_aperture(self, id: int) -> Aperture:
+        aperture = self.apertures.get(id, None)
+        if aperture is None:
             raise ApertureSelectionError(f"Aperture with ID {id} was not defined.")
-        else:
-            self.current_aperture = new_aperture
-
-    def pushRegionStep(self, spec: Spec):
-        self.region_bounds.append((self.current_aperture, spec))
+        return aperture

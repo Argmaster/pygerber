@@ -76,4 +76,4 @@ class DNN_Loader_Token(Token):
     ID = Int()
 
     def affect_meta(self):
-        self.meta.selectAperture(self.ID)
+        self.meta.select_aperture(self.ID)

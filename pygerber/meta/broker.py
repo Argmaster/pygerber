@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
-from typing import Tuple
+from typing import List, Tuple
 
 from .aperture import Aperture
 from .aperture_manager import ApertureManager
 from .data import Vector2D
 from .meta import DrawingMeta, TransformMeta
-from .spec import ArcSpec, FlashSpec, LineSpec, RegionSpec, Spec
+from .spec import ArcSpec, FlashSpec, LineSpec, Spec
 
 
 class DrawingBroker(TransformMeta, DrawingMeta, ApertureManager):
     current_aperture: Aperture
     current_point: Tuple[float, float]
+    region_bounds: List[Tuple[Aperture, Spec]]
+
+    def select_aperture(self, id: int):
+        self.current_aperture = self.get_aperture(id)
 
     def draw_flash(self, point: Vector2D) -> None:
         spec = FlashSpec(
@@ -18,7 +22,7 @@ class DrawingBroker(TransformMeta, DrawingMeta, ApertureManager):
             self.is_regionmode,
         )
         if self.is_regionmode:
-            self.pushRegionStep(spec)
+            self.push_region_step(spec)
         else:
             self.current_aperture.flash(spec)
 
@@ -35,7 +39,7 @@ class DrawingBroker(TransformMeta, DrawingMeta, ApertureManager):
             self.is_regionmode,
         )
         if self.is_regionmode:
-            self.pushRegionStep(spec)
+            self.push_region_step(spec)
         else:
             self.current_aperture.line(spec)
 
@@ -47,7 +51,7 @@ class DrawingBroker(TransformMeta, DrawingMeta, ApertureManager):
             self.is_regionmode,
         )
         if self.is_regionmode:
-            self.pushRegionStep(spec)
+            self.push_region_step(spec)
         else:
             self.current_aperture.arc(spec)
 
@@ -57,8 +61,8 @@ class DrawingBroker(TransformMeta, DrawingMeta, ApertureManager):
         apertureClass(self.region_bounds).finish()
         self.region_bounds = []
 
-    def move_pointer(self, end: Vector2D) -> None:
-        self.current_point = self.fill_xy_none_with_current(end)
+    def move_pointer(self, location: Vector2D) -> None:
+        self.current_point = self.fill_xy_none_with_current(location)
 
     def fill_xy_none_with_current(self, point: Vector2D):
         if point.x is None:
@@ -66,3 +70,7 @@ class DrawingBroker(TransformMeta, DrawingMeta, ApertureManager):
         if point.y is None:
             point.y = self.current_point.y
         return point
+
+    def push_region_step(self, spec: Spec):
+        self.region_bounds.append((self.current_aperture, spec))
+

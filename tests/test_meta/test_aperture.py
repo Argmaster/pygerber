@@ -130,8 +130,9 @@ class PolygonApertureTest(TestCase):
         self.assertEqual(bbox.as_tuple(), (-0.3, 0.3, 0.3, -0.3))
 
 
-class TestApertureSet(TestCase):
-    def get_dummy_apertureSet(self):
+class ApertureSetTest(TestCase):
+    @staticmethod
+    def get_dummy_apertureSet():
         return ApertureSet(
             TestCircleAperture,
             TestRectangleAperture,
