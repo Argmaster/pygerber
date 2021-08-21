@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from unittest import TestCase, main
 from pygerber.tokens import G0N_Token, G36_Token, G37_Token
-from pygerber.meta import  Meta, Interpolation
+from pygerber.meta import Meta, Interpolation
 
 
 class G0N_Token_Test(TestCase):
-
     def init_token(self, source):
-        META = Meta()
+        META = Meta(None)
         token = G0N_Token.match(source, 0)
         self.assertTrue(token)
         token.dispatch(META)
@@ -26,10 +25,10 @@ class G0N_Token_Test(TestCase):
         META = self.init_token("G03*")
         self.assertEqual(META.interpolation, Interpolation.CounterclockwiseCircular)
 
-class G36_G37_Token_Test(TestCase):
 
+class G36_G37_Token_Test(TestCase):
     def init_token(self, source, token_class, meta=None):
-        META = Meta() if meta is None else meta
+        META = Meta(None) if meta is None else meta
         token = token_class.match(source, 0)
         self.assertTrue(token)
         token.dispatch(META)

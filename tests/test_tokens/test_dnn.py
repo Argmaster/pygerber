@@ -7,7 +7,7 @@ from pygerber.tokens import D01_Token, D02_Token, D03_Token, DNN_Loader_Token
 
 class D01_TokenText(TestCase):
     def init_token(self, source):
-        META = Meta()
+        META = Meta(None)
         dnntoken = D01_Token.match(source, 0)
         self.assertTrue(dnntoken)
         dnntoken.dispatch(META)
@@ -36,7 +36,7 @@ class D01_TokenText(TestCase):
 
 class D02_TokenText(TestCase):
     def init_token(self, source):
-        META = Meta()
+        META = Meta(None)
         dnntoken = D02_Token.match(source, 0)
         self.assertTrue(dnntoken)
         dnntoken.dispatch(META)
@@ -58,7 +58,7 @@ class D02_TokenText(TestCase):
 
 class D03_TokenText(TestCase):
     def init_token(self, source):
-        META = Meta()
+        META = Meta(None)
         dnntoken = D03_Token.match(source, 0)
         self.assertTrue(dnntoken)
         dnntoken.dispatch(META)
@@ -80,7 +80,7 @@ class D03_TokenText(TestCase):
 
 class DNN_Loader_Token_Test(TestCase):
     def test_match(self):
-        META = Meta()
+        META = Meta(None)
         source = "D12*"
         token = DNN_Loader_Token.match(source, 0)
         self.assertTrue(token)
@@ -88,12 +88,10 @@ class DNN_Loader_Token_Test(TestCase):
         self.assertEqual(token.ID, 12)
 
     def test_fail_on_nn_less_than_10(self):
-        META = Meta()
+        META = Meta(None)
         source = "D07*"
         token = DNN_Loader_Token.match(source, 0)
         self.assertFalse(token)
-
-
 
 
 if __name__ == "__main__":

@@ -8,7 +8,6 @@ from pygerber.tokens import FormatSpecifierToken
 
 
 class FormatSpecifierTokenTest(TestCase):
-
     def parse_and_dispatch(self, META, SOURCE, BEIGN) -> FormatSpecifierToken:
         fs_token = FormatSpecifierToken.match(SOURCE, BEIGN)
         self.assertTrue(fs_token)
@@ -16,7 +15,7 @@ class FormatSpecifierTokenTest(TestCase):
         return fs_token
 
     def test_simple_valid_match(self):
-        fs_token = self.parse_and_dispatch(Meta(), """%FSLAX36Y36*%""", 0)
+        fs_token = self.parse_and_dispatch(Meta(None), """%FSLAX36Y36*%""", 0)
         self.assertEqual(fs_token.zeros, "L")
         self.assertEqual(fs_token.mode, "A")
         self.assertEqual(fs_token.X_int, 3)
@@ -25,7 +24,7 @@ class FormatSpecifierTokenTest(TestCase):
         self.assertEqual(fs_token.Y_dec, 6)
 
     def test_properties(self):
-        fs_token = self.parse_and_dispatch(Meta(), """%FSLAX36Y36*%""", 0)
+        fs_token = self.parse_and_dispatch(Meta(None), """%FSLAX36Y36*%""", 0)
         self.assertEqual(fs_token.length, 9)
         self.assertEqual(fs_token.INT_FORMAT, 3)
         self.assertEqual(fs_token.DEC_FORMAT, 6)
@@ -52,27 +51,28 @@ class FormatSpecifierTokenTest(TestCase):
         FormatSpecifierToken.regex = self.ORIGINAL_REGEX
 
     def test_affect_meta(self):
-        META = Meta()
+        META = Meta(None)
         fs_token = self.parse_and_dispatch(META, """%FSLAX36Y36*%""", 0)
         fs_token.affect_meta()
         self.assertEqual(META.coparser.format, fs_token)
 
     def test_deprecated_unequal_int_specifiers(self):
-        META = Meta(ignore_deprecated=False)
+        META = Meta(None, ignore_deprecated=False)
         SOURCE = r"%FSLIX36Y26*%"
         fs_token = FormatSpecifierToken.match(SOURCE, 0)
         self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
 
     def test_deprecated_unequal_dec_specifiers(self):
-        META = Meta(ignore_deprecated=False)
+        META = Meta(None, ignore_deprecated=False)
         SOURCE = r"%FSLIX36Y35*%"
         fs_token = FormatSpecifierToken.match(SOURCE, 0)
         self.assertRaises(DeprecatedSyntax, fs_token.dispatch, META)
 
     def test_stringify(self):
-        META = Meta(ignore_deprecated=False)
+        META = Meta(None, ignore_deprecated=False)
         fs_token = self.parse_and_dispatch(META, r"""%FSLAX36Y36*%""", 0)
         self.assertEqual(str(fs_token), r"%FSLAX36Y36*%")
+
 
 if __name__ == "__main__":
     main()

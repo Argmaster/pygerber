@@ -11,9 +11,8 @@ from pygerber.meta import Meta
 
 
 class TestLoaderTokens(TestCase):
-
     def init_token(self, TokenClass, source):
-        meta = Meta()
+        meta = Meta(None)
         token = TokenClass.match(source)
         self.assertTrue(token)
         token.dispatch(meta)
@@ -54,7 +53,6 @@ class TestLoaderTokens(TestCase):
         self.assertEqual(token.UNIT, "IN")
         token.affect_meta()
         self.assertEqual(meta.unit, "IN")
-
 
 
 if __name__ == "__main__":

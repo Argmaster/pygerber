@@ -21,7 +21,9 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
         self.re_match = match_object
 
     @classmethod
-    def match_and_dispatch(class_, meta: Meta, source: str, index: int=0) -> Union[Token, bool]:
+    def match_and_dispatch(
+        class_, meta: Meta, source: str, index: int = 0
+    ) -> Union[Token, bool]:
         # returns False on failure, Token object on success, token is dispatched.
         token = class_.match(source, index)
         if token:
@@ -66,8 +68,9 @@ class Deprecated:
 
     def __call__(self, class_: Token):
         message = self.message
+
         def deprecated_dispatch(self, meta):
-            meta.raiseDeprecatedSyntax( message)
+            meta.raiseDeprecatedSyntax(message)
             super(class_, self).dispatch(meta)
 
         class_.dispatch = deprecated_dispatch
