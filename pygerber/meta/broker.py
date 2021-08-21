@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from typing import List, Tuple
+from typing import Tuple
 
-from .aperture import Aperture, ApertureManager
+from .aperture import Aperture
+from .aperture_manager import ApertureManager
+from .data import Vector2D
 from .meta import DrawingMeta, TransformMeta
 from .spec import ArcSpec, FlashSpec, LineSpec, RegionSpec, Spec
-from .data import Vector2D
 
 
 class DrawingBroker(TransformMeta, DrawingMeta, ApertureManager):
@@ -53,7 +54,7 @@ class DrawingBroker(TransformMeta, DrawingMeta, ApertureManager):
     def end_region(self):
         super().end_region()
         apertureClass = self.apertureSet.getApertureClass(None, True)
-        apertureClass(STEPS=self.region_bounds).region()
+        apertureClass(self.region_bounds).finish()
         self.region_bounds = []
 
     def move_pointer(self, end: Vector2D) -> None:

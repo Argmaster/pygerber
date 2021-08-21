@@ -3,23 +3,22 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Type
+from typing import List, Tuple, Type
 
-from pygerber.exceptions import ApertureSelectionError, NoCorespondingApertureClass
-from pygerber.meta.spec import Spec
+from pygerber.exceptions import NoCorespondingApertureClass
+from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from pygerber.tokens.add import ADD_Token
 
 from .data import BoundingBox
 
 
 class Aperture(ABC):
-    def __init__(
-        self, args: ADD_Token.ARGS, *, STEPS: List[Tuple[Aperture, Spec]] = None
-    ) -> None:
+    @abstractmethod
+    def __init__(self, args: ADD_Token.ARGS) -> None:
         pass
 
     @abstractmethod
-    def flash(self) -> None:
+    def flash(self, spec: FlashSpec) -> None:
         pass
 
     @abstractmethod
@@ -30,12 +29,18 @@ class Aperture(ABC):
     def arc(self) -> None:
         pass
 
-    def region(self) -> None:
-        pass
-
     @abstractmethod
     def bbox(self) -> BoundingBox:
         pass
+
+    def flash_bbox(self, spec: FlashSpec) -> BoundingBox:
+        return self.bbox().transform(spec.location)
+
+    def line_bbox(self, spec: LineSpec) -> BoundingBox:
+        return self.bbox().transform(spec.begin) + self.bbox().transform(spec.end)
+
+    def arc_bbox(self, spec: ArcSpec) -> BoundingBox:
+        return self.bbox().transform(spec.begin) + self.bbox().transform(spec.end)
 
 
 class CircularAperture(Aperture):
@@ -43,9 +48,7 @@ class CircularAperture(Aperture):
     DIAMETER: float
     HOLE_DIAMETER: float
 
-    def __init__(
-        self, args: ADD_Token.ARGS, *, _: List[Tuple[Aperture, Spec]] = None
-    ) -> None:
+    def __init__(self, args: ADD_Token.ARGS) -> None:
         self.HOLE_DIAMETER = args.HOLE_DIAMETER
         self.DIAMETER = args.DIAMETER
 
@@ -65,9 +68,7 @@ class RectangularAperture(Aperture):
     Y: float
     HOLE_DIAMETER: float
 
-    def __init__(
-        self, args: ADD_Token.ARGS, *, _: List[Tuple[Aperture, Spec]] = None
-    ) -> None:
+    def __init__(self, args: ADD_Token.ARGS) -> None:
         self.X = args.X
         self.Y = args.Y
         self.HOLE_DIAMETER = args.HOLE_DIAMETER
@@ -90,22 +91,20 @@ class PolygonAperture(CircularAperture):
     DIAMETER: float
     HOLE_DIAMETER: float
 
-    def __init__(
-        self, args: ADD_Token.ARGS, *, _: List[Tuple[Aperture, Spec]] = None
-    ) -> None:
+    def __init__(self, args: ADD_Token.ARGS) -> None:
         super().__init__(args)
         self.VERTICES = args.VERTICES
         self.ROTATION = args.ROTATION
 
 
-class RegionAperture(Aperture):
+class RegionApertureManager(ABC):
+    steps: List[Tuple[Aperture, Spec]]
 
-    STEPS: float
+    def __init__(self, steps: List[Tuple[Aperture, Spec]]) -> None:
+        self.steps = steps
 
-    def __init__(
-        self, _: ADD_Token.ARGS, *, STEPS: List[Tuple[Aperture, Spec]]
-    ) -> None:
-        self.STEPS = STEPS
+    def finish(self) -> None:
+        pass
 
 
 @dataclass
@@ -115,9 +114,9 @@ class ApertureSet:
     rectangle: Type[Aperture]
     obround: Type[Aperture]
     polygon: Type[Aperture]
-    region: Type[Aperture]
+    region: Type[RegionApertureManager]
 
-    def getApertureClass(self, name: str, is_region: bool) -> Aperture:
+    def getApertureClass(self, name: str=None, is_region: bool=False) -> Aperture:
         if is_region:
             return self.region
         elif name == "C":
@@ -134,27 +133,3 @@ class ApertureSet:
             )
 
 
-class ApertureManager:
-    apertures: Dict[int, Aperture]
-    apertureSet: ApertureSet
-    region_bounds: List[Tuple[Aperture, Spec]]
-
-    def bindApertureSet(self, apSet: ApertureSet):
-        self.apertureSet = apSet
-
-    def defineAperture(self, token: ADD_Token):
-        if token.TYPE is not None:
-            apertureClass = self.apertureSet.getApertureClass(token.TYPE)
-        else:
-            apertureClass = self.apertureSet.getApertureClass(token.NAME)
-        self.apertures[token.ID] = apertureClass(token.ARGS)
-
-    def selectAperture(self, id: int):
-        new_aperture = self.apertures.get(id, None)
-        if new_aperture is None:
-            raise ApertureSelectionError(f"Aperture with ID {id} was not defined.")
-        else:
-            self.current_aperture = new_aperture
-
-    def pushRegionStep(self, spec: Spec):
-        self.region_bounds.append((self.current_aperture, spec))
