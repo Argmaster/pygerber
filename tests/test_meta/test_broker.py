@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pygerber.meta.meta import Interpolation
 from types import SimpleNamespace
 from unittest import TestCase, main
 
@@ -98,6 +99,24 @@ class DrawingBrokerTest(TestCase):
         self.assertEqual(spec.end, Vector2D(1, 1))
         self.assertEqual(spec.center, Vector2D(0, 2))
         self.assertEqual(spec.is_region, False)
+
+    def test_draw_interpolated(self):
+        broker = self.get_filled_broker()
+        broker.select_aperture(10)
+        self.assertRaises(
+            ApertureCollector.CalledLine,
+            broker.draw_interpolated,
+            Vector2D(1, 1),
+            Vector2D(0, 2),
+        )
+        broker.set_interpolation(Interpolation.ClockwiseCircular)
+        self.assertRaises(
+            ApertureCollector.CalledArc,
+            broker.draw_interpolated,
+            Vector2D(1, 1),
+            Vector2D(0, 2),
+        )
+
 
     def test_regionmode(self):
         broker = self.get_filled_broker()

@@ -7,11 +7,11 @@ from .aperture import Aperture
 from .aperture_manager import ApertureManager
 from .apertureset import ApertureSet
 from pygerber.mathclasses import Vector2D
-from .meta import DrawingMeta, TransformMeta
+from .meta import Interpolation, TransformMeta
 from .spec import ArcSpec, FlashSpec, LineSpec, Spec
 
 
-class DrawingBroker(ApertureManager, TransformMeta, DrawingMeta):
+class DrawingBroker(ApertureManager, TransformMeta):
     current_aperture: Aperture
     current_point: Vector2D
     region_bounds: List[Tuple[Aperture, Spec]]
@@ -22,10 +22,17 @@ class DrawingBroker(ApertureManager, TransformMeta, DrawingMeta):
         self.region_bounds = []
         ApertureManager.__init__(self, apertureSet)
         TransformMeta.__init__(self)
-        DrawingMeta.__init__(self)
 
     def select_aperture(self, id: int):
         self.current_aperture = self.get_aperture(id)
+
+    def draw_interpolated(self, end: Vector2D, offset: Vector2D) -> None:
+        end = self.convert_to_mm(end)
+        if self.interpolation == Interpolation.Linear:
+            self.draw_line(end)
+        else:
+            offset = self.convert_to_mm(offset)
+            self.draw_arc(end, offset)
 
     def draw_line(self, end: Vector2D) -> None:
         spec = LineSpec(
@@ -52,20 +59,15 @@ class DrawingBroker(ApertureManager, TransformMeta, DrawingMeta):
             self.get_current_aperture().arc(spec)
 
     def draw_flash(self, point: Vector2D) -> None:
-        spec = FlashSpec(
-            point,
-            self.is_regionmode,
-        )
         if self.is_regionmode:
             raise RuntimeError("Flashes can't be used in region mode.")
         else:
+            point = self.convert_to_mm(point)
+            spec = FlashSpec(
+                point,
+                self.is_regionmode,
+            )
             self.get_current_aperture().flash(spec)
-
-    def draw_interpolated(self, end: Vector2D, offset: Vector2D) -> None:
-        if self.interpolation == DrawingMeta.Interpolation.Linear:
-            self.draw_line(end)
-        else:
-            self.draw_arc(end, offset)
 
     def get_current_aperture(self):
         if self.current_aperture is None:
@@ -75,14 +77,16 @@ class DrawingBroker(ApertureManager, TransformMeta, DrawingMeta):
         return self.current_aperture
 
     def end_region(self):
-        apertureClass = self.apertureSet.getApertureClass(None, True)
         bounds = self.region_bounds
         self.region_bounds = []
         super().end_region()
+        apertureClass = self.apertureSet.getApertureClass(None, True)
         apertureClass().finish(bounds)
 
     def move_pointer(self, location: Vector2D) -> None:
-        self.current_point = self.fill_xy_none_with_current(location)
+        self.current_point = self.fill_xy_none_with_current(
+            self.convert_vector_to_mm(location)
+        )
 
     def fill_xy_none_with_current(self, point: Vector2D):
         if point.x is None:
@@ -93,3 +97,4 @@ class DrawingBroker(ApertureManager, TransformMeta, DrawingMeta):
 
     def push_region_step(self, spec: Spec):
         self.region_bounds.append((self.current_aperture, spec))
+

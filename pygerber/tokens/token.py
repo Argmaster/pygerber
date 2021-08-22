@@ -16,6 +16,7 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
     re_match: re.Match
     # meta attribute is only available after dispatch
     meta: Meta
+    keep: bool = True
 
     def __init__(self, match_object: re.Match) -> None:
         self.re_match = match_object

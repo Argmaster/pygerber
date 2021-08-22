@@ -1,14 +1,13 @@
+from pygerber.meta.meta import DrawingMeta
 from typing import Dict
 
 from pygerber.exceptions import ApertureSelectionError
-from pygerber.meta.spec import Spec
-from pygerber.tokens.add import ADD_Token
 
 from .aperture import Aperture
 from .apertureset import ApertureSet
 
 
-class ApertureManager:
+class ApertureManager(DrawingMeta):
     """
     Remember to call bindApertureSet(apSet) before later usage.
     """
@@ -18,6 +17,7 @@ class ApertureManager:
 
     def __init__(self, apertureSet: ApertureSet) -> None:
         self.bind_aperture_set(apertureSet)
+        DrawingMeta.__init__(self)
 
     def bind_aperture_set(self, apSet: ApertureSet):
         self.apertureSet = apSet
@@ -28,7 +28,7 @@ class ApertureManager:
             apertureClass = self.apertureSet.getApertureClass(type)
         else:
             apertureClass = self.apertureSet.getApertureClass(name)
-        self.apertures[ID] = apertureClass(args)
+        self.apertures[ID] = apertureClass(args, self)
 
     def get_aperture(self, id: int) -> Aperture:
         aperture = self.apertures.get(id, None)

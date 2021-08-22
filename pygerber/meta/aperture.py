@@ -2,7 +2,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygerber.meta.broker import DrawingBroker
+from typing import TYPE_CHECKING, List, Tuple
 
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from pygerber.tokens.add import ADD_Token
@@ -12,7 +16,7 @@ from pygerber.mathclasses import BoundingBox
 
 class Aperture(ABC):
     @abstractmethod
-    def __init__(self, args: ADD_Token.ARGS) -> None:
+    def __init__(self, args: ADD_Token.ARGS, broker: DrawingBroker) -> None:
         pass
 
     @abstractmethod
@@ -46,9 +50,9 @@ class CircularAperture(Aperture):
     DIAMETER: float
     HOLE_DIAMETER: float
 
-    def __init__(self, args: ADD_Token.ARGS) -> None:
-        self.HOLE_DIAMETER = args.HOLE_DIAMETER
-        self.DIAMETER = args.DIAMETER
+    def __init__(self, args: ADD_Token.ARGS, broker: DrawingBroker) -> None:
+        self.HOLE_DIAMETER = broker.convert_to_mm(args.HOLE_DIAMETER)
+        self.DIAMETER = broker.convert_to_mm(args.DIAMETER)
 
     def bbox(self) -> BoundingBox:
         d_half = self.DIAMETER / 2
@@ -66,10 +70,10 @@ class RectangularAperture(Aperture):
     Y: float
     HOLE_DIAMETER: float
 
-    def __init__(self, args: ADD_Token.ARGS) -> None:
-        self.X = args.X
-        self.Y = args.Y
-        self.HOLE_DIAMETER = args.HOLE_DIAMETER
+    def __init__(self, args: ADD_Token.ARGS, broker: DrawingBroker) -> None:
+        self.X = broker.convert_to_mm(args.X)
+        self.Y = broker.convert_to_mm(args.Y)
+        self.HOLE_DIAMETER = broker.convert_to_mm(args.HOLE_DIAMETER)
 
     def bbox(self) -> BoundingBox:
         x_half = self.X / 2
@@ -89,8 +93,8 @@ class PolygonAperture(CircularAperture):
     DIAMETER: float
     HOLE_DIAMETER: float
 
-    def __init__(self, args: ADD_Token.ARGS) -> None:
-        super().__init__(args)
+    def __init__(self, args: ADD_Token.ARGS, broker: DrawingBroker) -> None:
+        super().__init__(args, broker)
         self.VERTICES = args.VERTICES
         self.ROTATION = args.ROTATION
 
