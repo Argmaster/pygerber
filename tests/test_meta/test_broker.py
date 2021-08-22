@@ -1,11 +1,14 @@
+# -*- coding: utf-8 -*-
+from types import SimpleNamespace
+from unittest import TestCase, main
+
 from pygerber.exceptions import ApertureSelectionError
+from pygerber.meta.broker import DrawingBroker
+from pygerber.mathclasses import Vector2D
 from pygerber.meta.spec import LineSpec
 from tests.test_meta.test_aperture import ApertureSetTest
+
 from .test_aperture import ApertureCollector
-from pygerber.meta.data import Vector2D
-from types import SimpleNamespace
-from pygerber.meta.broker import DrawingBroker
-from unittest import TestCase, main
 
 
 class DrawingBrokerTest(TestCase):
@@ -58,9 +61,7 @@ class DrawingBrokerTest(TestCase):
 
     def test_aperture_not_selected(self):
         broker = self.get_filled_broker()
-        self.assertRaises(
-            ApertureSelectionError, broker.draw_flash, Vector2D(1, 1)
-        )
+        self.assertRaises(ApertureSelectionError, broker.draw_flash, Vector2D(1, 1))
 
     def test_draw_flash_no_region(self):
         broker = self.get_filled_broker()

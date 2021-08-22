@@ -4,7 +4,8 @@ from pygerber.exceptions import ApertureSelectionError
 from pygerber.meta.spec import Spec
 from pygerber.tokens.add import ADD_Token
 
-from .aperture import Aperture, ApertureSet
+from .aperture import Aperture
+from .apertureset import ApertureSet
 
 
 class ApertureManager:

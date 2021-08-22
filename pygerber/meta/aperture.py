@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import List, Tuple, Type
+from typing import Tuple
 
-from pygerber.exceptions import NoCorespondingApertureClass
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from pygerber.tokens.add import ADD_Token
 
-from .data import BoundingBox
+from pygerber.mathclasses import BoundingBox
 
 
 class Aperture(ABC):
@@ -103,31 +101,3 @@ class RegionApertureManager(ABC):
     @abstractmethod
     def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
         pass
-
-
-@dataclass
-class ApertureSet:
-
-    circle: Type[Aperture]
-    rectangle: Type[Aperture]
-    obround: Type[Aperture]
-    polygon: Type[Aperture]
-    region: Type[RegionApertureManager]
-
-    def getApertureClass(self, name: str=None, is_region: bool=False) -> Aperture:
-        if is_region:
-            return self.region
-        elif name == "C":
-            return self.circle
-        elif name == "R":
-            return self.rectangle
-        elif name == "O":
-            return self.obround
-        elif name == "P":
-            return self.polygon
-        else:
-            raise NoCorespondingApertureClass(
-                f"Missing aperture class for name {name}."
-            )
-
-

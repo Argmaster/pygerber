@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-from pygerber.exceptions import ApertureSelectionError
 from typing import List, Tuple
 
-from .aperture import Aperture, ApertureSet
+from pygerber.exceptions import ApertureSelectionError
+
+from .aperture import Aperture
 from .aperture_manager import ApertureManager
-from .data import Vector2D
+from .apertureset import ApertureSet
+from pygerber.mathclasses import Vector2D
 from .meta import DrawingMeta, TransformMeta
 from .spec import ArcSpec, FlashSpec, LineSpec, Spec
 

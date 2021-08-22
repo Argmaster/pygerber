@@ -1,6 +1,8 @@
 from types import SimpleNamespace
-from pygerber.meta.aperture_manager import ApertureManager
 from unittest import TestCase, main
+
+from pygerber.meta.aperture_manager import ApertureManager
+
 from .test_aperture import ApertureSetTest, CircleApertureCollector
 
 
@@ -28,7 +30,6 @@ class ApertureManagerTest(TestCase):
         )
         am.define_aperture("C", None, 10, args)
         self.assertEqual(am.apertures[10], am.get_aperture(10))
-
 
 
 if __name__ == "__main__":

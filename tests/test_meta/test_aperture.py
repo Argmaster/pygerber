@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
-from typing import List, Tuple
-from pygerber.meta.data import Vector2D
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from types import SimpleNamespace
+from typing import List, Tuple
 from unittest import TestCase, main
 
+from pygerber.meta import ApertureSet
 from pygerber.meta.aperture import (
     Aperture,
-    ApertureSet,
     CircularAperture,
     PolygonAperture,
     RectangularAperture,
     RegionApertureManager,
 )
+from pygerber.mathclasses import Vector2D
+from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 
 
 class ApertureCollector:
     class Called(Exception):
         pass
+
     class CalledWithSpec(Exception):
         def __init__(self, spec: Spec) -> None:
             self.spec = spec

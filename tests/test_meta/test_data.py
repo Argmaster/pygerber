@@ -1,5 +1,7 @@
-from pygerber.meta.data import BoundingBox, Vector2D
+# -*- coding: utf-8 -*-
 from unittest import TestCase, main
+
+from pygerber.mathclasses import BoundingBox, Vector2D
 
 
 class DataClassesTest(TestCase):
@@ -59,9 +61,6 @@ class DataClassesTest(TestCase):
         box = BoundingBox(-1, -3, -3, -1)
         self.assertEqual(box.width(), 2)
         self.assertEqual(box.height(), 2)
-
-
-
 
 
 if __name__ == "__main__":

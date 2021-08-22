@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from .data import Vector2D
+from pygerber.mathclasses import Vector2D
 
 
 class Spec:

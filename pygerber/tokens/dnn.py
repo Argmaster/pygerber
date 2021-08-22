@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.meta.data import Vector2D
+from pygerber.mathclasses import Vector2D
 
 import re
 

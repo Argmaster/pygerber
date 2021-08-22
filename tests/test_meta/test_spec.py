@@ -1,14 +1,14 @@
-from pygerber.meta.data import Vector2D
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, RegionSpec
+# -*- coding: utf-8 -*-
 from unittest import TestCase, main
+
+from pygerber.mathclasses import Vector2D
+from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, RegionSpec
 
 
 class SpecTest(TestCase):
-
     def test_FlashSpec(self):
         location = Vector2D(332, 24)
         spec = FlashSpec(location, True)
-
 
     def test_LineSpec(self):
         begin = Vector2D(3, 1)
@@ -33,8 +33,5 @@ class SpecTest(TestCase):
         self.assertEqual(spec.bounds, [])
 
 
-
-
 if __name__ == "__main__":
     main()
-
