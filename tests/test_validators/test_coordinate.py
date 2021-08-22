@@ -7,7 +7,7 @@ from pygerber.meta import Meta
 
 class CoordinateTest(TestCase):
     def get_dummy_token(self):
-        return SimpleNamespace(meta=Meta())
+        return SimpleNamespace(meta=Meta(None))
 
     def test_coordinate(self):
         token = self.get_dummy_token()

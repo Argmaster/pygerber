@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import re
 from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from pygerber.meta import Meta
@@ -21,7 +21,18 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
         self.re_match = match_object
 
     @classmethod
-    def match(class_: Token, source: str, index: int = 0) -> Token:
+    def match_and_dispatch(
+        class_, meta: Meta, source: str, index: int = 0
+    ) -> Union[Token, bool]:
+        # returns False on failure, Token object on success, token is dispatched.
+        token = class_.match(source, index)
+        if token:
+            token.dispatch(meta)
+        return token
+
+    @classmethod
+    def match(class_: Token, source: str, index: int = 0) -> Union[Token, bool]:
+        # returns False on failure, Token object on success, token is not dispatched.
         optional_match = class_.regex.match(source, pos=index)
         if optional_match is None:
             return False
@@ -57,8 +68,9 @@ class Deprecated:
 
     def __call__(self, class_: Token):
         message = self.message
+
         def deprecated_dispatch(self, meta):
-            meta.raiseDeprecatedSyntax( message)
+            meta.raiseDeprecatedSyntax(message)
             super(class_, self).dispatch(meta)
 
         class_.dispatch = deprecated_dispatch

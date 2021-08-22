@@ -9,7 +9,7 @@ from pygerber.validators.validator import Validator
 
 class DispatcherTest(TestCase):
     def get_dummy_token(self):
-        return SimpleNamespace(meta=Meta())
+        return SimpleNamespace(meta=Meta(None))
 
     def test_dispatcher(self):
         token = self.get_dummy_token()

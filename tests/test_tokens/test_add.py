@@ -7,7 +7,7 @@ from pygerber.tokens import ADD_Token
 
 class ADD_TokenTest(TestCase):
     def init_token(self, source):
-        META = Meta()
+        META = Meta(None)
         token = ADD_Token.match(source, 0)
         self.assertTrue(token)
         token.dispatch(META)
