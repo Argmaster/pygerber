@@ -6,7 +6,7 @@ import re
 
 from pygerber.validators import Coordinate, Int, load_validators
 
-from .token import Token
+from .token import Deprecated, Token
 
 CO_PATTERN = r"[-+]?[0-9]+"
 
@@ -68,6 +68,16 @@ class D03_Token(Token):
 
     def render(self):
         self.meta.draw_flash(self.point)
+
+
+@Deprecated("G54 command is deprecated since 2012")
+@load_validators
+class G54DNN_Loader_Token(Token):
+    regex = re.compile(r"G54D(?P<ID>[1-9][0-9]*)\*")
+    ID = Int()
+
+    def affect_meta(self):
+        self.meta.select_aperture(self.ID)
 
 
 @load_validators

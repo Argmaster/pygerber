@@ -23,6 +23,12 @@ class CoParser:
     def set_format(self, format: FormatSpecifierToken) -> None:
         self.format = format
 
+    def set_mode(self, mode: str) -> None:
+        self.format.mode = mode
+
+    def set_zeros(self, zeros: str) -> None:
+        self.format.zeros = zeros
+
     def dump(self, co: float) -> str:
         # TODO implement some day...
         return str(co)

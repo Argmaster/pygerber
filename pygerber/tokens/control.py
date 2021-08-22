@@ -10,7 +10,7 @@ from .token import Token
 
 @load_validators
 class EndOfStream_Token(Token):
-    regex = re.compile(r"M02\*")
+    regex = re.compile(r"M0[02]\*")
 
     def affect_meta(self):
         raise EndOfStream()

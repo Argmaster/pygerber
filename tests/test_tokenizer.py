@@ -21,7 +21,7 @@ class TokenizerTest(TestCase):
         tokenizer.tokenize_string(self.SOURCE_0)
         self.assertEqual(tokenizer.token_stack_size, 6)
 
-    def test_tokenize_file(self):
+    def test_tokenize_file_0(self):
         tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())
         tokenizer.tokenize_file("./tests/gerber/s0.grb")
         self.assertEqual(tokenizer.token_stack_size, 17)
@@ -29,10 +29,15 @@ class TokenizerTest(TestCase):
         self.assertTrue(10 in tokenizer.meta.apertures.keys())
         self.assertEqual(tokenizer.meta.interpolation, Interpolation.Linear)
 
-    def test_tokenize_file_example(self):
+    def test_tokenize_file_1(self):
         tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())
-        tokenizer.tokenize_file("./examples/board_outline.grb")
-        self.assertEqual(tokenizer.token_stack_size, 17)
+        tokenizer.tokenize_file("./tests/gerber/s1.grb")
+        self.assertEqual(tokenizer.token_stack_size, 47)
+
+    def test_tokenize_file_2(self):
+        tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())
+        tokenizer.tokenize_file("./tests/gerber/s2.grb")
+        self.assertEqual(tokenizer.token_stack_size, 116)
 
     def test_render(self):
         tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())

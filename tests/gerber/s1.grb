@@ -1,0 +1,59 @@
+G04 FreePCB version 1.355*
+G04 C:\MyHard\LMP91200\CAM\board_outline.grb*
+G04 board outline layer *
+G04 Scale: 100 percent, Rotated: No, Reflected: No *
+%FSLAX24Y24*%
+%MOIN*%
+%LN board outline *%
+G04 Rounded Rectangle Macro, params: W/2, H/2, R *
+%AMRNDREC*
+21,1,$1+$1,$2+$2-$3-$3,0,0,0*
+21,1,$1+$1-$3-$3,$2+$2,0,0,0*
+1,1,$3+$3,$1-$3,$2-$3*
+1,1,$3+$3,$3-$1,$2-$3*
+1,1,$3+$3,$1-$3,$3-$2*
+1,1,$3+$3,$3-$1,$3-$2*%
+G04 Rectangular Thermal Macro, params: W/2, H/2, T/2 *
+%AMRECTHERM*
+$4=$3/2*
+21,1,$1-$3,$2-$3,0-$1/2-$4,0-$2/2-$4,0*
+21,1,$1-$3,$2-$3,0-$1/2-$4,$2/2+$4,0*
+21,1,$1-$3,$2-$3,$1/2+$4,0-$2/2-$4,0*
+21,1,$1-$3,$2-$3,$1/2+$4,$2/2+$4,0*%
+%ADD10C,0.005000*%
+G90*
+G70D02*
+
+G04 Step and Repeat for panelization *
+
+G04 ----------------------- Draw board outline (positive)*
+%LPD*%
+G54D10*
+G01X0Y17D02*
+G01X0Y9955D01*
+G04 end of side 1*
+G01X21653Y9955D01*
+G04 end of side 2*
+G01X21653Y17D01*
+G04 end of side 3*
+G01X0Y17D01*
+
+G04 -------------- Draw Parts, Pads, Traces, Vias and Text (positive)*
+%LPD*%
+G04 Draw part U1*
+G04 Draw part R1*
+G04 Draw part C2*
+G04 Draw part D1*
+G04 Draw part U2*
+G04 Draw part J1*
+G04 Draw part C3*
+G04 Draw part C5*
+G04 Draw part J2*
+G04 Draw part C1*
+G04 Draw part C4*
+
+G04 Draw traces*
+
+G04 Draw Text*
+M00*
+M02*
