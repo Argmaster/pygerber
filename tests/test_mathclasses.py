@@ -28,6 +28,13 @@ class DataClassesTest(TestCase):
         self.assertEqual(box.right, 5)
         self.assertEqual(box.lower, 3)
 
+    def test_BoundingBox_reverse_points(self):
+        box = BoundingBox(5, 3, -2, 4)
+        self.assertEqual(box.left, -2)
+        self.assertEqual(box.upper, 4)
+        self.assertEqual(box.right, 5)
+        self.assertEqual(box.lower, 3)
+
     def test_BoundingBox_add_bbox(self):
         box1 = BoundingBox(10, 23, 32, 15)
         box2 = BoundingBox(-2, 4, -1, 3)

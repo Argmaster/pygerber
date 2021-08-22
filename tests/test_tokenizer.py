@@ -1,3 +1,4 @@
+from pygerber.mathclasses import BoundingBox
 from pygerber.meta.meta import Interpolation, Polarity
 from pygerber.tokens.token import Token
 from unittest import TestCase, main
@@ -20,6 +21,7 @@ class TokenizerTest(TestCase):
         tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())
         tokenizer.tokenize_string(self.SOURCE_0)
         self.assertEqual(tokenizer.token_stack_size, 6)
+        self.assertEqual(tokenizer.bbox.as_tuple(), (-0.75, 0.75, 0.75, -0.75))
 
     def test_tokenize_file_0(self):
         tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())
@@ -28,21 +30,28 @@ class TokenizerTest(TestCase):
         self.assertEqual(tokenizer.meta.polarity, Polarity.DARK)
         self.assertTrue(10 in tokenizer.meta.apertures.keys())
         self.assertEqual(tokenizer.meta.interpolation, Interpolation.Linear)
+        self.assertEqual(tokenizer.bbox.as_tuple(), (-0.005, 5.005, 11.005, -0.005))
 
     def test_tokenize_file_1(self):
         tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())
         tokenizer.tokenize_file("./tests/gerber/s1.grb")
         self.assertEqual(tokenizer.token_stack_size, 47)
+        self.assertEqual(
+            tokenizer.bbox.as_tuple(), (-0.0635, 25.3492, 55.062119999999986, -0.0635)
+        )
 
     def test_tokenize_file_2(self):
         tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())
         tokenizer.tokenize_file("./tests/gerber/s2.grb")
         self.assertEqual(tokenizer.token_stack_size, 116)
+        self.assertEqual(
+            tokenizer.bbox.as_tuple(), (-0.0635, 25.3492, 55.062119999999986, -0.0635)
+        )
 
     def test_render(self):
         tokenizer = Tokenizer(ApertureSetTest.get_dummy_apertureSet())
-        stack = tokenizer.tokenize_string(self.SOURCE_0)
-        self.assertRaises(ApertureCollector.CalledFlash, tokenizer.render, stack)
+        tokenizer.tokenize_string(self.SOURCE_0)
+        self.assertRaises(ApertureCollector.CalledFlash, tokenizer.render)
 
 
 if __name__ == "__main__":

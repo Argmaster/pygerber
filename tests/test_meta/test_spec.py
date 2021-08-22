@@ -2,7 +2,7 @@
 from unittest import TestCase, main
 
 from pygerber.mathclasses import Vector2D
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, RegionSpec
+from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
 
 
 class SpecTest(TestCase):
@@ -27,10 +27,6 @@ class SpecTest(TestCase):
         self.assertEqual(spec.end, end)
         self.assertEqual(spec.center, center)
         self.assertEqual(spec.is_region, False)
-
-    def test_RegionSpec(self):
-        spec = RegionSpec([])
-        self.assertEqual(spec.bounds, [])
 
 
 if __name__ == "__main__":

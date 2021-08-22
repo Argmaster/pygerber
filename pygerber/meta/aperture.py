@@ -24,11 +24,11 @@ class Aperture(ABC):
         pass
 
     @abstractmethod
-    def line(self) -> None:
+    def line(self, spec: LineSpec) -> None:
         pass
 
     @abstractmethod
-    def arc(self) -> None:
+    def arc(self, spec: ArcSpec) -> None:
         pass
 
     @abstractmethod
@@ -105,3 +105,14 @@ class RegionApertureManager(ABC):
     @abstractmethod
     def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
         pass
+
+    def bbox(self, bounds: List[Tuple[Aperture, Spec]]) -> BoundingBox:
+        if len(bounds) == 0:
+            return BoundingBox(0, 0, 0, 0)
+        aperture, spec = bounds[0]
+        aperture: Aperture
+        spec: Spec
+        bbox = spec.bbox(aperture)
+        for bound in bounds[1:]:
+            aperture, spec = bound
+            bbox = bbox + spec.bbox(aperture)

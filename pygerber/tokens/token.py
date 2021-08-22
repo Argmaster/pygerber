@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pygerber.mathclasses import BoundingBox
 
 import re
 from abc import ABCMeta, abstractmethod
@@ -54,6 +55,9 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
         """
         This method should be called only after token is dispatched and after affect_meta().
         """
+        pass
+
+    def bbox(self) -> BoundingBox:
         pass
 
     def __str__(self) -> str:

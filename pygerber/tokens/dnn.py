@@ -35,6 +35,9 @@ class D01_Token(Token):
     def render(self):
         self.meta.draw_interpolated(self.end, self.offset)
 
+    def bbox(self):
+        return self.meta.bbox_interpolated(self.end, self.offset)
+
 
 @load_validators
 class D02_Token(Token):
@@ -68,6 +71,9 @@ class D03_Token(Token):
 
     def render(self):
         self.meta.draw_flash(self.point)
+
+    def bbox(self):
+        return self.meta.bbox_flash(self.point)
 
 
 @Deprecated("G54 command is deprecated since 2012")

@@ -27,6 +27,12 @@ class BoundingBox:
     right: float
     lower: float
 
+    def __init__(self, x0: float, y0: float, x1: float, y1: float) -> None:
+        self.left = min(x0, x1)
+        self.right = max(x0, x1)
+        self.upper = max(y0, y1)
+        self.lower = min(y0, y1)
+
     def as_tuple(self) -> Tuple[float]:
         return self.left, self.upper, self.right, self.lower
 
