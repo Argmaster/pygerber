@@ -16,6 +16,7 @@ from .load import (
     LoadUnitToken,
 )
 from .control import EndOfStream_Token, Whitespace_Token
+from .am import ApertureMacro_Token
 
 token_classes: List[Type[Token]] = [
     Whitespace_Token,
@@ -37,4 +38,5 @@ token_classes: List[Type[Token]] = [
     LoadScalingToken,
     LoadUnitToken,
     EndOfStream_Token,
+    ApertureMacro_Token,
 ]

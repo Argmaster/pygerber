@@ -20,18 +20,33 @@ class Tokenizer:
 
     def __init__(self, apertureSet: ApertureSet) -> None:
         self.token_stack = deque()
+        self.apertureSet = apertureSet
         self.meta = Meta(apertureSet)
         self.begin_index = 0
         self.char_index = 0
         self.line_index = 1
 
-    def evaluate(self) -> None:
-        pass
+    def render(self, token_stack: deque) -> None:
+        """
+        Render all tokens contained in token_stack.
+        """
+        self.meta = Meta(self.apertureSet)
+        for token in token_stack:
+            self.render_token(token)
 
-    def tokenize_file(self, filepath: str) -> None:
+    def render_token(self, token: Token) -> None:
+        token: Token
+        token.affect_meta()
+        token.render()
+
+    def tokenize_file(self, filepath: str) -> deque:
+        """
+        Opens file that filepath is pointing to and tokenizes its contents.
+        Deque containing all of the tokens is returned.
+        """
         self.filepath = filepath
         source = self.load_file()
-        self.tokenize_string(source)
+        return self.tokenize_string(source)
 
     def load_file(self) -> str:
         with open(self.filepath, "r", encoding="utf-8") as file:
@@ -39,6 +54,10 @@ class Tokenizer:
         return source
 
     def tokenize_string(self, string: str) -> deque:
+        """
+        Tokenizes source string, assuming that it contains Gerber code.
+        Deque containing all of the tokens is returned.
+        """
         self.source = string
         return self.tokenize()
 
