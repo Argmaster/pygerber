@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pygerber.meta.aperture_manager import ApertureManager
 from types import SimpleNamespace
 from typing import List, Tuple
 from unittest import TestCase, main
@@ -74,7 +75,9 @@ class RectangularApertureTest(TestCase):
             HOLE_DIAMETER=0.1,
         ),
     ):
-        return RectangleApertureCollector(args)
+        return RectangleApertureCollector(
+            args, ApertureManager(ApertureSetTest.get_dummy_apertureSet())
+        )
 
     def test_create(self):
         aperture = self.create_rectangle_aperture()
@@ -107,7 +110,7 @@ class CircularApertureTest(TestCase):
             HOLE_DIAMETER=0.1,
         ),
     ):
-        return CircleApertureCollector(args)
+        return CircleApertureCollector(args, ApertureManager(ApertureSetTest.get_dummy_apertureSet()))
 
     def test_create(self):
         aperture = self.create_circle_aperture()
@@ -124,7 +127,7 @@ class PolygonApertureTest(TestCase):
         self,
         args=SimpleNamespace(DIAMETER=0.6, HOLE_DIAMETER=0.1, ROTATION=0.3, VERTICES=5),
     ):
-        return PolygonApertureCollector(args)
+        return PolygonApertureCollector(args, ApertureManager(ApertureSetTest.get_dummy_apertureSet()))
 
     def test_create(self):
         aperture = self.create_polygon_aperture()

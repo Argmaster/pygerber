@@ -13,9 +13,12 @@ from .load import (
     LoadMirroringToken,
     LoadRotationToken,
     LoadScalingToken,
+    LoadUnitToken,
 )
+from .control import EndOfStream_Token, Whitespace_Token
 
 token_classes: List[Type[Token]] = [
+    Whitespace_Token,
     FormatSpecifierToken,
     D01_Token,
     D02_Token,
@@ -32,4 +35,6 @@ token_classes: List[Type[Token]] = [
     LoadMirroringToken,
     LoadRotationToken,
     LoadScalingToken,
+    LoadUnitToken,
+    EndOfStream_Token,
 ]
