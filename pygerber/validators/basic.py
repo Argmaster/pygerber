@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING
 
 from .validator import Validator
 
-if TYPE_CHECKING:
-    from pygerber.tokens.token import Token
+
+from pygerber.tokens import token as tkn
 
 
 class Float(Validator):
-    def __call__(self, token: Token, value: str) -> float:
+    def __call__(self, token: tkn.Token, value: str) -> float:
         if value is not None:
             return float(value)
         else:
@@ -17,7 +17,7 @@ class Float(Validator):
 
 
 class Int(Validator):
-    def __call__(self, token: Token, value: str) -> int:
+    def __call__(self, token: tkn.Token, value: str) -> int:
         if value is not None:
             return int(value)
         else:
@@ -25,7 +25,7 @@ class Int(Validator):
 
 
 class String(Validator):
-    def __call__(self, token: Token, value: str) -> str:
+    def __call__(self, token: tkn.Token, value: str) -> str:
         if value is not None:
             return str(value)
         else:

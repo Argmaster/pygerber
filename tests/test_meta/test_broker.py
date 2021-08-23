@@ -7,15 +7,13 @@ from pygerber.exceptions import ApertureSelectionError
 from pygerber.meta.broker import DrawingBroker
 from pygerber.mathclasses import Vector2D
 from pygerber.meta.spec import LineSpec
-from tests.test_meta.test_aperture import ApertureSetTest
-
-from .test_aperture import ApertureCollector
+import tests.test_meta.test_aperture as test_aperture
 
 
 class DrawingBrokerTest(TestCase):
     @staticmethod
     def get_dummy_broker() -> DrawingBroker:
-        return DrawingBroker(ApertureSetTest.get_dummy_apertureSet())
+        return DrawingBroker(test_aperture.ApertureSetTest.get_dummy_apertureSet())
 
     @staticmethod
     def fill_dummy_apertures(broker: DrawingBroker):
@@ -43,7 +41,7 @@ class DrawingBrokerTest(TestCase):
     def get_collector_spec(function, *args):
         try:
             function(*args)
-        except ApertureCollector.CalledWithSpec as e:
+        except test_aperture.ApertureCollector.CalledWithSpec as e:
             return e.spec
         raise Exception("Failed to catch CalledWithSpec exception.")
 
@@ -51,7 +49,7 @@ class DrawingBrokerTest(TestCase):
     def get_collector_bounds(function, *args):
         try:
             function(*args)
-        except ApertureCollector.CalledFinish as e:
+        except test_aperture.ApertureCollector.CalledFinish as e:
             return e.bounds
         raise Exception("Failed to catch CalledFinish exception.")
 
@@ -68,7 +66,7 @@ class DrawingBrokerTest(TestCase):
         broker = self.get_filled_broker()
         broker.select_aperture(10)
         self.assertRaises(
-            ApertureCollector.CalledFlash, broker.draw_flash, Vector2D(1, 1)
+            test_aperture.ApertureCollector.CalledFlash, broker.draw_flash, Vector2D(1, 1)
         )
         spec = self.get_collector_spec(broker.draw_flash, Vector2D(1, 1))
         self.assertEqual(spec.location, Vector2D(1, 1))
@@ -78,7 +76,7 @@ class DrawingBrokerTest(TestCase):
         broker = self.get_filled_broker()
         broker.select_aperture(10)
         self.assertRaises(
-            ApertureCollector.CalledLine, broker.draw_line, Vector2D(1, 1)
+            test_aperture.ApertureCollector.CalledLine, broker.draw_line, Vector2D(1, 1)
         )
         spec = self.get_collector_spec(broker.draw_line, Vector2D(1, 1))
         self.assertEqual(spec.begin, Vector2D(0, 0))
@@ -89,7 +87,7 @@ class DrawingBrokerTest(TestCase):
         broker = self.get_filled_broker()
         broker.select_aperture(10)
         self.assertRaises(
-            ApertureCollector.CalledArc,
+            test_aperture.ApertureCollector.CalledArc,
             broker.draw_arc,
             Vector2D(1, 1),
             Vector2D(0, 2),
@@ -104,14 +102,14 @@ class DrawingBrokerTest(TestCase):
         broker = self.get_filled_broker()
         broker.select_aperture(10)
         self.assertRaises(
-            ApertureCollector.CalledLine,
+            test_aperture.ApertureCollector.CalledLine,
             broker.draw_interpolated,
             Vector2D(1, 1),
             Vector2D(0, 2),
         )
         broker.set_interpolation(Interpolation.ClockwiseCircular)
         self.assertRaises(
-            ApertureCollector.CalledArc,
+            test_aperture.ApertureCollector.CalledArc,
             broker.draw_interpolated,
             Vector2D(1, 1),
             Vector2D(0, 2),

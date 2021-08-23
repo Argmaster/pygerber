@@ -39,9 +39,6 @@ class G37_Token(Token):
 class G55_Token(Token):
     regex = re.compile(r"G55.*?\*")
 
-    def affect_meta(self):
-        self.meta.set_unit(Unit.INCHES)
-
 @Deprecated("G70 command is deprecated since 2012")
 @load_validators
 class G70_Token(Token):

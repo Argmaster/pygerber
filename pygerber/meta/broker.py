@@ -29,6 +29,7 @@ class DrawingBroker(ApertureManager, TransformMeta):
         self.current_aperture = self.get_aperture(id)
 
     def draw_interpolated(self, end: Vector2D, offset: Vector2D) -> None:
+        self.move_pointer(end)
         end = self.preprocess_vector(end)
         if self.interpolation == Interpolation.Linear:
             self.draw_line(end)
@@ -37,6 +38,7 @@ class DrawingBroker(ApertureManager, TransformMeta):
             self.draw_arc(end, offset)
 
     def bbox_interpolated(self, end: Vector2D, offset: Vector2D) -> BoundingBox:
+        self.move_pointer(end)
         end = self.preprocess_vector(end)
         if self.interpolation == Interpolation.Linear:
             return self.bbox_line(end)
@@ -92,11 +94,13 @@ class DrawingBroker(ApertureManager, TransformMeta):
         if self.is_regionmode:
             raise RuntimeError("Flashes can't be used in region mode.")
         else:
+            self.move_pointer(point)
             aperture = self.get_current_aperture()
             spec = self.get_flash_spec(point)
             aperture.flash(spec)
 
     def bbox_flash(self, point: Vector2D) -> BoundingBox:
+        self.move_pointer(point)
         aperture = self.get_current_aperture()
         spec = self.get_flash_spec(point)
         return aperture.flash_bbox(spec)

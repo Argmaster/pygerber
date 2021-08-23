@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pygerber.exceptions import FeatureNotSupportedError
 from types import SimpleNamespace
 
 from pygerber.tokens import FormatSpecifierToken
@@ -26,12 +27,37 @@ class CoParser:
     def set_mode(self, mode: str) -> None:
         self.format.mode = mode
 
+    def get_mode(self) -> str:
+        return self.format.mode
+
     def set_zeros(self, zeros: str) -> None:
         self.format.zeros = zeros
 
+    def get_zeros(self) -> None:
+        return self.format.zeros
+
     def dump(self, co: float) -> str:
-        # TODO implement some day...
-        return str(co)
+        if co < 0:
+            sign = "-"
+            co = abs(co)
+        else:
+            sign = ""
+        DEC_FORMAT = self.format.DEC_FORMAT
+        integer_as_int = int(co)
+        co_decimal_rounded = round(co - integer_as_int, DEC_FORMAT)
+        decimal_as_int = int(co_decimal_rounded * 10 ** DEC_FORMAT)
+
+        if self.get_zeros() == "L":
+            if integer_as_int != 0:
+                output = sign + str(integer_as_int)
+                output += str(decimal_as_int).rjust(DEC_FORMAT, "0")
+            else:
+                output = sign + str(decimal_as_int)
+            return output
+        else:
+            raise FeatureNotSupportedError(
+                "Dump of other zeros format than 'L' not supported."
+            )
 
     def parse(self, float_string: str) -> float:
         if float_string[0] == "-" or float_string[0] == "+":
@@ -47,9 +73,9 @@ class CoParser:
 
     def format_zeros(self, float_string):
         # three possible behaviors of zeros
-        if self.format.zeros == "L":  # skip leading
+        if self.get_zeros() == "L":  # skip leading
             return f"{float_string:0>{self.format.length}}"
-        elif self.format.zeros == "T":  # skip trailing
-            return f"{float_string:0<{self.format.length}}"
-        else:  # D - don't skip, no oder gets through regex
-            return float_string
+        elif self.get_zeros() == "T":
+            return float_string # we don't need trailing zeros anyway
+        else:
+            return float_string # use as-is as no zeros are skipped

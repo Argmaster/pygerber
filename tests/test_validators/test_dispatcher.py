@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pygerber.exceptions import InvalidCommandFormat
 from types import SimpleNamespace
 from unittest import TestCase, main
 
@@ -24,6 +25,17 @@ class DispatcherTest(TestCase):
         cleaned2 = validator1(token, "bar")
         self.assertEqual(cleaned1.VALUE, "foo")
         self.assertEqual(cleaned2.VALUE, "bar")
+
+    def test_dispatcher_fail(self):
+        token = self.get_dummy_token()
+
+        @load_validators
+        class ARGS_dispatcher(Dispatcher):
+            VALUE = Validator()
+
+        validator1 = ARGS_dispatcher(r"(?P<VALUE>[a-z]+)")
+
+        self.assertRaises(InvalidCommandFormat, lambda: validator1(token, "346"))
 
 
 if __name__ == "__main__":

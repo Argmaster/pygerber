@@ -20,6 +20,7 @@ class DeprecatedSyntax(InvalidSyntaxError):
 class EndOfStream(InvalidSyntaxError):
     pass
 
+
 class RenderingError(Exception):
     pass
 
@@ -27,7 +28,8 @@ class RenderingError(Exception):
 class ApertureSelectionError(Exception):
     pass
 
-class NoCorespondingApertureClass(Exception):
+
+class FeatureNotSupportedError(Exception):
     pass
 
 

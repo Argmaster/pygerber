@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+from tests.test_meta.test_broker import DrawingBrokerTest
+from tests.test_meta.test_aperture import ApertureCollector
 from unittest import TestCase, main
 
 from pygerber.meta import Meta
 from pygerber.tokens import D01_Token, D02_Token, D03_Token, DNN_Loader_Token
+from tests.test_meta.test_meta import TestMeta
 
 
 class D01_TokenText(TestCase):
     def init_token(self, source):
-        META = Meta(None)
+        META = TestMeta.get_filled_meta()
         dnntoken = D01_Token.match(source, 0)
         self.assertTrue(dnntoken)
         dnntoken.dispatch(META)
@@ -32,6 +35,11 @@ class D01_TokenText(TestCase):
         SOURCE = "H333I300J100D01*"
         dnntoken = D01_Token.match(SOURCE, 0)
         self.assertFalse(dnntoken)
+
+    def test_render_line(self):
+        dnntoken = self.init_token("I300J100D01*")
+        dnntoken.meta.select_aperture(10)
+        self.assertRaises(ApertureCollector.CalledLine, dnntoken.render)
 
 
 class D02_TokenText(TestCase):

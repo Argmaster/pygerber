@@ -2,10 +2,8 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import List, TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from pygerber.meta.aperture import Aperture
+import pygerber.meta.aperture as meta_ap
 
 from pygerber.mathclasses import Vector2D
 
@@ -14,11 +12,11 @@ class Spec(ABC):
 
     @abstractmethod
     def draw(self, aperture):
-        pass
+        raise TypeError()
 
     @abstractmethod
     def bbox(self, aperture):
-        pass
+        raise TypeError()
 
 
 @dataclass
@@ -27,10 +25,10 @@ class FlashSpec(Spec):
     location: Vector2D
     is_region: bool
 
-    def draw(self, aperture: Aperture):
+    def draw(self, aperture: meta_ap.Aperture):
         return aperture.flash(self)
 
-    def bbox(self, aperture: Aperture):
+    def bbox(self, aperture: meta_ap.Aperture):
         return aperture.flash_bbox(self)
 
 @dataclass
@@ -40,10 +38,10 @@ class LineSpec(Spec):
     end: Vector2D
     is_region: bool
 
-    def draw(self, aperture: Aperture):
+    def draw(self, aperture: meta_ap.Aperture):
         return aperture.line(self)
 
-    def bbox(self, aperture: Aperture):
+    def bbox(self, aperture: meta_ap.Aperture):
         return aperture.line_bbox(self)
 
 
@@ -55,9 +53,9 @@ class ArcSpec(Spec):
     center: Vector2D
     is_region: bool
 
-    def draw(self, aperture: Aperture):
+    def draw(self, aperture: meta_ap.Aperture):
         return aperture.arc(self)
 
-    def bbox(self, aperture: Aperture):
+    def bbox(self, aperture: meta_ap.Aperture):
         return aperture.arc_bbox(self)
 

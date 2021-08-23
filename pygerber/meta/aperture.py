@@ -2,11 +2,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from pygerber.meta.broker import DrawingBroker
-from typing import TYPE_CHECKING, List, Tuple
+from typing import List, Tuple
 
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from pygerber.tokens.add import ADD_Token
@@ -15,25 +12,24 @@ from pygerber.mathclasses import BoundingBox
 
 
 class Aperture(ABC):
-    @abstractmethod
-    def __init__(self, args: ADD_Token.ARGS, broker: DrawingBroker) -> None:
-        pass
+    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
+        raise TypeError()
 
     @abstractmethod
     def flash(self, spec: FlashSpec) -> None:
-        pass
+        raise TypeError()
 
     @abstractmethod
     def line(self, spec: LineSpec) -> None:
-        pass
+        raise TypeError()
 
     @abstractmethod
     def arc(self, spec: ArcSpec) -> None:
-        pass
+        raise TypeError()
 
     @abstractmethod
     def bbox(self) -> BoundingBox:
-        pass
+        raise TypeError()
 
     def flash_bbox(self, spec: FlashSpec) -> BoundingBox:
         return self.bbox().transform(spec.location)
@@ -50,7 +46,8 @@ class CircularAperture(Aperture):
     DIAMETER: float
     HOLE_DIAMETER: float
 
-    def __init__(self, args: ADD_Token.ARGS, broker: DrawingBroker) -> None:
+    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
+        self.broker = broker
         self.HOLE_DIAMETER = broker.convert_to_mm(args.HOLE_DIAMETER)
         self.DIAMETER = broker.convert_to_mm(args.DIAMETER)
 
@@ -70,7 +67,8 @@ class RectangularAperture(Aperture):
     Y: float
     HOLE_DIAMETER: float
 
-    def __init__(self, args: ADD_Token.ARGS, broker: DrawingBroker) -> None:
+    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
+        self.broker = broker
         self.X = broker.convert_to_mm(args.X)
         self.Y = broker.convert_to_mm(args.Y)
         self.HOLE_DIAMETER = broker.convert_to_mm(args.HOLE_DIAMETER)
@@ -93,7 +91,7 @@ class PolygonAperture(CircularAperture):
     DIAMETER: float
     HOLE_DIAMETER: float
 
-    def __init__(self, args: ADD_Token.ARGS, broker: DrawingBroker) -> None:
+    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
         super().__init__(args, broker)
         self.VERTICES = args.VERTICES
         self.ROTATION = args.ROTATION
@@ -104,7 +102,7 @@ class RegionApertureManager(ABC):
 
     @abstractmethod
     def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
-        pass
+        raise TypeError()
 
     def bbox(self, bounds: List[Tuple[Aperture, Spec]]) -> BoundingBox:
         if len(bounds) == 0:
@@ -116,3 +114,15 @@ class RegionApertureManager(ABC):
         for bound in bounds[1:]:
             aperture, spec = bound
             bbox = bbox + spec.bbox(aperture)
+        return bbox
+
+
+class CustomAperture(Aperture):
+
+    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
+        self.broker = broker
+        self.args = args
+        self.process_args()
+
+    def process_args(self):
+        pass

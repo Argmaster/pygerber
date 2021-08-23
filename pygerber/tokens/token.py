@@ -6,8 +6,7 @@ import re
 from abc import ABCMeta, abstractmethod
 from typing import TYPE_CHECKING, Union
 
-if TYPE_CHECKING:
-    from pygerber.meta import Meta
+import pygerber.meta
 
 import pygerber.validators as validator
 
@@ -16,7 +15,7 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
     regex: re.Pattern
     re_match: re.Match
     # meta attribute is only available after dispatch
-    meta: Meta
+    meta: pygerber.meta.Meta
     keep: bool = True
 
     def __init__(self, match_object: re.Match) -> None:
@@ -24,7 +23,7 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
 
     @classmethod
     def match_and_dispatch(
-        class_, meta: Meta, source: str, index: int = 0
+        class_, meta: pygerber.meta.Meta, source: str, index: int = 0
     ) -> Union[Token, bool]:
         # returns False on failure, Token object on success, token is dispatched.
         token = class_.match(source, index)
@@ -41,9 +40,6 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
         else:
             # Token object have to be dispatched to make it functional
             return class_(optional_match)
-
-    def dump_co(self, co: float):
-        return self.meta.coparser.dump(co)
 
     def affect_meta(self):
         """

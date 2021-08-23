@@ -3,15 +3,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-if TYPE_CHECKING:
-    from pygerber.tokens.token import Token
+from pygerber.tokens import token as tkn
 
 
 class Validator:
     def __init__(self, default: Any = None) -> None:
         self.default = default
 
-    def __call__(self, token: Token, value: str) -> str:
+    def __call__(self, token: tkn.Token, value: str) -> str:
         return value
 
 

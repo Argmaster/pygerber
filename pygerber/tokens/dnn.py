@@ -52,7 +52,7 @@ class D02_Token(Token):
     def point(self):
         return Vector2D(self.X, self.Y)
 
-    def render(self):
+    def affect_meta(self):
         self.meta.move_pointer(self.point)
 
 
