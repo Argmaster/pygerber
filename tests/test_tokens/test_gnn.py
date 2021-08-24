@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+from tests.testutils.meta import get_or_create_dummy_meta
+from tests.testutils.apertures import ApertureCollector
 from pygerber.mathclasses import BoundingBox
 from pygerber.meta.meta import Unit
 from pygerber.tokens.gnn import G55_Token, G70_Token, G71_Token, G90_Token, G91_Token
-from tests.test_meta.test_aperture import ApertureCollector, ApertureSetTest
 from unittest import TestCase, main
 from pygerber.tokens import G0N_Token, G36_Token, G37_Token
 from pygerber.meta import Meta, Interpolation
@@ -32,7 +33,7 @@ class G0N_Token_Test(TestCase):
 
 class GNN_Token_Test(TestCase):
     def init_token(self, source, token_class, meta=None):
-        META = Meta(ApertureSetTest.get_dummy_apertureSet()) if meta is None else meta
+        META = get_or_create_dummy_meta(meta)
         token = token_class.match(source, 0)
         self.assertTrue(token)
         token.dispatch(META)

@@ -1,80 +1,18 @@
 # -*- coding: utf-8 -*-
-from tests.test_meta.test_broker import DrawingBrokerTest
+from tests.testutils.broker import get_filled_broker
+from tests.testutils.apertures import CircleApertureCollector, PolygonApertureCollector, RectangleApertureCollector, get_dummy_apertureSet
 from pygerber.meta.aperture_manager import ApertureManager
 from types import SimpleNamespace
-from typing import List, Tuple
 from unittest import TestCase, main
 from unittest.mock import Mock
 
-from pygerber.meta import ApertureSet
 from pygerber.meta.aperture import (
     Aperture,
-    CircularAperture,
-    CustomAperture,
-    PolygonAperture,
-    RectangularAperture,
     RegionApertureManager,
 )
 from pygerber.mathclasses import BoundingBox, Vector2D
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
+from pygerber.meta.spec import ArcSpec, LineSpec
 
-
-class ApertureCollector:
-    class Called(Exception):
-        pass
-
-    class CalledWithSpec(Exception):
-        def __init__(self, spec: Spec) -> None:
-            self.spec = spec
-
-    class CalledFlash(CalledWithSpec):
-        pass
-
-    class CalledLine(CalledWithSpec):
-        pass
-
-    class CalledArc(CalledWithSpec):
-        pass
-
-    class CalledBBox(Called):
-        pass
-
-    class CalledFinish(Called):
-        def __init__(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
-            self.bounds = bounds
-
-    def flash(self, spec: FlashSpec) -> None:
-        raise self.CalledFlash(spec)
-
-    def line(self, spec: LineSpec) -> None:
-        raise self.CalledLine(spec)
-
-    def arc(self, spec: ArcSpec) -> None:
-        raise self.CalledArc(spec)
-
-    def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
-        raise self.CalledFinish(bounds)
-
-
-class RectangleApertureCollector(ApertureCollector, RectangularAperture):
-    pass
-
-
-class CircleApertureCollector(ApertureCollector, CircularAperture):
-    pass
-
-
-class PolygonApertureCollector(ApertureCollector, PolygonAperture):
-    pass
-
-
-class RegionApertureCollector(ApertureCollector, RegionApertureManager):
-    pass
-
-
-class CustomApertureCollector(ApertureCollector, CustomAperture):
-    def bbox(self):
-        return BoundingBox(0, 0, 0, 0)
 
 
 class ABCsTest(TestCase):
@@ -102,7 +40,7 @@ class ABCsTest(TestCase):
 
     def test_region_bbox(self):
         self.assertEqual(RegionApertureManager.bbox(None, []), BoundingBox(0, 0, 0, 0))
-        broker = DrawingBrokerTest.get_filled_broker()
+        broker = get_filled_broker()
         broker.select_aperture(10)
         self.assertEqual(
             RegionApertureManager.bbox(
@@ -119,7 +57,7 @@ class ABCsTest(TestCase):
 
     def test_region_bbox_many_bounds(self):
         self.assertEqual(RegionApertureManager.bbox(None, []), BoundingBox(0, 0, 0, 0))
-        broker = DrawingBrokerTest.get_filled_broker()
+        broker = get_filled_broker()
         broker.select_aperture(10)
         self.assertEqual(
             RegionApertureManager.bbox(
@@ -149,7 +87,7 @@ class RectangularApertureTest(TestCase):
         ),
     ):
         return RectangleApertureCollector(
-            args, ApertureManager(ApertureSetTest.get_dummy_apertureSet())
+            args, ApertureManager(get_dummy_apertureSet())
         )
 
     def test_create(self):
@@ -184,7 +122,7 @@ class CircularApertureTest(TestCase):
         ),
     ):
         return CircleApertureCollector(
-            args, ApertureManager(ApertureSetTest.get_dummy_apertureSet())
+            args, ApertureManager(get_dummy_apertureSet())
         )
 
     def test_create(self):
@@ -203,7 +141,7 @@ class PolygonApertureTest(TestCase):
         args=SimpleNamespace(DIAMETER=0.6, HOLE_DIAMETER=0.1, ROTATION=0.3, VERTICES=5),
     ):
         return PolygonApertureCollector(
-            args, ApertureManager(ApertureSetTest.get_dummy_apertureSet())
+            args, ApertureManager(get_dummy_apertureSet())
         )
 
     def test_create(self):
@@ -218,25 +156,6 @@ class PolygonApertureTest(TestCase):
         self.assertEqual(bbox.as_tuple(), (-0.3, 0.3, 0.3, -0.3))
 
 
-class ApertureSetTest(TestCase):
-    @staticmethod
-    def get_dummy_apertureSet():
-        return ApertureSet(
-            CircleApertureCollector,
-            RectangleApertureCollector,
-            RectangleApertureCollector,
-            PolygonApertureCollector,
-            CustomApertureCollector,
-            RegionApertureCollector,
-        )
-
-    def test_getApertureClass(self):
-        AS = self.get_dummy_apertureSet()
-        self.assertEqual(AS.getApertureClass("C"), CircleApertureCollector)
-        self.assertEqual(AS.getApertureClass("R"), RectangleApertureCollector)
-        self.assertEqual(AS.getApertureClass("O"), RectangleApertureCollector)
-        self.assertEqual(AS.getApertureClass("P"), PolygonApertureCollector)
-        self.assertEqual(AS.getApertureClass(is_region=True), RegionApertureCollector)
 
 
 if __name__ == "__main__":
