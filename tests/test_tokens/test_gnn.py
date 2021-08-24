@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pygerber.mathclasses import BoundingBox
 from pygerber.meta.meta import Unit
 from pygerber.tokens.gnn import G55_Token, G70_Token, G71_Token, G90_Token, G91_Token
 from tests.test_meta.test_aperture import ApertureCollector, ApertureSetTest
@@ -42,8 +43,10 @@ class GNN_Token_Test(TestCase):
         token.affect_meta()
         self.assertTrue(meta.is_regionmode)
         token, meta = self.init_token("G37*", G37_Token, meta)
-        self.assertRaises(ApertureCollector.CalledFinish, token.affect_meta)
+        token.affect_meta()
         self.assertFalse(meta.is_regionmode)
+        self.assertRaises(ApertureCollector.CalledFinish, token.render)
+        self.assertEqual(token.bbox(), BoundingBox(0, 0, 0, 0))
 
     def test_G70(self):
         token, meta = self.init_token("G70*", G70_Token)
@@ -58,13 +61,12 @@ class GNN_Token_Test(TestCase):
     def test_G90(self):
         token, meta = self.init_token("G90*", G90_Token)
         token.affect_meta()
-        self.assertEqual(meta.coparser.get_mode(), 'A')
+        self.assertEqual(meta.coparser.get_mode(), "A")
 
     def test_G91(self):
         token, meta = self.init_token("G91*", G91_Token)
         token.affect_meta()
-        self.assertEqual(meta.coparser.get_mode(), 'I')
-
+        self.assertEqual(meta.coparser.get_mode(), "I")
 
 
 if __name__ == "__main__":

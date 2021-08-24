@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 from pygerber.exceptions import ApertureSelectionError
 
-from .aperture import Aperture
+from .aperture import Aperture, RegionApertureManager
 from .aperture_manager import ApertureManager
 from .apertureset import ApertureSet
 from pygerber.mathclasses import BoundingBox, Vector2D
@@ -36,6 +36,26 @@ class DrawingBroker(ApertureManager, TransformMeta):
         else:
             offset = self.preprocess_offset(offset)
             self.draw_arc(end, offset)
+
+    def preprocess_vector(self, vector: Vector2D) -> Vector2D:
+        return self.fill_xy_none_with_current(self.convert_vector_to_mm(vector))
+
+    def preprocess_offset(self, vector: Vector2D) -> Vector2D:
+        return self.fill_xy_none_with_zero(self.convert_vector_to_mm(vector))
+
+    def fill_xy_none_with_current(self, point: Vector2D):
+        if point.x is None:
+            point.x = self.current_point.x
+        if point.y is None:
+            point.y = self.current_point.y
+        return point
+
+    def fill_xy_none_with_zero(self, point: Vector2D):
+        if point.x is None:
+            point.x = 0
+        if point.y is None:
+            point.y = 0
+        return point
 
     def bbox_interpolated(self, end: Vector2D, offset: Vector2D) -> BoundingBox:
         self.move_pointer(end)
@@ -120,17 +140,11 @@ class DrawingBroker(ApertureManager, TransformMeta):
             )
         return self.current_aperture
 
-    def end_region(self):
+    def end_region(self) -> Tuple[RegionApertureManager, List[Tuple[Aperture, Spec]]]:
         bounds = self.get_and_clean_region_bounds()
         super().end_region()
         apertureClass = self.apertureSet.getApertureClass(None, True)
-        apertureClass().finish(bounds)
-
-    def bbox_region(self):
-        bounds = self.get_and_clean_region_bounds()
-        super().end_region()
-        apertureClass = self.apertureSet.getApertureClass(None, True)
-        apertureClass().bbox(bounds)
+        return apertureClass, bounds
 
     def get_and_clean_region_bounds(self):
         bounds = self.region_bounds

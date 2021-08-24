@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+from pygerber.meta.aperture import RegionApertureManager
 from pygerber.meta.meta import Interpolation
 from types import SimpleNamespace
 from unittest import TestCase, main
 
 from pygerber.exceptions import ApertureSelectionError
 from pygerber.meta.broker import DrawingBroker
-from pygerber.mathclasses import Vector2D
+from pygerber.mathclasses import BoundingBox, Vector2D
 from pygerber.meta.spec import LineSpec
 import tests.test_meta.test_aperture as test_aperture
 
@@ -45,14 +46,6 @@ class DrawingBrokerTest(TestCase):
             return e.spec
         raise Exception("Failed to catch CalledWithSpec exception.")
 
-    @staticmethod
-    def get_collector_bounds(function, *args):
-        try:
-            function(*args)
-        except test_aperture.ApertureCollector.CalledFinish as e:
-            return e.bounds
-        raise Exception("Failed to catch CalledFinish exception.")
-
     def test_select_aperture(self):
         broker = self.get_filled_broker()
         broker.select_aperture(10)
@@ -66,11 +59,19 @@ class DrawingBrokerTest(TestCase):
         broker = self.get_filled_broker()
         broker.select_aperture(10)
         self.assertRaises(
-            test_aperture.ApertureCollector.CalledFlash, broker.draw_flash, Vector2D(1, 1)
+            test_aperture.ApertureCollector.CalledFlash,
+            broker.draw_flash,
+            Vector2D(1, 1),
         )
         spec = self.get_collector_spec(broker.draw_flash, Vector2D(1, 1))
         self.assertEqual(spec.location, Vector2D(1, 1))
         self.assertEqual(spec.is_region, False)
+
+    def test_flash_fails_in_regionmode(self):
+        broker = self.get_filled_broker()
+        broker.select_aperture(10)
+        broker.begin_region()
+        self.assertRaises(RuntimeError, broker.draw_flash, None)
 
     def test_draw_line_no_region(self):
         broker = self.get_filled_broker()
@@ -98,6 +99,18 @@ class DrawingBrokerTest(TestCase):
         self.assertEqual(spec.center, Vector2D(0, 2))
         self.assertEqual(spec.is_region, False)
 
+    def test_draw_arc_region(self):
+        broker = self.get_filled_broker()
+        broker.select_aperture(10)
+        broker.begin_region()
+        self.assertEqual(
+            broker.draw_arc(
+                Vector2D(1, 1),
+                Vector2D(0, 2),
+            ),
+            None,
+        )
+
     def test_draw_interpolated(self):
         broker = self.get_filled_broker()
         broker.select_aperture(10)
@@ -115,7 +128,6 @@ class DrawingBrokerTest(TestCase):
             Vector2D(0, 2),
         )
 
-
     def test_regionmode(self):
         broker = self.get_filled_broker()
         broker.select_aperture(10)
@@ -125,10 +137,8 @@ class DrawingBrokerTest(TestCase):
         broker.select_aperture(11)
         self.assertNotEqual(broker.region_bounds[0][0], broker.current_aperture)
         spec: LineSpec = broker.region_bounds[0][1]
-        region_bounds = broker.region_bounds
         self.assertEqual(spec, LineSpec(Vector2D(0, 0), Vector2D(1, 1), True))
-        bounds = self.get_collector_bounds(broker.end_region)
-        self.assertEqual(bounds, region_bounds)
+        broker.end_region()
         self.assertEqual(broker.region_bounds, [])
         self.assertFalse(broker.is_regionmode)
 
@@ -140,6 +150,48 @@ class DrawingBrokerTest(TestCase):
         self.assertEqual(spec.begin, Vector2D(3, 0))
         self.assertEqual(spec.end, Vector2D(1, 1))
         self.assertEqual(spec.is_region, False)
+
+    def test_fill_xy_none_with_current(self):
+        broker = self.get_filled_broker()
+        self.assertEqual(
+            broker.fill_xy_none_with_current(Vector2D(None, None)), Vector2D(0, 0)
+        )
+
+    def test_fill_xy_none_with_zero(self):
+        broker = self.get_filled_broker()
+        self.assertEqual(
+            broker.fill_xy_none_with_zero(Vector2D(None, None)), Vector2D(0, 0)
+        )
+
+    def test_bbox_interpolated_line(self):
+        broker = self.get_filled_broker()
+        broker.set_interpolation(Interpolation.Linear)
+        broker.select_aperture(10)
+        broker.begin_region()
+        bbox = broker.bbox_interpolated(Vector2D(1, 1), Vector2D(0, 1))
+        self.assertEqual(bbox, None)
+
+    def test_bbox_interpolated_arc(self):
+        broker = self.get_filled_broker()
+        broker.set_interpolation(Interpolation.ClockwiseCircular)
+        broker.select_aperture(10)
+        bbox = broker.bbox_interpolated(Vector2D(1, 1), Vector2D(0, 1))
+        self.assertEqual(bbox, BoundingBox(0.5, 1.5, 1.5, 0.5))
+        broker.begin_region()
+        bbox = broker.bbox_interpolated(Vector2D(1, 1), Vector2D(0, 1))
+        self.assertEqual(bbox, None)
+
+    def test_bbox_region(self):
+        broker = self.get_filled_broker()
+        broker.set_interpolation(Interpolation.Linear)
+        broker.select_aperture(10)
+        broker.begin_region()
+        broker.bbox_interpolated(Vector2D(1, 1), Vector2D(0, 1))
+        broker.bbox_interpolated(Vector2D(2, 2), Vector2D(0, 1))
+        region_aperture, bounds = broker.end_region()
+        self.assertEqual(
+            region_aperture().bbox(bounds), BoundingBox(0.5, 2.5, 2.5, 0.5)
+        )
 
 
 if __name__ == "__main__":

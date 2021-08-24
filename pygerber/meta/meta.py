@@ -39,6 +39,7 @@ class DrawingMeta:
         self.unit = Unit.MILLIMETERS
         self.polarity = Polarity.DARK
         self.interpolation = Interpolation.Linear
+        self.current_point = Vector2D(0, 0)
 
     def set_unit(self, unit):
         self.unit = unit
@@ -55,26 +56,6 @@ class DrawingMeta:
     def end_region(self):
         self.is_regionmode = False
 
-    def preprocess_vector(self, vector: Vector2D) -> Vector2D:
-        return self.fill_xy_none_with_current(self.convert_vector_to_mm(vector))
-
-    def preprocess_offset(self, vector: Vector2D) -> Vector2D:
-        return self.fill_xy_none_with_zero(self.convert_vector_to_mm(vector))
-
-    def fill_xy_none_with_current(self, point: Vector2D):
-        if point.x is None:
-            point.x = self.current_point.x
-        if point.y is None:
-            point.y = self.current_point.y
-        return point
-
-    def fill_xy_none_with_zero(self, point: Vector2D):
-        if point.x is None:
-            point.x = 0
-        if point.y is None:
-            point.y = 0
-        return point
-
     def convert_to_mm(self, value: float):
         if self.unit == Unit.INCHES:
             return value * 25.4
@@ -86,6 +67,7 @@ class DrawingMeta:
             self.convert_to_mm(vector.x),
             self.convert_to_mm(vector.y),
         )
+
 
 class TransformMeta:
 

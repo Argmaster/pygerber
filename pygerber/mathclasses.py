@@ -28,12 +28,19 @@ class BoundingBox:
     lower: float
 
     def __init__(self, x0: float, y0: float, x1: float, y1: float) -> None:
+        """
+        Coordinates are called x0, x1, y0, y1 on purpose - any of x's can be left.
+        During assignment smaller one will be picked to be left, bigger one to be right.
+        Same thing applies to y's. Order of coordinates doesn't mether as long
+        as axes are preserved.
+        """
         self.left = min(x0, x1)
         self.right = max(x0, x1)
         self.upper = max(y0, y1)
         self.lower = min(y0, y1)
 
     def as_tuple(self) -> Tuple[float]:
+        """Tuple (left, upper, right, lower)"""
         return self.left, self.upper, self.right, self.lower
 
     def contains(self, other: BoundingBox) -> bool:
