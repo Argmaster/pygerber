@@ -4,7 +4,7 @@ from pygerber.mathclasses import Vector2D
 
 import re
 
-from pygerber.validators import Coordinate, Int, load_validators
+from pygerber.validators import Int, load_validators, OffsetCoordinate, VectorCoordinateX, VectorCoordinateY
 
 from .token import Deprecated, Token
 
@@ -19,10 +19,10 @@ class D01_Token(Token):
         )
     )
 
-    X = Coordinate()
-    Y = Coordinate()
-    I = Coordinate()
-    J = Coordinate()
+    X = VectorCoordinateX()
+    Y = VectorCoordinateY()
+    I = OffsetCoordinate()
+    J = OffsetCoordinate()
 
     @property
     def end(self):
@@ -45,8 +45,8 @@ class D02_Token(Token):
         r"(X(?P<X>{0}))?(Y(?P<Y>{0}))?D02\*".format(CO_PATTERN),
     )
 
-    X = Coordinate()
-    Y = Coordinate()
+    X = VectorCoordinateX()
+    Y = VectorCoordinateY()
 
     @property
     def point(self):
@@ -62,8 +62,8 @@ class D03_Token(Token):
         r"(X(?P<X>{0}))?(Y(?P<Y>{0}))?D03\*".format(CO_PATTERN),
     )
 
-    X = Coordinate()
-    Y = Coordinate()
+    X = VectorCoordinateX()
+    Y = VectorCoordinateY()
 
     @property
     def point(self):

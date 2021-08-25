@@ -48,8 +48,8 @@ class CircularAperture(Aperture):
 
     def __init__(self, args: ADD_Token.ARGS, broker) -> None:
         self.broker = broker
-        self.HOLE_DIAMETER = broker.convert_to_mm(args.HOLE_DIAMETER)
-        self.DIAMETER = broker.convert_to_mm(args.DIAMETER)
+        self.HOLE_DIAMETER = args.HOLE_DIAMETER
+        self.DIAMETER = args.DIAMETER
 
     def bbox(self) -> BoundingBox:
         d_half = self.DIAMETER / 2
@@ -69,9 +69,9 @@ class RectangularAperture(Aperture):
 
     def __init__(self, args: ADD_Token.ARGS, broker) -> None:
         self.broker = broker
-        self.X = broker.convert_to_mm(args.X)
-        self.Y = broker.convert_to_mm(args.Y)
-        self.HOLE_DIAMETER = broker.convert_to_mm(args.HOLE_DIAMETER)
+        self.X = args.X
+        self.Y = args.Y
+        self.HOLE_DIAMETER = args.HOLE_DIAMETER
 
     def bbox(self) -> BoundingBox:
         x_half = self.X / 2

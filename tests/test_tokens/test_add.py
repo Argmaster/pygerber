@@ -27,15 +27,17 @@ class ADD_TokenTest(TestCase):
         HOLE_DIAMETER=0.0,
         ROTATION=0.0,
     ):
-        self.assertTrue(token.ID == ID)
-        self.assertTrue(token.TYPE == TYPE)
-        self.assertTrue(token.NAME == NAME)
-        self.assertTrue(token.ARGS.X == X)
-        self.assertTrue(token.ARGS.Y == Y)
-        self.assertTrue(token.ARGS.VERTICES == VERTICES)
-        self.assertTrue(token.ARGS.DIAMETER == DIAMETER)
-        self.assertTrue(token.ARGS.HOLE_DIAMETER == HOLE_DIAMETER)
-        self.assertTrue(token.ARGS.ROTATION == ROTATION)
+        self.assertTrue(token.ID == ID, f"{token.ID}")
+        self.assertTrue(token.TYPE == TYPE, f"{token.TYPE}")
+        self.assertTrue(token.NAME == NAME, f"{token.NAME}")
+        self.assertTrue(token.ARGS.X == X, f"{token.ARGS.X}")
+        self.assertTrue(token.ARGS.Y == Y, f"{token.ARGS.Y}")
+        self.assertTrue(token.ARGS.VERTICES == VERTICES, f"{token.ARGS.VERTICES}")
+        self.assertTrue(token.ARGS.DIAMETER == DIAMETER, f"{token.ARGS.DIAMETER}")
+        self.assertTrue(
+            token.ARGS.HOLE_DIAMETER == HOLE_DIAMETER, f"{token.ARGS.HOLE_DIAMETER}"
+        )
+        self.assertTrue(token.ARGS.ROTATION == ROTATION, f"{token.ARGS.ROTATION}")
 
     def test_valid_circle(self):
         token = self.init_token(r"%ADD10C,0.1*%")

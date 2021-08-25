@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from math import degrees
 from unittest import TestCase, main
 
-from pygerber.mathclasses import BoundingBox, Vector2D
+from pygerber.mathclasses import UNIT_VECTOR_X, BoundingBox, Vector2D, angle_between, angle_from_zero
 
 
 class DataClassesTest(TestCase):
@@ -68,6 +69,18 @@ class DataClassesTest(TestCase):
         box = BoundingBox(-1, -3, -3, -1)
         self.assertEqual(box.width(), 2)
         self.assertEqual(box.height(), 2)
+
+    def test_angle_from_zero(self):
+        alpha = angle_from_zero(Vector2D(-1, 1))
+        self.assertEqual(degrees(alpha), 135.0)
+        alpha = angle_from_zero(Vector2D(-1, -1))
+        self.assertEqual(degrees(alpha), 225.0)
+
+    def test_angle_between(self):
+        alpha = angle_between(Vector2D(1, 1), Vector2D(-1, 1))
+        self.assertEqual(degrees(alpha), 90)
+        alpha = angle_between(Vector2D(1, 1), Vector2D(-1, -1))
+        self.assertEqual(degrees(alpha), 180)
 
 
 if __name__ == "__main__":

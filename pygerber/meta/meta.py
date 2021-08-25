@@ -56,17 +56,6 @@ class DrawingMeta:
     def end_region(self):
         self.is_regionmode = False
 
-    def convert_to_mm(self, value: float):
-        if self.unit == Unit.INCHES:
-            return value * 25.4
-        else:
-            return value
-
-    def convert_vector_to_mm(self, vector: Vector2D):
-        return Vector2D(
-            self.convert_to_mm(vector.x),
-            self.convert_to_mm(vector.y),
-        )
 
 
 class TransformMeta:

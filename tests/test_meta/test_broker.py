@@ -110,23 +110,11 @@ class DrawingBrokerTest(TestCase):
     def test_move(self):
         broker = get_filled_broker()
         broker.select_aperture(10)
-        broker.move_pointer(Vector2D(3, None))
+        broker.move_pointer(Vector2D(3, 0))
         spec = get_collector_spec(broker.draw_line, Vector2D(1, 1))
         self.assertEqual(spec.begin, Vector2D(3, 0))
         self.assertEqual(spec.end, Vector2D(1, 1))
         self.assertEqual(spec.is_region, False)
-
-    def test_fill_xy_none_with_current(self):
-        broker = get_filled_broker()
-        self.assertEqual(
-            broker.fill_xy_none_with_current(Vector2D(None, None)), Vector2D(0, 0)
-        )
-
-    def test_fill_xy_none_with_zero(self):
-        broker = get_filled_broker()
-        self.assertEqual(
-            broker.fill_xy_none_with_zero(Vector2D(None, None)), Vector2D(0, 0)
-        )
 
     def test_bbox_interpolated_line(self):
         broker = get_filled_broker()

@@ -16,15 +16,18 @@ class D01_TokenText(TestCase):
         return token
 
     def assertValues(self, token, X, Y, I, J):
-        self.assertTrue(token.X == X and token.Y == Y and token.I == I and token.J == J)
+        self.assertTrue(
+            token.X == X and token.Y == Y and token.I == I and token.J == J,
+            f"{token.X} == {X} and {token.Y} == {Y} and {token.I} == {I} and {token.J} == {J}",
+        )
 
     def test_valid_match_ij_xy(self):
         token = self.init_token("I300J100D01*")
-        self.assertValues(token, None, None, 0.0003, 0.0001)
+        self.assertValues(token, 0, 0, 0.0003, 0.0001)
         token = self.init_token("X1700Y2000D01*")
-        self.assertValues(token, 0.0017, 0.002, None, None)
+        self.assertValues(token, 0.0017, 0.002, 0, 0)
         token = self.init_token("Y500000D01*")
-        self.assertValues(token, None, 0.5, None, None)
+        self.assertValues(token, 0, 0.5, 0, 0)
 
     def test_valid_match_xyij(self):
         token = self.init_token("X-300Y+200I50J50D01*")
@@ -50,13 +53,15 @@ class D02_TokenText(TestCase):
         return token, META
 
     def assertValues(self, token, X, Y):
-        self.assertTrue(token.X == X and token.Y == Y)
+        self.assertTrue(
+            token.X == X and token.Y == Y, f"{token.X} == {X} and {token.Y} == {Y}"
+        )
 
     def test_valid_match(self):
         token, meta = self.init_token("X1700Y2000D02*")
         self.assertValues(token, 0.0017, 0.002)
         token, meta = self.init_token("X600000D02*")
-        self.assertValues(token, 0.6, None)
+        self.assertValues(token, 0.6, 0)
 
     def test_invalid_match(self):
         token = D02_Token.match("X1700Y2000D01*", 0)
@@ -72,13 +77,15 @@ class D03_TokenText(TestCase):
         return token, META
 
     def assertValues(self, token, X, Y):
-        self.assertTrue(token.X == X and token.Y == Y)
+        self.assertTrue(
+            token.X == X and token.Y == Y, f"{token.X} == {X} and {token.Y} == {Y}"
+        )
 
     def test_valid_match(self):
         token, meta = self.init_token("X1700Y2000D03*")
         self.assertValues(token, 0.0017, 0.002)
         token, meta = self.init_token("X600000D03*")
-        self.assertValues(token, 0.6, None)
+        self.assertValues(token, 0.6, 0)
 
     def test_invalid_match(self):
         token = D03_Token.match("X1700Y2000D01*", 0)

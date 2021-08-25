@@ -2,11 +2,11 @@
 from tests.testutils.meta import get_or_create_dummy_meta
 from tests.testutils.apertures import ApertureCollector
 from pygerber.mathclasses import BoundingBox
-from pygerber.meta.meta import Unit
+from pygerber.meta.meta import Interpolation, Unit
 from pygerber.tokens.gnn import G55_Token, G70_Token, G71_Token, G90_Token, G91_Token
 from unittest import TestCase, main
 from pygerber.tokens import G0N_Token, G36_Token, G37_Token
-from pygerber.meta import Meta, Interpolation
+from pygerber.meta import Meta
 
 
 class G0N_Token_Test(TestCase):

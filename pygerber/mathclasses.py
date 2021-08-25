@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from math import acos, sqrt, tau
 from dataclasses import dataclass
 from typing import SupportsIndex, Tuple
 
@@ -15,8 +16,48 @@ class Vector2D:
     def __add__(self, other: SupportsIndex) -> Vector2D:
         return Vector2D(other[0] + self.x, other[1] + self.y)
 
+    def __sub__(self, other: SupportsIndex) -> Vector2D:
+        return Vector2D(self.x - other[0], self.y - other[1])
+
+    def __mul__(self, other: float) -> Vector2D:
+        return Vector2D(self.x * other, self.y * other)
+
     def __getitem__(self, index: int) -> float:
         return self.as_tuple()[index]
+
+    def length(self):
+        return sqrt(self.x ** 2 + self.y ** 2)
+
+    __len__ = length
+
+    def dot(self, other: Vector2D) -> float:
+        return self.x * other.x + self.y * other.y
+
+    def normalize(self):
+        length = len(self)
+        return Vector2D(
+            self.x / length,
+            self.y / length,
+        )
+
+
+UNIT_VECTOR_X = Vector2D(1, 0)
+UNIT_VECTOR_Y = Vector2D(0, 1)
+
+
+def angle_from_zero(vector: Vector2D) -> float:
+    raw_angle = acos(vector.dot(UNIT_VECTOR_X) / vector.length())
+    if vector.y > 0:
+        return raw_angle
+    else:
+        return tau - raw_angle
+
+
+def angle_between(this: Vector2D, other: Vector2D) -> float:
+    # from this to other clockwise in radians
+    begin = angle_from_zero(this)
+    end = angle_from_zero(other)
+    return end - begin
 
 
 @dataclass

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+from pygerber.validators.coordinate import VectorCoordinateX
 from types import SimpleNamespace
 from unittest import TestCase, main
-from pygerber.validators import Coordinate
 from pygerber.meta import Meta
 
 
@@ -12,7 +12,7 @@ class CoordinateTest(TestCase):
     def test_coordinate(self):
         token = self.get_dummy_token()
         test_value = "30100"
-        validator = Coordinate()
+        validator = VectorCoordinateX()
         self.assertEqual(validator(token, test_value), 0.0301)
 
 

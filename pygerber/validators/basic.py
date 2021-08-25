@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import Any, Callable
 
 from .validator import Validator
 
@@ -30,3 +30,15 @@ class String(Validator):
             return str(value)
         else:
             return self.default
+
+
+class Function(Validator):
+    def __init__(self, function: Callable, default: Any=None) -> None:
+        self.function = function
+        super().__init__(default=None)
+
+    def __call__(self, token: tkn.Token, value: str) -> str:
+        if value is not None:
+            return
+        else:
+            return self.function(token, self.default)
