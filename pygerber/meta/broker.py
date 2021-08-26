@@ -18,11 +18,16 @@ class DrawingBroker(ApertureManager, TransformMeta):
     region_bounds: List[Tuple[Aperture, Spec]]
 
     def __init__(self, apertureSet: ApertureSet) -> None:
+        self.reset_defaults()
+        ApertureManager.__init__(self, apertureSet)
+        TransformMeta.__init__(self)
+
+    def reset_defaults(self):
+        ApertureManager.reset_defaults(self)
+        TransformMeta.reset_defaults(self)
         self.current_aperture = None
         self.current_point = Vector2D(0, 0)
         self.region_bounds = []
-        ApertureManager.__init__(self, apertureSet)
-        TransformMeta.__init__(self)
 
     def select_aperture(self, id: int):
         self.current_aperture = self.get_aperture(id)

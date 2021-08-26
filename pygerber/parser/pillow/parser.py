@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pygerber.meta import Meta
 from pygerber.parser.pillow.apertures import *
 from typing import Generator, Tuple
 
@@ -32,8 +33,9 @@ class ParserWithPillow:
         PillowObround,
         PillowPolygon,
         PillowCustom,
-        PillowRegion
+        PillowRegion,
     )
+    is_rendered: bool
 
     def __init__(
         self,
@@ -50,15 +52,17 @@ class ParserWithPillow:
         string_source will be complitely ignored. Passing None to both
         will result in RuntimeError.
         """
+        self.is_rendered = False
         self.tokenizer = Tokenizer(
             self.apertureSet,
             ignore_deprecated=ignore_deprecated,
         )
-        self.tokenizer.meta.colors = colors
-        self.tokenizer.meta.dpmm = dpi / 25.4
+        self.colors = colors
+        self.dpmm = dpi / 25.4
         self._tokenize(filepath, string_source)
 
     def _tokenize(self, filepath: str, string_source: str) -> None:
+        self._preprare_meta()
         if filepath is not None:
             self.tokenizer.tokenize_file(filepath)
         elif string_source is not None:
@@ -70,19 +74,37 @@ class ParserWithPillow:
     def canvas(self) -> Image.Image:
         return self.tokenizer.meta.canvas
 
-    def render(self):
-        self.tokenizer.meta.canvas = self.make_canvas()
-        self.tokenizer.meta.draw_canvas = ImageDraw.Draw(self.tokenizer.canvas)
-        return self.tokenizer.render()
+    def render(self) -> None:
+        if not self.is_rendered:
+            self.tokenizer.render()
+            self.is_rendered = True
+        else:
+            raise RuntimeError("Attempt to render already rendered canvas.")
 
-    def make_canvas(self) -> Image.Image:
-        bbox = self.tokenizer.get_bbox()
-        width = bbox.width() * self.dpi
-        height = bbox.height() * self.dpi
-        return Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    def _preprare_meta(self) -> None:
+        self._prepare_canvas()
+        self.tokenizer.meta.colors = self.colors
+        self.tokenizer.meta.dpmm = self.dpmm
 
-    def render_generator(self, yield_after: int = 10) -> Generator[int]:
-        return self.tokenizer.render_generator(yield_after)
+    def _prepare_canvas(self) -> None:
+        width = self._get_width()
+        height = self._get_height()
+        self.tokenizer.meta.canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        self.tokenizer.meta.draw_canvas = ImageDraw.Draw(self.canvas)
+        self.tokenizer.meta.canvas_width_half = width / 2
+        self.tokenizer.meta.canvas_height_half = height / 2
+
+    def _get_width(self) -> int:
+        return int(self.tokenizer.get_bbox().width() * self.dpmm)
+
+    def _get_height(self) -> int:
+        return int(self.tokenizer.get_bbox().height() * self.dpmm)
+
+    def get_image(self) -> Image.Image:
+        if self.is_rendered:
+            return self.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        else:
+            raise RuntimeError("Can't return canvas that was not rendered.")
 
     def save(self, filepath: str, format: str) -> None:
         self.canvas.save(filepath, format)

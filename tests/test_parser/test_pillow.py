@@ -19,9 +19,9 @@ class TestPillowParser(TestCase):
             """
 
     def test_parser(self):
-        #ParserWithPillow()
-        pass
-
+        parser = ParserWithPillow(None, self.SOURCE_0)
+        parser.render()
+        parser.get_image()
 
 if __name__ == "__main__":
     main()

@@ -27,11 +27,12 @@ class Tokenizer:
         self.token_stack = deque()
         self.apertureSet = apertureSet
         self.ignore_deprecated = ignore_deprecated
-        self.clean_tokenization_data()
+        self.meta = Meta(self.apertureSet, ignore_deprecated=self.ignore_deprecated)
+        self.reset_state()
         self.bbox = None
 
-    def clean_tokenization_data(self):
-        self.meta = Meta(self.apertureSet, ignore_deprecated=self.ignore_deprecated)
+    def reset_state(self):
+        self.meta.reset_defaults()
         self.begin_index = 0
         self.char_index = 0
         self.line_index = 1
@@ -40,22 +41,11 @@ class Tokenizer:
         """
         Render all tokens contained in token_stack.
         """
-        self.clean_tokenization_data()
-        for token in self.token_stack:
-            self.render_token(token)
-
-    def render_generator(self, yield_after: int = 10) -> Tuple[int, int]:
-        """
-        Generator version of render, renders `yield_after` of tokens and
-        yields total number of tokens rendered.
-        """
-        i = 0
-        self.clean_tokenization_data()
-        for token in self.token_stack:
-            self.render_token(token)
-            i += 1
-            if i % yield_after == 0:
-                yield i
+        try:
+            for token in self.token_stack:
+                self.render_token(token)
+        except EndOfStream:
+            return
 
     def render_token(self, token: Token) -> None:
         token: Token
@@ -94,6 +84,7 @@ class Tokenizer:
             raise InvalidSyntaxError(
                 "No explicit indication of end at the end of file."
             )
+        self.reset_state()
         return self.token_stack
 
     def hasReachedEnd(self):

@@ -53,9 +53,6 @@ class TokenizerTest(TestCase):
         tokenizer = get_dummy_tokenizer()
         tokenizer.tokenize_file("./tests/gerber/s0.grb")
         self.assertEqual(tokenizer.token_stack_size, 17)
-        self.assertEqual(tokenizer.meta.polarity, Polarity.DARK)
-        self.assertTrue(10 in tokenizer.meta.apertures.keys())
-        self.assertEqual(tokenizer.meta.interpolation, Interpolation.Linear)
         self.assertEqual(tokenizer.bbox.as_tuple(), (-0.005, 5.005, 11.005, -0.005))
 
     def test_tokenize_file_1(self):
@@ -86,14 +83,6 @@ class TokenizerTest(TestCase):
         self.assertEqual(tokenizer.get_bbox(), BoundingBox(0, 0, 0, 0))
         tokenizer.tokenize_string(self.SOURCE_0)
         self.assertEqual(tokenizer.get_bbox(), BoundingBox(-0.75, 0.75, 0.75, -0.75))
-
-    def test_render_generator(self):
-        tokenizer = get_dummy_tokenizer()
-        tokenizer.tokenize_string(self.SOURCE_0)
-        generator = tokenizer.render_generator(yield_after=3)
-        next(generator)
-        self.assertRaises(ApertureCollector.CalledFlash, lambda: next(generator))
-
 
 if __name__ == "__main__":
     main()

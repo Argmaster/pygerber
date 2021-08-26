@@ -37,6 +37,10 @@ def initialize_parser_attrs(broker, size=DEFAULT_TEST_CANVAS_SIZE, dpi=600, colo
     broker.dpmm = dpi / 25.4
     broker.canvas = Image.new("RGBA", size, (99, 99, 99, 99))
     broker.draw_canvas = ImageDraw.Draw(broker.canvas)
+    broker.canvas_width = broker.canvas.width
+    broker.canvas_height = broker.canvas.height
+    broker.canvas_width_half = broker.canvas.width / 2
+    broker.canvas_height_half = broker.canvas.height / 2
     return broker
 
 
@@ -46,7 +50,7 @@ def get_pillow_circle(broker, diameter=1, hole_diameter=0):
         broker,
     )
 
-def get_pillow_rectangle(broker, x=1, y=2, hole_diameter=0):
+def get_pillow_rectangle(broker, x=1, y=3, hole_diameter=0):
     return PillowRectangle(
         SimpleNamespace(X=x, Y=y, HOLE_DIAMETER=hole_diameter),
         broker

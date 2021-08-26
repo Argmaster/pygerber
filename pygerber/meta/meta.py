@@ -35,6 +35,9 @@ class DrawingMeta:
     is_regionmode: bool
 
     def __init__(self) -> None:
+        self.reset_defaults()
+
+    def reset_defaults(self):
         self.is_regionmode = False
         self.unit = Unit.MILLIMETERS
         self.polarity = Polarity.DARK
@@ -65,6 +68,9 @@ class TransformMeta:
     scale: float
 
     def __init__(self) -> None:
+        self.reset_defaults()
+
+    def reset_defaults(self):
         self.mirroring = Mirroring.No
         self.rotation = 0.0
         self.scale = 1.0

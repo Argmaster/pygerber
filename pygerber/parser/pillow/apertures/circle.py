@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 from functools import cached_property
-from math import degrees
-from pygerber.mathclasses import BoundingBox, Vector2D, angle_from_zero
+from pygerber.mathclasses import Vector2D
 from typing import Tuple
 
 from PIL import Image, ImageDraw
@@ -48,27 +47,20 @@ class PillowCircle(CircularAperture, PillowUtilMethdos):
         )
 
     def arc(self, spec: ArcSpec) -> None:
+        self.prepare_arc_spec(spec)
         self._arc(spec)
         self._flash(spec.begin)
         self._flash(spec.end)
 
     def _arc(self, spec: ArcSpec):
-        self.prepare_arc_spec(spec)
         begin_angle, end_angle = self._get_begin_end_angles(spec)
         self.draw_canvas.arc(
             self._get_arc_bbox(spec),
-            -end_angle,
-            -begin_angle,
+            begin_angle,
+            end_angle,
             self.get_color(),
             width=self.diameter,
         )
-
-    def _get_begin_end_angles(self, spec):
-        begin_absolute = spec.begin - spec.center
-        end_absolute = spec.end - spec.center
-        begin_angle = degrees(angle_from_zero(begin_absolute))
-        end_angle = degrees(angle_from_zero(end_absolute))
-        return begin_angle, end_angle
 
     def _get_arc_bbox(self, spec: ArcSpec) -> tuple:
         radius = (spec.begin - spec.center).length() + self.radius

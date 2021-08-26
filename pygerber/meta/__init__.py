@@ -22,6 +22,9 @@ class Meta(DrawingBroker):
         self.ignore_deprecated = ignore_deprecated
         self.coparser = CoParser()
 
+    def reset_defaults(self):
+        super().reset_defaults()
+
     def raiseDeprecatedSyntax(self, message: str):
         if not self.ignore_deprecated:
             raise DeprecatedSyntax(message)
