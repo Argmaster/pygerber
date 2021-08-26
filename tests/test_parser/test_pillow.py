@@ -18,10 +18,25 @@ class TestPillowParser(TestCase):
             M02*
             """
 
-    def test_parser(self):
+    def test_parser_string(self):
         parser = ParserWithPillow(None, self.SOURCE_0)
+        self.assertEqual(parser.tokenizer.bbox.width(), 1.5)
         parser.render()
-        parser.get_image()
+        image = parser.get_image()
+        # should display white circle
+        # image.show()
+
+    def test_parser_file_0(self):
+        parser = ParserWithPillow("./tests/gerber/s3.grb", dpi=1600)
+        parser.render()
+        image = parser.get_image()
+        image.show()
+
+    def test_parser_file_1(self):
+        parser = ParserWithPillow("./tests/gerber/s4.grb")
+        parser.render()
+        image = parser.get_image()
+        image.show()
 
 if __name__ == "__main__":
     main()

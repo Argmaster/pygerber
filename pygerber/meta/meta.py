@@ -42,7 +42,6 @@ class DrawingMeta:
         self.unit = Unit.MILLIMETERS
         self.polarity = Polarity.DARK
         self.interpolation = Interpolation.Linear
-        self.current_point = Vector2D(0, 0)
 
     def set_unit(self, unit):
         self.unit = unit
@@ -58,7 +57,6 @@ class DrawingMeta:
 
     def end_region(self):
         self.is_regionmode = False
-
 
 
 class TransformMeta:

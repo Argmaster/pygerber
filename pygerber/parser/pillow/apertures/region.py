@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from typing import List, Tuple
 
 from PIL import Image, ImageDraw
@@ -12,4 +13,4 @@ class PillowRegion(RegionApertureManager, PillowUtilMethdos):
     draw_canvas: ImageDraw.ImageDraw
 
     def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
-        return super().finish(bounds)
+        pass

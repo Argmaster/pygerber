@@ -35,6 +35,9 @@ class D01_Token(Token):
     def render(self):
         self.meta.draw_interpolated(self.end, self.offset)
 
+    def post_render(self):
+        self.meta.move_pointer(self.end)
+
     def bbox(self):
         return self.meta.bbox_interpolated(self.end, self.offset)
 
@@ -52,7 +55,7 @@ class D02_Token(Token):
     def point(self):
         return Vector2D(self.X, self.Y)
 
-    def affect_meta(self):
+    def post_render(self):
         self.meta.move_pointer(self.point)
 
 
@@ -71,6 +74,9 @@ class D03_Token(Token):
 
     def render(self):
         self.meta.draw_flash(self.point)
+
+    def post_render(self):
+        self.meta.move_pointer(self.point)
 
     def bbox(self):
         return self.meta.bbox_flash(self.point)

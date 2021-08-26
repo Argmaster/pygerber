@@ -30,6 +30,7 @@ class TestPillowCircle(TestCase):
         circle.flash(spec)
         canvas: Image.Image = broker.canvas
         # \/ uncomment to see test result
+        # circle should be visible
         # canvas.show()
 
     def test_draw_line(self):
@@ -37,6 +38,7 @@ class TestPillowCircle(TestCase):
         spec = LineSpec(Vector2D(-3, -3), Vector2D(3, 3), False)
         circle.line(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # line with rounded edges
         # canvas.show()
 
     def test_draw_arc_most(self):
@@ -44,6 +46,7 @@ class TestPillowCircle(TestCase):
         spec = ArcSpec(Vector2D(3, -2), Vector2D(-3, -2), Vector2D(0, 2), False)
         circle.arc(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # arc with rounded edges, about 70% of circle
         # canvas.show()
 
     def test_draw_arc_least(self):
@@ -51,6 +54,7 @@ class TestPillowCircle(TestCase):
         spec = ArcSpec(Vector2D(-3, -2), Vector2D(3, -2), Vector2D(0, 2), False)
         circle.arc(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # arc with rounded edges, about 30% of circle
         # canvas.show()
 
     def test_draw_arc_half(self):
@@ -58,6 +62,7 @@ class TestPillowCircle(TestCase):
         spec = ArcSpec(Vector2D(3, -2), Vector2D(3, 6), Vector2D(0, 2), False)
         circle.arc(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # arc with rounded edges, about 50% of circle
         # canvas.show()
 
     def test_draw_arc_full(self):
@@ -65,6 +70,7 @@ class TestPillowCircle(TestCase):
         spec = ArcSpec(Vector2D(3, -2), Vector2D(3, -2), Vector2D(0, 2), False)
         circle.arc(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # circle, empty inside
         # canvas.show()
 
 
@@ -83,6 +89,7 @@ class TestPillowRectangle(TestCase):
         spec = FlashSpec(Vector2D(0, 0), False)
         rectangle.flash(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # rectangle 3:1 in the middle
         # canvas.show()
 
     def test_draw_line(self):
@@ -90,6 +97,7 @@ class TestPillowRectangle(TestCase):
         spec = LineSpec(Vector2D(-3, -3), Vector2D(3, 3), False)
         rectangle.line(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # line stroked with rectangle
         # canvas.show()
 
     def test_draw_line_2(self):
@@ -97,6 +105,7 @@ class TestPillowRectangle(TestCase):
         spec = LineSpec(Vector2D(6, -6), Vector2D(3, 3), False)
         rectangle.line(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # line stroked with rectangle
         # canvas.show()
 
     def test_draw_arc_most(self):
@@ -104,6 +113,7 @@ class TestPillowRectangle(TestCase):
         spec = ArcSpec(Vector2D(6, -4), Vector2D(-6, -4), Vector2D(0, 4), False)
         rectangle.arc(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # arc stroked with rectangle, ~70% of 'circle'
         # canvas.show()
 
     def test_draw_arc_least(self):
@@ -111,6 +121,7 @@ class TestPillowRectangle(TestCase):
         spec = ArcSpec(Vector2D(-6, -4), Vector2D(6, -4), Vector2D(0, 4), False)
         rectangle.arc(spec)
         canvas: Image.Image = broker.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+        # arc stroked with rectangle, ~30% of 'circle'
         # canvas.show()
 
 

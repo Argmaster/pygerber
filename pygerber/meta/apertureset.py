@@ -15,7 +15,7 @@ class ApertureSet:
     custom: Type[Aperture]
     region: Type[RegionApertureManager]
 
-    def getApertureClass(self, name: str=None, is_region: bool=False) -> Aperture:
+    def getApertureClass(self, name: str = None, is_region: bool = False) -> Aperture:
         if is_region:
             return self.region
         elif name == "C":

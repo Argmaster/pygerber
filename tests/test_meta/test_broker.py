@@ -129,7 +129,7 @@ class DrawingBrokerTest(TestCase):
         broker.set_interpolation(Interpolation.ClockwiseCircular)
         broker.select_aperture(10)
         bbox = broker.bbox_interpolated(Vector2D(1, 1), Vector2D(0, 1))
-        self.assertEqual(bbox, BoundingBox(0.5, 1.5, 1.5, 0.5))
+        self.assertEqual(bbox, BoundingBox(-0.5, 1.5, 1.5, -0.5))
         broker.begin_region()
         bbox = broker.bbox_interpolated(Vector2D(1, 1), Vector2D(0, 1))
         self.assertEqual(bbox, None)
@@ -143,7 +143,7 @@ class DrawingBrokerTest(TestCase):
         broker.bbox_interpolated(Vector2D(2, 2), Vector2D(0, 1))
         region_aperture, bounds = broker.end_region()
         self.assertEqual(
-            region_aperture().bbox(bounds), BoundingBox(0.5, 2.5, 2.5, 0.5)
+            region_aperture().bbox(bounds), BoundingBox(-0.5, 2.5, 2.5, -0.5)
         )
 
 

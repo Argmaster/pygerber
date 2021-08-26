@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from functools import cached_property
 from typing import Tuple
-from pygerber.mathclasses import BoundingBox, Vector2D
 
 from PIL import Image, ImageDraw
+from pygerber.mathclasses import BoundingBox, Vector2D
 from pygerber.meta.aperture import RectangularAperture
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
 from pygerber.parser.pillow.apertures.util import PillowFlashArcMixin, PillowUtilMethdos
@@ -15,11 +16,11 @@ class PillowRectangle(RectangularAperture, PillowUtilMethdos, PillowFlashArcMixi
 
     @cached_property
     def x(self) -> float:
-        return int(self._prepare_co(self.Y))
+        return int(self._prepare_co(self.Y)) / 2
 
     @cached_property
     def y(self) -> float:
-        return int(self._prepare_co(self.X))
+        return int(self._prepare_co(self.X)) / 2
 
     def flash(self, spec: FlashSpec) -> None:
         self.prepare_flash_spec(spec)

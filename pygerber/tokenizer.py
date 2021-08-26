@@ -50,7 +50,9 @@ class Tokenizer:
     def render_token(self, token: Token) -> None:
         token: Token
         token.affect_meta()
+        token.pre_render()
         token.render()
+        token.post_render()
 
     def tokenize_file(self, filepath: str) -> deque:
         """
@@ -96,7 +98,9 @@ class Tokenizer:
         self.push_token(token)
         self.update_indexes(token)
         token.affect_meta()
+        token.pre_render()
         bbox = token.bbox()
+        token.post_render()
         if bbox is not None:
             if self.bbox is None:
                 self.bbox = bbox

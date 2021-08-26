@@ -47,10 +47,18 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
         """
         pass
 
+    def pre_render(self):
+        # called right before render, even if render was not called
+        pass
+
     def render(self):
         """
         This method should be called only after token is dispatched and after affect_meta().
         """
+        pass
+
+    def post_render(self):
+        # called right after render, even if render was not called
         pass
 
     def bbox(self) -> BoundingBox:

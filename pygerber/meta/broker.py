@@ -2,14 +2,13 @@
 from typing import List, Tuple
 
 from pygerber.exceptions import ApertureSelectionError
+from pygerber.mathclasses import BoundingBox, Vector2D
 
 from .aperture import Aperture, RegionApertureManager
 from .aperture_manager import ApertureManager
 from .apertureset import ApertureSet
-from pygerber.mathclasses import BoundingBox, Vector2D
 from .meta import Interpolation, TransformMeta
 from .spec import ArcSpec, FlashSpec, LineSpec, Spec
-
 
 
 class DrawingBroker(ApertureManager, TransformMeta):
@@ -33,14 +32,12 @@ class DrawingBroker(ApertureManager, TransformMeta):
         self.current_aperture = self.get_aperture(id)
 
     def draw_interpolated(self, end: Vector2D, offset: Vector2D) -> None:
-        self.move_pointer(end)
         if self.interpolation == Interpolation.Linear:
             self.draw_line(end)
         else:
             self.draw_arc(end, offset)
 
     def bbox_interpolated(self, end: Vector2D, offset: Vector2D) -> BoundingBox:
-        self.move_pointer(end)
         if self.interpolation == Interpolation.Linear:
             return self.bbox_line(end)
         else:

@@ -37,14 +37,14 @@ class PillowUtilMethdos:
         else:
             return self.broker.colors.dark
 
-    def _prepare_co(self, value: float) -> float:
-        return value * self.dpmm
-
     def prepare_coordinates(self, vector: Vector2D) -> Vector2D:
         return Vector2D(
-            int(self._prepare_co(vector.x) + self.broker.canvas_width_half),
-            int(self._prepare_co(vector.y) + self.broker.canvas_height_half),
+            int(self._prepare_co(vector.x) + self.broker.left_offset),
+            int(self._prepare_co(vector.y) + self.broker.bottom_offset),
         )
+
+    def _prepare_co(self, value: float) -> float:
+        return value * self.dpmm
 
     def prepare_flash_spec(self, spec: FlashSpec) -> FlashSpec:
         spec.location = self.prepare_coordinates(spec.location)
@@ -70,7 +70,6 @@ class PillowUtilMethdos:
 
 
 class PillowFlashArcMixin:
-
     def _arc_of_flashes(self, spec, begin_angle, end_angle):
         radius = self._get_radius(spec)
         x, y = self._get_arc_co_functions(radius)

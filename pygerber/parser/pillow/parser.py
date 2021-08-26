@@ -21,7 +21,7 @@ class ColorSet:
     region: Color
 
 
-DEFAULT_COLOR_SET = ColorSet((255, 255, 255, 255), (0, 0, 0, 0), (255, 255, 255, 255))
+DEFAULT_COLOR_SET = ColorSet((66, 166, 66, 255), (16, 66, 36, 255), (66, 166, 66, 255))
 
 
 class ParserWithPillow:
@@ -62,7 +62,6 @@ class ParserWithPillow:
         self._tokenize(filepath, string_source)
 
     def _tokenize(self, filepath: str, string_source: str) -> None:
-        self._preprare_meta()
         if filepath is not None:
             self.tokenizer.tokenize_file(filepath)
         elif string_source is not None:
@@ -75,6 +74,7 @@ class ParserWithPillow:
         return self.tokenizer.meta.canvas
 
     def render(self) -> None:
+        self._preprare_meta()
         if not self.is_rendered:
             self.tokenizer.render()
             self.is_rendered = True
@@ -87,18 +87,16 @@ class ParserWithPillow:
         self.tokenizer.meta.dpmm = self.dpmm
 
     def _prepare_canvas(self) -> None:
-        width = self._get_width()
-        height = self._get_height()
+        bbox = self.tokenizer.get_bbox()
+        width = self._prepare_co(bbox.width())
+        height = self._prepare_co(bbox.height())
         self.tokenizer.meta.canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         self.tokenizer.meta.draw_canvas = ImageDraw.Draw(self.canvas)
-        self.tokenizer.meta.canvas_width_half = width / 2
-        self.tokenizer.meta.canvas_height_half = height / 2
+        self.tokenizer.meta.left_offset = self._prepare_co(-bbox.left)
+        self.tokenizer.meta.bottom_offset = self._prepare_co(-bbox.lower)
 
-    def _get_width(self) -> int:
-        return int(self.tokenizer.get_bbox().width() * self.dpmm)
-
-    def _get_height(self) -> int:
-        return int(self.tokenizer.get_bbox().height() * self.dpmm)
+    def _prepare_co(self, value: float) -> float:
+        return int(value * self.dpmm)
 
     def get_image(self) -> Image.Image:
         if self.is_rendered:
