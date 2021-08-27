@@ -30,10 +30,16 @@ class TestPillowParser(TestCase):
         parser = ParserWithPillow("./tests/gerber/s3.grb", dpi=1600)
         parser.render()
         image = parser.get_image()
-        image.show()
+        # image.show()
 
     def test_parser_file_1(self):
         parser = ParserWithPillow("./tests/gerber/s4.grb")
+        parser.render()
+        image = parser.get_image()
+        # image.show()
+
+    def test_parser_file_1(self):
+        parser = ParserWithPillow("./tests/gerber/s5.grb")
         parser.render()
         image = parser.get_image()
         image.show()

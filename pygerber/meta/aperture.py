@@ -100,6 +100,9 @@ class PolygonAperture(CircularAperture):
 class RegionApertureManager(ABC):
     steps: List[Tuple[Aperture, Spec]]
 
+    def __init__(self, broker) -> None:
+        self.broker = broker
+
     @abstractmethod
     def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
         raise TypeError()

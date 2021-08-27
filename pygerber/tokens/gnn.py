@@ -34,7 +34,7 @@ class G37_Token(Token):
 
     def affect_meta(self):
         self.manager, self.bounds = self.meta.end_region()
-        self.manager = self.manager()
+        self.manager = self.manager(self.meta)
 
     def render(self):
         self.manager.finish(self.bounds)
