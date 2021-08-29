@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from pygerber.meta.arc_util_mixin import ArcUtilMixin
 
 from typing import List, Tuple
 
@@ -11,7 +12,8 @@ from pygerber.tokens.add import ADD_Token
 from pygerber.mathclasses import BoundingBox
 
 
-class Aperture(ABC):
+class Aperture(ABC, ArcUtilMixin):
+
     def __init__(self, args: ADD_Token.ARGS, broker) -> None:
         raise TypeError()
 
@@ -38,8 +40,13 @@ class Aperture(ABC):
         return self.bbox().transform(spec.begin) + self.bbox().transform(spec.end)
 
     def arc_bbox(self, spec: ArcSpec) -> BoundingBox:
-        return self.bbox().transform(spec.begin) + self.bbox().transform(spec.end)
-
+        radius = spec.get_radius() + self.DIAMETER / 2
+        return BoundingBox(
+            spec.center.x - radius,
+            spec.center.y - radius,
+            spec.center.x + radius,
+            spec.center.y + radius,
+        )
 
 class CircularAperture(Aperture):
 
@@ -97,7 +104,7 @@ class PolygonAperture(CircularAperture):
         self.ROTATION = args.ROTATION
 
 
-class RegionApertureManager(ABC):
+class RegionApertureManager(ABC, ArcUtilMixin):
     steps: List[Tuple[Aperture, Spec]]
 
     def __init__(self, broker) -> None:

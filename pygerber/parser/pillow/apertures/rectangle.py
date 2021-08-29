@@ -8,10 +8,10 @@ from PIL import Image, ImageDraw
 from pygerber.mathclasses import BoundingBox, Vector2D
 from pygerber.meta.aperture import RectangularAperture
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
-from pygerber.parser.pillow.apertures.util import PillowFlashArcMixin, PillowUtilMethdos
+from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 
 
-class PillowRectangle(RectangularAperture, PillowUtilMethdos, PillowFlashArcMixin):
+class PillowRectangle(RectangularAperture, PillowUtilMethdos):
     draw_canvas: ImageDraw.ImageDraw
 
     @cached_property
@@ -89,7 +89,5 @@ class PillowRectangle(RectangularAperture, PillowUtilMethdos, PillowFlashArcMixi
         self._flash(spec.end)
 
     def _arc(self, spec: ArcSpec) -> None:
-        begin_angle, end_angle = self._get_begin_end_angles(spec)
-        if begin_angle > end_angle:
-            begin_angle -= 360
-        self._arc_of_flashes(spec, begin_angle, end_angle)
+        for point in self.get_arc_points(spec):
+            self._flash(point)

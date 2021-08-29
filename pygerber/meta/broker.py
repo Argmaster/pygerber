@@ -132,3 +132,6 @@ class DrawingBroker(ApertureManager, TransformMeta):
 
     def _push_region_step(self, spec: Spec):
         self.region_bounds.append((self.get_current_aperture(), spec))
+
+    def isCCW(self):
+        return self.interpolation == Interpolation.CounterclockwiseCircular

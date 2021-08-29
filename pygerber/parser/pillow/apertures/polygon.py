@@ -12,7 +12,7 @@ class PillowPolygon(PolygonAperture, PillowUtilMethdos):
 
     def flash(self, spec: FlashSpec) -> None:
         self.prepare_flash_spec(spec)
-        
+
     def line(self, spec: LineSpec) -> None:
         self.prepare_line_spec(spec)
 

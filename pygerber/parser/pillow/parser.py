@@ -21,7 +21,16 @@ class ColorSet:
     region: Color
 
 
-DEFAULT_COLOR_SET = ColorSet((66, 166, 66, 255), (16, 66, 36, 255), (66, 166, 66, 255))
+DEFAULT_COLOR_SET_ORANGE = ColorSet(
+    (209, 110, 44),
+    (0, 0, 0, 0),
+    (209, 110, 44),
+)
+DEFAULT_COLOR_SET_GREEN = ColorSet(
+    (66, 166, 66, 255),
+    (16, 66, 36, 255),
+    (66, 166, 66, 255),
+)
 
 
 class ParserWithPillow:
@@ -43,7 +52,7 @@ class ParserWithPillow:
         string_source: str = None,
         *,
         dpi: int = 600,
-        colors: ColorSet = DEFAULT_COLOR_SET,
+        colors: ColorSet = DEFAULT_COLOR_SET_ORANGE,
         ignore_deprecated: bool = True,
     ) -> None:
         """

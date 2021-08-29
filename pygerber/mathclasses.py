@@ -53,12 +53,6 @@ def angle_from_zero(vector: Vector2D) -> float:
         return tau - raw_angle
 
 
-def angle_between(this: Vector2D, other: Vector2D) -> float:
-    # from this to other clockwise in radians
-    begin = angle_from_zero(this)
-    end = angle_from_zero(other)
-    return end - begin
-
 
 @dataclass
 class BoundingBox:

@@ -23,22 +23,22 @@ class TestPillowParser(TestCase):
         self.assertEqual(parser.tokenizer.bbox.width(), 1.5)
         parser.render()
         image = parser.get_image()
-        # should display white circle
-        # image.show()
+        # should display circle
+        #image.show()
 
     def test_parser_file_0(self):
         parser = ParserWithPillow("./tests/gerber/s3.grb", dpi=1600)
         parser.render()
         image = parser.get_image()
-        # image.show()
+        #image.show()
 
     def test_parser_file_1(self):
         parser = ParserWithPillow("./tests/gerber/s4.grb")
         parser.render()
         image = parser.get_image()
-        # image.show()
+        image.show()
 
-    def test_parser_file_1(self):
+    def test_parser_file_2(self):
         parser = ParserWithPillow("./tests/gerber/s5.grb")
         parser.render()
         image = parser.get_image()

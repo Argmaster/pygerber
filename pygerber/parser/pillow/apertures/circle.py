@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from functools import cached_property
+from pygerber.meta.meta import Interpolation
 from typing import Tuple
 
 from PIL import Image, ImageDraw
@@ -54,14 +55,25 @@ class PillowCircle(CircularAperture, PillowUtilMethdos):
         self._flash(spec.end)
 
     def _arc(self, spec: ArcSpec):
-        begin_angle, end_angle = self._get_begin_end_angles(spec)
-        self.draw_canvas.arc(
-            self._get_arc_bbox(spec),
-            begin_angle,
-            end_angle,
-            self.get_color(),
-            width=self.diameter,
-        )
+        begin_angle, end_angle = self.get_begin_end_angles(spec)
+        print(spec)
+        if self.isCCW:
+            self.draw_canvas.arc(
+                self._get_arc_bbox(spec),
+                begin_angle,
+                end_angle,
+                self.get_color(),
+                width=self.diameter,
+            )
+        else:
+            self.draw_canvas.arc(
+                self._get_arc_bbox(spec),
+                -begin_angle,
+                -end_angle,
+                self.get_color(),
+                width=self.diameter,
+            )
+
 
     def _get_arc_bbox(self, spec: ArcSpec) -> tuple:
         radius = (spec.begin - spec.center).length() + self.radius

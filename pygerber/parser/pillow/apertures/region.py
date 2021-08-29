@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pygerber.meta.meta import Interpolation
 
-from numpy import isin
 from pygerber.mathclasses import Vector2D
 
 from typing import List, Tuple
@@ -17,26 +17,23 @@ class PillowRegion(RegionApertureManager, PillowUtilMethdos):
 
     def finish(self, bounds: List[Tuple[Aperture, LineSpec]]) -> None:
         if bounds:
-            bound_points = self._get_bound_points(bounds)
-            self._draw_polygon(bound_points)
-            self._draw_boundaries(bounds)
+            self._draw_region(bounds)
 
-    def _draw_boundaries(self, bounds: List[Tuple[Aperture, LineSpec]]):
+    def _draw_region(self, bounds: List[Tuple[Aperture, LineSpec]]):
+        bound_points = []
         for aperture, spec in bounds:
             spec.draw(aperture)
-
-    def _get_bound_points(self, bounds: List[Tuple[Aperture, LineSpec]]):
-        bound_points = [bounds[0][1].begin.as_tuple()]
-        for aperture, spec in bounds:
             if isinstance(spec, LineSpec):
                 bound_points.append(spec.end.as_tuple())
             elif isinstance(spec, ArcSpec):
                 bound_points.extend(self._get_arc_boundpoints(spec))
-
-        return bound_points
+        self._draw_polygon(bound_points)
 
     def _get_arc_boundpoints(self, spec: ArcSpec) -> List[Tuple[float, float]]:
-        return []
+        bound_points = []
+        for point in self.get_arc_points(spec):
+            bound_points.append(point.as_tuple())
+        return bound_points
 
     def _draw_polygon(self, bound_points: List[Tuple[float, float]]):
         self.draw_canvas.polygon(bound_points, self.get_color())

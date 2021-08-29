@@ -59,3 +59,5 @@ class ArcSpec(Spec):
     def bbox(self, aperture: meta_ap.Aperture):
         return aperture.arc_bbox(self)
 
+    def get_radius(spec: ArcSpec):
+        return (spec.begin - spec.center).length()

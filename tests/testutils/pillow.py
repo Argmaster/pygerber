@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 from PIL import Image, ImageDraw
-from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET, ColorSet
+from pygerber.parser.pillow.parser import ColorSet
 from types import SimpleNamespace
 from pygerber.parser.pillow.apertures import *
 from pygerber.meta.apertureset import ApertureSet
