@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from math import acos, sqrt, tau
+
 from dataclasses import dataclass
+from math import acos, sqrt, tau
 from typing import SupportsIndex, Tuple
 
 
@@ -51,7 +52,6 @@ def angle_from_zero(vector: Vector2D) -> float:
         return raw_angle
     else:
         return tau - raw_angle
-
 
 
 @dataclass

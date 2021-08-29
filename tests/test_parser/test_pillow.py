@@ -24,13 +24,13 @@ class TestPillowParser(TestCase):
         parser.render()
         image = parser.get_image()
         # should display circle
-        #image.show()
+        # image.show()
 
     def test_parser_file_0(self):
         parser = ParserWithPillow("./tests/gerber/s3.grb", dpi=1600)
         parser.render()
         image = parser.get_image()
-        #image.show()
+        # image.show()
 
     def test_parser_file_1(self):
         parser = ParserWithPillow("./tests/gerber/s4.grb")
@@ -43,6 +43,7 @@ class TestPillowParser(TestCase):
         parser.render()
         image = parser.get_image()
         image.show()
+
 
 if __name__ == "__main__":
     main()

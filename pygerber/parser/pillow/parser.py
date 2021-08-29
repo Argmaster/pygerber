@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pygerber.meta import Meta
-from pygerber.parser.pillow.apertures import *
-from typing import Generator, Tuple
+from typing import Tuple
 
 from PIL import Image, ImageDraw
 from pygerber.meta.apertureset import ApertureSet
+from pygerber.parser.pillow.apertures import *
 from pygerber.tokenizer import Tokenizer
 
 
@@ -109,9 +108,12 @@ class ParserWithPillow:
 
     def get_image(self) -> Image.Image:
         if self.is_rendered:
-            return self.canvas.transpose(Image.FLIP_TOP_BOTTOM)
+            return self._get_image()
         else:
             raise RuntimeError("Can't return canvas that was not rendered.")
+
+    def _get_image(self) -> Image.Image:
+        return self.canvas.transpose(Image.FLIP_TOP_BOTTOM)
 
     def save(self, filepath: str, format: str) -> None:
         self.canvas.save(filepath, format)

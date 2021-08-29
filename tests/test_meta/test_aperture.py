@@ -27,11 +27,12 @@ class ABCsTest(TestCase):
     def test_aperture_bbox(self):
         mock = Mock()
         mock.bbox = Mock(return_value=BoundingBox(-0.5, 0.5, 0.5, -0.5))
+        mock.DIAMETER = 1
         self.assertEqual(
             Aperture.arc_bbox(
                 mock, ArcSpec(Vector2D(0, 0), Vector2D(1, 1), Vector2D(1, 0), False)
             ),
-            BoundingBox(-0.5, 1.5, 1.5, -0.5),
+            BoundingBox(-0.5, 1.5, 2.5, -1.5),
         )
 
     def test_region(self):

@@ -16,11 +16,11 @@ class PillowRectangle(RectangularAperture, PillowUtilMethdos):
 
     @cached_property
     def x(self) -> float:
-        return int(self._prepare_co(self.Y)) / 2
+        return int(self._prepare_co(self.X)) / 2
 
     @cached_property
     def y(self) -> float:
-        return int(self._prepare_co(self.X)) / 2
+        return int(self._prepare_co(self.Y)) / 2
 
     def flash(self, spec: FlashSpec) -> None:
         self.prepare_flash_spec(spec)

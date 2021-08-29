@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from math import radians, tau, degrees, cos, sin
-from pygerber.meta.spec import ArcSpec
+
+from math import cos, degrees, radians, sin, tau
+
 from pygerber.mathclasses import Vector2D, angle_from_zero
+from pygerber.meta.spec import ArcSpec
 
 
 class ArcUtilMixin:
@@ -29,11 +31,11 @@ class ArcUtilMixin:
         x, y = self.get_arc_co_functions(radius)
         delta = self._get_delta_angle(begin_angle, end_angle, radius)
         if self.isCCW:
-            return self._arc_ccw(end_angle, begin_angle, x, spec, y, delta)
+            return self._get_arc_points_ccw(end_angle, begin_angle, x, spec, y, delta)
         else:
-            return self._arc_cw(end_angle, begin_angle, x, spec, y, delta)
+            return self._get_arc_points_cw(end_angle, begin_angle, x, spec, y, delta)
 
-    def _arc_ccw(self, end_angle, begin_angle, x, spec, y, delta):
+    def _get_arc_points_ccw(self, end_angle, begin_angle, x, spec, y, delta):
         end_relative_angle = end_angle - begin_angle
         angle_offset = begin_angle
         current_angle = 0
@@ -44,7 +46,7 @@ class ArcUtilMixin:
             )
             current_angle += delta
 
-    def _arc_cw(self, end_angle, begin_angle, x, spec, y, delta):
+    def _get_arc_points_cw(self, end_angle, begin_angle, x, spec, y, delta):
         end_relative_angle = end_angle - begin_angle
         angle_offset = begin_angle
         current_angle = 360
