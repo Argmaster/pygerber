@@ -16,17 +16,18 @@ from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 class PillowRegion(ArcUtilMixinPillow, RegionApertureManager, PillowUtilMethdos):
     draw_canvas: ImageDraw.ImageDraw
 
-    def finish(self, bounds: List[Tuple[Aperture, LineSpec]]) -> None:
+    def finish(self, bounds: List[LineSpec]) -> None:
         if bounds:
             self._draw_region(bounds)
 
-    def _draw_region(self, bounds: List[Tuple[Aperture, LineSpec]]):
+    def _draw_region(self, bounds: List[LineSpec]):
         bound_points = []
-        for aperture, spec in bounds:
-            spec.draw(aperture)
+        for spec in bounds:
             if isinstance(spec, LineSpec):
+                self.prepare_line_spec(spec)
                 bound_points.append(spec.end.as_tuple())
             elif isinstance(spec, ArcSpec):
+                self.prepare_arc_spec(spec)
                 bound_points.extend(self._get_arc_boundpoints(spec))
         self._draw_polygon(bound_points)
 

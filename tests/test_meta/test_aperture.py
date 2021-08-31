@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 from tests.testutils.broker import get_filled_broker
-from tests.testutils.apertures import CircleApertureCollector, PolygonApertureCollector, RectangleApertureCollector, get_dummy_apertureSet
+from tests.testutils.apertures import (
+    CircleApertureCollector,
+    PolygonApertureCollector,
+    RectangleApertureCollector,
+    get_dummy_apertureSet,
+)
 from pygerber.meta.aperture_manager import ApertureManager
 from types import SimpleNamespace
 from unittest import TestCase, main
@@ -12,7 +17,6 @@ from pygerber.meta.aperture import (
 )
 from pygerber.mathclasses import BoundingBox, Vector2D
 from pygerber.meta.spec import ArcSpec, LineSpec
-
 
 
 class ABCsTest(TestCase):
@@ -47,13 +51,10 @@ class ABCsTest(TestCase):
             RegionApertureManager.bbox(
                 None,
                 [
-                    (
-                        broker.get_current_aperture(),
-                        LineSpec(Vector2D(0, 0), Vector2D(1, 1), True),
-                    )
+                    LineSpec(Vector2D(0, 0), Vector2D(1, 1), True),
                 ],
             ),
-            BoundingBox(-0.5, 1.5, 1.5, -0.5),
+            BoundingBox(0, 1, 1, 0),
         )
 
     def test_region_bbox_many_bounds(self):
@@ -64,17 +65,11 @@ class ABCsTest(TestCase):
             RegionApertureManager.bbox(
                 None,
                 [
-                    (
-                        broker.get_current_aperture(),
-                        LineSpec(Vector2D(0, 0), Vector2D(1, 1), True),
-                    ),
-                    (
-                        broker.get_current_aperture(),
-                        LineSpec(Vector2D(1, 1), Vector2D(2, 2), True),
-                    ),
+                    LineSpec(Vector2D(0, 0), Vector2D(1, 1), True),
+                    LineSpec(Vector2D(1, 1), Vector2D(2, 2), True),
                 ],
             ),
-            BoundingBox(-0.5, 2.5, 2.5, -0.5),
+            BoundingBox(0, 2, 1, 2),
         )
 
 
@@ -122,9 +117,7 @@ class CircularApertureTest(TestCase):
             HOLE_DIAMETER=0.1,
         ),
     ):
-        return CircleApertureCollector(
-            args, ApertureManager(get_dummy_apertureSet())
-        )
+        return CircleApertureCollector(args, ApertureManager(get_dummy_apertureSet()))
 
     def test_create(self):
         aperture = self.create_circle_aperture()
@@ -141,9 +134,7 @@ class PolygonApertureTest(TestCase):
         self,
         args=SimpleNamespace(DIAMETER=0.6, HOLE_DIAMETER=0.1, ROTATION=0.3, VERTICES=5),
     ):
-        return PolygonApertureCollector(
-            args, ApertureManager(get_dummy_apertureSet())
-        )
+        return PolygonApertureCollector(args, ApertureManager(get_dummy_apertureSet()))
 
     def test_create(self):
         aperture = self.create_polygon_aperture()
@@ -155,8 +146,6 @@ class PolygonApertureTest(TestCase):
     def test_bbox(self):
         bbox = self.create_polygon_aperture().bbox()
         self.assertEqual(bbox.as_tuple(), (-0.3, 0.3, 0.3, -0.3))
-
-
 
 
 if __name__ == "__main__":

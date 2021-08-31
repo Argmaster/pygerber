@@ -14,7 +14,7 @@ from .spec import ArcSpec, FlashSpec, LineSpec, Spec
 class DrawingBroker(ApertureManager, TransformMeta):
     current_aperture: Aperture
     current_point: Vector2D
-    region_bounds: List[Tuple[Aperture, Spec]]
+    region_bounds: List[Spec]
 
     def __init__(self, apertureSet: ApertureSet) -> None:
         self.reset_defaults()
@@ -116,7 +116,7 @@ class DrawingBroker(ApertureManager, TransformMeta):
             )
         return self.current_aperture
 
-    def end_region(self) -> Tuple[RegionApertureManager, List[Tuple[Aperture, Spec]]]:
+    def end_region(self) -> Tuple[RegionApertureManager, List[Spec]]:
         bounds = self._get_and_clean_region_bounds()
         super().end_region()
         apertureClass = self.apertureSet.getApertureClass(None, True)
@@ -131,7 +131,7 @@ class DrawingBroker(ApertureManager, TransformMeta):
         self.current_point = location
 
     def _push_region_step(self, spec: Spec):
-        self.region_bounds.append((self.get_current_aperture(), spec))
+        self.region_bounds.append(spec)
 
     def isCCW(self):
         return self.interpolation == Interpolation.CounterclockwiseCircular

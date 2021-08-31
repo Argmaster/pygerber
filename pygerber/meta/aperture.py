@@ -109,19 +109,17 @@ class RegionApertureManager(ABC, ArcUtilMixin):
         self.broker = broker
 
     @abstractmethod
-    def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
+    def finish(self, bounds: List[Spec]) -> None:
         raise TypeError()
 
-    def bbox(self, bounds: List[Tuple[Aperture, Spec]]) -> BoundingBox:
+    def bbox(self, bounds: List[Spec]) -> BoundingBox:
         if len(bounds) == 0:
             return BoundingBox(0, 0, 0, 0)
-        aperture, spec = bounds[0]
-        aperture: Aperture
+        spec = bounds[0]
         spec: Spec
-        bbox = spec.bbox(aperture)
-        for bound in bounds[1:]:
-            aperture, spec = bound
-            bbox = bbox + spec.bbox(aperture)
+        bbox: BoundingBox = BoundingBox(*spec.begin.as_tuple(), *spec.end.as_tuple())
+        for spec in bounds[1:]:
+            bbox = bbox.include_point(spec.end)
         return bbox
 
 

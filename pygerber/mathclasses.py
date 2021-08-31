@@ -89,12 +89,20 @@ class BoundingBox:
             and self.lower <= other.lower
         )
 
-    def padded(self, delta) -> None:
+    def padded(self, delta) -> BoundingBox:
         return BoundingBox(
             self.left - delta,
             self.upper + delta,
             self.right + delta,
             self.lower - delta,
+        )
+
+    def include_point(self, point: Vector2D) -> BoundingBox:
+        return BoundingBox(
+            min(self.left, point.x),
+            max(self.upper, point.y),
+            min(self.right, point.x),
+            max(self.lower, point.y),
         )
 
     def height(self) -> float:

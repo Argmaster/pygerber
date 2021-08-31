@@ -98,10 +98,7 @@ class DrawingBrokerTest(TestCase):
         broker.select_aperture(10)
         broker.begin_region()
         broker.draw_line(Vector2D(1, 1))
-        self.assertEqual(broker.region_bounds[0][0], broker.current_aperture)
-        broker.select_aperture(11)
-        self.assertNotEqual(broker.region_bounds[0][0], broker.current_aperture)
-        spec: LineSpec = broker.region_bounds[0][1]
+        spec: LineSpec = broker.region_bounds[0]
         self.assertEqual(spec, LineSpec(Vector2D(0, 0), Vector2D(1, 1), True))
         broker.end_region()
         self.assertEqual(broker.region_bounds, [])
@@ -143,7 +140,7 @@ class DrawingBrokerTest(TestCase):
         broker.bbox_interpolated(Vector2D(2, 2), Vector2D(0, 1))
         region_aperture, bounds = broker.end_region()
         self.assertEqual(
-            region_aperture(broker).bbox(bounds), BoundingBox(-0.5, 2.5, 2.5, -0.5)
+            region_aperture(broker).bbox(bounds), BoundingBox(0, 2, 1, 2)
         )
 
 

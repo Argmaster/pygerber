@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pygerber.mathclasses import BoundingBox
 from pygerber.meta.apertureset import ApertureSet
-from typing import List, Tuple
+from typing import List
 
 from pygerber.meta.aperture import (Aperture, CircularAperture, CustomAperture,
                                     PolygonAperture, RectangularAperture,
@@ -30,7 +30,7 @@ class ApertureCollector:
         pass
 
     class CalledFinish(Called):
-        def __init__(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
+        def __init__(self, bounds: List[Spec]) -> None:
             self.bounds = bounds
 
     def flash(self, spec: FlashSpec) -> None:
@@ -42,7 +42,7 @@ class ApertureCollector:
     def arc(self, spec: ArcSpec) -> None:
         raise self.CalledArc(spec)
 
-    def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
+    def finish(self, bounds: List[Spec]) -> None:
         raise self.CalledFinish(bounds)
 
 

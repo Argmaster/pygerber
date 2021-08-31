@@ -2,16 +2,14 @@
 from __future__ import annotations
 
 from functools import cached_property
+from pygerber.parser.pillow.apertures.rectangle import PillowRectangle
 from typing import Tuple
 
-from PIL import Image, ImageDraw
-from pygerber.meta.aperture import RectangularAperture
+from PIL import ImageDraw
 from pygerber.meta.spec import ArcSpec, LineSpec
-from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
-from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 
 
-class PillowObround(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
+class PillowObround(PillowRectangle):
     draw_canvas: ImageDraw.ImageDraw
 
     @cached_property
@@ -42,3 +40,5 @@ class PillowObround(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
 
     def arc(self, spec: ArcSpec) -> None:
         self.prepare_arc_spec(spec)
+
+
