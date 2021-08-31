@@ -14,8 +14,6 @@ class DataClassesTest(TestCase):
     def test_Vector2D_as_tuple(self):
         v = Vector2D(10, 11)
         self.assertEqual(v.as_tuple(), (10, 11))
-        self.assertEqual(v[0], 10)
-        self.assertEqual(v[1], 11)
 
     def test_Vector2D_addition(self):
         v1 = Vector2D(10, 11)

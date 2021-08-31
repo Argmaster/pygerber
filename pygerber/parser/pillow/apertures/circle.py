@@ -6,13 +6,13 @@ from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from typing import Tuple
 
 from PIL import Image, ImageDraw
-from pygerber.mathclasses import Vector2D
+from pygerber.mathclasses import BoundingBox, Vector2D
 from pygerber.meta.aperture import CircularAperture
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 
 
-class PillowCircle(ArcUtilMixinPillow, CircularAperture, PillowUtilMethdos):
+class PillowCircle(ArcUtilMixinPillow, PillowUtilMethdos, CircularAperture):
     canvas: Image.Image
     draw_canvas: ImageDraw.ImageDraw
 
@@ -24,16 +24,49 @@ class PillowCircle(ArcUtilMixinPillow, CircularAperture, PillowUtilMethdos):
     def diameter(self) -> float:
         return int(self._prepare_co(self.DIAMETER))
 
-    def flash(self, spec: FlashSpec) -> None:
-        self.prepare_flash_spec(spec)
-        self._flash(spec.location)
+    @cached_property
+    def hole_diameter(self) -> float:
+        return int(self._prepare_co(self.HOLE_DIAMETER))
 
-    def _flash(self, location: Vector2D) -> None:
-        self.draw_canvas.ellipse(self._get_ellipse_bbox(location), self.get_color())
+    @cached_property
+    def hole_radius(self) -> float:
+        return int(self._prepare_co(self.HOLE_DIAMETER) / 2)
 
-    def _get_ellipse_bbox(self, loc: Vector2D) -> Tuple:
-        r = self.radius
-        return (loc.x - r, loc.y - r, loc.x + r, loc.y + r)
+    @cached_property
+    def aperture_mask(self) -> Image.Image:
+        aperture_mask, aperture_mask_draw = self.get_aperture_canvas()
+        aperture_mask_draw.ellipse(self._get_aperture_bbox( ), (255, 255, 255, 255))
+        if self.hole_diameter:
+            aperture_mask_draw.ellipse(
+                self.get_aperture_hole_bbox().as_tuple_y_inverse(),
+                (0, 0, 0, 0),
+            )
+        return aperture_mask
+
+    def get_aperture_canvas(self) -> Image.Image:
+        canvas = Image.new(
+            "RGBA", (self.diameter + 1, self.diameter + 1), (0, 0, 0, 0)
+        )
+        canvas_draw = ImageDraw.Draw(canvas)
+        return canvas, canvas_draw
+
+    @cached_property
+    def aperture_stamp_dark(self) -> Image.Image:
+        aperture_stamp, aperture_stamp_draw = self.get_aperture_canvas()
+        aperture_stamp_draw.ellipse(self._get_aperture_bbox(), self.get_dark_color())
+        return aperture_stamp
+
+    @cached_property
+    def aperture_stamp_clear(self) -> Image.Image:
+        aperture_stamp, aperture_stamp_draw = self.get_aperture_canvas()
+        aperture_stamp_draw.ellipse(self._get_aperture_bbox(), self.get_clear_color())
+        return aperture_stamp
+
+    def _get_aperture_bbox(self) -> Tuple[float]:
+        return 0, 0, self.diameter - 1, self.diameter - 1
+
+    def flash_offset(self):
+        return Vector2D(self.radius, self.radius)
 
     def line(self, spec: LineSpec) -> None:
         self.prepare_line_spec(spec)

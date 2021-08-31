@@ -60,3 +60,37 @@ def get_pillow_rectangle(broker, x=1, y=3, hole_diameter=0):
     return PillowRectangle(
         SimpleNamespace(X=x, Y=y, HOLE_DIAMETER=hole_diameter), broker
     )
+
+
+def are_images_similar(
+    img1: Image.Image,
+    img2: Image.Image,
+    color_tolerance: float=0,
+    content_tolerance: float=0,
+):
+    if img1.size != img2.size:
+        return False
+    misses = 0
+    for x in range(img1.width):
+        for y in range(img2.height):
+            r, g, b, a = img1.getpixel((x, y))
+            R, G, B, A = img2.getpixel((x, y))
+            if not compare_color(r, R, color_tolerance):
+                misses += 1
+            if not compare_color(g, G, color_tolerance):
+                misses += 1
+            if not compare_color(b, B, color_tolerance):
+                misses += 1
+            if not compare_color(a, A, color_tolerance):
+                misses += 1
+    if misses / (img1.width * img1.height) <= content_tolerance:
+        return True
+    else:
+        return False
+
+
+def compare_color(c: float, C: float, tresh: float):
+    c = c / 255
+    C = C / 255
+    cC = abs(c - C)
+    return cC <= tresh

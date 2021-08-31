@@ -14,17 +14,14 @@ class Vector2D:
     def as_tuple(self):
         return (self.x, self.y)
 
-    def __add__(self, other: SupportsIndex) -> Vector2D:
-        return Vector2D(other[0] + self.x, other[1] + self.y)
+    def __add__(self, other: Vector2D) -> Vector2D:
+        return Vector2D(other.x + self.x, other.y + self.y)
 
-    def __sub__(self, other: SupportsIndex) -> Vector2D:
-        return Vector2D(self.x - other[0], self.y - other[1])
+    def __sub__(self, other: Vector2D) -> Vector2D:
+        return Vector2D(self.x - other.x, self.y - other.y)
 
     def __mul__(self, other: float) -> Vector2D:
         return Vector2D(self.x * other, self.y * other)
-
-    def __getitem__(self, index: int) -> float:
-        return self.as_tuple()[index]
 
     def length(self):
         return sqrt(self.x ** 2 + self.y ** 2)
@@ -40,6 +37,9 @@ class Vector2D:
             self.x / length,
             self.y / length,
         )
+
+    def floor(self):
+        return Vector2D(int(self.x), int(self.y))
 
 
 UNIT_VECTOR_X = Vector2D(1, 0)
@@ -77,6 +77,9 @@ class BoundingBox:
     def as_tuple(self) -> Tuple[float]:
         """Tuple (left, upper, right, lower)"""
         return self.left, self.upper, self.right, self.lower
+
+    def as_tuple_y_inverse(self) -> Tuple[float]:
+        return self.left, self.lower, self.right, self.upper
 
     def contains(self, other: BoundingBox) -> bool:
         return (

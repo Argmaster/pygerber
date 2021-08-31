@@ -32,6 +32,10 @@ DEFAULT_COLOR_SET_GREEN = ColorSet(
 )
 
 
+class ImageSizeNullError(IndexError):
+    pass
+
+
 class ParserWithPillow:
 
     tokenizer: Tokenizer
@@ -95,7 +99,7 @@ class ParserWithPillow:
         self.tokenizer.meta.dpmm = self.dpmm
 
     def _prepare_canvas(self) -> None:
-        bbox = self.tokenizer.get_bbox()
+        bbox = self.tokenizer.get_bbox().padded(1)
         width = self._prepare_co(bbox.width())
         height = self._prepare_co(bbox.height())
         self.tokenizer.meta.canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
@@ -113,7 +117,20 @@ class ParserWithPillow:
             raise RuntimeError("Can't return canvas that was not rendered.")
 
     def _get_image(self) -> Image.Image:
+        if self.canvas.width == 0 or self.canvas.height == 0:
+            raise ImageSizeNullError("Image has null width or height.")
         return self.canvas.transpose(Image.FLIP_TOP_BOTTOM)
 
     def save(self, filepath: str, format: str) -> None:
         self.canvas.save(filepath, format)
+
+
+def render_file_and_save(filepath: str, savepath: str, **kwargs):
+    image = render_file(filepath, **kwargs)
+    image.save(savepath)
+
+
+def render_file(filepath: str, **kwargs) -> Image.Image:
+    parser = ParserWithPillow(filepath, **kwargs)
+    parser.render()
+    return parser.get_image()

@@ -1,0 +1,41 @@
+%FSLAX26Y26*%
+%MOMM*%
+G04 Rectangle background aperture *
+%ADD10R,3.0X3.0*%
+G04 Circle apertures *
+%ADD11C,0.5*%
+%ADD12C,0.5X0.25*%
+G04 Rectangle apertures *
+%ADD13R,0.6X0.3*%
+%ADD14R,0.6X0.3X0.2*%
+G01*
+G04 Make dark background apertures *
+%LPD*%
+D10*
+X1500000Y1500000D03*
+X4500000Y4500000D03*
+G04 Make circle dark stamps *
+%LPD*%
+D11*
+X1000000Y5000000D03*
+D12*
+X1000000Y4000000D03*
+G04 Make circle transparent stamps *
+%LPC*%
+D11*
+X4000000Y5000000D03*
+D12*
+X4000000Y4000000D03*
+G04 Make rectangle dark stamps *
+%LPD*%
+D13*
+X2000000Y5000000D03*
+D14*
+X2000000Y4000000D03*
+G04 Make rectangle transparent stamps *
+%LPC*%
+D13*
+X5000000Y5000000D03*
+D14*
+X5000000Y4000000D03*
+M02*
