@@ -2,17 +2,17 @@
 from __future__ import annotations
 
 from functools import cached_property
+from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from typing import Tuple
 
 from PIL import Image, ImageDraw
 from pygerber.mathclasses import BoundingBox, Vector2D
 from pygerber.meta.aperture import RectangularAperture
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
-from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
+from pygerber.meta.spec import ArcSpec, LineSpec
 
 
-class PillowRectangle(ArcUtilMixinPillow, PillowUtilMethdos, RectangularAperture):
+class PillowRectangle(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
     draw_canvas: ImageDraw.ImageDraw
 
     @cached_property
@@ -31,58 +31,16 @@ class PillowRectangle(ArcUtilMixinPillow, PillowUtilMethdos, RectangularAperture
     def y_half(self) -> float:
         return int(self._prepare_co(self.Y) / 2)
 
-    @cached_property
-    def hole_diameter(self) -> float:
-        return int(self._prepare_co(self.HOLE_DIAMETER))
+    def draw_shape(self, aperture_stamp_draw: ImageDraw.Draw, color: Tuple):
+        aperture_stamp_draw.rectangle(self.get_aperture_bbox(), color)
 
-    @cached_property
-    def hole_radius(self) -> float:
-        return int(self._prepare_co(self.HOLE_DIAMETER) / 2)
-
-    @cached_property
-    def aperture_mask(self) -> Image.Image:
-        aperture_mask, aperture_mask_draw = self.get_aperture_canvas()
-        aperture_mask_draw.rectangle(
-            self._get_aperture_stamp_bbox(), (255, 255, 255, 255)
+    def _get_bbox_at_location(self, loc: Vector2D) -> Tuple:
+        return (
+            loc.x - self.x_half,
+            loc.y - self.y_half,
+            loc.x + self.x_half,
+            loc.y + self.y_half,
         )
-        if self.hole_diameter:
-            aperture_mask_draw.ellipse(
-                self.get_aperture_hole_bbox().as_tuple_y_inverse(),
-                (0, 0, 0, 0),
-            )
-        return aperture_mask
-
-    def get_aperture_canvas(self) -> Image.Image:
-        canvas = Image.new(
-            "RGBA", (self.x + 1, self.y + 1), (0, 0, 0, 0)
-        )
-        canvas_draw = ImageDraw.Draw(canvas)
-        return canvas, canvas_draw
-
-    @cached_property
-    def aperture_stamp_dark(self) -> Image.Image:
-        aperture_stamp, aperture_stamp_draw = self.get_aperture_canvas()
-        aperture_stamp_draw.rectangle(
-            self._get_aperture_stamp_bbox(), self.get_dark_color()
-        )
-        return aperture_stamp
-
-    @cached_property
-    def aperture_stamp_clear(self) -> Image.Image:
-        aperture_stamp, aperture_stamp_draw = self.get_aperture_canvas()
-        aperture_stamp_draw.rectangle(
-            self._get_aperture_stamp_bbox(), self.get_clear_color()
-        )
-        return aperture_stamp
-
-    def _get_aperture_stamp_bbox(self):
-        return 0, 0, self.x - 1, self.y - 1
-
-    def _get_aperture_bbox(self, loc: Vector2D) -> Tuple:
-        return (loc.x - self.x_half, loc.y - self.y_half, loc.x + self.x_half, loc.y + self.y_half)
-
-    def flash_offset(self):
-        return Vector2D(self.x_half, self.y_half)
 
     def line(self, spec: LineSpec) -> None:
         self.prepare_line_spec(spec)
@@ -95,8 +53,8 @@ class PillowRectangle(ArcUtilMixinPillow, PillowUtilMethdos, RectangularAperture
         self._draw_side(self._get_right_site_points(top, bot))
 
     def _get_top_bot_sides(self, begin: Vector2D, end: Vector2D) -> BoundingBox:
-        return BoundingBox(*self._get_aperture_bbox(begin)), BoundingBox(
-            *self._get_aperture_bbox(end)
+        return BoundingBox(*self._get_bbox_at_location(begin)), BoundingBox(
+            *self._get_bbox_at_location(end)
         )
 
     def _draw_side(self, points: tuple) -> None:

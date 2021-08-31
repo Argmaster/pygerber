@@ -9,7 +9,7 @@ from typing import List, Tuple
 
 from PIL import Image, ImageDraw
 from pygerber.meta.aperture import Aperture, RegionApertureManager
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
+from pygerber.meta.spec import ArcSpec, LineSpec
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 
 

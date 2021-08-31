@@ -8,6 +8,9 @@ G04 Circle apertures *
 G04 Rectangle apertures *
 %ADD13R,0.6X0.3*%
 %ADD14R,0.6X0.3X0.2*%
+G04 Obround apertures *
+%ADD15O,0.6X0.3*%
+%ADD16O,0.6X0.3X0.2*%
 G01*
 G04 Make dark background apertures *
 %LPD*%
@@ -38,4 +41,16 @@ D13*
 X5000000Y5000000D03*
 D14*
 X5000000Y4000000D03*
+G04 Make rectangle dark stamps *
+%LPD*%
+D15*
+X4000000Y2000000D03*
+D16*
+X4000000Y1000000D03*
+G04 Make rectangle transparent stamps *
+%LPC*%
+D15*
+X1000000Y2000000D03*
+D16*
+X1000000Y1000000D03*
 M02*

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from PIL import Image, ImageDraw
 
-
-from pygerber.mathclasses import BoundingBox, Vector2D
+from pygerber.mathclasses import Vector2D
 from pygerber.meta.broker import DrawingBroker
 from pygerber.meta.meta import Polarity
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
@@ -11,46 +9,7 @@ from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
 INCH_TO_MM_MULTIPLIER = 0.0393701
 
 
-class FlashUtil:
-    aperture_stamp_clear: Image.Image
-    aperture_stamp_dark: Image.Image
-    aperture_mask: Image.Image
-    canvas: Image.Image
-    draw_canvas: ImageDraw.ImageDraw
-    hole_diameter: float
-
-    def flash(self, spec: FlashSpec) -> None:
-        self.prepare_flash_spec(spec)
-        self._flash(spec.location)
-
-    def _flash(self, location: Vector2D) -> None:
-        offset_to_center = location - self.flash_offset()
-        if self.is_clear():
-            self.canvas.paste(
-                self.aperture_stamp_clear,
-                offset_to_center.as_tuple(),
-                self.aperture_mask,
-            )
-        else:
-            self.canvas.paste(
-                self.aperture_stamp_dark,
-                offset_to_center.as_tuple(),
-                self.aperture_mask,
-            )
-
-    def get_aperture_hole_bbox(self) -> BoundingBox:
-        return BoundingBox(
-            0, 0, self.hole_diameter - 1, self.hole_diameter - 1
-        ).transform(
-            self.flash_offset()
-            - Vector2D(
-                self.hole_radius,
-                self.hole_radius,
-            )
-        )
-
-
-class PillowUtilMethdos(FlashUtil):
+class PillowUtilMethdos:
 
     broker: DrawingBroker
 

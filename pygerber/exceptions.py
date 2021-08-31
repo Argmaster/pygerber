@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
+class EndOfStream(Exception):
+    pass
+
+
 class InvalidSyntaxError(Exception):
     pass
 
@@ -17,7 +21,7 @@ class DeprecatedSyntax(InvalidSyntaxError):
     pass
 
 
-class EndOfStream(InvalidSyntaxError):
+class TokenizationFatalFailure(InvalidSyntaxError):
     pass
 
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import deque
+from pathlib import Path
 from pygerber.mathclasses import BoundingBox
 from typing import Tuple
 
@@ -7,7 +8,12 @@ from pygerber.meta import Meta
 from pygerber.meta.apertureset import ApertureSet
 from pygerber.tokens.token import Token
 
-from .exceptions import EndOfStream, InvalidSyntaxError, TokenNotFound
+from .exceptions import (
+    EndOfStream,
+    InvalidSyntaxError,
+    TokenNotFound,
+    TokenizationFatalFailure,
+)
 from .tokens import token_classes
 
 
@@ -82,12 +88,22 @@ class Tokenizer:
                 self.next_token()
         except EndOfStream:
             pass
+        except InvalidSyntaxError as e:
+            raise e.__class__(
+                f"""File "{self.get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}: {e}"""
+            ) from e
         else:
             raise InvalidSyntaxError(
                 "No explicit indication of end at the end of file."
             )
         self.reset_state()
         return self.token_stack
+
+    def get_abspath_if_possible(self):
+        if self.filepath == self.__class__.filepath:
+            return self.filepath
+        else:
+            return Path(self.filepath).absolute()
 
     def hasReachedEnd(self):
         return self.begin_index >= len(self.source)
@@ -140,7 +156,7 @@ class Tokenizer:
     def raise_token_not_found(self):
         end_index = min(len(self.source), self.begin_index + 30)
         raise TokenNotFound(
-            f'\n  File "{self.filepath}", line {self.line_index}, character {self.char_index}:\n{self.source[self.begin_index:end_index]}'
+            f'\n  File "{self.get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}:\n{self.source[self.begin_index:end_index]}'
         )
 
     def get_bbox(self):

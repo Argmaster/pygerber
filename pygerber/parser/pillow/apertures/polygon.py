@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
+
+from typing import Tuple
 
 from PIL import Image, ImageDraw
 from pygerber.meta.aperture import PolygonAperture
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
-from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
+from pygerber.meta.spec import ArcSpec, LineSpec
+from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
+from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 
 
-class PillowPolygon(ArcUtilMixinPillow, PolygonAperture, PillowUtilMethdos):
+class PillowPolygon(ArcUtilMixinPillow, FlashUtilMixin, PolygonAperture):
     draw_canvas: ImageDraw.ImageDraw
 
-    def flash(self, spec: FlashSpec) -> None:
-        self.prepare_flash_spec(spec)
+    def draw_shape(self, aperture_stamp_draw: ImageDraw.Draw, color: Tuple):
+        pass
 
     def line(self, spec: LineSpec) -> None:
         self.prepare_line_spec(spec)

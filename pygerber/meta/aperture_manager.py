@@ -1,7 +1,7 @@
 from pygerber.meta.meta import DrawingMeta
 from typing import Dict
 
-from pygerber.exceptions import ApertureSelectionError
+from pygerber.exceptions import ApertureSelectionError, InvalidSyntaxError
 
 from .aperture import Aperture
 from .apertureset import ApertureSet
@@ -17,16 +17,19 @@ class ApertureManager(DrawingMeta):
 
     def __init__(self, apertureSet: ApertureSet) -> None:
         self.bind_aperture_set(apertureSet)
+        self.reset_defaults()
         DrawingMeta.__init__(self)
 
     def reset_defaults(self):
         DrawingMeta.reset_defaults(self)
+        self.apertures = {}
 
     def bind_aperture_set(self, apSet: ApertureSet):
         self.apertureSet = apSet
-        self.apertures = {}
 
     def define_aperture(self, type: str, name: str, ID: int, args: object):
+        if ID in self.apertures.keys():
+            raise InvalidSyntaxError(f"Redefinition of aperture is not allowed. Attempt for aperture D{ID}.")
         if type is not None:
             apertureClass = self.apertureSet.getApertureClass(type)
         else:

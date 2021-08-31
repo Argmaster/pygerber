@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pathlib import Path
-from PIL import Image
-from tests.testutils.pillow import are_images_similar
 
+from pathlib import Path
 from unittest import TestCase, main
 
+from PIL import Image
 from pygerber.parser.pillow.parser import ParserWithPillow, render_file
+from tests.testutils.pillow import are_images_similar
 
 RENDERED_PATH = Path("./tests/gerber/rendered")
 GERBER_PATH = Path("./tests/gerber")
@@ -79,7 +79,7 @@ class TestPillowParser(TestCase):
     def test_parser_file_4(self):
         image = render_file(GERBER_PATH / "s4.grb")
         # to manually validate output uncomment this:
-        image.show()
+        # image.show()
         # to create new comparison image uncomment this:
         # image.save("./tests/gerber/rendered/s4.png")
         # self.assertTrue(
