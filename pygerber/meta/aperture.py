@@ -2,18 +2,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from pygerber.meta.arc_util_mixin import ArcUtilMixin
-
 from typing import List, Tuple
 
+from pygerber.mathclasses import BoundingBox
+from pygerber.meta.arc_util_mixin import ArcUtilMixin
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from pygerber.tokens.add import ADD_Token
 
-from pygerber.mathclasses import BoundingBox
-
 
 class Aperture(ABC, ArcUtilMixin):
-
     def __init__(self, args: ADD_Token.ARGS, broker) -> None:
         raise TypeError()
 
@@ -47,6 +44,7 @@ class Aperture(ABC, ArcUtilMixin):
             spec.center.x + radius,
             spec.center.y + radius,
         )
+
 
 class CircularAperture(Aperture):
 
@@ -128,7 +126,6 @@ class RegionApertureManager(ABC, ArcUtilMixin):
 
 
 class CustomAperture(Aperture):
-
     def __init__(self, args: ADD_Token.ARGS, broker) -> None:
         self.broker = broker
         self.args = args

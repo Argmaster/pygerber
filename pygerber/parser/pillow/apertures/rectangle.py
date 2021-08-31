@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from functools import cached_property
+from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from typing import Tuple
 
 from PIL import Image, ImageDraw
@@ -11,7 +12,7 @@ from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 
 
-class PillowRectangle(RectangularAperture, PillowUtilMethdos):
+class PillowRectangle(ArcUtilMixinPillow, RectangularAperture, PillowUtilMethdos):
     draw_canvas: ImageDraw.ImageDraw
 
     @cached_property

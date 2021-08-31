@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from functools import cached_property
+from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from typing import Tuple
 
 from PIL import Image, ImageDraw
@@ -11,7 +12,7 @@ from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 
 
-class PillowCircle(CircularAperture, PillowUtilMethdos):
+class PillowCircle(ArcUtilMixinPillow, CircularAperture, PillowUtilMethdos):
     canvas: Image.Image
     draw_canvas: ImageDraw.ImageDraw
 

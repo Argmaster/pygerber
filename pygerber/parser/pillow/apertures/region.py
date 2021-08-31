@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.meta.meta import Interpolation
 
 from pygerber.mathclasses import Vector2D
@@ -12,7 +13,7 @@ from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 
 
-class PillowRegion(RegionApertureManager, PillowUtilMethdos):
+class PillowRegion(ArcUtilMixinPillow, RegionApertureManager, PillowUtilMethdos):
     draw_canvas: ImageDraw.ImageDraw
 
     def finish(self, bounds: List[Tuple[Aperture, LineSpec]]) -> None:
