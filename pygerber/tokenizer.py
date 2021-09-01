@@ -115,8 +115,10 @@ class Tokenizer:
         self.update_indexes(token)
         token.affect_meta()
         token.pre_render()
-        bbox = token.bbox()
+        self.update_bbox(token.bbox())
         token.post_render()
+
+    def update_bbox(self, bbox: BoundingBox):
         if bbox is not None:
             if self.bbox is None:
                 self.bbox = bbox

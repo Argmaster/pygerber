@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest import TestCase, main
 
 from PIL import Image
-from pygerber.parser.pillow.parser import ParserWithPillow, render_file
+from pygerber.parser.pillow.parser import ImageSizeNullError, ParserWithPillow, render_file, render_file_and_save
 from tests.testutils.pillow import are_images_similar
 
 RENDERED_PATH = Path("./tests/gerber/rendered")
@@ -23,6 +23,9 @@ class TestPillowParser(TestCase):
             M02*
             """
 
+    def test_parser_double_none(self):
+        self.assertRaises(RuntimeError, lambda: ParserWithPillow(None, None))
+
     def test_parser_string(self):
         parser = ParserWithPillow(None, self.SOURCE_0)
         self.assertEqual(parser.tokenizer.bbox.width(), 1.5)
@@ -35,6 +38,21 @@ class TestPillowParser(TestCase):
         # self.assertTrue(
         #     are_images_similar(Image.open(RENDERED_PATH / "SOURCE_0.png"), image, 0, 0)
         # )
+
+    def test_parser_double_render(self):
+        parser = ParserWithPillow(None, self.SOURCE_0)
+        self.assertRaises(RuntimeError, lambda: parser.get_image())
+        parser.render()
+        self.assertRaises(RuntimeError, lambda: parser.render())
+        parser.save(".\\tests\\test_parser\\test_render.png", "png")
+        parser.save(".\\tests\\test_parser\\test_render.png")
+
+    def test_parser_null_size_image(self):
+        parser = ParserWithPillow(None, "M02*")
+        self.assertRaises(ImageSizeNullError, parser.render)
+
+    def test_render_file_and_save(self):
+        render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png")
 
     def test_parser_file_0(self):
         image = render_file(GERBER_PATH / "s0.grb", dpi=1600)
@@ -105,8 +123,6 @@ class TestPillowParser(TestCase):
         # self.assertTrue(
         #    are_images_similar(Image.open(RENDERED_PATH / "s6.png"), image, 0, 0)
         # )
-
-
 
 
 if __name__ == "__main__":

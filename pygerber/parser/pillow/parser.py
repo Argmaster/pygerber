@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Tuple
 
 from PIL import Image, ImageDraw
+from pygerber.mathclasses import BoundingBox
 from pygerber.meta.apertureset import ApertureSet
 from pygerber.parser.pillow.apertures import *
 from pygerber.tokenizer import Tokenizer
@@ -71,9 +72,9 @@ class ParserWithPillow:
         )
         self.colors = colors
         self.dpmm = dpi / 25.4
-        self._tokenize(filepath, string_source)
+        self.__tokenize(filepath, string_source)
 
-    def _tokenize(self, filepath: str, string_source: str) -> None:
+    def __tokenize(self, filepath: str, string_source: str) -> None:
         if filepath is not None:
             self.tokenizer.tokenize_file(filepath)
         elif string_source is not None:
@@ -86,43 +87,56 @@ class ParserWithPillow:
         return self.tokenizer.meta.canvas
 
     def render(self) -> None:
-        self._preprare_meta()
         if not self.is_rendered:
+            self.__preprare_meta()
             self.tokenizer.render()
             self.is_rendered = True
         else:
             raise RuntimeError("Attempt to render already rendered canvas.")
 
-    def _preprare_meta(self) -> None:
-        self._prepare_canvas()
+    def __preprare_meta(self) -> None:
+        self.__prepare_canvas()
         self.tokenizer.meta.colors = self.colors
         self.tokenizer.meta.dpmm = self.dpmm
 
-    def _prepare_canvas(self) -> None:
-        bbox = self.tokenizer.get_bbox().padded(1)
-        width = self._prepare_co(bbox.width())
-        height = self._prepare_co(bbox.height())
+    def __prepare_canvas(self) -> None:
+        bbox = self.__get_canvas_bbox()
+        width, height = self.__get_canvas_size(bbox)
         self.tokenizer.meta.canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
         self.tokenizer.meta.draw_canvas = ImageDraw.Draw(self.canvas)
-        self.tokenizer.meta.left_offset = self._prepare_co(-bbox.left)
-        self.tokenizer.meta.bottom_offset = self._prepare_co(-bbox.lower)
+        left_offset, bottom_offset = self.__get_drawing_offset(bbox)
+        self.tokenizer.meta.left_offset = left_offset
+        self.tokenizer.meta.bottom_offset = bottom_offset
+
+    def __get_canvas_bbox(self) -> BoundingBox:
+        bbox = self.tokenizer.get_bbox()
+        if bbox.width() == 0 or bbox.height() == 0:
+            raise ImageSizeNullError("Image has null width or height.")
+        return bbox
+
+    def __get_canvas_size(self, bbox: BoundingBox) -> Tuple[int, int]:
+        return self._prepare_co(bbox.width()), self._prepare_co(bbox.height())
+
+    def __get_drawing_offset(self, bbox: BoundingBox) -> Tuple[int, int]:
+        return self._prepare_co(-bbox.left), self._prepare_co(-bbox.lower)
 
     def _prepare_co(self, value: float) -> float:
         return int(value * self.dpmm)
 
     def get_image(self) -> Image.Image:
         if self.is_rendered:
-            return self._get_image()
+            return self.__get_image()
         else:
             raise RuntimeError("Can't return canvas that was not rendered.")
 
-    def _get_image(self) -> Image.Image:
-        if self.canvas.width == 0 or self.canvas.height == 0:
-            raise ImageSizeNullError("Image has null width or height.")
+    def __get_image(self) -> Image.Image:
         return self.canvas.transpose(Image.FLIP_TOP_BOTTOM)
 
-    def save(self, filepath: str, format: str) -> None:
-        self.canvas.save(filepath, format)
+    def save(self, filepath: str, format: str = None) -> None:
+        if format is not None:
+            self.canvas.save(filepath, format)
+        else:
+            self.canvas.save(filepath)
 
 
 def render_file_and_save(filepath: str, savepath: str, **kwargs):
