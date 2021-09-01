@@ -51,7 +51,9 @@ class FlashUtilMixin(PillowUtilMethdos):
         return aperture_stamp
 
     def draw_shape(self, aperture_stamp_draw: ImageDraw.Draw, color: Tuple):
-        raise NotImplementedError(f"Implement draw_shape(...) in subclass of {self.__class__.__qualname__}")
+        raise NotImplementedError(
+            f"Implement draw_shape(...) in subclass of {self.__class__.__qualname__}"
+        )
 
     def __get_aperture_canvas(self) -> Image.Image:
         canvas = Image.new(

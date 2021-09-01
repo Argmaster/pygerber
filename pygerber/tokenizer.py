@@ -17,6 +17,8 @@ from .exceptions import (
 from .tokens import token_classes
 
 
+DEFAULT_TRACE_FILEPATH = "<string>"
+
 class Tokenizer:
 
     token_stack: deque  # contains Token objects
@@ -24,7 +26,7 @@ class Tokenizer:
     source: str = ""
     begin_index: int = 0
     token_stack_size: int = 0
-    filepath: str = "<string>"
+    filepath: str = None
     bbox: BoundingBox
 
     def __init__(
@@ -49,11 +51,11 @@ class Tokenizer:
         """
         try:
             for token in self.token_stack:
-                self.render_token(token)
+                self.__render_token(token)
         except EndOfStream:
             return
 
-    def render_token(self, token: Token) -> None:
+    def __render_token(self, token: Token) -> None:
         token: Token
         token.affect_meta()
         token.pre_render()
@@ -84,13 +86,13 @@ class Tokenizer:
 
     def tokenize(self) -> deque:
         try:
-            while not self.hasReachedEnd():
-                self.next_token()
+            while not self.__has_reached_end():
+                self.__next_token()
         except EndOfStream:
             pass
         except InvalidSyntaxError as e:
             raise e.__class__(
-                f"""File "{self.get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}: {e}"""
+                f"""File "{self.__get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}: {e}"""
             ) from e
         else:
             raise InvalidSyntaxError(
@@ -99,26 +101,26 @@ class Tokenizer:
         self.reset_state()
         return self.token_stack
 
-    def get_abspath_if_possible(self):
-        if self.filepath == self.__class__.filepath:
-            return self.filepath
+    def __get_abspath_if_possible(self):
+        if self.filepath is None:
+            return DEFAULT_TRACE_FILEPATH
         else:
             return Path(self.filepath).absolute()
 
-    def hasReachedEnd(self):
+    def __has_reached_end(self):
         return self.begin_index >= len(self.source)
 
-    def next_token(self) -> int:
-        token: Token = self.find_matching_token()
+    def __next_token(self) -> int:
+        token: Token = self.__find_matching_token()
         token.dispatch(self.meta)
         self.push_token(token)
-        self.update_indexes(token)
+        self.__update_indexes(token)
         token.affect_meta()
         token.pre_render()
-        self.update_bbox(token.bbox())
+        self.__update_bbox(token.bbox())
         token.post_render()
 
-    def update_bbox(self, bbox: BoundingBox):
+    def __update_bbox(self, bbox: BoundingBox):
         if bbox is not None:
             if self.bbox is None:
                 self.bbox = bbox
@@ -130,7 +132,7 @@ class Tokenizer:
             self.token_stack.append(token)
             self.token_stack_size += 1
 
-    def update_indexes(self, token: Token) -> None:
+    def __update_indexes(self, token: Token) -> None:
         # update begin index
         self.begin_index = token.re_match.end()
         matched_string: str = token.re_match.group()
@@ -145,7 +147,7 @@ class Tokenizer:
             last_endl_index = matched_string.rfind("\n")
             self.char_index = source_length - last_endl_index
 
-    def find_matching_token(self):
+    def __find_matching_token(self):
         for token_class in token_classes:
             if token := token_class.match(
                 self.source,
@@ -158,7 +160,7 @@ class Tokenizer:
     def raise_token_not_found(self):
         end_index = min(len(self.source), self.begin_index + 30)
         raise TokenNotFound(
-            f'\n  File "{self.get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}:\n{self.source[self.begin_index:end_index]}'
+            f'\n  File "{self.__get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}:\n{self.source[self.begin_index:end_index]}'
         )
 
     def get_bbox(self):

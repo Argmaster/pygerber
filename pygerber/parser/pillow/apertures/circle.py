@@ -29,11 +29,11 @@ class PillowCircle(ArcUtilMixinPillow, FlashUtilMixin, CircularAperture):
 
     def line(self, spec: LineSpec) -> None:
         self.prepare_line_spec(spec)
-        self._line(spec.begin, spec.end)
+        self.__line(spec.begin, spec.end)
         self.flash_at_location(spec.begin)
         self.flash_at_location(spec.end)
 
-    def _line(self, begin: Vector2D, end: Vector2D) -> None:
+    def __line(self, begin: Vector2D, end: Vector2D) -> None:
         self.draw_canvas.line(
             [begin.as_tuple(), end.as_tuple()],
             self.get_color(),
@@ -42,27 +42,27 @@ class PillowCircle(ArcUtilMixinPillow, FlashUtilMixin, CircularAperture):
 
     def arc(self, spec: ArcSpec) -> None:
         self.prepare_arc_spec(spec)
-        self._arc(spec)
+        self.__arc(spec)
         self.flash_at_location(spec.begin)
         self.flash_at_location(spec.end)
 
-    def _arc(self, spec: ArcSpec):
+    def __arc(self, spec: ArcSpec):
         begin_angle, end_angle = self.get_begin_end_angles(spec)
         if self.isCCW:
-            self._draw_arc(spec, begin_angle, end_angle)
+            self.__draw_arc(spec, begin_angle, end_angle)
         else:
-            self._draw_arc(spec, -begin_angle, -end_angle)
+            self.__draw_arc(spec, -begin_angle, -end_angle)
 
-    def _draw_arc(self, spec, begin_angle, end_angle):
+    def __draw_arc(self, spec, begin_angle, end_angle):
         self.draw_canvas.arc(
-            self._get_arc_bbox(spec),
+            self.__get_arc_bbox(spec),
             begin_angle,
             end_angle,
             self.get_color(),
             width=self.diameter,
         )
 
-    def _get_arc_bbox(self, spec: ArcSpec) -> tuple:
+    def __get_arc_bbox(self, spec: ArcSpec) -> tuple:
         radius = (spec.begin - spec.center).length() + self.radius
         return (
             spec.center.x - radius,

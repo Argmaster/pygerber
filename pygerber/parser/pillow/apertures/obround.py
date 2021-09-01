@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from pygerber.parser.pillow.apertures.flash_line_mixin import FlashLineMixin
-from pygerber.parser.pillow.apertures.rectangle import PillowRectangle
 from typing import Tuple
 
 from PIL import ImageDraw
+from pygerber.parser.pillow.apertures.flash_line_mixin import FlashLineMixin
+from pygerber.parser.pillow.apertures.rectangle import PillowRectangle
 
 
 class PillowObround(FlashLineMixin, PillowRectangle):

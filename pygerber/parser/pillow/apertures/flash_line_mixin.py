@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from pygerber.mathclasses import Vector2D
 from pygerber.meta.spec import LineSpec
-
 
 LINE_DELTA_STEP = 4
 

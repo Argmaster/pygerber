@@ -43,6 +43,12 @@ class TokenizerTest(TestCase):
             InvalidSyntaxError, lambda: tokenizer.tokenize_string(self.SOURCE_1)
         )
 
+    def test_tokenize_file_invalid_syntax(self):
+        tokenizer = get_dummy_tokenizer()
+        self.assertRaises(
+            InvalidSyntaxError, lambda: tokenizer.tokenize_file("tests\\gerber\\invalid_syntax.grb")
+        )
+
     def test_tokenize_string_token_not_found(self):
         tokenizer = get_dummy_tokenizer()
         self.assertRaises(

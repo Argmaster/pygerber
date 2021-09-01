@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
-from pygerber.meta.meta import Interpolation
-
-from pygerber.mathclasses import Vector2D
 
 from typing import List, Tuple
 
-from PIL import Image, ImageDraw
-from pygerber.meta.aperture import Aperture, RegionApertureManager
+from PIL import ImageDraw
+from pygerber.meta.aperture import RegionApertureManager
 from pygerber.meta.spec import ArcSpec, LineSpec
+from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 
 
