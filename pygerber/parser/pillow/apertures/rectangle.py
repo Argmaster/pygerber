@@ -16,16 +16,8 @@ class PillowRectangle(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
     draw_canvas: ImageDraw.ImageDraw
 
     @cached_property
-    def x(self) -> float:
-        return int(self._prepare_co(self.X))
-
-    @cached_property
     def x_half(self) -> float:
         return int(self._prepare_co(self.X) / 2)
-
-    @cached_property
-    def y(self) -> float:
-        return int(self._prepare_co(self.Y))
 
     @cached_property
     def y_half(self) -> float:

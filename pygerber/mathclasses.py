@@ -23,6 +23,9 @@ class Vector2D:
     def __mul__(self, other: float) -> Vector2D:
         return Vector2D(self.x * other, self.y * other)
 
+    def __truediv__(self, other: float) -> Vector2D:
+        return Vector2D(self.x / other, self.y / other)
+
     def length(self):
         return sqrt(self.x ** 2 + self.y ** 2)
 

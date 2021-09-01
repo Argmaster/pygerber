@@ -62,11 +62,27 @@ def get_pillow_rectangle(broker, x=1, y=3, hole_diameter=0):
     )
 
 
+def get_pillow_obround(broker, x=1, y=3, hole_diameter=0):
+    return PillowObround(SimpleNamespace(X=x, Y=y, HOLE_DIAMETER=hole_diameter), broker)
+
+
+def get_pillow_polygon(broker, diameter=3, vertices=6, rotation=0, hole_diameter=0):
+    return PillowPolygon(
+        SimpleNamespace(
+            DIAMETER=diameter,
+            VERTICES=vertices,
+            ROTATION=rotation,
+            HOLE_DIAMETER=hole_diameter,
+        ),
+        broker,
+    )
+
+
 def are_images_similar(
     img1: Image.Image,
     img2: Image.Image,
-    color_tolerance: float=0,
-    content_tolerance: float=0,
+    color_tolerance: float = 0,
+    content_tolerance: float = 0,
 ):
     if img1.size != img2.size:
         return False

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 from functools import cached_property
+from pygerber.parser.pillow.apertures.flash_line_mixin import FlashLineMixin
 
 from typing import Tuple
 
@@ -11,16 +12,14 @@ from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 
 
-class PillowPolygon(ArcUtilMixinPillow, FlashUtilMixin, PolygonAperture):
+class PillowPolygon(
+    ArcUtilMixinPillow, FlashUtilMixin, FlashLineMixin, PolygonAperture
+):
     draw_canvas: ImageDraw.ImageDraw
 
     @cached_property
     def radius(self) -> float:
         return int(self._prepare_co(self.DIAMETER) / 2)
-
-    @cached_property
-    def diameter(self) -> float:
-        return int(self._prepare_co(self.DIAMETER))
 
     def draw_shape(self, aperture_stamp_draw: ImageDraw.ImageDraw, color: Tuple):
         aperture_stamp_draw.regular_polygon(
@@ -31,11 +30,7 @@ class PillowPolygon(ArcUtilMixinPillow, FlashUtilMixin, PolygonAperture):
             None,
         )
 
-    def line(self, spec: LineSpec) -> None:
-        self.prepare_line_spec(spec)
-
     def arc(self, spec: ArcSpec) -> None:
-        self.prepare_arc_spec(spec)
         self.prepare_arc_spec(spec)
         self._arc(spec)
         self._flash(spec.begin)
