@@ -4,7 +4,7 @@ from pygerber.mathclasses import Vector2D
 
 import re
 
-from pygerber.validators import Coordinate, Int, load_validators
+from pygerber.validators import Int, load_validators, OffsetCoordinate, VectorCoordinateX, VectorCoordinateY
 
 from .token import Deprecated, Token
 
@@ -19,10 +19,10 @@ class D01_Token(Token):
         )
     )
 
-    X = Coordinate()
-    Y = Coordinate()
-    I = Coordinate()
-    J = Coordinate()
+    X = VectorCoordinateX()
+    Y = VectorCoordinateY()
+    I = OffsetCoordinate()
+    J = OffsetCoordinate()
 
     @property
     def end(self):
@@ -35,6 +35,12 @@ class D01_Token(Token):
     def render(self):
         self.meta.draw_interpolated(self.end, self.offset)
 
+    def post_render(self):
+        self.meta.move_pointer(self.end)
+
+    def bbox(self):
+        return self.meta.bbox_interpolated(self.end, self.offset)
+
 
 @load_validators
 class D02_Token(Token):
@@ -42,14 +48,14 @@ class D02_Token(Token):
         r"(X(?P<X>{0}))?(Y(?P<Y>{0}))?D02\*".format(CO_PATTERN),
     )
 
-    X = Coordinate()
-    Y = Coordinate()
+    X = VectorCoordinateX()
+    Y = VectorCoordinateY()
 
     @property
     def point(self):
         return Vector2D(self.X, self.Y)
 
-    def render(self):
+    def post_render(self):
         self.meta.move_pointer(self.point)
 
 
@@ -59,8 +65,8 @@ class D03_Token(Token):
         r"(X(?P<X>{0}))?(Y(?P<Y>{0}))?D03\*".format(CO_PATTERN),
     )
 
-    X = Coordinate()
-    Y = Coordinate()
+    X = VectorCoordinateX()
+    Y = VectorCoordinateY()
 
     @property
     def point(self):
@@ -68,6 +74,12 @@ class D03_Token(Token):
 
     def render(self):
         self.meta.draw_flash(self.point)
+
+    def post_render(self):
+        self.meta.move_pointer(self.point)
+
+    def bbox(self):
+        return self.meta.bbox_flash(self.point)
 
 
 @Deprecated("G54 command is deprecated since 2012")

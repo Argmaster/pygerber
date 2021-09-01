@@ -34,10 +34,6 @@ class FormatSpecifierToken(Token):
     zeros = String("L")
     mode = String("A")
 
-    def raiseDeprecatedIfNotEqual(self, value_1, value_2, message) -> None:
-        if value_1 != value_2:
-            self.meta.raiseDeprecatedSyntax(message)
-
     @cached_property
     def length(self):
         return self.INT_FORMAT + self.DEC_FORMAT

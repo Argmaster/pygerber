@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pygerber.validators.coordinate import UnitFloat
+from pygerber.validators.basic import Function
 
 import re
 
@@ -39,12 +41,12 @@ class ADD_Token(Token):
 
     @load_validators
     class ARGS_dispatcher(Dispatcher):
-        DIAMETER = Float()
-        X = Float()
-        Y = Float()
+        DIAMETER = UnitFloat()
+        X = UnitFloat()
+        Y = UnitFloat()
         VERTICES = Int()
         ROTATION = Float(0.0)
-        HOLE_DIAMETER = Float(0.0)
+        HOLE_DIAMETER = UnitFloat(0)
 
     @ARGS_dispatcher
     def ARGS(self: Token, __: str) -> re.Pattern:

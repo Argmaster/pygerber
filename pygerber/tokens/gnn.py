@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pygerber.mathclasses import BoundingBox
 from pygerber.meta.meta import Unit
 
 import re
@@ -32,15 +33,21 @@ class G37_Token(Token):
     regex = re.compile(r"G37\*")
 
     def affect_meta(self):
+        self.manager, self.bounds = self.meta.finish_drawing_region()
+
+    def render(self):
+        self.manager.finish(self.bounds)
+
+    def post_render(self):
         self.meta.end_region()
+
+    def bbox(self) -> BoundingBox:
+        return self.manager.bbox(self.bounds)
 
 @Deprecated("G55 command is deprecated since 2012")
 @load_validators
 class G55_Token(Token):
     regex = re.compile(r"G55.*?\*")
-
-    def affect_meta(self):
-        self.meta.set_unit(Unit.INCHES)
 
 @Deprecated("G70 command is deprecated since 2012")
 @load_validators

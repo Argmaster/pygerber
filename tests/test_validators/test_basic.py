@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pygerber.validators.basic import Function
 from unittest import TestCase, main
 from pygerber.validators import Float, Int, String
 
@@ -24,6 +25,12 @@ class BasicValidatorsTest(TestCase):
         validator = String(default)
         test_value = "some string"
         self.assertEqual(validator(token, test_value), test_value)
+        self.assertEqual(validator(token, None), default)
+
+    def test_Function_validator(self):
+        token = None
+        default = "some default"
+        validator = Function(lambda tk, value: default)
         self.assertEqual(validator(token, None), default)
 
 

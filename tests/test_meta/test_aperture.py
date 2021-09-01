@@ -1,69 +1,76 @@
 # -*- coding: utf-8 -*-
+from tests.testutils.broker import get_filled_broker
+from tests.testutils.apertures import (
+    CircleApertureCollector,
+    PolygonApertureCollector,
+    RectangleApertureCollector,
+    get_dummy_apertureSet,
+)
 from pygerber.meta.aperture_manager import ApertureManager
 from types import SimpleNamespace
-from typing import List, Tuple
 from unittest import TestCase, main
+from unittest.mock import Mock
 
-from pygerber.meta import ApertureSet
 from pygerber.meta.aperture import (
     Aperture,
-    CircularAperture,
-    PolygonAperture,
-    RectangularAperture,
     RegionApertureManager,
 )
-from pygerber.mathclasses import Vector2D
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
+from pygerber.mathclasses import BoundingBox, Vector2D
+from pygerber.meta.spec import ArcSpec, LineSpec
 
 
-class ApertureCollector:
-    class Called(Exception):
-        pass
+class ABCsTest(TestCase):
+    def test_aperture(self):
+        self.assertRaises(TypeError, Aperture)
+        self.assertRaises(TypeError, lambda: Aperture.__init__(None, None, None))
+        self.assertRaises(TypeError, lambda: Aperture.flash(None, None))
+        self.assertRaises(TypeError, lambda: Aperture.line(None, None))
+        self.assertRaises(TypeError, lambda: Aperture.arc(None, None))
+        self.assertRaises(TypeError, lambda: Aperture.bbox(None))
 
-    class CalledWithSpec(Exception):
-        def __init__(self, spec: Spec) -> None:
-            self.spec = spec
+    def test_aperture_bbox(self):
+        mock = Mock()
+        mock.bbox = Mock(return_value=BoundingBox(-0.5, 0.5, 0.5, -0.5))
+        mock.DIAMETER = 1
+        self.assertEqual(
+            Aperture.arc_bbox(
+                mock, ArcSpec(Vector2D(0, 0), Vector2D(1, 1), Vector2D(1, 0), False)
+            ),
+            BoundingBox(-0.5, 1.5, 2.5, -1.5),
+        )
 
-    class CalledFlash(CalledWithSpec):
-        pass
+    def test_region(self):
+        self.assertRaises(TypeError, RegionApertureManager)
+        self.assertRaises(TypeError, RegionApertureManager.finish, None, None)
 
-    class CalledLine(CalledWithSpec):
-        pass
+    def test_region_bbox(self):
+        self.assertEqual(RegionApertureManager.bbox(None, []), BoundingBox(0, 0, 0, 0))
+        broker = get_filled_broker()
+        broker.select_aperture(10)
+        self.assertEqual(
+            RegionApertureManager.bbox(
+                None,
+                [
+                    LineSpec(Vector2D(0, 0), Vector2D(1, 1), True),
+                ],
+            ),
+            BoundingBox(0, 1, 1, 0),
+        )
 
-    class CalledArc(CalledWithSpec):
-        pass
-
-    class CalledFinish(Called):
-        def __init__(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
-            self.bounds = bounds
-
-    def flash(self, spec: FlashSpec) -> None:
-        raise self.CalledFlash(spec)
-
-    def line(self, spec: LineSpec) -> None:
-        raise self.CalledLine(spec)
-
-    def arc(self, spec: ArcSpec) -> None:
-        raise self.CalledArc(spec)
-
-    def finish(self, bounds: List[Tuple[Aperture, Spec]]) -> None:
-        raise self.CalledFinish(bounds)
-
-
-class RectangleApertureCollector(ApertureCollector, RectangularAperture):
-    pass
-
-
-class CircleApertureCollector(ApertureCollector, CircularAperture):
-    pass
-
-
-class PolygonApertureCollector(ApertureCollector, PolygonAperture):
-    pass
-
-
-class RegionApertureCollector(ApertureCollector, RegionApertureManager):
-    pass
+    def test_region_bbox_many_bounds(self):
+        self.assertEqual(RegionApertureManager.bbox(None, []), BoundingBox(0, 0, 0, 0))
+        broker = get_filled_broker()
+        broker.select_aperture(10)
+        self.assertEqual(
+            RegionApertureManager.bbox(
+                None,
+                [
+                    LineSpec(Vector2D(0, 0), Vector2D(1, 1), True),
+                    LineSpec(Vector2D(1, 1), Vector2D(2, 2), True),
+                ],
+            ),
+            BoundingBox(0, 2, 1, 2),
+        )
 
 
 class RectangularApertureTest(TestCase):
@@ -76,7 +83,7 @@ class RectangularApertureTest(TestCase):
         ),
     ):
         return RectangleApertureCollector(
-            args, ApertureManager(ApertureSetTest.get_dummy_apertureSet())
+            args, ApertureManager(get_dummy_apertureSet())
         )
 
     def test_create(self):
@@ -110,7 +117,7 @@ class CircularApertureTest(TestCase):
             HOLE_DIAMETER=0.1,
         ),
     ):
-        return CircleApertureCollector(args, ApertureManager(ApertureSetTest.get_dummy_apertureSet()))
+        return CircleApertureCollector(args, ApertureManager(get_dummy_apertureSet()))
 
     def test_create(self):
         aperture = self.create_circle_aperture()
@@ -127,7 +134,7 @@ class PolygonApertureTest(TestCase):
         self,
         args=SimpleNamespace(DIAMETER=0.6, HOLE_DIAMETER=0.1, ROTATION=0.3, VERTICES=5),
     ):
-        return PolygonApertureCollector(args, ApertureManager(ApertureSetTest.get_dummy_apertureSet()))
+        return PolygonApertureCollector(args, ApertureManager(get_dummy_apertureSet()))
 
     def test_create(self):
         aperture = self.create_polygon_aperture()
@@ -139,26 +146,6 @@ class PolygonApertureTest(TestCase):
     def test_bbox(self):
         bbox = self.create_polygon_aperture().bbox()
         self.assertEqual(bbox.as_tuple(), (-0.3, 0.3, 0.3, -0.3))
-
-
-class ApertureSetTest(TestCase):
-    @staticmethod
-    def get_dummy_apertureSet():
-        return ApertureSet(
-            CircleApertureCollector,
-            RectangleApertureCollector,
-            RectangleApertureCollector,
-            PolygonApertureCollector,
-            RegionApertureCollector,
-        )
-
-    def test_getApertureClass(self):
-        AS = self.get_dummy_apertureSet()
-        self.assertEqual(AS.getApertureClass("C"), CircleApertureCollector)
-        self.assertEqual(AS.getApertureClass("R"), RectangleApertureCollector)
-        self.assertEqual(AS.getApertureClass("O"), RectangleApertureCollector)
-        self.assertEqual(AS.getApertureClass("P"), PolygonApertureCollector)
-        self.assertEqual(AS.getApertureClass(is_region=True), RegionApertureCollector)
 
 
 if __name__ == "__main__":

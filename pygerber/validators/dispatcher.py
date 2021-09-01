@@ -10,8 +10,7 @@ from pygerber.exceptions import InvalidCommandFormat
 from .validator import Validator
 from .validator_dispatcher import ValidatorDispatcher
 
-if TYPE_CHECKING:
-    from pygerber.tokens.token import Token
+from pygerber.tokens import token as tkn
 
 
 class Dispatcher(ValidatorDispatcher, Validator):
@@ -30,20 +29,20 @@ class Dispatcher(ValidatorDispatcher, Validator):
         else:
             return self.pattern
 
-    def __call__(self, token: Token, value: str) -> str:
+    def __call__(self, token: tkn.Token, value: str) -> str:
         if value is not None:
             return self.clean_not_none(token, value)
         else:
             return self.clean_none(token)
 
-    def clean_not_none(self, token: Token, value: str):
+    def clean_not_none(self, token: tkn.Token, value: str):
         pattern = self.get_pattern(token, value)
         self.re_match = pattern.match(value)
         if self.re_match is None:
             raise InvalidCommandFormat("Invalid set of arguments.")
         return self.dispatch_into_namespace(token.meta)
 
-    def clean_none(self, token: Token):
+    def clean_none(self, token: tkn.Token):
         self.re_match = None
         return self.dispatch_into_namespace(token.meta)
 

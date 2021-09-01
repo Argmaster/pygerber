@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict
+from typing import Dict
 
 from pygerber.exceptions import InvalidCommandFormat, suppress_context
 from pygerber.validators.validator import Validator
 
-if TYPE_CHECKING:
-    from pygerber.meta import Meta
+import pygerber.meta as meta
 
 
 class ValidatorDispatcher:
@@ -20,10 +19,10 @@ class ValidatorDispatcher:
 
     validators: Dict[str, Validator] = {}
 
-    def dispatch(self, meta: Meta) -> None:
+    def dispatch(self, meta: meta.Meta) -> None:
         self.dispatch_into_namespace(meta, self)
 
-    def dispatch_into_namespace(self, meta: Meta, namespace: object) -> object:
+    def dispatch_into_namespace(self, meta: meta.Meta, namespace: object) -> object:
         self.meta = meta
         group_dict = self.get_groupdict()
         for attribute_name, validator in self.validators.items():

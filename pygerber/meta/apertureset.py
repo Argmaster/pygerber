@@ -2,8 +2,6 @@
 from dataclasses import dataclass
 from typing import Type
 
-from pygerber.exceptions import NoCorespondingApertureClass
-
 from .aperture import Aperture, RegionApertureManager
 
 
@@ -14,9 +12,10 @@ class ApertureSet:
     rectangle: Type[Aperture]
     obround: Type[Aperture]
     polygon: Type[Aperture]
+    custom: Type[Aperture]
     region: Type[RegionApertureManager]
 
-    def getApertureClass(self, name: str=None, is_region: bool=False) -> Aperture:
+    def getApertureClass(self, name: str = None, is_region: bool = False) -> Aperture:
         if is_region:
             return self.region
         elif name == "C":
@@ -28,6 +27,4 @@ class ApertureSet:
         elif name == "P":
             return self.polygon
         else:
-            raise NoCorespondingApertureClass(
-                f"Missing aperture class for name {name}."
-            )
+            return self.custom

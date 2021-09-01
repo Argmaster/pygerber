@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
+class EndOfStream(Exception):
+    pass
+
+
 class InvalidSyntaxError(Exception):
     pass
 
@@ -17,8 +21,9 @@ class DeprecatedSyntax(InvalidSyntaxError):
     pass
 
 
-class EndOfStream(InvalidSyntaxError):
+class TokenizationFatalFailure(InvalidSyntaxError):
     pass
+
 
 class RenderingError(Exception):
     pass
@@ -27,7 +32,8 @@ class RenderingError(Exception):
 class ApertureSelectionError(Exception):
     pass
 
-class NoCorespondingApertureClass(Exception):
+
+class FeatureNotSupportedError(Exception):
     pass
 
 
