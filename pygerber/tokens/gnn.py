@@ -33,11 +33,13 @@ class G37_Token(Token):
     regex = re.compile(r"G37\*")
 
     def affect_meta(self):
-        self.manager, self.bounds = self.meta.end_region()
-        self.manager = self.manager(self.meta)
+        self.manager, self.bounds = self.meta.finish_drawing_region()
 
     def render(self):
         self.manager.finish(self.bounds)
+
+    def post_render(self):
+        self.meta.end_region()
 
     def bbox(self) -> BoundingBox:
         return self.manager.bbox(self.bounds)

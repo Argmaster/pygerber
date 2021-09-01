@@ -25,20 +25,11 @@ class PillowUtilMethdos:
     def draw_canvas(self):
         return self.broker.draw_canvas
 
-    @property
-    def current_point(self):
-        return self.broker.current_point
-
     def get_color(self):
-        if self.is_region():
-            return self.get_region_color()
         if self.is_clear():
             return self.get_clear_color()
         else:
             return self.get_dark_color()
-
-    def is_region(self):
-        return self.broker.is_regionmode
 
     def is_clear(self):
         return self.broker.polarity == Polarity.CLEAR
@@ -48,9 +39,6 @@ class PillowUtilMethdos:
 
     def get_clear_color(self):
         return self.broker.colors.clear
-
-    def get_region_color(self):
-        return self.broker.colors.region
 
     def prepare_coordinates(self, vector: Vector2D) -> Vector2D:
         return Vector2D(

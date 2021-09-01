@@ -29,7 +29,7 @@ class FlashUtilMixin(PillowUtilMethdos):
 
     @cached_property
     def aperture_mask(self) -> Image.Image:
-        aperture_mask, aperture_mask_draw = self.get_aperture_canvas()
+        aperture_mask, aperture_mask_draw = self.__get_aperture_canvas()
         self.draw_shape(aperture_mask_draw, (255, 255, 255, 255))
         if self.hole_diameter:
             aperture_mask_draw.ellipse(
@@ -40,29 +40,29 @@ class FlashUtilMixin(PillowUtilMethdos):
 
     @cached_property
     def aperture_stamp_dark(self) -> Image.Image:
-        aperture_stamp, aperture_stamp_draw = self.get_aperture_canvas()
+        aperture_stamp, aperture_stamp_draw = self.__get_aperture_canvas()
         self.draw_shape(aperture_stamp_draw, self.get_dark_color())
         return aperture_stamp
 
     @cached_property
     def aperture_stamp_clear(self) -> Image.Image:
-        aperture_stamp, aperture_stamp_draw = self.get_aperture_canvas()
+        aperture_stamp, aperture_stamp_draw = self.__get_aperture_canvas()
         self.draw_shape(aperture_stamp_draw, self.get_clear_color())
         return aperture_stamp
 
     def draw_shape(self, aperture_stamp_draw: ImageDraw.Draw, color: Tuple):
         raise NotImplementedError(f"Implement draw_shape(...) in subclass of {self.__class__.__qualname__}")
 
-    def get_aperture_canvas(self) -> Image.Image:
+    def __get_aperture_canvas(self) -> Image.Image:
         canvas = Image.new(
             "RGBA",
-            self.get_aperture_canvas_size(),
+            self.__get_aperture_canvas_size(),
             (0, 0, 0, 0),
         )
         canvas_draw = ImageDraw.Draw(canvas)
         return canvas, canvas_draw
 
-    def get_aperture_canvas_size(self) -> Tuple[float, float]:
+    def __get_aperture_canvas_size(self) -> Tuple[float, float]:
         return int(self.pixel_bbox.width() + 1), int(self.pixel_bbox.height() + 1)
 
     def get_aperture_bbox(self) -> Tuple[float]:
@@ -85,9 +85,9 @@ class FlashUtilMixin(PillowUtilMethdos):
 
     def flash(self, spec: FlashSpec) -> None:
         self.prepare_flash_spec(spec)
-        self._flash(spec.location)
+        self.flash_at_location(spec.location)
 
-    def _flash(self, location: Vector2D) -> None:
+    def flash_at_location(self, location: Vector2D) -> None:
         offset_to_center = location - self.flash_offset()
         if self.is_clear():
             self.canvas.paste(

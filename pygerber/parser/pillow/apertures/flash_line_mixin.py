@@ -10,10 +10,10 @@ LINE_DELTA_STEP = 4
 class FlashLineMixin:
     def line(self, spec: LineSpec) -> None:
         self.prepare_line_spec(spec)
-        for vec in self.get_line_flash_offset_vector(spec):
-            self._flash(spec.begin + vec)
+        for vec in self.__get_line_flash_offset_vector(spec):
+            self.flash_at_location(spec.begin + vec)
 
-    def get_line_flash_offset_vector(self, spec: LineSpec) -> Vector2D:
+    def __get_line_flash_offset_vector(self, spec: LineSpec) -> Vector2D:
         length_vector = spec.end - spec.begin
         length_vector.x = length_vector.x
         length_vector.y = length_vector.y

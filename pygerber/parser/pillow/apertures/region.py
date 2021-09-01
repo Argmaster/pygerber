@@ -18,9 +18,9 @@ class PillowRegion(ArcUtilMixinPillow, RegionApertureManager, PillowUtilMethdos)
 
     def finish(self, bounds: List[LineSpec]) -> None:
         if bounds:
-            self._draw_region(bounds)
+            self.__draw_region(bounds)
 
-    def _draw_region(self, bounds: List[LineSpec]):
+    def __draw_region(self, bounds: List[LineSpec]):
         bound_points = []
         for spec in bounds:
             if isinstance(spec, LineSpec):
@@ -28,14 +28,14 @@ class PillowRegion(ArcUtilMixinPillow, RegionApertureManager, PillowUtilMethdos)
                 bound_points.append(spec.end.as_tuple())
             elif isinstance(spec, ArcSpec):
                 self.prepare_arc_spec(spec)
-                bound_points.extend(self._get_arc_boundpoints(spec))
-        self._draw_polygon(bound_points)
+                bound_points.extend(self.__get_arc_boundpoints(spec))
+        self.__draw_polygon(bound_points)
 
-    def _get_arc_boundpoints(self, spec: ArcSpec) -> List[Tuple[float, float]]:
+    def __get_arc_boundpoints(self, spec: ArcSpec) -> List[Tuple[float, float]]:
         bound_points = []
         for point in self.get_arc_points(spec):
             bound_points.append(point.as_tuple())
         return bound_points
 
-    def _draw_polygon(self, bound_points: List[Tuple[float, float]]):
+    def __draw_polygon(self, bound_points: List[Tuple[float, float]]):
         self.draw_canvas.polygon(bound_points, self.get_color())

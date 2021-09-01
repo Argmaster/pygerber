@@ -11,25 +11,26 @@ from pygerber.parser.pillow.apertures import *
 from pygerber.tokenizer import Tokenizer
 
 
+Color_Type = Tuple[float, float, float, float]
+
+
 @dataclass
 class ColorSet:
 
-    Color = Tuple[float, float, float, float]
-
-    dark: Color
-    clear: Color
-    region: Color
+    dark: Color_Type
+    clear: Color_Type
+    background: Color_Type
 
 
 DEFAULT_COLOR_SET_ORANGE = ColorSet(
     (209, 110, 44),
     (0, 0, 0, 0),
-    (209, 110, 44),
+    (0, 0, 0, 0),
 )
 DEFAULT_COLOR_SET_GREEN = ColorSet(
     (66, 166, 66, 255),
     (16, 66, 36, 255),
-    (66, 166, 66, 255),
+    (16, 66, 36, 255),
 )
 
 
@@ -56,8 +57,9 @@ class ParserWithPillow:
         string_source: str = None,
         *,
         dpi: int = 600,
-        colors: ColorSet = DEFAULT_COLOR_SET_ORANGE,
+        colors: ColorSet = DEFAULT_COLOR_SET_GREEN,
         ignore_deprecated: bool = True,
+        image_padding: int = 0,
     ) -> None:
         """
         If filepath is None, string_source will be used as source,
@@ -65,6 +67,7 @@ class ParserWithPillow:
         string_source will be complitely ignored. Passing None to both
         will result in RuntimeError.
         """
+        self.image_padding = image_padding
         self.is_rendered = False
         self.tokenizer = Tokenizer(
             self.apertureSet,
@@ -102,7 +105,9 @@ class ParserWithPillow:
     def __prepare_canvas(self) -> None:
         bbox = self.__get_canvas_bbox()
         width, height = self.__get_canvas_size(bbox)
-        self.tokenizer.meta.canvas = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        self.tokenizer.meta.canvas = Image.new(
+            "RGBA", (width, height), self.colors.background
+        )
         self.tokenizer.meta.draw_canvas = ImageDraw.Draw(self.canvas)
         left_offset, bottom_offset = self.__get_drawing_offset(bbox)
         self.tokenizer.meta.left_offset = left_offset
@@ -115,10 +120,16 @@ class ParserWithPillow:
         return bbox
 
     def __get_canvas_size(self, bbox: BoundingBox) -> Tuple[int, int]:
-        return self._prepare_co(bbox.width()), self._prepare_co(bbox.height())
+        return (
+            self._prepare_co(bbox.width()) + self.image_padding * 2,
+            self._prepare_co(bbox.height()) + self.image_padding * 2,
+        )
 
     def __get_drawing_offset(self, bbox: BoundingBox) -> Tuple[int, int]:
-        return self._prepare_co(-bbox.left), self._prepare_co(-bbox.lower)
+        return (
+            self._prepare_co(-bbox.left) + self.image_padding,
+            self._prepare_co(-bbox.lower) + self.image_padding,
+        )
 
     def _prepare_co(self, value: float) -> float:
         return int(value * self.dpmm)

@@ -30,8 +30,8 @@ class PillowCircle(ArcUtilMixinPillow, FlashUtilMixin, CircularAperture):
     def line(self, spec: LineSpec) -> None:
         self.prepare_line_spec(spec)
         self._line(spec.begin, spec.end)
-        self._flash(spec.begin)
-        self._flash(spec.end)
+        self.flash_at_location(spec.begin)
+        self.flash_at_location(spec.end)
 
     def _line(self, begin: Vector2D, end: Vector2D) -> None:
         self.draw_canvas.line(
@@ -43,8 +43,8 @@ class PillowCircle(ArcUtilMixinPillow, FlashUtilMixin, CircularAperture):
     def arc(self, spec: ArcSpec) -> None:
         self.prepare_arc_spec(spec)
         self._arc(spec)
-        self._flash(spec.begin)
-        self._flash(spec.end)
+        self.flash_at_location(spec.begin)
+        self.flash_at_location(spec.end)
 
     def _arc(self, spec: ArcSpec):
         begin_angle, end_angle = self.get_begin_end_angles(spec)

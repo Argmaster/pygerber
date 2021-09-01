@@ -45,6 +45,7 @@ class GNN_Token_Test(TestCase):
         self.assertTrue(meta.is_regionmode)
         token, meta = self.init_token("G37*", G37_Token, meta)
         token.affect_meta()
+        token.post_render()
         self.assertFalse(meta.is_regionmode)
         self.assertRaises(ApertureCollector.CalledFinish, token.render)
         self.assertEqual(token.bbox(), BoundingBox(0, 0, 0, 0))

@@ -32,10 +32,10 @@ class PillowPolygon(
 
     def arc(self, spec: ArcSpec) -> None:
         self.prepare_arc_spec(spec)
-        self._arc(spec)
-        self._flash(spec.begin)
-        self._flash(spec.end)
+        self.__arc(spec)
+        self.flash_at_location(spec.begin)
+        self.flash_at_location(spec.end)
 
-    def _arc(self, spec: ArcSpec) -> None:
+    def __arc(self, spec: ArcSpec) -> None:
         for point in self.get_arc_points(spec):
-            self._flash(point.floor())
+            self.flash_at_location(point.floor())

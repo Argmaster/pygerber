@@ -44,20 +44,20 @@ class DrawingBroker(ApertureManager, TransformMeta):
             return self.bbox_arc(end, offset)
 
     def draw_line(self, end: Vector2D) -> None:
-        spec = self._get_line_spec(end)
+        spec = self.__get_line_spec(end)
         if self.is_regionmode:
-            self._push_region_step(spec)
+            self.__push_region_step(spec)
         else:
             self.get_current_aperture().line(spec)
 
     def bbox_line(self, end: Vector2D) -> None:
-        spec = self._get_line_spec(end)
+        spec = self.__get_line_spec(end)
         if self.is_regionmode:
-            self._push_region_step(spec)
+            self.__push_region_step(spec)
         else:
             return self.get_current_aperture().line_bbox(spec)
 
-    def _get_line_spec(self, end: Vector2D) -> LineSpec:
+    def __get_line_spec(self, end: Vector2D) -> LineSpec:
         return LineSpec(
             self.current_point,
             end,
@@ -65,20 +65,20 @@ class DrawingBroker(ApertureManager, TransformMeta):
         )
 
     def draw_arc(self, end: Vector2D, offset: Vector2D) -> None:
-        spec = self._get_arc_spec(end, offset)
+        spec = self.__get_arc_spec(end, offset)
         if self.is_regionmode:
-            self._push_region_step(spec)
+            self.__push_region_step(spec)
         else:
             self.get_current_aperture().arc(spec)
 
     def bbox_arc(self, end: Vector2D, offset: Vector2D) -> None:
-        spec = self._get_arc_spec(end, offset)
+        spec = self.__get_arc_spec(end, offset)
         if self.is_regionmode:
-            self._push_region_step(spec)
+            self.__push_region_step(spec)
         else:
             return self.get_current_aperture().arc_bbox(spec)
 
-    def _get_arc_spec(self, end: Vector2D, offset: Vector2D) -> ArcSpec:
+    def __get_arc_spec(self, end: Vector2D, offset: Vector2D) -> ArcSpec:
         return ArcSpec(
             self.current_point,
             end,
@@ -93,16 +93,16 @@ class DrawingBroker(ApertureManager, TransformMeta):
         else:
             self.move_pointer(point)
             aperture = self.get_current_aperture()
-            spec = self._get_flash_spec(point)
+            spec = self.__get_flash_spec(point)
             aperture.flash(spec)
 
     def bbox_flash(self, point: Vector2D) -> BoundingBox:
         self.move_pointer(point)
         aperture = self.get_current_aperture()
-        spec = self._get_flash_spec(point)
+        spec = self.__get_flash_spec(point)
         return aperture.flash_bbox(spec)
 
-    def _get_flash_spec(self, point: Vector2D) -> FlashSpec:
+    def __get_flash_spec(self, point: Vector2D) -> FlashSpec:
         spec = FlashSpec(
             point,
             self.is_regionmode,
@@ -116,13 +116,12 @@ class DrawingBroker(ApertureManager, TransformMeta):
             )
         return self.current_aperture
 
-    def end_region(self) -> Tuple[RegionApertureManager, List[Spec]]:
-        bounds = self._get_and_clean_region_bounds()
-        super().end_region()
+    def finish_drawing_region(self) -> Tuple[RegionApertureManager, List[Spec]]:
+        bounds = self.__get_and_clean_region_bounds()
         apertureClass = self.apertureSet.getApertureClass(None, True)
-        return apertureClass, bounds
+        return apertureClass(self), bounds
 
-    def _get_and_clean_region_bounds(self):
+    def __get_and_clean_region_bounds(self):
         bounds = self.region_bounds
         self.region_bounds = []
         return bounds
@@ -130,7 +129,7 @@ class DrawingBroker(ApertureManager, TransformMeta):
     def move_pointer(self, location: Vector2D) -> None:
         self.current_point = location
 
-    def _push_region_step(self, spec: Spec):
+    def __push_region_step(self, spec: Spec):
         self.region_bounds.append(spec)
 
     def isCCW(self):

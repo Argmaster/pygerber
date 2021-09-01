@@ -36,23 +36,23 @@ class PillowRectangle(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
 
     def line(self, spec: LineSpec) -> None:
         self.prepare_line_spec(spec)
-        self._flash(spec.begin)
-        self._flash(spec.end)
+        self.flash_at_location(spec.begin)
+        self.flash_at_location(spec.end)
         top, bot = self._get_top_bot_sides(spec.begin, spec.end)
-        self._draw_side(self._get_top_site_points(top, bot))
-        self._draw_side(self._get_bot_site_points(top, bot))
-        self._draw_side(self._get_left_site_points(top, bot))
-        self._draw_side(self._get_right_site_points(top, bot))
+        self.__draw_side(self.__get_top_site_points(top, bot))
+        self.__draw_side(self.__get_bot_site_points(top, bot))
+        self.__draw_side(self.__get_left_site_points(top, bot))
+        self.__draw_side(self.__get_right_site_points(top, bot))
 
     def _get_top_bot_sides(self, begin: Vector2D, end: Vector2D) -> BoundingBox:
         return BoundingBox(*self._get_bbox_at_location(begin)), BoundingBox(
             *self._get_bbox_at_location(end)
         )
 
-    def _draw_side(self, points: tuple) -> None:
+    def __draw_side(self, points: tuple) -> None:
         self.draw_canvas.polygon(points, self.get_color())
 
-    def _get_top_site_points(self, top: BoundingBox, bot: BoundingBox):
+    def __get_top_site_points(self, top: BoundingBox, bot: BoundingBox):
         return (
             (top.left, top.upper),
             (top.right, top.upper),
@@ -60,7 +60,7 @@ class PillowRectangle(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
             (bot.left, bot.upper),
         )
 
-    def _get_bot_site_points(self, top: BoundingBox, bot: BoundingBox):
+    def __get_bot_site_points(self, top: BoundingBox, bot: BoundingBox):
         return (
             (top.left, top.lower),
             (top.right, top.lower),
@@ -68,7 +68,7 @@ class PillowRectangle(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
             (bot.left, bot.lower),
         )
 
-    def _get_left_site_points(self, top: BoundingBox, bot: BoundingBox):
+    def __get_left_site_points(self, top: BoundingBox, bot: BoundingBox):
         return (
             (top.left, top.lower),
             (top.left, top.upper),
@@ -76,7 +76,7 @@ class PillowRectangle(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
             (bot.left, bot.lower),
         )
 
-    def _get_right_site_points(self, top: BoundingBox, bot: BoundingBox):
+    def __get_right_site_points(self, top: BoundingBox, bot: BoundingBox):
         return (
             (top.right, top.lower),
             (top.right, top.upper),
@@ -86,10 +86,10 @@ class PillowRectangle(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):
 
     def arc(self, spec: ArcSpec) -> None:
         self.prepare_arc_spec(spec)
-        self._arc(spec)
-        self._flash(spec.begin)
-        self._flash(spec.end)
+        self.__arc(spec)
+        self.flash_at_location(spec.begin)
+        self.flash_at_location(spec.end)
 
-    def _arc(self, spec: ArcSpec) -> None:
+    def __arc(self, spec: ArcSpec) -> None:
         for point in self.get_arc_points(spec):
-            self._flash(point.floor())
+            self.flash_at_location(point.floor())

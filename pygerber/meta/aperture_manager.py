@@ -16,7 +16,7 @@ class ApertureManager(DrawingMeta):
     apertureSet: ApertureSet
 
     def __init__(self, apertureSet: ApertureSet) -> None:
-        self.bind_aperture_set(apertureSet)
+        self.__bind_aperture_set(apertureSet)
         self.reset_defaults()
         DrawingMeta.__init__(self)
 
@@ -24,7 +24,7 @@ class ApertureManager(DrawingMeta):
         DrawingMeta.reset_defaults(self)
         self.apertures = {}
 
-    def bind_aperture_set(self, apSet: ApertureSet):
+    def __bind_aperture_set(self, apSet: ApertureSet):
         self.apertureSet = apSet
 
     def define_aperture(self, type: str, name: str, ID: int, args: object):

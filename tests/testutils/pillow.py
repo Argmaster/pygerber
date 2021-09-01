@@ -10,7 +10,7 @@ from pygerber.meta.broker import DrawingBroker
 DEFAULT_TEST_COLOR_SET = ColorSet(
     (120, 120, 255, 255),
     (255, 120, 120, 255),
-    (120, 255, 120, 255),
+    (0, 0, 0, 0),
 )
 
 DEFAULT_TEST_CANVAS_SIZE = (1600, 1600)
@@ -76,6 +76,10 @@ def get_pillow_polygon(broker, diameter=3, vertices=6, rotation=0, hole_diameter
         ),
         broker,
     )
+
+
+def get_pillow_custom(broker, **kwargs):
+    return PillowCustom(SimpleNamespace(**kwargs), broker)
 
 
 def are_images_similar(
