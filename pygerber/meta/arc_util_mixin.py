@@ -8,9 +8,6 @@ from pygerber.meta.spec import ArcSpec
 
 
 class ArcUtilMixin:
-    @property
-    def interpolation(self):
-        return self.broker.interpolation
 
     @property
     def isCCW(self):
@@ -37,7 +34,7 @@ class ArcUtilMixin:
 
     def get_arc_traverse_step_angle(self, begin_angle, end_angle, radius):
         raise NotImplementedError("get_arc_traverse_step_angle() have to be implemented in subclass.")
-        
+
     def _get_arc_points_ccw(self, end_angle, begin_angle, x, spec, y, delta):
         end_relative_angle = end_angle - begin_angle
         angle_offset = begin_angle

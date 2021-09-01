@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from abc import ABC
 
 from typing import TYPE_CHECKING, Any
 
 from pygerber.tokens import token as tkn
 
 
-class Validator:
+class Validator(ABC):
     def __init__(self, default: Any = None) -> None:
         self.default = default
 

@@ -33,12 +33,9 @@ class String(Validator):
 
 
 class Function(Validator):
-    def __init__(self, function: Callable, default: Any=None) -> None:
+    def __init__(self, function: Callable) -> None:
         self.function = function
         super().__init__(default=None)
 
     def __call__(self, token: tkn.Token, value: str) -> str:
-        if value is not None:
-            return
-        else:
-            return self.function(token, self.default)
+        return self.function(token, value)

@@ -5,7 +5,7 @@ from unittest import TestCase, main
 from pygerber.mathclasses import UNIT_VECTOR_X, BoundingBox, Vector2D, angle_from_zero
 
 
-class DataClassesTest(TestCase):
+class Vector2D_Test(TestCase):
     def test_Vector2D(self):
         v = Vector2D(10, 11)
         self.assertEqual(v.x, 10)
@@ -20,6 +20,24 @@ class DataClassesTest(TestCase):
         v2 = Vector2D(4, 33)
         self.assertEqual((v1 + v2).as_tuple(), (14, 44))
 
+    def test_Vector2D_multiplication(self):
+        v1 = Vector2D(10, 11)
+        self.assertEqual(v1 * 3, Vector2D(30, 33))
+
+    def test_Vector2D_length(self):
+        v1 = Vector2D(3, 4)
+        self.assertEqual(v1.length(), 5)
+
+    def test_Vector2D_dot(self):
+        v1 = Vector2D(10, 11)
+        v2 = Vector2D(4, 33)
+        self.assertEqual(v1.dot(v2), 403)
+
+    def test_Vector2D_normalize(self):
+        v1 = Vector2D(10, 11)
+        self.assertAlmostEqual(v1.normalize().length(), 1)
+
+class BoundingBox_Test(TestCase):
     def test_BoundingBox(self):
         box = BoundingBox(-2, 4, 5, 3)
         self.assertEqual(box.left, -2)
@@ -68,7 +86,8 @@ class DataClassesTest(TestCase):
         self.assertEqual(box.width(), 2)
         self.assertEqual(box.height(), 2)
 
-    def angle_from_zero(self):
+class StandaloneFunctionTest(TestCase):
+    def test_angle_from_zero(self):
         alpha = angle_from_zero(Vector2D(-1, 1))
         self.assertEqual(degrees(alpha), 135.0)
         alpha = angle_from_zero(Vector2D(-1, -1))

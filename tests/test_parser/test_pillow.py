@@ -79,7 +79,7 @@ class TestPillowParser(TestCase):
     def test_parser_file_4(self):
         image = render_file(GERBER_PATH / "s4.grb")
         # to manually validate output uncomment this:
-        image.show()
+        # image.show()
         # to create new comparison image uncomment this:
         # image.save("./tests/gerber/rendered/s4.png")
         # self.assertTrue(
@@ -89,7 +89,7 @@ class TestPillowParser(TestCase):
     def test_parser_file_5(self):
         image = render_file(GERBER_PATH / "s5.grb", dpi=600)
         # to manually validate output uncomment this:
-        image.show()
+        # image.show()
         # to create new comparison image uncomment this:
         # image.save("./tests/gerber/rendered/s5.png")
         # self.assertTrue(

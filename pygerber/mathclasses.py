@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import acos, sqrt, tau
+from math import acos, floor, sqrt, tau
 from typing import SupportsIndex, Tuple
 
 
@@ -26,20 +26,18 @@ class Vector2D:
     def length(self):
         return sqrt(self.x ** 2 + self.y ** 2)
 
-    __len__ = length
-
     def dot(self, other: Vector2D) -> float:
         return self.x * other.x + self.y * other.y
 
     def normalize(self):
-        length = len(self)
+        length = self.length()
         return Vector2D(
             self.x / length,
             self.y / length,
         )
 
     def floor(self):
-        return Vector2D(int(self.x), int(self.y))
+        return Vector2D(floor(self.x), int(self.y))
 
 
 UNIT_VECTOR_X = Vector2D(1, 0)

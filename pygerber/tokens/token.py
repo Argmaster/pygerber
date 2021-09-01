@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.mathclasses import BoundingBox
+from pygerber.mathclasses import BoundingBox, Vector2D
 
 import re
 from abc import ABCMeta, abstractmethod
@@ -63,6 +63,9 @@ class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
 
     def bbox(self) -> BoundingBox:
         pass
+
+    def get_current_point(self) -> Vector2D:
+        return self.meta.current_point
 
     def __str__(self) -> str:
         """

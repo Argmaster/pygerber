@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from abc import abstractmethod
-from pygerber.meta.meta import Unit
 
+from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
 
-from .validator import Validator
-
+from pygerber.meta.meta import Unit
 from pygerber.tokens import token as tkn
 
+from .validator import Validator
 
 INCH_TO_MM_RATIO = 25.4
 
 
 class Coordinate(Validator):
-    def __init__(self, use_x=True, use_y=False) -> None:
-        self.use_x = use_x
-        self.use_y = use_y
+    def __init__(self) -> None:
         super().__init__(default=None)
 
     def __call__(self, token: tkn.Token, value: str) -> Any:
@@ -36,30 +33,29 @@ class Coordinate(Validator):
 
     def replace_none_with_valid(self, token: tkn.Token, value: float):
         if value is None:
-            return self.get_default(token, value)
+            return self.get_default(token)
         else:
             return self.ensure_mm(token, value)
 
-    @abstractmethod
-    def get_default(self, token: tkn.Token, value: float):
+    def get_default(self, token: tkn.Token):
         raise TypeError(
-            "get_default not implemented. Implement it in subclass or use VectorCoordinateX, "
+            "get_default(...) not implemented. Implement it in subclass or use VectorCoordinateX, "
             "VectorCoordinateY, OffsetCoordinate instead."
         )
 
 
 class VectorCoordinateX(Coordinate):
-    def get_default(self, token: tkn.Token, value: float):
-        return token.meta.current_point.x
+    def get_default(self, token: tkn.Token):
+        return token.get_current_point().x
 
 
 class VectorCoordinateY(Coordinate):
-    def get_default(self, token: tkn.Token, value: float):
-        return token.meta.current_point.y
+    def get_default(self, token: tkn.Token):
+        return token.get_current_point().y
 
 
 class OffsetCoordinate(Coordinate):
-    def get_default(self, token: tkn.Token, value: float):
+    def get_default(self, token: tkn.Token):
         return 0
 
 class UnitFloat(Coordinate):
