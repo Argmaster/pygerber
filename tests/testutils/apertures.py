@@ -3,9 +3,13 @@ from pygerber.mathclasses import BoundingBox
 from pygerber.meta.apertureset import ApertureSet
 from typing import List
 
-from pygerber.meta.aperture import (Aperture, CircularAperture, CustomAperture,
-                                    PolygonAperture, RectangularAperture,
-                                    RegionApertureManager)
+from pygerber.meta.aperture import (
+    CircularAperture,
+    CustomAperture,
+    PolygonAperture,
+    RectangularAperture,
+    RegionApertureManager,
+)
 from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
 
 
