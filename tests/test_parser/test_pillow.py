@@ -5,8 +5,7 @@ from pathlib import Path
 from unittest import TestCase, main
 
 from PIL import Image
-from pygerber.parser.pillow.parser import ImageSizeNullError, ParserWithPillow, render_file, render_file_and_save
-from tests.testutils.pillow import are_images_similar
+from pygerber.parser.pillow.parser import ImageSizeNullError, ParserWithPillow
 
 RENDERED_PATH = Path("./tests/gerber/rendered")
 GERBER_PATH = Path("./tests/gerber")
@@ -52,10 +51,10 @@ class TestPillowParser(TestCase):
         self.assertRaises(ImageSizeNullError, parser.render)
 
     def test_render_file_and_save(self):
-        render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png")
+        ParserWithPillow.render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png")
 
     def test_parser_file_0(self):
-        image = render_file(GERBER_PATH / "s0.grb", dpi=1600)
+        image = ParserWithPillow.render_file(GERBER_PATH / "s0.grb", dpi=1600)
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
@@ -65,7 +64,7 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_file_1(self):
-        image = render_file(GERBER_PATH / "s1.grb")
+        image = ParserWithPillow.render_file(GERBER_PATH / "s1.grb")
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
@@ -75,7 +74,7 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_file_2(self):
-        image = render_file(GERBER_PATH / "s2.grb")
+        image = ParserWithPillow.render_file(GERBER_PATH / "s2.grb")
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
@@ -85,7 +84,7 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_file_3(self):
-        image = render_file(GERBER_PATH / "s3.grb")
+        image = ParserWithPillow.render_file(GERBER_PATH / "s3.grb")
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
@@ -95,7 +94,7 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_file_4(self):
-        image = render_file(GERBER_PATH / "s4.grb")
+        image = ParserWithPillow.render_file(GERBER_PATH / "s4.grb")
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
@@ -105,7 +104,7 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_file_5(self):
-        image = render_file(GERBER_PATH / "s5.grb", dpi=600, image_padding=50)
+        image = ParserWithPillow.render_file(GERBER_PATH / "s5.grb", dpi=600, image_padding=50)
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
@@ -115,7 +114,7 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_file_6(self):
-        image = render_file(GERBER_PATH / "s6.grb", dpi=2600)
+        image = ParserWithPillow.render_file(GERBER_PATH / "s6.grb", dpi=2600)
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
@@ -125,7 +124,7 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_file_7(self):
-        image = render_file(GERBER_PATH / "s7.grb", dpi=2600)
+        image = ParserWithPillow.render_file(GERBER_PATH / "s7.grb", dpi=2600)
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:

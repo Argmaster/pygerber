@@ -62,10 +62,14 @@ class ParserWithPillow:
         image_padding: int = 0,
     ) -> None:
         """
-        If filepath is None, string_source will be used as source,
+        If `filepath` is None, `string_source` will be used as source,
         otherwise filepath will be used to read and parse file, then
         string_source will be complitely ignored. Passing None to both
         will result in RuntimeError.
+        `dpi` controls DPI of output image.
+        `colors` represents colorset to be used to render file.
+        `ignore_deprecated` causes parser to ignore deprecated syntax.
+        `image_padding` specifies padding in pixels of output image in every direction.
         """
         self.image_padding = image_padding
         self.is_rendered = False
@@ -144,18 +148,33 @@ class ParserWithPillow:
         return self.canvas.transpose(Image.FLIP_TOP_BOTTOM)
 
     def save(self, filepath: str, format: str = None) -> None:
+        """
+        Saves rendered image.
+        `filepath` A filename (string), pathlib.Path object or file object.
+        `format` Optional format override. If omitted, the format to use is determined
+        from the filename extension. If a file object was used instead of a filename,
+        this parameter should always be used.
+        """
         if format is not None:
-            self.canvas.save(filepath, format)
+            self.get_image().save(filepath, format)
         else:
-            self.canvas.save(filepath)
+            self.get_image().save(filepath)
 
+    @staticmethod
+    def render_file_and_save(filepath: str, savepath: str, **kwargs):
+        """
+        Loads, parses, renders file from `filepath` and saves it in `savepath`.
+        **kwargs will be passed to ParserWithPillow, check it out for available params.
+        """
+        image = ParserWithPillow.render_file(filepath, **kwargs)
+        image.save(savepath)
 
-def render_file_and_save(filepath: str, savepath: str, **kwargs):
-    image = render_file(filepath, **kwargs)
-    image.save(savepath)
-
-
-def render_file(filepath: str, **kwargs) -> Image.Image:
-    parser = ParserWithPillow(filepath, **kwargs)
-    parser.render()
-    return parser.get_image()
+    @staticmethod
+    def render_file(filepath: str, **kwargs) -> Image.Image:
+        """
+        Loads, parses and renders file from given path and returns its render as PIL.Image.Image.
+        **kwargs will be passed to ParserWithPillow, check it out for available params.
+        """
+        parser = ParserWithPillow(filepath, **kwargs)
+        parser.render()
+        return parser.get_image()
