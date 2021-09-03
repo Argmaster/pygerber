@@ -29,7 +29,7 @@ DEFAULT_COLOR_SET_ORANGE = ColorSet(
 DEFAULT_COLOR_SET_GREEN = ColorSet(
     (66, 166, 66, 255),
     (16, 66, 36, 255),
-    (16, 66, 36, 255),
+    (0, 0, 0, 0),
 )
 
 
@@ -52,7 +52,7 @@ class ParserWithPillow:
 
     def __init__(
         self,
-        filepath: str = None,
+        file_path: str = None,
         string_source: str = None,
         *,
         dpi: int = 600,
@@ -61,8 +61,8 @@ class ParserWithPillow:
         image_padding: int = 0,
     ) -> None:
         """
-        If `filepath` is None, `string_source` will be used as source,
-        otherwise filepath will be used to read and parse file, then
+        If `file_path` is None, `string_source` will be used as source,
+        otherwise file_path will be used to read and parse file, then
         string_source will be complitely ignored. Passing None to both
         will result in RuntimeError.
         `dpi` controls DPI of output image.
@@ -78,15 +78,15 @@ class ParserWithPillow:
         )
         self.colors = colors
         self.dpmm = dpi / 25.4
-        self.__tokenize(filepath, string_source)
+        self.__tokenize(file_path, string_source)
 
-    def __tokenize(self, filepath: str, string_source: str) -> None:
-        if filepath is not None:
-            self.tokenizer.tokenize_file(filepath)
+    def __tokenize(self, file_path: str, string_source: str) -> None:
+        if file_path is not None:
+            self.tokenizer.tokenize_file(file_path)
         elif string_source is not None:
             self.tokenizer.tokenize_string(string_source)
         else:
-            raise RuntimeError("filepath and source_string can't be both None.")
+            raise RuntimeError("file_path and source_string can't be both None.")
 
     @property
     def canvas(self) -> Image.Image:
@@ -146,15 +146,15 @@ class ParserWithPillow:
     def __get_image(self) -> Image.Image:
         return self.canvas.transpose(Image.FLIP_TOP_BOTTOM)
 
-    def save(self, filepath: str, format: str = None) -> None:
+    def save(self, file_path: str, format: str = None) -> None:
         """
         Saves rendered image.
-        `filepath` A filename (string), pathlib.Path object or file object.
+        `file_path` A filename (string), pathlib.Path object or file object.
         `format` Optional format override. If omitted, the format to use is determined
         from the filename extension. If a file object was used instead of a filename,
         this parameter should always be used.
         """
         if format is not None:
-            self.get_image().save(filepath, format)
+            self.get_image().save(file_path, format)
         else:
-            self.get_image().save(filepath)
+            self.get_image().save(file_path)

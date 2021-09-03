@@ -2,22 +2,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from pygerber.parser.pillow.api import (
-    LayerSpec,
-    join_layers,
-    render_file,
-    render_file_and_save,
-    render_layers,
-)
-from tests.testutils.pillow import are_images_similar, get_layerset
 from unittest import TestCase, main
 
 from PIL import Image
-from pygerber.parser.pillow.parser import (
-    ColorSet,
-    ImageSizeNullError,
-    ParserWithPillow,
-)
+from pygerber.parser.pillow.api import ProjectSpec, render_file, render_file_and_save
+from pygerber.parser.pillow.parser import ImageSizeNullError, ParserWithPillow
+from tests.testutils.pillow import are_images_similar
 
 RENDERED_PATH = Path("./tests/gerber/rendered")
 GERBER_PATH = Path("./tests/gerber")
@@ -107,15 +97,41 @@ class TestPillowParser(TestCase):
     def test_parser_file_7(self):
         self.render_file_optional_show_and_save("s7.grb", False, False, False, dpi=1600)
 
-    def test_render_multilayer(self):
-        images = render_layers(get_layerset(GERBER_PATH))
-        for layer in images:
-            layer.show()
 
-    def test_join_layers(self):
-        image = join_layers(render_layers(get_layerset(GERBER_PATH)))
-        image.show()
+class ProjectSpecTest(TestCase):
+    def test_load(self):
+        ProjectSpec(
+            {
+                "dpi": 600,
+                "image_padding": 0,
+                "ignore_deprecated": True,
+                "save_path": ".\\tests\\gerber\\rendered\\set.png",
+                "layers": [
+                    {
+                        "file_path": ".\\tests\\gerber\\set\\top_copper.grb",
+                        "colors": {
+                            "dark": [40, 143, 40, 255],
+                            "clear": [60, 181, 60, 255],
+                        },
+                    },
+                    {
+                        "file_path": ".\\tests\\gerber\\set\\top_solder_mask.grb",
+                        "colors": "solder_mask",
+                    },
+                    {"file_path": ".\\tests\\gerber\\set\\top_paste_mask.grb"},
+                    {
+                        "file_path": ".\\tests\\gerber\\set\\top_silk.grb",
+                        "colors": "silk",
+                    },
+                ],
+            }
+        ).render().show()
 
+    def test_from_json(self):
+        ProjectSpec.from_json(GERBER_PATH / "pillow" / "specfile.json").render().show()
+
+    def test_from_yaml(self):
+        ProjectSpec.from_yaml(GERBER_PATH / "pillow" / "specfile.yaml").render().show()
 
 if __name__ == "__main__":
     main()
