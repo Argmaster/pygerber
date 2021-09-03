@@ -15,7 +15,7 @@ from .load import (
     LoadScalingToken,
     LoadUnitToken,
 )
-from .control import EndOfStream_Token, Whitespace_Token
+from .control import EndOfStream_Token, ImagePolarity_Token, Whitespace_Token
 from .am import ApertureMacro_Token
 
 token_classes: List[Type[Token]] = [
@@ -46,4 +46,5 @@ token_classes: List[Type[Token]] = [
     G71_Token,
     G90_Token,
     G91_Token,
+    ImagePolarity_Token,
 ]

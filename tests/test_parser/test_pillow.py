@@ -2,10 +2,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+from tests.testutils.pillow import are_images_similar
 from unittest import TestCase, main
 
 from PIL import Image
-from pygerber.parser.pillow.parser import ImageSizeNullError, ParserWithPillow
+from pygerber.parser.pillow.parser import (
+    ColorSet,
+    ImageSizeNullError,
+    LayerSpec,
+    ParserWithPillow,
+)
 
 RENDERED_PATH = Path("./tests/gerber/rendered")
 GERBER_PATH = Path("./tests/gerber")
@@ -51,87 +57,74 @@ class TestPillowParser(TestCase):
         self.assertRaises(ImageSizeNullError, parser.render)
 
     def test_render_file_and_save(self):
-        ParserWithPillow.render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png")
+        ParserWithPillow.render_file_and_save(
+            GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png"
+        )
+
+    def render_file_optional_show_and_save(
+        self,
+        filename: str,
+        fulltest: bool = False,
+        show: bool = False,
+        save: bool = False,
+        **kwargs
+    ):
+        image = ParserWithPillow.render_file(GERBER_PATH / filename, **kwargs)
+        if show:
+            image.show()
+        if save:
+            image.save(RENDERED_PATH / (filename.split(".")[0] + ".png"))
+        if fulltest:
+            self.assertTrue(
+                are_images_similar(Image.open(RENDERED_PATH / filename), image, 0, 0)
+            )
 
     def test_parser_file_0(self):
-        image = ParserWithPillow.render_file(GERBER_PATH / "s0.grb", dpi=1600)
-        # to manually validate output uncomment this:
-        # image.show()
-        # to create new comparison image uncomment this:
-        # image.save("./tests/gerber/rendered/s0.png")
-        # self.assertTrue(
-        #     are_images_similar(Image.open(RENDERED_PATH / "s0.png"), image, 0, 0)
-        # )
+        self.render_file_optional_show_and_save("s0.grb", False, False, True, dpi=1600)
 
     def test_parser_file_1(self):
-        image = ParserWithPillow.render_file(GERBER_PATH / "s1.grb")
-        # to manually validate output uncomment this:
-        # image.show()
-        # to create new comparison image uncomment this:
-        # image.save("./tests/gerber/rendered/s1.png")
-        # self.assertTrue(
-        #     are_images_similar(Image.open(RENDERED_PATH / "s1.png"), image, 0, 0)
-        # )
+        self.render_file_optional_show_and_save("s1.grb", False, False, True, dpi=1600)
 
     def test_parser_file_2(self):
-        image = ParserWithPillow.render_file(GERBER_PATH / "s2.grb")
-        # to manually validate output uncomment this:
-        # image.show()
-        # to create new comparison image uncomment this:
-        # image.save("./tests/gerber/rendered/s2.png")
-        # self.assertTrue(
-        #     are_images_similar(Image.open(RENDERED_PATH / "s2.png"), image, 0, 0)
-        # )
+        self.render_file_optional_show_and_save("s2.grb", False, False, True, dpi=1600)
 
     def test_parser_file_3(self):
-        image = ParserWithPillow.render_file(GERBER_PATH / "s3.grb")
-        # to manually validate output uncomment this:
-        # image.show()
-        # to create new comparison image uncomment this:
-        # image.save("./tests/gerber/rendered/s3.png")
-        # self.assertTrue(
-        #    are_images_similar(Image.open(RENDERED_PATH / "s3.png"), image, 0, 0)
-        # )
+        self.render_file_optional_show_and_save("s3.grb", False, False, True, dpi=1600)
 
     def test_parser_file_4(self):
-        image = ParserWithPillow.render_file(GERBER_PATH / "s4.grb")
-        # to manually validate output uncomment this:
-        # image.show()
-        # to create new comparison image uncomment this:
-        # image.save("./tests/gerber/rendered/s4.png")
-        # self.assertTrue(
-        #     are_images_similar(Image.open(RENDERED_PATH / "s4.png"), image, 0, 0)
-        # )
+        self.render_file_optional_show_and_save("s4.grb", False, False, True, dpi=1600)
 
     def test_parser_file_5(self):
-        image = ParserWithPillow.render_file(GERBER_PATH / "s5.grb", dpi=600, image_padding=50)
-        # to manually validate output uncomment this:
-        # image.show()
-        # to create new comparison image uncomment this:
-        # image.save("./tests/gerber/rendered/s5.png")
-        # self.assertTrue(
-        #     are_images_similar(Image.open(RENDERED_PATH / "s5.png"), image, 0, 0)
-        # )
+        self.render_file_optional_show_and_save("s5.grb", False, False, True, dpi=1600)
 
     def test_parser_file_6(self):
-        image = ParserWithPillow.render_file(GERBER_PATH / "s6.grb", dpi=2600)
-        # to manually validate output uncomment this:
-        # image.show()
-        # to create new comparison image uncomment this:
-        # image.save("./tests/gerber/rendered/s6.png")
-        # self.assertTrue(
-        #    are_images_similar(Image.open(RENDERED_PATH / "s6.png"), image, 0, 0)
-        # )
+        self.render_file_optional_show_and_save("s6.grb", False, False, True, dpi=1600)
 
     def test_parser_file_7(self):
-        image = ParserWithPillow.render_file(GERBER_PATH / "s7.grb", dpi=2600)
-        # to manually validate output uncomment this:
-        # image.show()
-        # to create new comparison image uncomment this:
-        # image.save("./tests/gerber/rendered/s7.png")
-        # self.assertTrue(
-        #    are_images_similar(Image.open(RENDERED_PATH / "s7.png"), image, 0, 0)
-        # )
+        self.render_file_optional_show_and_save("s7.grb", False, False, True, dpi=1600)
+
+    def test_render_multilayer(self):
+        images = ParserWithPillow.render_all(
+            [
+                LayerSpec(
+                    GERBER_PATH / "set" / "top_copper.grb",
+                    ColorSet((50, 168, 82, 255), (71, 196, 105, 255)),
+                ),
+                LayerSpec(
+                    GERBER_PATH / "set" / "top_silk.grb", ColorSet((255, 255, 255, 255))
+                ),
+                LayerSpec(
+                    GERBER_PATH / "set" / "top_paste_mask.grb",
+                    ColorSet((117, 117, 117, 255)),
+                ),
+                LayerSpec(
+                    GERBER_PATH / "set" / "top_solder_mask.grb",
+                    ColorSet((153, 153, 153, 255)),
+                ),
+            ]
+        )
+        for image in images:
+            image.show()
 
 
 if __name__ == "__main__":

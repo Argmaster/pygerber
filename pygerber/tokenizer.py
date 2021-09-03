@@ -92,7 +92,7 @@ class Tokenizer:
             pass
         except InvalidSyntaxError as e:
             raise e.__class__(
-                f"""File "{self.__get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}: {e}"""
+                f"""File "{self.__get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}:\n{e}"""
             ) from e
         else:
             raise InvalidSyntaxError(
@@ -160,7 +160,7 @@ class Tokenizer:
     def raise_token_not_found(self):
         end_index = min(len(self.source), self.begin_index + 30)
         raise TokenNotFound(
-            f'\n  File "{self.__get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}:\n{self.source[self.begin_index:end_index]}'
+            f'{self.source[self.begin_index:end_index]}'
         )
 
     def get_bbox(self):
