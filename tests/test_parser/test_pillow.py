@@ -2,14 +2,20 @@
 from __future__ import annotations
 
 from pathlib import Path
-from tests.testutils.pillow import are_images_similar
+from pygerber.parser.pillow.api import (
+    LayerSpec,
+    join_layers,
+    render_file,
+    render_file_and_save,
+    render_layers,
+)
+from tests.testutils.pillow import are_images_similar, get_layerset
 from unittest import TestCase, main
 
 from PIL import Image
 from pygerber.parser.pillow.parser import (
     ColorSet,
     ImageSizeNullError,
-    LayerSpec,
     ParserWithPillow,
 )
 
@@ -57,9 +63,7 @@ class TestPillowParser(TestCase):
         self.assertRaises(ImageSizeNullError, parser.render)
 
     def test_render_file_and_save(self):
-        ParserWithPillow.render_file_and_save(
-            GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png"
-        )
+        render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png")
 
     def render_file_optional_show_and_save(
         self,
@@ -69,7 +73,7 @@ class TestPillowParser(TestCase):
         save: bool = False,
         **kwargs
     ):
-        image = ParserWithPillow.render_file(GERBER_PATH / filename, **kwargs)
+        image = render_file(GERBER_PATH / filename, **kwargs)
         if show:
             image.show()
         if save:
@@ -80,51 +84,37 @@ class TestPillowParser(TestCase):
             )
 
     def test_parser_file_0(self):
-        self.render_file_optional_show_and_save("s0.grb", False, False, True, dpi=1600)
+        self.render_file_optional_show_and_save("s0.grb", False, False, False, dpi=1600)
 
     def test_parser_file_1(self):
-        self.render_file_optional_show_and_save("s1.grb", False, False, True, dpi=1600)
+        self.render_file_optional_show_and_save("s1.grb", False, False, False, dpi=1600)
 
     def test_parser_file_2(self):
-        self.render_file_optional_show_and_save("s2.grb", False, False, True, dpi=1600)
+        self.render_file_optional_show_and_save("s2.grb", False, False, False, dpi=1600)
 
     def test_parser_file_3(self):
-        self.render_file_optional_show_and_save("s3.grb", False, False, True, dpi=1600)
+        self.render_file_optional_show_and_save("s3.grb", False, False, False, dpi=1600)
 
     def test_parser_file_4(self):
-        self.render_file_optional_show_and_save("s4.grb", False, False, True, dpi=1600)
+        self.render_file_optional_show_and_save("s4.grb", False, False, False, dpi=1600)
 
     def test_parser_file_5(self):
-        self.render_file_optional_show_and_save("s5.grb", False, False, True, dpi=1600)
+        self.render_file_optional_show_and_save("s5.grb", False, False, False, dpi=1600)
 
     def test_parser_file_6(self):
-        self.render_file_optional_show_and_save("s6.grb", False, False, True, dpi=1600)
+        self.render_file_optional_show_and_save("s6.grb", False, False, False, dpi=1600)
 
     def test_parser_file_7(self):
-        self.render_file_optional_show_and_save("s7.grb", False, False, True, dpi=1600)
+        self.render_file_optional_show_and_save("s7.grb", False, False, False, dpi=1600)
 
     def test_render_multilayer(self):
-        images = ParserWithPillow.render_all(
-            [
-                LayerSpec(
-                    GERBER_PATH / "set" / "top_copper.grb",
-                    ColorSet((50, 168, 82, 255), (71, 196, 105, 255)),
-                ),
-                LayerSpec(
-                    GERBER_PATH / "set" / "top_silk.grb", ColorSet((255, 255, 255, 255))
-                ),
-                LayerSpec(
-                    GERBER_PATH / "set" / "top_paste_mask.grb",
-                    ColorSet((117, 117, 117, 255)),
-                ),
-                LayerSpec(
-                    GERBER_PATH / "set" / "top_solder_mask.grb",
-                    ColorSet((153, 153, 153, 255)),
-                ),
-            ]
-        )
-        for image in images:
-            image.show()
+        images = render_layers(get_layerset(GERBER_PATH))
+        for layer in images:
+            layer.show()
+
+    def test_join_layers(self):
+        image = join_layers(render_layers(get_layerset(GERBER_PATH)))
+        image.show()
 
 
 if __name__ == "__main__":

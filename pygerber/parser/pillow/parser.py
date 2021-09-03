@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-
-from concurrent.futures import Future, ProcessPoolExecutor
 from dataclasses import dataclass
-from typing import List, Tuple
+
+from typing import Tuple
 
 from PIL import Image, ImageDraw
 from pygerber.mathclasses import BoundingBox
@@ -36,12 +35,6 @@ DEFAULT_COLOR_SET_GREEN = ColorSet(
 
 class ImageSizeNullError(IndexError):
     pass
-
-
-@dataclass
-class LayerSpec:
-    filepath: str
-    colors: ColorSet
 
 
 class ParserWithPillow:
@@ -165,63 +158,3 @@ class ParserWithPillow:
             self.get_image().save(filepath, format)
         else:
             self.get_image().save(filepath)
-
-    @staticmethod
-    def render_file_and_save(filepath: str, savepath: str, **kwargs):
-        """
-        Loads, parses, renders file from `filepath` and saves it in `savepath`.
-        **kwargs will be passed to ParserWithPillow, check it out for available params.
-        """
-        image = ParserWithPillow.render_file(filepath, **kwargs)
-        image.save(savepath)
-
-    @staticmethod
-    def render_file(filepath: str, **kwargs) -> Image.Image:
-        """
-        Loads, parses and renders file from given path and returns its render as PIL.Image.Image.
-        **kwargs will be passed to ParserWithPillow, check it out for available params.
-        """
-        parser = ParserWithPillow(filepath, **kwargs)
-        parser.render()
-        return parser.get_image()
-
-    @staticmethod
-    def render_all(
-        layers: List[LayerSpec],
-        *,
-        dpi: int = 600,
-        ignore_deprecated: bool = True,
-        image_padding: int = 0,
-    ) -> List[Image.Image]:
-        with ProcessPoolExecutor() as executor:
-            processes: List[Future] = []
-            for layer in layers:
-                future = executor.submit(
-                    _render_layer,
-                    layer,
-                    dpi,
-                    ignore_deprecated,
-                    image_padding,
-                )
-                processes.append(future)
-            results: List[Image.Image] = []
-            for future in processes:
-                rendered_image: Image.Image = future.result()
-                results.append(rendered_image)
-        return results
-
-    @staticmethod
-    def join_layers(layers: List[Image.Image]) -> Image.Image:
-        pass
-
-
-def _render_layer(
-    layer: LayerSpec, dpi: int, ignore_deprecated: bool, image_padding: int
-) -> Image.Image:
-    return ParserWithPillow.render_file(
-        layer.filepath,
-        dpi=dpi,
-        colors=layer.colors,
-        ignore_deprecated=ignore_deprecated,
-        image_padding=image_padding,
-    )

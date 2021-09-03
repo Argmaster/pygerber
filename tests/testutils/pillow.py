@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pathlib import Path
+from pygerber.parser.pillow.api import LayerSpec
 from PIL import Image, ImageDraw
 from pygerber.parser.pillow.parser import ColorSet
 from types import SimpleNamespace
@@ -114,3 +116,22 @@ def compare_color(c: float, C: float, tresh: float):
     C = C / 255
     cC = abs(c - C)
     return cC <= tresh
+
+def get_layerset(GERBER_PATH: Path):
+    return [
+            LayerSpec(
+                GERBER_PATH / "set" / "top_copper.grb",
+                ColorSet((40, 143, 40, 255), (60, 181, 60, 255)),
+            ),
+            LayerSpec(
+                GERBER_PATH / "set" / "top_silk.grb", ColorSet((255, 255, 255, 255))
+            ),
+            LayerSpec(
+                GERBER_PATH / "set" / "top_solder_mask.grb",
+                ColorSet((153, 153, 153, 255)),
+            ),
+            LayerSpec(
+                GERBER_PATH / "set" / "top_paste_mask.grb",
+                ColorSet((117, 117, 117, 255)),
+            ),
+        ]
