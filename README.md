@@ -15,14 +15,14 @@ image = pillow.render_file("example_gerber.py")
 image.show()
 ```
 
-For a complete overview of top-level 2D API usage, see `examples/pillow_api.md`
+For a complete overview of top-level 2D API usage, see [`examples/pillow_api.md`](https://github.com/Argmaster/pygerber/blob/external-api/examples/pillow_api.md)
 
 #### CLI quick start example
 ```bash
 $ python -m pygerber --pillow --yamlspec "specfile.yaml"
 ```
 
-For a complete overview of top-level CLI usage, see `examples/cli.md`
+For a complete overview of top-level CLI usage, see [`examples/cli.md`](https://github.com/Argmaster/pygerber/blob/external-api/examples/cli.md)
 
 
 
