@@ -44,11 +44,14 @@ def render_from_json(file_path: str) -> Image.Image:
     return ProjectSpec.from_json(file_path).render()
 
 
+def render_from_toml(file_path: str) -> Image.Image:
+    return ProjectSpec.from_toml(file_path).render()
+
+
 class ProjectSpec:
     dpi: int = 600
     ignore_deprecated: bool = True
     image_padding: int = 0
-    save_path: str = None
     layers: List[LayerSpec] = []
 
     def __init__(self, init_spec: Dict) -> None:

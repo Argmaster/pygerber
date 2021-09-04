@@ -7,4 +7,5 @@ from .api import (
     render_from_spec,
     render_from_yaml,
     render_from_json,
+    render_from_toml,
 )
