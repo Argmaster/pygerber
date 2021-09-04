@@ -52,5 +52,5 @@ from pygerber import pillow
 image = pillow.render_from_json("specfile.json")
 image.show()
 ```
-Example **JSON**, **YAML** and **TOML** files are available in `tests/gerber/pillow/`
-for more in-depth overview of specfile capabilities, see `specfile.md`
+Example **JSON**, **YAML** and **TOML** files are available in [`tests/gerber/pillow/`](https://github.com/Argmaster/pygerber/blob/external-api/tests/gerber/pillow)
+for more in-depth overview of specfile capabilities, see [`specfile.md`](https://github.com/Argmaster/pygerber/blob/external-api/examples/specfile.md)
