@@ -10,4 +10,4 @@ layers:
       colors: solder_mask
     - file_path: .\\tests\\gerber\\set\\top_paste_mask.grb
     - file_path: .\\tests\\gerber\\set\\top_silk.grb
-      colors": silk
+      colors: silk

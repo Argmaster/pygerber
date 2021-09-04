@@ -105,7 +105,7 @@ class ProjectSpec:
     @staticmethod
     def from_yaml(file_path: str) -> ProjectSpec:
         with open(file_path, 'rb') as file:
-            spec = yaml.load(file)
+            spec = yaml.safe_load(file)
         return ProjectSpec(spec)
 
     @staticmethod

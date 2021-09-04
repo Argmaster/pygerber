@@ -100,7 +100,7 @@ class TestPillowParser(TestCase):
 
 class ProjectSpecTest(TestCase):
     def test_load(self):
-        ProjectSpec(
+        image = ProjectSpec(
             {
                 "dpi": 600,
                 "image_padding": 0,
@@ -125,13 +125,17 @@ class ProjectSpecTest(TestCase):
                     },
                 ],
             }
-        ).render().show()
+        ).render()
+        # image.show()
 
     def test_from_json(self):
-        ProjectSpec.from_json(GERBER_PATH / "pillow" / "specfile.json").render().show()
+        image = ProjectSpec.from_json(GERBER_PATH / "pillow" / "specfile.json").render()
+        # image.show()
 
     def test_from_yaml(self):
-        ProjectSpec.from_yaml(GERBER_PATH / "pillow" / "specfile.yaml").render().show()
+        image = ProjectSpec.from_yaml(GERBER_PATH / "pillow" / "specfile.yaml").render()
+        # image.show()
+
 
 if __name__ == "__main__":
     main()
