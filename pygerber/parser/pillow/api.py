@@ -15,6 +15,7 @@ from pygerber.parser.pillow.parser import (
 )
 import yaml
 import json
+import toml
 
 NAMED_COLORS = {
     "silk": ColorSet((255, 255, 255, 255)),
@@ -29,6 +30,18 @@ NAMED_COLORS = {
         (0, 0, 0, 0),
     ),
 }
+
+
+def render_from_spec(spec: Dict) -> Image.Image:
+    return ProjectSpec(spec).render()
+
+
+def render_from_yaml(file_path: str) -> Image.Image:
+    return ProjectSpec.from_yaml(file_path).render()
+
+
+def render_from_json(file_path: str) -> Image.Image:
+    return ProjectSpec.from_json(file_path).render()
 
 
 class ProjectSpec:
@@ -104,7 +117,7 @@ class ProjectSpec:
 
     @staticmethod
     def from_yaml(file_path: str) -> ProjectSpec:
-        with open(file_path, 'rb') as file:
+        with open(file_path, "rb") as file:
             spec = yaml.safe_load(file)
         return ProjectSpec(spec)
 
@@ -112,6 +125,12 @@ class ProjectSpec:
     def from_json(file_path: str) -> ProjectSpec:
         with open(file_path, "r", encoding="utf-8") as file:
             spec = json.load(file)
+        return ProjectSpec(spec)
+
+    @staticmethod
+    def from_toml(file_path: str) -> ProjectSpec:
+        with open(file_path, "r", encoding="utf-8") as file:
+            spec = toml.load(file)
         return ProjectSpec(spec)
 
 
@@ -169,20 +188,47 @@ class LayerSpec:
         return colors
 
 
-def render_file_and_save(file_path: str, save_path: str, **kwargs):
+def render_file_and_save(
+    file_path: str,
+    save_path: str,
+    *,
+    dpi: int = 600,
+    colors: ColorSet = DEFAULT_COLOR_SET_GREEN,
+    ignore_deprecated: bool = True,
+    image_padding: int = 0,
+):
     """
     Loads, parses, renders file from `file_path` and saves it in `save_path`.
     **kwargs will be passed to ParserWithPillow, check it out for available params.
     """
-    image = render_file(file_path, **kwargs)
+    image = render_file(
+        file_path,
+        dpi=dpi,
+        colors=colors,
+        ignore_deprecated=ignore_deprecated,
+        image_padding=image_padding,
+    )
     image.save(save_path)
 
 
-def render_file(file_path: str, **kwargs) -> Image.Image:
+def render_file(
+    file_path: str,
+    *,
+    dpi: int = 600,
+    colors: ColorSet = DEFAULT_COLOR_SET_GREEN,
+    ignore_deprecated: bool = True,
+    image_padding: int = 0,
+) -> Image.Image:
     """
     Loads, parses and renders file from given path and returns its render as PIL.Image.Image.
     **kwargs will be passed to ParserWithPillow, check it out for available params.
     """
-    parser = ParserWithPillow(file_path, **kwargs)
+    parser = ParserWithPillow(
+        file_path,
+        dpi=dpi,
+        colors=colors,
+        ignore_deprecated=ignore_deprecated,
+        image_padding=image_padding,
+    )
     parser.render()
     return parser.get_image()

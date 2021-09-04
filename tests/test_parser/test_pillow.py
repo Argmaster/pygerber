@@ -136,6 +136,17 @@ class ProjectSpecTest(TestCase):
         image = ProjectSpec.from_yaml(GERBER_PATH / "pillow" / "specfile.yaml").render()
         # image.show()
 
+    def test_toml(self):
+        import toml
+        with open(GERBER_PATH/ "pillow" / "specfile.toml") as file:
+            output = toml.load(file)
+        import json
+        print(json.dumps(output, indent="  "))
+
+    def test_from_toml(self):
+        image = ProjectSpec.from_toml(GERBER_PATH / "pillow" / "specfile.toml").render()
+        image.show()
+
 
 if __name__ == "__main__":
     main()

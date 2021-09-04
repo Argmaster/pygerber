@@ -1,3 +1,1 @@
-from .parser.pillow.parser import ParserWithPillow
-
-
+from .parser import pillow
