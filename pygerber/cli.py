@@ -20,11 +20,22 @@ def get_argument_parser() -> ArgumentParser:
         required=True,
         metavar="<savepath>",
         help=(
-            "Save path for output render. See "
+            "Save path for output render, file format will be automatically. See "
             "https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html "
             "for supported image types for 2D rendering. "
-            f"Note that we are currently using pillow {pillow_version}."
+            f"Note that we are currently using pillow {pillow_version}. "
         ),
+    )
+    parser.add_argument(
+        "--dpi",
+        type=int,
+        default=600,
+        help="DPI of output image. Affects only 2D renders in --file mode.",
+    )
+    parser.add_argument(
+        "--colors",
+        default="copper",
+        help="Colors of rendered Gerber image. Affects renders in --file mode.",
     )
     renderer_group: _MutuallyExclusiveGroup = parser.add_mutually_exclusive_group(
         required=True
@@ -52,19 +63,18 @@ def get_argument_parser() -> ArgumentParser:
     return parser
 
 
-
 def __add_specfile_types_group(source_group: _ArgumentGroup):
     specfile_types_group: _MutuallyExclusiveGroup = (
         source_group.add_mutually_exclusive_group()
     )
+
+    def validate(spectype_name):
+        return lambda value: {
+            "type": spectype_name,
+            "filepath": Path(value).absolute(),
+        }
+
     for name in ["yaml", "json", "toml"]:
-
-        def validate(spectype_name):
-            return lambda value: {
-                "type": spectype_name,
-                "filepath": Path(value).absolute(),
-            }
-
         specfile_types_group.add_argument(
             f"--{name}",
             dest="specfile",
@@ -72,6 +82,13 @@ def __add_specfile_types_group(source_group: _ArgumentGroup):
             metavar="<filepath>",
             help=f"Use {name.upper()} specfile, from file <filepath>.",
         )
+    specfile_types_group.add_argument(
+        f"--file",
+        dest="specfile",
+        type=validate('file'),
+        metavar="<filepath>",
+        help=f"Render single gerber file.",
+    )
 
 
 def handle_pygerber_cli(args):
@@ -81,4 +98,3 @@ def handle_pygerber_cli(args):
         handle_pillow_cli(args)
     elif args.renderer == "blender":
         raise NotImplementedError("Blender rendering is not yet implemented.")
-

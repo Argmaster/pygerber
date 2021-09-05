@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple
 
 from pygerber.parser.pillow.api import (
     render_from_json,
+    render_from_spec,
     render_from_toml,
     render_from_yaml,
 )
@@ -15,12 +16,13 @@ from pygerber.parser.pillow.api import (
 UNIT_MAP_TYPE = Dict[Tuple[float, float], str]
 
 _ByteUnits = {
-        (0, 1024): "B",
-        (1024, 1024 ** 2): "KiB",
-        (1024 ** 2, 1024 ** 3): "MiB",
-        (1024 ** 3, 1024 ** 4): "GiB",
-        (1024 ** 4, inf): "TiB",
-    }
+    (0, 1024): "B",
+    (1024, 1024 ** 2): "KiB",
+    (1024 ** 2, 1024 ** 3): "MiB",
+    (1024 ** 3, 1024 ** 4): "GiB",
+    (1024 ** 4, inf): "TiB",
+}
+
 
 def format_bytes(
     val: float,
@@ -39,6 +41,18 @@ def handle_pillow_cli(args):
         image = render_from_yaml(args.specfile["filepath"])
     elif args.specfile["type"] == "toml":
         image = render_from_toml(args.specfile["filepath"])
+    elif args.specfile["type"] == "file":
+        image = render_from_spec(
+            {
+                "dpi": args.dpi,
+                "layers": [
+                    {
+                        "file_path": str(args.specfile["filepath"]),
+                        "colors": args.colors
+                    }
+                ],
+            }
+        )
     else:
         raise NotImplementedError(
             f"Rendering based on {args.specfile['type']} file format is not supported."
