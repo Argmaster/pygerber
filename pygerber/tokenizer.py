@@ -19,6 +19,7 @@ from .tokens import token_classes
 
 DEFAULT_TRACE_FILEPATH = "<string>"
 
+
 class Tokenizer:
 
     token_stack: deque  # contains Token objects
@@ -26,7 +27,7 @@ class Tokenizer:
     source: str = ""
     begin_index: int = 0
     token_stack_size: int = 0
-    filepath: str = None
+    file_path: str = None
     bbox: BoundingBox
 
     def __init__(
@@ -62,17 +63,17 @@ class Tokenizer:
         token.render()
         token.post_render()
 
-    def tokenize_file(self, filepath: str) -> deque:
+    def tokenize_file(self, file_path: str) -> deque:
         """
-        Opens file that filepath is pointing to and tokenizes its contents.
+        Opens file that file_path is pointing to and tokenizes its contents.
         Deque containing all of the tokens is returned.
         """
-        self.filepath = filepath
+        self.file_path = file_path
         source = self.load_file()
         return self.tokenize_string(source)
 
     def load_file(self) -> str:
-        with open(self.filepath, "r", encoding="utf-8") as file:
+        with open(self.file_path, "r", encoding="utf-8") as file:
             source = file.read()
         return source
 
@@ -92,7 +93,7 @@ class Tokenizer:
             pass
         except InvalidSyntaxError as e:
             raise e.__class__(
-                f"""File "{self.__get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}: {e}"""
+                f"""File "{self.__get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}:\n{e}"""
             ) from e
         else:
             raise InvalidSyntaxError(
@@ -102,10 +103,10 @@ class Tokenizer:
         return self.token_stack
 
     def __get_abspath_if_possible(self):
-        if self.filepath is None:
+        if self.file_path is None:
             return DEFAULT_TRACE_FILEPATH
         else:
-            return Path(self.filepath).absolute()
+            return Path(self.file_path).absolute()
 
     def __has_reached_end(self):
         return self.begin_index >= len(self.source)
@@ -159,9 +160,7 @@ class Tokenizer:
 
     def raise_token_not_found(self):
         end_index = min(len(self.source), self.begin_index + 30)
-        raise TokenNotFound(
-            f'\n  File "{self.__get_abspath_if_possible()}", line {self.line_index}, character {self.char_index}:\n{self.source[self.begin_index:end_index]}'
-        )
+        raise TokenNotFound(f"{self.source[self.begin_index:end_index]}")
 
     def get_bbox(self):
         if self.bbox is not None:
