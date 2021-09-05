@@ -42,5 +42,5 @@ layers:
 - *solder_mask* meaning 'dark' is lighter grey, 'clear' is transparent,
 - *copper* meaning 'dark' is darker green, 'clear' is lighter green,
 
-and a few more, see [`pygerber/parser/pillow/api.py`](https://github.com/Argmaster/pygerber/blob/external-api/pygerber/parser/pillow/api.py#L20) **NAMED_COLORS** constant for details.
+and a few more, see [`pygerber/parser/pillow/api.py`](https://github.com/Argmaster/pygerber/blob/main/pygerber/parser/pillow/api.py#L20) **NAMED_COLORS** constant for details.
 

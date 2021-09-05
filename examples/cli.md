@@ -18,7 +18,7 @@ All rendering commands require You to specify rendering engine:
 - Blender for 3D, using `--blender` or `-b`
 
 ### Rendering single file
-Single-file mode requires You to pass `--file` flag, followed by path to gerber file You want to render. You can optionally provide `--colors` flag followed by one of predefined color set names, see them in [`specfile.md`](https://github.com/Argmaster/pygerber/blob/external-api/examples/specfile.md).
+Single-file mode requires You to pass `--file` flag, followed by path to gerber file You want to render. You can optionally provide `--colors` flag followed by one of predefined color set names, see them in [`specfile.md`](https://github.com/Argmaster/pygerber/blob/main/examples/specfile.md).
 ```bash
 $ python -m pygerber --pillow --file "tests/gerber/s5.grb" -s "render.png"
 Rendering D:\dev\pygerber\tests\gerber\s5.grb as FILE
@@ -29,7 +29,7 @@ Successfully saved image 1006x887, 6.9 KiB.
 
 ### Rendering multiple files
 
-Multi-file mode allows You to use all three specfile formats: **JSON**, **YAML** and **TOML**. For more information about what specfile should contain, see [`specfile.md`](https://github.com/Argmaster/pygerber/blob/external-api/examples/specfile.md). You can specify specfile path and format via one of `--json` `--yaml` `--toml` followed by `file path`
+Multi-file mode allows You to use all three specfile formats: **JSON**, **YAML** and **TOML**. For more information about what specfile should contain, see [`specfile.md`](https://github.com/Argmaster/pygerber/blob/main/examples/specfile.md). You can specify specfile path and format via one of `--json` `--yaml` `--toml` followed by `file path`
 
 ```bash
 $ python -m pygerber --pillow --toml "tests/gerber/pillow/specfile.toml" -s "render.png"
