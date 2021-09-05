@@ -18,8 +18,11 @@ from pygerber import pillow
 
 pillow.render_and_save("./gerber/example_gerber.py", "example_gerber.png")
 ```
+
 ### Rendering of multiple layers
+
 Rendering based on python dictionary, without configuration files
+
 ```python
 from pygerber import pillow
 
@@ -44,7 +47,9 @@ image = pillow.render_from_spec({
     })
 image.show()
 ```
+
 Rendering based on specification files written in **JSON**, **YAML** or **TOML** files
+
 ```python
 from pygerber import pillow
 
@@ -52,5 +57,6 @@ from pygerber import pillow
 image = pillow.render_from_json("specfile.json")
 image.show()
 ```
+
 Example **JSON**, **YAML** and **TOML** files are available in [`tests/gerber/pillow/`](https://github.com/Argmaster/pygerber/blob/external-api/tests/gerber/pillow)
 for more in-depth overview of specfile capabilities, see [`specfile.md`](https://github.com/Argmaster/pygerber/blob/external-api/examples/specfile.md)
