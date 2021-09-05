@@ -1,8 +1,8 @@
 # PyGerber CLI
 
-**CLI** offers you two ways of rendering
+**CLI** offers You two ways of rendering
 
--   single-file, when you have to specify path to file and colors to use
+-   single-file, when You have to specify path to file and colors to use
 -   multi-file, based on specfile, which You have to provide
 
 ### Getting help
@@ -18,7 +18,7 @@ All rendering commands require You to specify rendering engine:
 - Blender for 3D, using `--blender` or `-b`
 
 ### Rendering single file
-Single-file mode requires you to pass `--file` flag, followed by path to gerber file you want to render. You can optionally provide `--colors` flag followed by one of predefined color set names, see them in [`specfile.md`](https://github.com/Argmaster/pygerber/blob/external-api/examples/specfile.md).
+Single-file mode requires You to pass `--file` flag, followed by path to gerber file You want to render. You can optionally provide `--colors` flag followed by one of predefined color set names, see them in [`specfile.md`](https://github.com/Argmaster/pygerber/blob/external-api/examples/specfile.md).
 ```bash
 $ python -m pygerber --pillow --file "tests/gerber/s5.grb" -s "render.png"
 Rendering D:\dev\pygerber\tests\gerber\s5.grb as FILE

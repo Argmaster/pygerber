@@ -11,7 +11,7 @@ rendered_image = pillow.render_file("gerber/example_gerber.py")
 rendered_image.show()
 ```
 
-There is a shortcut for render and save
+There is a shortcut to render and save
 
 ```python
 from pygerber import pillow
