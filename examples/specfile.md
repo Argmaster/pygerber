@@ -35,12 +35,11 @@ layers:
       colors: solder_mask
 ```
 
-<small>
-<small style="color: #36a1ff;">*</small> Available colors are:
-silk, meaning 'dark' is white, 'clear' is transparent,
-paste_mask, meaning 'dark' is grey, 'clear' is transparent,
-solder_mask, meaning 'dark' is lighter grey, 'clear' is transparent,
-copper, meaning 'dark' is darker green, 'clear' is lighter green,
-and a few more, see pygerber/parser/pillow/api.py NAMED_COLORS constant for details.
-</small>
-</small>
+## Available colors are:
+- *silk*, meaning 'dark' is white, 'clear' is transparent,
+- *paste_mask*, meaning 'dark' is grey, 'clear' is transparent,
+- *solder_mask*, meaning 'dark' is lighter grey, 'clear' is transparent,
+- *copper*, meaning 'dark' is darker green, 'clear' is lighter green,
+
+and a few more, see [`pygerber/parser/pillow/api.py`](https://github.com/Argmaster/pygerber/blob/external-api/pygerber/parser/pillow/api.py#L20) **NAMED_COLORS** constant for details.
+
