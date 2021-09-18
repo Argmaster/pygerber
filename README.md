@@ -9,7 +9,7 @@ PyGerber for sure runs on`CPython 3.9.5`. No other versions have been tested.
 
 #### API quick start example
 ```python
-from python import pillow
+from pygerber import pillow
 
 image = pillow.render_file("example_gerber.py")
 image.show()
