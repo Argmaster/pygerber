@@ -21,10 +21,6 @@ class DeprecatedSyntax(InvalidSyntaxError):
     pass
 
 
-class TokenizationFatalFailure(InvalidSyntaxError):
-    pass
-
-
 class RenderingError(Exception):
     pass
 

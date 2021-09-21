@@ -14,12 +14,10 @@ class CoParser:
         self.set_default_format()
 
     def set_default_format(self):
-        dummy_meta = SimpleNamespace(ignore_deprecated=True)
-        fstoken = FormatSpecifierToken.match(
+        re_match = FormatSpecifierToken.regex.match(
             self.default_format,
         )
-        fstoken.dispatch(dummy_meta)
-        self.format = fstoken
+        self.format = FormatSpecifierToken(re_match, None)
 
     def set_format(self, format: FormatSpecifierToken) -> None:
         self.format = format

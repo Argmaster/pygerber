@@ -15,7 +15,7 @@ class G0N_Token_Test(TestCase):
         token = G0N_Token.match(source, 0)
         self.assertTrue(token)
         token.dispatch(META)
-        token.affect_meta()
+        token.alter_state()
         return META
 
     def test_G01(self):
@@ -41,10 +41,10 @@ class GNN_Token_Test(TestCase):
 
     def test_G36_G37(self):
         token, meta = self.init_token("G36*", G36_Token)
-        token.affect_meta()
+        token.alter_state()
         self.assertTrue(meta.is_regionmode)
         token, meta = self.init_token("G37*", G37_Token, meta)
-        token.affect_meta()
+        token.alter_state()
         token.post_render()
         self.assertFalse(meta.is_regionmode)
         self.assertRaises(ApertureCollector.CalledFinish, token.render)
@@ -52,22 +52,22 @@ class GNN_Token_Test(TestCase):
 
     def test_G70(self):
         token, meta = self.init_token("G70*", G70_Token)
-        token.affect_meta()
+        token.alter_state()
         self.assertEqual(meta.unit, Unit.INCHES)
 
     def test_G71(self):
         token, meta = self.init_token("G71*", G71_Token)
-        token.affect_meta()
+        token.alter_state()
         self.assertEqual(meta.unit, Unit.MILLIMETERS)
 
     def test_G90(self):
         token, meta = self.init_token("G90*", G90_Token)
-        token.affect_meta()
+        token.alter_state()
         self.assertEqual(meta.coparser.get_mode(), "A")
 
     def test_G91(self):
         token, meta = self.init_token("G91*", G91_Token)
-        token.affect_meta()
+        token.alter_state()
         self.assertEqual(meta.coparser.get_mode(), "I")
 
 

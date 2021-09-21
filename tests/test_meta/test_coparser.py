@@ -15,14 +15,6 @@ class CoParserTest(TestCase):
         self.assertEqual(coparser.format.INT_FORMAT, 3)
         self.assertEqual(coparser.format.DEC_FORMAT, 6)
 
-    def test_set_format(self):
-        fs = FormatSpecifierToken.match_and_dispatch(None, r"%FSLAX25Y25*%")
-        coparser = CoParser()
-        coparser.set_format(fs)
-        self.assertEqual(coparser.format.length, 7)
-        self.assertEqual(coparser.format.INT_FORMAT, 2)
-        self.assertEqual(coparser.format.DEC_FORMAT, 5)
-
     def test_manual_format_change(self):
         coparser = CoParser()
         coparser.set_mode("I")

@@ -1,35 +1,77 @@
+
+# class Meta(DrawingBroker):
+#
+#     coparser = CoParser
+#
+#     def __init__(
+#         self,
+#         apertureSet: ApertureSet,
+#         *,
+#         ignore_deprecated: bool = True,
+#     ) -> None:
+#         super().__init__(apertureSet)
+#         self.ignore_deprecated = ignore_deprecated
+#         self.coparser = CoParser()
+#
+#     def set_defaults(self):
+#         super().set_defaults()
+#
+#     def raiseDeprecatedSyntax(self, message: str):
+#         if not self.ignore_deprecated:
+#             raise DeprecatedSyntax(message)
 # -*- coding: utf-8 -*-
+from pygerber.exceptions import EndOfStream
 from typing import List, Tuple
 
-from pygerber.exceptions import ApertureSelectionError
 from pygerber.mathclasses import BoundingBox, Vector2D
 
-from .aperture import Aperture, RegionApertureManager
+from .aperture import RegionApertureManager
 from .aperture_manager import ApertureManager
 from .apertureset import ApertureSet
-from .meta import Interpolation, TransformMeta
 from .spec import ArcSpec, FlashSpec, LineSpec, Spec
+from pygerber.drawing_state import DrawingState, Interpolation
+from pygerber.tokens.token import Token
 
 
-class DrawingBroker(ApertureManager, TransformMeta):
-    current_aperture: Aperture
+class Renderer():
+
     current_point: Vector2D
     region_bounds: List[Spec]
 
-    def __init__(self, apertureSet: ApertureSet) -> None:
-        self.reset_defaults()
-        ApertureManager.__init__(self, apertureSet)
-        TransformMeta.__init__(self)
+    apertures: ApertureManager
+    drawing_state: DrawingState
 
-    def reset_defaults(self):
-        ApertureManager.reset_defaults(self)
-        TransformMeta.reset_defaults(self)
+    def __init__(self, apertureSet: ApertureSet) -> None:
+        self.apertures = ApertureManager(apertureSet)
+        self.drawing_state = DrawingState()
+        self.set_defaults()
+
+    def render(self) -> None:
+        """
+        Render all tokens contained in token_stack.
+        """
+        try:
+            for token in self.token_stack:
+                self.__render_token(token)
+        except EndOfStream:
+            return
+
+    def __render_token(self, token: Token) -> None:
+        token: Token
+        token.alter_state()
+        token.pre_render()
+        token.render()
+        token.post_render()
+
+    def set_defaults(self):
+        self.apertures.set_defaults()
+        self.drawing_state.set_defaults()
         self.current_aperture = None
         self.current_point = Vector2D(0, 0)
         self.region_bounds = []
 
     def select_aperture(self, id: int):
-        self.current_aperture = self.get_aperture(id)
+        self.apertures.select_aperture(id)
 
     def draw_interpolated(self, end: Vector2D, offset: Vector2D) -> None:
         if self.interpolation == Interpolation.Linear:
@@ -48,14 +90,17 @@ class DrawingBroker(ApertureManager, TransformMeta):
         if self.is_regionmode:
             self.__push_region_step(spec)
         else:
-            self.get_current_aperture().line(spec)
+            self.apertures.get_current_aperture().line(spec)
+
+    def __push_region_step(self, spec: Spec):
+        self.region_bounds.append(spec)
 
     def bbox_line(self, end: Vector2D) -> None:
         spec = self.__get_line_spec(end)
         if self.is_regionmode:
             self.__push_region_step(spec)
         else:
-            return self.get_current_aperture().line_bbox(spec)
+            return self.apertures.get_current_aperture().line_bbox(spec)
 
     def __get_line_spec(self, end: Vector2D) -> LineSpec:
         return LineSpec(
@@ -69,14 +114,14 @@ class DrawingBroker(ApertureManager, TransformMeta):
         if self.is_regionmode:
             self.__push_region_step(spec)
         else:
-            self.get_current_aperture().arc(spec)
+            self.apertures.get_current_aperture().arc(spec)
 
     def bbox_arc(self, end: Vector2D, offset: Vector2D) -> None:
         spec = self.__get_arc_spec(end, offset)
         if self.is_regionmode:
             self.__push_region_step(spec)
         else:
-            return self.get_current_aperture().arc_bbox(spec)
+            return self.apertures.get_current_aperture().arc_bbox(spec)
 
     def __get_arc_spec(self, end: Vector2D, offset: Vector2D) -> ArcSpec:
         return ArcSpec(
@@ -92,13 +137,13 @@ class DrawingBroker(ApertureManager, TransformMeta):
             raise RuntimeError("Flashes can't be used in region mode.")
         else:
             self.move_pointer(point)
-            aperture = self.get_current_aperture()
+            aperture = self.apertures.get_current_aperture()
             spec = self.__get_flash_spec(point)
             aperture.flash(spec)
 
     def bbox_flash(self, point: Vector2D) -> BoundingBox:
         self.move_pointer(point)
-        aperture = self.get_current_aperture()
+        aperture = self.apertures.get_current_aperture()
         spec = self.__get_flash_spec(point)
         return aperture.flash_bbox(spec)
 
@@ -109,16 +154,9 @@ class DrawingBroker(ApertureManager, TransformMeta):
         )
         return spec
 
-    def get_current_aperture(self):
-        if self.current_aperture is None:
-            raise ApertureSelectionError(
-                "Attempt to perform operation with aperture without preceding aperture selection."
-            )
-        return self.current_aperture
-
     def finish_drawing_region(self) -> Tuple[RegionApertureManager, List[Spec]]:
         bounds = self.__get_and_clean_region_bounds()
-        apertureClass = self.apertureSet.getApertureClass(None, True)
+        apertureClass = self.apertures.getApertureClass(None, True)
         return apertureClass(self), bounds
 
     def __get_and_clean_region_bounds(self):
@@ -128,9 +166,6 @@ class DrawingBroker(ApertureManager, TransformMeta):
 
     def move_pointer(self, location: Vector2D) -> None:
         self.current_point = location
-
-    def __push_region_step(self, spec: Spec):
-        self.region_bounds.append(spec)
 
     def isCCW(self):
         return self.interpolation == Interpolation.CounterclockwiseCircular

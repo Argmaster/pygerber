@@ -2,7 +2,6 @@ from tests.testutils.tokenizer import get_dummy_tokenizer
 from tests.testutils.apertures import ApertureCollector, get_dummy_apertureSet
 from pygerber.exceptions import InvalidSyntaxError, TokenNotFound
 from pygerber.mathclasses import BoundingBox
-from pygerber.meta.meta import Interpolation, Polarity
 from pygerber.tokens.token import Token
 from unittest import TestCase, main
 from pygerber.tokenizer import Tokenizer

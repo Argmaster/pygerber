@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-from typing import Any
+from __future__ import annotations
+from typing import TYPE_CHECKING, Any
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
+    from pygerber.tokens.token import Token
 
 from .validator import Validator
 
@@ -12,8 +16,8 @@ class CallOnCondition(Validator):
         self.condition = condition
         self.onfailure = onfailure
 
-    def __call__(self, token, value: str) -> Any:
-        cleaned_value = self.validator(token, value)
+    def __call__(self, token: Token, drawing_state: DrawingState, value: str) -> Any:
+        cleaned_value = self.validator(token, drawing_state, value)
         if self.condition(token, cleaned_value):
             self.onfailure(token, cleaned_value)
         return cleaned_value

@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from pygerber.validators.struct_validator import StructValidator
 from pygerber.validators.coordinate import UnitFloat
-from pygerber.validators.basic import Function
 
 import re
 
 from .token import Token
-from pygerber.validators import Dispatcher, Float, Int, String, load_validators
+from pygerber.validators.basic import Float, Int, String
 
 
-@load_validators
 class ADD_Token(Token):
 
     FLOAT_PATTERN = r"[-+]?[0-9]*\.?[0-9]*"
@@ -39,8 +38,7 @@ class ADD_Token(Token):
     TYPE = String()
     NAME = String()
 
-    @load_validators
-    class ARGS_dispatcher(Dispatcher):
+    class ARGS_dispatcher(StructValidator):
         DIAMETER = UnitFloat()
         X = UnitFloat()
         Y = UnitFloat()
@@ -57,5 +55,5 @@ class ADD_Token(Token):
         elif self.TYPE == "P":
             return self.POLYGON_PATTERN
 
-    def affect_meta(self):
+    def alter_state(self):
         self.meta.define_aperture(self.TYPE, self.NAME, self.ID, self.ARGS)

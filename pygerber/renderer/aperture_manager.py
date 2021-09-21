@@ -1,4 +1,3 @@
-from pygerber.meta.meta import DrawingMeta
 from typing import Dict
 
 from pygerber.exceptions import ApertureSelectionError, InvalidSyntaxError
@@ -7,21 +6,27 @@ from .aperture import Aperture
 from .apertureset import ApertureSet
 
 
-class ApertureManager(DrawingMeta):
-    """
-    Remember to call bindApertureSet(apSet) before later usage.
-    """
+class ApertureManager:
 
     apertures: Dict[int, Aperture]
     apertureSet: ApertureSet
+    current_aperture: Aperture
 
     def __init__(self, apertureSet: ApertureSet) -> None:
         self.__bind_aperture_set(apertureSet)
-        self.reset_defaults()
-        DrawingMeta.__init__(self)
+        self.set_defaults()
+        
+    def select_aperture(self, id: int):
+        self.current_aperture = self.apertures.get_aperture(id)
 
-    def reset_defaults(self):
-        DrawingMeta.reset_defaults(self)
+    def get_current_aperture(self):
+        if self.current_aperture is None:
+            raise ApertureSelectionError(
+                "Attempt to perform operation with aperture without preceding aperture selection."
+            )
+        return self.current_aperture
+
+    def set_defaults(self):
         self.apertures = {}
 
     def __bind_aperture_set(self, apSet: ApertureSet):
@@ -29,7 +34,9 @@ class ApertureManager(DrawingMeta):
 
     def define_aperture(self, type: str, name: str, ID: int, args: object):
         if ID in self.apertures.keys():
-            raise InvalidSyntaxError(f"Redefinition of aperture is not allowed. Attempt for aperture D{ID}.")
+            raise InvalidSyntaxError(
+                f"Redefinition of aperture is not allowed. Attempt for aperture D{ID}."
+            )
         if type is not None:
             apertureClass = self.apertureSet.getApertureClass(type)
         else:
@@ -41,3 +48,6 @@ class ApertureManager(DrawingMeta):
         if aperture is None:
             raise ApertureSelectionError(f"Aperture with ID {id} was not defined.")
         return aperture
+
+    def getApertureClass(self, name: str = None, is_region: bool = False):
+        return self.apertureSet.getApertureClass(name, is_region)

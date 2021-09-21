@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from abc import abstractmethod
 from typing import TYPE_CHECKING, Any
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
 
-from pygerber.meta.meta import Unit
+from pygerber.constants import Unit
 from pygerber.tokens import token as tkn
 
 from .validator import Validator
@@ -16,14 +17,14 @@ class Coordinate(Validator):
     def __init__(self) -> None:
         super().__init__(default=None)
 
-    def __call__(self, token: tkn.Token, value: str) -> Any:
+    def __call__(self, token: tkn.Token, drawing_state: DrawingState, value: str) -> Any:
         return self.replace_none_with_valid(
             token, self.parse(token, value),
         )
 
-    def parse(self, token: tkn.Token, value: str) -> Any:
+    def parse(self, drawing_state: DrawingState, value: str) -> Any:
         if value is not None:
-            return token.meta.coparser.parse(value)
+            return drawing_state.parse(value)
 
     def ensure_mm(self, token: tkn.Token, value: float):
         if token.meta.unit == Unit.INCHES:

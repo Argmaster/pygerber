@@ -4,14 +4,18 @@ from pygerber.mathclasses import Vector2D
 
 import re
 
-from pygerber.validators import Int, load_validators, OffsetCoordinate, VectorCoordinateX, VectorCoordinateY
+from pygerber.validators.basic import Int
+from pygerber.validators.coordinate import (
+    OffsetCoordinate,
+    VectorCoordinateX,
+    VectorCoordinateY,
+)
 
 from .token import Deprecated, Token
 
 CO_PATTERN = r"[-+]?[0-9]+"
 
 
-@load_validators
 class D01_Token(Token):
     regex = re.compile(
         r"(X(?P<X>{0}))?(Y(?P<Y>{0}))?(I(?P<I>{0}))?(J(?P<J>{0}))?D01\*".format(
@@ -42,7 +46,6 @@ class D01_Token(Token):
         return self.meta.bbox_interpolated(self.end, self.offset)
 
 
-@load_validators
 class D02_Token(Token):
     regex = re.compile(
         r"(X(?P<X>{0}))?(Y(?P<Y>{0}))?D02\*".format(CO_PATTERN),
@@ -59,7 +62,6 @@ class D02_Token(Token):
         self.meta.move_pointer(self.point)
 
 
-@load_validators
 class D03_Token(Token):
     regex = re.compile(
         r"(X(?P<X>{0}))?(Y(?P<Y>{0}))?D03\*".format(CO_PATTERN),
@@ -83,19 +85,17 @@ class D03_Token(Token):
 
 
 @Deprecated("G54 command is deprecated since 2012")
-@load_validators
 class G54DNN_Loader_Token(Token):
     regex = re.compile(r"G54D(?P<ID>[1-9][0-9]*)\*")
     ID = Int()
 
-    def affect_meta(self):
+    def alter_state(self):
         self.meta.select_aperture(self.ID)
 
 
-@load_validators
 class DNN_Loader_Token(Token):
     regex = re.compile(r"D(?P<ID>[1-9][0-9]*)\*")
     ID = Int()
 
-    def affect_meta(self):
+    def alter_state(self):
         self.meta.select_aperture(self.ID)

@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-import pygerber.meta.aperture as meta_ap
+import pygerber.renderer.aperture as meta_ap
 
 from pygerber.mathclasses import Vector2D
 

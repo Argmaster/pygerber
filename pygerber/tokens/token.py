@@ -1,63 +1,49 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygerber.renderer import Renderer
+    from pygerber.drawing_state import DrawingState
 from pygerber.mathclasses import BoundingBox, Vector2D
 
 import re
-from abc import ABCMeta, abstractmethod
-from typing import TYPE_CHECKING, Union
-
-import pygerber.meta
-
-import pygerber.validators as validator
 
 
-class Token(validator.ValidatorDispatcher, metaclass=ABCMeta):
+from .dispatcher_meta import Dispatcher
+
+
+class Token(Dispatcher):
     regex: re.Pattern
     re_match: re.Match
-    # meta attribute is only available after dispatch
-    meta: pygerber.meta.Meta
     keep: bool = True
+    __deprecated__: bool = False
 
-    def __init__(self, match_object: re.Match) -> None:
+    def __init__(self, match_object: re.Match, drawing_state: DrawingState) -> None:
         self.re_match = match_object
+        group_dict = self.re_match.groupdict()
+        for name, validator in self.__validators__:
+            print(group_dict)
+            cleaned_value = validator(self, drawing_state, group_dict.get(name))
+            setattr(self, name, cleaned_value)
 
-    @classmethod
-    def match_and_dispatch(
-        class_, meta: pygerber.meta.Meta, source: str, index: int = 0
-    ) -> Union[Token, bool]:
-        # returns False on failure, Token object on success, token is dispatched.
-        token = class_.match(source, index)
-        if token:
-            token.dispatch(meta)
-        return token
-
-    @classmethod
-    def match(class_: Token, source: str, index: int = 0) -> Union[Token, bool]:
-        # returns False on failure, Token object on success, token is not dispatched.
-        optional_match = class_.regex.match(source, pos=index)
-        if optional_match is None:
-            return False
-        else:
-            # Token object have to be dispatched to make it functional
-            return class_(optional_match)
-
-    def affect_meta(self):
+    def alter_state(self, drawing_state: DrawingState):
         """
         This method should be called only after token is dispatched and before render().
         """
         pass
 
-    def pre_render(self):
+    def pre_render(self, drawing_state: DrawingState):
         # called right before render, even if render was not called
         pass
 
-    def render(self):
+    def render(self, renderer: Renderer):
         """
-        This method should be called only after token is dispatched and after affect_meta().
+        This method should be called only after token is dispatched and after alter_state().
         """
         pass
 
-    def post_render(self):
+    def post_render(self, drawing_state: DrawingState):
         # called right after render, even if render was not called
         pass
 
@@ -80,11 +66,5 @@ class Deprecated:
 
     def __call__(self, class_: Token):
         message = self.message
-
-        def deprecated_dispatch(self, meta):
-            meta.raiseDeprecatedSyntax(message)
-            super(class_, self).dispatch(meta)
-
-        class_.dispatch = deprecated_dispatch
-
+        class_.__deprecated__ = message
         return class_

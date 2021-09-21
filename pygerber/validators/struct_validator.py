@@ -5,15 +5,18 @@ import re
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Callable
 
+from pygerber.tokens.dispatcher_meta import Dispatcher
+
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
+
 from pygerber.exceptions import InvalidCommandFormat
-
-from .validator import Validator
-from .validator_dispatcher import ValidatorDispatcher
-
 from pygerber.tokens import token as tkn
 
+from .validator import Validator
 
-class Dispatcher(ValidatorDispatcher, Validator):
+
+class StructValidator(Dispatcher, Validator):
 
     re_match: re.Match
 
@@ -29,7 +32,9 @@ class Dispatcher(ValidatorDispatcher, Validator):
         else:
             return self.pattern
 
-    def __call__(self, token: tkn.Token, value: str) -> str:
+    def __call__(
+        self, token: tkn.Token, drawing_state: DrawingState, value: str
+    ) -> str:
         if value is not None:
             return self.clean_not_none(token, value)
         else:

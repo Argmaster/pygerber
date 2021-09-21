@@ -15,7 +15,6 @@ class DispatcherTest(TestCase):
     def test_dispatcher(self):
         token = self.get_dummy_token()
 
-        @load_validators
         class ARGS_dispatcher(Dispatcher):
             VALUE = Validator()
 
@@ -29,7 +28,6 @@ class DispatcherTest(TestCase):
     def test_dispatcher_fail(self):
         token = self.get_dummy_token()
 
-        @load_validators
         class ARGS_dispatcher(Dispatcher):
             VALUE = Validator()
 

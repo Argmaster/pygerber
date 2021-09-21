@@ -4,8 +4,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from pygerber.mathclasses import BoundingBox
-from pygerber.meta.arc_util_mixin import ArcUtilMixin
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
+from pygerber.renderer.arc_util_mixin import ArcUtilMixin
+from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec
 from pygerber.tokens.add import ADD_Token
 
 
