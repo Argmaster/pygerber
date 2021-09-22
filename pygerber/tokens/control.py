@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
 from pygerber.validators.basic import String
 from pygerber.exceptions import EndOfStream
 import re
@@ -10,7 +14,7 @@ from .token import Deprecated, Token
 class EndOfStream_Token(Token):
     regex = re.compile(r"M0[02]\*")
 
-    def alter_state(self):
+    def alter_state(self, state: DrawingState):
         raise EndOfStream()
 
 
