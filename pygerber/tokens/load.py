@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
 
 import re
 
@@ -13,8 +16,8 @@ class LoadPolarityToken(Token):
 
     POLARITY = String()
 
-    def alter_state(self):
-        self.meta.set_polarity(self.POLARITY)
+    def alter_state(self, state: DrawingState):
+        state.set_polarity(self.POLARITY)
 
 
 class LoadMirroringToken(Token):
@@ -22,8 +25,8 @@ class LoadMirroringToken(Token):
 
     MIRRORING = String()
 
-    def alter_state(self):
-        self.meta.set_mirroring(self.MIRRORING)
+    def alter_state(self, state: DrawingState):
+        state.set_mirroring(self.MIRRORING)
 
 
 
@@ -35,8 +38,8 @@ class LoadRotationToken(Token):
 
     ROTATION = Float()
 
-    def alter_state(self):
-        self.meta.set_rotation(self.ROTATION)
+    def alter_state(self, state: DrawingState):
+        state.set_rotation(self.ROTATION)
 
 
 
@@ -48,8 +51,8 @@ class LoadScalingToken(Token):
 
     SCALE = Float()
 
-    def alter_state(self):
-        self.meta.set_scaling(self.SCALE)
+    def alter_state(self, state: DrawingState):
+        state.set_scaling(self.SCALE)
 
 
 
@@ -59,5 +62,5 @@ class LoadUnitToken(Token):
 
     UNIT = String()
 
-    def alter_state(self):
-        self.meta.set_unit(self.UNIT)
+    def alter_state(self, state: DrawingState):
+        state.set_unit(self.UNIT)
