@@ -18,46 +18,19 @@ class Coordinate(Validator):
         super().__init__(default=None)
 
     def __call__(self, token: tkn.Token, drawing_state: DrawingState, value: str) -> Any:
-        return self.replace_none_with_valid(
-            token, self.parse(token, value),
-        )
+        value = self.parse(drawing_state, value)
+        value = self.ensure_mm(drawing_state, value)
+        return value
 
     def parse(self, drawing_state: DrawingState, value: str) -> Any:
         if value is not None:
-            return drawing_state.parse(value)
+            return drawing_state.parse_co(value)
 
-    def ensure_mm(self, token: tkn.Token, value: float):
-        if token.meta.unit == Unit.INCHES:
+    def ensure_mm(self, drawing_state: tkn.Token, value: float):
+        if drawing_state.unit == Unit.INCHES:
             return value * INCH_TO_MM_RATIO
         else:
             return value
-
-    def replace_none_with_valid(self, token: tkn.Token, value: float):
-        if value is None:
-            return self.get_default(token)
-        else:
-            return self.ensure_mm(token, value)
-
-    def get_default(self, token: tkn.Token):
-        raise TypeError(
-            "get_default(...) not implemented. Implement it in subclass or use VectorCoordinateX, "
-            "VectorCoordinateY, OffsetCoordinate instead."
-        )
-
-
-class VectorCoordinateX(Coordinate):
-    def get_default(self, token: tkn.Token):
-        return token.get_current_point().x
-
-
-class VectorCoordinateY(Coordinate):
-    def get_default(self, token: tkn.Token):
-        return token.get_current_point().y
-
-
-class OffsetCoordinate(Coordinate):
-    def get_default(self, token: tkn.Token):
-        return 0
 
 class UnitFloat(Coordinate):
     def __init__(self, default: float = None) -> None:

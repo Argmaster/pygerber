@@ -18,22 +18,22 @@ class Token(Dispatcher):
     re_match: re.Match
     keep: bool = True
     __deprecated__: bool = False
+    renderer: Renderer = None
 
     def __init__(self, match_object: re.Match, drawing_state: DrawingState) -> None:
         self.re_match = match_object
         group_dict = self.re_match.groupdict()
         for name, validator in self.__validators__:
-            print(group_dict)
             cleaned_value = validator(self, drawing_state, group_dict.get(name))
             setattr(self, name, cleaned_value)
 
     def alter_state(self, drawing_state: DrawingState):
         """
-        This method should be called only after token is dispatched and before render().
+        This method should be called before render().
         """
         pass
 
-    def pre_render(self, drawing_state: DrawingState):
+    def pre_render(self, renderer: Renderer):
         # called right before render, even if render was not called
         pass
 
@@ -43,15 +43,12 @@ class Token(Dispatcher):
         """
         pass
 
-    def post_render(self, drawing_state: DrawingState):
+    def post_render(self, renderer: Renderer):
         # called right after render, even if render was not called
         pass
 
     def bbox(self) -> BoundingBox:
         pass
-
-    def get_current_point(self) -> Vector2D:
-        return self.meta.current_point
 
     def __str__(self) -> str:
         """

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from pygerber.mathclasses import BoundingBox
-from pygerber.meta.apertureset import ApertureSet
+from pygerber.renderer.apertureset import ApertureSet
 from typing import List
 
-from pygerber.meta.aperture import (
+from pygerber.renderer.aperture import (
     CircularAperture,
     CustomAperture,
     PolygonAperture,
     RectangularAperture,
     RegionApertureManager,
 )
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
+from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec, Spec
 
 
 class ApertureCollector:

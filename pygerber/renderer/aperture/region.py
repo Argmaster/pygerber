@@ -5,8 +5,8 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 
 from pygerber.mathclasses import BoundingBox
-from pygerber.meta.arc_util_mixin import ArcUtilMixin
-from pygerber.meta.spec import Spec
+from pygerber.renderer.arc_util_mixin import ArcUtilMixin
+from pygerber.renderer.spec import Spec
 from .aperture import Aperture
 
 
