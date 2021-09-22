@@ -9,9 +9,9 @@ from pygerber.tokens.dispatcher_meta import Dispatcher
 
 if TYPE_CHECKING:
     from pygerber.drawing_state import DrawingState
+    from pygerber.tokens.token import Token
 
-from pygerber.exceptions import InvalidCommandFormat
-from pygerber.tokens import token as tkn
+from pygerber.exceptions import InvalidCommandFormat, InvalidSyntaxError
 
 from .validator import Validator
 
@@ -33,24 +33,24 @@ class StructValidator(Dispatcher, Validator):
             return self.pattern
 
     def __call__(
-        self, token: tkn.Token, drawing_state: DrawingState, value: str
+        self, token: Token, drawing_state: DrawingState, value: str
     ) -> str:
         if value is not None:
-            return self.clean_not_none(token, value)
+            return self.clean_args(token, drawing_state, value)
         else:
-            return self.clean_none(token)
+            return self.empty_namespace(token, drawing_state)
 
-    def clean_not_none(self, token: tkn.Token, value: str):
+    def clean_args(self, token: Token, drawing_state: DrawingState, value: str):
         pattern = self.get_pattern(token, value)
         self.re_match = pattern.match(value)
         if self.re_match is None:
             raise InvalidCommandFormat("Invalid set of arguments.")
-        return self.dispatch_into_namespace(token.meta)
+        namespace = SimpleNamespace(__validators__=self.__validators__)
+        Dispatcher.__init__(namespace, self.re_match, drawing_state)
+        return namespace
 
-    def clean_none(self, token: tkn.Token):
-        self.re_match = None
-        return self.dispatch_into_namespace(token.meta)
-
-    def dispatch_into_namespace(self, meta):
+    def empty_namespace(self, token: Token, drawing_state: DrawingState):
         namespace = SimpleNamespace()
-        return super().dispatch_into_namespace(meta, namespace)
+        for key, validator in self.__validators__:
+            setattr(namespace, key, validator(token, drawing_state, None))
+        return namespace

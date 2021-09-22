@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+from typing import TYPE_CHECKING
 from pygerber.validators.struct_validator import StructValidator
 from pygerber.validators.coordinate import UnitFloat
 
+if TYPE_CHECKING:
+    from pygerber.renderer import Renderer
 import re
 
 from .token import Token
@@ -55,5 +58,5 @@ class ADD_Token(Token):
         elif self.TYPE == "P":
             return self.POLYGON_PATTERN
 
-    def alter_state(self):
-        self.meta.define_aperture(self.TYPE, self.NAME, self.ID, self.ARGS)
+    def pre_render(self, renderer: Renderer):
+        renderer.define_aperture(self.TYPE, self.NAME, self.ID, self.ARGS)

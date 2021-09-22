@@ -20,13 +20,6 @@ class Token(Dispatcher):
     __deprecated__: bool = False
     renderer: Renderer = None
 
-    def __init__(self, match_object: re.Match, drawing_state: DrawingState) -> None:
-        self.re_match = match_object
-        group_dict = self.re_match.groupdict()
-        for name, validator in self.__validators__:
-            cleaned_value = validator(self, drawing_state, group_dict.get(name))
-            setattr(self, name, cleaned_value)
-
     def alter_state(self, drawing_state: DrawingState):
         """
         This method should be called before render().

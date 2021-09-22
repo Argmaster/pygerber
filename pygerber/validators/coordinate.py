@@ -36,8 +36,8 @@ class UnitFloat(Coordinate):
     def __init__(self, default: float = None) -> None:
         self.default = default
 
-    def __call__(self, token: tkn.Token, value: str) -> Any:
+    def __call__(self, token: tkn.Token, drawing_state: DrawingState, value: str) -> Any:
         if value is not None:
-            return self.ensure_mm(token, float(value))
+            return self.ensure_mm(drawing_state, float(value))
         else:
             return self.default

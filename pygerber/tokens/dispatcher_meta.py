@@ -3,10 +3,14 @@ from __future__ import annotations
 from abc import ABCMeta
 from inspect import isclass
 
-from typing import Dict, Tuple, Type
+from typing import TYPE_CHECKING, Dict, Tuple, Type
+
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
+
+import re
 
 from pygerber.validators.validator import Validator
-
 
 
 class DispatcherMeta(ABCMeta):
@@ -36,6 +40,13 @@ class DispatcherMeta(ABCMeta):
 class Dispatcher(metaclass=DispatcherMeta):
 
     __validators__: Dict[str, Validator]
+
+    def __init__(self, match_object: re.Match, drawing_state: DrawingState) -> None:
+        self.re_match = match_object
+        group_dict = self.re_match.groupdict()
+        for name, validator in self.__validators__:
+            cleaned_value = validator(self, drawing_state, group_dict.get(name))
+            setattr(self, name, cleaned_value)
 
 
 def getvalidators(mesh_factory: Dispatcher) -> dict:

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from unittest.mock import Mock
-from pygerber.drawing_state import DrawingState
 from unittest import TestCase, main
+from unittest.mock import Mock
 
+from pygerber.drawing_state import DrawingState
 from pygerber.tokens import D03_Token
 
 
