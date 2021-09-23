@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pygerber.renderer import Renderer
 from pygerber.mathclasses import BoundingBox
 from pygerber.renderer.apertureset import ApertureSet
 from typing import List
@@ -67,7 +68,7 @@ class RegionApertureCollector(ApertureCollector, RegionApertureManager):
 
 
 class CustomApertureCollector(ApertureCollector, CustomAperture):
-    def bbox(self):
+    def bbox(self, renderer: Renderer):
         return BoundingBox(0, 0, 0, 0)
 
 

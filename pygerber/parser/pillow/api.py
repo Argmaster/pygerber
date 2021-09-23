@@ -227,11 +227,10 @@ def render_file(
     **kwargs will be passed to ParserWithPillow, check it out for available params.
     """
     parser = ParserWithPillow(
-        file_path,
         dpi=dpi,
         colors=colors,
         ignore_deprecated=ignore_deprecated,
         image_padding=image_padding,
     )
-    parser.render()
+    parser.parse_file(file_path)
     return parser.get_image()

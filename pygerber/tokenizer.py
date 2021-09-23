@@ -31,7 +31,7 @@ class Tokenizer:
     char_index = 0
     line_index = 1
 
-    def __init__(self, *, ignore_deprecated: bool = True) -> None:
+    def __init__(self, ignore_deprecated: bool = True) -> None:
         self.ignore_deprecated = ignore_deprecated
         self.token_stack = deque()
         self.state = DrawingState()

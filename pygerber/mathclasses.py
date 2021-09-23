@@ -132,3 +132,4 @@ class BoundingBox:
             return self.transform(other)
         else:
             raise TypeError(f"Type {type(other).__qualname__} addition not supported.")
+

@@ -34,7 +34,7 @@ class G36_Token(Token):
 class G37_Token(Token):
     regex = re.compile(r"G37\*")
 
-    def pre_render(self, renderer: DrawingState):
+    def pre_render(self, renderer: Renderer):
         self.manager, self.bounds = renderer.finish_drawing_region()
 
     def render(self, renderer: Renderer):
@@ -43,7 +43,7 @@ class G37_Token(Token):
     def post_render(self, renderer: Renderer):
         renderer.end_region()
 
-    def bbox(self) -> BoundingBox:
+    def bbox(self, renderer: Renderer) -> BoundingBox:
         return self.manager.bbox(self.bounds)
 
 

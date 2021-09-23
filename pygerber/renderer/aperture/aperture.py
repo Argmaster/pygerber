@@ -2,6 +2,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygerber.renderer import Renderer
 
 from pygerber.mathclasses import BoundingBox
 from pygerber.renderer.arc_util_mixin import ArcUtilMixin
@@ -10,7 +14,7 @@ from pygerber.tokens.add import ADD_Token
 
 
 class Aperture(ABC, ArcUtilMixin):
-    def __init__(self, args: ADD_Token.ARGS, renderer) -> None:
+    def __init__(self, args: ADD_Token.ARGS, renderer: Renderer) -> None:
         raise TypeError()
 
     @abstractmethod

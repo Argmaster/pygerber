@@ -42,7 +42,7 @@ class D01_Token(Token):
         renderer.move_pointer(self.end)
 
     def bbox(self, renderer: Renderer):
-        renderer.bbox_interpolated(self.end, self.offset)
+        return renderer.bbox_interpolated(self.end, self.offset)
 
 
 class D02_Token(Token):
@@ -73,7 +73,7 @@ class D03_Token(D02_Token):
         renderer.move_pointer(self.point)
 
     def bbox(self, renderer: Renderer):
-        renderer.bbox_flash(self.point)
+        return renderer.bbox_flash(self.point)
 
 
 

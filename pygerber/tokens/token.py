@@ -40,7 +40,7 @@ class Token(Dispatcher):
         # called right after render, even if render was not called
         pass
 
-    def bbox(self) -> BoundingBox:
+    def bbox(self, renderer: Renderer) -> BoundingBox:
         pass
 
     def __str__(self) -> str:

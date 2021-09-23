@@ -36,9 +36,8 @@ class TestPillowParser(TestCase):
         self.assertRaises(RuntimeError, lambda: ParserWithPillow(None, None))
 
     def test_parser_string(self):
-        parser = ParserWithPillow(None, self.SOURCE_0)
-        self.assertEqual(parser.tokenizer.bbox.width(), 1.5)
-        parser.render()
+        parser = ParserWithPillow()
+        parser.parse(self.SOURCE_0)
         image = parser.get_image()
         # to manually validate output uncomment this:
         # image.show()
@@ -57,8 +56,8 @@ class TestPillowParser(TestCase):
         parser.save(".\\tests\\test_parser\\test_render.png")
 
     def test_parser_null_size_image(self):
-        parser = ParserWithPillow(None, "M02*")
-        self.assertRaises(ImageSizeNullError, parser.render)
+        parser = ParserWithPillow()
+        self.assertRaises(ImageSizeNullError, parser.parse, "M02*")
 
     def test_render_file_and_save(self):
         render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png")
@@ -97,13 +96,13 @@ class TestPillowParser(TestCase):
         self.render_file_optional_show_and_save("s4.grb", False, False, False, dpi=1600)
 
     def test_parser_file_5(self):
-        self.render_file_optional_show_and_save("s5.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s5.grb", False, True, False, dpi=1600)
 
     def test_parser_file_6(self):
-        self.render_file_optional_show_and_save("s6.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s6.grb", False, True, False, dpi=1600)
 
     def test_parser_file_7(self):
-        self.render_file_optional_show_and_save("s7.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s7.grb", False, True, False, dpi=1600)
 
 
 def get_test_spec():

@@ -8,15 +8,18 @@ from pygerber.exceptions import ApertureSelectionError, InvalidSyntaxError
 if TYPE_CHECKING:
     from .aperture import Aperture
     from .apertureset import ApertureSet
+    from pygerber.renderer import Renderer
 
 
 class ApertureManager:
 
     apertures: Dict[int, Aperture]
     apertureSet: ApertureSet
+    renderer: Renderer
     current_aperture: Aperture=None
 
-    def __init__(self, apertureSet: ApertureSet) -> None:
+    def __init__(self, apertureSet: ApertureSet, renderer: Renderer) -> None:
+        self.renderer = renderer
         self.__bind_aperture_set(apertureSet)
         self.set_defaults()
 
@@ -48,7 +51,7 @@ class ApertureManager:
             apertureClass = self.apertureSet.getApertureClass(type)
         else:
             apertureClass = self.apertureSet.getApertureClass(name)
-        self.apertures[ID] = apertureClass(args, self)
+        self.apertures[ID] = apertureClass(args, self.renderer)
 
     def get_aperture(self, id: int) -> Aperture:
         aperture = self.apertures.get(id, None)
