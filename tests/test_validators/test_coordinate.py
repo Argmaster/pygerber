@@ -7,7 +7,6 @@ from unittest import TestCase, main
 
 
 class CoordinateTest(TestCase):
-
     def test_Coordinate(self):
         token = None
         state = DrawingState()

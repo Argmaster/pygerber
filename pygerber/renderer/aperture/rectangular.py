@@ -12,8 +12,8 @@ class RectangularAperture(Aperture):
     Y: float
     HOLE_DIAMETER: float
 
-    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
-        self.broker = broker
+    def __init__(self, args: ADD_Token.ARGS, renderer) -> None:
+        self.renderer = renderer
         self.X = args.X
         self.Y = args.Y
         self.HOLE_DIAMETER = args.HOLE_DIAMETER

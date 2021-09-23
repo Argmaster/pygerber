@@ -3,7 +3,7 @@ from unittest import TestCase, main
 from unittest.mock import MagicMock
 
 from pygerber.mathclasses import BoundingBox, Vector2D
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec, Spec
+from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec, Spec
 
 
 class SpecTest(TestCase):

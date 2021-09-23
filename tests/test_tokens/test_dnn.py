@@ -38,6 +38,7 @@ class DNN_Loader_Token_Test(TestCase):
         token.pre_render(renderer)
         renderer.select_aperture.assert_called_with(self.V1)
 
+
 class G54DNN_Loader_Token_Test(DNN_Loader_Token_Test):
 
     S0 = "G54D12*"
@@ -49,6 +50,7 @@ class G54DNN_Loader_Token_Test(DNN_Loader_Token_Test):
             return G54DNN_Loader_Token(re_match, DrawingState())
         else:
             raise RuntimeError(f"Token not matched for {source}")
+
 
 if __name__ == "__main__":
     main()

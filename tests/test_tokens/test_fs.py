@@ -6,6 +6,7 @@ from pygerber.exceptions import DeprecatedSyntax, InvalidCommandFormat
 from pygerber.tokens import FormatSpecifierToken
 from pygerber.drawing_state import DrawingState
 
+
 class FormatSpecifierTokenTest(TestCase):
     def match_fs_token(self, SOURCE) -> FormatSpecifierToken:
         re_match = FormatSpecifierToken.regex.match(SOURCE)

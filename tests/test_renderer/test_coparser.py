@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from pygerber.exceptions import FeatureNotSupportedError
-from pygerber import meta
 from unittest import TestCase, main
-from pygerber.meta import coparser
 
-from pygerber.meta.coparser import CoParser
+from pygerber.coparser import CoParser
 from pygerber.tokens.fs import FormatSpecifierToken
 
 

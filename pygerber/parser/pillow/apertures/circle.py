@@ -8,8 +8,8 @@ from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 
 from PIL import Image, ImageDraw
 from pygerber.mathclasses import Vector2D
-from pygerber.meta.aperture import CircularAperture
-from pygerber.meta.spec import ArcSpec, LineSpec
+from pygerber.renderer.aperture import CircularAperture
+from pygerber.renderer.spec import ArcSpec, LineSpec
 
 
 class PillowCircle(ArcUtilMixinPillow, FlashUtilMixin, CircularAperture):

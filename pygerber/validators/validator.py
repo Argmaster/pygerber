@@ -13,5 +13,5 @@ class Validator:
     def __init__(self, default: Any = None) -> None:
         self.default = default
 
-    def __call__(self, token: Token, drawing_state: DrawingState, value: str) -> str:
+    def __call__(self, token: Token, state: DrawingState, value: str) -> str:
         return value

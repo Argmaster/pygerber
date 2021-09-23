@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class Float(Validator):
-    def __call__(self, token: Token, drawing_state: DrawingState, value: str) -> float:
+    def __call__(self, token: Token, state: DrawingState, value: str) -> float:
         if value is not None:
             return float(value)
         else:
@@ -18,7 +18,7 @@ class Float(Validator):
 
 
 class Int(Validator):
-    def __call__(self, token: Token, drawing_state: DrawingState, value: str) -> int:
+    def __call__(self, token: Token, state: DrawingState, value: str) -> int:
         if value is not None:
             return int(value)
         else:
@@ -26,7 +26,7 @@ class Int(Validator):
 
 
 class String(Validator):
-    def __call__(self, token: Token, drawing_state: DrawingState, value: str) -> str:
+    def __call__(self, token: Token, state: DrawingState, value: str) -> str:
         if value is not None:
             return str(value)
         else:
@@ -38,5 +38,5 @@ class Function(Validator):
         self.function = function
         super().__init__(default=None)
 
-    def __call__(self, token: Token, drawing_state: DrawingState, value: str) -> str:
+    def __call__(self, token: Token, state: DrawingState, value: str) -> str:
         return self.function(token, value)

@@ -41,5 +41,6 @@ class D02_TokenText(TestCase):
         token.post_render(renderer)
         renderer.move_pointer.assert_called_with(token.point)
 
+
 if __name__ == "__main__":
     main()

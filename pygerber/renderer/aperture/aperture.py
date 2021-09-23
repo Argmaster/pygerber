@@ -10,8 +10,7 @@ from pygerber.tokens.add import ADD_Token
 
 
 class Aperture(ABC, ArcUtilMixin):
-
-    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
+    def __init__(self, args: ADD_Token.ARGS, renderer) -> None:
         raise TypeError()
 
     @abstractmethod

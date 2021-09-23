@@ -9,11 +9,11 @@ from pygerber.renderer.spec import ArcSpec
 
 DELTA_MULTIPLIER = 25
 
-class ArcUtilMixin:
 
+class ArcUtilMixin:
     @property
     def isCCW(self):
-        return self.broker.isCCW()
+        return self.renderer.isCCW()
 
     def get_begin_end_angles(self, spec: ArcSpec):
         begin_relative = spec.begin - spec.center
@@ -28,14 +28,19 @@ class ArcUtilMixin:
         begin_angle, end_angle = self.get_begin_end_angles(spec)
         radius = spec.get_radius()
         x, y = self.get_arc_co_functions(radius)
-        delta = self.get_arc_traverse_step_angle(begin_angle, end_angle, radius) * DELTA_MULTIPLIER
+        delta = (
+            self.get_arc_traverse_step_angle(begin_angle, end_angle, radius)
+            * DELTA_MULTIPLIER
+        )
         if self.isCCW:
             return self.__get_arc_points_ccw(end_angle, begin_angle, x, spec, y, delta)
         else:
             return self.__get_arc_points_cw(end_angle, begin_angle, x, spec, y, delta)
 
     def get_arc_traverse_step_angle(self, begin_angle, end_angle, radius):
-        raise NotImplementedError("get_arc_traverse_step_angle() have to be implemented in subclass.")
+        raise NotImplementedError(
+            "get_arc_traverse_step_angle() have to be implemented in subclass."
+        )
 
     def __get_arc_points_ccw(self, end_angle, begin_angle, x, spec, y, delta):
         end_relative_angle = end_angle - begin_angle

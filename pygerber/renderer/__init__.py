@@ -1,4 +1,3 @@
-
 # class Meta(DrawingBroker):
 #
 #     coparser = CoParser
@@ -20,6 +19,8 @@
 #         if not self.ignore_deprecated:
 #             raise DeprecatedSyntax(message)
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+from pygerber.renderer.aperture.aperture import Aperture
 from pygerber.exceptions import EndOfStream
 from typing import List, Tuple
 
@@ -33,17 +34,17 @@ from pygerber.drawing_state import DrawingState, Interpolation
 from pygerber.tokens.token import Token
 
 
-class Renderer():
+class Renderer:
 
     current_point: Vector2D
     region_bounds: List[Spec]
 
     apertures: ApertureManager
-    drawing_state: DrawingState
+    state: DrawingState
 
     def __init__(self, apertureSet: ApertureSet) -> None:
         self.apertures = ApertureManager(apertureSet)
-        self.drawing_state = DrawingState()
+        self.state = DrawingState()
         self.set_defaults()
 
     def render(self) -> None:
@@ -65,29 +66,31 @@ class Renderer():
 
     def set_defaults(self):
         self.apertures.set_defaults()
-        self.drawing_state.set_defaults()
-        self.current_aperture = None
+        self.state.set_defaults()
         self.current_point = Vector2D(0, 0)
         self.region_bounds = []
+
+    def define_aperture(self, *args, **kwargs):
+        self.apertures.define_aperture(*args, **kwargs)
 
     def select_aperture(self, id: int):
         self.apertures.select_aperture(id)
 
     def draw_interpolated(self, end: Vector2D, offset: Vector2D) -> None:
-        if self.interpolation == Interpolation.Linear:
+        if self.state.interpolation == Interpolation.Linear:
             self.draw_line(end)
         else:
             self.draw_arc(end, offset)
 
     def bbox_interpolated(self, end: Vector2D, offset: Vector2D) -> BoundingBox:
-        if self.interpolation == Interpolation.Linear:
+        if self.state.interpolation == Interpolation.Linear:
             return self.bbox_line(end)
         else:
             return self.bbox_arc(end, offset)
 
     def draw_line(self, end: Vector2D) -> None:
         spec = self.__get_line_spec(end)
-        if self.is_regionmode:
+        if self.state.is_regionmode:
             self.__push_region_step(spec)
         else:
             self.apertures.get_current_aperture().line(spec)
@@ -97,7 +100,7 @@ class Renderer():
 
     def bbox_line(self, end: Vector2D) -> None:
         spec = self.__get_line_spec(end)
-        if self.is_regionmode:
+        if self.state.is_regionmode:
             self.__push_region_step(spec)
         else:
             return self.apertures.get_current_aperture().line_bbox(spec)
@@ -106,19 +109,19 @@ class Renderer():
         return LineSpec(
             self.current_point,
             end,
-            self.is_regionmode,
+            self.state.is_regionmode,
         )
 
     def draw_arc(self, end: Vector2D, offset: Vector2D) -> None:
         spec = self.__get_arc_spec(end, offset)
-        if self.is_regionmode:
+        if self.state.is_regionmode:
             self.__push_region_step(spec)
         else:
             self.apertures.get_current_aperture().arc(spec)
 
     def bbox_arc(self, end: Vector2D, offset: Vector2D) -> None:
         spec = self.__get_arc_spec(end, offset)
-        if self.is_regionmode:
+        if self.state.is_regionmode:
             self.__push_region_step(spec)
         else:
             return self.apertures.get_current_aperture().arc_bbox(spec)
@@ -129,11 +132,11 @@ class Renderer():
             end,
             # TODO Not entirely sure how center should be calculated
             self.current_point + offset,
-            self.is_regionmode,
+            self.state.is_regionmode,
         )
 
     def draw_flash(self, point: Vector2D) -> None:
-        if self.is_regionmode:
+        if self.state.is_regionmode:
             raise RuntimeError("Flashes can't be used in region mode.")
         else:
             self.move_pointer(point)
@@ -150,12 +153,12 @@ class Renderer():
     def __get_flash_spec(self, point: Vector2D) -> FlashSpec:
         spec = FlashSpec(
             point,
-            self.is_regionmode,
+            self.state.is_regionmode,
         )
         return spec
 
     def end_region(self):
-        self.drawing_state.end_region()
+        self.state.end_region()
 
     def finish_drawing_region(self) -> Tuple[RegionApertureManager, List[Spec]]:
         bounds = self.__get_and_clean_region_bounds()
@@ -171,4 +174,4 @@ class Renderer():
         self.current_point = location
 
     def isCCW(self):
-        return self.interpolation == Interpolation.CounterclockwiseCircular
+        return self.state.interpolation == Interpolation.CounterclockwiseCircular

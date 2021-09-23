@@ -6,8 +6,8 @@ from .aperture import Aperture
 
 
 class CustomAperture(Aperture):
-    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
-        self.broker = broker
+    def __init__(self, args: ADD_Token.ARGS, renderer) -> None:
+        self.renderer = renderer
         self.args = args
         self.process_args()
 

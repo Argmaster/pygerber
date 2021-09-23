@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from PIL import ImageDraw
-from pygerber.meta.aperture import CustomAperture
+from pygerber.renderer.aperture import CustomAperture
 from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.parser.pillow.apertures.flash_line_mixin import FlashLineMixin
 from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin

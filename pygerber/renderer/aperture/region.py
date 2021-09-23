@@ -13,8 +13,8 @@ from .aperture import Aperture
 class RegionApertureManager(ABC, ArcUtilMixin):
     steps: List[Tuple[Aperture, Spec]]
 
-    def __init__(self, broker) -> None:
-        self.broker = broker
+    def __init__(self, renderer) -> None:
+        self.renderer = renderer
 
     @abstractmethod
     def finish(self, bounds: List[Spec]) -> None:

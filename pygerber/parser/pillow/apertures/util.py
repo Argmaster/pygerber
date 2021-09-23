@@ -2,28 +2,28 @@
 from __future__ import annotations
 
 from pygerber.mathclasses import Vector2D
-from pygerber.meta.broker import DrawingBroker
-from pygerber.meta.meta import Polarity
-from pygerber.meta.spec import ArcSpec, FlashSpec, LineSpec
+from pygerber.renderer import Renderer
+from pygerber.constants import Polarity
+from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec
 
 INCH_TO_MM_MULTIPLIER = 0.0393701
 
 
 class PillowUtilMethdos:
 
-    broker: DrawingBroker
+    renderer: Renderer
 
     @property
     def dpmm(self):
-        return self.broker.dpmm
+        return self.renderer.dpmm
 
     @property
     def canvas(self):
-        return self.broker.canvas
+        return self.renderer.canvas
 
     @property
     def draw_canvas(self):
-        return self.broker.draw_canvas
+        return self.renderer.draw_canvas
 
     def get_color(self):
         if self.is_clear():
@@ -32,18 +32,18 @@ class PillowUtilMethdos:
             return self.get_dark_color()
 
     def is_clear(self):
-        return self.broker.polarity == Polarity.CLEAR
+        return self.renderer.state.polarity == Polarity.CLEAR
 
     def get_dark_color(self):
-        return self.broker.colors.dark
+        return self.renderer.colors.dark
 
     def get_clear_color(self):
-        return self.broker.colors.clear
+        return self.renderer.colors.clear
 
     def prepare_coordinates(self, vector: Vector2D) -> Vector2D:
         return Vector2D(
-            int(self._prepare_co(vector.x) + self.broker.left_offset),
-            int(self._prepare_co(vector.y) + self.broker.bottom_offset),
+            int(self._prepare_co(vector.x) + self.renderer.left_offset),
+            int(self._prepare_co(vector.y) + self.renderer.bottom_offset),
         )
 
     def _prepare_co(self, value: float) -> float:

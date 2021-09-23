@@ -1,23 +1,30 @@
-from typing import Dict
+# -*- coding: utf-8 -*-
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict
 
 from pygerber.exceptions import ApertureSelectionError, InvalidSyntaxError
 
-from .aperture import Aperture
-from .apertureset import ApertureSet
+if TYPE_CHECKING:
+    from .aperture import Aperture
+    from .apertureset import ApertureSet
 
 
 class ApertureManager:
 
     apertures: Dict[int, Aperture]
     apertureSet: ApertureSet
-    current_aperture: Aperture
+    current_aperture: Aperture=None
 
     def __init__(self, apertureSet: ApertureSet) -> None:
         self.__bind_aperture_set(apertureSet)
         self.set_defaults()
-        
+
+    def __getitem__(self, id: int) -> Aperture:
+        return self.apertures.get(id)
+
     def select_aperture(self, id: int):
-        self.current_aperture = self.apertures.get_aperture(id)
+        self.current_aperture = self.apertures.get(id)
 
     def get_current_aperture(self):
         if self.current_aperture is None:

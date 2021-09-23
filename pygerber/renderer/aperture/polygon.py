@@ -12,7 +12,7 @@ class PolygonAperture(CircularAperture):
     DIAMETER: float
     HOLE_DIAMETER: float
 
-    def __init__(self, args: ADD_Token.ARGS, broker) -> None:
-        super().__init__(args, broker)
+    def __init__(self, args: ADD_Token.ARGS, renderer) -> None:
+        super().__init__(args, renderer)
         self.VERTICES = args.VERTICES
         self.ROTATION = args.ROTATION

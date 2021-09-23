@@ -6,8 +6,8 @@ from typing import Tuple
 
 from PIL import ImageDraw
 from pygerber.mathclasses import BoundingBox, Vector2D
-from pygerber.meta.aperture import RectangularAperture
-from pygerber.meta.spec import ArcSpec, LineSpec
+from pygerber.renderer.aperture import RectangularAperture
+from pygerber.renderer.spec import ArcSpec, LineSpec
 from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 

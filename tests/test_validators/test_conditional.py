@@ -8,10 +8,10 @@ from pygerber.validators.validator import Validator
 
 
 class TestConditional(TestCase):
-
     def test_conditional_succeed(self):
         def raise_ValueError():
             raise ValueError()
+
         token = None
         state = DrawingState()
         validator = CallOnCondition(

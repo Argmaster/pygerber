@@ -44,11 +44,11 @@ class Dispatcher(metaclass=DispatcherMeta):
 
     __validators__: Dict[str, Validator]
 
-    def __init__(self, match_object: re.Match, drawing_state: DrawingState) -> None:
+    def __init__(self, match_object: re.Match, state: DrawingState) -> None:
         self.re_match = match_object
         group_dict = self.re_match.groupdict()
         for name, validator in self.__validators__:
-            cleaned_value = validator(self, drawing_state, group_dict.get(name))
+            cleaned_value = validator(self, state, group_dict.get(name))
             setattr(self, name, cleaned_value)
 
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections import deque
 from typing import TYPE_CHECKING, Deque
+
 if TYPE_CHECKING:
     from pathlib import Path
     from pygerber.tokens.token import Token
@@ -24,33 +25,31 @@ DEFAULT_TRACE_FILEPATH = "<string>"
 class Tokenizer:
 
     token_stack: deque  # contains Token objects
-    drawing_state: DrawingState
+    state: DrawingState
     token_stack_size: int = 0
     begin_index: int = 0
     char_index = 0
     line_index = 1
 
-    def __init__(
-        self, *, ignore_deprecated: bool = True
-    ) -> None:
+    def __init__(self, *, ignore_deprecated: bool = True) -> None:
         self.ignore_deprecated = ignore_deprecated
         self.token_stack = deque()
-        self.drawing_state = DrawingState()
+        self.state = DrawingState()
         self.set_defaults()
 
     def set_defaults(self):
-        self.drawing_state.set_defaults()
+        self.state.set_defaults()
         self.token_stack_size = 0
         self.begin_index = 0
         self.char_index = 0
         self.line_index = 1
 
-    def tokenize_file(self, file_path: str|Path) -> Deque[Token]:
+    def tokenize_file(self, file_path: str | Path) -> Deque[Token]:
         with open(file_path) as file:
             source = file.read()
         return self.tokenize(source, file_path)
 
-    def tokenize(self, source, file_path: str="<string>") -> Deque[Token]:
+    def tokenize(self, source, file_path: str = "<string>") -> Deque[Token]:
         try:
             while not self.__has_reached_end(source):
                 self.__next_token(source)
@@ -71,7 +70,7 @@ class Tokenizer:
         self.__check_deprecated_syntax(token.__deprecated__)
         self.push_token(token)
         self.__update_indexes(token)
-        token.alter_state(self.drawing_state)
+        token.alter_state(self.state)
         # token.alter_state()
         # token.pre_render()
         # self.__update_bbox(token.bbox())
@@ -85,7 +84,7 @@ class Tokenizer:
         for token_class in token_classes:
             re_match = token_class.regex.match(source, pos=self.begin_index)
             if re_match is not None:
-                return token_class(re_match, self.drawing_state)
+                return token_class(re_match, self.state)
         else:
             self.raise_token_not_found(source)
 
@@ -122,4 +121,3 @@ class Tokenizer:
     def raise_token_not_found(self, source):
         end_index = min(len(source), self.begin_index + 30)
         raise TokenNotFound(f"{source[self.begin_index:end_index]}")
-

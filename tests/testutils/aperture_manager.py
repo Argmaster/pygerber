@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from tests.testutils.apertures import get_dummy_apertureSet
-from pygerber.meta.aperture_manager import ApertureManager
+from pygerber.renderer.aperture_manager import ApertureManager
 
 
 def get_dummy_bound_aperture_manager():

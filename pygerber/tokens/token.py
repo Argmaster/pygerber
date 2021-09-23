@@ -20,7 +20,7 @@ class Token(Dispatcher):
     __deprecated__: bool = False
     renderer: Renderer = None
 
-    def alter_state(self, drawing_state: DrawingState):
+    def alter_state(self, state: DrawingState):
         """
         This method should be called before render().
         """

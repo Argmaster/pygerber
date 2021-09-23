@@ -6,7 +6,7 @@ from typing import Tuple
 
 from PIL import Image, ImageDraw
 from pygerber.mathclasses import BoundingBox
-from pygerber.meta.apertureset import ApertureSet
+from pygerber.renderer.apertureset import ApertureSet
 from pygerber.parser.pillow.apertures import *
 from pygerber.tokenizer import Tokenizer
 
@@ -73,7 +73,6 @@ class ParserWithPillow:
         self.image_padding = image_padding
         self.is_rendered = False
         self.tokenizer = Tokenizer(
-            self.apertureSet,
             ignore_deprecated=ignore_deprecated,
         )
         self.colors = colors
@@ -84,7 +83,7 @@ class ParserWithPillow:
         if file_path is not None:
             self.tokenizer.tokenize_file(file_path)
         elif string_source is not None:
-            self.tokenizer.tokenize_string(string_source)
+            self.tokenizer.tokenize(string_source)
         else:
             raise RuntimeError("file_path and source_string can't be both None.")
 

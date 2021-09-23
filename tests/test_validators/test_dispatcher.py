@@ -8,7 +8,6 @@ from pygerber.validators.validator import Validator
 
 
 class DispatcherTest(TestCase):
-
     def test_dispatcher(self):
         class ARGS_dispatcher(StructValidator):
             VALUE = Validator()
@@ -26,7 +25,9 @@ class DispatcherTest(TestCase):
 
         validator1 = ARGS_dispatcher(r"(?P<VALUE>[a-z]+)")
 
-        self.assertRaises(InvalidCommandFormat, lambda: validator1(None, DrawingState(), "346"))
+        self.assertRaises(
+            InvalidCommandFormat, lambda: validator1(None, DrawingState(), "346")
+        )
 
 
 if __name__ == "__main__":

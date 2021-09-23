@@ -1,8 +1,12 @@
-from tests.testutils.am import get_dummy_bound_aperture_manager
-from tests.testutils.apertures import CircleApertureCollector, CustomApertureCollector
-from pygerber.exceptions import ApertureSelectionError, InvalidSyntaxError
+# -*- coding: utf-8 -*-
+from __future__ import annotations
+
 from types import SimpleNamespace
 from unittest import TestCase, main
+
+from pygerber.exceptions import ApertureSelectionError, InvalidSyntaxError
+from tests.testutils.aperture_manager import get_dummy_bound_aperture_manager
+from tests.testutils.apertures import CircleApertureCollector, CustomApertureCollector
 
 
 class ApertureManagerTest(TestCase):

@@ -8,6 +8,7 @@ from pygerber.validators.basic import Int
 from pygerber.constants import Unit
 
 from .token import Deprecated, Token
+
 if TYPE_CHECKING:
     from pygerber.renderer import Renderer
     from pygerber.mathclasses import BoundingBox

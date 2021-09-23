@@ -4,8 +4,10 @@ from typing import TYPE_CHECKING
 from pygerber.constants import Interpolation, Mirroring, Polarity, Unit
 
 from .coparser import CoParser
+
 if TYPE_CHECKING:
     from pygerber.tokens.fs import FormatSpecifierToken
+
 
 class DrawingState:
 

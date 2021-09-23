@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from pygerber.drawing_state import DrawingState
 
@@ -29,7 +30,6 @@ class LoadMirroringToken(Token):
         state.set_mirroring(self.MIRRORING)
 
 
-
 class LoadRotationToken(Token):
 
     FLOAT_PATTERN = r"[-+]?[0-9]*\.?[0-9]*"
@@ -42,7 +42,6 @@ class LoadRotationToken(Token):
         state.set_rotation(self.ROTATION)
 
 
-
 class LoadScalingToken(Token):
 
     FLOAT_PATTERN = r"[-+]?[0-9]*\.?[0-9]*"
@@ -53,7 +52,6 @@ class LoadScalingToken(Token):
 
     def alter_state(self, state: DrawingState):
         state.set_scaling(self.SCALE)
-
 
 
 class LoadUnitToken(Token):

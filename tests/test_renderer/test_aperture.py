@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
-from tests.testutils.broker import get_filled_broker
+from tests.testutils.renderer import get_filled_renderer
 from tests.testutils.apertures import (
     CircleApertureCollector,
     PolygonApertureCollector,
     RectangleApertureCollector,
     get_dummy_apertureSet,
 )
-from pygerber.meta.aperture_manager import ApertureManager
+from pygerber.renderer.aperture_manager import ApertureManager
 from types import SimpleNamespace
 from unittest import TestCase, main
 from unittest.mock import Mock
 
-from pygerber.meta.aperture import (
+from pygerber.renderer.aperture import (
     Aperture,
     RegionApertureManager,
 )
 from pygerber.mathclasses import BoundingBox, Vector2D
-from pygerber.meta.spec import ArcSpec, LineSpec
+from pygerber.renderer.spec import ArcSpec, LineSpec
 
 
 class ABCsTest(TestCase):
@@ -45,8 +45,8 @@ class ABCsTest(TestCase):
 
     def test_region_bbox(self):
         self.assertEqual(RegionApertureManager.bbox(None, []), BoundingBox(0, 0, 0, 0))
-        broker = get_filled_broker()
-        broker.select_aperture(10)
+        renderer = get_filled_renderer()
+        renderer.select_aperture(10)
         self.assertEqual(
             RegionApertureManager.bbox(
                 None,
@@ -59,8 +59,8 @@ class ABCsTest(TestCase):
 
     def test_region_bbox_many_bounds(self):
         self.assertEqual(RegionApertureManager.bbox(None, []), BoundingBox(0, 0, 0, 0))
-        broker = get_filled_broker()
-        broker.select_aperture(10)
+        renderer = get_filled_renderer()
+        renderer.select_aperture(10)
         self.assertEqual(
             RegionApertureManager.bbox(
                 None,

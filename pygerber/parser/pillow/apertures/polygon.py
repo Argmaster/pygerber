@@ -6,8 +6,8 @@ from pygerber.parser.pillow.apertures.flash_line_mixin import FlashLineMixin
 from typing import Tuple
 
 from PIL import ImageDraw
-from pygerber.meta.aperture import PolygonAperture
-from pygerber.meta.spec import ArcSpec, LineSpec
+from pygerber.renderer.aperture import PolygonAperture
+from pygerber.renderer.spec import ArcSpec, LineSpec
 from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 
