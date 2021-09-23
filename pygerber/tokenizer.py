@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from collections import deque
-from pathlib import Path
-from pygerber.drawing_state import DrawingState
-from pygerber.mathclasses import BoundingBox
+from __future__ import annotations
 
-from pygerber.tokens.token import Token
+from collections import deque
+from typing import TYPE_CHECKING, Deque
+if TYPE_CHECKING:
+    from pathlib import Path
+    from pygerber.tokens.token import Token
+
+from pygerber.drawing_state import DrawingState
 
 from .exceptions import (
     DeprecatedSyntax,
@@ -22,71 +25,53 @@ class Tokenizer:
 
     token_stack: deque  # contains Token objects
     drawing_state: DrawingState
-    source: str = ""
-    begin_index: int = 0
     token_stack_size: int = 0
-    file_path: str = None
-    bbox: BoundingBox
+    begin_index: int = 0
+    char_index = 0
+    line_index = 1
 
     def __init__(
         self, *, ignore_deprecated: bool = True
     ) -> None:
+        self.ignore_deprecated = ignore_deprecated
         self.token_stack = deque()
-        self.drawing_state = DrawingState(ignore_deprecated)
+        self.drawing_state = DrawingState()
         self.set_defaults()
-        self.bbox = None
 
     def set_defaults(self):
         self.drawing_state.set_defaults()
+        self.token_stack_size = 0
         self.begin_index = 0
         self.char_index = 0
         self.line_index = 1
 
-    def tokenize_file(self, file_path: str) -> deque:
-        """
-        Opens file that file_path is pointing to and tokenizes its contents.
-        Deque containing all of the tokens is returned.
-        """
-        self.file_path = Path(file_path).resolve()
-        source = self.load_file()
-        return self.tokenize_string(source)
-
-    def load_file(self) -> str:
-        with open(self.file_path, "r", encoding="utf-8") as file:
+    def tokenize_file(self, file_path: str|Path) -> Deque[Token]:
+        with open(file_path) as file:
             source = file.read()
-        return source
+        return self.tokenize(source, file_path)
 
-    def tokenize_string(self, string: str) -> deque:
-        """
-        Tokenizes source string, assuming that it contains Gerber code.
-        Deque containing all of the tokens is returned.
-        """
-        self.source = string
-        return self.tokenize()
-
-    def tokenize(self) -> deque:
+    def tokenize(self, source, file_path: str="<string>") -> Deque[Token]:
         try:
-            while not self.__has_reached_end():
-                self.__next_token()
+            while not self.__has_reached_end(source):
+                self.__next_token(source)
         except EndOfStream:
             pass
         except InvalidSyntaxError as e:
             raise e.__class__(
-                f"""File "{self.file_path}", line {self.line_index}, char {self.char_index}:\n{e}"""
+                f"""File "{file_path}", line {self.line_index}, char {self.char_index}:\n{e}"""
             ) from e
         else:
             raise InvalidSyntaxError(
-                "No explicit indication of end at the end of file."
+                """File "{file_path}",No explicit indication of end at the end of source."""
             )
-        self.set_defaults()
         return self.token_stack
 
-    def __next_token(self) -> int:
-        token: Token = self.__find_matching_token()
-        token.dispatch(self.meta)
+    def __next_token(self, source) -> int:
+        token: Token = self.__find_matching_token(source)
         self.__check_deprecated_syntax(token.__deprecated__)
         self.push_token(token)
         self.__update_indexes(token)
+        token.alter_state(self.drawing_state)
         # token.alter_state()
         # token.pre_render()
         # self.__update_bbox(token.bbox())
@@ -96,16 +81,16 @@ class Tokenizer:
         if message is not None and not self.ignore_deprecated:
             raise DeprecatedSyntax(message)
 
-    def __find_matching_token(self):
+    def __find_matching_token(self, source):
         for token_class in token_classes:
-            re_match = token_class.regex.match(self.source, pos=self.index)
+            re_match = token_class.regex.match(source, pos=self.begin_index)
             if re_match is not None:
-                return token_class(re_match, self)
+                return token_class(re_match, self.drawing_state)
         else:
-            self.raise_token_not_found()
+            self.raise_token_not_found(source)
 
-    def __has_reached_end(self):
-        return self.begin_index >= len(self.source)
+    def __has_reached_end(self, source):
+        return self.begin_index >= len(source)
 
     # def __update_bbox(self, bbox: BoundingBox):
     #     if bbox is not None:
@@ -134,7 +119,7 @@ class Tokenizer:
             last_endl_index = matched_string.rfind("\n")
             self.char_index = source_length - last_endl_index
 
-    def raise_token_not_found(self):
-        end_index = min(len(self.source), self.begin_index + 30)
-        raise TokenNotFound(f"{self.source[self.begin_index:end_index]}")
+    def raise_token_not_found(self, source):
+        end_index = min(len(source), self.begin_index + 30)
+        raise TokenNotFound(f"{source[self.begin_index:end_index]}")
 

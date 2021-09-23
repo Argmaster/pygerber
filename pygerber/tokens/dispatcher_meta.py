@@ -38,6 +38,9 @@ class DispatcherMeta(ABCMeta):
 
 
 class Dispatcher(metaclass=DispatcherMeta):
+    """Base class for all dispatcher objects. Includes
+    tokens and some of the fields.
+    """
 
     __validators__: Dict[str, Validator]
 

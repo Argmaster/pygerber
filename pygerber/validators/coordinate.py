@@ -19,7 +19,8 @@ class Coordinate(Validator):
 
     def __call__(self, token: tkn.Token, drawing_state: DrawingState, value: str) -> Any:
         value = self.parse(drawing_state, value)
-        value = self.ensure_mm(drawing_state, value)
+        if value is not None:
+            value = self.ensure_mm(drawing_state, value)
         return value
 
     def parse(self, drawing_state: DrawingState, value: str) -> Any:
