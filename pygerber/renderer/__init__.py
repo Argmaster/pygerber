@@ -172,10 +172,10 @@ class Renderer:
         return bounds
 
     def move_pointer(self, location: Vector2D) -> None:
-        if location.x is not None:
-            self.current_point.x = location.x
-        if location.y is not None:
-            self.current_point.y = location.y
+        self.current_point = Vector2D(
+            location.x if location.x is not None else self.current_point.x,
+            location.y if location.y is not None else self.current_point.y,
+        )
 
     def isCCW(self):
         return self.state.interpolation == Interpolation.CounterclockwiseCircular
