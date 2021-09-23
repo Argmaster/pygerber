@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-from pygerber.drawing_state import DrawingState
-from pygerber.tokens.load import LoadUnitToken
 from unittest import TestCase, main
+
+from pygerber.drawing_state import DrawingState
 from pygerber.tokens import (
-    LoadPolarityToken,
     LoadMirroringToken,
+    LoadPolarityToken,
     LoadRotationToken,
     LoadScalingToken,
 )
+from pygerber.tokens.load import LoadUnitToken
 
 
 class TestLoaderTokens(TestCase):
-
-
-    def parse_token(self,TokenClass, source):
+    def parse_token(self, TokenClass, source):
         re_match = TokenClass.regex.match(source, 0)
         if re_match is not None:
             return TokenClass(re_match, DrawingState())

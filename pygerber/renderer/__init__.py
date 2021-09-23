@@ -154,6 +154,9 @@ class Renderer():
         )
         return spec
 
+    def end_region(self):
+        self.drawing_state.end_region()
+
     def finish_drawing_region(self) -> Tuple[RegionApertureManager, List[Spec]]:
         bounds = self.__get_and_clean_region_bounds()
         apertureClass = self.apertures.getApertureClass(None, True)
