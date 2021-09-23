@@ -83,7 +83,7 @@ class RectangularApertureTest(TestCase):
         ),
     ):
         return RectangleApertureCollector(
-            args, ApertureManager(get_dummy_apertureSet())
+            args, ApertureManager(get_dummy_apertureSet(), None)
         )
 
     def test_create(self):
@@ -117,7 +117,7 @@ class CircularApertureTest(TestCase):
             HOLE_DIAMETER=0.1,
         ),
     ):
-        return CircleApertureCollector(args, ApertureManager(get_dummy_apertureSet()))
+        return CircleApertureCollector(args, ApertureManager(get_dummy_apertureSet(), None))
 
     def test_create(self):
         aperture = self.create_circle_aperture()
@@ -134,7 +134,7 @@ class PolygonApertureTest(TestCase):
         self,
         args=SimpleNamespace(DIAMETER=0.6, HOLE_DIAMETER=0.1, ROTATION=0.3, VERTICES=5),
     ):
-        return PolygonApertureCollector(args, ApertureManager(get_dummy_apertureSet()))
+        return PolygonApertureCollector(args, ApertureManager(get_dummy_apertureSet(), None))
 
     def test_create(self):
         aperture = self.create_polygon_aperture()

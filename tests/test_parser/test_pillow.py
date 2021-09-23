@@ -32,9 +32,6 @@ class TestPillowParser(TestCase):
             M02*
             """
 
-    def test_parser_double_none(self):
-        self.assertRaises(RuntimeError, lambda: ParserWithPillow(None, None))
-
     def test_parser_string(self):
         parser = ParserWithPillow()
         parser.parse(self.SOURCE_0)
@@ -48,10 +45,10 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_double_render(self):
-        parser = ParserWithPillow(None, self.SOURCE_0)
+        parser = ParserWithPillow()
         self.assertRaises(RuntimeError, lambda: parser.get_image())
-        parser.render()
-        self.assertRaises(RuntimeError, lambda: parser.render())
+        parser.parse(self.SOURCE_0)
+        self.assertRaises(RuntimeError, lambda: parser.parse(self.SOURCE_0))
         parser.save(".\\tests\\test_parser\\test_render.png", "png")
         parser.save(".\\tests\\test_parser\\test_render.png")
 
@@ -96,13 +93,13 @@ class TestPillowParser(TestCase):
         self.render_file_optional_show_and_save("s4.grb", False, False, False, dpi=1600)
 
     def test_parser_file_5(self):
-        self.render_file_optional_show_and_save("s5.grb", False, True, False, dpi=1600)
+        self.render_file_optional_show_and_save("s5.grb", False, False, False, dpi=1600)
 
     def test_parser_file_6(self):
-        self.render_file_optional_show_and_save("s6.grb", False, True, False, dpi=1600)
+        self.render_file_optional_show_and_save("s6.grb", False, False, False, dpi=1600)
 
     def test_parser_file_7(self):
-        self.render_file_optional_show_and_save("s7.grb", False, True, False, dpi=1600)
+        self.render_file_optional_show_and_save("s7.grb", False, False, False, dpi=1600)
 
 
 def get_test_spec():

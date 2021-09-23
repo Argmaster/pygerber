@@ -113,7 +113,6 @@ class Renderer:
     def draw_arc(self, end: Vector2D, offset: Vector2D) -> None:
         spec = self.__get_arc_spec(end, offset)
         if self.state.is_regionmode:
-            # print(spec)
             self.__push_region_step(spec)
         else:
             self.apertures.get_current_aperture().arc(spec)

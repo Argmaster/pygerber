@@ -24,9 +24,7 @@ class PillowRegion(ArcUtilMixinPillow, RegionApertureManager, PillowUtilMethdos)
                 self.prepare_line_spec(spec)
                 bound_points.append(spec.end.as_tuple())
             elif isinstance(spec, ArcSpec):
-                print(spec)
                 self.prepare_arc_spec(spec)
-                print(spec)
                 bound_points.extend(self.__get_arc_boundpoints(spec))
         self.__draw_polygon(bound_points)
 
