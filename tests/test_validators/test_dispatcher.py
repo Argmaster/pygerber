@@ -3,7 +3,6 @@ from pygerber.exceptions import InvalidCommandFormat
 from types import SimpleNamespace
 from unittest import TestCase, main
 
-from pygerber.meta import Meta
 from pygerber.validators import Dispatcher, load_validators
 from pygerber.validators.validator import Validator
 
