@@ -1,74 +1,109 @@
 # -*- coding: utf-8 -*-
-from tests.testutils.meta import get_or_create_dummy_meta
-from tests.testutils.apertures import ApertureCollector
-from pygerber.mathclasses import BoundingBox
-from pygerber.meta.meta import Interpolation, Unit
-from pygerber.tokens.gnn import G55_Token, G70_Token, G71_Token, G90_Token, G91_Token
 from unittest import TestCase, main
-from pygerber.tokens import G0N_Token, G36_Token, G37_Token
-from pygerber.meta import Meta
+from unittest.mock import Mock
+
+from pygerber.constants import Interpolation, Unit
+from pygerber.drawing_state import DrawingState
+from pygerber.mathclasses import BoundingBox
+from pygerber.tokens.gnn import (
+    G0N_Token,
+    G36_Token,
+    G37_Token,
+    G55_Token,
+    G70_Token,
+    G71_Token,
+    G90_Token,
+    G91_Token,
+)
+from tests.testutils.apertures import ApertureCollector
 
 
 class G0N_Token_Test(TestCase):
-    def init_token(self, source):
-        META = Meta(None)
-        token = G0N_Token.match(source, 0)
-        self.assertTrue(token)
-        token.dispatch(META)
-        token.affect_meta()
-        return META
+    def parse_token(self, source):
+        re_match = G0N_Token.regex.match(source, 0)
+        if re_match is not None:
+            return G0N_Token(re_match, DrawingState())
+        else:
+            raise RuntimeError(f"Token not matched for {source}")
 
     def test_G01(self):
-        META = self.init_token("G01*")
-        self.assertEqual(META.interpolation, Interpolation.Linear)
+        token = self.parse_token("G01*")
+        state = DrawingState()
+        token.alter_state(state)
+        self.assertEqual(state.interpolation, Interpolation.Linear)
 
     def test_G02(self):
-        META = self.init_token("G02*")
-        self.assertEqual(META.interpolation, Interpolation.ClockwiseCircular)
+        token = self.parse_token("G02*")
+        state = DrawingState()
+        token.alter_state(state)
+        self.assertEqual(state.interpolation, Interpolation.ClockwiseCircular)
 
     def test_G03(self):
-        META = self.init_token("G03*")
-        self.assertEqual(META.interpolation, Interpolation.CounterclockwiseCircular)
+        token = self.parse_token("G03*")
+        state = DrawingState()
+        token.alter_state(state)
+        self.assertEqual(state.interpolation, Interpolation.CounterclockwiseCircular)
 
 
 class GNN_Token_Test(TestCase):
-    def init_token(self, source, token_class, meta=None):
-        META = get_or_create_dummy_meta(meta)
-        token = token_class.match(source, 0)
-        self.assertTrue(token)
-        token.dispatch(META)
-        return token, META
+    def parse_token(self, source, token_class):
+        re_match = token_class.regex.match(source, 0)
+        if re_match is not None:
+            return token_class(re_match, DrawingState())
+        else:
+            raise RuntimeError(f"Token not matched for {source}")
 
-    def test_G36_G37(self):
-        token, meta = self.init_token("G36*", G36_Token)
-        token.affect_meta()
-        self.assertTrue(meta.is_regionmode)
-        token, meta = self.init_token("G37*", G37_Token, meta)
-        token.affect_meta()
-        token.post_render()
-        self.assertFalse(meta.is_regionmode)
-        self.assertRaises(ApertureCollector.CalledFinish, token.render)
-        self.assertEqual(token.bbox(), BoundingBox(0, 0, 0, 0))
+    def test_region_mode_in_out(self):
+        token = self.parse_token("G36*", G36_Token)
+        state = DrawingState()
+        token.alter_state(state)
+        self.assertTrue(state.is_regionmode)
+        token = self.parse_token("G37*", G37_Token)
+        token.post_render(state)
+        self.assertFalse(state.is_regionmode)
+
+    def get_renderer_mock(self):
+        manager = Mock()
+        bounds = Mock()
+        return Mock(
+            manager=manager,
+            bounds=bounds,
+            finish_drawing_region=Mock(return_value=(manager, bounds)),
+        )
+
+    def test_region_mode_render(self):
+        token = self.parse_token("G37*", G37_Token)
+        renderer = self.get_renderer_mock()
+        token.pre_render(renderer)
+        token.render(renderer)
+        token.post_render(renderer)
+        renderer.finish_drawing_region.assert_called()
+        renderer.manager.finish.assert_called_with(renderer.bounds)
+        renderer.end_region.assert_called()
 
     def test_G70(self):
-        token, meta = self.init_token("G70*", G70_Token)
-        token.affect_meta()
-        self.assertEqual(meta.unit, Unit.INCHES)
+        token = self.parse_token("G70*", G70_Token)
+        state = DrawingState()
+        token.alter_state(state)
+        self.assertEqual(state.unit, Unit.INCHES)
 
     def test_G71(self):
-        token, meta = self.init_token("G71*", G71_Token)
-        token.affect_meta()
-        self.assertEqual(meta.unit, Unit.MILLIMETERS)
+        token = self.parse_token("G71*", G71_Token)
+        state = DrawingState()
+        token.alter_state(state)
+        self.assertEqual(state.unit, Unit.MILLIMETERS)
 
     def test_G90(self):
-        token, meta = self.init_token("G90*", G90_Token)
-        token.affect_meta()
-        self.assertEqual(meta.coparser.get_mode(), "A")
+        token = self.parse_token("G90*", G90_Token)
+        state = DrawingState()
+        token.alter_state(state)
+        self.assertEqual(state.coparser.get_mode(), "A")
 
     def test_G91(self):
-        token, meta = self.init_token("G91*", G91_Token)
-        token.affect_meta()
-        self.assertEqual(meta.coparser.get_mode(), "I")
+        token = self.parse_token("G91*", G91_Token)
+        state = DrawingState()
+        token.alter_state(state)
+        self.assertEqual(state.coparser.get_mode(), "I")
 
 
 if __name__ == "__main__":

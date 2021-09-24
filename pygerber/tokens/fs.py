@@ -3,13 +3,18 @@ from __future__ import annotations
 
 import re
 from functools import cached_property
+from typing import TYPE_CHECKING
 
-from pygerber.validators import CallOnCondition, Int, String, load_validators
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
+
+from pygerber.validators.basic import Int, String
+from pygerber.validators.conditional import CallOnCondition
+
 
 from .token import Token
 
 
-@load_validators
 class FormatSpecifierToken(Token):
     regex = re.compile(
         r"%FS(?P<zeros>[LTD])(?P<mode>[AI])X(?P<X_int>[1-6])(?P<X_dec>[1-6])Y(?P<Y_int>[1-6])(?P<Y_dec>[1-6])\*%"
@@ -20,15 +25,19 @@ class FormatSpecifierToken(Token):
     Y_int = CallOnCondition(
         Int(3),
         lambda token, value: token.X_int != value,
-        lambda token, _: token.meta.raiseDeprecatedSyntax(
-            "Integer format specifier for X and Y are not equal."
+        lambda token, _: setattr(
+            token,
+            "__deprecated__",
+            "Integer format specifier for X and Y are not equal.",
         ),
     )
     Y_dec = CallOnCondition(
         Int(6),
         lambda token, value: token.X_dec != value,
-        lambda token, _: token.meta.raiseDeprecatedSyntax(
-            "Decimal format specifier for X and Y are not equal."
+        lambda token, _: setattr(
+            token,
+            "__deprecated__",
+            "Decimal format specifier for X and Y are not equal.",
         ),
     )
     zeros = String("L")
@@ -46,5 +55,5 @@ class FormatSpecifierToken(Token):
     def DEC_FORMAT(self):
         return self.X_dec
 
-    def affect_meta(self):
-        self.meta.coparser.set_format(self)
+    def alter_state(self, state: DrawingState):
+        state.set_co_format(self)

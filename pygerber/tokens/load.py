@@ -1,34 +1,36 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
+
 import re
 
-from pygerber.validators import Float, String, load_validators
+from pygerber.validators.basic import Float, String
 
 from .token import Token
 
 
-@load_validators
 class LoadPolarityToken(Token):
     regex = re.compile(r"%LP(?P<POLARITY>[CD])\*%")
 
     POLARITY = String()
 
-    def affect_meta(self):
-        self.meta.set_polarity(self.POLARITY)
+    def alter_state(self, state: DrawingState):
+        state.set_polarity(self.POLARITY)
 
 
-@load_validators
 class LoadMirroringToken(Token):
     regex = re.compile(r"%LM(?P<MIRRORING>((N)|(X)|(Y)|(XY)))\*%")
 
     MIRRORING = String()
 
-    def affect_meta(self):
-        self.meta.set_mirroring(self.MIRRORING)
+    def alter_state(self, state: DrawingState):
+        state.set_mirroring(self.MIRRORING)
 
 
-@load_validators
 class LoadRotationToken(Token):
 
     FLOAT_PATTERN = r"[-+]?[0-9]*\.?[0-9]*"
@@ -37,11 +39,10 @@ class LoadRotationToken(Token):
 
     ROTATION = Float()
 
-    def affect_meta(self):
-        self.meta.set_rotation(self.ROTATION)
+    def alter_state(self, state: DrawingState):
+        state.set_rotation(self.ROTATION)
 
 
-@load_validators
 class LoadScalingToken(Token):
 
     FLOAT_PATTERN = r"[-+]?[0-9]*\.?[0-9]*"
@@ -50,16 +51,15 @@ class LoadScalingToken(Token):
 
     SCALE = Float()
 
-    def affect_meta(self):
-        self.meta.set_scaling(self.SCALE)
+    def alter_state(self, state: DrawingState):
+        state.set_scaling(self.SCALE)
 
 
-@load_validators
 class LoadUnitToken(Token):
 
     regex = re.compile(r"%MO(?P<UNIT>(MM)|(IN))\*%")
 
     UNIT = String()
 
-    def affect_meta(self):
-        self.meta.set_unit(self.UNIT)
+    def alter_state(self, state: DrawingState):
+        state.set_unit(self.UNIT)

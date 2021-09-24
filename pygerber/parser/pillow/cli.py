@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from math import inf
-from functools import lru_cache
 
 import os
+from functools import lru_cache
+from math import inf
 from typing import Dict, List, Tuple
 
 from pygerber.parser.pillow.api import (
@@ -46,10 +46,7 @@ def handle_pillow_cli(args):
             {
                 "dpi": args.dpi,
                 "layers": [
-                    {
-                        "file_path": str(args.specfile["filepath"]),
-                        "colors": args.colors
-                    }
+                    {"file_path": str(args.specfile["filepath"]), "colors": args.colors}
                 ],
             }
         )

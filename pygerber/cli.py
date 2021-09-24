@@ -85,7 +85,7 @@ def __add_specfile_types_group(source_group: _ArgumentGroup):
     specfile_types_group.add_argument(
         f"--file",
         dest="specfile",
-        type=validate('file'),
+        type=validate("file"),
         metavar="<filepath>",
         help=f"Render single gerber file.",
     )

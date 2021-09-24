@@ -7,7 +7,16 @@ from .add import ADD_Token
 from .comment import G04_Token, G74_Token, G75_Token, LoadName_Token
 from .dnn import D01_Token, D02_Token, D03_Token, DNN_Loader_Token, G54DNN_Loader_Token
 from .fs import FormatSpecifierToken
-from .gnn import G0N_Token, G36_Token, G37_Token, G55_Token, G70_Token, G71_Token, G90_Token, G91_Token
+from .gnn import (
+    G0N_Token,
+    G36_Token,
+    G37_Token,
+    G55_Token,
+    G70_Token,
+    G71_Token,
+    G90_Token,
+    G91_Token,
+)
 from .load import (
     LoadPolarityToken,
     LoadMirroringToken,

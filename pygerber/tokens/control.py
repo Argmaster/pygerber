@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pygerber.drawing_state import DrawingState
 from pygerber.validators.basic import String
 from pygerber.exceptions import EndOfStream
 import re
 
-from pygerber.validators import load_validators
-
 from .token import Deprecated, Token
 
 
-@load_validators
 class EndOfStream_Token(Token):
     regex = re.compile(r"M0[02]\*")
 
-    def affect_meta(self):
+    def alter_state(self, state: DrawingState):
         raise EndOfStream()
 
 
-@load_validators
 class Whitespace_Token(Token):
     regex = re.compile(r"\s+")
     keep: bool = False
@@ -34,7 +35,6 @@ class Whitespace_Token(Token):
     "skip it. "
     "Deprecated in 2013"
 )
-@load_validators
 class ImagePolarity_Token(Token):
     regex = re.compile(r"%IP(?P<POLARITY>((POS)|(NEG)))\*%")
     POLARITY = String("POS")

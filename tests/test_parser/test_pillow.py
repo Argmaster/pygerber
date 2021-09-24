@@ -32,13 +32,9 @@ class TestPillowParser(TestCase):
             M02*
             """
 
-    def test_parser_double_none(self):
-        self.assertRaises(RuntimeError, lambda: ParserWithPillow(None, None))
-
     def test_parser_string(self):
-        parser = ParserWithPillow(None, self.SOURCE_0)
-        self.assertEqual(parser.tokenizer.bbox.width(), 1.5)
-        parser.render()
+        parser = ParserWithPillow()
+        parser.parse(self.SOURCE_0)
         image = parser.get_image()
         # to manually validate output uncomment this:
         # image.show()
@@ -49,16 +45,16 @@ class TestPillowParser(TestCase):
         # )
 
     def test_parser_double_render(self):
-        parser = ParserWithPillow(None, self.SOURCE_0)
+        parser = ParserWithPillow()
         self.assertRaises(RuntimeError, lambda: parser.get_image())
-        parser.render()
-        self.assertRaises(RuntimeError, lambda: parser.render())
+        parser.parse(self.SOURCE_0)
+        self.assertRaises(RuntimeError, lambda: parser.parse(self.SOURCE_0))
         parser.save(".\\tests\\test_parser\\test_render.png", "png")
         parser.save(".\\tests\\test_parser\\test_render.png")
 
     def test_parser_null_size_image(self):
-        parser = ParserWithPillow(None, "M02*")
-        self.assertRaises(ImageSizeNullError, parser.render)
+        parser = ParserWithPillow()
+        self.assertRaises(ImageSizeNullError, parser.parse, "M02*")
 
     def test_render_file_and_save(self):
         render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png")

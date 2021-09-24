@@ -3,10 +3,9 @@ from __future__ import annotations
 
 from unittest import TestCase, main
 
-from tests.testutils.pillow import (
-    get_pillow_initialized_broker,
-    get_pillow_custom,
-)
+from tests.testutils.pillow import (get_pillow_custom,
+                                    get_pillow_initialized_renderer)
+
 
 class TestPillowCustom(TestCase):
     pass

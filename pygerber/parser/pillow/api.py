@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import json
 import os
 from concurrent.futures import Future, ProcessPoolExecutor
 from dataclasses import dataclass
 from typing import Dict, List
 
+import toml
+import yaml
 from PIL import Image
 from pygerber.parser.pillow.parser import (
     DEFAULT_COLOR_SET_GREEN,
@@ -13,9 +16,6 @@ from pygerber.parser.pillow.parser import (
     ColorSet,
     ParserWithPillow,
 )
-import yaml
-import json
-import toml
 
 NAMED_COLORS = {
     "silk": ColorSet((255, 255, 255, 255)),
@@ -227,11 +227,10 @@ def render_file(
     **kwargs will be passed to ParserWithPillow, check it out for available params.
     """
     parser = ParserWithPillow(
-        file_path,
         dpi=dpi,
         colors=colors,
         ignore_deprecated=ignore_deprecated,
         image_padding=image_padding,
     )
-    parser.render()
+    parser.parse_file(file_path)
     return parser.get_image()

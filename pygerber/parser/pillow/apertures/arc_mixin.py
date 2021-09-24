@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from math import tau
 
-from pygerber.meta.arc_util_mixin import ArcUtilMixin
+from pygerber.renderer.arc_util_mixin import ArcUtilMixin
 
 
 class ArcUtilMixinPillow(ArcUtilMixin):

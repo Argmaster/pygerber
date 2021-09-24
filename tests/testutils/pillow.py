@@ -6,8 +6,8 @@ from PIL import Image, ImageDraw
 from pygerber.parser.pillow.parser import ColorSet
 from types import SimpleNamespace
 from pygerber.parser.pillow.apertures import *
-from pygerber.meta.apertureset import ApertureSet
-from pygerber.meta.broker import DrawingBroker
+from pygerber.renderer.apertureset import ApertureSet
+from pygerber.renderer import Renderer
 
 DEFAULT_TEST_COLOR_SET = ColorSet(
     (120, 120, 255, 255),
@@ -18,14 +18,14 @@ DEFAULT_TEST_COLOR_SET = ColorSet(
 DEFAULT_TEST_CANVAS_SIZE = (1600, 1600)
 
 
-def get_pillow_initialized_broker(
+def get_pillow_initialized_renderer(
     size=DEFAULT_TEST_CANVAS_SIZE, dpi=600, colors=DEFAULT_TEST_COLOR_SET
 ):
-    return initialize_parser_attrs(get_pillow_filled_broker(), size, dpi, colors)
+    return initialize_parser_attrs(get_pillow_filled_renderer(), size, dpi, colors)
 
 
-def get_pillow_filled_broker():
-    return DrawingBroker(
+def get_pillow_filled_renderer():
+    return Renderer(
         ApertureSet(
             PillowCircle,
             PillowRectangle,
@@ -38,37 +38,39 @@ def get_pillow_filled_broker():
 
 
 def initialize_parser_attrs(
-    broker, size=DEFAULT_TEST_CANVAS_SIZE, dpi=600, colors=DEFAULT_TEST_COLOR_SET
+    renderer, size=DEFAULT_TEST_CANVAS_SIZE, dpi=600, colors=DEFAULT_TEST_COLOR_SET
 ):
-    broker.colors = colors
-    broker.dpmm = dpi / 25.4
-    broker.canvas = Image.new("RGBA", size, (99, 99, 99, 99))
-    broker.draw_canvas = ImageDraw.Draw(broker.canvas)
-    broker.canvas_width = broker.canvas.width
-    broker.canvas_height = broker.canvas.height
-    broker.left_offset = broker.canvas.width / 2
-    broker.bottom_offset = broker.canvas.height / 2
-    return broker
+    renderer.colors = colors
+    renderer.dpmm = dpi / 25.4
+    renderer.canvas = Image.new("RGBA", size, (99, 99, 99, 99))
+    renderer.draw_canvas = ImageDraw.Draw(renderer.canvas)
+    renderer.canvas_width = renderer.canvas.width
+    renderer.canvas_height = renderer.canvas.height
+    renderer.left_offset = renderer.canvas.width / 2
+    renderer.bottom_offset = renderer.canvas.height / 2
+    return renderer
 
 
-def get_pillow_circle(broker, diameter=1, hole_diameter=0):
+def get_pillow_circle(renderer, diameter=1, hole_diameter=0):
     return PillowCircle(
         SimpleNamespace(DIAMETER=diameter, HOLE_DIAMETER=hole_diameter),
-        broker,
+        renderer,
     )
 
 
-def get_pillow_rectangle(broker, x=1, y=3, hole_diameter=0):
+def get_pillow_rectangle(renderer, x=1, y=3, hole_diameter=0):
     return PillowRectangle(
-        SimpleNamespace(X=x, Y=y, HOLE_DIAMETER=hole_diameter), broker
+        SimpleNamespace(X=x, Y=y, HOLE_DIAMETER=hole_diameter), renderer
     )
 
 
-def get_pillow_obround(broker, x=1, y=3, hole_diameter=0):
-    return PillowObround(SimpleNamespace(X=x, Y=y, HOLE_DIAMETER=hole_diameter), broker)
+def get_pillow_obround(renderer, x=1, y=3, hole_diameter=0):
+    return PillowObround(
+        SimpleNamespace(X=x, Y=y, HOLE_DIAMETER=hole_diameter), renderer
+    )
 
 
-def get_pillow_polygon(broker, diameter=3, vertices=6, rotation=0, hole_diameter=0):
+def get_pillow_polygon(renderer, diameter=3, vertices=6, rotation=0, hole_diameter=0):
     return PillowPolygon(
         SimpleNamespace(
             DIAMETER=diameter,
@@ -76,12 +78,12 @@ def get_pillow_polygon(broker, diameter=3, vertices=6, rotation=0, hole_diameter
             ROTATION=rotation,
             HOLE_DIAMETER=hole_diameter,
         ),
-        broker,
+        renderer,
     )
 
 
-def get_pillow_custom(broker, **kwargs):
-    return PillowCustom(SimpleNamespace(**kwargs), broker)
+def get_pillow_custom(renderer, **kwargs):
+    return PillowCustom(SimpleNamespace(**kwargs), renderer)
 
 
 def are_images_similar(
@@ -117,21 +119,20 @@ def compare_color(c: float, C: float, tresh: float):
     cC = abs(c - C)
     return cC <= tresh
 
+
 def get_layerset(GERBER_PATH: Path):
     return [
-            LayerSpec(
-                GERBER_PATH / "set" / "top_copper.grb",
-                ColorSet((40, 143, 40, 255), (60, 181, 60, 255)),
-            ),
-            LayerSpec(
-                GERBER_PATH / "set" / "top_solder_mask.grb",
-                ColorSet((153, 153, 153, 255)),
-            ),
-            LayerSpec(
-                GERBER_PATH / "set" / "top_paste_mask.grb",
-                ColorSet((117, 117, 117, 255)),
-            ),
-            LayerSpec(
-                GERBER_PATH / "set" / "top_silk.grb", ColorSet((255, 255, 255, 255))
-            ),
-        ]
+        LayerSpec(
+            GERBER_PATH / "set" / "top_copper.grb",
+            ColorSet((40, 143, 40, 255), (60, 181, 60, 255)),
+        ),
+        LayerSpec(
+            GERBER_PATH / "set" / "top_solder_mask.grb",
+            ColorSet((153, 153, 153, 255)),
+        ),
+        LayerSpec(
+            GERBER_PATH / "set" / "top_paste_mask.grb",
+            ColorSet((117, 117, 117, 255)),
+        ),
+        LayerSpec(GERBER_PATH / "set" / "top_silk.grb", ColorSet((255, 255, 255, 255))),
+    ]
