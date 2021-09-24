@@ -1,9 +1,8 @@
-# PyGerber CLI
+# PyGerber Command Line Interface
 
-**CLI** offers You two ways of rendering
 
--   single-file, when You have to specify path to file and colors to use
--   multi-file, based on specfile, it renders multiple layers and joins them into one image
+### With the command line interface you can do both 2D and 3D rendering.
+In both cases, it is possible to render single files or multifile projects, the structure of which must be specified with the help of special *specfile* files. *Specfiles* differ for 2D and 3D rendering due to the different characteristics of the resulting objects.
 
 
 

@@ -18,9 +18,9 @@ class TestControlTokens(TestCase):
         self.assertTrue(len(Whitespace_Token.regex.match("     \n\t ").group()) == 8)
 
     def test_ImagePolarity_Token(self):
-        self.assertIsNotNone(ImagePolarity_Token.__deprecated__)
-        self.asserstIsNotNone(ImagePolarity_Token.regex.match("%IPPOS*%"))
-        self.assertIsNotNone(ImagePolarity_Token.regex.match("%IPNEG*%"))
+        self.assertTrue(ImagePolarity_Token.__deprecated__ is not None)
+        self.assertTrue(ImagePolarity_Token.regex.match("%IPPOS*%") is not None)
+        self.assertTrue(ImagePolarity_Token.regex.match("%IPNEG*%") is not None)
 
 
 if __name__ == "__main__":
