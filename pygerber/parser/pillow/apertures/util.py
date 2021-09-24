@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+from pygerber.constants import Polarity
 from pygerber.mathclasses import Vector2D
 from pygerber.renderer import Renderer
-from pygerber.constants import Polarity
 from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec
 
 INCH_TO_MM_MULTIPLIER = 0.0393701

@@ -6,8 +6,8 @@ from typing import Tuple
 
 from PIL import Image, ImageDraw
 from pygerber.mathclasses import BoundingBox, Vector2D
-from pygerber.renderer.spec import FlashSpec
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
+from pygerber.renderer.spec import FlashSpec
 
 
 class FlashUtilMixin(PillowUtilMethdos):

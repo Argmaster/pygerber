@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from pygerber.exceptions import FeatureNotSupportedError
-
 from pygerber.tokens import FormatSpecifierToken
 
 

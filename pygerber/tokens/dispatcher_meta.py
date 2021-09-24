@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from abc import ABCMeta
 from inspect import isclass
 

@@ -10,14 +10,8 @@ if TYPE_CHECKING:
 
 from pygerber.drawing_state import DrawingState
 
-from .exceptions import (
-    DeprecatedSyntax,
-    EndOfStream,
-    InvalidSyntaxError,
-    TokenNotFound,
-)
+from .exceptions import DeprecatedSyntax, EndOfStream, InvalidSyntaxError, TokenNotFound
 from .tokens import token_classes
-
 
 DEFAULT_TRACE_FILEPATH = "<string>"
 

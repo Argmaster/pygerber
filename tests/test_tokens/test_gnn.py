@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from unittest import TestCase, main
 from unittest.mock import Mock
-from pygerber.drawing_state import DrawingState
-from tests.testutils.apertures import ApertureCollector
-from pygerber.mathclasses import BoundingBox
+
 from pygerber.constants import Interpolation, Unit
+from pygerber.drawing_state import DrawingState
+from pygerber.mathclasses import BoundingBox
 from pygerber.tokens.gnn import (
     G0N_Token,
     G36_Token,
@@ -14,7 +15,7 @@ from pygerber.tokens.gnn import (
     G90_Token,
     G91_Token,
 )
-from unittest import TestCase, main
+from tests.testutils.apertures import ApertureCollector
 
 
 class G0N_Token_Test(TestCase):

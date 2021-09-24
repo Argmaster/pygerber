@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.validators.basic import String
 import re
-
-
+from pygerber.validators.basic import String
 from .token import Token
 
 

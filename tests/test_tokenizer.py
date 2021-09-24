@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.exceptions import InvalidSyntaxError, TokenNotFound
+
 from unittest import TestCase, main
+
+from pygerber.exceptions import InvalidSyntaxError, TokenNotFound
 from pygerber.tokenizer import Tokenizer
 
 
@@ -35,9 +37,7 @@ class TokenizerTest(TestCase):
 
     def test_tokenize_string_no_end(self):
         tokenizer = Tokenizer()
-        self.assertRaises(
-            InvalidSyntaxError, lambda: tokenizer.tokenize(self.SOURCE_1)
-        )
+        self.assertRaises(InvalidSyntaxError, lambda: tokenizer.tokenize(self.SOURCE_1))
 
     def test_tokenize_file_invalid_syntax(self):
         tokenizer = Tokenizer()
@@ -49,9 +49,7 @@ class TokenizerTest(TestCase):
 
     def test_tokenize_string_token_not_found(self):
         tokenizer = Tokenizer()
-        self.assertRaises(
-            TokenNotFound, lambda: tokenizer.tokenize(self.SOURCE_2)
-        )
+        self.assertRaises(TokenNotFound, lambda: tokenizer.tokenize(self.SOURCE_2))
 
     def test_tokenize_file_0(self):
         tokenizer = Tokenizer()
@@ -67,6 +65,7 @@ class TokenizerTest(TestCase):
         tokenizer = Tokenizer()
         tokenizer.tokenize_file("./tests/gerber/s2.grb")
         self.assertEqual(tokenizer.token_stack_size, 116)
+
 
 if __name__ == "__main__":
     main()

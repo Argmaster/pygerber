@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from unittest import TestCase, main
+
 from tests.testutils.apertures import (
     CircleApertureCollector,
     PolygonApertureCollector,
@@ -6,7 +8,6 @@ from tests.testutils.apertures import (
     RegionApertureCollector,
     get_dummy_apertureSet,
 )
-from unittest import TestCase, main
 
 
 class ApertureSetTest(TestCase):

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from pygerber.drawing_state import DrawingState
 from types import SimpleNamespace
 from unittest import TestCase, main
 
+from pygerber.drawing_state import DrawingState
 from pygerber.validators.conditional import CallOnCondition
 from pygerber.validators.validator import Validator
 

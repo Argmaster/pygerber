@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.tokens.control import EndOfStream_Token, ImagePolarity_Token, Whitespace_Token
+
 from unittest import TestCase, main
+
+from pygerber.tokens.control import (
+    EndOfStream_Token,
+    ImagePolarity_Token,
+    Whitespace_Token,
+)
 
 
 class TestControlTokens(TestCase):
@@ -13,8 +19,9 @@ class TestControlTokens(TestCase):
 
     def test_ImagePolarity_Token(self):
         self.assertIsNotNone(ImagePolarity_Token.__deprecated__)
-        self.assertIsNotNone(ImagePolarity_Token.regex.match("%IPPOS*%"))
+        self.asserstIsNotNone(ImagePolarity_Token.regex.match("%IPPOS*%"))
         self.assertIsNotNone(ImagePolarity_Token.regex.match("%IPNEG*%"))
+
 
 if __name__ == "__main__":
     main()

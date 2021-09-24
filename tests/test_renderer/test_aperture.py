@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
-from tests.testutils.renderer import get_filled_renderer
+from types import SimpleNamespace
+from unittest import TestCase, main
+from unittest.mock import Mock
+
+from pygerber.mathclasses import BoundingBox, Vector2D
+from pygerber.renderer.aperture import Aperture, RegionApertureManager
+from pygerber.renderer.aperture_manager import ApertureManager
+from pygerber.renderer.spec import ArcSpec, LineSpec
 from tests.testutils.apertures import (
     CircleApertureCollector,
     PolygonApertureCollector,
     RectangleApertureCollector,
     get_dummy_apertureSet,
 )
-from pygerber.renderer.aperture_manager import ApertureManager
-from types import SimpleNamespace
-from unittest import TestCase, main
-from unittest.mock import Mock
-
-from pygerber.renderer.aperture import (
-    Aperture,
-    RegionApertureManager,
-)
-from pygerber.mathclasses import BoundingBox, Vector2D
-from pygerber.renderer.spec import ArcSpec, LineSpec
+from tests.testutils.renderer import get_filled_renderer
 
 
 class ABCsTest(TestCase):
@@ -117,7 +114,9 @@ class CircularApertureTest(TestCase):
             HOLE_DIAMETER=0.1,
         ),
     ):
-        return CircleApertureCollector(args, ApertureManager(get_dummy_apertureSet(), None))
+        return CircleApertureCollector(
+            args, ApertureManager(get_dummy_apertureSet(), None)
+        )
 
     def test_create(self):
         aperture = self.create_circle_aperture()
@@ -134,7 +133,9 @@ class PolygonApertureTest(TestCase):
         self,
         args=SimpleNamespace(DIAMETER=0.6, HOLE_DIAMETER=0.1, ROTATION=0.3, VERTICES=5),
     ):
-        return PolygonApertureCollector(args, ApertureManager(get_dummy_apertureSet(), None))
+        return PolygonApertureCollector(
+            args, ApertureManager(get_dummy_apertureSet(), None)
+        )
 
     def test_create(self):
         aperture = self.create_polygon_aperture()

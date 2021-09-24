@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from pygerber.drawing_state import DrawingState
 from unittest import TestCase, main
 
+from pygerber.drawing_state import DrawingState
 from pygerber.tokens import ADD_Token
 
 

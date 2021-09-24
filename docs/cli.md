@@ -3,7 +3,9 @@
 **CLI** offers You two ways of rendering
 
 -   single-file, when You have to specify path to file and colors to use
--   multi-file, based on specfile, which You have to provide
+-   multi-file, based on specfile, it renders multiple layers and joins them into one image
+
+
 
 ### Getting help
 

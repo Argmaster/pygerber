@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import pygerber.renderer.aperture as meta_ap
-
 from pygerber.mathclasses import Vector2D
 
 

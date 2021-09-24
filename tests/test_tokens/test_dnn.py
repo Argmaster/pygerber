@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from pygerber.tokens.dnn import G54DNN_Loader_Token
-from unittest.mock import Mock
-from pygerber.drawing_state import DrawingState
 from unittest import TestCase, main
+from unittest.mock import Mock
 
-from pygerber.tokens import DNN_Loader_Token, DNN_Loader_Token
+from pygerber.drawing_state import DrawingState
+from pygerber.tokens import DNN_Loader_Token
+from pygerber.tokens.dnn import G54DNN_Loader_Token
 
 
 class DNN_Loader_Token_Test(TestCase):

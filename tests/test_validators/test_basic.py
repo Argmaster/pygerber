@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from pygerber.drawing_state import DrawingState
-from pygerber.validators.basic import Function
 from unittest import TestCase, main
-from pygerber.validators.basic import Float, Int, String
+
+from pygerber.drawing_state import DrawingState
+from pygerber.validators.basic import Float, Function, Int, String
 
 
 class BasicValidatorsTest(TestCase):

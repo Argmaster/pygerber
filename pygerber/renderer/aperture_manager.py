@@ -6,9 +6,10 @@ from typing import TYPE_CHECKING, Dict
 from pygerber.exceptions import ApertureSelectionError, InvalidSyntaxError
 
 if TYPE_CHECKING:
+    from pygerber.renderer import Renderer
+
     from .aperture import Aperture
     from .apertureset import ApertureSet
-    from pygerber.renderer import Renderer
 
 
 class ApertureManager:
@@ -16,7 +17,7 @@ class ApertureManager:
     apertures: Dict[int, Aperture]
     apertureSet: ApertureSet
     renderer: Renderer
-    current_aperture: Aperture=None
+    current_aperture: Aperture = None
 
     def __init__(self, apertureSet: ApertureSet, renderer: Renderer) -> None:
         self.renderer = renderer

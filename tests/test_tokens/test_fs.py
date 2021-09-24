@@ -2,9 +2,8 @@
 import re
 from unittest import TestCase, main
 
-from pygerber.exceptions import DeprecatedSyntax, InvalidCommandFormat
-from pygerber.tokens import FormatSpecifierToken
 from pygerber.drawing_state import DrawingState
+from pygerber.tokens import FormatSpecifierToken
 
 
 class FormatSpecifierTokenTest(TestCase):

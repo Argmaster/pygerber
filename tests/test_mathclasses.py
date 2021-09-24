@@ -2,7 +2,8 @@
 from math import degrees
 from unittest import TestCase, main
 
-from pygerber.mathclasses import UNIT_VECTOR_X, BoundingBox, Vector2D, angle_from_zero
+from pygerber.mathclasses import (UNIT_VECTOR_X, BoundingBox, Vector2D,
+                                  angle_from_zero)
 
 
 class Vector2D_Test(TestCase):

@@ -8,6 +8,7 @@ from pygerber.mathclasses import BoundingBox
 from pygerber.renderer.arc_util_mixin import ArcUtilMixin
 from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec, Spec
 from pygerber.tokens.add import ADD_Token
+
 from .aperture import Aperture
 
 

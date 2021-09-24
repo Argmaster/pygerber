@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
+
 from unittest import TestCase, main
+
+from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 
 
 class Test(TestCase):

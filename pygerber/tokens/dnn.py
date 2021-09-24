@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 from pygerber.mathclasses import Vector2D
 
@@ -7,6 +8,7 @@ import re
 
 from pygerber.validators.basic import Int
 from pygerber.validators.coordinate import Coordinate
+
 if TYPE_CHECKING:
     from pygerber.renderer import Renderer
 
@@ -76,13 +78,13 @@ class D03_Token(D02_Token):
         return renderer.bbox_flash(self.point)
 
 
-
 class DNN_Loader_Token(Token):
     regex = re.compile(r"D(?P<ID>[1-9][0-9]*)\*")
     ID = Int()
 
     def pre_render(self, renderer: Renderer):
         renderer.select_aperture(self.ID)
+
 
 @Deprecated("G54 command is deprecated since 2012")
 class G54DNN_Loader_Token(DNN_Loader_Token):

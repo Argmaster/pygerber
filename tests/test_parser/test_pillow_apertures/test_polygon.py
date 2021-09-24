@@ -4,13 +4,10 @@ from __future__ import annotations
 from unittest import TestCase, main
 
 from PIL import Image
-from pygerber.mathclasses import Vector2D
 from pygerber.constants import Interpolation, Polarity
+from pygerber.mathclasses import Vector2D
 from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec
-from tests.testutils.pillow import (
-    get_pillow_initialized_renderer,
-    get_pillow_polygon,
-)
+from tests.testutils.pillow import get_pillow_initialized_renderer, get_pillow_polygon
 
 
 class TestPillowPolygon(TestCase):

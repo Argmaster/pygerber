@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pygerber.mathclasses import BoundingBox
 from pygerber.tokens.add import ADD_Token
+
 from .aperture import Aperture
 
 

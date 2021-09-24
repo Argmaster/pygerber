@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from pygerber.exceptions import FeatureNotSupportedError
 from unittest import TestCase, main
 
 from pygerber.coparser import CoParser
+from pygerber.exceptions import FeatureNotSupportedError
 from pygerber.tokens.fs import FormatSpecifierToken
 
 
@@ -35,17 +35,16 @@ class CoParserTest(TestCase):
         self.assertEqual(coparser.dump(0.0003), "300")
 
     def test_parser_coordinates_D(self):
-        coparser = CoParser() # 3.6
+        coparser = CoParser()  # 3.6
         coparser.set_zeros("D")
         self.assertEqual(coparser.parse("010000300"), 10.0003)
         self.assertEqual(coparser.parse("-000000300"), -0.0003)
 
     def test_parser_coordinates_T(self):
-        coparser = CoParser() # 3.6
+        coparser = CoParser()  # 3.6
         coparser.set_zeros("T")
         self.assertEqual(coparser.parse("0100003"), 10.0003)
         self.assertEqual(coparser.parse("-0000003"), -0.0003)
-
 
     def test_dump_negative(self):
         coparser = CoParser()
@@ -57,8 +56,6 @@ class CoParserTest(TestCase):
         coparser = CoParser()
         coparser.set_zeros("D")
         self.assertRaises(FeatureNotSupportedError, coparser.dump, 0.1)
-
-
 
 
 if __name__ == "__main__":

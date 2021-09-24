@@ -7,6 +7,7 @@ from typing import List, Tuple
 from pygerber.mathclasses import BoundingBox
 from pygerber.renderer.arc_util_mixin import ArcUtilMixin
 from pygerber.renderer.spec import Spec
+
 from .aperture import Aperture
 
 

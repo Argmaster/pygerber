@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from pygerber.drawing_state import DrawingState
-from pygerber.exceptions import InvalidCommandFormat
 from unittest import TestCase, main
 
+from pygerber.drawing_state import DrawingState
+from pygerber.exceptions import InvalidCommandFormat
 from pygerber.validators.struct_validator import StructValidator
 from pygerber.validators.validator import Validator
 

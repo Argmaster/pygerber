@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from dataclasses import dataclass
-from pygerber.tokens.token import Token
-from pygerber.parser.parser import AbstractParser
 
+from dataclasses import dataclass
 from typing import Deque, Tuple
 
 from PIL import Image, ImageDraw
 from pygerber.mathclasses import BoundingBox
-from pygerber.renderer.apertureset import ApertureSet
+from pygerber.parser.parser import AbstractParser
 from pygerber.parser.pillow.apertures import *
+from pygerber.renderer.apertureset import ApertureSet
 from pygerber.tokenizer import Tokenizer
+from pygerber.tokens.token import Token
 
 Color_Type = Tuple[float, float, float, float]
 

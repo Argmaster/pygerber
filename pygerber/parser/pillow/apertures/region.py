@@ -4,10 +4,10 @@ from __future__ import annotations
 from typing import List, Tuple
 
 from PIL import ImageDraw
-from pygerber.renderer.aperture import RegionApertureManager
-from pygerber.renderer.spec import ArcSpec, LineSpec
 from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
+from pygerber.renderer.aperture import RegionApertureManager
+from pygerber.renderer.spec import ArcSpec, LineSpec
 
 
 class PillowRegion(ArcUtilMixinPillow, RegionApertureManager, PillowUtilMethdos):

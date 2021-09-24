@@ -6,7 +6,6 @@ from math import cos, degrees, radians, sin
 from pygerber.mathclasses import Vector2D, angle_from_zero
 from pygerber.renderer.spec import ArcSpec
 
-
 DELTA_MULTIPLIER = 25
 
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 from pygerber.validators.struct_validator import StructValidator
 from pygerber.validators.coordinate import UnitFloat
