@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import acos, floor, sqrt, tau
-from typing import SupportsIndex, Tuple
+from typing import Tuple
 
 
 @dataclass
