@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from typing import Deque, List, Tuple
 
-from black import re
 from pygerber.constants import Interpolation
 from pygerber.drawing_state import DrawingState
 from pygerber.exceptions import EndOfStream

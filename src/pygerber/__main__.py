@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-from __future__ import annotations
+"""
+Entrypoint module for PyGerber command line interface.
+Type following to invoke:
+python -m pygerber
+"""
 
 import sys
 
