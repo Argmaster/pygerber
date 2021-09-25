@@ -50,8 +50,8 @@ class TestPillowParser(TestCase):
         self.assertRaises(RuntimeError, lambda: parser.get_image())
         parser.parse(self.SOURCE_0)
         self.assertRaises(RuntimeError, lambda: parser.parse(self.SOURCE_0))
-        parser.save(TESTS_FOLDER / "test_parser\\test_render.png", "png")
-        parser.save(TESTS_FOLDER / "test_parser\\test_render.png")
+        parser.save(TESTS_FOLDER / "test_parser/test_render.png", "png")
+        parser.save(TESTS_FOLDER / "test_parser/test_render.png")
 
     def test_parser_null_size_image(self):
         parser = ParserWithPillow()
@@ -110,19 +110,19 @@ def get_test_spec():
         "ignore_deprecated": True,
         "layers": [
             {
-                "file_path": ".\\tests\\gerber\\set\\top_copper.grb",
+                "file_path": "./tests/gerber/set/top_copper.grb",
                 "colors": {
                     "dark": [40, 143, 40, 255],
                     "clear": [60, 181, 60, 255],
                 },
             },
             {
-                "file_path": ".\\tests\\gerber\\set\\top_solder_mask.grb",
+                "file_path": "./tests/gerber/set/top_solder_mask.grb",
                 "colors": "solder_mask",
             },
-            {"file_path": ".\\tests\\gerber\\set\\top_paste_mask.grb"},
+            {"file_path": "./tests/gerber/set/top_paste_mask.grb"},
             {
-                "file_path": ".\\tests\\gerber\\set\\top_silk.grb",
+                "file_path": "./tests/gerber/set/top_silk.grb",
                 "colors": "silk",
             },
         ],
@@ -137,7 +137,7 @@ class ProjectSpecTest(TestCase):
                 {
                     "layers": [
                         {
-                            "file_path": ".\\tests\\gerber\\set\\top_copper.grb",
+                            "file_path": "./tests/gerber/set/top_copper.grb",
                             "colors": 444,
                         },
                     ],

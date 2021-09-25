@@ -45,7 +45,7 @@ class TokenizerTest(TestCase):
 
     def test_tokenize_file_invalid_syntax(self):
         tokenizer = Tokenizer()
-        path = TESTS_FOLDER / "gerber\\invalid_syntax.grb"
+        path = TESTS_FOLDER / "gerber/invalid_syntax.grb"
         with open(path) as file:
             self.assertRaises(
                 InvalidSyntaxError, lambda: tokenizer.tokenize(file.read(), path)
