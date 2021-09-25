@@ -6,6 +6,10 @@ from unittest import TestCase, main
 from pygerber.exceptions import InvalidSyntaxError, TokenNotFound
 from pygerber.tokenizer import Tokenizer
 
+from pathlib import Path
+
+TESTS_FOLDER = Path(__file__).parent
+
 
 class TokenizerTest(TestCase):
 
@@ -41,7 +45,7 @@ class TokenizerTest(TestCase):
 
     def test_tokenize_file_invalid_syntax(self):
         tokenizer = Tokenizer()
-        path = "tests\\gerber\\invalid_syntax.grb"
+        path = TESTS_FOLDER / "gerber\\invalid_syntax.grb"
         with open(path) as file:
             self.assertRaises(
                 InvalidSyntaxError, lambda: tokenizer.tokenize(file.read(), path)
@@ -53,17 +57,17 @@ class TokenizerTest(TestCase):
 
     def test_tokenize_file_0(self):
         tokenizer = Tokenizer()
-        tokenizer.tokenize_file("./tests/gerber/s0.grb")
+        tokenizer.tokenize_file(TESTS_FOLDER / "gerber/s0.grb")
         self.assertEqual(tokenizer.token_stack_size, 17)
 
     def test_tokenize_file_1(self):
         tokenizer = Tokenizer()
-        tokenizer.tokenize_file("./tests/gerber/s1.grb")
+        tokenizer.tokenize_file(TESTS_FOLDER / "gerber/s1.grb")
         self.assertEqual(tokenizer.token_stack_size, 47)
 
     def test_tokenize_file_2(self):
         tokenizer = Tokenizer()
-        tokenizer.tokenize_file("./tests/gerber/s2.grb")
+        tokenizer.tokenize_file(TESTS_FOLDER / "gerber/s2.grb")
         self.assertEqual(tokenizer.token_stack_size, 116)
 
 

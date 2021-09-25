@@ -66,7 +66,7 @@ setup(
     keywords=[
         'python-3', 'gerber', 'gerber-rendering', 'gerber-x3', 'python-rendering', 'gerber-parser', 'python-3.9'
     ],
-    python_requires='==3.9.*',
+    python_requires='>=3.7',
     install_requires=INTALL_REQUIRES,
     extras_require={
         # eg:

@@ -17,8 +17,9 @@ from pygerber.parser.pillow.api import (
 from pygerber.parser.pillow.parser import ImageSizeNullError, ParserWithPillow
 from tests.testutils.pillow import are_images_similar
 
-RENDERED_PATH = Path("./tests/gerber/rendered")
-GERBER_PATH = Path("./tests/gerber")
+TESTS_FOLDER = Path(__file__).parent.parent
+RENDERED_PATH = TESTS_FOLDER / Path("gerber/rendered")
+GERBER_PATH = TESTS_FOLDER / Path("gerber")
 
 
 class TestPillowParser(TestCase):
@@ -49,8 +50,8 @@ class TestPillowParser(TestCase):
         self.assertRaises(RuntimeError, lambda: parser.get_image())
         parser.parse(self.SOURCE_0)
         self.assertRaises(RuntimeError, lambda: parser.parse(self.SOURCE_0))
-        parser.save(".\\tests\\test_parser\\test_render.png", "png")
-        parser.save(".\\tests\\test_parser\\test_render.png")
+        parser.save(TESTS_FOLDER / "test_parser\\test_render.png", "png")
+        parser.save(TESTS_FOLDER / "test_parser\\test_render.png")
 
     def test_parser_null_size_image(self):
         parser = ParserWithPillow()
