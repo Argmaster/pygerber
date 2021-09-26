@@ -5,11 +5,14 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pygerber.drawing_state import DrawingState
-from pygerber.validators.basic import String
-from pygerber.exceptions import EndOfStream
+
 import re
 
-from .token import Deprecated, Token
+from pygerber.exceptions import EndOfStream
+from pygerber.validators.basic import String
+
+from .token import Deprecated
+from .token import Token
 
 
 class EndOfStream_Token(Token):

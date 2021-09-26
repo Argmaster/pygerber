@@ -5,7 +5,8 @@ import re
 
 from pygerber.validators.basic import String
 
-from .token import Deprecated, Token
+from .token import Deprecated
+from .token import Token
 
 
 class G04_Token(Token):

@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 
 from pygerber.drawing_state import DrawingState
-from pygerber.tokens import (
-    LoadMirroringToken,
-    LoadPolarityToken,
-    LoadRotationToken,
-    LoadScalingToken,
-)
+from pygerber.tokens import LoadMirroringToken
+from pygerber.tokens import LoadPolarityToken
+from pygerber.tokens import LoadRotationToken
+from pygerber.tokens import LoadScalingToken
 from pygerber.tokens.load import LoadUnitToken
 
 

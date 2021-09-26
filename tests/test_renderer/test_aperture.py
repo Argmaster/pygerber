@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 from types import SimpleNamespace
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 from unittest.mock import Mock
 
-from pygerber.mathclasses import BoundingBox, Vector2D
-from pygerber.renderer.aperture import Aperture, RegionApertureManager
+from pygerber.mathclasses import BoundingBox
+from pygerber.mathclasses import Vector2D
+from pygerber.renderer.aperture import Aperture
+from pygerber.renderer.aperture import RegionApertureManager
 from pygerber.renderer.aperture_manager import ApertureManager
-from pygerber.renderer.spec import ArcSpec, LineSpec
-from tests.testutils.apertures import (
-    CircleApertureCollector,
-    PolygonApertureCollector,
-    RectangleApertureCollector,
-    get_dummy_apertureSet,
-)
+from pygerber.renderer.spec import ArcSpec
+from pygerber.renderer.spec import LineSpec
+from tests.testutils.apertures import CircleApertureCollector
+from tests.testutils.apertures import PolygonApertureCollector
+from tests.testutils.apertures import RectangleApertureCollector
+from tests.testutils.apertures import get_dummy_apertureSet
 from tests.testutils.renderer import get_filled_renderer
 
 

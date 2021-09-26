@@ -2,15 +2,20 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from pygerber.validators.struct_validator import StructValidator
+
 from pygerber.validators.coordinate import UnitFloat
+from pygerber.validators.struct_validator import StructValidator
 
 if TYPE_CHECKING:
     from pygerber.renderer import Renderer
+
 import re
 
+from pygerber.validators.basic import Float
+from pygerber.validators.basic import Int
+from pygerber.validators.basic import String
+
 from .token import Token
-from pygerber.validators.basic import Float, Int, String
 
 
 class ADD_Token(Token):

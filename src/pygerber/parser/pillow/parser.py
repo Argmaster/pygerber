@@ -2,19 +2,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Deque, Tuple
+from typing import Deque
+from typing import Tuple
 
-from PIL import Image, ImageDraw
+from PIL import Image
+from PIL import ImageDraw
+
 from pygerber.mathclasses import BoundingBox
 from pygerber.parser.parser import AbstractParser
-from pygerber.parser.pillow.apertures import (
-    PillowCircle,
-    PillowRectangle,
-    PillowObround,
-    PillowPolygon,
-    PillowCustom,
-    PillowRegion,
-)
+from pygerber.parser.pillow.apertures import PillowCircle
+from pygerber.parser.pillow.apertures import PillowCustom
+from pygerber.parser.pillow.apertures import PillowObround
+from pygerber.parser.pillow.apertures import PillowPolygon
+from pygerber.parser.pillow.apertures import PillowRectangle
+from pygerber.parser.pillow.apertures import PillowRegion
 from pygerber.renderer.apertureset import ApertureSet
 from pygerber.tokenizer import Tokenizer
 from pygerber.tokens.token import Token

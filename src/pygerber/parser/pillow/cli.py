@@ -4,14 +4,14 @@ from __future__ import annotations
 import os
 from functools import lru_cache
 from math import inf
-from typing import Dict, List, Tuple
+from typing import Dict
+from typing import List
+from typing import Tuple
 
-from pygerber.parser.pillow.api import (
-    render_from_json,
-    render_from_spec,
-    render_from_toml,
-    render_from_yaml,
-)
+from pygerber.parser.pillow.api import render_from_json
+from pygerber.parser.pillow.api import render_from_spec
+from pygerber.parser.pillow.api import render_from_toml
+from pygerber.parser.pillow.api import render_from_yaml
 
 UNIT_MAP_TYPE = Dict[Tuple[float, float], str]
 

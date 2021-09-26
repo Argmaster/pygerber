@@ -4,8 +4,11 @@ from __future__ import annotations
 from functools import cached_property
 from typing import Tuple
 
-from PIL import Image, ImageDraw
-from pygerber.mathclasses import BoundingBox, Vector2D
+from PIL import Image
+from PIL import ImageDraw
+
+from pygerber.mathclasses import BoundingBox
+from pygerber.mathclasses import Vector2D
 from pygerber.parser.pillow.apertures.util import PillowUtilMethdos
 from pygerber.renderer.spec import FlashSpec
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 
 from pygerber.drawing_state import DrawingState
 from pygerber.validators.coordinate import Coordinate

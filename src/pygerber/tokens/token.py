@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pygerber.renderer import Renderer
     from pygerber.drawing_state import DrawingState
-from pygerber.mathclasses import BoundingBox, Vector2D
 
 import re
 
+from pygerber.mathclasses import BoundingBox
+from pygerber.mathclasses import Vector2D
 
 from .dispatcher_meta import Dispatcher
 

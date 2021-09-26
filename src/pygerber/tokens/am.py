@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 import re
+
 from pygerber.validators.basic import String
+
 from .token import Token
 
 

@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from math import cos, degrees, radians, sin
+from math import cos
+from math import degrees
+from math import radians
+from math import sin
 
-from pygerber.mathclasses import Vector2D, angle_from_zero
+from pygerber.mathclasses import Vector2D
+from pygerber.mathclasses import angle_from_zero
 from pygerber.renderer.spec import ArcSpec
 
 DELTA_MULTIPLIER = 25

@@ -1,6 +1,8 @@
 from types import SimpleNamespace
+
 from pygerber.renderer import Renderer
-from tests.testutils.apertures import ApertureCollector, get_dummy_apertureSet
+from tests.testutils.apertures import ApertureCollector
+from tests.testutils.apertures import get_dummy_apertureSet
 
 
 def get_dummy_renderer() -> Renderer:

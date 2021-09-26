@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from argparse import ArgumentParser, _ArgumentGroup, _MutuallyExclusiveGroup
+from argparse import ArgumentParser
+from argparse import _ArgumentGroup
+from argparse import _MutuallyExclusiveGroup
 from pathlib import Path
 
 from PIL._version import __version__ as pillow_version

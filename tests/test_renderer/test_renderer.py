@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 
 from pygerber.constants import Interpolation
 from pygerber.exceptions import ApertureSelectionError
-from pygerber.mathclasses import BoundingBox, Vector2D
+from pygerber.mathclasses import BoundingBox
+from pygerber.mathclasses import Vector2D
 from pygerber.renderer.spec import LineSpec
 from tests.testutils.apertures import ApertureCollector
-from tests.testutils.renderer import get_collector_spec, get_filled_renderer
+from tests.testutils.renderer import get_collector_spec
+from tests.testutils.renderer import get_filled_renderer
 
 
 class TestRenderer(TestCase):

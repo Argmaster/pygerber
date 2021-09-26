@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 from unittest.mock import MagicMock
 
-from pygerber.mathclasses import BoundingBox, Vector2D
-from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec, Spec
+from pygerber.mathclasses import BoundingBox
+from pygerber.mathclasses import Vector2D
+from pygerber.renderer.spec import ArcSpec
+from pygerber.renderer.spec import FlashSpec
+from pygerber.renderer.spec import LineSpec
+from pygerber.renderer.spec import Spec
 
 
 class SpecTest(TestCase):

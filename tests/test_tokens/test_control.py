@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 
-from pygerber.tokens.control import (
-    EndOfStream_Token,
-    ImagePolarity_Token,
-    Whitespace_Token,
-)
+from pygerber.tokens.control import EndOfStream_Token
+from pygerber.tokens.control import ImagePolarity_Token
+from pygerber.tokens.control import Whitespace_Token
 
 
 class TestControlTokens(TestCase):

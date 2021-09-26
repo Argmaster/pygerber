@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from unittest import TestCase
+from unittest import main
 from unittest.mock import Mock
-from pygerber.mathclasses import Vector2D
-from pygerber.drawing_state import DrawingState
-from unittest import TestCase, main
 
+from pygerber.drawing_state import DrawingState
+from pygerber.mathclasses import Vector2D
 from pygerber.tokens import D01_Token
 
 
