@@ -5,7 +5,14 @@ from pygerber.parser.pillow.api import LayerSpec
 from PIL import Image, ImageDraw
 from pygerber.parser.pillow.parser import ColorSet
 from types import SimpleNamespace
-from pygerber.parser.pillow.apertures import *
+from pygerber.parser.pillow.apertures import (
+    PillowCircle,
+    PillowRectangle,
+    PillowObround,
+    PillowPolygon,
+    PillowCustom,
+    PillowRegion,
+)
 from pygerber.renderer.apertureset import ApertureSet
 from pygerber.renderer import Renderer
 

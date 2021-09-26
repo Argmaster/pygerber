@@ -83,11 +83,11 @@ def __add_specfile_types_group(source_group: _ArgumentGroup):
             help=f"Use {name.upper()} specfile, from file <filepath>.",
         )
     specfile_types_group.add_argument(
-        f"--file",
+        "--file",
         dest="specfile",
         type=validate("file"),
         metavar="<filepath>",
-        help=f"Render single gerber file.",
+        help="Render single gerber file.",
     )
 
 

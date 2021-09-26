@@ -9,7 +9,6 @@ from pygerber.mathclasses import Vector2D
 
 
 class Spec(ABC):
-
     @abstractmethod
     def draw(self, aperture):
         raise TypeError()
@@ -30,6 +29,7 @@ class FlashSpec(Spec):
 
     def bbox(self, aperture: meta_ap.Aperture):
         return aperture.flash_bbox(self)
+
 
 @dataclass
 class LineSpec(Spec):

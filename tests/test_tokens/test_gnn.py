@@ -4,18 +4,15 @@ from unittest.mock import Mock
 
 from pygerber.constants import Interpolation, Unit
 from pygerber.drawing_state import DrawingState
-from pygerber.mathclasses import BoundingBox
 from pygerber.tokens.gnn import (
     G0N_Token,
     G36_Token,
     G37_Token,
-    G55_Token,
     G70_Token,
     G71_Token,
     G90_Token,
     G91_Token,
 )
-from tests.testutils.apertures import ApertureCollector
 
 
 class G0N_Token_Test(TestCase):

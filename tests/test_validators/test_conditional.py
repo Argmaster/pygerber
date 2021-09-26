@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from types import SimpleNamespace
 from unittest import TestCase, main
 
 from pygerber.drawing_state import DrawingState

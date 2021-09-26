@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import re
 from unittest import TestCase, main
 
 from pygerber.drawing_state import DrawingState
@@ -41,7 +40,6 @@ class FormatSpecifierTokenTest(TestCase):
         self.assertEqual(state.coparser.format, fs_token)
 
     def test_deprecated_unequal_int_specifiers(self):
-        META = DrawingState()
         SOURCE = r"%FSLIX36Y26*%"
         fs_token = self.match_fs_token(SOURCE)
         self.assertTrue(fs_token.__deprecated__ is not None)
@@ -52,7 +50,6 @@ class FormatSpecifierTokenTest(TestCase):
         self.assertTrue(fs_token.__deprecated__ is not None)
 
     def test_stringify(self):
-        META = DrawingState()
         fs_token = self.match_fs_token(r"""%FSLAX36Y36*%""")
         self.assertEqual(str(fs_token), r"%FSLAX36Y36*%")
 

@@ -40,10 +40,10 @@ class TestPillowParser(TestCase):
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
-        # image.save(RENDERED_PATH/"SOURCE_0.png")
-        # self.assertTrue(
-        #     are_images_similar(Image.open(RENDERED_PATH / "SOURCE_0.png"), image, 0, 0)
-        # )
+        image.save(RENDERED_PATH/"SOURCE_0.png")
+        self.assertTrue(
+            are_images_similar(Image.open(RENDERED_PATH / "SOURCE_0.png"), image, 0, 0)
+        )
 
     def test_parser_double_render(self):
         parser = ParserWithPillow()
@@ -74,33 +74,35 @@ class TestPillowParser(TestCase):
         if save:
             image.save(RENDERED_PATH / (filename.split(".")[0] + ".png"))
         if fulltest:
+            filepath = RENDERED_PATH / filename
+            filepath = filepath.with_suffix('.png')
             self.assertTrue(
-                are_images_similar(Image.open(RENDERED_PATH / filename), image, 0, 0)
+                are_images_similar(Image.open(filepath), image, 0.01, 0.01)
             )
 
     def test_parser_file_0(self):
-        self.render_file_optional_show_and_save("s0.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s0.grb", True, False, False, dpi=1600)
 
     def test_parser_file_1(self):
-        self.render_file_optional_show_and_save("s1.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s1.grb", True, False, False, dpi=1600)
 
     def test_parser_file_2(self):
-        self.render_file_optional_show_and_save("s2.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s2.grb", True, False, False, dpi=1600)
 
     def test_parser_file_3(self):
-        self.render_file_optional_show_and_save("s3.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s3.grb", True, False, False, dpi=1600)
 
     def test_parser_file_4(self):
-        self.render_file_optional_show_and_save("s4.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s4.grb", True, False, False, dpi=1600)
 
     def test_parser_file_5(self):
-        self.render_file_optional_show_and_save("s5.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s5.grb", True, False, False, dpi=1600)
 
     def test_parser_file_6(self):
-        self.render_file_optional_show_and_save("s6.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s6.grb", True, False, False, dpi=1600)
 
     def test_parser_file_7(self):
-        self.render_file_optional_show_and_save("s7.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s7.grb", True, False, False, dpi=1600)
 
 
 def get_test_spec():

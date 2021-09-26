@@ -72,6 +72,6 @@ class CoParser:
         if self.get_zeros() == "L":  # skip leading
             return f"{float_string:0>{self.format.length}}"
         elif self.get_zeros() == "T":
-            return float_string # we don't need trailing zeros anyway
+            return float_string  # we don't need trailing zeros anyway
         else:
-            return float_string # use as-is as no zeros are skipped
+            return float_string  # use as-is as no zeros are skipped

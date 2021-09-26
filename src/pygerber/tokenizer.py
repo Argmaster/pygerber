@@ -93,7 +93,7 @@ class Tokenizer:
     #             self.bbox += bbox
 
     def push_token(self, token: Token) -> None:
-        if token.keep == True:
+        if token.keep is True:
             self.token_stack.append(token)
             self.token_stack_size += 1
 

@@ -44,9 +44,8 @@ Overview
 
 PyGerber is a Python library for 2D and 3D rendering of Gerber X3 files.
 It is completely written in Python, and only dependencies are limiting its portability.
-`3D rendering is still under development, it will arrive at next major release. (v1.0.0)`
 
-Documentation of this library is available at https://pygerber.readthedocs.io/
+*3D rendering is still under development, it will arrive at next major release. (v1.0.0)*
 
 **This package is a Free Software; it is released under MIT license**. Be aware that dependencies might be using different licenses.
 
@@ -56,13 +55,9 @@ support for older standards and deprecated features.
 Package is using third party libraries for low level drawing and mesh
 creation.
 
-PyGerber's parser was not mend to be used by package users, but, there are no obstacles preventing
+*PyGerber's parser was not ment to be used by package users, but there are no obstacles preventing
 you from using it. However, stability of the API is not guaranteed between minor releases (I'll do my
-best to make it stable among patches).
-
-PyGerber officially supports only Python 3.9, but it's very likely
-that 2D rendering is possible on Python 3.7 and 3.8. 3D rendering is not
-possible there due to compatibility issues of Blender and Blender's API changes.
+best to make it stable among patches).*
 
 Installation
 ============
@@ -86,6 +81,18 @@ You can also install the in-development version from github with
     pip install https://github.com/Argmaster/pygerber/archive/main.zip
 
 Same Blender dependency issue applies to this installation method.
+
+Compatibility
+=============
+
+PyGerber officially supports only Python 3.9, but 2D rendering should be also available for
+3.8 and 3.7, as long as Pillow provides support for those versions. 3D rendering is not
+possible on those versions of Python due to compatibility issues of Blender binaries and Blender's API changes.
+
+Documentation
+=============
+
+Documentation of this library is available at https://pygerber.readthedocs.io/
 
 Development
 ===========

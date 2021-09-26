@@ -65,6 +65,10 @@ class ArcUtilMixin:
 
     @staticmethod
     def get_arc_co_functions(radius):
-        x = lambda alpha: radius * cos(radians(alpha))
-        y = lambda alpha: radius * sin(radians(alpha))
+        def x(alpha):
+            return radius * cos(radians(alpha))
+
+        def y(alpha):
+            return radius * sin(radians(alpha))
+
         return x, y

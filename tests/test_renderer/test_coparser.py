@@ -3,7 +3,6 @@ from unittest import TestCase, main
 
 from pygerber.coparser import CoParser
 from pygerber.exceptions import FeatureNotSupportedError
-from pygerber.tokens.fs import FormatSpecifierToken
 
 
 class CoParserTest(TestCase):
@@ -45,12 +44,6 @@ class CoParserTest(TestCase):
         coparser.set_zeros("T")
         self.assertEqual(coparser.parse("0100003"), 10.0003)
         self.assertEqual(coparser.parse("-0000003"), -0.0003)
-
-    def test_dump_negative(self):
-        coparser = CoParser()
-
-    def test_dump_positive(self):
-        coparser = CoParser()
 
     def test_dump_not_supported(self):
         coparser = CoParser()

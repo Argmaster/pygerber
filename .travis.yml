@@ -9,10 +9,10 @@ env:
     - LANG=en_US.UTF-8
 matrix:
   include:
-    - python: '3.6'
+    - python: '3.9'
       env:
         - TOXENV=check
-    - python: '3.6'
+    - python: '3.9'
       env:
         - TOXENV=docs
     - env:

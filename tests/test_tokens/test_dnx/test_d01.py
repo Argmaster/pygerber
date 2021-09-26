@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from unittest.mock import Mock
-from pygerber.renderer import Renderer
 from pygerber.mathclasses import Vector2D
 from pygerber.drawing_state import DrawingState
 from unittest import TestCase, main
