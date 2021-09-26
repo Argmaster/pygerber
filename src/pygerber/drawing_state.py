@@ -3,7 +3,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pygerber.constants import Interpolation, Mirroring, Polarity, Unit
+from pygerber.constants import Interpolation
+from pygerber.constants import Mirroring
+from pygerber.constants import Polarity
+from pygerber.constants import Unit
 
 from .coparser import CoParser
 

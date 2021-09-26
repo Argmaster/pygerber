@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from pygerber.mathclasses import Vector2D
-
 import re
+from typing import TYPE_CHECKING
 
+from pygerber.mathclasses import Vector2D
 from pygerber.validators.basic import Int
 from pygerber.validators.coordinate import Coordinate
 
 if TYPE_CHECKING:
     from pygerber.renderer import Renderer
 
-from .token import Deprecated, Token
+from .token import Deprecated
+from .token import Token
 
 CO_PATTERN = r"[-+]?[0-9]+"
 

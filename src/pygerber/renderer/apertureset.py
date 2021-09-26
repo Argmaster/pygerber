@@ -2,7 +2,8 @@
 from dataclasses import dataclass
 from typing import Type
 
-from .aperture import Aperture, RegionApertureManager
+from .aperture import Aperture
+from .aperture import RegionApertureManager
 
 
 @dataclass

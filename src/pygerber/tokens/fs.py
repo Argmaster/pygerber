@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pygerber.drawing_state import DrawingState
 
-from pygerber.validators.basic import Int, String
+from pygerber.validators.basic import Int
+from pygerber.validators.basic import String
 from pygerber.validators.conditional import CallOnCondition
-
 
 from .token import Token
 

@@ -3,19 +3,20 @@ from __future__ import annotations
 
 import json
 import os
-from concurrent.futures import Future, ProcessPoolExecutor
+from concurrent.futures import Future
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 import toml
 import yaml
 from PIL import Image
-from pygerber.parser.pillow.parser import (
-    DEFAULT_COLOR_SET_GREEN,
-    DEFAULT_COLOR_SET_ORANGE,
-    ColorSet,
-    ParserWithPillow,
-)
+
+from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_GREEN
+from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_ORANGE
+from pygerber.parser.pillow.parser import ColorSet
+from pygerber.parser.pillow.parser import ParserWithPillow
 
 NAMED_COLORS = {
     "silk": ColorSet((255, 255, 255, 255)),

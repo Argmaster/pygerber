@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 
-from tests.testutils.apertures import (
-    CircleApertureCollector,
-    PolygonApertureCollector,
-    RectangleApertureCollector,
-    RegionApertureCollector,
-    get_dummy_apertureSet,
-)
+from tests.testutils.apertures import CircleApertureCollector
+from tests.testutils.apertures import PolygonApertureCollector
+from tests.testutils.apertures import RectangleApertureCollector
+from tests.testutils.apertures import RegionApertureCollector
+from tests.testutils.apertures import get_dummy_apertureSet
 
 
 class ApertureSetTest(TestCase):

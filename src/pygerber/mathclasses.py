@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import acos, floor, sqrt, tau
+from math import acos
+from math import floor
+from math import sqrt
+from math import tau
 from typing import Tuple
 
 

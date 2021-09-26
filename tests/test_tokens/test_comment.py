@@ -1,8 +1,11 @@
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 
 from pygerber.drawing_state import DrawingState
 from pygerber.exceptions import DeprecatedSyntax
-from pygerber.tokens import G04_Token, G74_Token, G75_Token
+from pygerber.tokens import G04_Token
+from pygerber.tokens import G74_Token
+from pygerber.tokens import G75_Token
 
 
 class TestCommentTokens(TestCase):

@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 from pathlib import Path
-from pygerber.parser.pillow.api import LayerSpec
-from PIL import Image, ImageDraw
-from pygerber.parser.pillow.parser import ColorSet
 from types import SimpleNamespace
-from pygerber.parser.pillow.apertures import *
-from pygerber.renderer.apertureset import ApertureSet
+
+from PIL import Image
+from PIL import ImageDraw
+
+from pygerber.parser.pillow.apertures import PillowCircle
+from pygerber.parser.pillow.apertures import PillowCustom
+from pygerber.parser.pillow.apertures import PillowObround
+from pygerber.parser.pillow.apertures import PillowPolygon
+from pygerber.parser.pillow.apertures import PillowRectangle
+from pygerber.parser.pillow.apertures import PillowRegion
+from pygerber.parser.pillow.api import LayerSpec
+from pygerber.parser.pillow.parser import ColorSet
 from pygerber.renderer import Renderer
+from pygerber.renderer.apertureset import ApertureSet
 
 DEFAULT_TEST_COLOR_SET = ColorSet(
     (120, 120, 255, 255),

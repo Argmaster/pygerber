@@ -8,7 +8,8 @@ if TYPE_CHECKING:
 
 import re
 
-from pygerber.validators.basic import Float, String
+from pygerber.validators.basic import Float
+from pygerber.validators.basic import String
 
 from .token import Token
 

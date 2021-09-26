@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import Deque, List, Tuple
+from typing import Deque
+from typing import List
+from typing import Tuple
 
 from pygerber.constants import Interpolation
 from pygerber.drawing_state import DrawingState
 from pygerber.exceptions import EndOfStream
-from pygerber.mathclasses import BoundingBox, Vector2D
+from pygerber.mathclasses import BoundingBox
+from pygerber.mathclasses import Vector2D
 from pygerber.tokens.token import Token
 
 from .aperture import RegionApertureManager
 from .aperture_manager import ApertureManager
 from .apertureset import ApertureSet
-from .spec import ArcSpec, FlashSpec, LineSpec, Spec
+from .spec import ArcSpec
+from .spec import FlashSpec
+from .spec import LineSpec
+from .spec import Spec
 
 
 class Renderer:

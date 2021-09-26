@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from unittest import TestCase, main
-
-from pygerber.exceptions import InvalidSyntaxError, TokenNotFound
-from pygerber.tokenizer import Tokenizer
-
 from pathlib import Path
+from unittest import TestCase
+from unittest import main
+
+from pygerber.exceptions import InvalidSyntaxError
+from pygerber.exceptions import TokenNotFound
+from pygerber.tokenizer import Tokenizer
 
 TESTS_FOLDER = Path(__file__).parent
 

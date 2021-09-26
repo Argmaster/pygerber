@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from argparse import ArgumentParser, _ArgumentGroup, _MutuallyExclusiveGroup
+from argparse import ArgumentParser
+from argparse import _ArgumentGroup
+from argparse import _MutuallyExclusiveGroup
 from pathlib import Path
 
 from PIL._version import __version__ as pillow_version
@@ -83,11 +85,11 @@ def __add_specfile_types_group(source_group: _ArgumentGroup):
             help=f"Use {name.upper()} specfile, from file <filepath>.",
         )
     specfile_types_group.add_argument(
-        f"--file",
+        "--file",
         dest="specfile",
         type=validate("file"),
         metavar="<filepath>",
-        help=f"Render single gerber file.",
+        help="Render single gerber file.",
     )
 
 

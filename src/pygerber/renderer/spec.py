@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from dataclasses import dataclass
 
 import pygerber.renderer.aperture as meta_ap
@@ -9,7 +10,6 @@ from pygerber.mathclasses import Vector2D
 
 
 class Spec(ABC):
-
     @abstractmethod
     def draw(self, aperture):
         raise TypeError()
@@ -30,6 +30,7 @@ class FlashSpec(Spec):
 
     def bbox(self, aperture: meta_ap.Aperture):
         return aperture.flash_bbox(self)
+
 
 @dataclass
 class LineSpec(Spec):

@@ -4,12 +4,15 @@ from __future__ import annotations
 from functools import cached_property
 from typing import Tuple
 
-from PIL import Image, ImageDraw
+from PIL import Image
+from PIL import ImageDraw
+
 from pygerber.mathclasses import Vector2D
 from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 from pygerber.renderer.aperture import CircularAperture
-from pygerber.renderer.spec import ArcSpec, LineSpec
+from pygerber.renderer.spec import ArcSpec
+from pygerber.renderer.spec import LineSpec
 
 
 class PillowCircle(ArcUtilMixinPillow, FlashUtilMixin, CircularAperture):

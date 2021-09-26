@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
-import re
-
-from pygerber.validators.basic import Int
 from pygerber.constants import Unit
+from pygerber.validators.basic import Int
 
-from .token import Deprecated, Token
+from .token import Deprecated
+from .token import Token
 
 if TYPE_CHECKING:
-    from pygerber.renderer import Renderer
-    from pygerber.mathclasses import BoundingBox
     from pygerber.drawing_state import DrawingState
+    from pygerber.mathclasses import BoundingBox
+    from pygerber.renderer import Renderer
 
 
 class G0N_Token(Token):

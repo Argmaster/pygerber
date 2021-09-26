@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from math import degrees
-from unittest import TestCase, main
+from unittest import TestCase
+from unittest import main
 
-from pygerber.mathclasses import (UNIT_VECTOR_X, BoundingBox, Vector2D,
-                                  angle_from_zero)
+from pygerber.mathclasses import BoundingBox
+from pygerber.mathclasses import Vector2D
+from pygerber.mathclasses import angle_from_zero
 
 
 class Vector2D_Test(TestCase):
@@ -37,6 +39,7 @@ class Vector2D_Test(TestCase):
     def test_Vector2D_normalize(self):
         v1 = Vector2D(10, 11)
         self.assertAlmostEqual(v1.normalize().length(), 1)
+
 
 class BoundingBox_Test(TestCase):
     def test_BoundingBox(self):
@@ -87,13 +90,13 @@ class BoundingBox_Test(TestCase):
         self.assertEqual(box.width(), 2)
         self.assertEqual(box.height(), 2)
 
+
 class StandaloneFunctionTest(TestCase):
     def test_angle_from_zero(self):
         alpha = angle_from_zero(Vector2D(-1, 1))
         self.assertEqual(degrees(alpha), 135.0)
         alpha = angle_from_zero(Vector2D(-1, -1))
         self.assertEqual(degrees(alpha), 225.0)
-
 
 
 if __name__ == "__main__":

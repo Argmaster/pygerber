@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import TYPE_CHECKING, Deque
+from typing import TYPE_CHECKING
+from typing import Deque
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -10,7 +11,10 @@ if TYPE_CHECKING:
 
 from pygerber.drawing_state import DrawingState
 
-from .exceptions import DeprecatedSyntax, EndOfStream, InvalidSyntaxError, TokenNotFound
+from .exceptions import DeprecatedSyntax
+from .exceptions import EndOfStream
+from .exceptions import InvalidSyntaxError
+from .exceptions import TokenNotFound
 from .tokens import token_classes
 
 DEFAULT_TRACE_FILEPATH = "<string>"
@@ -93,7 +97,7 @@ class Tokenizer:
     #             self.bbox += bbox
 
     def push_token(self, token: Token) -> None:
-        if token.keep == True:
+        if token.keep is True:
             self.token_stack.append(token)
             self.token_stack_size += 1
 
