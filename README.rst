@@ -12,11 +12,11 @@ Overview
     :target: https://pygerber.readthedocs.io/
     :alt: Documentation Status
 
-.. |travis| image:: https://app.travis-ci.com/Argmaster/pygerber.svg?branch=main
+.. |travis| image:: https://api.travis-ci.com/Argmaster/pygerber.svg?branch=v0.0.1
     :alt: Travis-CI Build Status
     :target: https://travis-ci.com/github/Argmaster/pygerber
 
-.. |codecov| image:: https://codecov.io/gh/Argmaster/pygerber/branch/main/graphs/badge.svg?branch=main
+.. |codecov| image:: https://api.travis-ci.com/Argmaster/pygerber.svg?branch=v0.0.1
     :alt: Coverage Status
     :target: https://codecov.io/github/Argmaster/pygerber
 
