@@ -2,10 +2,8 @@
 from __future__ import annotations
 
 import os
-from functools import lru_cache
 from math import inf
 from typing import Dict
-from typing import List
 from typing import Tuple
 
 from pygerber.parser.pillow.api import render_from_json

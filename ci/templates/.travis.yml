@@ -1,5 +1,5 @@
 language: python
-dist: xenial
+dist: focal
 virt: lxd
 cache: false
 env:
@@ -28,6 +28,8 @@ matrix:
 {%- endif %}{{ '' }}
 {%- endfor %}{{ '' }}
 before_install:
+  - sudo apt update
+  - sudo apt install libpulse0
   - python --version
   - uname -a
   - lsb_release -a || true
