@@ -49,7 +49,7 @@ html_sidebars = {
 }
 html_short_title = "%s-%s" % (project, version)
 
-default_dark_mode = True
+default_dark_mode = False
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
