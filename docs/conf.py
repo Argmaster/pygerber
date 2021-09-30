@@ -13,6 +13,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
+    "sphinx_rtd_dark_mode",
 ]
 source_suffix = ".rst"
 master_doc = "index"
@@ -47,6 +48,8 @@ html_sidebars = {
     "**": ["searchbox.html", "globaltoc.html", "sourcelink.html"],
 }
 html_short_title = "%s-%s" % (project, version)
+
+default_dark_mode = True
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
