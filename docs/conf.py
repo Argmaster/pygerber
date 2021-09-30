@@ -37,7 +37,7 @@ if not on_rtd:  # only set the theme if we're building docs locally
 html_static_path = ["_static"]
 html_logo = "_static/pygerber_logo.png"
 html_theme_options = {
-    "logo_only": True,
+    "logo_only": False,
     "display_version": True,
 }
 html_use_smartypants = True

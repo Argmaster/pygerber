@@ -1,5 +1,6 @@
-.. image:: https://raw.githubusercontent.com/Argmaster/pygerber/main/docs/_static/pygerber_logo.png
-
+.. image:: _static/pygerber_logo.png
+   :height: 400px
+   :align: center
 ========
 Overview
 ========
@@ -68,19 +69,14 @@ PyGerber is available on PyPI and can be obtained via pip
 
     pip install pygerber
 
-Be aware that this will **only install general and 2D rendering dependencies**, as
-**bpy (Blender) is not officially released as Python package**. You have to obtain
-it yourself, which, for example, you can archive with help of guides contained in
-this `repository <https://github.com/Argmaster/pyr3>`_.
-
-
 You can also install the in-development version from github with
 
 .. code:: bash
 
     pip install https://github.com/Argmaster/pygerber/archive/main.zip
 
-Same Blender dependency issue applies to this installation method.
+Blender dependency issue mentioned in previous releases was resolved by using
+`PyR3 package <https://pypi.org/project/PyR3/>`_ which provides Blender.
 
 Compatibility
 =============
@@ -113,16 +109,8 @@ To build and verify that the built package is proper and other code QA checks::
 
     tox -e check
 
-To build sdist, and bdist_wheel::
-
-    python setup.py clean --all sdist bdist_wheel
-
-To make a release of the project on PyPI, assuming you got some distributions in dist/, the most simple usage is::
-
-    twine upload --skip-existing dist/*.whl dist/*.gz dist/*.zip
-
 Credits
 =======
 
 Structure of this project was created using cookiecutter template `cookiecutter-pylibrary <https://github.com/ionelmc/cookiecutter-pylibrary>`_.
-I'm very grateful to Ionel Cristian Mărieș for its creation.
+I'm very grateful to Ionel Cristian Mărieș for sharing it with GitHub community.

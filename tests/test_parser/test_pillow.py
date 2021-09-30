@@ -41,7 +41,7 @@ class TestPillowParser(TestCase):
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
-        image.save(RENDERED_PATH/"SOURCE_0.png")
+        image.save(RENDERED_PATH / "SOURCE_0.png")
         self.assertTrue(
             are_images_similar(Image.open(RENDERED_PATH / "SOURCE_0.png"), image, 0, 0)
         )
@@ -76,10 +76,8 @@ class TestPillowParser(TestCase):
             image.save(RENDERED_PATH / (filename.split(".")[0] + ".png"))
         if fulltest:
             filepath = RENDERED_PATH / filename
-            filepath = filepath.with_suffix('.png')
-            self.assertTrue(
-                are_images_similar(Image.open(filepath), image, 0.01, 0.01)
-            )
+            filepath = filepath.with_suffix(".png")
+            self.assertTrue(are_images_similar(Image.open(filepath), image, 0.01, 0.01))
 
     def test_parser_file_0(self):
         self.render_file_optional_show_and_save("s0.grb", True, False, False, dpi=1600)
