@@ -9,7 +9,6 @@ from pygerber.renderer.spec import LineSpec
 
 
 class BlenderPolygon(ArcUtilMixinBlender, PolygonAperture):
-
     def flash(self, spec: FlashSpec) -> None:
         pass
 

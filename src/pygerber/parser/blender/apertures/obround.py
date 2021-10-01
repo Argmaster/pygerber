@@ -9,4 +9,3 @@ from pygerber.renderer.spec import LineSpec
 
 class BlenderObround(BlenderRectangle):
     pass
-

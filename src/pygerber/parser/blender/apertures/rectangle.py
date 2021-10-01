@@ -9,7 +9,6 @@ from pygerber.renderer.spec import LineSpec
 
 
 class BlenderRectangle(ArcUtilMixinBlender, RectangularAperture):
-
     def flash(self, spec: FlashSpec) -> None:
         pass
 

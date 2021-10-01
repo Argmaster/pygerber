@@ -9,7 +9,6 @@ from pygerber.renderer.spec import LineSpec
 
 
 class BlenderCircle(ArcUtilMixinBlender, CircularAperture):
-
     def flash(self, spec: FlashSpec) -> None:
         pass
 
