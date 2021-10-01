@@ -202,7 +202,6 @@ def render_file_and_save(
     image_padding: int = 0,
 ):
     """Loads, parses, renders file from file_path and saves it in save_path.
-    kwargs will be passed to ParserWithPillow, check it out for available params.
 
     :param file_path: Path to gerber file.
     :type file_path: str
@@ -237,7 +236,19 @@ def render_file(
 ) -> Image.Image:
     """
     Loads, parses and renders file from given path and returns its render as PIL.Image.Image.
-    kwargs will be passed to ParserWithPillow, check it out for available params.
+
+    :param file_path: Path to gerber file to render.
+    :type file_path: str
+    :param dpi: Output image DPI, defaults to 600
+    :type dpi: int, optional
+    :param colors: Color specification, defaults to DEFAULT_COLOR_SET_GREEN
+    :type colors: ColorSet, optional
+    :param ignore_deprecated: If false causes parser to stop when deprecated syntax is met, defaults to True
+    :type ignore_deprecated: bool, optional
+    :param image_padding: Additional image padding, defaults to 0
+    :type image_padding: int, optional
+    :return: Output image.
+    :rtype: Image.Image
     """
     parser = ParserWithPillow(
         dpi=dpi,

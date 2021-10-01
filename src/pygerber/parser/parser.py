@@ -14,6 +14,7 @@ from pygerber.tokens.token import Token
 
 class AbstractParser(ABC):
 
+    tokenizer: Tokenizer
     apertureSet: ApertureSet
     __is_bound: bool
 
