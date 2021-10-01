@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Deque, Tuple
+from pathlib import Path
 
 from PyR3.shortcut.context import wipeScenes
-from PyR3.shortcut.io import ExportGlobal
+from PyR3.shortcut.io import export_to
 
 from pygerber.mathclasses import BoundingBox
 from pygerber.parser.blender.apertures.circle import BlenderCircle
@@ -62,4 +63,5 @@ class ParserWithBlender(AbstractParser):
         :param file_path: File save path.
         :type file_path: str
         """
-        ExportGlobal(file_path)
+        Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+        export_to(file_path)
