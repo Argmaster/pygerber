@@ -39,48 +39,39 @@ class TestBlenderParser(TestCase):
         # to create new comparison image uncomment this:
         parser.save(RENDERED_PATH / "SOURCE_0.glb")
 
-    def test_parser_double_render(self):
-        parser = ParserWithBlender()
-        self.assertRaises(RuntimeError, lambda: parser.get_image())
-        parser.parse(self.SOURCE_0)
-        self.assertRaises(RuntimeError, lambda: parser.parse(self.SOURCE_0))
-        parser.save(TESTS_FOLDER / "test_parser/test_render.glb")
-
     def test_render_file_and_save(self):
         render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.glb")
 
-    def render_file_optional_show_and_save(
+    def render_file_and_optional_save(
         self, filename: str, show: bool = False, save: bool = False, **kwargs
     ):
-        image = render_file(GERBER_PATH / filename, **kwargs)
-        if show:
-            image.show()
+        render_file(GERBER_PATH / filename, **kwargs)
         if save:
-            image.save(RENDERED_PATH / (filename.split(".")[0] + ".glb"))
+            render_file_and_save(GERBER_PATH / filename, **kwargs, RENDERED_PATH / (filename.split(".")[0] + ".glb"))
 
     def test_parser_file_0(self):
-        self.render_file_optional_show_and_save("s0.grb", False, False, scale=100)
+        self.render_file_and_optional_save("s0.grb", False, scale=100)
 
     def test_parser_file_1(self):
-        self.render_file_optional_show_and_save("s1.grb", False, False, scale=100)
+        self.render_file_and_optional_save("s1.grb", False, scale=100)
 
     def test_parser_file_2(self):
-        self.render_file_optional_show_and_save("s2.grb", False, False, scale=100)
+        self.render_file_and_optional_save("s2.grb", False, scale=100)
 
     def test_parser_file_3(self):
-        self.render_file_optional_show_and_save("s3.grb", False, False, scale=100)
+        self.render_file_and_optional_save("s3.grb", False, scale=100)
 
     def test_parser_file_4(self):
-        self.render_file_optional_show_and_save("s4.grb", False, False, scale=100)
+        self.render_file_and_optional_save("s4.grb", False, scale=100)
 
     def test_parser_file_5(self):
-        self.render_file_optional_show_and_save("s5.grb", False, False, scale=100)
+        self.render_file_and_optional_save("s5.grb", False, scale=100)
 
     def test_parser_file_6(self):
-        self.render_file_optional_show_and_save("s6.grb", False, False, scale=100)
+        self.render_file_and_optional_save("s6.grb", False, scale=100)
 
     def test_parser_file_7(self):
-        self.render_file_optional_show_and_save("s7.grb", False, False, scale=100)
+        self.render_file_and_optional_save("s7.grb", False, scale=100)
 
 
 # def get_test_spec():

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Deque, Tuple
 
 from PyR3.shortcut.context import wipeScenes
 from PyR3.shortcut.io import ExportGlobal
@@ -16,6 +16,7 @@ from pygerber.parser.blender.apertures.rectangle import BlenderRectangle
 from pygerber.parser.blender.apertures.region import BlenderRegion
 from pygerber.parser.parser import AbstractParser
 from pygerber.renderer.apertureset import ApertureSet
+from pygerber.tokens.token import Token
 
 Color_Type = Tuple[float, float, float, float]
 
@@ -51,8 +52,9 @@ class ParserWithBlender(AbstractParser):
         self.scale = scale
         self.layer_spec = layer_spec
 
-    def _pre_render(self, _: BoundingBox):
+    def _render(self, token_stack: Deque[Token]) -> None:
         wipeScenes()
+        self.renderer.render(token_stack)
 
     def save(self, file_path: str) -> None:
         """Saves scene content in file. File format is determined from file extension.
