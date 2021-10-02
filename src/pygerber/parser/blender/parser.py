@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Deque, Tuple
 from pathlib import Path
+from typing import Deque
+from typing import Tuple
 
 from PyR3.shortcut.context import wipeScenes
 from PyR3.shortcut.io import export_to

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from math import tau
-
 from pygerber.renderer.arc_util_mixin import ArcUtilMixin
 
 
@@ -16,15 +14,3 @@ class ArcUtilMixinPillow(ArcUtilMixin):
         arc_length = self.get_arc_length(radius) * arc_ratio
         number_of_points = int(arc_length * self.dpmm)
         return relative_angle / number_of_points
-
-    @staticmethod
-    def get_arc_length(radius) -> float:
-        return tau * radius
-
-    @staticmethod
-    def get_arc_ratio(relative_angle):
-        return relative_angle / 360
-
-    @staticmethod
-    def get_relative_angle(begin_angle, end_angle):
-        return end_angle - begin_angle

@@ -5,6 +5,7 @@ from math import cos
 from math import degrees
 from math import radians
 from math import sin
+from math import tau
 
 from pygerber.mathclasses import Vector2D
 from pygerber.mathclasses import angle_from_zero
@@ -76,3 +77,15 @@ class ArcUtilMixin:
             return radius * sin(radians(alpha))
 
         return x, y
+
+    @staticmethod
+    def get_arc_length(radius) -> float:
+        return tau * radius
+
+    @staticmethod
+    def get_arc_ratio(relative_angle):
+        return relative_angle / 360
+
+    @staticmethod
+    def get_relative_angle(begin_angle, end_angle):
+        return end_angle - begin_angle
