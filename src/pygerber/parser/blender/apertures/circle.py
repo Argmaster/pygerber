@@ -7,10 +7,12 @@ from pygerber.renderer.spec import ArcSpec
 from pygerber.renderer.spec import FlashSpec
 from pygerber.renderer.spec import LineSpec
 
+from PyR3.shortcut.mesh import addCircle
+
 
 class BlenderCircle(ArcUtilMixinBlender, CircularAperture):
     def flash(self, spec: FlashSpec) -> None:
-        pass
+        addCircle(vertices=self)
 
     def line(self, spec: LineSpec) -> None:
         pass

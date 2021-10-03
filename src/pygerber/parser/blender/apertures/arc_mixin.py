@@ -11,8 +11,11 @@ class ArcUtilMixinBlender(ArcUtilMixin):
         point_count = max(int(arc_length) * POINT_COUNT_MULTIPLIER, MIN_CIRCLE_POINTS)
         return point_count
 
-    def get_arc_traverse_step_angle(self, begin_angle, end_angle, radius):
-        relative_angle = self.get_relative_angle(begin_angle, end_angle)
+    def get_points_within_angle(self, relative_angle, radius):
         arc_ratio = self.get_arc_ratio(relative_angle)
         arc_length = self.get_arc_length(radius) * arc_ratio
-        return relative_angle / self.points_in_arc(arc_length)
+        self.points_in_arc(arc_length)
+
+    def get_arc_traverse_step_angle(self, begin_angle, end_angle, radius):
+        relative_angle = self.get_relative_angle(begin_angle, end_angle)
+        return relative_angle / self.get_points_within_angle(relative_angle, radius)
