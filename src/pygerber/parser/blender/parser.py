@@ -20,6 +20,9 @@ from pygerber.parser.parser import AbstractParser
 from pygerber.renderer.apertureset import ApertureSet
 from pygerber.tokens.token import Token
 
+import bpy
+from PyR3
+
 Color_Type = Tuple[float, float, float, float]
 
 
@@ -53,6 +56,9 @@ class ParserWithBlender(AbstractParser):
         super().__init__(ignore_deprecated=ignore_deprecated)
         self.scale = scale
         self.layer_spec = layer_spec
+
+    def _inject_layer_spec_to_renderer(self):
+        self.renderer.material =
 
     def _render(self, token_stack: Deque[Token]) -> None:
         wipeScenes()

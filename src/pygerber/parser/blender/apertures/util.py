@@ -3,4 +3,9 @@ from __future__ import annotations
 
 
 class BlenderUtilMethods:
-    pass
+
+    def material(self):
+        return self.renderer.material
+
+    def thickness(self):
+        return self.renderer.thickness
