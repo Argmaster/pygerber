@@ -8,6 +8,9 @@ from typing import Tuple
 
 from PyR3.shortcut.context import wipeScenes
 from PyR3.shortcut.io import export_to
+from PyR3.shortcut.material import new_node_material
+from PyR3.shortcut.material import update_BSDF_node
+from PyR3.shortcut.mesh import fromPyData
 
 from pygerber.mathclasses import BoundingBox
 from pygerber.parser.blender.apertures.circle import BlenderCircle
@@ -20,19 +23,14 @@ from pygerber.parser.parser import AbstractParser
 from pygerber.renderer.apertureset import ApertureSet
 from pygerber.tokens.token import Token
 
-import bpy
-from PyR3
-
-Color_Type = Tuple[float, float, float, float]
-
 
 @dataclass
 class LayerSpec:
-    color: Color_Type
-    thickness: float = 0.78e-3
+    material: dict
+    thickness: float = 0.78
 
 
-DEFAULT_LAYER_GREEN = LayerSpec((50, 150, 50, 255))
+DEFAULT_LAYER_GREEN = LayerSpec({"color": (50 / 255, 150 / 255, 50 / 255, 1)})
 
 
 class ParserWithBlender(AbstractParser):
@@ -58,10 +56,14 @@ class ParserWithBlender(AbstractParser):
         self.layer_spec = layer_spec
 
     def _inject_layer_spec_to_renderer(self):
-        self.renderer.material =
+        self.renderer.material = new_node_material()
+        update_BSDF_node(self.renderer.material, **self.layer_spec.material)
+        self.renderer.thickness = self.layer_spec.thickness
+        self.renderer.root = fromPyData([(0, 0, 0)])
 
     def _render(self, token_stack: Deque[Token]) -> None:
         wipeScenes()
+        self._inject_layer_spec_to_renderer()
         self.renderer.render(token_stack)
 
     def save(self, file_path: str) -> None:

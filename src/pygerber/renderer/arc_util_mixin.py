@@ -11,8 +11,6 @@ from pygerber.mathclasses import Vector2D
 from pygerber.mathclasses import angle_from_zero
 from pygerber.renderer.spec import ArcSpec
 
-DELTA_MULTIPLIER = 25
-
 
 class ArcUtilMixin:
     @property
@@ -34,7 +32,6 @@ class ArcUtilMixin:
         x, y = self.get_arc_co_functions(radius)
         delta = (
             self.get_arc_traverse_step_angle(begin_angle, end_angle, radius)
-            * DELTA_MULTIPLIER
         )
         if self.isCCW:
             return self.__get_arc_points_ccw(end_angle, begin_angle, x, spec, y, delta)

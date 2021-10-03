@@ -41,8 +41,9 @@ class BlenderRegion(ArcUtilMixinBlender, RegionApertureManager, BlenderUtilMetho
         ]
         edge_count = len(edges)
         faces = [tuple(i for i in range(edge_count))]
-        fromPyData(
+        mesh_object = fromPyData(
             vertices,
             edges,
             faces,
         )
+        self.commit_mesh_to_root(mesh_object)
