@@ -48,7 +48,6 @@ class BlenderUtilMethods:
         Objects.delete(ob)
 
     def commit_dark(self, ob):
-        set_material(ob, self.material)
         Boolean(self.root, ob, "UNION").apply()
         Objects.delete(ob)
 

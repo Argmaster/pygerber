@@ -45,14 +45,15 @@ class TestBlenderParser(TestCase):
     def render_file_and_optional_save(
         self, filename: str, save: bool = False, **kwargs
     ):
-        render_file(
-            GERBER_PATH / filename,
-            **kwargs,
-        )
         if save:
             render_file_and_save(
                 GERBER_PATH / filename,
                 RENDERED_PATH / "blender" / (filename.split(".")[0] + ".blend"),
+                **kwargs,
+            )
+        else:
+            render_file(
+                GERBER_PATH / filename,
                 **kwargs,
             )
 

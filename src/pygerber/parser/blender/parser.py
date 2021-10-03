@@ -10,9 +10,9 @@ from PyR3.shortcut.context import wipeScenes
 from PyR3.shortcut.io import export_to
 from PyR3.shortcut.material import new_node_material
 from PyR3.shortcut.material import update_BSDF_node
+from PyR3.shortcut.material import set_material
 from PyR3.shortcut.mesh import fromPyData
 
-from pygerber.mathclasses import BoundingBox
 from pygerber.parser.blender.apertures.circle import BlenderCircle
 from pygerber.parser.blender.apertures.custom import BlenderCustom
 from pygerber.parser.blender.apertures.obround import BlenderObround
@@ -62,6 +62,7 @@ class ParserWithBlender(AbstractParser):
         update_BSDF_node(self.renderer.material, **self.layer_spec.material)
         self.renderer.thickness = self.layer_spec.thickness
         self.renderer.root = fromPyData([(0, 0, 0)])
+        set_material(self.renderer.root, self.renderer.material)
 
     def _render(self, token_stack: Deque[Token]) -> None:
         wipeScenes()

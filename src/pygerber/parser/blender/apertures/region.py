@@ -30,7 +30,7 @@ class BlenderRegion(ArcUtilMixinBlender, RegionApertureManager, BlenderUtilMetho
 
     def __get_arc_boundpoints(self, spec: ArcSpec) -> List[Tuple[float, float]]:
         bound_points = []
-        for point in self.get_arc_points(spec):
+        for point in self.get_arc_points(spec, self.isCCW):
             bound_points.append(point.as_tuple())
         return bound_points
 

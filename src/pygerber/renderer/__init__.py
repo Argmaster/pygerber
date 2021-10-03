@@ -19,6 +19,7 @@ from .spec import ArcSpec
 from .spec import FlashSpec
 from .spec import LineSpec
 from .spec import Spec
+import os
 
 
 class Renderer:
@@ -41,12 +42,17 @@ class Renderer:
         self.region_bounds = []
 
     def render(self, token_stack: Deque[Token]) -> None:
+        total = len(token_stack)
+        current = 0
         try:
             for token in token_stack:
                 token.alter_state(self.state)
                 token.pre_render(self)
                 token.render(self)
                 token.post_render(self)
+                current += 1
+                if current % 10 == 0:
+                    print(f"Rendered {current} / {total}")
         except EndOfStream:
             return
 
