@@ -12,6 +12,8 @@ from pygerber.renderer.aperture.region import RegionApertureManager
 from pygerber.renderer.spec import ArcSpec
 from pygerber.renderer.spec import LineSpec
 
+from PyR3.shortcut.modifiers import Solidify
+
 
 class BlenderRegion(ArcUtilMixinBlender, RegionApertureManager, BlenderUtilMethods):
     def finish(self, bounds: List[LineSpec]) -> None:
@@ -46,4 +48,6 @@ class BlenderRegion(ArcUtilMixinBlender, RegionApertureManager, BlenderUtilMetho
             edges,
             faces,
         )
+        Solidify(mesh_object, self.thickness, offset=0, use_even_offset=True).apply()
         self.commit_mesh_to_root(mesh_object)
+

@@ -17,6 +17,9 @@ class Vector2D:
     def as_tuple(self):
         return (self.x, self.y)
 
+    def as_tuple_3D(self, z: float = 0):
+        return (self.x, self.y, z)
+
     def __add__(self, other: Vector2D) -> Vector2D:
         return Vector2D(other.x + self.x, other.y + self.y)
 
