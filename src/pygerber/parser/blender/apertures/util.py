@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import bpy
-
-from PyR3.shortcut.modifiers import Boolean
-from pygerber.constants import Polarity
-from pygerber.renderer import Renderer
 from PyR3.shortcut.context import Objects
 from PyR3.shortcut.material import set_material
+from PyR3.shortcut.modifiers import Boolean
+from PyR3.shortcut.modifiers import Solidify
+
+from pygerber.constants import Polarity
+from pygerber.renderer import Renderer
 
 
 class BlenderUtilMethods:
@@ -50,3 +51,6 @@ class BlenderUtilMethods:
         set_material(ob, self.material)
         Boolean(self.root, ob, "UNION").apply()
         Objects.delete(ob)
+
+    def solidify(self, ob, thickness):
+        Solidify(ob, thickness, offset=0, use_even_offset=True).apply()

@@ -79,3 +79,4 @@ blender/
 typings/
 *.blend1
 *.blend
+.temp/

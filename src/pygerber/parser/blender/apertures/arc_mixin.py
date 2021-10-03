@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
+
 import math
 
 from pygerber.renderer.arc_util_mixin import ArcUtilMixin
@@ -7,8 +8,8 @@ from pygerber.renderer.arc_util_mixin import ArcUtilMixin
 
 class ArcUtilMixinBlender(ArcUtilMixin):
     def points_in_arc(self, arc_length: float):
-        MIN_CIRCLE_POINTS = 9
-        POINT_COUNT_MULTIPLIER = 1.33
+        MIN_CIRCLE_POINTS = 11
+        POINT_COUNT_MULTIPLIER = 1.25
         point_count = MIN_CIRCLE_POINTS + int(arc_length) * POINT_COUNT_MULTIPLIER
         return point_count
 

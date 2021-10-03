@@ -19,4 +19,4 @@ include README.rst
 
 recursive-exclude scripts *.bat
 
-global-exclude *.py[cod] __pycache__/* *.so *.dylib
+global-exclude *.py[cod] __pycache__/* *.so *.dylib .temp/

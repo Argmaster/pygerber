@@ -32,17 +32,19 @@ class LayerSpec:
 
 DEFAULT_LAYER_GREEN = LayerSpec({"color": (50 / 255, 150 / 255, 50 / 255, 1)})
 
+BLENDER_APERTURE_SET = ApertureSet(
+    BlenderCircle,
+    BlenderRectangle,
+    BlenderObround,
+    BlenderPolygon,
+    BlenderCustom,
+    BlenderRegion,
+)
+
 
 class ParserWithBlender(AbstractParser):
 
-    apertureSet = ApertureSet(
-        BlenderCircle,
-        BlenderRectangle,
-        BlenderObround,
-        BlenderPolygon,
-        BlenderCustom,
-        BlenderRegion,
-    )
+    apertureSet = BLENDER_APERTURE_SET
 
     def __init__(
         self,

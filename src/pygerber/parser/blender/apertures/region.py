@@ -5,14 +5,13 @@ from typing import List
 from typing import Tuple
 
 from PyR3.shortcut.mesh import fromPyData
+from PyR3.shortcut.modifiers import Solidify
 
 from pygerber.parser.blender.apertures.arc_mixin import ArcUtilMixinBlender
 from pygerber.parser.blender.apertures.util import BlenderUtilMethods
 from pygerber.renderer.aperture.region import RegionApertureManager
 from pygerber.renderer.spec import ArcSpec
 from pygerber.renderer.spec import LineSpec
-
-from PyR3.shortcut.modifiers import Solidify
 
 
 class BlenderRegion(ArcUtilMixinBlender, RegionApertureManager, BlenderUtilMethods):
@@ -48,6 +47,6 @@ class BlenderRegion(ArcUtilMixinBlender, RegionApertureManager, BlenderUtilMetho
             edges,
             faces,
         )
-        Solidify(mesh_object, self.thickness, offset=0, use_even_offset=True).apply()
+        self.solidify(mesh_object, self.thickness)
         self.commit_mesh_to_root(mesh_object)
 

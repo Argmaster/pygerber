@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from pygerber.parser.blender.apertures.util import BlenderUtilMethods
-
-from pygerber.renderer.spec import FlashSpec
-
+import bpy
+from PyR3.shortcut.context import Objects
 from PyR3.shortcut.mesh import addCircle
 from PyR3.shortcut.modifiers import Boolean
 from PyR3.shortcut.modifiers import Solidify
-from PyR3.shortcut.context import Objects
-import bpy
+
+from pygerber.parser.blender.apertures.util import BlenderUtilMethods
+from pygerber.renderer.spec import FlashSpec
 
 
 class FlashUtilMixin(BlenderUtilMethods):
 
     def flash(self, spec: FlashSpec) -> None:
         shape = self.create_stamp_shape(spec)
-        Solidify(shape, thickness=self.thickness).apply()
+        self.solidify(shape, self.thickness)
         if self.HOLE_DIAMETER > 0:
             self.make_hole_in_stamp(spec, shape)
         self.commit_mesh_to_root(shape)
@@ -29,7 +28,7 @@ class FlashUtilMixin(BlenderUtilMethods):
                 location=spec.location.as_tuple_3D(),
                 fill_type="NGON",
             )
-        Solidify(shape, thickness=self.inner_thickness).apply()
+        self.solidify(hole_shape, self.inner_thickness)
         Boolean(shape, hole_shape, "DIFFERENCE").apply()
         Objects.delete(hole_shape)
 

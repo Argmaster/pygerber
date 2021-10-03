@@ -30,9 +30,7 @@ class ArcUtilMixin:
         begin_angle, end_angle = self.get_begin_end_angles(spec)
         radius = spec.get_radius()
         x, y = self.get_arc_co_functions(radius)
-        delta = (
-            self.get_arc_traverse_step_angle(begin_angle, end_angle, radius)
-        )
+        delta = self.get_arc_traverse_step_angle(begin_angle, end_angle, radius)
         if self.isCCW:
             return self.__get_arc_points_ccw(end_angle, begin_angle, x, spec, y, delta)
         else:

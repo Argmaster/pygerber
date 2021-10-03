@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import bpy
+from PyR3.shortcut.context import Objects
+from PyR3.shortcut.mesh import addCircle
+from PyR3.shortcut.modifiers import Boolean
+from PyR3.shortcut.modifiers import Solidify
+
 from pygerber.parser.blender.apertures.arc_mixin import ArcUtilMixinBlender
 from pygerber.parser.blender.apertures.flash_mixin import FlashUtilMixin
 from pygerber.renderer.aperture.circular import CircularAperture
 from pygerber.renderer.spec import ArcSpec
 from pygerber.renderer.spec import FlashSpec
 from pygerber.renderer.spec import LineSpec
-
-from PyR3.shortcut.mesh import addCircle
-from PyR3.shortcut.modifiers import Boolean
-from PyR3.shortcut.modifiers import Solidify
-from PyR3.shortcut.context import Objects
-import bpy
 
 
 class BlenderCircle(ArcUtilMixinBlender, FlashUtilMixin, CircularAperture):

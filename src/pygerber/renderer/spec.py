@@ -23,7 +23,7 @@ class Spec(ABC):
 class FlashSpec(Spec):
 
     location: Vector2D
-    is_region: bool
+    is_region: bool = False
 
     def draw(self, aperture: meta_ap.Aperture):
         return aperture.flash(self)
@@ -37,7 +37,7 @@ class LineSpec(Spec):
 
     begin: Vector2D
     end: Vector2D
-    is_region: bool
+    is_region: bool = False
 
     def draw(self, aperture: meta_ap.Aperture):
         return aperture.line(self)
@@ -52,7 +52,7 @@ class ArcSpec(Spec):
     begin: Vector2D
     end: Vector2D
     center: Vector2D
-    is_region: bool
+    is_region: bool = False
 
     def draw(self, aperture: meta_ap.Aperture):
         return aperture.arc(self)
