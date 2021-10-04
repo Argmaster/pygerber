@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import bpy
 from PyR3.shortcut.context import Objects
-from PyR3.shortcut.material import set_material
 from PyR3.shortcut.modifiers import Boolean
 from PyR3.shortcut.modifiers import Solidify
+from PyR3.shortcut.edit import Edit
+from PyR3.shortcut.mesh import join
 
 from pygerber.constants import Polarity
 from pygerber.renderer import Renderer
@@ -49,6 +50,9 @@ class BlenderUtilMethods:
 
     def commit_dark(self, ob):
         Boolean(self.root, ob, "UNION").apply()
+        # join(self.root, ob)
+        #with Edit(self.root) as edit:
+        #    bpy.ops.mesh.decimate()
         Objects.delete(ob)
 
     def solidify(self, ob, thickness):

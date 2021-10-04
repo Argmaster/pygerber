@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-
+import math
 import bpy
 from PyR3.shortcut.context import Objects
 from PyR3.shortcut.mesh import addCircle
