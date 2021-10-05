@@ -5,7 +5,6 @@ import bpy
 from PyR3.shortcut.context import Objects
 from PyR3.shortcut.mesh import addCircle
 from PyR3.shortcut.modifiers import Boolean
-from PyR3.shortcut.modifiers import Solidify
 
 from pygerber.parser.blender.apertures.util import BlenderUtilMethods
 from pygerber.renderer.spec import FlashSpec

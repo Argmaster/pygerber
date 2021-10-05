@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import bpy
+from PyR3.shortcut.context import Objects
+from PyR3.shortcut.mesh import fromPyData
+from PyR3.shortcut.transform import Transform
 
 from pygerber.parser.blender.apertures.arc_mixin import ArcUtilMixinBlender
 from pygerber.parser.blender.apertures.flash_mixin import FlashUtilMixin
@@ -9,9 +12,6 @@ from pygerber.renderer.aperture.rectangular import RectangularAperture
 from pygerber.renderer.spec import ArcSpec
 from pygerber.renderer.spec import FlashSpec
 from pygerber.renderer.spec import LineSpec
-from PyR3.shortcut.mesh import fromPyData
-from PyR3.shortcut.transform import Transform
-from PyR3.shortcut.context import Objects
 
 
 class BlenderRectangle(ArcUtilMixinBlender, FlashUtilMixin, RectangularAperture):

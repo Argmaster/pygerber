@@ -6,10 +6,13 @@ from pathlib import Path
 from typing import Deque
 from typing import Tuple
 
+from PyR3.shortcut.context import Objects
 from PyR3.shortcut.context import wipeScenes
 from PyR3.shortcut.io import export_to
 from PyR3.shortcut.material import new_node_material
 from PyR3.shortcut.material import update_BSDF_node
+from PyR3.shortcut.mesh import fromPyData
+from PyR3.shortcut.mesh import join
 
 from pygerber.parser.blender.apertures.circle import BlenderCircle
 from pygerber.parser.blender.apertures.custom import BlenderCustom
@@ -59,12 +62,15 @@ class ParserWithBlender(AbstractParser):
         self.renderer.material = new_node_material()
         update_BSDF_node(self.renderer.material, **self.layer_spec.material)
         self.renderer.thickness = self.layer_spec.thickness
-        self.renderer.root = None
+        self.renderer.tree = None
 
     def _render(self, token_stack: Deque[Token]) -> None:
         wipeScenes()
         self._inject_layer_spec_to_renderer()
         self.renderer.render(token_stack)
+        Objects.select_all()
+        tree = fromPyData([(0, 0, 0)])
+        join(tree, *self.renderer.tree)
 
     def save(self, file_path: str) -> None:
         """Saves scene content in file. File format is determined from file extension.

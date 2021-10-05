@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Deque
 from typing import List
 from typing import Tuple
+
+from PyR3.shortcut.io import export_to
 
 from pygerber.constants import Interpolation
 from pygerber.drawing_state import DrawingState
@@ -19,7 +23,11 @@ from .spec import ArcSpec
 from .spec import FlashSpec
 from .spec import LineSpec
 from .spec import Spec
-import os
+
+TEMP_PATH = Path(os.getcwd()) / ".temp"
+TEMP_PATH.mkdir(parents=True, exist_ok=True)
+
+DEBUG = False
 
 
 class Renderer:
@@ -41,20 +49,39 @@ class Renderer:
         self.current_point = Vector2D(0, 0)
         self.region_bounds = []
 
-    def render(self, token_stack: Deque[Token]) -> None:
-        total = len(token_stack)
-        current = 0
-        try:
-            for token in token_stack:
-                token.alter_state(self.state)
-                token.pre_render(self)
-                token.render(self)
-                token.post_render(self)
-                current += 1
-                if current % 10 == 0:
-                    print(f"Rendered {current} / {total}")
-        except EndOfStream:
-            return
+    if DEBUG:
+
+        def render(self, token_stack: Deque[Token]) -> None:
+            total = len(token_stack)
+            current = 0
+            try:
+                for token in token_stack:
+                    token.alter_state(self.state)
+                    token.pre_render(self)
+                    token.render(self)
+                    token.post_render(self)
+                    current += 1
+                    if current % 10 == 0:
+                        print(f"Rendered {current} / {total}")
+                    if (current > 500 and current % 20 == 0) or current % 100 == 0:
+                        export_to(TEMP_PATH / f"render_{current}_{total}.blend")
+            except EndOfStream:
+                return
+
+    else:
+
+        def render(self, token_stack: Deque[Token]) -> None:
+            total = len(token_stack)
+            current = 0
+            try:
+                for token in token_stack:
+                    token.alter_state(self.state)
+                    token.pre_render(self)
+                    token.render(self)
+                    token.post_render(self)
+                    current += 1
+            except EndOfStream:
+                return
 
     def define_aperture(self, *args, **kwargs):
         self.apertures.define_aperture(*args, **kwargs)

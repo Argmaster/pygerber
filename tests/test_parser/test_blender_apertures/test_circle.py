@@ -11,7 +11,8 @@ from PyR3.shortcut.io import export_to
 
 from pygerber.mathclasses import Vector2D
 from pygerber.parser.blender.apertures.circle import BlenderCircle
-from pygerber.renderer.spec import FlashSpec, LineSpec
+from pygerber.renderer.spec import FlashSpec
+from pygerber.renderer.spec import LineSpec
 from tests.testutils.blender import get_dummy_renderer
 
 TEMP_LOCAL = Path(__file__).parent / ".temp"
