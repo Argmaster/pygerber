@@ -50,7 +50,7 @@ class ParserWithBlender(AbstractParser):
     def __init__(
         self,
         *,
-        scale: float = 1,
+        scale: float = 1.0,
         layer_spec: LayerSpec = DEFAULT_LAYER_GREEN,
         ignore_deprecated: bool = True,
     ) -> None:
@@ -69,7 +69,7 @@ class ParserWithBlender(AbstractParser):
         self._inject_layer_spec_to_renderer()
         self.renderer.render(token_stack)
         Objects.select_all()
-        tree = fromPyData([(0, 0, 0)])
+        tree = fromPyData([(0.0, 0.0, 0.0)])
         join(tree, *self.renderer.tree)
 
     def save(self, file_path: str) -> None:

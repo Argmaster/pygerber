@@ -32,14 +32,14 @@ class BlenderUtilMethods:
         if self.renderer.state.polarity == Polarity.DARK:
             return self.renderer.thickness
         else:
-            return self.renderer.thickness * 2
+            return self.renderer.thickness * 2.0
 
     @property
     def inner_thickness(self):
         if self.renderer.state.polarity == Polarity.DARK:
-            return self.renderer.thickness * 2
+            return self.renderer.thickness * 2.0
         else:
-            return self.renderer.thickness * 3
+            return self.renderer.thickness * 3.0
 
     def commit_mesh_to_root(self, ob: bpy.types.Object):
         if self.renderer.state.polarity == Polarity.DARK:
@@ -57,10 +57,9 @@ class BlenderUtilMethods:
             Boolean(submesh, ob, "DIFFERENCE").apply()
         Objects.delete(ob)
 
-    # try using separate dark objects
     def commit_dark(self, ob):
         self.tree.append(ob)
 
     def solidify(self, ob, thickness):
-        Solidify(ob, thickness, offset=0, use_even_offset=True).apply()
+        Solidify(ob, float(thickness), offset=0.0, use_even_offset=True).apply()
 

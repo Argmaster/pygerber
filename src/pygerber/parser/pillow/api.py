@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from concurrent.futures import Future
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -11,6 +12,7 @@ from typing import List
 
 import toml
 import yaml
+import pygerber
 from PIL import Image
 
 from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_GREEN
@@ -92,20 +94,15 @@ class ProjectSpec:
         bottom_most_layer.paste(layer, (delta_width, delta_height), layer)
 
     def _render_layers(self) -> List[Image.Image]:
+        NEW_PATH = list(sys.path)
+        sys.path = pygerber.SYS_PATH
         with ProcessPoolExecutor() as executor:
             processes = self.__submit_rendering_processes(executor)
             results = self.__get_rendering_processes_results(processes)
+        sys.path = NEW_PATH
         return results
 
-    @staticmethod
-    def __get_rendering_processes_results(processes):
-        results: List[Image.Image] = []
-        for future in processes:
-            rendered_image: Image.Image = future.result()
-            results.append(rendered_image)
-        return results
-
-    def __submit_rendering_processes(self, executor):
+    def __submit_rendering_processes(self, executor: ProcessPoolExecutor):
         processes: List[Future] = []
         for layer in self.layers:
             future = executor.submit(
@@ -118,6 +115,14 @@ class ProjectSpec:
             )
             processes.append(future)
         return processes
+
+    @staticmethod
+    def __get_rendering_processes_results(processes):
+        results: List[Image.Image] = []
+        for future in processes:
+            rendered_image: Image.Image = future.result()
+            results.append(rendered_image)
+        return results
 
     @staticmethod
     def from_yaml(file_path: str) -> ProjectSpec:

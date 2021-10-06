@@ -49,15 +49,15 @@ class BlenderCircle(ArcUtilMixinBlender, FlashUtilMixin, CircularAperture):
         end_point = spec.end - spec.begin
         length = end_point.length()
         left_arc_spec = ArcSpec(
-            Vector2D(0, self.RADIUS),
-            Vector2D(0, -self.RADIUS),
-            Vector2D(0, 0),
+            Vector2D(0.0, self.RADIUS),
+            Vector2D(0.0, -self.RADIUS),
+            Vector2D(0.0, 0.0),
         )
         vertices = [p.as_tuple_3D() for p in self.get_arc_points(left_arc_spec, True)]
         right_arc_spec = ArcSpec(
             Vector2D(length, -self.RADIUS),
             Vector2D(length, self.RADIUS),
-            Vector2D(length, 0),
+            Vector2D(length, 0.0),
         )
         vertices.extend(
             [p.as_tuple_3D() for p in self.get_arc_points(right_arc_spec, True)]
@@ -74,7 +74,7 @@ class BlenderCircle(ArcUtilMixinBlender, FlashUtilMixin, CircularAperture):
             value=-angle,
             orient_axis="Z",
             orient_type="GLOBAL",
-            center_override=(0, 0, 0),
+            center_override=(0.0, 0.0, 0.0),
         )
         Transform.move(spec.begin.as_tuple_3D())
         self.solidify(line_mesh, self.thickness)

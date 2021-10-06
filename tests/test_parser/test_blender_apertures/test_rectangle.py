@@ -25,8 +25,8 @@ class TestBlenderRectangle(TestCase):
 
     def test_draw_flash(self):
         renderer = self.prepare_to_draw()
-        circle = BlenderRectangle(SimpleNamespace(X=1, Y=2, HOLE_DIAMETER=0), renderer)
-        circle.flash(FlashSpec(Vector2D(0, 0), False))
+        circle = BlenderRectangle(SimpleNamespace(X=1.0, Y=2.0, HOLE_DIAMETER=0), renderer)
+        circle.flash(FlashSpec(Vector2D(0.0, 0.0), False))
         export_to(TEMP_LOCAL / "rectangle_flash.blend")
 
     def test_draw_flash_with_hole(self):
@@ -34,7 +34,7 @@ class TestBlenderRectangle(TestCase):
         circle = BlenderRectangle(
             SimpleNamespace(X=1, Y=2, HOLE_DIAMETER=0.4), renderer
         )
-        circle.flash(FlashSpec(Vector2D(0, 0), False))
+        circle.flash(FlashSpec(Vector2D(0.0, 0.0), False))
         export_to(TEMP_LOCAL / "rectangle_flash_with_hole.blend")
 
 

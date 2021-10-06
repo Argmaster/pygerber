@@ -19,7 +19,7 @@ class BlenderRectangle(ArcUtilMixinBlender, FlashUtilMixin, RectangularAperture)
         x = self.X / 2
         y = self.Y / 2
         ob = fromPyData(
-            [(x, y, 0), (-x, y, 0), (-x, -y, 0), (x, -y, 0)],
+            [(x, y, 0.0), (-x, y, 0.0), (-x, -y, 0.0), (x, -y, 0.0)],
             [(0, 1), (1, 2), (2, 3), (3, 0)],
             [(0, 1, 2, 3)],
         )

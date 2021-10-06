@@ -24,10 +24,11 @@ from .spec import FlashSpec
 from .spec import LineSpec
 from .spec import Spec
 
-TEMP_PATH = Path(os.getcwd()) / ".temp"
-TEMP_PATH.mkdir(parents=True, exist_ok=True)
 
 DEBUG = False
+if DEBUG:
+    TEMP_PATH = Path(os.getcwd()) / ".temp"
+    TEMP_PATH.mkdir(parents=True, exist_ok=True)
 
 
 class Renderer:
@@ -225,7 +226,7 @@ class Renderer:
 
     def replace_none_with_0(self, vector: Vector2D):
         if vector.x is None:
-            vector.x = 0
+            vector.x = 0.0
         if vector.y is None:
-            vector.y = 0
+            vector.y = 0.0
         return vector

@@ -1,5 +1,5 @@
 
-.. image:: _static/pygerber_logo.png
+.. image:: https://raw.githubusercontent.com/Argmaster/pygerber/main/docs/_static/pygerber_logo.png
    :height: 400px
    :align: center
 

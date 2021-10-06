@@ -10,8 +10,8 @@ class ArcUtilMixinBlender(ArcUtilMixin):
     def points_in_arc(self, arc_length: float):
         MIN_CIRCLE_POINTS = 9
         POINT_COUNT_MULTIPLIER = 0.9
-        point_count = MIN_CIRCLE_POINTS + int(arc_length) * POINT_COUNT_MULTIPLIER
-        return point_count
+        point_count = MIN_CIRCLE_POINTS + arc_length * POINT_COUNT_MULTIPLIER
+        return int(point_count)
 
     def get_number_points_within_angle(self, relative_angle=math.pi * 2, radius=1.0):
         arc_ratio = self.get_arc_ratio(relative_angle)
