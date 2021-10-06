@@ -24,7 +24,6 @@ from .spec import FlashSpec
 from .spec import LineSpec
 from .spec import Spec
 
-
 DEBUG = False
 if DEBUG:
     TEMP_PATH = Path(os.getcwd()) / ".temp"

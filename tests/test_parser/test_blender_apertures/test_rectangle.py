@@ -25,7 +25,9 @@ class TestBlenderRectangle(TestCase):
 
     def test_draw_flash(self):
         renderer = self.prepare_to_draw()
-        circle = BlenderRectangle(SimpleNamespace(X=1.0, Y=2.0, HOLE_DIAMETER=0), renderer)
+        circle = BlenderRectangle(
+            SimpleNamespace(X=1.0, Y=2.0, HOLE_DIAMETER=0), renderer
+        )
         circle.flash(FlashSpec(Vector2D(0.0, 0.0), False))
         export_to(TEMP_LOCAL / "rectangle_flash.blend")
 

@@ -12,13 +12,15 @@ from typing import List
 
 import toml
 import yaml
-import pygerber
 from PIL import Image
 
+import pygerber
 from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_GREEN
 from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_ORANGE
 from pygerber.parser.pillow.parser import ColorSet
 from pygerber.parser.pillow.parser import ParserWithPillow
+from pygerber.parser.project_spec import LayerSpecBase
+from pygerber.parser.project_spec import ProjectSpecBase
 
 NAMED_COLORS = {
     "silk": ColorSet((255, 255, 255, 255)),
@@ -36,44 +38,58 @@ NAMED_COLORS = {
 
 
 def render_from_spec(spec: Dict) -> Image.Image:
-    return ProjectSpec(spec).render()
+    """Render 2D image from specfile alike dictionary.
+
+    :param spec: specfile parameters dictionary.
+    :type spec: Dict
+    :return: rendered and merged image.
+    :rtype: Image.Image
+    """
+    return PillowProjectSpec(spec).render()
 
 
 def render_from_yaml(file_path: str) -> Image.Image:
-    return ProjectSpec.from_yaml(file_path).render()
+    """Render 2D image from specfile written in yaml.
+
+    :param file_path: yaml specfile path.
+    :type file_path: str
+    :return: rendered and merged image.
+    :rtype: Image.Image
+    """
+    return PillowProjectSpec.from_yaml(file_path).render()
 
 
 def render_from_json(file_path: str) -> Image.Image:
-    return ProjectSpec.from_json(file_path).render()
+    """Render 2D image from specfile written in json.
+
+    :param file_path: json specfile path.
+    :type file_path: str
+    :return: rendered and merged image.
+    :rtype: Image.Image
+    """
+    return PillowProjectSpec.from_json(file_path).render()
 
 
 def render_from_toml(file_path: str) -> Image.Image:
-    return ProjectSpec.from_toml(file_path).render()
+    """Render 2D image from specfile written in toml.
+
+    :param file_path: toml specfile path.
+    :type file_path: str
+    :return: rendered and merged image.
+    :rtype: Image.Image
+    """
+    return PillowProjectSpec.from_toml(file_path).render()
 
 
-class ProjectSpec:
+class PillowProjectSpec(ProjectSpecBase):
     dpi: int = 600
     ignore_deprecated: bool = True
     image_padding: int = 0
-    layers: List[LayerSpec] = []
+    layers: List[PillowLayerSpec] = []
 
-    def __init__(self, init_spec: Dict) -> None:
-        self._load_init_spec(init_spec)
-
-    def _load_init_spec(self, init_spec: Dict) -> None:
-        for name in self.__class__.__annotations__:
-            default = getattr(self.__class__, name, None)
-            value = init_spec.get(name, default)
-            setattr(self, name, value)
-        self.__load_layers_as_LayerSpec()
-
-    def __load_layers_as_LayerSpec(self):
-        if not self.layers:
-            raise ValueError("You have to provide at least one layer.")
-        layers = []
-        for layer_data in self.layers:
-            layers.append(LayerSpec.load(layer_data))
-        self.layers = layers
+    @property
+    def LayerSpecClass(self) -> PillowLayerSpec:
+        return PillowLayerSpec
 
     def render(self) -> Image.Image:
         return self._join_layers(self._render_layers())
@@ -124,51 +140,23 @@ class ProjectSpec:
             results.append(rendered_image)
         return results
 
-    @staticmethod
-    def from_yaml(file_path: str) -> ProjectSpec:
-        with open(file_path, "rb") as file:
-            spec = yaml.safe_load(file)
-        return ProjectSpec(spec)
-
-    @staticmethod
-    def from_json(file_path: str) -> ProjectSpec:
-        with open(file_path, "r", encoding="utf-8") as file:
-            spec = json.load(file)
-        return ProjectSpec(spec)
-
-    @staticmethod
-    def from_toml(file_path: str) -> ProjectSpec:
-        with open(file_path, "r", encoding="utf-8") as file:
-            spec = toml.load(file)
-        return ProjectSpec(spec)
-
 
 @dataclass
-class LayerSpec:
+class PillowLayerSpec(LayerSpecBase):
     file_path: str
     colors: ColorSet
 
-    @staticmethod
-    def load(contents: Dict):
-        file_path = LayerSpec.__load_file_path(contents)
-        colors = LayerSpec.__load_colors(contents)
-        colors = LayerSpec.__replace_none_color_with_named_color_based_on_file_name(
-            colors, file_path
+    @classmethod
+    def load(cls, contents: Dict):
+        file_path = cls._get_checked_file_path(contents)
+        colors = cls.__load_colors(contents)
+        colors = cls._replace_none_color_with_named_color_based_on_file_name(
+            colors, file_path, NAMED_COLORS
         )
-        return LayerSpec(file_path, colors)
+        return cls(file_path, colors)
 
     @staticmethod
-    def __replace_none_color_with_named_color_based_on_file_name(colors, file_path):
-        if colors is None:
-            file_name = os.path.basename(file_path)
-            for name, named_colors in NAMED_COLORS.items():
-                if name in file_name:
-                    colors = named_colors
-                    break
-        return colors
-
-    @staticmethod
-    def __load_file_path(contents):
+    def _get_checked_file_path(contents):
         file_path = contents.get("file_path")
         os.path.exists(file_path)
         return file_path

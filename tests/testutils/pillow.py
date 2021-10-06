@@ -13,7 +13,7 @@ from pygerber.parser.pillow.apertures import PillowObround
 from pygerber.parser.pillow.apertures import PillowPolygon
 from pygerber.parser.pillow.apertures import PillowRectangle
 from pygerber.parser.pillow.apertures import PillowRegion
-from pygerber.parser.pillow.api import LayerSpec
+from pygerber.parser.pillow.api import PillowLayerSpec
 from pygerber.parser.pillow.parser import ColorSet
 from pygerber.renderer import Renderer
 from pygerber.renderer.apertureset import ApertureSet

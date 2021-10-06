@@ -7,7 +7,7 @@ from unittest import main
 
 from PIL import Image
 
-from pygerber.parser.pillow.api import ProjectSpec
+from pygerber.parser.pillow.api import PillowProjectSpec
 from pygerber.parser.pillow.api import render_file
 from pygerber.parser.pillow.api import render_file_and_save
 from pygerber.parser.pillow.api import render_from_json
@@ -130,11 +130,11 @@ def get_test_spec():
     }
 
 
-class ProjectSpecTest(TestCase):
+class PillowProjectSpecTest(TestCase):
     def test_load_empty(self):
         self.assertRaises(
             TypeError,
-            lambda: ProjectSpec(
+            lambda: PillowProjectSpec(
                 {
                     "layers": [
                         {
@@ -149,7 +149,7 @@ class ProjectSpecTest(TestCase):
     def test_invalid_color_spec(self):
         self.assertRaises(
             ValueError,
-            lambda: ProjectSpec(
+            lambda: PillowProjectSpec(
                 {
                     "layers": [],
                 }
@@ -157,19 +157,25 @@ class ProjectSpecTest(TestCase):
         )
 
     def test_load(self):
-        image = ProjectSpec(get_test_spec()).render()
+        image = PillowProjectSpec(get_test_spec()).render()
         # image.show()
 
     def test_from_json(self):
-        image = ProjectSpec.from_json(GERBER_PATH / "pillow" / "specfile.json").render()
+        image = PillowProjectSpec.from_json(
+            GERBER_PATH / "pillow" / "specfile.json"
+        ).render()
         # image.show()
 
     def test_from_yaml(self):
-        image = ProjectSpec.from_yaml(GERBER_PATH / "pillow" / "specfile.yaml").render()
+        image = PillowProjectSpec.from_yaml(
+            GERBER_PATH / "pillow" / "specfile.yaml"
+        ).render()
         # image.show()
 
     def test_from_toml(self):
-        image = ProjectSpec.from_toml(GERBER_PATH / "pillow" / "specfile.toml").render()
+        image = PillowProjectSpec.from_toml(
+            GERBER_PATH / "pillow" / "specfile.toml"
+        ).render()
         # image.show()
 
 
