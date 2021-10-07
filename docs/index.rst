@@ -13,6 +13,7 @@ Contents
    :maxdepth: 2
 
    readme
+   installation
    usage/index
    reference/modules
    contributing
