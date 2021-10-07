@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - release-*
+      - develop
   pull_request:
     branches:
       - main
       - release-*
+      - develop
 
   workflow_dispatch:
 
@@ -36,9 +38,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox
 
-      - name: Test with tox
+      - name: Tox -e clean
         run: |
-          tox
+          tox -e clean
+
+      - name: Tox -e check
+        run: |
+          tox -e check
+
+      - name: Tox -e docs
+        run: |
+          tox -e docs
+
+      - name: Tox -e py39
+        run: |
+          tox -e py39
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
