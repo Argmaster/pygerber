@@ -4,9 +4,30 @@ from __future__ import annotations
 from dataclasses import dataclass
 from math import acos
 from math import floor
+from math import inf
 from math import sqrt
 from math import tau
+from typing import Dict
 from typing import Tuple
+
+UNIT_MAP_TYPE = Dict[Tuple[float, float], str]
+
+_ByteUnits = {
+    (0, 1024): "B",
+    (1024, 1024 ** 2): "KiB",
+    (1024 ** 2, 1024 ** 3): "MiB",
+    (1024 ** 3, 1024 ** 4): "GiB",
+    (1024 ** 4, inf): "TiB",
+}
+
+
+def format_bytes(
+    val: float,
+) -> str:
+    abs_val = abs(val)
+    for range, unit in _ByteUnits.items():
+        if range[0] <= abs_val < range[1]:
+            return f"{val/range[0]:.1f} {unit}"
 
 
 @dataclass
@@ -16,6 +37,9 @@ class Vector2D:
 
     def as_tuple(self):
         return (self.x, self.y)
+
+    def as_tuple_3D(self, z: float = 0.0):
+        return (self.x, self.y, z)
 
     def __add__(self, other: Vector2D) -> Vector2D:
         return Vector2D(other.x + self.x, other.y + self.y)

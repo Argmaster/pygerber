@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from typing import Deque
 from typing import List
 from typing import Tuple
@@ -19,6 +21,11 @@ from .spec import ArcSpec
 from .spec import FlashSpec
 from .spec import LineSpec
 from .spec import Spec
+
+DEBUG = False
+if DEBUG:
+    TEMP_PATH = Path(os.getcwd()) / ".temp"
+    TEMP_PATH.mkdir(parents=True, exist_ok=True)
 
 
 class Renderer:
@@ -40,15 +47,41 @@ class Renderer:
         self.current_point = Vector2D(0, 0)
         self.region_bounds = []
 
-    def render(self, token_stack: Deque[Token]) -> None:
-        try:
-            for token in token_stack:
-                token.alter_state(self.state)
-                token.pre_render(self)
-                token.render(self)
-                token.post_render(self)
-        except EndOfStream:
-            return
+    if DEBUG:
+
+        def render(self, token_stack: Deque[Token]) -> None:
+            from PyR3.shortcut.io import export_to
+
+            total = len(token_stack)
+            current = 0
+            try:
+                for token in token_stack:
+                    token.alter_state(self.state)
+                    token.pre_render(self)
+                    token.render(self)
+                    token.post_render(self)
+                    current += 1
+                    if current % 10 == 0:
+                        print(f"Rendered {current} / {total}")
+                    if (current > 500 and current % 20 == 0) or current % 100 == 0:
+                        export_to(TEMP_PATH / f"render_{current}_{total}.blend")
+            except EndOfStream:
+                return
+
+    else:
+
+        def render(self, token_stack: Deque[Token]) -> None:
+            total = len(token_stack)
+            current = 0
+            try:
+                for token in token_stack:
+                    token.alter_state(self.state)
+                    token.pre_render(self)
+                    token.render(self)
+                    token.post_render(self)
+                    current += 1
+            except EndOfStream:
+                return
 
     def define_aperture(self, *args, **kwargs):
         self.apertures.define_aperture(*args, **kwargs)
@@ -192,7 +225,7 @@ class Renderer:
 
     def replace_none_with_0(self, vector: Vector2D):
         if vector.x is None:
-            vector.x = 0
+            vector.x = 0.0
         if vector.y is None:
-            vector.y = 0
+            vector.y = 0.0
         return vector

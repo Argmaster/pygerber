@@ -1,0 +1,13 @@
+ignore_deprecated = true
+[[layers]]
+    file_path = "./tests/gerber/set/top_copper.grb"
+    [layers.material]
+        color = [40, 143, 40, 255]
+        thickness = 0.78
+[[layers]]
+    file_path = "./tests/gerber/set/top_solder_mask.grb"
+    material = "solder_mask"
+[[layers]]
+    file_path = "./tests/gerber/set/top_paste_mask.grb"
+[[layers]]
+    file_path = "./tests/gerber/set/top_silk.grb"

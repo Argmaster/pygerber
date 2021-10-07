@@ -3,12 +3,14 @@ graft src
 graft ci
 graft tests
 
+prune tests/gerber/rendered/*
+prune scripts
+
 include .bumpversion.cfg
 include .cookiecutterrc
 include .coveragerc
 include .editorconfig
 include tox.ini
-include .travis.yml
 include .readthedocs.yml
 include .pre-commit-config.yaml
 include AUTHORS.rst
@@ -17,5 +19,4 @@ include CONTRIBUTING.rst
 include LICENSE
 include README.rst
 
-
-global-exclude *.py[cod] __pycache__/* *.so *.dylib
+global-exclude *.py[cod] __pycache__/* *.so *.dylib .temp/*

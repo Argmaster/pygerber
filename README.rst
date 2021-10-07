@@ -1,5 +1,5 @@
 
-.. image:: _static/pygerber_logo.png
+.. image:: https://raw.githubusercontent.com/Argmaster/pygerber/main/docs/_static/pygerber_logo.png
    :height: 400px
    :align: center
 
@@ -9,15 +9,11 @@ Overview
 
 .. start-badges
 
-|docs| |travis| |codecov| |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
+|docs| |codecov| |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
 
 .. |docs| image:: https://readthedocs.org/projects/pygerber/badge/?style=flat
     :target: https://pygerber.readthedocs.io/
     :alt: Documentation Status
-
-.. |travis| image:: https://api.travis-ci.com/Argmaster/pygerber.svg?branch=v0.0.1
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.com/github/Argmaster/pygerber
 
 .. |codecov| image:: https://api.travis-ci.com/Argmaster/pygerber.svg?branch=v0.0.1
     :alt: Coverage Status
@@ -79,6 +75,11 @@ You can also install the in-development version from github with
 
 Blender dependency issue mentioned in previous releases was resolved by using
 `PyR3 package <https://pypi.org/project/PyR3/>`_ which provides Blender.
+**However, blender has to be installed independently from package by calling PyR3.install_blender script**::
+
+    python -m PyR3.install_blender
+
+Before You try to use 3D rendering.
 
 Compatibility
 =============

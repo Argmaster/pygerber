@@ -14,8 +14,8 @@ Contents
 
    readme
    installation
-   usage
-   reference/index
+   usage/index
+   reference/modules
    contributing
    authors
    changelog
