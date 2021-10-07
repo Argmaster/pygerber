@@ -8,6 +8,7 @@ from unittest import main
 from PyR3.shortcut.io import export_to
 
 from pygerber.parser.blender.api import BlenderProjectSpec
+from pygerber.parser.blender.api import _skip_next_render
 from pygerber.parser.blender.api import render_file
 from pygerber.parser.blender.api import render_file_and_save
 from pygerber.parser.blender.api import render_from_json
@@ -38,10 +39,12 @@ class TestBlenderParser(TestCase):
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
-        parser.save(RENDERED_PATH / "SOURCE_0.glb")
+        parser.save(RENDERED_PATH / "blender" / "SOURCE_0.glb")
 
     def test_render_file_and_save(self):
-        render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.glb")
+        render_file_and_save(
+            GERBER_PATH / "s0.grb", RENDERED_PATH / "blender" / "s0_0.glb"
+        )
 
     def render_file_and_optional_save(
         self, filename: str, save: bool = False, **kwargs
@@ -59,6 +62,7 @@ class TestBlenderParser(TestCase):
             )
 
     def test_parser_file_0(self):
+
         self.render_file_and_optional_save("s0.grb", True, scale=100)
 
     def test_parser_file_1(self):
@@ -90,7 +94,11 @@ def get_test_spec():
             {
                 "file_path": "./tests/gerber/set/top_copper.grb",
                 "structure": {
-                    "material": {"color": [40, 143, 40, 255]},
+                    "material": {
+                        "color": [40, 143, 40, 255],
+                        "metallic": 1.0,
+                        "roughness": 0.8,
+                    },
                     "thickness": 0.78,
                 },
             },
@@ -140,14 +148,17 @@ class TestAPI(TestCase):
         export_to(RENDERED_PATH / "blender" / "TestAPI_from_spec.glb")
 
     def test_render_from_json(self):
+        _skip_next_render()
         render_from_json(GERBER_PATH / "blender" / "specfile.json")
         export_to(RENDERED_PATH / "blender" / "TestAPI_from_json.glb")
 
     def test_render_from_yaml(self):
+        _skip_next_render()
         render_from_yaml(GERBER_PATH / "blender" / "specfile.yaml")
         export_to(RENDERED_PATH / "blender" / "TestAPI_from_yaml.glb")
 
     def test_render_from_toml(self):
+        _skip_next_render()
         render_from_toml(GERBER_PATH / "blender" / "specfile.toml")
         export_to(RENDERED_PATH / "blender" / "TestAPI_from_toml.glb")
 

@@ -23,8 +23,9 @@ from .parser import DEFAULT_LAYER_GREEN
 from .parser import LayerStructure
 from .parser import ParserWithBlender
 
-THIN_THICKNESS = 0.01
+THIN_THICKNESS = 0.04
 COPPER_THICKNESS = 0.78
+MASK_THICKNESS = 0.10
 
 
 TEMP_LOCAL = Path(__file__).parent / ".temp"
@@ -35,22 +36,47 @@ NAMED_STRUCTURES = {
     "silk": LayerStructure(
         {
             "color": (255, 255, 255, 255),
+            "metallic": 0.0,
+            "roughness": 1.0,
         },
         THIN_THICKNESS,
     ),
     "paste_mask": LayerStructure(
         {
             "color": (117, 117, 117, 255),
+            "metallic": 1.0,
+            "roughness": 0.5,
         },
-        THIN_THICKNESS * 5,
+        MASK_THICKNESS,
     ),
-    "solder_mask": LayerStructure({"color": (153, 153, 153, 255)}, THIN_THICKNESS * 5),
-    "copper": LayerStructure({"color": (40, 143, 40, 255)}, COPPER_THICKNESS),
+    "solder_mask": LayerStructure(
+        {
+            "color": (153, 153, 153, 255),
+            "metallic": 1.0,
+            "roughness": 0.5,
+        },
+        MASK_THICKNESS,
+    ),
+    "copper": LayerStructure(
+        {"color": (35, 140, 35, 255), "metallic": 1.0, "roughness": 0.7},
+        COPPER_THICKNESS,
+    ),
     "green": LayerStructure({"color": (30, 156, 63, 255)}, COPPER_THICKNESS),
     "debug": LayerStructure({"color": (210, 23, 227, 255)}, COPPER_THICKNESS),
     "debug2": LayerStructure({"color": (227, 179, 23, 255)}, COPPER_THICKNESS),
     "debug3": LayerStructure({"color": (227, 84, 23, 255)}, COPPER_THICKNESS),
 }
+_skip_next_render_cache = False
+
+
+def _skip_next_render():
+    global _skip_next_render_cache
+    if _skip_next_render_cache is False:
+        _skip_next_render_cache = True
+        return False
+    else:
+        _skip_next_render_cache = False
+        return True
 
 
 @dataclass
@@ -140,7 +166,8 @@ class BlenderProjectSpec(ProjectSpecBase):
         return BlenderLayerSpec
 
     def render(self) -> None:
-        return self._join_layers(self._render_layers())
+        if _skip_next_render() is False:
+            return self._join_layers(self._render_layers())
 
     def _join_layers(self, layers: List[str]) -> None:
         wipeScenes()

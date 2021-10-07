@@ -122,26 +122,8 @@ def are_images_similar(
         return False
 
 
-def compare_color(c: float, C: float, tresh: float):
+def compare_color(c: float, C: float, thresh: float):
     c = c / 255
     C = C / 255
     cC = abs(c - C)
-    return cC <= tresh
-
-
-def get_layerset(GERBER_PATH: Path):
-    return [
-        LayerSpec(
-            GERBER_PATH / "set" / "top_copper.grb",
-            ColorSet((40, 143, 40, 255), (60, 181, 60, 255)),
-        ),
-        LayerSpec(
-            GERBER_PATH / "set" / "top_solder_mask.grb",
-            ColorSet((153, 153, 153, 255)),
-        ),
-        LayerSpec(
-            GERBER_PATH / "set" / "top_paste_mask.grb",
-            ColorSet((117, 117, 117, 255)),
-        ),
-        LayerSpec(GERBER_PATH / "set" / "top_silk.grb", ColorSet((255, 255, 255, 255))),
-    ]
+    return cC <= thresh

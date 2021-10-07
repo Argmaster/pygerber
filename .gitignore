@@ -80,3 +80,4 @@ typings/
 *.blend1
 *.blend
 .temp/
+*.glb
