@@ -4,8 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Deque
-from typing import Tuple
 
+from PyR3.factory.fields.Unit import Length
 from PyR3.shortcut.context import Objects
 from PyR3.shortcut.context import wipeScenes
 from PyR3.shortcut.io import export_to
@@ -26,12 +26,34 @@ from pygerber.tokens.token import Token
 
 
 @dataclass
-class LayerSpec:
+class LayerStructure:
     material: dict
-    thickness: float = 0.78
+    thickness: float
+
+    def __init__(self, material: dict = None, thickness: float = 0.78) -> None:
+        if material is not None:
+            if not isinstance(material, dict):
+                raise TypeError(f"Structure's 'material' expected a dict, got {material.__class__.__qualname__}.")
+            self.material = material
+            if "color" in self.material:
+                self.material["color"] = tuple(c / 255 for c in self.material["color"])
+            if "subsurfaceColor" in self.material:
+                self.material["subsurfaceColor"] = tuple(
+                    c / 255 for c in self.material["subsurfaceColor"]
+                )
+            if "emission" in self.material:
+                self.material["emission"] = tuple(
+                    c / 255 for c in self.material["emission"]
+                )
+        else:
+            self.material = {}
+        if isinstance(thickness, str):
+            self.thickness = Length.parser.parse(thickness) * 1e3
+        else:
+            self.thickness = float(thickness)
 
 
-DEFAULT_LAYER_GREEN = LayerSpec({"color": (50 / 255, 150 / 255, 50 / 255, 1)})
+DEFAULT_LAYER_GREEN = LayerStructure({"color": (50, 150, 50, 1)})
 
 BLENDER_APERTURE_SET = ApertureSet(
     BlenderCircle,
@@ -51,17 +73,17 @@ class ParserWithBlender(AbstractParser):
         self,
         *,
         scale: float = 1.0,
-        layer_spec: LayerSpec = DEFAULT_LAYER_GREEN,
+        layer_structure: LayerStructure = DEFAULT_LAYER_GREEN,
         ignore_deprecated: bool = True,
     ) -> None:
         super().__init__(ignore_deprecated=ignore_deprecated)
         self.scale = scale
-        self.layer_spec = layer_spec
+        self.layer_structure = layer_structure
 
     def _inject_layer_spec_to_renderer(self):
         self.renderer.material = new_node_material()
-        update_BSDF_node(self.renderer.material, **self.layer_spec.material)
-        self.renderer.thickness = self.layer_spec.thickness
+        update_BSDF_node(self.renderer.material, **self.layer_structure.material)
+        self.renderer.thickness = self.layer_structure.thickness
         self.renderer.tree = None
 
     def _render(self, token_stack: Deque[Token]) -> None:

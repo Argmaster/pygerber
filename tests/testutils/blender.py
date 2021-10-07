@@ -14,6 +14,6 @@ def get_dummy_renderer():
     renderer = Renderer(BLENDER_APERTURE_SET)
     renderer.state.set_polarity(Polarity.DARK)
     ParserWithBlender._inject_layer_spec_to_renderer(
-        SimpleNamespace(renderer=renderer, layer_spec=DEFAULT_LAYER_GREEN)
+        SimpleNamespace(renderer=renderer, layer_structure=DEFAULT_LAYER_GREEN)
     )
     return renderer

@@ -7,13 +7,13 @@ from unittest import main
 
 from PIL import Image
 
+from pygerber.API2D import render_file
+from pygerber.API2D import render_file_and_save
+from pygerber.API2D import render_from_json
+from pygerber.API2D import render_from_spec
+from pygerber.API2D import render_from_toml
+from pygerber.API2D import render_from_yaml
 from pygerber.parser.pillow.api import PillowProjectSpec
-from pygerber.parser.pillow.api import render_file
-from pygerber.parser.pillow.api import render_file_and_save
-from pygerber.parser.pillow.api import render_from_json
-from pygerber.parser.pillow.api import render_from_spec
-from pygerber.parser.pillow.api import render_from_toml
-from pygerber.parser.pillow.api import render_from_yaml
 from pygerber.parser.pillow.parser import ImageSizeNullError
 from pygerber.parser.pillow.parser import ParserWithPillow
 from tests.testutils.pillow import are_images_similar

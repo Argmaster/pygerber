@@ -5,14 +5,15 @@ from pathlib import Path
 from unittest import TestCase
 from unittest import main
 
-# from pygerber.parser.blender.api import ProjectSpec
+from PyR3.shortcut.io import export_to
+
+from pygerber.parser.blender.api import BlenderProjectSpec
 from pygerber.parser.blender.api import render_file
 from pygerber.parser.blender.api import render_file_and_save
-
-# from pygerber.parser.blender.api import render_from_json
-# from pygerber.parser.blender.api import render_from_spec
-# from pygerber.parser.blender.api import render_from_toml
-# from pygerber.parser.blender.api import render_from_yaml
+from pygerber.parser.blender.api import render_from_json
+from pygerber.parser.blender.api import render_from_spec
+from pygerber.parser.blender.api import render_from_toml
+from pygerber.parser.blender.api import render_from_yaml
 from pygerber.parser.blender.parser import ParserWithBlender
 
 TESTS_FOLDER = Path(__file__).parent.parent
@@ -82,91 +83,73 @@ class TestBlenderParser(TestCase):
         self.render_file_and_optional_save("s7.grb", True, scale=100)
 
 
-# def get_test_spec():
-#     return {
-#         "dpi": 600,
-#         "image_padding": 0,
-#         "ignore_deprecated": True,
-#         "layers": [
-#             {
-#                 "file_path": "./tests/gerber/set/top_copper.grb",
-#                 "colors": {
-#                     "dark": [40, 143, 40, 255],
-#                     "clear": [60, 181, 60, 255],
-#                 },
-#             },
-#             {
-#                 "file_path": "./tests/gerber/set/top_solder_mask.grb",
-#                 "colors": "solder_mask",
-#             },
-#             {"file_path": "./tests/gerber/set/top_paste_mask.grb"},
-#             {
-#                 "file_path": "./tests/gerber/set/top_silk.grb",
-#                 "colors": "silk",
-#             },
-#         ],
-#     }
+def get_test_spec():
+    return {
+        "ignore_deprecated": True,
+        "layers": [
+            {
+                "file_path": "./tests/gerber/set/top_copper.grb",
+                "structure": {
+                    "material": {"color": [40, 143, 40, 255]},
+                    "thickness": 0.78,
+                },
+            },
+            {
+                "file_path": "./tests/gerber/set/top_solder_mask.grb",
+                "structure": "solder_mask",
+            },
+            {"file_path": "./tests/gerber/set/top_paste_mask.grb"},
+            {
+                "file_path": "./tests/gerber/set/top_silk.grb",
+                "structure": "silk",
+            },
+        ],
+    }
 
 
-# class ProjectSpecTest(TestCase):
-#     def test_load_empty(self):
-#         self.assertRaises(
-#             TypeError,
-#             lambda: ProjectSpec(
-#                 {
-#                     "layers": [
-#                         {
-#                             "file_path": "./tests/gerber/set/top_copper.grb",
-#                             "colors": 444,
-#                         },
-#                     ],
-#                 }
-#             ),
-#         )
-#
-#     def test_invalid_color_spec(self):
-#         self.assertRaises(
-#             ValueError,
-#             lambda: ProjectSpec(
-#                 {
-#                     "layers": [],
-#                 }
-#             ),
-#         )
-#
-#     def test_load(self):
-#         image = ProjectSpec(get_test_spec()).render()
-#         # image.show()
-#
-#     def test_from_json(self):
-#         image = ProjectSpec.from_json(GERBER_PATH / "blender" / "specfile.json").render()
-#         # image.show()
-#
-#     def test_from_yaml(self):
-#         image = ProjectSpec.from_yaml(GERBER_PATH / "blender" / "specfile.yaml").render()
-#         # image.show()
-#
-#     def test_from_toml(self):
-#         image = ProjectSpec.from_toml(GERBER_PATH / "blender" / "specfile.toml").render()
-#         # image.show()
+class ProjectSpecTest(TestCase):
+    def test_load_empty(self):
+        self.assertRaises(
+            TypeError,
+            lambda: BlenderProjectSpec(
+                {
+                    "layers": [
+                        {
+                            "file_path": "./tests/gerber/set/top_copper.grb",
+                            "structure": 444,
+                        },
+                    ],
+                }
+            ),
+        )
+
+    def test_invalid_color_spec(self):
+        self.assertRaises(
+            ValueError,
+            lambda: BlenderProjectSpec(
+                {
+                    "layers": [],
+                }
+            ),
+        )
 
 
-# class TestAPI(TestCase):
-#     def test_render_from_spec(self):
-#         image = render_from_spec(get_test_spec())
-#         # image.show()
-#
-#     def test_render_from_json(self):
-#         image = render_from_json(GERBER_PATH / "blender" / "specfile.json")
-#         # image.show()
-#
-#     def test_render_from_yaml(self):
-#         image = render_from_yaml(GERBER_PATH / "blender" / "specfile.yaml")
-#         # image.show()
-#
-#     def test_render_from_toml(self):
-#         image = render_from_toml(GERBER_PATH / "blender" / "specfile.toml")
-#         # image.show()
+class TestAPI(TestCase):
+    def test_render_from_spec(self):
+        render_from_spec(get_test_spec())
+        export_to(RENDERED_PATH / "blender" / "TestAPI_from_spec.glb")
+
+    def test_render_from_json(self):
+        render_from_json(GERBER_PATH / "blender" / "specfile.json")
+        export_to(RENDERED_PATH / "blender" / "TestAPI_from_json.glb")
+
+    def test_render_from_yaml(self):
+        render_from_yaml(GERBER_PATH / "blender" / "specfile.yaml")
+        export_to(RENDERED_PATH / "blender" / "TestAPI_from_yaml.glb")
+
+    def test_render_from_toml(self):
+        render_from_toml(GERBER_PATH / "blender" / "specfile.toml")
+        export_to(RENDERED_PATH / "blender" / "TestAPI_from_toml.glb")
 
 
 if __name__ == "__main__":

@@ -63,8 +63,14 @@ class ProjectSpecBase(ABC):
 
 class LayerSpecBase(ABC):
     @abstractstaticmethod
-    def load(contents: Dict):
+    def load(contents: Dict) -> LayerSpecBase:
         ...
+
+    @staticmethod
+    def _get_checked_file_path(contents: dict) -> str:
+        file_path = contents.get("file_path")
+        os.path.exists(file_path)
+        return file_path
 
     @staticmethod
     def _replace_none_color_with_named_color_based_on_file_name(

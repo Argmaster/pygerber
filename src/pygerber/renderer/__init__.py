@@ -7,8 +7,6 @@ from typing import Deque
 from typing import List
 from typing import Tuple
 
-from PyR3.shortcut.io import export_to
-
 from pygerber.constants import Interpolation
 from pygerber.drawing_state import DrawingState
 from pygerber.exceptions import EndOfStream
@@ -52,6 +50,8 @@ class Renderer:
     if DEBUG:
 
         def render(self, token_stack: Deque[Token]) -> None:
+            from PyR3.shortcut.io import export_to
+
             total = len(token_stack)
             current = 0
             try:

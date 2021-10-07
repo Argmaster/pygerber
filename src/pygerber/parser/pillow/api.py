@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import json
 import os
 import sys
 from concurrent.futures import Future
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
+from typing import Any
 from typing import Dict
 from typing import List
 
-import toml
-import yaml
 from PIL import Image
 
 import pygerber
@@ -37,7 +35,7 @@ NAMED_COLORS = {
 }
 
 
-def render_from_spec(spec: Dict) -> Image.Image:
+def render_from_spec(spec: Dict[str, Any]) -> Image.Image:
     """Render 2D image from specfile alike dictionary.
 
     :param spec: specfile parameters dictionary.
@@ -154,12 +152,6 @@ class PillowLayerSpec(LayerSpecBase):
             colors, file_path, NAMED_COLORS
         )
         return cls(file_path, colors)
-
-    @staticmethod
-    def _get_checked_file_path(contents):
-        file_path = contents.get("file_path")
-        os.path.exists(file_path)
-        return file_path
 
     @staticmethod
     def __load_colors(contents):
