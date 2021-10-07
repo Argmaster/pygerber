@@ -2,6 +2,12 @@
 Usage
 =====
 
-To use PyGerber in a project::
+PyGerber project provides both CLI and API for rendering Gerber files.
 
-	import pygerber
+
+.. toctree::
+   :maxdepth: 2
+
+   cli
+   api
+   specfile
