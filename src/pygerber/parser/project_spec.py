@@ -11,7 +11,7 @@ from typing import Optional
 
 import toml
 import yaml
-from black import os
+import os
 
 
 class ProjectSpecBase(ABC):
