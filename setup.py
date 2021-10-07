@@ -21,7 +21,7 @@ def read(*names, **kwargs):
 
 
 with open("src/requirements.txt") as file:
-    INTALL_REQUIRES = file.readlines()
+    INTALL_REQUIRES = [r.strip() for r in file.readlines()]
 
 setup(
     name="pygerber",

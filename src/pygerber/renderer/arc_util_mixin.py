@@ -5,12 +5,11 @@ from math import cos
 from math import degrees
 from math import radians
 from math import sin
+from math import tau
 
 from pygerber.mathclasses import Vector2D
 from pygerber.mathclasses import angle_from_zero
 from pygerber.renderer.spec import ArcSpec
-
-DELTA_MULTIPLIER = 25
 
 
 class ArcUtilMixin:
@@ -27,15 +26,12 @@ class ArcUtilMixin:
             end_angle += 360
         return begin_angle, end_angle
 
-    def get_arc_points(self, spec) -> Vector2D:
+    def get_arc_points(self, spec: ArcSpec, is_ccw: bool) -> Vector2D:
         begin_angle, end_angle = self.get_begin_end_angles(spec)
         radius = spec.get_radius()
         x, y = self.get_arc_co_functions(radius)
-        delta = (
-            self.get_arc_traverse_step_angle(begin_angle, end_angle, radius)
-            * DELTA_MULTIPLIER
-        )
-        if self.isCCW:
+        delta = self.get_arc_traverse_step_angle(begin_angle, end_angle, radius)
+        if is_ccw:
             return self.__get_arc_points_ccw(end_angle, begin_angle, x, spec, y, delta)
         else:
             return self.__get_arc_points_cw(end_angle, begin_angle, x, spec, y, delta)
@@ -76,3 +72,15 @@ class ArcUtilMixin:
             return radius * sin(radians(alpha))
 
         return x, y
+
+    @staticmethod
+    def get_arc_length(radius) -> float:
+        return tau * radius
+
+    @staticmethod
+    def get_arc_ratio(relative_angle):
+        return relative_angle / 360
+
+    @staticmethod
+    def get_relative_angle(begin_angle, end_angle):
+        return end_angle - begin_angle

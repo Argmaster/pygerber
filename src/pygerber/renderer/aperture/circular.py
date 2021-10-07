@@ -1,17 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from abc import ABC
-from abc import abstractmethod
-from typing import List
-from typing import Tuple
-
 from pygerber.mathclasses import BoundingBox
-from pygerber.renderer.arc_util_mixin import ArcUtilMixin
-from pygerber.renderer.spec import ArcSpec
-from pygerber.renderer.spec import FlashSpec
-from pygerber.renderer.spec import LineSpec
-from pygerber.renderer.spec import Spec
 from pygerber.tokens.add import ADD_Token
 
 from .aperture import Aperture

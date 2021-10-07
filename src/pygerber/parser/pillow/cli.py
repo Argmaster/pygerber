@@ -2,36 +2,17 @@
 from __future__ import annotations
 
 import os
-from math import inf
-from typing import Dict
-from typing import Tuple
 
+from pygerber.mathclasses import format_bytes
+from pygerber.parser.pillow.api import _skip_next_render
 from pygerber.parser.pillow.api import render_from_json
-from pygerber.parser.pillow.api import render_from_spec
 from pygerber.parser.pillow.api import render_from_toml
 from pygerber.parser.pillow.api import render_from_yaml
 
-UNIT_MAP_TYPE = Dict[Tuple[float, float], str]
-
-_ByteUnits = {
-    (0, 1024): "B",
-    (1024, 1024 ** 2): "KiB",
-    (1024 ** 2, 1024 ** 3): "MiB",
-    (1024 ** 3, 1024 ** 4): "GiB",
-    (1024 ** 4, inf): "TiB",
-}
-
-
-def format_bytes(
-    val: float,
-) -> str:
-    abs_val = abs(val)
-    for range, unit in _ByteUnits.items():
-        if range[0] <= abs_val < range[1]:
-            return f"{val/range[0]:.1f} {unit}"
-
 
 def handle_pillow_cli(args):
+    if args.dry is True:
+        _skip_next_render()
     print(f"Rendering {args.specfile['filepath']} as {args.specfile['type'].upper()}")
     if args.specfile["type"] == "json":
         image = render_from_json(args.specfile["filepath"])
@@ -39,21 +20,17 @@ def handle_pillow_cli(args):
         image = render_from_yaml(args.specfile["filepath"])
     elif args.specfile["type"] == "toml":
         image = render_from_toml(args.specfile["filepath"])
-    elif args.specfile["type"] == "file":
-        image = render_from_spec(
-            {
-                "dpi": args.dpi,
-                "layers": [
-                    {"file_path": str(args.specfile["filepath"]), "colors": args.colors}
-                ],
-            }
-        )
     else:
         raise NotImplementedError(
             f"Rendering based on {args.specfile['type']} file format is not supported."
         )
-    print(f"Saving to {args.save}")
-    image.save(args.save)
-    filesize = os.stat(args.save).st_size
-    pretty_filesize = format_bytes(filesize)
-    print(f"Successfully saved image {image.width}x{image.height}, {pretty_filesize}.")
+    if args.dry is False:
+        print(f"Saving to {args.save}")
+        image.save(args.save)
+        filesize = os.stat(args.save).st_size
+        pretty_filesize = format_bytes(filesize)
+        print(
+            f"Successfully saved image {image.width}x{image.height}, {pretty_filesize}."
+        )
+    else:
+        print("Skipping, dry run.")
