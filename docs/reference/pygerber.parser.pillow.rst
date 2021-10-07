@@ -12,29 +12,12 @@ Subpackages
 Submodules
 ----------
 
-pygerber.parser.pillow.api module
----------------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: pygerber.parser.pillow.api
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pygerber.parser.pillow.cli module
----------------------------------
-
-.. automodule:: pygerber.parser.pillow.cli
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pygerber.parser.pillow.parser module
-------------------------------------
-
-.. automodule:: pygerber.parser.pillow.parser
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   pygerber.parser.pillow.api
+   pygerber.parser.pillow.cli
+   pygerber.parser.pillow.parser
 
 Module contents
 ---------------
