@@ -46,10 +46,6 @@ jobs:
         run: |
           tox -e check
 
-      - name: Tox -e docs
-        run: |
-          tox -e docs
-
       - name: Tox -e py39
         run: |
           tox -e py39
