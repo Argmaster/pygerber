@@ -80,7 +80,7 @@ class TestPillowParser(TestCase):
             self.assertTrue(are_images_similar(Image.open(filepath), image, 0.01, 0.01))
 
     def test_parser_file_0(self):
-        self.render_file_optional_show_and_save("s0.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s0.grb", True, True, True, dpi=1600)
 
     def test_parser_file_1(self):
         self.render_file_optional_show_and_save("s1.grb", False, False, False, dpi=1600)
