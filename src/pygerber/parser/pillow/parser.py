@@ -49,7 +49,6 @@ class ImageSizeNullError(IndexError):
 
 class ParserWithPillow(AbstractParser):
 
-    tokenizer: Tokenizer
     apertureSet = ApertureSet(
         PillowCircle,
         PillowRectangle,

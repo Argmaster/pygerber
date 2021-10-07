@@ -13,6 +13,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
+    "sphinx_rtd_dark_mode",
 ]
 source_suffix = ".rst"
 master_doc = "index"
@@ -20,7 +21,7 @@ project = "PyGerber"
 year = "2021"
 author = "Krzysztof Wiśniewski"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.0.1"
+version = release = "1.0.0"
 
 pygments_style = "trac"
 templates_path = ["."]
@@ -37,7 +38,7 @@ if not on_rtd:  # only set the theme if we're building docs locally
 html_static_path = ["_static"]
 html_logo = "_static/pygerber_logo.png"
 html_theme_options = {
-    "logo_only": True,
+    "logo_only": False,
     "display_version": True,
 }
 html_use_smartypants = True
@@ -47,6 +48,8 @@ html_sidebars = {
     "**": ["searchbox.html", "globaltoc.html", "sourcelink.html"],
 }
 html_short_title = "%s-%s" % (project, version)
+
+default_dark_mode = False
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False

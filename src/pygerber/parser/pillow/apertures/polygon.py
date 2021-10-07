@@ -39,5 +39,5 @@ class PillowPolygon(
         self.flash_at_location(spec.end)
 
     def __arc(self, spec: ArcSpec) -> None:
-        for point in self.get_arc_points(spec):
+        for point in self.get_arc_points(spec, self.isCCW):
             self.flash_at_location(point.floor())

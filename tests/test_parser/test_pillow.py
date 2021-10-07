@@ -7,13 +7,13 @@ from unittest import main
 
 from PIL import Image
 
-from pygerber.parser.pillow.api import ProjectSpec
-from pygerber.parser.pillow.api import render_file
-from pygerber.parser.pillow.api import render_file_and_save
-from pygerber.parser.pillow.api import render_from_json
-from pygerber.parser.pillow.api import render_from_spec
-from pygerber.parser.pillow.api import render_from_toml
-from pygerber.parser.pillow.api import render_from_yaml
+from pygerber.API2D import render_file
+from pygerber.API2D import render_file_and_save
+from pygerber.API2D import render_from_json
+from pygerber.API2D import render_from_spec
+from pygerber.API2D import render_from_toml
+from pygerber.API2D import render_from_yaml
+from pygerber.parser.pillow.api import PillowProjectSpec
 from pygerber.parser.pillow.parser import ImageSizeNullError
 from pygerber.parser.pillow.parser import ParserWithPillow
 from tests.testutils.pillow import are_images_similar
@@ -41,7 +41,7 @@ class TestPillowParser(TestCase):
         # to manually validate output uncomment this:
         # image.show()
         # to create new comparison image uncomment this:
-        image.save(RENDERED_PATH/"SOURCE_0.png")
+        image.save(RENDERED_PATH / "SOURCE_0.png")
         self.assertTrue(
             are_images_similar(Image.open(RENDERED_PATH / "SOURCE_0.png"), image, 0, 0)
         )
@@ -76,34 +76,32 @@ class TestPillowParser(TestCase):
             image.save(RENDERED_PATH / (filename.split(".")[0] + ".png"))
         if fulltest:
             filepath = RENDERED_PATH / filename
-            filepath = filepath.with_suffix('.png')
-            self.assertTrue(
-                are_images_similar(Image.open(filepath), image, 0.01, 0.01)
-            )
+            filepath = filepath.with_suffix(".png")
+            self.assertTrue(are_images_similar(Image.open(filepath), image, 0.01, 0.01))
 
     def test_parser_file_0(self):
-        self.render_file_optional_show_and_save("s0.grb", True, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s0.grb", True, True, True, dpi=1600)
 
     def test_parser_file_1(self):
-        self.render_file_optional_show_and_save("s1.grb", True, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s1.grb", False, False, False, dpi=1600)
 
     def test_parser_file_2(self):
-        self.render_file_optional_show_and_save("s2.grb", True, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s2.grb", False, False, False, dpi=1600)
 
     def test_parser_file_3(self):
-        self.render_file_optional_show_and_save("s3.grb", True, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s3.grb", False, False, False, dpi=1600)
 
     def test_parser_file_4(self):
-        self.render_file_optional_show_and_save("s4.grb", True, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s4.grb", False, False, False, dpi=1600)
 
     def test_parser_file_5(self):
-        self.render_file_optional_show_and_save("s5.grb", True, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s5.grb", False, False, False, dpi=1600)
 
     def test_parser_file_6(self):
-        self.render_file_optional_show_and_save("s6.grb", True, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s6.grb", False, False, False, dpi=1600)
 
     def test_parser_file_7(self):
-        self.render_file_optional_show_and_save("s7.grb", True, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s7.grb", False, False, False, dpi=1600)
 
 
 def get_test_spec():
@@ -132,11 +130,11 @@ def get_test_spec():
     }
 
 
-class ProjectSpecTest(TestCase):
+class PillowProjectSpecTest(TestCase):
     def test_load_empty(self):
         self.assertRaises(
             TypeError,
-            lambda: ProjectSpec(
+            lambda: PillowProjectSpec(
                 {
                     "layers": [
                         {
@@ -151,7 +149,7 @@ class ProjectSpecTest(TestCase):
     def test_invalid_color_spec(self):
         self.assertRaises(
             ValueError,
-            lambda: ProjectSpec(
+            lambda: PillowProjectSpec(
                 {
                     "layers": [],
                 }
@@ -159,19 +157,25 @@ class ProjectSpecTest(TestCase):
         )
 
     def test_load(self):
-        image = ProjectSpec(get_test_spec()).render()
+        image = PillowProjectSpec(get_test_spec()).render()
         # image.show()
 
     def test_from_json(self):
-        image = ProjectSpec.from_json(GERBER_PATH / "pillow" / "specfile.json").render()
+        image = PillowProjectSpec.from_json(
+            GERBER_PATH / "pillow" / "specfile.json"
+        ).render()
         # image.show()
 
     def test_from_yaml(self):
-        image = ProjectSpec.from_yaml(GERBER_PATH / "pillow" / "specfile.yaml").render()
+        image = PillowProjectSpec.from_yaml(
+            GERBER_PATH / "pillow" / "specfile.yaml"
+        ).render()
         # image.show()
 
     def test_from_toml(self):
-        image = ProjectSpec.from_toml(GERBER_PATH / "pillow" / "specfile.toml").render()
+        image = PillowProjectSpec.from_toml(
+            GERBER_PATH / "pillow" / "specfile.toml"
+        ).render()
         # image.show()
 
 

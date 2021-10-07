@@ -1,3 +1,6 @@
-from .parser import pillow
+# -*- coding: utf-8 -*-
+import sys
 
-__version__ = "0.0.1"
+SYS_PATH = list(sys.path)
+
+__version__ = "1.0.0"

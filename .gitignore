@@ -75,3 +75,9 @@ docs/_build
 
 .vscode/
 render.png
+blender/
+typings/
+*.blend1
+*.blend
+.temp/
+*.glb

@@ -6,9 +6,17 @@ from argparse import _ArgumentGroup
 from argparse import _MutuallyExclusiveGroup
 from pathlib import Path
 
-from PIL._version import __version__ as pillow_version
-
 from .parser.pillow.cli import handle_pillow_cli
+
+try:
+    from .parser.blender.cli import handle_blender_cli
+except ImportError:
+
+    def handle_blender_cli(*_):
+        print(
+            "bpy module has to be installed to allow 3D rendering, check Installation section of PyGerber's docs."
+        )
+        exit(-1)
 
 
 def get_argument_parser() -> ArgumentParser:
@@ -22,22 +30,9 @@ def get_argument_parser() -> ArgumentParser:
         required=True,
         metavar="<savepath>",
         help=(
-            "Save path for output render, file format will be automatically. See "
-            "https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html "
-            "for supported image types for 2D rendering. "
-            f"Note that we are currently using pillow {pillow_version}. "
+            "Save path for output render, file format will be automatically determined from file "
+            "extension. Check our documentation for list of supported extensions. https://pygerber.readthedocs.io/en/latest/"
         ),
-    )
-    parser.add_argument(
-        "--dpi",
-        type=int,
-        default=600,
-        help="DPI of output image. Affects only 2D renders in --file mode.",
-    )
-    parser.add_argument(
-        "--colors",
-        default="copper",
-        help="Colors of rendered Gerber image. Affects renders in --file mode.",
     )
     renderer_group: _MutuallyExclusiveGroup = parser.add_mutually_exclusive_group(
         required=True
@@ -62,6 +57,12 @@ def get_argument_parser() -> ArgumentParser:
         required=True
     )
     __add_specfile_types_group(source_group)
+    parser.add_argument(
+        "--dry",
+        help="Run, but don't render anything.",
+        action="store_true",
+        default=False,
+    )
     return parser
 
 
@@ -84,13 +85,6 @@ def __add_specfile_types_group(source_group: _ArgumentGroup):
             metavar="<filepath>",
             help=f"Use {name.upper()} specfile, from file <filepath>.",
         )
-    specfile_types_group.add_argument(
-        "--file",
-        dest="specfile",
-        type=validate("file"),
-        metavar="<filepath>",
-        help="Render single gerber file.",
-    )
 
 
 def handle_pygerber_cli(args):
@@ -99,4 +93,4 @@ def handle_pygerber_cli(args):
     if args.renderer == "pillow":
         handle_pillow_cli(args)
     elif args.renderer == "blender":
-        raise NotImplementedError("Blender rendering is not yet implemented.")
+        handle_blender_cli(args)

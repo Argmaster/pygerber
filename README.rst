@@ -1,4 +1,7 @@
+
 .. image:: https://raw.githubusercontent.com/Argmaster/pygerber/main/docs/_static/pygerber_logo.png
+   :height: 400px
+   :align: center
 
 ========
 Overview
@@ -6,17 +9,17 @@ Overview
 
 .. start-badges
 
-|docs| |travis| |codecov| |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
+|docs| |tests| |codecov| |version| |wheel| |supported-versions| |supported-implementations| |commits-since|
 
 .. |docs| image:: https://readthedocs.org/projects/pygerber/badge/?style=flat
     :target: https://pygerber.readthedocs.io/
     :alt: Documentation Status
 
-.. |travis| image:: https://app.travis-ci.com/Argmaster/pygerber.svg?branch=main
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.com/github/Argmaster/pygerber
+.. |tests| image:: https://github.com/Argmaster/pygerber/actions/workflows/main.yml/badge.svg
+    :target: https://github.com/Argmaster/pygerber
+    :alt: Workflow Status
 
-.. |codecov| image:: https://codecov.io/gh/Argmaster/pygerber/branch/main/graphs/badge.svg?branch=main
+.. |codecov| image:: https://api.travis-ci.com/Argmaster/pygerber.svg?branch=v1.0.0
     :alt: Coverage Status
     :target: https://codecov.io/github/Argmaster/pygerber
 
@@ -36,16 +39,14 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/pygerber
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/Argmaster/pygerber/v0.0.1.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/Argmaster/pygerber/v1.0.0.svg
     :alt: Commits since latest release
-    :target: https://github.com/Argmaster/pygerber/compare/v0.0.1...main
+    :target: https://github.com/Argmaster/pygerber/compare/v1.0.0...main
 
 .. end-badges
 
 PyGerber is a Python library for 2D and 3D rendering of Gerber X3 files.
 It is completely written in Python, and only dependencies are limiting its portability.
-
-*3D rendering is still under development, it will arrive at next major release. (v1.0.0)*
 
 **This package is a Free Software; it is released under MIT license**. Be aware that dependencies might be using different licenses.
 
@@ -68,26 +69,29 @@ PyGerber is available on PyPI and can be obtained via pip
 
     pip install pygerber
 
-Be aware that this will **only install general and 2D rendering dependencies**, as
-**bpy (Blender) is not officially released as Python package**. You have to obtain
-it yourself, which, for example, you can archive with help of guides contained in
-this `repository <https://github.com/Argmaster/pyr3>`_.
-
-
 You can also install the in-development version from github with
 
 .. code:: bash
 
     pip install https://github.com/Argmaster/pygerber/archive/main.zip
 
-Same Blender dependency issue applies to this installation method.
+Blender dependency issue mentioned in previous releases was resolved by using
+`PyR3 package <https://pypi.org/project/PyR3/>`_ which provides Blender.
+**However, blender has to be installed independently from package by calling PyR3.install_bpy script**::
+
+    python -m PyR3.install_bpy
+
+Before You try to use 3D rendering.
 
 Compatibility
 =============
 
-PyGerber officially supports only Python 3.9, but 2D rendering should be also available for
-3.8 and 3.7, as long as Pillow provides support for those versions. 3D rendering is not
-possible on those versions of Python due to compatibility issues of Blender binaries and Blender's API changes.
+PyGerber officially runs on Python 3.9.* and only on this version.
+However it may be possible to run 2D rendering on other Python versions
+that are supported by Pillow.
+
+I'll consider bringing Python 3.8 3D rendering support, but no sooner than
+after implementation of full set of 3D rendering features and macros support.
 
 Documentation
 =============
@@ -101,10 +105,6 @@ To run all the tests, just run::
 
     tox
 
-To see all the tox environments::
-
-    tox -l
-
 To only build the docs::
 
     tox -e docs
@@ -112,17 +112,3 @@ To only build the docs::
 To build and verify that the built package is proper and other code QA checks::
 
     tox -e check
-
-To build sdist, and bdist_wheel::
-
-    python setup.py clean --all sdist bdist_wheel
-
-To make a release of the project on PyPI, assuming you got some distributions in dist/, the most simple usage is::
-
-    twine upload --skip-existing dist/*.whl dist/*.gz dist/*.zip
-
-Credits
-=======
-
-Structure of this project was created using cookiecutter template `cookiecutter-pylibrary <https://github.com/ionelmc/cookiecutter-pylibrary>`_.
-I'm very grateful to Ionel Cristian Mărieș for its creation.
