@@ -15,7 +15,7 @@ Overview
     :target: https://pygerber.readthedocs.io/
     :alt: Documentation Status
 
-.. |codecov| image:: https://api.travis-ci.com/Argmaster/pygerber.svg?branch=v0.0.1
+.. |codecov| image:: https://api.travis-ci.com/Argmaster/pygerber.svg?branch=v1.0.0
     :alt: Coverage Status
     :target: https://codecov.io/github/Argmaster/pygerber
 
@@ -35,9 +35,9 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/pygerber
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/Argmaster/pygerber/v0.0.1.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/Argmaster/pygerber/v1.0.0.svg
     :alt: Commits since latest release
-    :target: https://github.com/Argmaster/pygerber/compare/v0.0.1...main
+    :target: https://github.com/Argmaster/pygerber/compare/v1.0.0...main
 
 .. end-badges
 

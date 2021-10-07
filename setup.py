@@ -25,7 +25,7 @@ with open("src/requirements.txt") as file:
 
 setup(
     name="pygerber",
-    version="0.0.1",
+    version="1.0.0",
     license="MIT",
     description="Python package for 2D and 3D rendering of GerberX3 files.",
     long_description="%s\n%s"
