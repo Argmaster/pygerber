@@ -33,6 +33,21 @@ NAMED_COLORS = {
         (0, 0, 0, 0),
     ),
 }
+_skip_next_render_cache = False
+
+
+def _skip_next_render():
+    global _skip_next_render_cache
+    _skip_next_render_cache = True
+
+
+def _get_skip_next_render():
+    global _skip_next_render_cache
+    if _skip_next_render_cache:
+        _skip_next_render_cache = False
+        return True
+    else:
+        return False
 
 
 def render_from_spec(spec: Dict[str, Any]) -> Image.Image:
@@ -90,7 +105,8 @@ class PillowProjectSpec(ProjectSpecBase):
         return PillowLayerSpec
 
     def render(self) -> Image.Image:
-        return self._join_layers(self._render_layers())
+        if _get_skip_next_render() is False:
+            return self._join_layers(self._render_layers())
 
     def _join_layers(self, layer_images: List[Image.Image]) -> Image.Image:
         bottom_most_layer = layer_images[0].copy()

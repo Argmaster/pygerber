@@ -57,6 +57,12 @@ def get_argument_parser() -> ArgumentParser:
         required=True
     )
     __add_specfile_types_group(source_group)
+    parser.add_argument(
+        "--dry",
+        help="Run, but don't render anything.",
+        action="store_true",
+        default=False,
+    )
     return parser
 
 

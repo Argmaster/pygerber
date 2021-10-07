@@ -71,12 +71,16 @@ _skip_next_render_cache = False
 
 def _skip_next_render():
     global _skip_next_render_cache
-    if _skip_next_render_cache is False:
-        _skip_next_render_cache = True
-        return False
-    else:
+    _skip_next_render_cache = True
+
+
+def _get_skip_next_render():
+    global _skip_next_render_cache
+    if _skip_next_render_cache:
         _skip_next_render_cache = False
         return True
+    else:
+        return False
 
 
 @dataclass
@@ -166,7 +170,7 @@ class BlenderProjectSpec(ProjectSpecBase):
         return BlenderLayerSpec
 
     def render(self) -> None:
-        if _skip_next_render() is False:
+        if _get_skip_next_render() is False:
             return self._join_layers(self._render_layers())
 
     def _join_layers(self, layers: List[str]) -> None:

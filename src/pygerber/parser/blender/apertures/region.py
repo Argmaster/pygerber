@@ -49,4 +49,3 @@ class BlenderRegion(ArcUtilMixinBlender, RegionApertureManager, BlenderUtilMetho
         )
         self.solidify(mesh_object, self.thickness)
         self.commit_mesh_to_root(mesh_object)
-

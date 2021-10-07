@@ -62,4 +62,3 @@ class BlenderUtilMethods:
 
     def solidify(self, ob, thickness):
         Solidify(ob, float(thickness), offset=0.0, use_even_offset=True).apply()
-
