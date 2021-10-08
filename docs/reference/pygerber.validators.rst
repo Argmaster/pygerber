@@ -4,14 +4,45 @@ pygerber.validators package
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 4
+pygerber.validators.basic module
+--------------------------------
 
-   pygerber.validators.basic
-   pygerber.validators.conditional
-   pygerber.validators.coordinate
-   pygerber.validators.struct_validator
-   pygerber.validators.validator
+.. automodule:: pygerber.validators.basic
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.validators.conditional module
+--------------------------------------
+
+.. automodule:: pygerber.validators.conditional
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.validators.coordinate module
+-------------------------------------
+
+.. automodule:: pygerber.validators.coordinate
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.validators.struct\_validator module
+--------------------------------------------
+
+.. automodule:: pygerber.validators.struct_validator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.validators.validator module
+------------------------------------
+
+.. automodule:: pygerber.validators.validator
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

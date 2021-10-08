@@ -1,5 +1,5 @@
-Installation
-============
+PyGerber Installation
+=====================
 
 PyGerber is available on PyPI and can be obtained via pip
 

@@ -13,11 +13,21 @@ Subpackages
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 4
+pygerber.parser.parser module
+-----------------------------
 
-   pygerber.parser.parser
-   pygerber.parser.project_spec
+.. automodule:: pygerber.parser.parser
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.project\_spec module
+------------------------------------
+
+.. automodule:: pygerber.parser.project_spec
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

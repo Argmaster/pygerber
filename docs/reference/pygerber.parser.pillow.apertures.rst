@@ -4,19 +4,85 @@ pygerber.parser.pillow.apertures package
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 4
+pygerber.parser.pillow.apertures.arc\_mixin module
+--------------------------------------------------
 
-   pygerber.parser.pillow.apertures.arc_mixin
-   pygerber.parser.pillow.apertures.circle
-   pygerber.parser.pillow.apertures.custom
-   pygerber.parser.pillow.apertures.flash_line_mixin
-   pygerber.parser.pillow.apertures.flash_mixin
-   pygerber.parser.pillow.apertures.obround
-   pygerber.parser.pillow.apertures.polygon
-   pygerber.parser.pillow.apertures.rectangle
-   pygerber.parser.pillow.apertures.region
-   pygerber.parser.pillow.apertures.util
+.. automodule:: pygerber.parser.pillow.apertures.arc_mixin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.circle module
+----------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.circle
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.custom module
+----------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.custom
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.flash\_line\_mixin module
+----------------------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.flash_line_mixin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.flash\_mixin module
+----------------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.flash_mixin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.obround module
+-----------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.obround
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.polygon module
+-----------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.polygon
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.rectangle module
+-------------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.rectangle
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.region module
+----------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.region
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.pillow.apertures.util module
+--------------------------------------------
+
+.. automodule:: pygerber.parser.pillow.apertures.util
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

@@ -12,13 +12,37 @@ Subpackages
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 4
+pygerber.renderer.aperture\_manager module
+------------------------------------------
 
-   pygerber.renderer.aperture_manager
-   pygerber.renderer.apertureset
-   pygerber.renderer.arc_util_mixin
-   pygerber.renderer.spec
+.. automodule:: pygerber.renderer.aperture_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.renderer.apertureset module
+------------------------------------
+
+.. automodule:: pygerber.renderer.apertureset
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.renderer.arc\_util\_mixin module
+-----------------------------------------
+
+.. automodule:: pygerber.renderer.arc_util_mixin
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.renderer.spec module
+-----------------------------
+
+.. automodule:: pygerber.renderer.spec
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

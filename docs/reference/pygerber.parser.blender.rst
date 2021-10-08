@@ -1,23 +1,32 @@
 pygerber.parser.blender package
 ===============================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   pygerber.parser.blender.apertures
-
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 4
+pygerber.parser.blender.api module
+----------------------------------
 
-   pygerber.parser.blender.api
-   pygerber.parser.blender.cli
-   pygerber.parser.blender.parser
+.. automodule:: pygerber.parser.blender.api
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.blender.cli module
+----------------------------------
+
+.. automodule:: pygerber.parser.blender.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pygerber.parser.blender.parser module
+-------------------------------------
+
+.. automodule:: pygerber.parser.blender.parser
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
