@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import os
 
+from pygerber.API2D import render_from_json
+from pygerber.API2D import render_from_toml
+from pygerber.API2D import render_from_yaml
 from pygerber.mathclasses import format_bytes
 from pygerber.parser.pillow.api import _skip_next_render
-from pygerber.parser.pillow.api import render_from_json
-from pygerber.parser.pillow.api import render_from_toml
-from pygerber.parser.pillow.api import render_from_yaml
 
 
 def handle_pillow_cli(args):

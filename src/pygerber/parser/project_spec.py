@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from abc import ABC
 from abc import abstractmethod
 from abc import abstractstaticmethod
@@ -11,7 +12,6 @@ from typing import Optional
 
 import toml
 import yaml
-from black import os
 
 
 class ProjectSpecBase(ABC):

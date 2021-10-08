@@ -5,11 +5,11 @@ import os
 
 from PyR3.shortcut.io import export_to
 
+from pygerber.API3D import render_from_json
+from pygerber.API3D import render_from_toml
+from pygerber.API3D import render_from_yaml
 from pygerber.mathclasses import format_bytes
 from pygerber.parser.blender.api import _skip_next_render
-from pygerber.parser.blender.api import render_from_json
-from pygerber.parser.blender.api import render_from_toml
-from pygerber.parser.blender.api import render_from_yaml
 
 
 def handle_blender_cli(args):

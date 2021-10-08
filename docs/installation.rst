@@ -1,4 +1,3 @@
-============
 Installation
 ============
 
@@ -16,8 +15,8 @@ You can also install the in-development version from github with
 
 Blender dependency issue mentioned in previous releases was resolved by using
 `PyR3 package <https://pypi.org/project/PyR3/>`_ which provides Blender.
-**However, blender has to be installed independently from package by calling PyR3.install_blender script**::
+**However, blender has to be installed independently from package by calling PyR3.install_bpy script**::
 
-    python -m PyR3.install_blender
+    python -m PyR3.install_bpy
 
 Before You try to use 3D rendering.

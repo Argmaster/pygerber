@@ -1,10 +1,10 @@
 graft docs
 graft src
-graft ci
-graft tests
 
+prune tests
 prune tests/gerber/rendered/*
 prune scripts
+prune .github
 
 include .bumpversion.cfg
 include .cookiecutterrc
