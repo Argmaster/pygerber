@@ -5,7 +5,7 @@
 First and foremost, the PyGerber command line help page can be displayed
 with this command:
 
-.. code-block:: bash
+.. code:: bash
 
    $ python -m pygerber -h
 
