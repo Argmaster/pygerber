@@ -74,7 +74,7 @@ setup(
         "gerber-parser",
         "python-3.9",
     ],
-    python_requires=">=3.7",
+    python_requires="==3.9",
     install_requires=INTALL_REQUIRES,
     extras_require={
         # eg:
