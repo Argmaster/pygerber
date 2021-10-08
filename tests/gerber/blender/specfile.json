@@ -3,8 +3,10 @@
     "layers": [
         {
             "file_path": "./tests/gerber/set/top_copper.grb",
-            "material": {
-                "color": [40, 143, 40, 255],
+            "structure": {
+                "material": {
+                    "color": [40, 143, 40, 255]
+                },
                 "thickness": 0.78
             }
         },
