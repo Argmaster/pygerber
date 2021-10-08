@@ -1,51 +1,59 @@
-pygerber.renderer package
-=========================
+###########################
+ pygerber.renderer package
+###########################
 
-Subpackages
------------
+*************
+ Subpackages
+*************
 
 .. toctree::
    :maxdepth: 4
 
    pygerber.renderer.aperture
 
-Submodules
-----------
+************
+ Submodules
+************
 
-pygerber.renderer.aperture\_manager module
-------------------------------------------
+*******************************************
+ pygerber.renderer.aperture_manager module
+*******************************************
 
 .. automodule:: pygerber.renderer.aperture_manager
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.renderer.apertureset module
-------------------------------------
+**************************************
+ pygerber.renderer.apertureset module
+**************************************
 
 .. automodule:: pygerber.renderer.apertureset
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.renderer.arc\_util\_mixin module
------------------------------------------
+*****************************************
+ pygerber.renderer.arc_util_mixin module
+*****************************************
 
 .. automodule:: pygerber.renderer.arc_util_mixin
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.renderer.spec module
------------------------------
+*******************************
+ pygerber.renderer.spec module
+*******************************
 
 .. automodule:: pygerber.renderer.spec
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: pygerber.renderer
    :members:

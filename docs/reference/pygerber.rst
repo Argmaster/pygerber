@@ -1,8 +1,10 @@
-pygerber package
-================
+##################
+ pygerber package
+##################
 
-Subpackages
------------
+*************
+ Subpackages
+*************
 
 .. toctree::
    :maxdepth: 4
@@ -12,83 +14,94 @@ Subpackages
    pygerber.tokens
    pygerber.validators
 
-Submodules
-----------
+************
+ Submodules
+************
 
-pygerber.API2D module
----------------------
+***********************
+ pygerber.API2D module
+***********************
 
 .. automodule:: pygerber.API2D
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.API3D module
----------------------
+***********************
+ pygerber.API3D module
+***********************
 
 .. automodule:: pygerber.API3D
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.cli module
--------------------
+*********************
+ pygerber.cli module
+*********************
 
 .. automodule:: pygerber.cli
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.constants module
--------------------------
+***************************
+ pygerber.constants module
+***************************
 
 .. automodule:: pygerber.constants
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.coparser module
-------------------------
+**************************
+ pygerber.coparser module
+**************************
 
 .. automodule:: pygerber.coparser
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.drawing\_state module
-------------------------------
+*******************************
+ pygerber.drawing_state module
+*******************************
 
 .. automodule:: pygerber.drawing_state
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.exceptions module
---------------------------
+****************************
+ pygerber.exceptions module
+****************************
 
 .. automodule:: pygerber.exceptions
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.mathclasses module
----------------------------
+*****************************
+ pygerber.mathclasses module
+*****************************
 
 .. automodule:: pygerber.mathclasses
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.tokenizer module
--------------------------
+***************************
+ pygerber.tokenizer module
+***************************
 
 .. automodule:: pygerber.tokenizer
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: pygerber
    :members:

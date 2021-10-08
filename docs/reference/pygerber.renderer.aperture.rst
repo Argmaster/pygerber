@@ -1,59 +1,68 @@
-pygerber.renderer.aperture package
-==================================
+####################################
+ pygerber.renderer.aperture package
+####################################
 
-Submodules
-----------
+************
+ Submodules
+************
 
-pygerber.renderer.aperture.aperture module
-------------------------------------------
+********************************************
+ pygerber.renderer.aperture.aperture module
+********************************************
 
 .. automodule:: pygerber.renderer.aperture.aperture
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.renderer.aperture.circular module
-------------------------------------------
+********************************************
+ pygerber.renderer.aperture.circular module
+********************************************
 
 .. automodule:: pygerber.renderer.aperture.circular
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.renderer.aperture.custom module
-----------------------------------------
+******************************************
+ pygerber.renderer.aperture.custom module
+******************************************
 
 .. automodule:: pygerber.renderer.aperture.custom
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.renderer.aperture.polygon module
------------------------------------------
+*******************************************
+ pygerber.renderer.aperture.polygon module
+*******************************************
 
 .. automodule:: pygerber.renderer.aperture.polygon
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.renderer.aperture.rectangular module
----------------------------------------------
+***********************************************
+ pygerber.renderer.aperture.rectangular module
+***********************************************
 
 .. automodule:: pygerber.renderer.aperture.rectangular
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.renderer.aperture.region module
-----------------------------------------
+******************************************
+ pygerber.renderer.aperture.region module
+******************************************
 
 .. automodule:: pygerber.renderer.aperture.region
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: pygerber.renderer.aperture
    :members:

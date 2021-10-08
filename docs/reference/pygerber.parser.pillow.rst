@@ -1,43 +1,50 @@
-pygerber.parser.pillow package
-==============================
+################################
+ pygerber.parser.pillow package
+################################
 
-Subpackages
------------
+*************
+ Subpackages
+*************
 
 .. toctree::
    :maxdepth: 4
 
    pygerber.parser.pillow.apertures
 
-Submodules
-----------
+************
+ Submodules
+************
 
-pygerber.parser.pillow.api module
----------------------------------
+***********************************
+ pygerber.parser.pillow.api module
+***********************************
 
 .. automodule:: pygerber.parser.pillow.api
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.parser.pillow.cli module
----------------------------------
+***********************************
+ pygerber.parser.pillow.cli module
+***********************************
 
 .. automodule:: pygerber.parser.pillow.cli
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.parser.pillow.parser module
-------------------------------------
+**************************************
+ pygerber.parser.pillow.parser module
+**************************************
 
 .. automodule:: pygerber.parser.pillow.parser
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: pygerber.parser.pillow
    :members:

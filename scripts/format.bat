@@ -4,3 +4,4 @@ isort examples
 black src
 black tests
 black examples
+rstfmt docs

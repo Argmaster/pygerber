@@ -1,8 +1,10 @@
-pygerber.parser package
-=======================
+#########################
+ pygerber.parser package
+#########################
 
-Subpackages
------------
+*************
+ Subpackages
+*************
 
 .. toctree::
    :maxdepth: 4
@@ -10,27 +12,31 @@ Subpackages
    pygerber.parser.blender
    pygerber.parser.pillow
 
-Submodules
-----------
+************
+ Submodules
+************
 
-pygerber.parser.parser module
------------------------------
+*******************************
+ pygerber.parser.parser module
+*******************************
 
 .. automodule:: pygerber.parser.parser
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.parser.project\_spec module
-------------------------------------
+*************************************
+ pygerber.parser.project_spec module
+*************************************
 
 .. automodule:: pygerber.parser.project_spec
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: pygerber.parser
    :members:

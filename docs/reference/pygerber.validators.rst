@@ -1,51 +1,59 @@
-pygerber.validators package
-===========================
+#############################
+ pygerber.validators package
+#############################
 
-Submodules
-----------
+************
+ Submodules
+************
 
-pygerber.validators.basic module
---------------------------------
+**********************************
+ pygerber.validators.basic module
+**********************************
 
 .. automodule:: pygerber.validators.basic
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.validators.conditional module
---------------------------------------
+****************************************
+ pygerber.validators.conditional module
+****************************************
 
 .. automodule:: pygerber.validators.conditional
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.validators.coordinate module
--------------------------------------
+***************************************
+ pygerber.validators.coordinate module
+***************************************
 
 .. automodule:: pygerber.validators.coordinate
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.validators.struct\_validator module
---------------------------------------------
+*********************************************
+ pygerber.validators.struct_validator module
+*********************************************
 
 .. automodule:: pygerber.validators.struct_validator
    :members:
    :undoc-members:
    :show-inheritance:
 
-pygerber.validators.validator module
-------------------------------------
+**************************************
+ pygerber.validators.validator module
+**************************************
 
 .. automodule:: pygerber.validators.validator
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
+*****************
+ Module contents
+*****************
 
 .. automodule:: pygerber.validators
    :members:
