@@ -70,6 +70,10 @@ Example JSON specfile
 
 .. literalinclude:: ../../tests/gerber/pillow/specfile.json
    :language: json
+<<<<<<< HEAD
+=======
+   :name: specfile.json
+>>>>>>> 3a25005dd3b68d7c0ae7d3f513678a44364b3f67
    :caption: tests/gerber/pillow/specfile.json
 
 ***************************
