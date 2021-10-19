@@ -23,7 +23,7 @@ project = "PyGerber"
 year = "2021"
 author = "Krzysztof Wiśniewski"
 copyright = "{0}, {1}".format(year, author)
-version = release = "1.0.0"
+version = release = "1.1.0"
 
 pygments_style = "trac"
 templates_path = ["."]

@@ -30,7 +30,7 @@ def fetch_requirements(file_path: str):
 
 
 NAME = "pygerber"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 LICENSE_NAME = "MIT"
 SHORT_DESCRIPTION = "Package for testing various development tools."
 LONG_DESCRIPTION = fetch_long_description()
