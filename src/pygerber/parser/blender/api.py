@@ -2,26 +2,17 @@
 from __future__ import annotations
 
 import os
-import sys
-from asyncio import Future
-from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-from typing import Dict
-from typing import List
+from typing import Dict, List
 
-from PyR3.shortcut.context import Objects
-from PyR3.shortcut.context import wipeScenes
+from PyR3.shortcut.context import Objects, wipeScenes
 from PyR3.shortcut.io import import_from
 from PyR3.shortcut.transform import Transform
 
-from pygerber.parser.project_spec import LayerSpecBase
-from pygerber.parser.project_spec import ProjectSpecBase
+from pygerber.parser.project_spec import LayerSpecBase, ProjectSpecBase
 
-from .parser import DEFAULT_LAYER_GREEN
-from .parser import LayerStructure
-from .parser import ParserWithBlender
+from .parser import DEFAULT_LAYER_GREEN, LayerStructure, ParserWithBlender
 
 THIN_THICKNESS = 0.04
 COPPER_THICKNESS = 0.78
@@ -112,7 +103,6 @@ class BlenderLayerSpec(LayerSpecBase):
             )
 
 
-
 class BlenderProjectSpec(ProjectSpecBase):
     ignore_deprecated: bool = True
     scale: float = 1.0
@@ -170,5 +160,3 @@ def _render_file_and_save(
     parser.parse_file(file_path)
     parser.save(save_path)
     return save_path, layer_structure
-
-

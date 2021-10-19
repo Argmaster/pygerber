@@ -1,5 +1,6 @@
-PyGerber API Reference
-======================
+##########
+ pygerber
+##########
 
 .. toctree::
    :maxdepth: 4

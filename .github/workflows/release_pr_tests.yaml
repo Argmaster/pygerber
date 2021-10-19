@@ -1,19 +1,16 @@
-name: Tests
+name: Pull request tests
 
 on:
+  pull_request:
+
   push:
     branches:
-      - main
-      - release-*
-  pull_request:
-    branches:
-      - main
-      - release-*
+      - develop
 
   workflow_dispatch:
 
 jobs:
-  build:
+  tests:
     runs-on: ubuntu-latest
 
     strategy:
@@ -29,26 +26,24 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install dependencies
+      - name: Install project external dependencies
         run: |
-          sudo apt update
-          sudo apt install libpulse0
           python -m pip install --upgrade pip
-          pip install tox
+          pip install tox coverage
 
-      - name: Tox -e clean
-        run: |
-          tox -e clean
-
-      - name: Tox -e check
+      - name: Check code quality
         run: |
           tox -e check
 
-      - name: Tox -e py39
+      - name: Run release tests
         run: |
-          tox -e py39
+          tox -e py39-release
+          coverage xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
           file: ./coverage.xml
+          flags: unittests
+          fail_ci_if_error: true
+          verbose: true

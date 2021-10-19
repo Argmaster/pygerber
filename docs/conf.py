@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import os
 
 extensions = [
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
@@ -15,6 +16,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_rtd_dark_mode",
 ]
+autosectionlabel_prefix_document = True
 source_suffix = ".rst"
 master_doc = "index"
 project = "PyGerber"
