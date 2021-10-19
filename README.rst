@@ -48,7 +48,8 @@ Overview
 PyGerber is a Python library for 2D and 3D rendering of Gerber X3 files.
 It is completely written in Python, and only dependencies are limiting its portability.
 
-**This package is a Free Software; it is released under MIT license**. Be aware that dependencies might be using different licenses.
+**This package is a Free Software; it is released under MIT license**.
+Be aware that dependencies might be using different licenses.
 
 PyGerber offers a CLI and API for Python to allow easy rendering of Gerber files.
 Parser was build with GBR X3 format in mind, however, it has extensive

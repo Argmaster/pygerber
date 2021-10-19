@@ -1,9 +1,10 @@
 ignore_deprecated = true
 [[layers]]
     file_path = "./tests/gerber/set/top_copper.grb"
-    [layers.material]
-        color = [40, 143, 40, 255]
+    [layers.structure]
         thickness = 0.78
+        [layers.structure.material]
+            color = [40, 143, 40, 255]
 [[layers]]
     file_path = "./tests/gerber/set/top_solder_mask.grb"
     material = "solder_mask"

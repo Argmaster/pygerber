@@ -7,7 +7,6 @@ from asyncio import Future
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 from typing import Dict
 from typing import List
 
@@ -110,7 +109,6 @@ class BlenderLayerSpec(LayerSpecBase):
             raise TypeError(
                 f"Invalid type of Layer Struture parameter, expected dict, got {structure.__class__.__qualname__}"
             )
-
 
 
 class BlenderProjectSpec(ProjectSpecBase):

@@ -21,3 +21,4 @@ Changelog
 * Added promised documentation for CLI
 * Added promised documentation for project specfiles
 * Fixed RTD python version requirement building issue
+* Package is not Python 3.9.* only
