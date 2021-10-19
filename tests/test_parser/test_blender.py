@@ -2,19 +2,19 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest import TestCase
-from unittest import main
+from unittest import TestCase, main
 
 from PyR3.shortcut.io import export_to
 
-from pygerber.API3D import render_file
-from pygerber.API3D import render_file_and_save
-from pygerber.API3D import render_from_json
-from pygerber.API3D import render_from_spec
-from pygerber.API3D import render_from_toml
-from pygerber.API3D import render_from_yaml
-from pygerber.parser.blender.api import BlenderProjectSpec
-from pygerber.parser.blender.api import _skip_next_render
+from pygerber.API3D import (
+    render_file,
+    render_file_and_save,
+    render_from_json,
+    render_from_spec,
+    render_from_toml,
+    render_from_yaml,
+)
+from pygerber.parser.blender.api import BlenderProjectSpec, _skip_next_render
 from pygerber.parser.blender.parser import ParserWithBlender
 
 TESTS_FOLDER = Path(__file__).parent.parent

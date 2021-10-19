@@ -6,13 +6,11 @@ from typing import Tuple
 
 from PIL import ImageDraw
 
-from pygerber.mathclasses import BoundingBox
-from pygerber.mathclasses import Vector2D
+from pygerber.mathclasses import BoundingBox, Vector2D
 from pygerber.parser.pillow.apertures.arc_mixin import ArcUtilMixinPillow
 from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 from pygerber.renderer.aperture import RectangularAperture
-from pygerber.renderer.spec import ArcSpec
-from pygerber.renderer.spec import LineSpec
+from pygerber.renderer.spec import ArcSpec, LineSpec
 
 
 class PillowRectangle(ArcUtilMixinPillow, FlashUtilMixin, RectangularAperture):

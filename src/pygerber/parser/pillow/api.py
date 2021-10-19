@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import os
 import sys
-from concurrent.futures import Future
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import Future, ProcessPoolExecutor
 from dataclasses import dataclass
-from typing import Any
-from typing import Dict
-from typing import List
+from typing import Dict, List
 
 from PIL import Image
 
 import pygerber
-from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_GREEN
-from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_ORANGE
-from pygerber.parser.pillow.parser import ColorSet
-from pygerber.parser.pillow.parser import ParserWithPillow
-from pygerber.parser.project_spec import LayerSpecBase
-from pygerber.parser.project_spec import ProjectSpecBase
+from pygerber.parser.pillow.parser import (
+    DEFAULT_COLOR_SET_GREEN,
+    DEFAULT_COLOR_SET_ORANGE,
+    ColorSet,
+    ParserWithPillow,
+)
+from pygerber.parser.project_spec import LayerSpecBase, ProjectSpecBase
 
 NAMED_COLORS = {
     "silk": ColorSet((255, 255, 255, 255)),

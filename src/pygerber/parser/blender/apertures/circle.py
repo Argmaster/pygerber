@@ -1,22 +1,16 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import math
-
 import bpy
 from PyR3.shortcut.context import Objects
-from PyR3.shortcut.mesh import addCircle
-from PyR3.shortcut.mesh import fromPyData
+from PyR3.shortcut.mesh import addCircle, fromPyData
 from PyR3.shortcut.transform import Transform
 
-from pygerber.mathclasses import Vector2D
-from pygerber.mathclasses import angle_from_zero
+from pygerber.mathclasses import Vector2D, angle_from_zero
 from pygerber.parser.blender.apertures.arc_mixin import ArcUtilMixinBlender
 from pygerber.parser.blender.apertures.flash_mixin import FlashUtilMixin
 from pygerber.renderer.aperture.circular import CircularAperture
-from pygerber.renderer.spec import ArcSpec
-from pygerber.renderer.spec import FlashSpec
-from pygerber.renderer.spec import LineSpec
+from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec
 
 
 class BlenderCircle(ArcUtilMixinBlender, FlashUtilMixin, CircularAperture):

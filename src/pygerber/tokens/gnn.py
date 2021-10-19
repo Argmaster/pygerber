@@ -7,8 +7,7 @@ from typing import TYPE_CHECKING
 from pygerber.constants import Unit
 from pygerber.validators.basic import Int
 
-from .token import Deprecated
-from .token import Token
+from .token import Deprecated, Token
 
 if TYPE_CHECKING:
     from pygerber.drawing_state import DrawingState

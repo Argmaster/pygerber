@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
-from pygerber.exceptions import ApertureSelectionError
-from pygerber.exceptions import InvalidSyntaxError
+from pygerber.exceptions import ApertureSelectionError, InvalidSyntaxError
 
 if TYPE_CHECKING:
     from pygerber.renderer import Renderer

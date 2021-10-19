@@ -2,13 +2,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import acos
-from math import floor
-from math import inf
-from math import sqrt
-from math import tau
-from typing import Dict
-from typing import Tuple
+from math import acos, floor, inf, sqrt, tau
+from typing import Dict, Tuple
 
 UNIT_MAP_TYPE = Dict[Tuple[float, float], str]
 

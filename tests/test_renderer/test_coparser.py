@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from unittest import TestCase
-from unittest import main
+from unittest import TestCase, main
 
 from pygerber.coparser import CoParser
 from pygerber.exceptions import FeatureNotSupportedError

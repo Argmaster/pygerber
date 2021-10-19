@@ -11,9 +11,7 @@ if TYPE_CHECKING:
 
 import re
 
-from pygerber.validators.basic import Float
-from pygerber.validators.basic import Int
-from pygerber.validators.basic import String
+from pygerber.validators.basic import Float, Int, String
 
 from .token import Token
 

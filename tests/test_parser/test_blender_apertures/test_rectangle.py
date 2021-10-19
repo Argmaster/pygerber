@@ -3,8 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest import TestCase
-from unittest import main
+from unittest import TestCase, main
 
 from PyR3.shortcut.context import wipeScenes
 from PyR3.shortcut.io import export_to

@@ -2,20 +2,20 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest import TestCase
-from unittest import main
+from unittest import TestCase, main
 
 from PIL import Image
 
-from pygerber.API2D import render_file
-from pygerber.API2D import render_file_and_save
-from pygerber.API2D import render_from_json
-from pygerber.API2D import render_from_spec
-from pygerber.API2D import render_from_toml
-from pygerber.API2D import render_from_yaml
+from pygerber.API2D import (
+    render_file,
+    render_file_and_save,
+    render_from_json,
+    render_from_spec,
+    render_from_toml,
+    render_from_yaml,
+)
 from pygerber.parser.pillow.api import PillowProjectSpec
-from pygerber.parser.pillow.parser import ImageSizeNullError
-from pygerber.parser.pillow.parser import ParserWithPillow
+from pygerber.parser.pillow.parser import ImageSizeNullError, ParserWithPillow
 from tests.testutils.pillow import are_images_similar
 
 TESTS_FOLDER = Path(__file__).parent.parent

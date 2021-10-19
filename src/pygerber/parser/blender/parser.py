@@ -6,13 +6,10 @@ from pathlib import Path
 from typing import Deque
 
 from PyR3.factory.fields.Unit import Length
-from PyR3.shortcut.context import Objects
-from PyR3.shortcut.context import wipeScenes
+from PyR3.shortcut.context import Objects, wipeScenes
 from PyR3.shortcut.io import export_to
-from PyR3.shortcut.material import new_node_material
-from PyR3.shortcut.material import update_BSDF_node
-from PyR3.shortcut.mesh import fromPyData
-from PyR3.shortcut.mesh import join
+from PyR3.shortcut.material import new_node_material, update_BSDF_node
+from PyR3.shortcut.mesh import fromPyData, join
 
 from pygerber.parser.blender.apertures.circle import BlenderCircle
 from pygerber.parser.blender.apertures.custom import BlenderCustom
@@ -33,7 +30,9 @@ class LayerStructure:
     def __init__(self, material: dict = None, thickness: float = 0.78) -> None:
         if material is not None:
             if not isinstance(material, dict):
-                raise TypeError(f"Structure's 'material' expected a dict, got {material.__class__.__qualname__}.")
+                raise TypeError(
+                    f"Structure's 'material' expected a dict, got {material.__class__.__qualname__}."
+                )
             self.material = material
             if "color" in self.material:
                 self.material["color"] = tuple(c / 255 for c in self.material["color"])

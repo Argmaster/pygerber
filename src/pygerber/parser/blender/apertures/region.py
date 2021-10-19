@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from typing import List
-from typing import Tuple
+from typing import List, Tuple
 
 from PyR3.shortcut.mesh import fromPyData
-from PyR3.shortcut.modifiers import Solidify
 
 from pygerber.parser.blender.apertures.arc_mixin import ArcUtilMixinBlender
 from pygerber.parser.blender.apertures.util import BlenderUtilMethods
 from pygerber.renderer.aperture.region import RegionApertureManager
-from pygerber.renderer.spec import ArcSpec
-from pygerber.renderer.spec import LineSpec
+from pygerber.renderer.spec import ArcSpec, LineSpec
 
 
 class BlenderRegion(ArcUtilMixinBlender, RegionApertureManager, BlenderUtilMethods):

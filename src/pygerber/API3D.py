@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any
-from typing import Dict
+from typing import Any, Dict
 
-from pygerber.parser.blender.parser import DEFAULT_LAYER_GREEN
-from pygerber.parser.blender.parser import LayerStructure
-from pygerber.parser.blender.parser import ParserWithBlender
+from pygerber.parser.blender.parser import (
+    DEFAULT_LAYER_GREEN,
+    LayerStructure,
+    ParserWithBlender,
+)
 
-from .parser.blender.api import BlenderProjectSpec
-from .parser.blender.api import _render_file_and_save
+from .parser.blender.api import BlenderProjectSpec, _render_file_and_save
 
 
 def render_from_spec(spec: Dict[str, Any]) -> None:

@@ -1,11 +1,11 @@
-
 .. image:: https://raw.githubusercontent.com/Argmaster/pygerber/main/docs/_static/project_logo.png
    :alt: Project Logo
    :align: center
 
-========
-Overview
-========
+##########
+ Overview
+##########
+
 .. image:: https://img.shields.io/github/license/Argmaster/pygerber
    :alt: Package License
    :target: https://pypi.org/project/pygerber
@@ -67,23 +67,26 @@ Overview
    :target: https://pypi.org/project/pygerber
 
 PyGerber is a Python library for 2D and 3D rendering of Gerber X3 files.
-It is completely written in Python, and only dependencies are limiting its portability.
+It is completely written in Python, and only dependencies are limiting
+its portability.
 
 **This package is a Free Software; it is released under MIT license**.
 Be aware that dependencies might be using different licenses.
 
-PyGerber offers a CLI and API for Python to allow easy rendering of Gerber files.
-Parser was build with GBR X3 format in mind, however, it has extensive
-support for older standards and deprecated features.
+PyGerber offers a CLI and API for Python to allow easy rendering of
+Gerber files. Parser was build with GBR X3 format in mind, however, it
+has extensive support for older standards and deprecated features.
 Package is using third party libraries for low level drawing and mesh
 creation.
 
-*PyGerber's parser was not mend to be used by package users, but there are no obstacles preventing
-you from using it. However, stability of the API is not guaranteed between minor releases (I'll do my
-best to make it stable among patches).*
+*PyGerber's parser was not mend to be used by package users, but there
+are no obstacles preventing you from using it. However, stability of the
+API is not guaranteed between minor releases (I'll do my best to make it
+stable among patches).*
 
-Installation
-============
+**************
+ Installation
+**************
 
 PyGerber is available on PyPI and can be obtained via pip
 
@@ -97,25 +100,32 @@ You can also install the in-development version from github with
 
    pip install https://github.com/Argmaster/pygerber/archive/main.zip
 
-Blender dependency issue mentioned in previous releases was resolved by using
-`PyR3 package <https://pypi.org/project/PyR3/>`_ which provides Blender.
-**However, blender has to be installed independently from package by calling PyR3.install_bpy script**::
+Blender dependency issue mentioned in previous releases was resolved by
+using `PyR3 package <https://pypi.org/project/PyR3/>`_ which provides
+Blender. **However, blender has to be installed independently from
+package by calling PyR3.install_bpy script**:
+
+.. code::
 
    python -m PyR3.install_bpy
 
 Before You try to use 3D rendering.
 
-Compatibility
-=============
+***************
+ Compatibility
+***************
 
 PyGerber officially runs on Python 3.9.* and only on this version.
 However it may be possible to run 2D rendering on other Python versions
 that are supported by Pillow.
 
-I'll consider bringing Python 3.8 3D rendering support, but no sooner than
-after implementation of full set of 3D rendering features and macros support.
+I'll consider bringing Python 3.8 3D rendering support, but no sooner
+than after implementation of full set of 3D rendering features and
+macros support.
 
-Documentation
-=============
+***************
+ Documentation
+***************
 
-Documentation of this library is available at https://pygerber.readthedocs.io/
+Documentation of this library is available at
+https://pygerber.readthedocs.io/

@@ -3,24 +3,18 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Deque
-from typing import List
-from typing import Tuple
+from typing import Deque, List, Tuple
 
 from pygerber.constants import Interpolation
 from pygerber.drawing_state import DrawingState
 from pygerber.exceptions import EndOfStream
-from pygerber.mathclasses import BoundingBox
-from pygerber.mathclasses import Vector2D
+from pygerber.mathclasses import BoundingBox, Vector2D
 from pygerber.tokens.token import Token
 
 from .aperture import RegionApertureManager
 from .aperture_manager import ApertureManager
 from .apertureset import ApertureSet
-from .spec import ArcSpec
-from .spec import FlashSpec
-from .spec import LineSpec
-from .spec import Spec
+from .spec import ArcSpec, FlashSpec, LineSpec, Spec
 
 DEBUG = False
 if DEBUG:
@@ -71,15 +65,12 @@ class Renderer:
     else:
 
         def render(self, token_stack: Deque[Token]) -> None:
-            total = len(token_stack)
-            current = 0
             try:
                 for token in token_stack:
                     token.alter_state(self.state)
                     token.pre_render(self)
                     token.render(self)
                     token.post_render(self)
-                    current += 1
             except EndOfStream:
                 return
 
