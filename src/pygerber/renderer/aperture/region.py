@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from abc import ABC
-from abc import abstractmethod
-from typing import List
-from typing import Tuple
+from abc import ABC, abstractmethod
+from typing import List, Tuple
 
 from pygerber.mathclasses import BoundingBox
 from pygerber.renderer.arc_util_mixin import ArcUtilMixin

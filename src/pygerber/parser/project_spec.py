@@ -3,12 +3,8 @@ from __future__ import annotations
 
 import json
 import os
-from abc import ABC
-from abc import abstractmethod
-from abc import abstractstaticmethod
-from typing import Any
-from typing import Dict
-from typing import Optional
+from abc import ABC, abstractmethod, abstractstaticmethod
+from typing import Any, Dict, Optional
 
 import toml
 import yaml

@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any
-from typing import Dict
+from typing import Any, Dict
 
 from PIL import Image
 
-from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_GREEN
-from pygerber.parser.pillow.parser import ColorSet
+from pygerber.parser.pillow.parser import DEFAULT_COLOR_SET_GREEN, ColorSet
 
-from .parser.pillow.api import PillowProjectSpec
-from .parser.pillow.api import _render_file
+from .parser.pillow.api import PillowProjectSpec, _render_file
 
 
 def render_from_spec(spec: Dict[str, Any]) -> Image.Image:

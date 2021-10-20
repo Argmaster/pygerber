@@ -1,26 +1,35 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
 from pathlib import Path
-from unittest import TestCase
-from unittest import main
+from unittest import TestCase, main
 
 from PIL import Image
 
-from pygerber.API2D import render_file
-from pygerber.API2D import render_file_and_save
-from pygerber.API2D import render_from_json
-from pygerber.API2D import render_from_spec
-from pygerber.API2D import render_from_toml
-from pygerber.API2D import render_from_yaml
+from pygerber.API2D import (
+    render_file,
+    render_file_and_save,
+    render_from_json,
+    render_from_spec,
+    render_from_toml,
+    render_from_yaml,
+)
 from pygerber.parser.pillow.api import PillowProjectSpec
-from pygerber.parser.pillow.parser import ImageSizeNullError
-from pygerber.parser.pillow.parser import ParserWithPillow
+from pygerber.parser.pillow.parser import ImageSizeNullError, ParserWithPillow
 from tests.testutils.pillow import are_images_similar
 
 TESTS_FOLDER = Path(__file__).parent.parent
 RENDERED_PATH = TESTS_FOLDER / Path("gerber/rendered")
 GERBER_PATH = TESTS_FOLDER / Path("gerber")
+
+
+def show_if_release(image):
+    if os.environ.get("PYDEV") is None:
+        try:
+            image.show()
+        except Exception:
+            pass
 
 
 class TestPillowParser(TestCase):
@@ -38,8 +47,6 @@ class TestPillowParser(TestCase):
         parser = ParserWithPillow()
         parser.parse(self.SOURCE_0)
         image = parser.get_image()
-        # to manually validate output uncomment this:
-        # image.show()
         # to create new comparison image uncomment this:
         image.save(RENDERED_PATH / "SOURCE_0.png")
         self.assertTrue(
@@ -62,16 +69,10 @@ class TestPillowParser(TestCase):
         render_file_and_save(GERBER_PATH / "s0.grb", RENDERED_PATH / "s0_0.png")
 
     def render_file_optional_show_and_save(
-        self,
-        filename: str,
-        fulltest: bool = False,
-        show: bool = False,
-        save: bool = False,
-        **kwargs
+        self, filename: str, fulltest: bool = False, save: bool = False, **kwargs
     ):
         image = render_file(GERBER_PATH / filename, **kwargs)
-        if show:
-            image.show()
+        show_if_release(image)
         if save:
             image.save(RENDERED_PATH / (filename.split(".")[0] + ".png"))
         if fulltest:
@@ -80,28 +81,28 @@ class TestPillowParser(TestCase):
             self.assertTrue(are_images_similar(Image.open(filepath), image, 0.01, 0.01))
 
     def test_parser_file_0(self):
-        self.render_file_optional_show_and_save("s0.grb", True, True, True, dpi=1600)
+        self.render_file_optional_show_and_save("s0.grb", True, True, dpi=1600)
 
     def test_parser_file_1(self):
-        self.render_file_optional_show_and_save("s1.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s1.grb", False, False, dpi=1600)
 
     def test_parser_file_2(self):
-        self.render_file_optional_show_and_save("s2.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s2.grb", False, False, dpi=1600)
 
     def test_parser_file_3(self):
-        self.render_file_optional_show_and_save("s3.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s3.grb", False, False, dpi=1600)
 
     def test_parser_file_4(self):
-        self.render_file_optional_show_and_save("s4.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s4.grb", False, False, dpi=1600)
 
     def test_parser_file_5(self):
-        self.render_file_optional_show_and_save("s5.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s5.grb", False, False, dpi=1600)
 
     def test_parser_file_6(self):
-        self.render_file_optional_show_and_save("s6.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s6.grb", False, False, dpi=1600)
 
     def test_parser_file_7(self):
-        self.render_file_optional_show_and_save("s7.grb", False, False, False, dpi=1600)
+        self.render_file_optional_show_and_save("s7.grb", False, False, dpi=1600)
 
 
 def get_test_spec():
@@ -158,43 +159,43 @@ class PillowProjectSpecTest(TestCase):
 
     def test_load(self):
         image = PillowProjectSpec(get_test_spec()).render()
-        # image.show()
+        show_if_release(image)
 
     def test_from_json(self):
         image = PillowProjectSpec.from_json(
             GERBER_PATH / "pillow" / "specfile.json"
         ).render()
-        # image.show()
+        show_if_release(image)
 
     def test_from_yaml(self):
         image = PillowProjectSpec.from_yaml(
             GERBER_PATH / "pillow" / "specfile.yaml"
         ).render()
-        # image.show()
+        show_if_release(image)
 
     def test_from_toml(self):
         image = PillowProjectSpec.from_toml(
             GERBER_PATH / "pillow" / "specfile.toml"
         ).render()
-        # image.show()
+        show_if_release(image)
 
 
 class TestAPI(TestCase):
     def test_render_from_spec(self):
         image = render_from_spec(get_test_spec())
-        # image.show()
+        show_if_release(image)
 
     def test_render_from_json(self):
         image = render_from_json(GERBER_PATH / "pillow" / "specfile.json")
-        # image.show()
+        show_if_release(image)
 
     def test_render_from_yaml(self):
         image = render_from_yaml(GERBER_PATH / "pillow" / "specfile.yaml")
-        # image.show()
+        show_if_release(image)
 
     def test_render_from_toml(self):
         image = render_from_toml(GERBER_PATH / "pillow" / "specfile.toml")
-        # image.show()
+        show_if_release(image)
 
 
 if __name__ == "__main__":

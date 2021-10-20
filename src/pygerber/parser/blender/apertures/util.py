@@ -4,8 +4,7 @@ from __future__ import annotations
 import bpy
 from PyR3.shortcut.context import Objects
 from PyR3.shortcut.material import set_material
-from PyR3.shortcut.modifiers import Boolean
-from PyR3.shortcut.modifiers import Solidify
+from PyR3.shortcut.modifiers import Boolean, Solidify
 
 from pygerber.constants import Polarity
 from pygerber.renderer import Renderer

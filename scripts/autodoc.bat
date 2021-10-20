@@ -1,2 +1,2 @@
-sphinx-apidoc -o docs/reference ./src/pygerber -f --implicit-namespaces -e
+sphinx-apidoc -o docs/reference ./src/pygerber -f
 tox -e docs

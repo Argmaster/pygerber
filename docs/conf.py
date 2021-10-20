@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import os
 
 extensions = [
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
@@ -15,13 +16,14 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_rtd_dark_mode",
 ]
+autosectionlabel_prefix_document = True
 source_suffix = ".rst"
 master_doc = "index"
 project = "PyGerber"
 year = "2021"
 author = "Krzysztof Wiśniewski"
 copyright = "{0}, {1}".format(year, author)
-version = release = "1.0.0"
+version = release = "1.1.0"
 
 pygments_style = "trac"
 templates_path = ["."]

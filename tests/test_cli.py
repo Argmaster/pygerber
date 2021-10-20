@@ -2,8 +2,7 @@
 from __future__ import annotations
 
 import os
-from unittest import TestCase
-from unittest import main
+from unittest import TestCase, main
 
 
 class TestCLI(TestCase):

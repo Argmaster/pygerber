@@ -3,8 +3,7 @@ from __future__ import annotations
 
 import re
 from types import SimpleNamespace
-from typing import TYPE_CHECKING
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 from pygerber.tokens.dispatcher_meta import Dispatcher
 
@@ -13,7 +12,6 @@ if TYPE_CHECKING:
     from pygerber.tokens.token import Token
 
 from pygerber.exceptions import InvalidCommandFormat
-from pygerber.exceptions import InvalidSyntaxError
 
 from .validator import Validator
 

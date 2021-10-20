@@ -11,7 +11,6 @@ from pygerber.parser.pillow.apertures.flash_line_mixin import FlashLineMixin
 from pygerber.parser.pillow.apertures.flash_mixin import FlashUtilMixin
 from pygerber.renderer.aperture import PolygonAperture
 from pygerber.renderer.spec import ArcSpec
-from pygerber.renderer.spec import LineSpec
 
 
 class PillowPolygon(

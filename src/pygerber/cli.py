@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from argparse import ArgumentParser
-from argparse import _ArgumentGroup
-from argparse import _MutuallyExclusiveGroup
+from argparse import ArgumentParser, _ArgumentGroup, _MutuallyExclusiveGroup
 from pathlib import Path
 
 from .parser.pillow.cli import handle_pillow_cli

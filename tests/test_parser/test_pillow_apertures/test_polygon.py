@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from unittest import TestCase
-from unittest import main
+from unittest import TestCase, main
 
 from PIL import Image
 
-from pygerber.constants import Interpolation
-from pygerber.constants import Polarity
+from pygerber.constants import Interpolation, Polarity
 from pygerber.mathclasses import Vector2D
-from pygerber.renderer.spec import ArcSpec
-from pygerber.renderer.spec import FlashSpec
-from pygerber.renderer.spec import LineSpec
-from tests.testutils.pillow import get_pillow_initialized_renderer
-from tests.testutils.pillow import get_pillow_polygon
+from pygerber.renderer.spec import ArcSpec, FlashSpec, LineSpec
+from tests.testutils.pillow import get_pillow_initialized_renderer, get_pillow_polygon
 
 
 class TestPillowPolygon(TestCase):

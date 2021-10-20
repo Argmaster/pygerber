@@ -1,0 +1,65 @@
+name: Release draft
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Merge main -> develop
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: main
+          target_branch: develop
+          github_token: ${{ github.token }}
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install project external dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox
+
+      - name: Fetch version numbers
+        id: version_tag
+        run: |
+          echo ::set-output name=version_tag::$(python -m scripts.version_tag)
+
+      - name: Add git version tag
+        uses: mathieudutour/github-tag-action@v5.6
+        id: tag_ops
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag: ${{ steps.version_tag.outputs.version_tag }}
+
+      - name: Build release source dist and wheel
+        run: |
+          tox -e build-release
+
+      - name: Auto-generate release notes
+        id: release_notes
+        run: |
+          python -m scripts.get_release_notes --file "RELEASE_NOTES_FILE.md"
+
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1.8.10
+        with:
+          tag: ${{ steps.tag_ops.outputs.new_tag }}
+          name: Release ${{ steps.tag_ops.outputs.new_tag }}
+          bodyFile: "./RELEASE_NOTES_FILE.md"
+          artifacts: "dist/*.whl,dist/*.tar.gz"

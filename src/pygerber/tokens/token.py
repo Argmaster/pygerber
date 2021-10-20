@@ -10,7 +10,6 @@ if TYPE_CHECKING:
 import re
 
 from pygerber.mathclasses import BoundingBox
-from pygerber.mathclasses import Vector2D
 
 from .dispatcher_meta import Dispatcher
 

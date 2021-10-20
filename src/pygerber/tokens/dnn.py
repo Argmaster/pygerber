@@ -11,8 +11,7 @@ from pygerber.validators.coordinate import Coordinate
 if TYPE_CHECKING:
     from pygerber.renderer import Renderer
 
-from .token import Deprecated
-from .token import Token
+from .token import Deprecated, Token
 
 CO_PATTERN = r"[-+]?[0-9]+"
 

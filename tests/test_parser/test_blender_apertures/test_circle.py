@@ -3,16 +3,14 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import SimpleNamespace
-from unittest import TestCase
-from unittest import main
+from unittest import TestCase, main
 
 from PyR3.shortcut.context import wipeScenes
 from PyR3.shortcut.io import export_to
 
 from pygerber.mathclasses import Vector2D
 from pygerber.parser.blender.apertures.circle import BlenderCircle
-from pygerber.renderer.spec import FlashSpec
-from pygerber.renderer.spec import LineSpec
+from pygerber.renderer.spec import FlashSpec, LineSpec
 from tests.testutils.blender import get_dummy_renderer
 
 TEMP_LOCAL = Path(__file__).parent / ".temp"

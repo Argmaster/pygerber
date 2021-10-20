@@ -3,9 +3,7 @@ from __future__ import annotations
 
 import os
 
-from pygerber.API2D import render_from_json
-from pygerber.API2D import render_from_toml
-from pygerber.API2D import render_from_yaml
+from pygerber.API2D import render_from_json, render_from_toml, render_from_yaml
 from pygerber.mathclasses import format_bytes
 from pygerber.parser.pillow.api import _skip_next_render
 

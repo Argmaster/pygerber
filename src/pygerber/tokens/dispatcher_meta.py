@@ -3,10 +3,7 @@ from __future__ import annotations
 
 from abc import ABCMeta
 from inspect import isclass
-from typing import TYPE_CHECKING
-from typing import Dict
-from typing import Tuple
-from typing import Type
+from typing import TYPE_CHECKING, Dict, Tuple, Type
 
 if TYPE_CHECKING:
     from pygerber.drawing_state import DrawingState
