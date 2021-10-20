@@ -28,7 +28,7 @@
 
 .. image:: https://img.shields.io/github/v/release/Argmaster/pygerber?style=flat
    :alt: GitHub release (latest by date)
-   :target: https://github.com/Argmaster/pygerber/releases/tag/v1.0.0
+   :target: https://github.com/Argmaster/pygerber/releases/tag/1.1.0
 
 .. image:: https://img.shields.io/github/commit-activity/m/Argmaster/pygerber
    :alt: GitHub commit activity
