@@ -34,7 +34,7 @@ def generate_release_notes(version: str = "last"):
     if prev_last_version is not None and last_version is not None:
         link = (
             f"*Full list of changes:* [v{prev_last_version}...v{last_version}]"
-            f"(https://github.com/Argmaster/test-project/compare/v{prev_last_version}...v{last_version})"
+            f"(https://github.com/Argmaster/pygerber/compare/v{prev_last_version}...v{last_version})"
         )
     else:
         link = ""
