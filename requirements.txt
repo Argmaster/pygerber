@@ -1,4 +1,3 @@
--r docs/requirements.txt
 -r src/requirements.txt
 pytest==6.2.4
 pytest-cov==3.0.0
