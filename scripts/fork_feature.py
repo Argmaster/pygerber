@@ -16,7 +16,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
 def main():
     args = parse_args(sys.argv[1:])
     create_develop_if_not_exists()
-    subprocess.run(["git", "checkout", "-b", f"feature-{args.feature_name}", "main"])
+    subprocess.run(["git", "checkout", "-b", f"feature-{args.feature_name}", "develop"])
 
 
 if __name__ == "__main__":
