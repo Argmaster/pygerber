@@ -1,0 +1,10 @@
+**/*.min.js
+**/*min.css
+/.tox
+/.git
+/.env
+/.venv
+/coverage
+/dist
+/.venv
+**/data/*
