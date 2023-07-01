@@ -20,8 +20,8 @@ ruff = "^0.0.275"
 jinja2 = "^3.1.2"
 pyyaml = "^6.0"
 tox = "^4.6.3"
-docformatter = "^1.7.3"
 pre-commit = "^3.3.3"
+autoflake = "^2.2.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -52,7 +52,7 @@ extend-exclude = '\.pyi?$'
 
 [tool.ruff]
 select = ["ALL"]
-ignore = ["D203", "D205", "D213"]
+ignore = ["ANN401", "ANN101", "ANN102", "D203", "D205", "D213"]
 show-fixes = true
 target-version = "py38"
 

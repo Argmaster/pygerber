@@ -1,5 +1,20 @@
 {
-    "cSpell.words": ["dockerfiles"],
+    "cSpell.words": [
+        "alphanums",
+        "AMTHERMAL",
+        "dockerfiles",
+        "EOEX",
+        "EOSTMT",
+        "FSLAX",
+        "gerberx",
+        "MOMM",
+        "obround",
+        "pygerber",
+        "pyparsing",
+        "SOSTMT",
+        "Ucamco"
+    ],
+    "python.testing.pytestArgs": ["--log-level=DEBUG", "-s"],
     "python.linting.mypyEnabled": true,
     "ruff.enable": true,
     "ruff.fixAll": true,
