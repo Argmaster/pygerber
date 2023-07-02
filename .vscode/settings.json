@@ -1,18 +1,15 @@
 {
     "cSpell.words": [
-        "alphanums",
-        "AMTHERMAL",
-        "dockerfiles",
+        "CMPN",
         "EOEX",
         "EOSTMT",
         "FSLAX",
         "gerberx",
         "MOMM",
-        "obround",
+        "pydantic",
         "pygerber",
         "pyparsing",
-        "SOSTMT",
-        "Ucamco"
+        "SOSTMT"
     ],
     "python.testing.pytestArgs": ["--log-level=DEBUG", "-s"],
     "python.linting.mypyEnabled": true,

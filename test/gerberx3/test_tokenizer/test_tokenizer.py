@@ -11,21 +11,35 @@ if TYPE_CHECKING:
 
 
 def test_tokenizer_sample_0(asset_loader: AssetLoader) -> None:
-    """Test tokenizer of sample 0 - two squares."""
+    """Test tokenizer of sample 0."""
     Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-0/source.grb").decode("utf-8"),
     )
 
 
 def test_tokenizer_sample_1(asset_loader: AssetLoader) -> None:
-    """Test tokenizer of sample 1 - two squares."""
+    """Test tokenizer of sample 1."""
     Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-1/source.grb").decode("utf-8"),
     )
 
 
 def test_tokenizer_sample_2(asset_loader: AssetLoader) -> None:
-    """Test tokenizer of sample 2 - two squares."""
+    """Test tokenizer of sample 2."""
     Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-2/source.grb").decode("utf-8"),
+    )
+
+
+def test_tokenizer_sample_3(asset_loader: AssetLoader) -> None:
+    """Test tokenizer of sample 3."""
+    Tokenizer().tokenize(
+        asset_loader.load_asset("gerberx3/basic/sample-3/source.grb").decode("utf-8"),
+    )
+
+
+def test_tokenizer_sample_4(asset_loader: AssetLoader) -> None:
+    """Test tokenizer of sample 4."""
+    Tokenizer().tokenize(
+        asset_loader.load_asset("gerberx3/basic/sample-4/source.grb").decode("utf-8"),
     )

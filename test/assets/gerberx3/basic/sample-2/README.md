@@ -1,6 +1,6 @@
-# Example: Two Square Boxes
+# Example: Polarities and Apertures
 
 Example 2.11.2 from Ucamco's `The Gerber Layer Format Specification - Revision 2023.03`.
-As a outcome of code from this example, two square boxes are expected to be created.
+This example illustrates the use of polarities and various apertures.
 
 ![multiple orange shapes on black background](image.png)

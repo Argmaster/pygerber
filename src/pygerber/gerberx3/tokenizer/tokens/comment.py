@@ -9,10 +9,10 @@ from pygerber.gerberx3.tokenizer.tokens.token import Token
 class Comment(Token):
     """Comment token."""
 
-    def __init__(self, content: str) -> None:
+    def __init__(self, string: str) -> None:
         """Initialize token object."""
         super().__init__()
-        self.content = content
+        self.content = string
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
