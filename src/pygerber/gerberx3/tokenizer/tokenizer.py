@@ -6,7 +6,12 @@ Specification`.
 """
 from __future__ import annotations
 
-from pygerber.gerberx3.tokenizer._grammar import GRAMMAR
+from typing import TYPE_CHECKING, Iterator
+
+from pygerber.gerberx3.tokenizer.grammar import GRAMMAR
+
+if TYPE_CHECKING:
+    from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 
 class Tokenizer:
@@ -17,6 +22,23 @@ class Tokenizer:
         self.grammar = GRAMMAR
         self.strict = strict
 
-    def tokenize(self, source: str):
+    def tokenize(self, source: str) -> TokenStack:
+        """Convert source code into token stream."""
+        tokens: list[Token] = []
+
         for token in self.grammar.parse_string(source, parse_all=self.strict):
-            print(token, type(token))
+            tokens.append(token)
+
+        return TokenStack(tokens)
+
+
+class TokenStack:
+    """Token stack wrapper."""
+
+    def __init__(self, tokens: list[Token]) -> None:
+        """Initialize token stack."""
+        self.stack: list[Token] = tokens
+
+    def __iter__(self) -> Iterator[Token]:
+        """Acquire token stack iterator."""
+        return iter(self.stack)

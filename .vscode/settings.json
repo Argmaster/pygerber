@@ -5,11 +5,14 @@
         "EOSTMT",
         "FSLAX",
         "gerberx",
+        "metainformation",
         "MOMM",
+        "Obround",
         "pydantic",
         "pygerber",
         "pyparsing",
-        "SOSTMT"
+        "SOSTMT",
+        "Ucamco's"
     ],
     "python.testing.pytestArgs": ["--log-level=DEBUG", "-s"],
     "python.linting.mypyEnabled": true,

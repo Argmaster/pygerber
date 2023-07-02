@@ -1,8 +1,6 @@
 """GerberX3 grammar."""
 from __future__ import annotations
 
-from pygerber.gerberx3.tokenizer.tokens.comment import Comment
-from pygerber.gerberx3.tokenizer.tokens.coordinate_format import CoordinateFormat
 from pyparsing import (
     CharsNotIn,
     Combine,
@@ -20,12 +18,29 @@ from pyparsing import (
     oneOf,
 )
 
+from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import ADDefineAperture
+from pygerber.gerberx3.tokenizer.tokens.comment import Comment
+from pygerber.gerberx3.tokenizer.tokens.coordinate_format import CoordinateFormat
+from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
+from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
+from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
+from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import DNNSelectAperture
+from pygerber.gerberx3.tokenizer.tokens.g01_set_linear import G01SetLinear
+from pygerber.gerberx3.tokenizer.tokens.g02_set_clockwise_circular import (
+    G02SetClockwiseCircular,
+)
+from pygerber.gerberx3.tokenizer.tokens.g03_set_counterclockwise_circular import (
+    G03SetCounterclockwiseCircular,
+)
+from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
+
 EOEX = Suppress(Literal("*"))  # End of expression.
 SOSTMT = Suppress(Literal("%"))  # Start of statement.
 EOSTMT = Suppress(Literal("*%"))  # End of statement.
 
 
 def wrap_statement(expr: ParserElement) -> ParserElement:
+    """Wrap statement in start of statement (%) and end of statement (*%) symbols."""
     return SOSTMT + expr + EOSTMT
 
 
@@ -39,9 +54,11 @@ decimal = Combine(
     Opt(oneOf("+ -")) + (Opt(Word(nums)) + "." + Opt(Word(nums)) | Word(nums)),
 )
 
-aperture_identifier = Combine(
-    "D" + Word(nums).set_parse_action(lambda t: int(t[0])),
-).set_name("aperture identifier")
+aperture_identifier = (
+    Combine("D" + Regex(r"[1-9][0-9]+"))
+    .set_name("aperture identifier")
+    .set_results_name("aperture_identifier")
+)
 
 name = Regex(r"[._a-zA-Z$][._a-zA-Z0-9]*").set_name("name")
 user_name = Regex(r"/[_a-zA-Z$][._a-zA-Z0-9]*/").set_name("user name")
@@ -99,65 +116,114 @@ macro_body = OneOrMore(primitive | variable_definition | G04)
 # Defines a macro aperture template.
 AM = Literal("%AM") + name + EOEX + macro_body + "%"
 
+
+am_param = decimal.set_results_name("am_param", list_all_matches=True)
 # Defines a template-based aperture, assigns a D code to it.
-AD = wrap_statement(
-    Literal("AD")
-    + aperture_identifier
-    + Group(
-        (Literal("C") + "," + decimal + Opt("X" + decimal))
-        | (Literal("R") + "," + decimal + "X" + decimal + Opt("X" + decimal))
-        | (Literal("O") + "," + decimal + "X" + decimal + Opt("X" + decimal))
-        | (
-            Literal("P")
-            + ","
-            + decimal
-            + "X"
-            + decimal
-            + Opt("X" + decimal + Opt("X" + decimal))
-        )
-        | (name + Opt("," + decimal + ZeroOrMore("X" + decimal))),
+AD = ADDefineAperture.wrap(
+    wrap_statement(
+        Literal("AD")
+        + aperture_identifier
+        + (
+            (
+                Literal("C").set_results_name("aperture_type")
+                + ","
+                + decimal.set_results_name("diameter")
+                + Opt("X" + decimal.set_results_name("hole_diameter"))
+            )
+            | (
+                Literal("R").set_results_name("aperture_type")
+                + ","
+                + decimal.set_results_name("x_size")
+                + "X"
+                + decimal.set_results_name("y_size")
+                + Opt("X" + decimal.set_results_name("hole_diameter"))
+            )
+            | (
+                Literal("O").set_results_name("aperture_type")
+                + ","
+                + decimal.set_results_name("x_size")
+                + "X"
+                + decimal.set_results_name("y_size")
+                + Opt("X" + decimal.set_results_name("hole_diameter"))
+            )
+            | (
+                Literal("P").set_results_name("aperture_type")
+                + ","
+                + decimal.set_results_name("outer_diameter")
+                + "X"
+                + decimal.set_results_name("number_of_vertices")
+                + Opt(
+                    "X"
+                    + decimal.set_results_name("rotation")
+                    + Opt("X" + decimal.set_results_name("hole_diameter")),
+                )
+            )
+            | (
+                name.set_results_name("aperture_type")
+                + Opt("," + am_param + ZeroOrMore("X" + am_param))
+            )
+        ),
     ),
 )
 
 # Loads the scale object transformation parameter.
-LS = wrap_statement(Literal("LS") + decimal)
+LS = wrap_statement(Literal("LS") + decimal.set_results_name("scale"))
 # Loads the rotation object transformation parameter.
-LR = wrap_statement(Literal("LR") + decimal)
+LR = wrap_statement(Literal("LR") + decimal.set_results_name("rotation"))
 # Loads the mirror object transformation parameter.
-LM = wrap_statement(Literal("LM") + oneOf("N XY Y X"))
+LM = wrap_statement(Literal("LM") + oneOf("N XY Y X").set_results_name("mirroring"))
 # Loads the polarity object transformation parameter.
-LP = wrap_statement(Literal("LP") + oneOf("C D"))
+LP = wrap_statement(Literal("LP") + oneOf("C D").set_results_name("polarity"))
 
 # End of file.
-M02 = Literal("M02") + EOEX
-Dnn = aperture_identifier + EOEX
+M02 = M02EndOfFile.wrap(Literal("M02") + EOEX)
+# Sets the current aperture to D code nn.
+DNN = DNNSelectAperture.wrap(
+    aperture_identifier + EOEX,
+)
 
-# A G75 must be called before creating the first arc.
-G75 = Literal("G75") + EOEX
+# A G75 must be called before creating the first arc for backwards compatibility,
+# but we will ignore that, as it has no real impact on drawing.
+G75 = Suppress(Literal("G75") + EOEX)
 # Sets linear/circular mode to counterclockwise circular.
-G03 = Literal("G03") + EOEX
+G03 = G03SetCounterclockwiseCircular.wrap(Literal("G03") + EOEX)
 # Sets linear/circular mode to clockwise circular.
-G02 = Literal("G02") + EOEX
+G02 = G02SetClockwiseCircular.wrap(Literal("G02") + EOEX)
 # Sets linear/circular mode to linear.
-G01 = Literal("G01") + EOEX
+G01 = G01SetLinear.wrap(Literal("G01") + EOEX)
 
 # Creates a flash object with the current aperture. The
 # current point is moved to the flash point.
-D03 = Opt(Literal("X") + integer) + Opt(Literal("Y") + integer) + "D03" + EOEX
+D03 = D03Flash.wrap(
+    Opt(Literal("X") + integer.set_results_name("x"))
+    + Opt(Literal("Y") + integer.set_results_name("y"))
+    + "D03"
+    + EOEX,
+)
 # D02 moves the current point to the coordinate in the
 # command. It does not create an object.
-D02 = Opt(Literal("X") + integer) + Opt(Literal("Y") + integer) + "D02" + EOEX
+D02 = D02Move.wrap(
+    Opt(Literal("X") + integer.set_results_name("x"))
+    + Opt(Literal("Y") + integer.set_results_name("y"))
+    + "D02"
+    + EOEX,
+)
 # Outside a region statement D01 creates a draw or arc
 # object with the current aperture. Inside it adds a draw/arc
 # segment to the contour under construction. The current
 # point is moved to draw/arc end point after the creation of
 # the draw/arc.
-D01 = (
-    Opt(Literal("X") + integer)
-    + Opt(Literal("Y") + integer)
-    + Opt(Literal("I") + integer + Literal("J") + integer)
+D01 = D01Draw.wrap(
+    Opt(Literal("X") + integer.set_results_name("x"))
+    + Opt(Literal("Y") + integer.set_results_name("y"))
+    + Opt(
+        Literal("I")
+        + integer.set_results_name("i")
+        + Literal("J")
+        + integer.set_results_name("j"),
+    )
     + "D01"
-    + EOEX
+    + EOEX,
 )
 
 coord_digits = Regex(r"[1-6][1-6]")
@@ -186,7 +252,7 @@ block <<= ZeroOrMore(
     G04
     | AD
     | AM
-    | Dnn
+    | DNN
     | D01
     | D02
     | D03
@@ -236,7 +302,7 @@ GRAMMAR = (
         | FS
         | AD
         | AM
-        | Dnn
+        | DNN
         | D01
         | D02
         | D03

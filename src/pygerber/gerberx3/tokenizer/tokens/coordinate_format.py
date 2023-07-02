@@ -6,6 +6,7 @@ from __future__ import annotations
 from enum import Enum
 
 from pydantic import BaseModel
+
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 
@@ -28,9 +29,11 @@ class CoordinateFormat(Token):
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
-        return f"%FS{self.zeros_mode.value}{self.coordinate_mode.value}\
-                X{self.x_format.integer}{self.x_format.decimal}\
-                Y{self.y_format.integer}{self.y_format.decimal}"
+        return (
+            f"%FS{self.zeros_mode.value}{self.coordinate_mode.value}"
+            f"X{self.x_format.integer}{self.x_format.decimal}"
+            f"Y{self.y_format.integer}{self.y_format.decimal}"
+        )
 
 
 class TrailingZerosMode(Enum):

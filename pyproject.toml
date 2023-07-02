@@ -23,6 +23,7 @@ pyyaml = "^6.0"
 tox = "^4.6.3"
 pre-commit = "^3.3.3"
 autoflake = "^2.2.0"
+isort = "^5.12.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -45,6 +46,9 @@ pre-commit = [
 ]
 # -------------------------------------------------------------------------------------
 
+[tool.isort]
+profile = "black"
+src_paths = ["src", "test"]
 
 [tool.black]
 line-length = 88
@@ -56,6 +60,7 @@ select = ["ALL"]
 ignore = ["ANN401", "ANN101", "ANN102", "D203", "D205", "D213"]
 show-fixes = true
 target-version = "py38"
+src = ["src", "test"]
 
 [tool.mypy] # ANCHOR: tool.mypy
 # ---------------------------------------------------------------------------- #
