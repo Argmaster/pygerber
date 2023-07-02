@@ -5,7 +5,7 @@ from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, Coordinate
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 
-class D03Flash(Token):
+class Flash(Token):
     """Wrapper for flash operation token.
 
     Creates a flash object with the current aperture. The current point is moved to the

@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
 
 
-class ADDefineAperture(Token):
+class DefineAperture(Token):
     """Wrapper for aperture definition token.
 
     Defines a template-based aperture, assigns a D code to it. This class is never used
@@ -42,7 +42,7 @@ class ADDefineAperture(Token):
         _string: str,
         _location: int,
         tokens: ParseResults,
-    ) -> ADDefineAperture:
+    ) -> DefineAperture:
         """Create instance of this class.
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
@@ -53,25 +53,25 @@ class ADDefineAperture(Token):
             raise TypeError(msg)
 
         if aperture_type == "C":
-            return ADDefineCircle(**tokens.as_dict())
+            return DefineCircle(**tokens.as_dict())
 
         if aperture_type == "R":
-            return ADDefineRectangle(**tokens.as_dict())
+            return DefineRectangle(**tokens.as_dict())
 
         if aperture_type == "O":
-            return ADDefineObround(**tokens.as_dict())
+            return DefineObround(**tokens.as_dict())
 
         if aperture_type == "P":
-            return ADDefinePolygon(**tokens.as_dict())
+            return DefinePolygon(**tokens.as_dict())
 
-        return ADDefineMacro(aperture_type=aperture_type, **tokens.as_dict())
+        return DefineMacro(aperture_type=aperture_type, **tokens.as_dict())
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         return "<ADDefineAperture-INVALID>"
 
 
-class ADDefineCircle(ADDefineAperture):
+class DefineCircle(DefineAperture):
     """Wrapper for aperture definition token.
 
     Defines a circle.
@@ -97,7 +97,7 @@ class ADDefineCircle(ADDefineAperture):
         return f"%AD{self.aperture_identifier}C,{self.diameter}{suffix}*%"
 
 
-class ADDefineRectangle(ADDefineAperture):
+class DefineRectangle(DefineAperture):
     """Wrapper for aperture definition token.
 
     Defines a rectangle
@@ -125,7 +125,7 @@ class ADDefineRectangle(ADDefineAperture):
         return f"%AD{self.aperture_identifier}R,{self.x_size}X{self.y_size}{suffix}*%"
 
 
-class ADDefineObround(ADDefineAperture):
+class DefineObround(DefineAperture):
     """Wrapper for aperture definition token.
 
     Defines a obround.
@@ -153,7 +153,7 @@ class ADDefineObround(ADDefineAperture):
         return f"%AD{self.aperture_identifier}O,{self.x_size}X{self.y_size}{suffix}*%"
 
 
-class ADDefinePolygon(ADDefineAperture):
+class DefinePolygon(DefineAperture):
     """Wrapper for aperture definition token.
 
     Defines a polygon.
@@ -164,7 +164,7 @@ class ADDefinePolygon(ADDefineAperture):
         aperture_identifier: str,
         outer_diameter: str,
         number_of_vertices: str,
-        rotation: str,
+        rotation: str | None = None,
         hole_diameter: str | None = None,
     ) -> None:
         """Initialize token object."""
@@ -172,7 +172,7 @@ class ADDefinePolygon(ADDefineAperture):
         self.aperture_identifier = aperture_identifier
         self.outer_diameter = float(outer_diameter)
         self.number_of_vertices = int(number_of_vertices)
-        self.rotation = float(rotation)
+        self.rotation = float(rotation) if rotation is not None else None
         self.hole_diameter = float(hole_diameter) if hole_diameter is not None else None
 
     def __str__(self) -> str:
@@ -186,7 +186,7 @@ class ADDefinePolygon(ADDefineAperture):
         )
 
 
-class ADDefineMacro(ADDefineAperture):
+class DefineMacro(DefineAperture):
     """Wrapper for aperture definition token.
 
     Defines a macro based aperture.
@@ -196,13 +196,13 @@ class ADDefineMacro(ADDefineAperture):
         self,
         aperture_type: str,
         aperture_identifier: str,
-        am_param: list[str],
+        am_param: list[str] | None = None,
     ) -> None:
         """Initialize token object."""
         super().__init__()
         self.aperture_type = aperture_type
         self.aperture_identifier = aperture_identifier
-        self.am_param = am_param
+        self.am_param = am_param if am_param is not None else []
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

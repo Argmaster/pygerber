@@ -5,7 +5,7 @@ from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, Coordinate
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 
-class D01Draw(Token):
+class Draw(Token):
     """Wrapper for plot operation token.
 
     Outside a region statement D01 creates a draw or arc object with the current

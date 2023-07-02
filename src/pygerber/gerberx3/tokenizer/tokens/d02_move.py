@@ -5,7 +5,7 @@ from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, Coordinate
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 
-class D02Move(Token):
+class Move(Token):
     """Wrapper for move operation token.
 
     D02 moves the current point to the coordinate in the command. No graphical object is

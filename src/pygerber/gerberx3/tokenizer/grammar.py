@@ -18,21 +18,39 @@ from pyparsing import (
     oneOf,
 )
 
-from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import ADDefineAperture
-from pygerber.gerberx3.tokenizer.tokens.comment import Comment
-from pygerber.gerberx3.tokenizer.tokens.coordinate_format import CoordinateFormat
-from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
-from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
-from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
+from pygerber.gerberx3.tokenizer.tokens.ab_block_aperture import (
+    BlockApertureBegin,
+    BlockApertureEnd,
+)
+from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import DefineAperture
+from pygerber.gerberx3.tokenizer.tokens.d01_draw import Draw
+from pygerber.gerberx3.tokenizer.tokens.d02_move import Move
+from pygerber.gerberx3.tokenizer.tokens.d03_flash import Flash
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import DNNSelectAperture
-from pygerber.gerberx3.tokenizer.tokens.g01_set_linear import G01SetLinear
-from pygerber.gerberx3.tokenizer.tokens.g02_set_clockwise_circular import (
-    G02SetClockwiseCircular,
+from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateFormat
+from pygerber.gerberx3.tokenizer.tokens.g0n_set_draw_mode import (
+    SetClockwiseCircular,
+    SetCounterclockwiseCircular,
+    SetLinear,
 )
-from pygerber.gerberx3.tokenizer.tokens.g03_set_counterclockwise_circular import (
-    G03SetCounterclockwiseCircular,
-)
+from pygerber.gerberx3.tokenizer.tokens.g04_comment import Comment
+from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
+from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
+from pygerber.gerberx3.tokenizer.tokens.lp_load_polarity import LoadPolarity
+from pygerber.gerberx3.tokenizer.tokens.lr_load_rotation import LoadRotation
+from pygerber.gerberx3.tokenizer.tokens.ls_load_scaling import LoadScaling
 from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
+from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import UnitMode
+from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
+    StepRepeatBegin,
+    StepRepeatEnd,
+)
+from pygerber.gerberx3.tokenizer.tokens.tx_attributes import (
+    ApertureAttribute,
+    DeleteAttribute,
+    FileAttribute,
+    ObjectAttribute,
+)
 
 EOEX = Suppress(Literal("*"))  # End of expression.
 SOSTMT = Suppress(Literal("%"))  # Start of statement.
@@ -63,7 +81,9 @@ aperture_identifier = (
 name = Regex(r"[._a-zA-Z$][._a-zA-Z0-9]*").set_name("name")
 user_name = Regex(r"/[_a-zA-Z$][._a-zA-Z0-9]*/").set_name("user name")
 string = CharsNotIn("%*").set_name("string")
-field = CharsNotIn("%*,").set_name("field")
+field = (
+    CharsNotIn("%*,").set_name("field").set_results_name("field", list_all_matches=True)
+)
 
 file_attribute_name = (
     oneOf(
@@ -71,34 +91,52 @@ file_attribute_name = (
         .GenerationSoftware .ProjectId .MD5",
     )
     | user_name
-)
-aperture_attribute_name = oneOf(".AperFunction .DrillTolerance .FlashText") | user_name
+).set_name("file_attribute_name")
+aperture_attribute_name = (
+    oneOf(".AperFunction .DrillTolerance .FlashText") | user_name
+).set_name("aperture_attribute_name")
 object_attribute_name = (
     oneOf(
         ".N .P .C .CRot .CMfr .CMPN .CVal .CMnt .CFtp .CPgN .CPgD .CHgt .CLbN\
         .CLbD .CSup",
     )
     | user_name
-)
+).set_name("object_attribute_name")
 # Set a file attribute.
-TF = Group(
-    SOSTMT + Literal("TF") + file_attribute_name + ZeroOrMore("," + field) + EOSTMT,
+TF = FileAttribute.wrap(
+    SOSTMT
+    + Literal("TF")
+    + file_attribute_name.set_results_name("file_attribute_name")
+    + ZeroOrMore("," + (field | ""))
+    + EOSTMT,
 )
 # Add an aperture attribute to the dictionary or modify it.
-TA = SOSTMT + Literal("TA") + aperture_attribute_name + ZeroOrMore("," + field) + EOSTMT
+TA = ApertureAttribute.wrap(
+    SOSTMT
+    + Literal("TA")
+    + aperture_attribute_name.set_results_name("aperture_attribute_name")
+    + ZeroOrMore("," + (field | ""))
+    + EOSTMT,
+)
 # Add an object attribute to the dictionary or modify it.
-TO = SOSTMT + Literal("TO") + object_attribute_name + ZeroOrMore("," + field) + EOSTMT
+TO = ObjectAttribute.wrap(
+    SOSTMT
+    + Literal("TO")
+    + object_attribute_name.set_results_name("object_attribute_name")
+    + ZeroOrMore("," + (field | ""))
+    + EOSTMT,
+)
 # Delete one or all attributes in the dictionary.
-TD = (
+TD = DeleteAttribute.wrap(
     SOSTMT
     + Literal("TD")
-    + (
+    + Opt(
         file_attribute_name
         | aperture_attribute_name
         | object_attribute_name
-        | user_name
-    )
-    + EOSTMT
+        | user_name,
+    ).set_results_name("attribute_name")
+    + EOSTMT,
 )
 
 macro_variable = Regex(r"\$[0-9]*[1-9][0-9]*")
@@ -119,7 +157,7 @@ AM = Literal("%AM") + name + EOEX + macro_body + "%"
 
 am_param = decimal.set_results_name("am_param", list_all_matches=True)
 # Defines a template-based aperture, assigns a D code to it.
-AD = ADDefineAperture.wrap(
+AD = DefineAperture.wrap(
     wrap_statement(
         Literal("AD")
         + aperture_identifier
@@ -167,16 +205,24 @@ AD = ADDefineAperture.wrap(
 )
 
 # Loads the scale object transformation parameter.
-LS = wrap_statement(Literal("LS") + decimal.set_results_name("scale"))
+LS = LoadScaling.wrap(
+    wrap_statement(Literal("LS") + decimal.set_results_name("scaling")),
+)
 # Loads the rotation object transformation parameter.
-LR = wrap_statement(Literal("LR") + decimal.set_results_name("rotation"))
+LR = LoadRotation.wrap(
+    wrap_statement(Literal("LR") + decimal.set_results_name("rotation")),
+)
 # Loads the mirror object transformation parameter.
-LM = wrap_statement(Literal("LM") + oneOf("N XY Y X").set_results_name("mirroring"))
+LM = LoadMirroring.wrap(
+    wrap_statement(Literal("LM") + oneOf("N XY Y X").set_results_name("mirroring")),
+)
 # Loads the polarity object transformation parameter.
-LP = wrap_statement(Literal("LP") + oneOf("C D").set_results_name("polarity"))
+LP = LoadPolarity.wrap(
+    wrap_statement(Literal("LP") + oneOf("C D").set_results_name("polarity")),
+)
 
 # End of file.
-M02 = M02EndOfFile.wrap(Literal("M02") + EOEX)
+M02 = M02EndOfFile.wrap(Literal("M02").set_name("end of file") + EOEX)
 # Sets the current aperture to D code nn.
 DNN = DNNSelectAperture.wrap(
     aperture_identifier + EOEX,
@@ -186,15 +232,15 @@ DNN = DNNSelectAperture.wrap(
 # but we will ignore that, as it has no real impact on drawing.
 G75 = Suppress(Literal("G75") + EOEX)
 # Sets linear/circular mode to counterclockwise circular.
-G03 = G03SetCounterclockwiseCircular.wrap(Literal("G03") + EOEX)
+G03 = SetCounterclockwiseCircular.wrap(Literal("G03") + EOEX)
 # Sets linear/circular mode to clockwise circular.
-G02 = G02SetClockwiseCircular.wrap(Literal("G02") + EOEX)
+G02 = SetClockwiseCircular.wrap(Literal("G02") + EOEX)
 # Sets linear/circular mode to linear.
-G01 = G01SetLinear.wrap(Literal("G01") + EOEX)
+G01 = SetLinear.wrap(Literal("G01") + EOEX)
 
 # Creates a flash object with the current aperture. The
 # current point is moved to the flash point.
-D03 = D03Flash.wrap(
+D03 = Flash.wrap(
     Opt(Literal("X") + integer.set_results_name("x"))
     + Opt(Literal("Y") + integer.set_results_name("y"))
     + "D03"
@@ -202,7 +248,7 @@ D03 = D03Flash.wrap(
 )
 # D02 moves the current point to the coordinate in the
 # command. It does not create an object.
-D02 = D02Move.wrap(
+D02 = Move.wrap(
     Opt(Literal("X") + integer.set_results_name("x"))
     + Opt(Literal("Y") + integer.set_results_name("y"))
     + "D02"
@@ -213,7 +259,7 @@ D02 = D02Move.wrap(
 # segment to the contour under construction. The current
 # point is moved to draw/arc end point after the creation of
 # the draw/arc.
-D01 = D01Draw.wrap(
+D01 = Draw.wrap(
     Opt(Literal("X") + integer.set_results_name("x"))
     + Opt(Literal("Y") + integer.set_results_name("y"))
     + Opt(
@@ -241,7 +287,9 @@ FS = CoordinateFormat.wrap(
     ),
 )
 # Sets the unit to mm or inch.
-MO = wrap_statement(Literal("MO") + oneOf("MM IN"))
+MO = UnitMode.wrap(
+    wrap_statement(Literal("MO") + oneOf("MM IN").set_results_name("unit")),
+)
 
 region_statement = Forward()
 AB_statement = Forward()
@@ -272,26 +320,35 @@ block <<= ZeroOrMore(
     | TD,
 )
 
-SR_open = wrap_statement(
-    Literal("SR")
-    + "X"
-    + positive_integer
-    + "Y"
-    + positive_integer
-    + "I"
-    + decimal
-    + "J"
-    + decimal,
+# Open a step and repeat statement.
+SR_open = StepRepeatBegin.wrap(
+    wrap_statement(
+        Literal("SR")
+        + "X"
+        + positive_integer.set_results_name("x_repeat")
+        + "Y"
+        + positive_integer.set_results_name("y_repeat")
+        + "I"
+        + decimal.set_results_name("x_step")
+        + "J"
+        + decimal.set_results_name("y_step"),
+    ),
 )
-SR_close = wrap_statement(Literal("SR"))
+# Closes a step and repeat statement.
+SR_close = StepRepeatEnd.wrap(wrap_statement(Literal("SR")))
 SR_statement <<= SR_open + block + SR_close
 
-AB_open = wrap_statement(Literal("AB") + aperture_identifier)
-AB_close = wrap_statement(Literal("AB"))
+# Opens a block aperture statement and assigns its aperture number
+AB_open = BlockApertureBegin.wrap(wrap_statement(Literal("AB") + aperture_identifier))
+# Closes a block aperture statement.
+AB_close = BlockApertureEnd.wrap(wrap_statement(Literal("AB")))
 AB_statement <<= AB_open + block + AB_close
 
-G37 = Literal("G37") + EOEX
-G36 = Literal("G36") + EOEX
+# Starts a region statement which creates a region by defining its contours.
+G36 = BeginRegion.wrap(Literal("G36") + EOEX)
+# Ends the region statement.
+G37 = EndRegion.wrap(Literal("G37") + EOEX)
+
 contour = D02 + ZeroOrMore(D01 | G01 | G02 | G03 | G04)
 region_statement <<= G36 + OneOrMore(contour | G04) + G37
 

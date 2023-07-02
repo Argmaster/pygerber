@@ -6,12 +6,11 @@ Specification`.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterator
+import logging
+from typing import Iterator
 
 from pygerber.gerberx3.tokenizer.grammar import GRAMMAR
-
-if TYPE_CHECKING:
-    from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 
 class Tokenizer:
@@ -27,7 +26,9 @@ class Tokenizer:
         tokens: list[Token] = []
 
         for token in self.grammar.parse_string(source, parse_all=self.strict):
-            tokens.append(token)
+            if isinstance(token, Token):
+                tokens.append(token)
+            logging.debug("%s (%s)", token, type(token))
 
         return TokenStack(tokens)
 
