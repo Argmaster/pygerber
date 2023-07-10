@@ -5,15 +5,16 @@ from pyparsing import (
     CharsNotIn,
     Combine,
     Forward,
-    Group,
     Literal,
     OneOrMore,
+    OpAssoc,
     Opt,
     ParserElement,
     Regex,
     Suppress,
     Word,
     ZeroOrMore,
+    infix_notation,
     nums,
     oneOf,
 )
@@ -40,6 +41,25 @@ from pygerber.gerberx3.tokenizer.tokens.lp_load_polarity import LoadPolarity
 from pygerber.gerberx3.tokenizer.tokens.lr_load_rotation import LoadRotation
 from pygerber.gerberx3.tokenizer.tokens.ls_load_scaling import LoadScaling
 from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
+from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
+from pygerber.gerberx3.tokenizer.tokens.macro.arithmetic_expression import (
+    ArithmeticExpression,
+    NumericConstant,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.comment import MacroComment
+from pygerber.gerberx3.tokenizer.tokens.macro.point import Point
+from pygerber.gerberx3.tokenizer.tokens.macro.primitives import (
+    PrimitiveCenterLine,
+    PrimitiveCircle,
+    PrimitiveOutline,
+    PrimitivePolygon,
+    PrimitiveThermal,
+    PrimitiveVectorLine,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.variable_definition import (
+    MacroVariableDefinition,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.variable_name import MacroVariableName
 from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import UnitMode
 from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
     StepRepeatBegin,
@@ -54,12 +74,12 @@ from pygerber.gerberx3.tokenizer.tokens.tx_attributes import (
 
 EOEX = Suppress(Literal("*"))  # End of expression.
 SOSTMT = Suppress(Literal("%"))  # Start of statement.
-EOSTMT = Suppress(Literal("*%"))  # End of statement.
+EOSTMT = Suppress(Literal("%"))  # End of statement.
 
 
-def wrap_statement(expr: ParserElement) -> ParserElement:
+def wrap_statement(expr: ParserElement, *, eoex: bool = True) -> ParserElement:
     """Wrap statement in start of statement (%) and end of statement (*%) symbols."""
-    return SOSTMT + expr + EOSTMT
+    return SOSTMT + expr + ((EOEX + EOSTMT) if eoex else EOSTMT)
 
 
 unsigned_integer = Word(nums)
@@ -104,55 +124,181 @@ object_attribute_name = (
 ).set_name("object_attribute_name")
 # Set a file attribute.
 TF = FileAttribute.wrap(
-    SOSTMT
-    + Literal("TF")
-    + file_attribute_name.set_results_name("file_attribute_name")
-    + ZeroOrMore("," + (field | ""))
-    + EOSTMT,
+    wrap_statement(
+        Literal("TF")
+        + file_attribute_name.set_results_name("file_attribute_name")
+        + ZeroOrMore("," + (field | "")),
+    ),
 )
 # Add an aperture attribute to the dictionary or modify it.
 TA = ApertureAttribute.wrap(
-    SOSTMT
-    + Literal("TA")
-    + aperture_attribute_name.set_results_name("aperture_attribute_name")
-    + ZeroOrMore("," + (field | ""))
-    + EOSTMT,
+    wrap_statement(
+        Literal("TA")
+        + aperture_attribute_name.set_results_name("aperture_attribute_name")
+        + ZeroOrMore("," + (field | "")),
+    ),
 )
 # Add an object attribute to the dictionary or modify it.
 TO = ObjectAttribute.wrap(
-    SOSTMT
-    + Literal("TO")
-    + object_attribute_name.set_results_name("object_attribute_name")
-    + ZeroOrMore("," + (field | ""))
-    + EOSTMT,
+    wrap_statement(
+        Literal("TO")
+        + object_attribute_name.set_results_name("object_attribute_name")
+        + ZeroOrMore("," + (field | "")),
+    ),
 )
 # Delete one or all attributes in the dictionary.
 TD = DeleteAttribute.wrap(
-    SOSTMT
-    + Literal("TD")
-    + Opt(
-        file_attribute_name
-        | aperture_attribute_name
-        | object_attribute_name
-        | user_name,
-    ).set_results_name("attribute_name")
-    + EOSTMT,
+    wrap_statement(
+        Literal("TD")
+        + Opt(
+            file_attribute_name
+            | aperture_attribute_name
+            | object_attribute_name
+            | user_name,
+        ).set_results_name("attribute_name"),
+    ),
 )
 
-macro_variable = Regex(r"\$[0-9]*[1-9][0-9]*")
-expr = Forward()
-factor = Group("(" + expr + ")" | macro_variable | unsigned_decimal)
-term = Group(factor + ZeroOrMore(oneOf("x /") + factor))
-expr <<= Group(term + ZeroOrMore(oneOf("+ -") + term))
-
 # A human readable comment, does not affect the image.
-G04 = Comment.wrap(Suppress(Literal("G04")) + string("string") + EOEX)
+G04 = Comment.wrap(
+    Suppress(Literal("G04")) + string.set_results_name("string") + EOEX,
+)
 
-primitive = Group(oneOf("0 1 20 21 4 5 7") + ZeroOrMore("," + expr) + EOEX)
-variable_definition = macro_variable + "=" + expr + EOEX
-macro_body = OneOrMore(primitive | variable_definition | G04)
+macro_variable = MacroVariableName.wrap(Regex(r"\$[0-9]*[1-9][0-9]*")("name"))
+numeric_constant = NumericConstant.wrap(unsigned_decimal("value"))
+
+arithmetic_expression: ParserElement = infix_notation(
+    macro_variable | numeric_constant,
+    [
+        (oneOf("x X /"), 2, OpAssoc.LEFT, ArithmeticExpression.new),
+        (oneOf("+ -"), 2, OpAssoc.LEFT, ArithmeticExpression.new),
+    ],
+)
+
+
+expr = arithmetic_expression | macro_variable | numeric_constant
+
+
+cs = Suppress(Literal(","))
+primitive = (
+    MacroComment.wrap("0" + string.set_results_name("string"))
+    | PrimitiveCircle.wrap(
+        "1"  # Circle
+        + cs
+        + expr.set_results_name("exposure")  # Exposure
+        + cs
+        + expr.set_results_name("diameter")  # Diameter
+        + cs
+        + expr.set_results_name("center_x")  # Center X
+        + cs
+        + expr.set_results_name("center_y")  # Center Y
+        + Opt(cs + expr.set_results_name("rotation")),  # Rotation
+    )
+    | PrimitiveVectorLine.wrap(
+        "20"  # Vector Line
+        + cs
+        + expr.set_results_name("exposure")  # Exposure
+        + cs
+        + expr.set_results_name("width")  # Width
+        + cs
+        + expr.set_results_name("start_x")  # Start X
+        + cs
+        + expr.set_results_name("start_y")  # Start Y
+        + cs
+        + expr.set_results_name("end_x")  # End X
+        + cs
+        + expr.set_results_name("end_y")  # End Y
+        + cs
+        + expr.set_results_name("rotation"),  # Rotation
+    )
+    | PrimitiveCenterLine.wrap(
+        "21"  # Center Line
+        + cs
+        + expr.set_results_name("exposure")  # Exposure
+        + cs
+        + expr.set_results_name("width")  # Width
+        + cs
+        + expr.set_results_name("hight")  # Hight
+        + cs
+        + expr.set_results_name("center_x")  # Center X
+        + cs
+        + expr.set_results_name("center_y")  # Center Y
+        + cs
+        + expr.set_results_name("rotation"),  # Rotation
+    )
+    | PrimitiveOutline.wrap(
+        "4"  # Outline
+        + cs
+        + expr.set_results_name("exposure")  # Exposure
+        + cs
+        + expr.set_results_name("number_of_vertices")  # Number of vertices
+        + cs
+        + expr.set_results_name("start_x")  # Start X
+        + cs
+        + expr.set_results_name("start_y")  # Start Y
+        + OneOrMore(  # Subsequent points...
+            Point.wrap(
+                cs + expr.set_results_name("x") + cs + expr.set_results_name("y"),
+            ),
+        ).set_results_name(
+            "point",
+            list_all_matches=True,
+        )
+        + cs
+        + expr.set_results_name("rotation"),  # Rotation
+    )
+    | PrimitivePolygon.wrap(
+        "5"  # Polygon
+        + cs
+        + expr.set_results_name("exposure")  # Exposure
+        + cs
+        + expr.set_results_name("number_of_vertices")  # Number of vertices
+        + cs
+        + expr.set_results_name("center_x")  # Center X
+        + cs
+        + expr.set_results_name("center_y")  # Center Y
+        + cs
+        + expr.set_results_name("diameter")  # Diameter
+        + cs
+        + expr.set_results_name("rotation"),  # Rotation
+    )
+    | PrimitiveThermal.wrap(
+        "7"  # Thermal
+        + cs
+        + expr.set_results_name("center_x")  # Center X
+        + cs
+        + expr.set_results_name("center_y")  # Center Y
+        + cs
+        + expr.set_results_name("outer_diameter")  # Outer diameter
+        + cs
+        + expr.set_results_name("inner_diameter")  # Inner diameter
+        + cs
+        + expr.set_results_name("gap")  # Gap
+        + cs
+        + expr.set_results_name("rotation"),  # Rotation
+    )
+) + EOEX
+
+variable_definition = MacroVariableDefinition.wrap(
+    macro_variable.set_results_name("variable")
+    + "="
+    + expr.set_results_name("value")
+    + EOEX,
+)
+macro_body = (
+    (primitive | variable_definition | G04).set_results_name(
+        "macro_body",
+        list_all_matches=True,
+    )
+)[1, ...]
+
 # Defines a macro aperture template.
-AM = Literal("%AM") + name + EOEX + macro_body + "%"
+AM = MacroDefinition.wrap(
+    wrap_statement(
+        Literal("AM") + name.set_results_name("macro_name") + EOEX + macro_body,
+        eoex=False,
+    ),
+)
 
 
 am_param = decimal.set_results_name("am_param", list_all_matches=True)
@@ -352,32 +498,57 @@ G37 = EndRegion.wrap(Literal("G37") + EOEX)
 contour = D02 + ZeroOrMore(D01 | G01 | G02 | G03 | G04)
 region_statement <<= G36 + OneOrMore(contour | G04) + G37
 
+EXPRESSIONS = (
+    G04
+    | MO
+    | FS
+    | AD
+    | AM
+    | DNN
+    | D01
+    | D02
+    | D03
+    | G01
+    | G02
+    | G03
+    | G75
+    | LP
+    | LM
+    | LR
+    | LS
+    | region_statement
+    | AB_statement
+    | SR_statement
+    | TF
+    | TA
+    | TO
+    | TD
+    | M02
+)[0, ...]
+
 GRAMMAR = (
-    ZeroOrMore(
-        G04
-        | MO
-        | FS
-        | AD
-        | AM
-        | DNN
-        | D01
-        | D02
-        | D03
-        | G01
-        | G02
-        | G03
-        | G75
-        | LP
-        | LM
-        | LR
-        | LS
-        | region_statement
-        | AB_statement
-        | SR_statement
-        | TF
-        | TA
-        | TO
-        | TD,
-    )
-    + M02
-)
+    G04
+    | MO
+    | FS
+    | AD
+    | AM
+    | DNN
+    | D01
+    | D02
+    | D03
+    | G01
+    | G02
+    | G03
+    | G75
+    | LP
+    | LM
+    | LR
+    | LS
+    | region_statement
+    | AB_statement
+    | SR_statement
+    | TF
+    | TA
+    | TO
+    | TD
+)[0, ...] + M02
