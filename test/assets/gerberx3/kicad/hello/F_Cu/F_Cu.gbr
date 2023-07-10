@@ -29,6 +29,7 @@ G04 Aperture macros list*
 20,1,$1+$1,$6,$7,$8,$9,0*
 20,1,$1+$1,$8,$9,$2,$3,0*%
 G04 Aperture macros list end*
+M02*
 %TA.AperFunction,SMDPad,CuDef*%
 %ADD10RoundRect,0.150000X-0.825000X-0.150000X0.825000X-0.150000X0.825000X0.150000X-0.825000X0.150000X0*%
 %TD*%

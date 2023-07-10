@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import datetime
+import logging
 from pathlib import Path
 
 import pytest
+import tzlocal
 
 THIS_FILE = Path(__file__)
 THIS_FILE_DIRECTORY = THIS_FILE.parent
@@ -41,3 +44,19 @@ GLOBAL_ASSET_LOADER = AssetLoader(ASSETS_DIRECTORY)
 def asset_loader() -> AssetLoader:
     """Acquire global asset loader."""
     return GLOBAL_ASSET_LOADER
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
+start_time = datetime.datetime.now(tz=tzlocal.get_localzone())
+log_file_path = (
+    Path.cwd() / "log" / "test" / f"{start_time.isoformat(timespec='hours')}.log"
+)
+log_file_path.parent.mkdir(0o777, parents=True, exist_ok=True)
+file_handler = logging.FileHandler(log_file_path.as_posix(), encoding="utf-8")
+file_handler.setLevel(logging.DEBUG)
+logger.addHandler(file_handler)
+
+
+logging.debug("Configured logger at %s", start_time.isoformat())
