@@ -1,0 +1,36 @@
+------------------------------------------------------------------------------------------
+Gerber File Extension Report For: PCB1.GBR   28/06/2023  16:32:16
+------------------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------------------
+Layer Extension     Layer Description                      
+------------------------------------------------------------------------------------------
+.gbr                Top Layer                               
+.gbr                Bottom Layer                            
+.gbr                Bottom Pad Master                       
+.gbr                Top Pad Master                          
+.gbr                Top Overlay                             
+.gbr                Bottom Overlay                          
+.gbr                Top Solder                              
+.gbr                Bottom Solder                           
+.gbr                Top Paste                               
+.gbr                Bottom Paste                            
+.gbr                Keep-Out Layer                          
+.gbr                Board Shape                             
+.gbr                Top Assembly                            
+.gbr                Bottom Assembly                         
+.gbr                Top Component Center                    
+.gbr                Top 3D Body                             
+.gbr                Bottom 3D Body                          
+.gbr                Top Courtyard                           
+.gbr                Bottom Courtyard                        
+.gbr                Top Designator                          
+.gbr                Bottom Designator                       
+.gbr                Bottom Component Center                 
+.gbr                Profile                                 
+.gbr                Non-plated through-hole drill file      
+.gbr                Plated through-hole drill file          
+.gbr                Drill Drawing                           
+.gbr                Drill Guide                             
+------------------------------------------------------------------------------------------
