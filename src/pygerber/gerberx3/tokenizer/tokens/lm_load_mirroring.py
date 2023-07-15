@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import TYPE_CHECKING, Any
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class LoadMirroring(Token):
@@ -12,10 +16,13 @@ class LoadMirroring(Token):
     Loads the mirror object transformation parameter.
     """
 
-    def __init__(self, mirroring: str) -> None:
+    mirroring: Mirroring
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.mirroring = Mirroring(mirroring)
+        mirroring = Mirroring(tokens["mirroring"])
+        return cls(mirroring=mirroring)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

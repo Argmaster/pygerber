@@ -10,10 +10,6 @@ class SetLinear(Token):
     Sets linear/circular mode to linear.
     """
 
-    def __init__(self) -> None:
-        """Initialize token object."""
-        super().__init__()
-
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         return "G01*"
@@ -25,10 +21,6 @@ class SetClockwiseCircular(Token):
     Sets linear/circular mode to clockwise circular.
     """
 
-    def __init__(self) -> None:
-        """Initialize token object."""
-        super().__init__()
-
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         return "G02*"
@@ -39,10 +31,6 @@ class SetCounterclockwiseCircular(Token):
 
     Sets linear/circular mode to counterclockwise circular.
     """
-
-    def __init__(self) -> None:
-        """Initialize token object."""
-        super().__init__()
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

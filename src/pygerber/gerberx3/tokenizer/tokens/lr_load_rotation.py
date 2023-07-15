@@ -1,7 +1,12 @@
 """Wrapper for load rotation token."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from pygerber.gerberx3.tokenizer.tokens.token import Token
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class LoadRotation(Token):
@@ -10,10 +15,13 @@ class LoadRotation(Token):
     Loads the rotation object transformation parameter.
     """
 
-    def __init__(self, rotation: str) -> None:
+    rotation: float
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.rotation = float(rotation)
+        rotation = float(tokens["rotation"])
+        return cls(rotation=rotation)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

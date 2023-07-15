@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional
 
-from pygerber.gerberx3.tokenizer.tokens.macro.element import Element
+from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+from pygerber.gerberx3.tokenizer.tokens.macro.point import Point
 from pygerber.sequence_tools import unwrap
 
 if TYPE_CHECKING:
-    from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
-    from pygerber.gerberx3.tokenizer.tokens.macro.point import Point
+    from typing_extensions import Self
 
 
-class Primitive(Element):
+class Primitive(Expression):
     """Wrapper for macro primitive token, common base class for specialized tokens."""
 
     symbol: ClassVar[str] = "X"
@@ -21,24 +21,32 @@ class Primitive(Element):
 class PrimitiveCircle(Primitive):
     """Wrapper for macro circle primitive token."""
 
-    symbol = "1"
+    symbol: ClassVar[str] = "1"
 
-    def __init__(  # noqa: PLR0913
-        self,
-        exposure: Expression,
-        diameter: Expression,
-        center_x: Expression,
-        center_y: Expression,
-        rotation: Expression | None = None,
-    ) -> None:
+    exposure: Expression
+    diameter: Expression
+    center_x: Expression
+    center_y: Expression
+    rotation: Optional[Expression]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
+        exposure: Expression = unwrap(tokens["exposure"])
+        diameter: Expression = unwrap(tokens["diameter"])
+        center_x: Expression = unwrap(tokens["center_x"])
+        center_y: Expression = unwrap(tokens["center_y"])
+        rotation: Optional[Expression] = (
+            unwrap(tokens["rotation"]) if tokens.get("rotation") is not None else None
+        )
 
-        self.exposure = unwrap(exposure)
-        self.diameter = unwrap(diameter)
-        self.center_x = unwrap(center_x)
-        self.center_y = unwrap(center_y)
-        self.rotation = unwrap(rotation) if rotation is not None else None
+        return cls(
+            exposure=exposure,
+            diameter=diameter,
+            center_x=center_x,
+            center_y=center_y,
+            rotation=rotation,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -58,27 +66,36 @@ class PrimitiveCircle(Primitive):
 class PrimitiveVectorLine(Primitive):
     """Wrapper for macro vector line primitive token."""
 
-    symbol = "20"
+    symbol: ClassVar[str] = "20"
 
-    def __init__(  # noqa: PLR0913
-        self,
-        exposure: Expression,
-        width: Expression,
-        start_x: Expression,
-        start_y: Expression,
-        end_x: Expression,
-        end_y: Expression,
-        rotation: Expression,
-    ) -> None:
+    exposure: Expression
+    width: Expression
+    start_x: Expression
+    start_y: Expression
+    end_x: Expression
+    end_y: Expression
+    rotation: Expression
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.exposure = unwrap(exposure)
-        self.width = unwrap(width)
-        self.start_x = unwrap(start_x)
-        self.start_y = unwrap(start_y)
-        self.end_x = unwrap(end_x)
-        self.end_y = unwrap(end_y)
-        self.rotation = unwrap(rotation)
+        exposure: Expression = unwrap(tokens["exposure"])
+        width: Expression = unwrap(tokens["width"])
+        start_x: Expression = unwrap(tokens["start_x"])
+        start_y: Expression = unwrap(tokens["start_y"])
+        end_x: Expression = unwrap(tokens["end_x"])
+        end_y: Expression = unwrap(tokens["end_y"])
+        rotation: Expression = unwrap(tokens["rotation"])
+
+        return cls(
+            exposure=exposure,
+            width=width,
+            start_x=start_x,
+            start_y=start_y,
+            end_x=end_x,
+            end_y=end_y,
+            rotation=rotation,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -98,25 +115,33 @@ class PrimitiveVectorLine(Primitive):
 class PrimitiveCenterLine(Primitive):
     """Wrapper for macro center line primitive token."""
 
-    symbol = "21"
+    symbol: ClassVar[str] = "21"
 
-    def __init__(  # noqa: PLR0913
-        self,
-        exposure: Expression,
-        width: Expression,
-        hight: Expression,
-        center_x: Expression,
-        center_y: Expression,
-        rotation: Expression,
-    ) -> None:
+    exposure: Expression
+    width: Expression
+    hight: Expression
+    center_x: Expression
+    center_y: Expression
+    rotation: Expression
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.exposure = unwrap(exposure)
-        self.width = unwrap(width)
-        self.hight = unwrap(hight)
-        self.center_x = unwrap(center_x)
-        self.center_y = unwrap(center_y)
-        self.rotation = unwrap(rotation)
+        exposure: Expression = unwrap(tokens["exposure"])
+        width: Expression = unwrap(tokens["width"])
+        hight: Expression = unwrap(tokens["hight"])
+        center_x: Expression = unwrap(tokens["center_x"])
+        center_y: Expression = unwrap(tokens["center_y"])
+        rotation: Expression = unwrap(tokens["rotation"])
+
+        return cls(
+            exposure=exposure,
+            width=width,
+            hight=hight,
+            center_x=center_x,
+            center_y=center_y,
+            rotation=rotation,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -135,25 +160,33 @@ class PrimitiveCenterLine(Primitive):
 class PrimitiveOutline(Primitive):
     """Wrapper for macro outline primitive token."""
 
-    symbol = "4"
+    symbol: ClassVar[str] = "4"
 
-    def __init__(  # noqa: PLR0913
-        self,
-        exposure: Expression,
-        number_of_vertices: Expression,
-        start_x: Expression,
-        start_y: Expression,
-        rotation: Expression,
-        point: list[Point] | None = None,
-    ) -> None:
+    exposure: Expression
+    number_of_vertices: Expression
+    start_x: Expression
+    start_y: Expression
+    rotation: Expression
+    point: List[Point]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.exposure = unwrap(exposure)
-        self.number_of_vertices = unwrap(number_of_vertices)
-        self.start_x = unwrap(start_x)
-        self.start_y = unwrap(start_y)
-        self.rotation = unwrap(rotation)
-        self.point = point if point is not None else []
+        exposure: Expression = unwrap(tokens["exposure"])
+        number_of_vertices: Expression = unwrap(tokens["number_of_vertices"])
+        start_x: Expression = unwrap(tokens["start_x"])
+        start_y: Expression = unwrap(tokens["start_y"])
+        rotation: Expression = unwrap(tokens["rotation"])
+        point: list[Point] = list(tokens.get("point", []))
+
+        return cls(
+            exposure=exposure,
+            number_of_vertices=number_of_vertices,
+            start_x=start_x,
+            start_y=start_y,
+            rotation=rotation,
+            point=point,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -174,25 +207,32 @@ class PrimitiveOutline(Primitive):
 class PrimitivePolygon(Primitive):
     """Wrapper for macro outline primitive token."""
 
-    symbol = "5"
+    symbol: ClassVar[str] = "5"
 
-    def __init__(  # noqa: PLR0913
-        self,
-        exposure: Expression,
-        number_of_vertices: Expression,
-        center_x: Expression,
-        center_y: Expression,
-        diameter: Expression,
-        rotation: Expression,
-    ) -> None:
+    exposure: Expression
+    number_of_vertices: Expression
+    center_x: Expression
+    center_y: Expression
+    diameter: Expression
+    rotation: Expression
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.exposure = unwrap(exposure)
-        self.number_of_vertices = unwrap(number_of_vertices)
-        self.center_x = unwrap(center_x)
-        self.center_y = unwrap(center_y)
-        self.diameter = unwrap(diameter)
-        self.rotation = unwrap(rotation)
+        exposure: Expression = unwrap(tokens["exposure"])
+        number_of_vertices: Expression = unwrap(tokens["number_of_vertices"])
+        center_x: Expression = unwrap(tokens["center_x"])
+        center_y: Expression = unwrap(tokens["center_y"])
+        diameter: Expression = unwrap(tokens["diameter"])
+        rotation: Expression = unwrap(tokens["rotation"])
+        return cls(
+            exposure=exposure,
+            number_of_vertices=number_of_vertices,
+            center_x=center_x,
+            center_y=center_y,
+            diameter=diameter,
+            rotation=rotation,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -211,25 +251,32 @@ class PrimitivePolygon(Primitive):
 class PrimitiveThermal(Primitive):
     """Wrapper for macro outline primitive token."""
 
-    symbol = "7"
+    symbol: ClassVar[str] = "7"
 
-    def __init__(  # noqa: PLR0913
-        self,
-        center_x: Expression,
-        center_y: Expression,
-        outer_diameter: Expression,
-        inner_diameter: Expression,
-        gap: Expression,
-        rotation: Expression,
-    ) -> None:
+    center_x: Expression
+    center_y: Expression
+    outer_diameter: Expression
+    inner_diameter: Expression
+    gap: Expression
+    rotation: Expression
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.center_x = unwrap(center_x)
-        self.center_y = unwrap(center_y)
-        self.outer_diameter = unwrap(outer_diameter)
-        self.inner_diameter = unwrap(inner_diameter)
-        self.gap = unwrap(gap)
-        self.rotation = unwrap(rotation)
+        center_x: Expression = unwrap(tokens["center_x"])
+        center_y: Expression = unwrap(tokens["center_y"])
+        outer_diameter: Expression = unwrap(tokens["outer_diameter"])
+        inner_diameter: Expression = unwrap(tokens["inner_diameter"])
+        gap: Expression = unwrap(tokens["gap"])
+        rotation: Expression = unwrap(tokens["rotation"])
+        return cls(
+            center_x=center_x,
+            center_y=center_y,
+            outer_diameter=outer_diameter,
+            inner_diameter=inner_diameter,
+            gap=gap,
+            rotation=rotation,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

@@ -4,35 +4,42 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 
 class CoordinateFormat(Token):
     """Description of coordinate format token."""
 
-    def __init__(
-        self,
-        zeros_mode: str,
-        coordinate_mode: str,
-        x_format: str,
-        y_format: str,
-    ) -> None:
-        """Initialize token object."""
-        super().__init__()
-        self.zeros_mode = TrailingZerosMode(zeros_mode)
-        self.coordinate_mode = CoordinateMode(coordinate_mode)
-        self.x_format = AxisFormat(integer=int(x_format[0]), decimal=int(x_format[1]))
-        self.y_format = AxisFormat(integer=int(y_format[0]), decimal=int(y_format[1]))
+    zeros_mode: TrailingZerosMode
+    coordinate_mode: CoordinateMode
+    x_format: AxisFormat
+    y_format: AxisFormat
 
-    def __str__(self) -> str:
-        """Return pretty representation of comment token."""
-        return (
-            f"%FS{self.zeros_mode.value}{self.coordinate_mode.value}"
-            f"X{self.x_format.integer}{self.x_format.decimal}"
-            f"Y{self.y_format.integer}{self.y_format.decimal}"
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
+        """Initialize token object."""
+        zeros_mode = TrailingZerosMode(tokens["zeros_mode"])
+        coordinate_mode = CoordinateMode(tokens["coordinate_mode"])
+        x_format = AxisFormat(
+            integer=int(tokens["x_format"][0]),
+            decimal=int(tokens["x_format"][1]),
+        )
+        y_format = AxisFormat(
+            integer=int(tokens["y_format"][0]),
+            decimal=int(tokens["y_format"][1]),
+        )
+        return cls(
+            zeros_mode=zeros_mode,
+            coordinate_mode=coordinate_mode,
+            x_format=x_format,
+            y_format=y_format,
         )
 
 

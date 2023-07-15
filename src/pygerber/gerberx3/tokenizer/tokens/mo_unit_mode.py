@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import TYPE_CHECKING, Any
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class UnitMode(Token):
@@ -12,10 +16,13 @@ class UnitMode(Token):
     Sets the unit to mm or inch.
     """
 
-    def __init__(self, unit: str) -> None:
+    unit: Unit
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.unit = Unit(unit)
+        unit: Unit = Unit(tokens["unit"])
+        return cls(unit=unit)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

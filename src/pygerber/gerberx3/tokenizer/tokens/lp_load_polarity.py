@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import TYPE_CHECKING, Any
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class LoadPolarity(Token):
@@ -12,10 +16,13 @@ class LoadPolarity(Token):
     Loads the scale object transformation parameter.
     """
 
-    def __init__(self, polarity: str) -> None:
+    polarity: Polarity
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.polarity = Polarity(polarity)
+        polarity = Polarity(tokens["polarity"])
+        return cls(polarity=polarity)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

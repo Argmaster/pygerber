@@ -164,8 +164,14 @@ G04 = Comment.wrap(
     Suppress(Literal("G04")) + string.set_results_name("string") + EOEX,
 )
 
-macro_variable = MacroVariableName.wrap(Regex(r"\$[0-9]*[1-9][0-9]*")("name"))
-numeric_constant = NumericConstant.wrap(unsigned_decimal("value"))
+macro_variable = MacroVariableName.wrap(
+    Regex(r"\$[0-9]*[1-9][0-9]*")("macro_variable_name"),
+    use_group=False,
+)
+numeric_constant = NumericConstant.wrap(
+    unsigned_decimal("numeric_constant_value"),
+    use_group=False,
+)
 
 arithmetic_expression: ParserElement = infix_notation(
     macro_variable | numeric_constant,
@@ -239,10 +245,11 @@ primitive = (
         + OneOrMore(  # Subsequent points...
             Point.wrap(
                 cs + expr.set_results_name("x") + cs + expr.set_results_name("y"),
+                use_group=False,
+            ).set_results_name(
+                "point",
+                list_all_matches=True,
             ),
-        ).set_results_name(
-            "point",
-            list_all_matches=True,
         )
         + cs
         + expr.set_results_name("rotation"),  # Rotation
@@ -280,10 +287,7 @@ primitive = (
 ) + EOEX
 
 variable_definition = MacroVariableDefinition.wrap(
-    macro_variable.set_results_name("variable")
-    + "="
-    + expr.set_results_name("value")
-    + EOEX,
+    macro_variable + "=" + expr.set_results_name("value") + EOEX,
 )
 macro_body = (
     (primitive | variable_definition | G04).set_results_name(

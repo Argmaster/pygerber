@@ -17,12 +17,13 @@ a pad. This is just confusing. If there is nothing, put nothing.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
+    from typing_extensions import Self
 
 
 class DefineAperture(Token):
@@ -31,10 +32,6 @@ class DefineAperture(Token):
     Defines a template-based aperture, assigns a D code to it. This class is never used
     to create objects, only its subclasses are used.
     """
-
-    def __init__(self) -> None:
-        """Initialize token object."""
-        super().__init__()
 
     @classmethod
     def new(
@@ -53,18 +50,18 @@ class DefineAperture(Token):
             raise TypeError(msg)
 
         if aperture_type == "C":
-            return DefineCircle(**tokens.as_dict())
+            return DefineCircle.from_tokens(**tokens.as_dict())
 
         if aperture_type == "R":
-            return DefineRectangle(**tokens.as_dict())
+            return DefineRectangle.from_tokens(**tokens.as_dict())
 
         if aperture_type == "O":
-            return DefineObround(**tokens.as_dict())
+            return DefineObround.from_tokens(**tokens.as_dict())
 
         if aperture_type == "P":
-            return DefinePolygon(**tokens.as_dict())
+            return DefinePolygon.from_tokens(**tokens.as_dict())
 
-        return DefineMacro(aperture_type=aperture_type, **tokens.as_dict())
+        return DefineMacro.from_tokens(aperture_type=aperture_type, **tokens.as_dict())
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -77,17 +74,25 @@ class DefineCircle(DefineAperture):
     Defines a circle.
     """
 
-    def __init__(
-        self,
-        aperture_identifier: str,
-        diameter: str,
-        hole_diameter: str | None = None,
-    ) -> None:
+    aperture_identifier: str
+    diameter: float
+    hole_diameter: Optional[float]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.aperture_identifier = aperture_identifier
-        self.diameter = float(diameter)
-        self.hole_diameter = float(hole_diameter) if hole_diameter is not None else None
+        aperture_identifier: str = tokens["aperture_identifier"]
+        diameter: float = float(tokens["diameter"])
+        hole_diameter: Optional[float] = (
+            float(tokens["hole_diameter"])
+            if tokens.get("hole_diameter") is not None
+            else None
+        )
+        return cls(
+            aperture_identifier=aperture_identifier,
+            diameter=diameter,
+            hole_diameter=hole_diameter,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -103,19 +108,28 @@ class DefineRectangle(DefineAperture):
     Defines a rectangle
     """
 
-    def __init__(
-        self,
-        aperture_identifier: str,
-        x_size: str,
-        y_size: str,
-        hole_diameter: str | None = None,
-    ) -> None:
+    aperture_identifier: str
+    x_size: float
+    y_size: float
+    hole_diameter: Optional[float]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.aperture_identifier = aperture_identifier
-        self.x_size = float(x_size)
-        self.y_size = float(y_size)
-        self.hole_diameter = float(hole_diameter) if hole_diameter is not None else None
+        aperture_identifier: str = tokens["aperture_identifier"]
+        x_size: float = float(tokens["x_size"])
+        y_size: float = float(tokens["y_size"])
+        hole_diameter: Optional[float] = (
+            float(tokens["hole_diameter"])
+            if tokens.get("hole_diameter") is not None
+            else None
+        )
+        return cls(
+            aperture_identifier=aperture_identifier,
+            x_size=x_size,
+            y_size=y_size,
+            hole_diameter=hole_diameter,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -131,19 +145,28 @@ class DefineObround(DefineAperture):
     Defines a obround.
     """
 
-    def __init__(
-        self,
-        aperture_identifier: str,
-        x_size: str,
-        y_size: str,
-        hole_diameter: str | None = None,
-    ) -> None:
+    aperture_identifier: str
+    x_size: float
+    y_size: float
+    hole_diameter: Optional[float]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.aperture_identifier = aperture_identifier
-        self.x_size = float(x_size)
-        self.y_size = float(y_size)
-        self.hole_diameter = float(hole_diameter) if hole_diameter is not None else None
+        aperture_identifier: str = tokens["aperture_identifier"]
+        x_size: float = float(tokens["x_size"])
+        y_size: float = float(tokens["y_size"])
+        hole_diameter: Optional[float] = (
+            float(tokens["hole_diameter"])
+            if tokens.get("hole_diameter") is not None
+            else None
+        )
+        return cls(
+            aperture_identifier=aperture_identifier,
+            x_size=x_size,
+            y_size=y_size,
+            hole_diameter=hole_diameter,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -159,21 +182,33 @@ class DefinePolygon(DefineAperture):
     Defines a polygon.
     """
 
-    def __init__(  # noqa: PLR0913
-        self,
-        aperture_identifier: str,
-        outer_diameter: str,
-        number_of_vertices: str,
-        rotation: str | None = None,
-        hole_diameter: str | None = None,
-    ) -> None:
+    aperture_identifier: str
+    outer_diameter: float
+    number_of_vertices: int
+    rotation: Optional[float]
+    hole_diameter: Optional[float]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.aperture_identifier = aperture_identifier
-        self.outer_diameter = float(outer_diameter)
-        self.number_of_vertices = int(number_of_vertices)
-        self.rotation = float(rotation) if rotation is not None else None
-        self.hole_diameter = float(hole_diameter) if hole_diameter is not None else None
+        aperture_identifier: str = tokens["aperture_identifier"]
+        outer_diameter: float = float(tokens["outer_diameter"])
+        number_of_vertices: int = int(tokens["number_of_vertices"])
+        rotation: Optional[float] = (
+            float(tokens["rotation"]) if tokens.get("rotation") is not None else None
+        )
+        hole_diameter: Optional[float] = (
+            float(tokens["hole_diameter"])
+            if tokens.get("hole_diameter") is not None
+            else None
+        )
+        return cls(
+            aperture_identifier=aperture_identifier,
+            outer_diameter=outer_diameter,
+            number_of_vertices=number_of_vertices,
+            rotation=rotation,
+            hole_diameter=hole_diameter,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -192,17 +227,21 @@ class DefineMacro(DefineAperture):
     Defines a macro based aperture.
     """
 
-    def __init__(
-        self,
-        aperture_type: str,
-        aperture_identifier: str,
-        am_param: list[str] | None = None,
-    ) -> None:
+    aperture_type: str
+    aperture_identifier: str
+    am_param: List[str]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.aperture_type = aperture_type
-        self.aperture_identifier = aperture_identifier
-        self.am_param = am_param if am_param is not None else []
+        aperture_type: str = tokens["aperture_type"]
+        aperture_identifier: str = tokens["aperture_identifier"]
+        am_param: list[str] = tokens.get("am_param", [])
+        return cls(
+            aperture_type=aperture_type,
+            aperture_identifier=aperture_identifier,
+            am_param=am_param,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

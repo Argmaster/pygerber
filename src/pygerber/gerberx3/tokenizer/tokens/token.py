@@ -1,25 +1,29 @@
 """Base class for creating token classes."""
 from __future__ import annotations
 
-import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+from pydantic import BaseModel
 from pyparsing import Group
 
 if TYPE_CHECKING:
     from pyparsing import ParserElement, ParseResults
     from typing_extensions import Self
 
+    from pygerber.backend.draw_actions.draw_action import DrawAction
+    from pygerber.gerberx3.parser.state import State
 
-class Token:
+
+class Token(BaseModel):
     """Base class for creating token classes."""
 
-    def __init__(self) -> None:
-        """Initialize token object."""
-        logging.debug("Constructing token %s", self.__class__.__qualname__)
-
     @classmethod
-    def wrap(cls, expr: ParserElement, *, use_group: bool = True) -> ParserElement:
+    def wrap(
+        cls,
+        expr: ParserElement,
+        *,
+        use_group: bool = True,
+    ) -> ParserElement:
         """Set parse result to be instance of this class."""
         expr = expr.set_parse_action(cls.new)
 
@@ -34,7 +38,12 @@ class Token:
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
-        return cls(**dict(tokens))
+        return cls.from_tokens(**dict(tokens))
+
+    @classmethod
+    def from_tokens(cls, **_tokens: Any) -> Self:
+        """Initialize token object."""
+        return cls()
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -53,3 +62,11 @@ class Token:
     def __getitem__(self, _: int) -> Self:
         """Index return self."""
         return self
+
+    def update_drawing_state(self, state: State) -> State:
+        """Update drawing state."""
+        return state
+
+    def create_draw_action(self, state: State) -> DrawAction | None:  # noqa: ARG002
+        """Create new draw action."""
+        return None

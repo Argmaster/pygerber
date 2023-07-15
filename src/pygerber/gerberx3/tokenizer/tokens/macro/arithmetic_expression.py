@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from pygerber.gerberx3.tokenizer.errors import TokenizerError
 from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
-from pygerber.sequence_tools import unwrap
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -20,17 +19,18 @@ ARITHMETIC_EXPRESSION_NOT_ENOUGH_TOKEN_COUNT = 2
 class ArithmeticExpression(Expression):
     """Wrapper for arithmetic expression."""
 
-    def __init__(
-        self,
-        left: Expression,
-        operator: ArithmeticOperator,
-        right: Expression,
-    ) -> None:
+    left: Expression
+    operator: ArithmeticOperator
+    right: Expression
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.left = unwrap(left)
-        self.operator = unwrap(operator)
-        self.right = unwrap(right)
+        left = tokens["left"]
+        operator = str(tokens["operator"]).lower()
+        right = tokens["right"]
+
+        return cls(left=left, operator=ArithmeticOperator(operator), right=right)
 
     @classmethod
     def new(cls, _string: str, _location: int, tokens: ParseResults) -> Self:
@@ -58,9 +58,9 @@ class ArithmeticExpression(Expression):
         else:
             raise AssertionError
 
-        return cls(
-            left=cast(Expression, left),
-            operator=ArithmeticOperator(operator),
+        return cls.from_tokens(
+            left=left,
+            operator=operator,
             right=right,
         )
 
@@ -85,10 +85,14 @@ class ArithmeticOperator(Enum):
 class NumericConstant(Expression):
     """Wrapper around numeric constant expression token."""
 
-    def __init__(self, value: str) -> None:
+    value: float
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.value = float(value)
+        value: float = float(tokens["numeric_constant_value"])
+
+        return cls(value=value)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

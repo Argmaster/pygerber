@@ -1,7 +1,12 @@
 """Wrapper for aperture select token."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 from pygerber.gerberx3.tokenizer.tokens.token import Token
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class StepRepeatBegin(Token):
@@ -10,13 +15,24 @@ class StepRepeatBegin(Token):
     Opens an SR statement and starts block accumulation.
     """
 
-    def __init__(self, x_repeat: str, y_repeat: str, x_step: str, y_step: str) -> None:
+    x_repeat: float
+    y_repeat: float
+    x_step: float
+    y_step: float
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.x_repeat = float(x_repeat)
-        self.y_repeat = float(y_repeat)
-        self.x_step = float(x_step)
-        self.y_step = float(y_step)
+        x_repeat = float(tokens["x_repeat"])
+        y_repeat = float(tokens["y_repeat"])
+        x_step = float(tokens["x_step"])
+        y_step = float(tokens["y_step"])
+        return cls(
+            x_repeat=x_repeat,
+            y_repeat=y_repeat,
+            x_step=x_step,
+            y_step=y_step,
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -28,10 +44,6 @@ class StepRepeatEnd(Token):
 
     Ends step and repeat statement.
     """
-
-    def __init__(self) -> None:
-        """Initialize token object."""
-        super().__init__()
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

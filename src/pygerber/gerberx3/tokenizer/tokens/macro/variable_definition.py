@@ -2,24 +2,28 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from pygerber.gerberx3.tokenizer.tokens.macro.element import Element
+from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+from pygerber.gerberx3.tokenizer.tokens.macro.variable_name import MacroVariableName
 from pygerber.sequence_tools import unwrap
 
 if TYPE_CHECKING:
-    from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
-    from pygerber.gerberx3.tokenizer.tokens.macro.variable_name import MacroVariableName
+    from typing_extensions import Self
 
 
-class MacroVariableDefinition(Element):
+class MacroVariableDefinition(Expression):
     """Wrapper for macro variable definition."""
 
-    def __init__(self, variable: MacroVariableName, value: Expression) -> None:
+    variable: MacroVariableName
+    value: Expression
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.variable = unwrap(variable)
-        self.value = unwrap(value)
+        variable = unwrap(tokens["macro_variable_name"])
+        value = unwrap(tokens["value"])
+        return cls(variable=variable, value=value)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

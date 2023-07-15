@@ -10,10 +10,6 @@ class BeginRegion(Token):
     Starts a region statement which creates a region by defining its contours.
     """
 
-    def __init__(self) -> None:
-        """Initialize token object."""
-        super().__init__()
-
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         return "G36*"
@@ -24,10 +20,6 @@ class EndRegion(Token):
 
     Ends the region statement.
     """
-
-    def __init__(self) -> None:
-        """Initialize token object."""
-        super().__init__()
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

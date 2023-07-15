@@ -3,7 +3,14 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any, List, Optional
+
+from pyparsing import ParseResults
+
 from pygerber.gerberx3.tokenizer.tokens.token import Token
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class AttributeToken(Token):
@@ -18,19 +25,23 @@ class FileAttribute(AttributeToken):
     deleted.
     """
 
-    def __init__(
-        self,
-        file_attribute_name: str,
-        field: list[str] | None = None,
-    ) -> None:
+    name: str
+    value: List[str]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.attribute_name = file_attribute_name
-        self.fields = field if field is not None else []
+        name: str = tokens["file_attribute_name"]
+        value = tokens.get("field", [])
+
+        if isinstance(value, ParseResults):
+            value = value.as_list()
+
+        return cls(name=name, value=value)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
-        return f"TF{','.join((self.attribute_name, *self.fields))}*"
+        return f"TF{','.join((self.name, *self.value))}*"
 
 
 class ApertureAttribute(AttributeToken):
@@ -45,19 +56,23 @@ class ApertureAttribute(AttributeToken):
     assigned to regions directly.
     """
 
-    def __init__(
-        self,
-        aperture_attribute_name: str,
-        field: list[str] | None = None,
-    ) -> None:
+    name: str
+    value: List[str]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.attribute_name = aperture_attribute_name
-        self.fields = field if field is not None else []
+        name: str = tokens["aperture_attribute_name"]
+        value = tokens.get("field", [])
+
+        if isinstance(value, ParseResults):
+            value = value.as_list()
+
+        return cls(name=name, value=value)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
-        return f"TA{','.join((self.attribute_name, *self.fields))}*"
+        return f"TA{','.join((self.name, *self.value))}*"
 
 
 class ObjectAttribute(AttributeToken):
@@ -70,19 +85,23 @@ class ObjectAttribute(AttributeToken):
     Once attached to an object they cannot be chan
     """
 
-    def __init__(
-        self,
-        object_attribute_name: str,
-        field: list[str] | None = None,
-    ) -> None:
+    name: str
+    value: List[str]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.attribute_name = object_attribute_name
-        self.fields = field if field is not None else []
+        name: str = tokens["object_attribute_name"]
+        value = tokens.get("field", [])
+
+        if isinstance(value, ParseResults):
+            value = value.as_list()
+
+        return cls(name=name, value=value)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
-        return f"TO{','.join((self.attribute_name, *self.fields))}*"
+        return f"TO{','.join((self.name, *self.value))}*"
 
 
 class DeleteAttribute(AttributeToken):
@@ -92,11 +111,14 @@ class DeleteAttribute(AttributeToken):
     dictionary. (File attributes are immutable and are not deleted.)
     """
 
-    def __init__(self, attribute_name: str | None = None) -> None:
+    name: Optional[str]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.attribute_name = attribute_name
+        name: Optional[str] = tokens.get("attribute_name")
+        return cls(name=name)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
-        return f"TD{self.attribute_name if self.attribute_name is not None else ''}*"
+        return f"TD{self.name if self.name is not None else ''}*"

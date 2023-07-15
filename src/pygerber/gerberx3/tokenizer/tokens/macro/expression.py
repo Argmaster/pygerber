@@ -2,12 +2,8 @@
 
 from __future__ import annotations
 
-from pygerber.gerberx3.tokenizer.tokens.macro.element import Element
+from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 
-class Expression(Element):
+class Expression(Token):
     """Wrapper for in-macro expression."""
-
-    def __init__(self) -> None:
-        """Initialize token object."""
-        super().__init__()

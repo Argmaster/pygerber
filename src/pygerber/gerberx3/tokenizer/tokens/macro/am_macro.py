@@ -3,23 +3,31 @@
 from __future__ import annotations
 
 from textwrap import indent
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, List
 
-from pygerber.gerberx3.tokenizer.tokens.macro.element import Element
+from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+from pygerber.gerberx3.tokenizer.tokens.token import Token
 from pygerber.sequence_tools import flatten, unwrap
 
 if TYPE_CHECKING:
-    from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+    from typing_extensions import Self
 
 
-class MacroDefinition(Element):
+class MacroDefinition(Token):
     """Container token for macro definition."""
 
-    def __init__(self, macro_name: str, macro_body: list[Expression]) -> None:
+    macro_name: str
+    macro_body: List[Expression]
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.macro_name = macro_name
-        self.macro_body = [unwrap(e) for e in flatten(macro_body)]
+        macro_name: str = tokens["macro_name"]
+        macro_body: List[Expression] = [
+            unwrap(e) for e in flatten(tokens["macro_body"])
+        ]
+
+        return cls(macro_name=macro_name, macro_body=macro_body)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

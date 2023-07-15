@@ -3,16 +3,24 @@
 
 from __future__ import annotations
 
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from typing import TYPE_CHECKING, Any
+
+from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
-class Comment(Token):
+class Comment(Expression):
     """Comment token."""
 
-    def __init__(self, string: str) -> None:
+    content: str
+
+    @classmethod
+    def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        super().__init__()
-        self.content = string
+        content: str = tokens["string"]
+        return cls(content=content)
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
