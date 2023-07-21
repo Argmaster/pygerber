@@ -12,7 +12,9 @@ if TYPE_CHECKING:
     from test.conftest import AssetLoader
 
 
-def test_ATMEGA328_Motor_Board_B_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_B_Cu(  # noqa: N802
+    asset_loader: AssetLoader,
+) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-B.Cu file."""
     Tokenizer().tokenize(
         asset_loader.load_asset(
@@ -21,7 +23,9 @@ def test_ATMEGA328_Motor_Board_B_Cu(asset_loader: AssetLoader) -> None:  # noqa:
     )
 
 
-def test_ATMEGA328_Motor_Board_B_Mask(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_B_Mask(  # noqa: N802
+    asset_loader: AssetLoader,
+) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-B.Mask file."""
     Tokenizer().tokenize(
         asset_loader.load_asset(
@@ -30,7 +34,9 @@ def test_ATMEGA328_Motor_Board_B_Mask(asset_loader: AssetLoader) -> None:  # noq
     )
 
 
-def test_ATMEGA328_Motor_Board_F_Mask(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_F_Mask(  # noqa: N802
+    asset_loader: AssetLoader,
+) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-F.Mask file."""
     Tokenizer().tokenize(
         asset_loader.load_asset(
@@ -39,7 +45,9 @@ def test_ATMEGA328_Motor_Board_F_Mask(asset_loader: AssetLoader) -> None:  # noq
     )
 
 
-def test_ATMEGA328_Motor_Board_F_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_F_Cu(  # noqa: N802
+    asset_loader: AssetLoader,
+) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-F.Cu file."""
     Tokenizer().tokenize(
         asset_loader.load_asset(
@@ -49,7 +57,9 @@ def test_ATMEGA328_Motor_Board_F_Cu(asset_loader: AssetLoader) -> None:  # noqa:
 
 
 @pytest.mark.xfail(reason="No support for G0X merged with D01")
-def test_ATMEGA328_Motor_Board_F_SilkS(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_F_SilkS(  # noqa: N802
+    asset_loader: AssetLoader,
+) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-F.SilkS file."""
     Tokenizer().tokenize(
         asset_loader.load_asset(
@@ -58,7 +68,9 @@ def test_ATMEGA328_Motor_Board_F_SilkS(asset_loader: AssetLoader) -> None:  # no
     )
 
 
-def test_ATMEGA328_Motor_Board_F_Paste(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_F_Paste(  # noqa: N802
+    asset_loader: AssetLoader,
+) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-F.Paste file."""
     Tokenizer().tokenize(
         asset_loader.load_asset(
@@ -67,7 +79,7 @@ def test_ATMEGA328_Motor_Board_F_Paste(asset_loader: AssetLoader) -> None:  # no
     )
 
 
-def test_ATMEGA328_Motor_Board_Edge_Cuts(  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_Edge_Cuts(  # noqa: N802
     asset_loader: AssetLoader,
 ) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-Edge.Cuts file."""
@@ -78,7 +90,9 @@ def test_ATMEGA328_Motor_Board_Edge_Cuts(  # noqa: N802
     )
 
 
-def test_ATMEGA328_Motor_Board_B_Paste(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_B_Paste(  # noqa: N802
+    asset_loader: AssetLoader,
+) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-B.Paste file."""
     Tokenizer().tokenize(
         asset_loader.load_asset(
@@ -87,7 +101,9 @@ def test_ATMEGA328_Motor_Board_B_Paste(asset_loader: AssetLoader) -> None:  # no
     )
 
 
-def test_ATMEGA328_Motor_Board_B_SilkS(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_tokenizer_ATMEGA328_Motor_Board_B_SilkS(  # noqa: N802
+    asset_loader: AssetLoader,
+) -> None:
     """Tokenizer test based on ATMEGA328_Motor_Board-B.SilkS file."""
     Tokenizer().tokenize(
         asset_loader.load_asset(
