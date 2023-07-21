@@ -51,6 +51,8 @@ If they fail or change files, you will have to re-add changes and commit again.
 
 ## Tokenizer:
 
+Supported Gerber X3 features:
+
 - [x] G04 - Comment - A human readable comment, does not affect the image.
 - [x] MO - Mode - Sets the unit to mm or inch.
 - [x] FS - Format specification - Sets the coordinate format, e.g. the number of
@@ -58,7 +60,6 @@ If they fail or change files, you will have to re-add changes and commit again.
 - [x] FS (Deprecated modes)
 - [x] AD - Aperture define - Defines a template-based aperture, assigns a D code to it.
 - [x] AM - Aperture macro - Defines a macro aperture template.
-- [ ] AM - **DEPRECATED** primitive Moiré
 - [x] Dnn (nn≥10) - Sets the current aperture to D code nn.
 - [x] D01 - Plot operation - Outside a region statement D01 creates a draw or arc object
       with the current aperture. Inside it adds a draw/arc segment to the contour under
@@ -87,43 +88,59 @@ If they fail or change files, you will have to re-add changes and commit again.
 - [x] TO - Attribute on object - Add an object attribute to the dictionary or modify it.
 - [x] TD - Attribute delete - Delete one or all attributes in the dictionary.
 - [x] M02 - End of file.
-- [ ] G54 - **DEPRECATED** Select aperture - This historic code optionally precedes an
-      aperture selection Dnn command. It has no effect. Sometimes used. Deprecated
-      in 2012.
-- [ ] G55 - **DEPRECATED** Prepare for flash - This historic code optionally precedes
-      D03 code. It has no effect. Very rarely used nowadays. Deprecated in 2012.
-- [ ] G70 - **DEPRECATED** Set the 'Unit' to inch - These historic codes perform a
-      function handled by the MO command. See 4.2.1. Sometimes used. Deprecated in 2012.
-- [ ] G71 - **DEPRECATED** Set the 'Unit' to mm - This is part of the historic codes
-      that perform a function handled by the MO command.
-- [ ] G90 - **DEPRECATED** Set the 'Coordinate format' to 'Absolute notation' - These
-      historic codes perform a function handled by the FS command. Very rarely used
+
+**DEPRECATED** Gerber features:
+
+- [ ] G54 - Select aperture - This historic code optionally precedes an aperture
+      selection Dnn command. It has no effect. Sometimes used. Deprecated in 2012.
+- [ ] G55 - Prepare for flash - This historic code optionally precedes D03 code. It has
+      no effect. Very rarely used nowadays. Deprecated in 2012.
+- [ ] G70 - Set the 'Unit' to inch - These historic codes perform a function handled by
+      the MO command. See 4.2.1. Sometimes used. Deprecated in 2012.
+- [ ] G71 - Set the 'Unit' to mm - This is part of the historic codes that perform a
+      function handled by the MO command.
+- [ ] G90 - Set the 'Coordinate format' to 'Absolute notation' - These historic codes
+      perform a function handled by the FS command. Very rarely used nowadays.
+      Deprecated in 2012.
+- [ ] G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
+      codes handled by the FS command.
+- [ ] G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
+      Deprecated in 2020. (Spec. 8.1.10)
+- [ ] M00 - Program stop - This historic code has the same effect as M02. Very rarely,
+      if ever, used nowadays. Deprecated in 2012.
+- [ ] M01 - Optional stop - This historic code has no effect. Very rarely, if ever, used
       nowadays. Deprecated in 2012.
-- [ ] G91 - **DEPRECATED** Set the 'Coordinate format' to 'Incremental notation' - Part
-      of the historic codes handled by the FS command.
-- [ ] G74 - **DEPRECATED** Sets single quadrant mode - Rarely used, and then typically
-      without effect. Deprecated in 2020.
-- [ ] M00 - **DEPRECATED** Program stop - This historic code has the same effect as M02.
-      Very rarely, if ever, used nowadays. Deprecated in 2012.
-- [ ] M01 - **DEPRECATED** Optional stop - This historic code has no effect. Very
-      rarely, if ever, used nowadays. Deprecated in 2012.
-- [ ] IP - **DEPRECATED** Sets the 'Image polarity' graphics state parameter - This
-      command has no effect in CAD to CAM workflows. Sometimes used, and then usually as
-      %IPPOS\*% to confirm the default and then it then has no effect. Deprecated
-      in 2013.
-- [ ] AS - **DEPRECATED** Sets the 'Axes correspondence' graphics state parameter -
-      Deprecated in 2013. Rarely used nowadays.
-- [ ] IR - **DEPRECATED** Sets 'Image rotation' graphics state parameter - Deprecated
-      in 2013. Rarely used nowadays.
-- [ ] MI - **DEPRECATED** Sets 'Image mirroring' graphics state parameter
-- [ ] OF - **DEPRECATED** Sets 'Image offset' graphics state parameter
-- [ ] SF - **DEPRECATED** Sets 'Scale factor' graphics state parameter
-- [ ] IN - **DEPRECATED** Sets the name of the file image. Has no effect. It is comment.
-      Sometimes used. Deprecated in 2013.
-- [ ] LN - **DEPRECATED** Loads a name. Has no effect. It is a comment. Sometimes used.
-      Deprecated in 2013.
+- [ ] IP - Sets the 'Image polarity' graphics state parameter - This command has no
+      effect in CAD to CAM workflows. Sometimes used, and then usually as %IPPOS\*% to
+      confirm the default and then it then has no effect. Deprecated in 2013. (Spec.
+      8.1.4)
+- [ ] AS - Sets the 'Axes correspondence' graphics state parameter - Deprecated in 2013.
+      Rarely used nowadays. (Spec. 8.1.2)
+- [ ] IR - Sets 'Image rotation' graphics state parameter - Deprecated in 2013. Rarely
+      used nowadays. (Spec. 8.1.5)
+- [ ] MI - Sets 'Image mirroring' graphics state parameter (Spec. 8.1.7)
+- [ ] OF - Sets 'Image offset' graphics state parameter (Spec. 8.1.8)
+- [ ] SF - Sets 'Scale factor' graphics state parameter (Spec. 8.1.9)
+- [ ] IN - Sets the name of the file image. Has no effect. It is comment. Sometimes
+      used. Deprecated in 2013. (Spec. 8.1.3)
+- [ ] LN - Loads a name. Has no effect. It is a comment. Sometimes used. Deprecated
+      in 2013. (Spec. 8.1.6)
+- [ ] Combining G01/G02/G03 and D01 in a single command. (Spec 8.3.1)
+- [ ] Coordinate Data without Operation Code. (Spec 8.3.2)
+- [ ] Style Variations in Command Codes. (Spec 8.3.3)
+- [ ] Deprecated usage of SR. (Spec 8.3.4)
+- [ ] Deprecated Attribute Values. (Spec 8.4)
+- [ ] Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
+      (Spec. 8.2)
+- [ ] Rectangular Hole in Standard Apertures (Spec. 8.2.2)
+- [ ] Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)
+- [ ] Macro Primitive Code 2, Vector Line (Spec. 8.2.4)
+- [ ] Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)
+- [ ] Macro Primitive Code 6, Moiré (Spec. 8.2.6)
 
 ## Parsing
+
+Supported Gerber X3 features:
 
 - [ ] G04 - Comment - A human readable comment, does not affect the image.
 - [ ] MO - Mode - Sets the unit to mm or inch.
@@ -160,41 +177,55 @@ If they fail or change files, you will have to re-add changes and commit again.
 - [ ] TO - Attribute on object - Add an object attribute to the dictionary or modify it.
 - [ ] TD - Attribute delete - Delete one or all attributes in the dictionary.
 - [ ] M02 - End of file.
-- [ ] G54 - **DEPRECATED** Select aperture - This historic code optionally precedes an
-      aperture selection Dnn command. It has no effect. Sometimes used. Deprecated
-      in 2012.
-- [ ] G55 - **DEPRECATED** Prepare for flash - This historic code optionally precedes
-      D03 code. It has no effect. Very rarely used nowadays. Deprecated in 2012.
-- [ ] G70 - **DEPRECATED** Set the 'Unit' to inch - These historic codes perform a
-      function handled by the MO command. See 4.2.1. Sometimes used. Deprecated in 2012.
-- [ ] G71 - **DEPRECATED** Set the 'Unit' to mm - This is part of the historic codes
-      that perform a function handled by the MO command.
-- [ ] G90 - **DEPRECATED** Set the 'Coordinate format' to 'Absolute notation' - These
-      historic codes perform a function handled by the FS command. Very rarely used
+
+Supported **DEPRECATED** Gerber features:
+
+- [ ] G54 - Select aperture - This historic code optionally precedes an aperture
+      selection Dnn command. It has no effect. Sometimes used. Deprecated in 2012.
+- [ ] G55 - Prepare for flash - This historic code optionally precedes D03 code. It has
+      no effect. Very rarely used nowadays. Deprecated in 2012.
+- [ ] G70 - Set the 'Unit' to inch - These historic codes perform a function handled by
+      the MO command. See 4.2.1. Sometimes used. Deprecated in 2012.
+- [ ] G71 - Set the 'Unit' to mm - This is part of the historic codes that perform a
+      function handled by the MO command.
+- [ ] G90 - Set the 'Coordinate format' to 'Absolute notation' - These historic codes
+      perform a function handled by the FS command. Very rarely used nowadays.
+      Deprecated in 2012.
+- [ ] G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
+      codes handled by the FS command.
+- [ ] G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
+      Deprecated in 2020. (Spec. 8.1.10)
+- [ ] M00 - Program stop - This historic code has the same effect as M02. Very rarely,
+      if ever, used nowadays. Deprecated in 2012.
+- [ ] M01 - Optional stop - This historic code has no effect. Very rarely, if ever, used
       nowadays. Deprecated in 2012.
-- [ ] G91 - **DEPRECATED** Set the 'Coordinate format' to 'Incremental notation' - Part
-      of the historic codes handled by the FS command.
-- [ ] G74 - **DEPRECATED** Sets single quadrant mode - Rarely used, and then typically
-      without effect. Deprecated in 2020.
-- [ ] M00 - **DEPRECATED** Program stop - This historic code has the same effect as M02.
-      Very rarely, if ever, used nowadays. Deprecated in 2012.
-- [ ] M01 - **DEPRECATED** Optional stop - This historic code has no effect. Very
-      rarely, if ever, used nowadays. Deprecated in 2012.
-- [ ] IP - **DEPRECATED** Sets the 'Image polarity' graphics state parameter - This
-      command has no effect in CAD to CAM workflows. Sometimes used, and then usually as
-      %IPPOS\*% to confirm the default and then it then has no effect. Deprecated
-      in 2013.
-- [ ] AS - **DEPRECATED** Sets the 'Axes correspondence' graphics state parameter -
-      Deprecated in 2013. Rarely used nowadays.
-- [ ] IR - **DEPRECATED** Sets 'Image rotation' graphics state parameter - Deprecated
-      in 2013. Rarely used nowadays.
-- [ ] MI - **DEPRECATED** Sets 'Image mirroring' graphics state parameter
-- [ ] OF - **DEPRECATED** Sets 'Image offset' graphics state parameter
-- [ ] SF - **DEPRECATED** Sets 'Scale factor' graphics state parameter
-- [ ] IN - **DEPRECATED** Sets the name of the file image. Has no effect. It is comment.
-      Sometimes used. Deprecated in 2013.
-- [ ] LN - **DEPRECATED** Loads a name. Has no effect. It is a comment. Sometimes used.
-      Deprecated in 2013.
+- [ ] IP - Sets the 'Image polarity' graphics state parameter - This command has no
+      effect in CAD to CAM workflows. Sometimes used, and then usually as %IPPOS\*% to
+      confirm the default and then it then has no effect. Deprecated in 2013. (Spec.
+      8.1.4)
+- [ ] AS - Sets the 'Axes correspondence' graphics state parameter - Deprecated in 2013.
+      Rarely used nowadays. (Spec. 8.1.2)
+- [ ] IR - Sets 'Image rotation' graphics state parameter - Deprecated in 2013. Rarely
+      used nowadays. (Spec. 8.1.5)
+- [ ] MI - Sets 'Image mirroring' graphics state parameter (Spec. 8.1.7)
+- [ ] OF - Sets 'Image offset' graphics state parameter (Spec. 8.1.8)
+- [ ] SF - Sets 'Scale factor' graphics state parameter (Spec. 8.1.9)
+- [ ] IN - Sets the name of the file image. Has no effect. It is comment. Sometimes
+      used. Deprecated in 2013. (Spec. 8.1.3)
+- [ ] LN - Loads a name. Has no effect. It is a comment. Sometimes used. Deprecated
+      in 2013. (Spec. 8.1.6)
+- [ ] Combining G01/G02/G03 and D01 in a single command. (Spec 8.3.1)
+- [ ] Coordinate Data without Operation Code. (Spec 8.3.2)
+- [ ] Style Variations in Command Codes. (Spec 8.3.3)
+- [ ] Deprecated usage of SR. (Spec 8.3.4)
+- [ ] Deprecated Attribute Values. (Spec 8.4)
+- [ ] Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
+      (Spec. 8.2)
+- [ ] Rectangular Hole in Standard Apertures (Spec. 8.2.2)
+- [ ] Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)
+- [ ] Macro Primitive Code 2, Vector Line (Spec. 8.2.4)
+- [ ] Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)
+- [ ] Macro Primitive Code 6, Moiré (Spec. 8.2.6)
 
 ## Drawing
 
