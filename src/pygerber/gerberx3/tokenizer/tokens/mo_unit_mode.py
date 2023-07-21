@@ -1,13 +1,17 @@
 """Wrapper for set unit mode token."""
 from __future__ import annotations
 
+import logging
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
+from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from pygerber.gerberx3.parser.state import State
 
 
 class UnitMode(Token):
@@ -22,7 +26,29 @@ class UnitMode(Token):
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
         unit: Unit = Unit(tokens["unit"])
+        if unit == Unit.Inches:
+            logging.warning(
+                "Using metric units is recommended. Imperial units will be deprecated "
+                "in future. (See 4.2.1 in Gerber Layer Format Specification)",
+            )
         return cls(unit=unit)
+
+    def update_drawing_state(self, state: State) -> Tuple[State, Iterable[DrawAction]]:
+        """Update drawing state."""
+        if state.draw_units is not None:
+            logging.warning(
+                "Overriding coordinate format is illegal. "
+                "(See 4.2.1 in Gerber Layer Format Specification)",
+            )
+        return (
+            state.model_copy(
+                update={
+                    "draw_units": self.unit,
+                },
+                deep=True,
+            ),
+            (),
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

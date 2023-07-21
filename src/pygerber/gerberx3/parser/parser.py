@@ -10,7 +10,7 @@ from typing import Callable, Generator, Optional
 from pygerber.backend import BackendName
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.draw_list import DrawList
-from pygerber.gerberx3.parser.errors import OnCreateDrawActionError, ParserError
+from pygerber.gerberx3.parser.errors import OnUpdateDrawingStateError, ParserError
 from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.tokenizer.tokenizer import TokenStack
 from pygerber.gerberx3.tokenizer.tokens.token import Token
@@ -53,13 +53,15 @@ class Parser:
         """Iterate over tokens in stack and parse them."""
         for token in self.tokens:
             self._update_drawing_state(token)
-            self._create_draw_action(token)
 
             yield token
 
     def _update_drawing_state(self, token: Token) -> None:
         try:
-            self.state = token.update_drawing_state(self.state)
+            self.state, actions = token.update_drawing_state(self.state)
+            if actions is not None:
+                self.operations.extend(actions)
+
         except Exception as e:  # noqa: BLE001
             if self.options.on_update_drawing_state_error == ParserOnErrorAction.Ignore:
                 pass
@@ -68,43 +70,18 @@ class Parser:
                 self.options.on_update_drawing_state_error == ParserOnErrorAction.Raise
             ):
                 if not isinstance(e, ParserError):
-                    raise OnCreateDrawActionError from e
+                    raise OnUpdateDrawingStateError from e
 
                 raise
 
             elif self.options.on_update_drawing_state_error == ParserOnErrorAction.Warn:
                 logging.warning(
-                    "Encountered fatal error during call to create_draw_action() "
+                    "Encountered fatal error during call to update_drawing_state() "
                     "of '%s' token. Parser will skip this token and continue.",
                     token,
                 )
             else:
                 self.options.on_update_drawing_state_error(e, self, token)
-
-    def _create_draw_action(self, token: Token) -> None:
-        try:
-            action = token.create_draw_action(self.state)
-            if action is not None:
-                self.operations.append(action)
-
-        except Exception as e:  # noqa: BLE001
-            if self.options.on_create_draw_action_error == ParserOnErrorAction.Ignore:
-                pass
-
-            elif self.options.on_create_draw_action_error == ParserOnErrorAction.Raise:
-                if not isinstance(e, ParserError):
-                    raise OnCreateDrawActionError from e
-
-                raise
-
-            elif self.options.on_create_draw_action_error == ParserOnErrorAction.Warn:
-                logging.warning(
-                    "Encountered fatal error during call to create_draw_action() "
-                    "of '%s' token. Parser will skip this token and continue.",
-                    token,
-                )
-            else:
-                self.options.on_create_draw_action_error(e, self, token)
 
 
 class ParserOnErrorAction(Enum):
@@ -124,8 +101,6 @@ class ParserOptions:
         initial_state: Optional[State] = None,
         on_update_drawing_state_error: Callable[[Exception, Parser, Token], None]
         | ParserOnErrorAction = ParserOnErrorAction.Raise,
-        on_create_draw_action_error: Callable[[Exception, Parser, Token], None]
-        | ParserOnErrorAction = ParserOnErrorAction.Raise,
     ) -> None:
         """Initialize options."""
         self.backend = (
@@ -135,4 +110,3 @@ class ParserOptions:
         )
         self.initial_state = initial_state
         self.on_update_drawing_state_error = on_update_drawing_state_error
-        self.on_create_draw_action_error = on_create_draw_action_error

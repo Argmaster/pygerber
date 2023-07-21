@@ -1,7 +1,7 @@
 """Base class for creating token classes."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
 from pydantic import BaseModel
 from pyparsing import Group
@@ -64,10 +64,6 @@ class Token(BaseModel):
         """Index return self."""
         return self
 
-    def update_drawing_state(self, state: State) -> State:
+    def update_drawing_state(self, state: State) -> Tuple[State, Iterable[DrawAction]]:
         """Update drawing state."""
-        return state
-
-    def create_draw_action(self, state: State) -> DrawAction | None:  # noqa: ARG002
-        """Create new draw action."""
-        return None
+        return state, ()

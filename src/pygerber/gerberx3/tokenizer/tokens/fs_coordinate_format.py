@@ -6,10 +6,11 @@ from __future__ import annotations
 import logging
 from decimal import Decimal
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
 from pydantic import BaseModel
 
+from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
 from pygerber.gerberx3.parser.errors import (
     IncrementalCoordinatesNotSupportedError,
     InvalidCoordinateLengthError,
@@ -56,21 +57,24 @@ class CoordinateFormat(Token):
             y_format=y_format,
         )
 
-    def update_drawing_state(self, state: State) -> State:
+    def update_drawing_state(self, state: State) -> Tuple[State, Iterable[DrawAction]]:
         """Set coordinate parser."""
         if state.coordinate_parser is not None:
             logging.warning(
                 "Overriding coordinate format is illegal."
                 "(See 4.2.2 in Gerber Layer Format Specification)",
             )
-        return state.model_copy(
-            update={
-                "coordinate_parser": CoordinateParser.new(
-                    x_format=self.x_format,
-                    y_format=self.y_format,
-                ),
-            },
-            deep=True,
+        return (
+            state.model_copy(
+                update={
+                    "coordinate_parser": CoordinateParser.new(
+                        x_format=self.x_format,
+                        y_format=self.y_format,
+                    ),
+                },
+                deep=True,
+            ),
+            (),
         )
 
 
