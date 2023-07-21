@@ -6,11 +6,12 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel
 from pyparsing import Group
 
+from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+
 if TYPE_CHECKING:
     from pyparsing import ParserElement, ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.draw_actions.draw_action import DrawAction
     from pygerber.gerberx3.parser.state import State
 
 

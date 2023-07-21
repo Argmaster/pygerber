@@ -26,30 +26,14 @@ class Draw(Token):
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        x = tokens.get("x")
-        x = (
-            Coordinate(coordinate_type=CoordinateType.X, raw_offset=x)
-            if x is not None
-            else Coordinate(coordinate_type=CoordinateType.NULL, raw_offset="")
-        )
-        y = tokens.get("y")
-        y = (
-            Coordinate(coordinate_type=CoordinateType.Y, raw_offset=y)
-            if y is not None
-            else Coordinate(coordinate_type=CoordinateType.NULL, raw_offset="")
-        )
-        i = tokens.get("i")
-        i = (
-            Coordinate(coordinate_type=CoordinateType.I, raw_offset=i)
-            if i is not None
-            else Coordinate(coordinate_type=CoordinateType.NULL, raw_offset="")
-        )
-        j = tokens.get("j")
-        j = (
-            Coordinate(coordinate_type=CoordinateType.J, raw_offset=j)
-            if j is not None
-            else Coordinate(coordinate_type=CoordinateType.NULL, raw_offset="")
-        )
+        x = tokens.get("x", "0")
+        x = Coordinate.new(coordinate_type=CoordinateType.X, offset=x)
+        y = tokens.get("y", "0")
+        y = Coordinate.new(coordinate_type=CoordinateType.Y, offset=y)
+        i = tokens.get("i", "0")
+        i = Coordinate.new(coordinate_type=CoordinateType.X, offset=i)
+        j = tokens.get("j", "0")
+        j = Coordinate.new(coordinate_type=CoordinateType.Y, offset=j)
         return cls(x=x, y=y, i=i, j=j)
 
     def __str__(self) -> str:

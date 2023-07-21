@@ -23,18 +23,10 @@ class Flash(Token):
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        x = tokens.get("x")
-        x = (
-            Coordinate(coordinate_type=CoordinateType.X, raw_offset=x)
-            if x is not None
-            else Coordinate(coordinate_type=CoordinateType.NULL, raw_offset="")
-        )
-        y = tokens.get("y")
-        y = (
-            Coordinate(coordinate_type=CoordinateType.Y, raw_offset=y)
-            if y is not None
-            else Coordinate(coordinate_type=CoordinateType.NULL, raw_offset="")
-        )
+        x = tokens.get("x", "0")
+        x = Coordinate.new(coordinate_type=CoordinateType.X, offset=x)
+        y = tokens.get("y", "0")
+        y = Coordinate.new(coordinate_type=CoordinateType.Y, offset=y)
         return cls(x=x, y=y)
 
     def __str__(self) -> str:
