@@ -34,3 +34,9 @@ class OnUpdateDrawingStateError(ParserError):
     """Raised when parser encounters fatal failure from non-parser specific
     exception during call to .update_drawing_state() call.
     """
+
+
+class UnitNotSetError(ParserError):
+    """Raised when operation which requires units to be set is executed before units
+    are set.
+    """

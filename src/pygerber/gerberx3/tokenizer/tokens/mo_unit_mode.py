@@ -2,15 +2,16 @@
 from __future__ import annotations
 
 import logging
-from enum import Enum
 from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
-from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+from pygerber.gerberx3.state_enums import Unit
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
     from pygerber.gerberx3.parser.state import State
 
 
@@ -33,7 +34,11 @@ class UnitMode(Token):
             )
         return cls(unit=unit)
 
-    def update_drawing_state(self, state: State) -> Tuple[State, Iterable[DrawAction]]:
+    def update_drawing_state(
+        self,
+        state: State,
+        _backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
         """Update drawing state."""
         if state.draw_units is not None:
             logging.warning(
@@ -53,10 +58,3 @@ class UnitMode(Token):
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         return f"%MM{self.unit.value}*%"
-
-
-class Unit(Enum):
-    """Aperture unit."""
-
-    Millimeters = "MM"
-    Inches = "IN"

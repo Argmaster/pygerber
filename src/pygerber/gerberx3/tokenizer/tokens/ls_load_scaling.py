@@ -1,6 +1,7 @@
 """Wrapper for load scaling token."""
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
@@ -15,12 +16,12 @@ class LoadScaling(Token):
     Loads the scaling object transformation parameter.
     """
 
-    scaling: float
+    scaling: Decimal
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        scaling = float(tokens["scaling"])
+        scaling = Decimal(tokens["scaling"])
         return cls(scaling=scaling)
 
     def __str__(self) -> str:

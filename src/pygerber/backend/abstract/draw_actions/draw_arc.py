@@ -1,12 +1,8 @@
 """Abstract base class for creating arc draw actions."""
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
 
 
-class DrawArc(ABC):
+class DrawArc(DrawAction):
     """Abstract base class for creating arc drawing actions."""
-
-    @abstractmethod
-    def draw(self) -> None:
-        """Execute draw action."""

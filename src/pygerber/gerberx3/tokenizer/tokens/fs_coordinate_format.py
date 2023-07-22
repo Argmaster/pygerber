@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
 from pydantic import BaseModel
 
-from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
 from pygerber.gerberx3.parser.errors import (
     IncrementalCoordinatesNotSupportedError,
     InvalidCoordinateLengthError,
@@ -23,6 +22,8 @@ from pygerber.gerberx3.tokenizer.tokens.token import Token
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
     from pygerber.gerberx3.parser.state import State
 
 
@@ -57,7 +58,11 @@ class CoordinateFormat(Token):
             y_format=y_format,
         )
 
-    def update_drawing_state(self, state: State) -> Tuple[State, Iterable[DrawAction]]:
+    def update_drawing_state(
+        self,
+        state: State,
+        _backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
         """Set coordinate parser."""
         if state.coordinate_parser is not None:
             logging.warning(

@@ -1,9 +1,9 @@
-"""Backend related errors."""
+"""Base error classes used in this module."""
 from __future__ import annotations
 
 
-class BackendError(Exception):
-    """Base class used by all backend errors."""
+class BackendError(ValueError):
+    """Base class for backend errors."""
 
 
 class BackendNotSupportedError(BackendError):

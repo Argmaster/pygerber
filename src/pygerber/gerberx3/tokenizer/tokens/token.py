@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Any, Iterable, Tuple
 from pydantic import BaseModel
 from pyparsing import Group
 
-from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
-
 if TYPE_CHECKING:
     from pyparsing import ParserElement, ParseResults
     from typing_extensions import Self
 
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
     from pygerber.gerberx3.parser.state import State
 
 
@@ -64,6 +64,10 @@ class Token(BaseModel):
         """Index return self."""
         return self
 
-    def update_drawing_state(self, state: State) -> Tuple[State, Iterable[DrawAction]]:
+    def update_drawing_state(
+        self,
+        state: State,
+        _backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
         """Update drawing state."""
         return state, ()

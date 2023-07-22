@@ -4,17 +4,15 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Dict, Optional, Tuple
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
-from pygerber.backend.abstract.aperture_handle import ApertureHandle
+from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
+from pygerber.gerberx3.parser.errors import UnitNotSetError
+from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
-from pygerber.gerberx3.tokenizer.tokens.g0n_set_draw_mode import DrawMode
-from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import Mirroring
-from pygerber.gerberx3.tokenizer.tokens.lp_load_polarity import Polarity
-from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import Unit
 
 
 class State(BaseModel):
@@ -43,10 +41,10 @@ class State(BaseModel):
     mirroring: Mirroring = Mirroring.NoMirroring
     # LR  | Load rotation |  Loads the rotation object transformation   | 4.9.4
     #                       parameter.
-    rotation: float = 0.0
+    rotation: Decimal = Decimal("0.0")
     # LS  | Load scaling |   Loads the scale object transformation      | 4.9.5
     #                       parameter
-    scaling: float = 1.0
+    scaling: Decimal = Decimal("1.0")
     # G36 | |   Starts a region statement which creates a region by     | 4.10
     #     | |   defining its contours.
     # G37 | |   Ends the region statement.                              | 4.10
@@ -61,6 +59,13 @@ class State(BaseModel):
     # TF  | |   Attribute on fileSet a file attribute.                  | 5.3
     # TD  | |   Attribute deleteDelete one or all attributes in the     | 5.5
     #     | |   dictionary.                                             |
-    file_attributes: Dict[str, str] = {}
+    file_attributes: Dict[str, str] = Field(default_factory=dict)
 
-    apertures: Dict[ApertureID, ApertureHandle] = {}
+    apertures: Dict[ApertureID, PublicApertureHandle] = Field(default_factory=dict)
+
+    @property
+    def units(self) -> Unit:
+        """Get drawing unit."""
+        if self.draw_units is None:
+            raise UnitNotSetError
+        return self.draw_units

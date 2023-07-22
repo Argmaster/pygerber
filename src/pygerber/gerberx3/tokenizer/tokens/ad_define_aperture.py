@@ -17,13 +17,20 @@ a pad. This is just confusing. If there is nothing, put nothing.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Optional
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Tuple
 
+from pygerber.backend.abstract.offset import Offset
+from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
+
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.gerberx3.parser.state import State
 
 
 class DefineAperture(Token):
@@ -74,24 +81,59 @@ class DefineCircle(DefineAperture):
     Defines a circle.
     """
 
-    aperture_identifier: str
-    diameter: float
-    hole_diameter: Optional[float]
+    aperture_id: ApertureID
+    diameter: Decimal
+    hole_diameter: Optional[Decimal]
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        aperture_identifier: str = tokens["aperture_identifier"]
-        diameter: float = float(tokens["diameter"])
-        hole_diameter: Optional[float] = (
-            float(tokens["hole_diameter"])
+        aperture_id = ApertureID(tokens["aperture_identifier"])
+        diameter: Decimal = Decimal(tokens["diameter"])
+        hole_diameter: Optional[Decimal] = (
+            Decimal(tokens["hole_diameter"])
             if tokens.get("hole_diameter") is not None
             else None
         )
         return cls(
-            aperture_identifier=aperture_identifier,
+            aperture_id=aperture_id,
             diameter=diameter,
             hole_diameter=hole_diameter,
+        )
+
+    def update_drawing_state(
+        self,
+        state: State,
+        backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
+        """Update drawing state."""
+        handle = backend.create_aperture_handle(self.aperture_id)
+        handle.add_draw(
+            backend.get_aperture_draw_circle_cls()(
+                diameter=Offset.new(self.diameter, state.units),
+                polarity=state.polarity,
+            ),
+        )
+        if self.hole_diameter is not None:
+            handle.add_draw(
+                backend.get_aperture_draw_circle_cls()(
+                    diameter=Offset.new(self.hole_diameter, state.units),
+                    polarity=state.polarity.invert(),
+                ),
+            )
+        frozen_handle = handle.get_public_handle()
+
+        new_aperture_dict = {**state.apertures}
+        new_aperture_dict[self.aperture_id] = frozen_handle
+
+        return (
+            state.model_copy(
+                update={
+                    "apertures": new_aperture_dict,
+                },
+                deep=True,
+            ),
+            (),
         )
 
     def __str__(self) -> str:
@@ -99,7 +141,7 @@ class DefineCircle(DefineAperture):
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
-        return f"%AD{self.aperture_identifier}C,{self.diameter}{suffix}*%"
+        return f"%AD{self.aperture_id}C,{self.diameter}{suffix}*%"
 
 
 class DefineRectangle(DefineAperture):
@@ -108,24 +150,24 @@ class DefineRectangle(DefineAperture):
     Defines a rectangle
     """
 
-    aperture_identifier: str
-    x_size: float
-    y_size: float
-    hole_diameter: Optional[float]
+    aperture_id: ApertureID
+    x_size: Decimal
+    y_size: Decimal
+    hole_diameter: Optional[Decimal]
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        aperture_identifier: str = tokens["aperture_identifier"]
-        x_size: float = float(tokens["x_size"])
-        y_size: float = float(tokens["y_size"])
-        hole_diameter: Optional[float] = (
-            float(tokens["hole_diameter"])
+        aperture_id = ApertureID(tokens["aperture_identifier"])
+        x_size: Decimal = Decimal(tokens["x_size"])
+        y_size: Decimal = Decimal(tokens["y_size"])
+        hole_diameter: Optional[Decimal] = (
+            Decimal(tokens["hole_diameter"])
             if tokens.get("hole_diameter") is not None
             else None
         )
         return cls(
-            aperture_identifier=aperture_identifier,
+            aperture_id=aperture_id,
             x_size=x_size,
             y_size=y_size,
             hole_diameter=hole_diameter,
@@ -136,7 +178,7 @@ class DefineRectangle(DefineAperture):
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
-        return f"%AD{self.aperture_identifier}R,{self.x_size}X{self.y_size}{suffix}*%"
+        return f"%AD{self.aperture_id}R,{self.x_size}X{self.y_size}{suffix}*%"
 
 
 class DefineObround(DefineAperture):
@@ -145,24 +187,24 @@ class DefineObround(DefineAperture):
     Defines a obround.
     """
 
-    aperture_identifier: str
-    x_size: float
-    y_size: float
-    hole_diameter: Optional[float]
+    aperture_id: ApertureID
+    x_size: Decimal
+    y_size: Decimal
+    hole_diameter: Optional[Decimal]
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        aperture_identifier: str = tokens["aperture_identifier"]
-        x_size: float = float(tokens["x_size"])
-        y_size: float = float(tokens["y_size"])
-        hole_diameter: Optional[float] = (
-            float(tokens["hole_diameter"])
+        aperture_id = ApertureID(tokens["aperture_identifier"])
+        x_size: Decimal = Decimal(tokens["x_size"])
+        y_size: Decimal = Decimal(tokens["y_size"])
+        hole_diameter: Optional[Decimal] = (
+            Decimal(tokens["hole_diameter"])
             if tokens.get("hole_diameter") is not None
             else None
         )
         return cls(
-            aperture_identifier=aperture_identifier,
+            aperture_id=aperture_id,
             x_size=x_size,
             y_size=y_size,
             hole_diameter=hole_diameter,
@@ -173,7 +215,7 @@ class DefineObround(DefineAperture):
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
-        return f"%AD{self.aperture_identifier}O,{self.x_size}X{self.y_size}{suffix}*%"
+        return f"%AD{self.aperture_id}O,{self.x_size}X{self.y_size}{suffix}*%"
 
 
 class DefinePolygon(DefineAperture):
@@ -182,28 +224,28 @@ class DefinePolygon(DefineAperture):
     Defines a polygon.
     """
 
-    aperture_identifier: str
-    outer_diameter: float
+    aperture_id: ApertureID
+    outer_diameter: Decimal
     number_of_vertices: int
-    rotation: Optional[float]
-    hole_diameter: Optional[float]
+    rotation: Optional[Decimal]
+    hole_diameter: Optional[Decimal]
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        aperture_identifier: str = tokens["aperture_identifier"]
-        outer_diameter: float = float(tokens["outer_diameter"])
+        aperture_id = ApertureID(tokens["aperture_identifier"])
+        outer_diameter: Decimal = Decimal(tokens["outer_diameter"])
         number_of_vertices: int = int(tokens["number_of_vertices"])
-        rotation: Optional[float] = (
-            float(tokens["rotation"]) if tokens.get("rotation") is not None else None
+        rotation: Optional[Decimal] = (
+            Decimal(tokens["rotation"]) if tokens.get("rotation") is not None else None
         )
-        hole_diameter: Optional[float] = (
-            float(tokens["hole_diameter"])
+        hole_diameter: Optional[Decimal] = (
+            Decimal(tokens["hole_diameter"])
             if tokens.get("hole_diameter") is not None
             else None
         )
         return cls(
-            aperture_identifier=aperture_identifier,
+            aperture_id=aperture_id,
             outer_diameter=outer_diameter,
             number_of_vertices=number_of_vertices,
             rotation=rotation,
@@ -216,7 +258,7 @@ class DefinePolygon(DefineAperture):
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
         return (
-            f"%AD{self.aperture_identifier}P,{self.outer_diameter}"
+            f"%AD{self.aperture_id}P,{self.outer_diameter}"
             f"X{self.number_of_vertices}X{self.rotation}{suffix}*%"
         )
 
@@ -228,24 +270,21 @@ class DefineMacro(DefineAperture):
     """
 
     aperture_type: str
-    aperture_identifier: str
+    aperture_id: ApertureID
     am_param: List[str]
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
         aperture_type: str = tokens["aperture_type"]
-        aperture_identifier: str = tokens["aperture_identifier"]
+        aperture_id = ApertureID(tokens["aperture_identifier"])
         am_param: list[str] = tokens.get("am_param", [])
         return cls(
             aperture_type=aperture_type,
-            aperture_identifier=aperture_identifier,
+            aperture_id=aperture_id,
             am_param=am_param,
         )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
-        return (
-            f"%AD{self.aperture_identifier}{self.aperture_type},"
-            f"{'X'.join(self.am_param)}"
-        )
+        return f"%AD{self.aperture_id}{self.aperture_type},{'X'.join(self.am_param)}"

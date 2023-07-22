@@ -1,9 +1,9 @@
 """Wrapper for load polarity token."""
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+from pygerber.gerberx3.state_enums import Polarity
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
@@ -27,10 +27,3 @@ class LoadPolarity(Token):
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         return f"LP{self.polarity.value}*"
-
-
-class Polarity(Enum):
-    """Aperture polarity."""
-
-    Clear = "C"
-    Dark = "D"

@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 
 from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.errors import BackendNotSupportedError
+from pygerber.backend.abstract.errors import BackendNotSupportedError
 from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 
 

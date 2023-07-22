@@ -7,9 +7,10 @@ import logging
 from enum import Enum
 from typing import Callable, Generator, Optional
 
-from pygerber.backend import BackendName
 from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.draw_list import DrawList
+from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+from pygerber.backend.abstract.draw_actions_handle import DrawActionsHandle
+from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 from pygerber.gerberx3.parser.errors import OnUpdateDrawingStateError, ParserError
 from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.tokenizer.tokenizer import TokenStack
@@ -40,14 +41,26 @@ class Parser:
             if self.options.initial_state is None
             else self.options.initial_state
         )
-        self.operations: DrawList = DrawList()
+        self.draw_actions: list[DrawAction] = []
 
-    def parse(self) -> DrawList:
+    @property
+    def backend(self) -> Backend:
+        """Get reference to backend object."""
+        return self.options.backend
+
+    def parse(self) -> DrawActionsHandle:
         """Parse token stack."""
         for _ in self.parse_iter():
             pass
 
-        return self.operations
+        return self.get_draw_actions_handle()
+
+    def get_draw_actions_handle(self) -> DrawActionsHandle:
+        """Return handle to drawing actions."""
+        return self.backend.get_draw_actions_handle_cls()(
+            self.draw_actions,
+            self.backend,
+        )
 
     def parse_iter(self) -> Generator[Token, None, None]:
         """Iterate over tokens in stack and parse them."""
@@ -58,9 +71,9 @@ class Parser:
 
     def _update_drawing_state(self, token: Token) -> None:
         try:
-            self.state, actions = token.update_drawing_state(self.state)
+            self.state, actions = token.update_drawing_state(self.state, self.backend)
             if actions is not None:
-                self.operations.extend(actions)
+                self.draw_actions.extend(actions)
 
         except Exception as e:  # noqa: BLE001
             if self.options.on_update_drawing_state_error == ParserOnErrorAction.Ignore:
@@ -97,16 +110,12 @@ class ParserOptions:
 
     def __init__(
         self,
-        backend: BackendName | str | Backend = BackendName.Rasterized2D,
-        initial_state: Optional[State] = None,
+        backend: Backend | None = None,
+        initial_state: State | None = None,
         on_update_drawing_state_error: Callable[[Exception, Parser, Token], None]
         | ParserOnErrorAction = ParserOnErrorAction.Raise,
     ) -> None:
         """Initialize options."""
-        self.backend = (
-            BackendName.get_backend_class(backend)()
-            if not isinstance(backend, Backend)
-            else backend
-        )
+        self.backend = Rasterized2DBackend() if backend is None else backend
         self.initial_state = initial_state
         self.on_update_drawing_state_error = on_update_drawing_state_error

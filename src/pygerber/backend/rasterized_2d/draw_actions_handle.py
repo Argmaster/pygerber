@@ -1,10 +1,8 @@
 """Contains class wrapping list of draw operations created by Gerber parser."""
 from __future__ import annotations
 
-from typing import List
-
-from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+from pygerber.backend.abstract.draw_actions_handle import DrawActionsHandle
 
 
-class DrawList(List[DrawAction]):
+class Rasterized2DDrawActionsHandle(DrawActionsHandle):
     """List of drawing operations produced by Gerber parser."""

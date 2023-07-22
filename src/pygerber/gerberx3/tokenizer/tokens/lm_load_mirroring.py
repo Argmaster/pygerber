@@ -1,9 +1,9 @@
 """Wrapper for load mirroring token."""
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING, Any
 
+from pygerber.gerberx3.state_enums import Mirroring
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
@@ -27,12 +27,3 @@ class LoadMirroring(Token):
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         return f"LM{self.mirroring.value}*"
-
-
-class Mirroring(Enum):
-    """Aperture mirroring."""
-
-    NoMirroring = "N"
-    XY = "XY"
-    X = "X"
-    Y = "Y"
