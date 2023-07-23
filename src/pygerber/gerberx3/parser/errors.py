@@ -40,3 +40,19 @@ class UnitNotSetError(ParserError):
     """Raised when operation which requires units to be set is executed before units
     are set.
     """
+
+
+class ApertureNotDefinedError(ParserError):
+    """Raised when undefined aperture is selected."""
+
+
+class CoordinateFormatNotSetError(ParserError):
+    """Raised when coordinate parser is requested before coordinate format was set."""
+
+
+class ApertureNotSelectedError(ParserError):
+    """Raised when attempting to use aperture without selecting it first."""
+
+
+class ExitParsingProcessInterrupt(Exception):  # noqa: N818
+    """Raised to stop parsing."""

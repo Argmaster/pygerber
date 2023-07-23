@@ -12,6 +12,8 @@ from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pygerber.backend.abstract.aperture_draws.aperture_draw import ApertureDraw
 
 
@@ -58,6 +60,18 @@ class PrivateApertureHandle:
             aperture_id=self.aperture_id,
             private_id=self.private_id,
         )
+
+    @abstractmethod
+    def dump_aperture(self, dest: Path) -> None:
+        """Save aperture to local file, mainly for debugging purposes."""
+
+    def __str__(self) -> str:
+        return (
+            f"{self.__class__.__qualname__}(aperture_id={self.aperture_id}, "
+            f"private_id={self.private_id})"
+        )
+
+    __repr__ = __str__
 
 
 class PublicApertureHandle(BaseModel):

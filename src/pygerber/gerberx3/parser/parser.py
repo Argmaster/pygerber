@@ -11,7 +11,11 @@ from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
 from pygerber.backend.abstract.draw_actions_handle import DrawActionsHandle
 from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
-from pygerber.gerberx3.parser.errors import OnUpdateDrawingStateError, ParserError
+from pygerber.gerberx3.parser.errors import (
+    ExitParsingProcessInterrupt,
+    OnUpdateDrawingStateError,
+    ParserError,
+)
 from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.tokenizer.tokenizer import TokenStack
 from pygerber.gerberx3.tokenizer.tokens.token import Token
@@ -74,6 +78,9 @@ class Parser:
             self.state, actions = token.update_drawing_state(self.state, self.backend)
             if actions is not None:
                 self.draw_actions.extend(actions)
+
+        except ExitParsingProcessInterrupt:
+            return
 
         except Exception as e:  # noqa: BLE001
             if self.options.on_update_drawing_state_error == ParserOnErrorAction.Ignore:

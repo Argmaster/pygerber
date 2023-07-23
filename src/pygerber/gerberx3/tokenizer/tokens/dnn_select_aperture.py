@@ -1,15 +1,20 @@
 """Wrapper for aperture select token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
 from pydantic_core import CoreSchema, core_schema
 
+from pygerber.gerberx3.parser.errors import ApertureNotDefinedError
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pydantic import GetCoreSchemaHandler
     from typing_extensions import Self
+
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.gerberx3.parser.state import State
 
 
 class DNNSelectAperture(Token):
@@ -18,17 +23,35 @@ class DNNSelectAperture(Token):
     Sets the current aperture to D code NN (NN ≥ 10).
     """
 
-    aperture_identifier: ApertureID
+    aperture_id: ApertureID
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        aperture_identifier: ApertureID = tokens["aperture_identifier"]
-        return cls(aperture_identifier=aperture_identifier)
+        aperture_id: ApertureID = tokens["aperture_identifier"]
+        return cls(aperture_id=aperture_id)
+
+    def update_drawing_state(
+        self,
+        state: State,
+        _backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
+        """Set current aperture."""
+        if self.aperture_id not in state.apertures:
+            raise ApertureNotDefinedError(self.aperture_id)
+        return (
+            state.model_copy(
+                update={
+                    "current_aperture": state.apertures[self.aperture_id],
+                },
+                deep=True,
+            ),
+            (),
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
-        return f"{self.aperture_identifier}*"
+        return f"{self.aperture_id}*"
 
 
 class ApertureID(str):

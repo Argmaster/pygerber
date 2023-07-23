@@ -3,11 +3,24 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
+from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.bounding_box import BoundingBox
 
 
 class DrawAction(ABC):
     """Abstract base class for creating drawing actions."""
+
+    def __init__(
+        self,
+        handle: PublicApertureHandle,
+        backend: Backend,
+    ) -> None:
+        """Initialize DrawAction object."""
+        super().__init__()
+        self.handle = handle
+        self.backend = backend
+        self.private_handle = self.backend.get_private_aperture_handle(self.handle)
 
     @abstractmethod
     def draw(self) -> None:

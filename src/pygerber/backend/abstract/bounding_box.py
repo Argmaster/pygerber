@@ -1,11 +1,13 @@
 """Utility class for calculating bounding boxes of drawing elements."""
 from __future__ import annotations
 
-from typing import ClassVar, Tuple
+from decimal import Decimal
+from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from pygerber.backend.abstract.offset import Offset
+from pygerber.backend.abstract.vector_2d import Vector2D
 
 
 class BoundingBox(BaseModel):
@@ -44,18 +46,32 @@ class BoundingBox(BaseModel):
             min_y=min(self.min_y, other.min_y),
         )
 
-    def size(self) -> Size:
+    @property
+    def width(self) -> Offset:
+        """Return width of the bounding box."""
+        return self.max_x - self.min_x
+
+    @property
+    def height(self) -> Offset:
+        """Return height of the bounding box."""
+        return self.max_y - self.min_y
+
+    def size(self) -> Vector2D:
         """Get bounding box size."""
-        return Size((self.max_x - self.min_x, self.max_y - self.min_y))
+        return Vector2D(x=self.width, y=self.height)
+
+    @property
+    def center(self) -> Vector2D:
+        """Return current center of the bounding box."""
+        center_x = (self.max_x + self.min_x) / Offset(value=Decimal(2))
+        center_y = (self.max_y + self.min_y) / Offset(value=Decimal(2))
+        return Vector2D(x=center_x, y=center_y)
 
     def reposition_to_zero(self) -> BoundingBox:
         """Reposition the bounding box such that its min values are equal to zero."""
-        width = self.max_x - self.min_x
-        height = self.max_y - self.min_y
-
         return BoundingBox(
-            max_x=width,
-            max_y=height,
+            max_x=self.width,
+            max_y=self.height,
             min_x=Offset.NULL,
             min_y=Offset.NULL,
         )
@@ -78,6 +94,24 @@ class BoundingBox(BaseModel):
             self.max_y.as_pixels(dpi) + max_value_correction,
         )
 
+    def center_at(self, position: Vector2D) -> BoundingBox:
+        """Return bounding box with same size centered at given position."""
+        dx = position.x - self.center.x
+        dy = position.y - self.center.y
+
+        return BoundingBox(
+            max_x=self.max_x + dx,
+            max_y=self.max_y + dy,
+            min_x=self.min_x + dx,
+            min_y=self.min_y + dy,
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"{self.__class__.__qualname__}(max_x={self.max_x}, max_y={self.max_y}, "
+            f"min_x={self.min_x}, min_y={self.min_y})"
+        )
+
 
 BoundingBox.NULL = BoundingBox(
     max_x=Offset.NULL,
@@ -85,23 +119,3 @@ BoundingBox.NULL = BoundingBox(
     min_x=Offset.NULL,
     min_y=Offset.NULL,
 )
-
-
-class Size(Tuple[Offset, Offset]):
-    """Tuple wrapper for representing size with custom accessors."""
-
-    __slots__ = ()
-
-    @property
-    def x(self) -> Offset:
-        """Return size in X axis."""
-        return self[0]
-
-    @property
-    def y(self) -> Offset:
-        """Return size in X axis."""
-        return self[1]
-
-    def as_pixels(self, dpi: int) -> tuple[int, int]:
-        """Return size as pixels using given DPI for conversion."""
-        return (self.x.as_pixels(dpi), self.y.as_pixels(dpi))

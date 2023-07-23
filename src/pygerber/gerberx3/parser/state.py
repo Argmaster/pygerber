@@ -7,7 +7,12 @@ from typing import Dict, Optional, Tuple
 from pydantic import BaseModel, ConfigDict, Field
 
 from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
-from pygerber.gerberx3.parser.errors import UnitNotSetError
+from pygerber.backend.abstract.offset import Offset
+from pygerber.gerberx3.parser.errors import (
+    ApertureNotSelectedError,
+    CoordinateFormatNotSetError,
+    UnitNotSetError,
+)
 from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
@@ -20,7 +25,7 @@ class State(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    current_position: Tuple[Decimal, Decimal] = (Decimal(0.0), Decimal(0.0))
+    current_position: Tuple[Offset, Offset] = (Offset.NULL, Offset.NULL)
 
     # MO | Mode | Sets the unit to mm or inch                           | 4.2.1
     draw_units: Optional[Unit] = None
@@ -28,7 +33,7 @@ class State(BaseModel):
     #    |                      | e.g. the number of decimals
     coordinate_parser: Optional[CoordinateParser] = None
     # Dnn | (nn≥10) | Sets the current aperture to D code nn.           | 4.6
-    current_aperture: Optional[ApertureID] = None
+    current_aperture: Optional[PublicApertureHandle] = None
     # G01 | | Sets linear/circular mode to linear.                      | 4.7.1
     # G02 | | Sets linear/circular mode to clockwise circular           | 4.7.2
     # G03 | | Sets linear/circular mode to counterclockwise circular    | 4.7.3
@@ -63,9 +68,20 @@ class State(BaseModel):
 
     apertures: Dict[ApertureID, PublicApertureHandle] = Field(default_factory=dict)
 
-    @property
-    def units(self) -> Unit:
-        """Get drawing unit."""
+    def get_units(self) -> Unit:
+        """Get drawing unit or raise UnitNotSetError."""
         if self.draw_units is None:
             raise UnitNotSetError
         return self.draw_units
+
+    def get_coordinate_parser(self) -> CoordinateParser:
+        """Get coordinate parser or raise CoordinateFormatNotSetError."""
+        if self.coordinate_parser is None:
+            raise CoordinateFormatNotSetError
+        return self.coordinate_parser
+
+    def get_current_aperture(self) -> PublicApertureHandle:
+        """Get current aperture or raise ApertureNotSelectedError."""
+        if self.current_aperture is None:
+            raise ApertureNotSelectedError
+        return self.current_aperture

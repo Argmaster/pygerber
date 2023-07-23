@@ -150,5 +150,10 @@ class Offset(BaseModel):
             },
         )
 
+    def __str__(self) -> str:
+        return f"Offset({float(self.value)})"
+
+    __repr__ = __str__
+
 
 Offset.NULL = Offset(value=Decimal(0))

@@ -110,14 +110,14 @@ class DefineCircle(DefineAperture):
         handle = backend.create_aperture_handle(self.aperture_id)
         handle.add_draw(
             backend.get_aperture_draw_circle_cls()(
-                diameter=Offset.new(self.diameter, state.units),
+                diameter=Offset.new(self.diameter, state.get_units()),
                 polarity=state.polarity,
             ),
         )
         if self.hole_diameter is not None:
             handle.add_draw(
                 backend.get_aperture_draw_circle_cls()(
-                    diameter=Offset.new(self.hole_diameter, state.units),
+                    diameter=Offset.new(self.hole_diameter, state.get_units()),
                     polarity=state.polarity.invert(),
                 ),
             )

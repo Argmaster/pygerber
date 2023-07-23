@@ -10,3 +10,7 @@ class Rasterized2DBackendError(BackendError):
 
 class ApertureImageNotInitializedError(Rasterized2DBackendError):
     """Raised when aperture image is requested before it was initialized."""
+
+
+class BackendImageNotInitializedError(Rasterized2DBackendError):
+    """Raised when backend canvas image is requested before initialization."""

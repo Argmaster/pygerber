@@ -4,23 +4,29 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Type
 
-from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
-from pygerber.backend.abstract.result_handle import ResultHandle
-
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pygerber.backend.abstract.aperture_draws.aperture_draw_circle import (
         ApertureDrawCircle,
     )
-    from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
+    from pygerber.backend.abstract.aperture_handle import (
+        PrivateApertureHandle,
+        PublicApertureHandle,
+    )
+    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.backend.abstract.draw_actions.draw_flash import DrawFlash
     from pygerber.backend.abstract.draw_actions_handle import DrawActionsHandle
+    from pygerber.backend.abstract.result_handle import ResultHandle
     from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 
 
 class BackendOptions:
     """Additional configuration which can be passed to backend."""
 
-    def __init__(self) -> None:
+    def __init__(self, dump_apertures: Optional[Path] = None) -> None:
         """Initialize options."""
+        self.dump_apertures = dump_apertures
 
 
 class Backend(ABC):
@@ -43,6 +49,13 @@ class Backend(ABC):
         self.handles.append(handle)
         return handle
 
+    def get_private_aperture_handle(
+        self,
+        public_aperture_handle: PublicApertureHandle,
+    ) -> PrivateApertureHandle:
+        """Get private aperture handle."""
+        return self.handles[public_aperture_handle.private_id]
+
     def draw(self, draw_actions: List[DrawAction]) -> ResultHandle:
         """Execute all draw actions to create visualization."""
         self.finalize_aperture_creation()
@@ -56,6 +69,9 @@ class Backend(ABC):
         """Apply draw operations to aperture handles."""
         for handle in self.handles:
             handle.finalize_aperture_creation()
+
+            if self.options.dump_apertures is not None:
+                handle.dump_aperture(self.options.dump_apertures)
 
     @abstractmethod
     def get_result_handle(self) -> ResultHandle:
@@ -72,3 +88,7 @@ class Backend(ABC):
     @abstractmethod
     def get_draw_actions_handle_cls(self) -> type[DrawActionsHandle]:
         """Return backend-specific implementation of draw actions handle."""
+
+    @abstractmethod
+    def get_draw_action_flash_cls(self) -> type[DrawFlash]:
+        """Return backend-specific implementation of draw action flash."""

@@ -1,6 +1,7 @@
 """Circle component for creating apertures."""
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.aperture_draws.aperture_draw_circle import (
@@ -23,9 +24,15 @@ class Rasterized2DApertureDrawCircle(ApertureDrawCircle):
             msg = f"Expected Rasterized2DPrivateApertureHandle got {type(handle)}"
             raise TypeError(msg)
 
-        handle.image_draw.ellipse(
+        box = (
             self.get_bounding_box()
             .reposition_to_zero()
-            .as_pixel_box(handle.backend.dpi, max_value_correction=-1),
-            fill=self.polarity.get_1_color(),
+            .as_pixel_box(handle.backend.dpi, max_value_correction=-1)
         )
+        handle.image_draw.ellipse(
+            xy=box,
+            fill=self.polarity.get_1_color(),
+            outline=None,
+            width=0,
+        )
+        logging.debug("Adding %s to %s", self.__class__.__qualname__, handle)

@@ -10,6 +10,8 @@ from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
 from pygerber.backend.rasterized_2d.errors import ApertureImageNotInitializedError
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 
 
@@ -24,12 +26,10 @@ class Rasterized2DPrivateApertureHandle(PrivateApertureHandle):
         bbox = self.get_bounding_box()
         size = bbox.size().as_pixels(self.backend.dpi)
 
-        self.image = Image.new(mode="1", size=size)
+        self.image = Image.new(mode="1", size=size, color=0)
 
         for aperture_draw in self.aperture_draws:
             aperture_draw.draw(self)
-
-        self.image.save("image.png")
 
     @property
     def image(self) -> Image.Image:
@@ -47,3 +47,7 @@ class Rasterized2DPrivateApertureHandle(PrivateApertureHandle):
     def image_draw(self) -> ImageDraw.ImageDraw:
         """Acquire drawing interface."""
         return ImageDraw.Draw(self.image)
+
+    def dump_aperture(self, dest: Path) -> None:
+        """Save aperture to local file, mainly for debugging purposes."""
+        self.image.save(dest / f"{self.aperture_id}_{self.private_id}.png")
