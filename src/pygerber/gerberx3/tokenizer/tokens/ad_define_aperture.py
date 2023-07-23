@@ -443,6 +443,30 @@ class DefineMacro(DefineAperture):
             am_param=am_param,
         )
 
+    def update_drawing_state(
+        self,
+        state: State,
+        backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
+        """Update drawing state."""
+        handle = backend.create_aperture_handle(self.aperture_id)
+        # TODO(argmaster.world@gmail.com): Implement macro logic.
+        # https://github.com/Argmaster/pygerber/issues/23
+        frozen_handle = handle.get_public_handle()
+
+        new_aperture_dict = {**state.apertures}
+        new_aperture_dict[self.aperture_id] = frozen_handle
+
+        return (
+            state.model_copy(
+                update={
+                    "apertures": new_aperture_dict,
+                },
+                deep=True,
+            ),
+            (),
+        )
+
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         return f"%AD{self.aperture_id}{self.aperture_type},{'X'.join(self.am_param)}"
