@@ -69,7 +69,8 @@ ignore = [
     "UP007",
     "UP006",
     "TCH001",
-    "D105",  # Adding docstrings in all magic methods doesn't make sense, as usually they are just boilerplate to support operators.
+    "D105",   # Adding docstrings in all magic methods doesn't make sense, as usually they are just boilerplate to support operators.
+    "FIX002",
 ]
 show-fixes = true
 target-version = "py38"
