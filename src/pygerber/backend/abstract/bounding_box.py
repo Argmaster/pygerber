@@ -26,12 +26,24 @@ class BoundingBox(BaseModel):
     @classmethod
     def from_diameter(cls, diameter: Offset) -> BoundingBox:
         """Create a bounding box from a given diameter."""
-        half_diameter = diameter.value / 2
+        half_diameter = diameter / 2
         return cls(
-            max_x=Offset(value=half_diameter),
-            max_y=Offset(value=half_diameter),
-            min_x=Offset(value=-half_diameter),
-            min_y=Offset(value=-half_diameter),
+            max_x=half_diameter,
+            max_y=half_diameter,
+            min_x=-half_diameter,
+            min_y=-half_diameter,
+        )
+
+    @classmethod
+    def from_rectangle(cls, x_size: Offset, y_size: Offset) -> BoundingBox:
+        """Create a bounding box from a given diameter."""
+        half_x = x_size / 2
+        half_y = y_size / 2
+        return cls(
+            max_x=half_x,
+            max_y=half_y,
+            min_x=-half_x,
+            min_y=-half_y,
         )
 
     @property
@@ -55,14 +67,9 @@ class BoundingBox(BaseModel):
         center_y = (self.max_y + self.min_y) / Offset(value=Decimal(2))
         return Vector2D(x=center_x, y=center_y)
 
-    def reposition_to_zero(self) -> BoundingBox:
-        """Reposition the bounding box such that its min values are equal to zero."""
-        return BoundingBox(
-            max_x=self.width,
-            max_y=self.height,
-            min_x=Offset.NULL,
-            min_y=Offset.NULL,
-        )
+    def get_min_vector(self) -> Vector2D:
+        """Return Vector2D of min_x and min_y."""
+        return Vector2D(x=self.min_x, y=self.min_y)
 
     def as_pixel_box(
         self,
@@ -89,13 +96,6 @@ class BoundingBox(BaseModel):
         other: object,
         op: Callable,
     ) -> BoundingBox:
-        if isinstance(other, BoundingBox):
-            return BoundingBox(
-                max_x=op(self.max_x, other.max_x),
-                max_y=op(self.max_y, other.max_y),
-                min_x=op(self.min_x, other.min_x),
-                min_y=op(self.min_y, other.min_y),
-            )
         if isinstance(other, Vector2D):
             return BoundingBox(
                 max_x=op(self.max_x, other.x),
@@ -113,6 +113,13 @@ class BoundingBox(BaseModel):
         return NotImplemented  # type: ignore[unreachable]
 
     def __add__(self, other: object) -> BoundingBox:
+        if isinstance(other, BoundingBox):
+            return BoundingBox(
+                max_x=max(self.max_x, other.max_x),
+                max_y=max(self.max_y, other.max_y),
+                min_x=min(self.min_x, other.min_x),
+                min_y=min(self.min_y, other.min_y),
+            )
         return self._operator(other, operator.add)
 
     def __sub__(self, other: object) -> BoundingBox:

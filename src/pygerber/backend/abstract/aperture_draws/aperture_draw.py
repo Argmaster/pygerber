@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from pydantic import BaseModel
 
 from pygerber.backend.abstract.bounding_box import BoundingBox
+from pygerber.backend.abstract.vector_2d import Vector2D
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
@@ -14,6 +15,8 @@ if TYPE_CHECKING:
 
 class ApertureDraw(BaseModel):
     """Description of aperture component."""
+
+    center_position: Vector2D
 
     @abstractmethod
     def draw(self, handle: PrivateApertureHandle) -> None:

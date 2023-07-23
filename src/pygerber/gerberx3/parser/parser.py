@@ -90,7 +90,7 @@ class Parser:
                 self.options.on_update_drawing_state_error == ParserOnErrorAction.Raise
             ):
                 if not isinstance(e, ParserError):
-                    raise OnUpdateDrawingStateError from e
+                    raise OnUpdateDrawingStateError(token) from e
 
                 raise
 

@@ -1,11 +1,11 @@
-"""Circle component for creating apertures."""
+"""Rectangle component for creating apertures."""
 from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
 
-from pygerber.backend.abstract.aperture_draws.aperture_draw_circle import (
-    ApertureDrawCircle,
+from pygerber.backend.abstract.aperture_draws.aperture_draw_rectangle import (
+    ApertureDrawRectangle,
 )
 from pygerber.backend.rasterized_2d.aperture_handle import (
     Rasterized2DPrivateApertureHandle,
@@ -15,8 +15,8 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
 
 
-class Rasterized2DApertureDrawCircle(ApertureDrawCircle):
-    """Description of circle aperture component."""
+class Rasterized2DApertureDrawRectangle(ApertureDrawRectangle):
+    """Description of rectangle aperture component."""
 
     def draw(self, handle: PrivateApertureHandle) -> None:
         """Apply aperture draw component to handle."""
@@ -32,7 +32,7 @@ class Rasterized2DApertureDrawCircle(ApertureDrawCircle):
             max_value_correction=-1,
         )
 
-        handle.image_draw.ellipse(
+        handle.image_draw.rectangle(
             xy=pixel_box,
             fill=self.polarity.get_1_color(),
             outline=None,

@@ -4,6 +4,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Type
 
+from pygerber.backend.abstract.aperture_draws.aperture_draw_rectangle import (
+    ApertureDrawRectangle,
+)
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -84,6 +88,10 @@ class Backend(ABC):
     @abstractmethod
     def get_aperture_draw_circle_cls(self) -> Type[ApertureDrawCircle]:
         """Get backend-specific implementation of aperture circle component class."""
+
+    @abstractmethod
+    def get_aperture_draw_rectangle_cls(self) -> Type[ApertureDrawRectangle]:
+        """Get backend-specific implementation of aperture rectangle component class."""
 
     @abstractmethod
     def get_draw_actions_handle_cls(self) -> type[DrawActionsHandle]:

@@ -7,9 +7,11 @@ from PIL import Image, ImageDraw
 
 from pygerber.backend.abstract.backend_cls import Backend, BackendOptions
 from pygerber.backend.abstract.bounding_box import BoundingBox
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.backend.rasterized_2d.aperture_draws.aperture_draw_circle import (
     Rasterized2DApertureDrawCircle,
+)
+from pygerber.backend.rasterized_2d.aperture_draws.aperture_draw_rectangle import (
+    Rasterized2DApertureDrawRectangle,
 )
 from pygerber.backend.rasterized_2d.aperture_handle import (
     Rasterized2DPrivateApertureHandle,
@@ -26,6 +28,9 @@ if TYPE_CHECKING:
 
     from pygerber.backend.abstract.aperture_draws.aperture_draw_circle import (
         ApertureDrawCircle,
+    )
+    from pygerber.backend.abstract.aperture_draws.aperture_draw_rectangle import (
+        ApertureDrawRectangle,
     )
     from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
     from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
@@ -69,11 +74,10 @@ class Rasterized2DBackend(Backend):
 
     def draw(self, draw_actions: List[DrawAction]) -> ResultHandle:
         """Execute all draw actions to create visualization."""
-        bbox = self._get_draw_actions_bounding_box(draw_actions) * 1.2
+        bbox = self._get_draw_actions_bounding_box(draw_actions)
         size = bbox.get_size()
 
-        self.image_coordinates_correction = Vector2D(x=bbox.min_x, y=bbox.min_y)
-
+        self.image_coordinates_correction = bbox.get_min_vector()
         image_size = size.as_pixels(self.dpi)
 
         self.image = Image.new(mode="1", size=image_size, color=0)
@@ -118,6 +122,10 @@ class Rasterized2DBackend(Backend):
     def get_aperture_draw_circle_cls(self) -> type[ApertureDrawCircle]:
         """Get backend-specific implementation of aperture circle component class."""
         return Rasterized2DApertureDrawCircle
+
+    def get_aperture_draw_rectangle_cls(self) -> type[ApertureDrawRectangle]:
+        """Get backend-specific implementation of aperture rectangle component class."""
+        return Rasterized2DApertureDrawRectangle
 
     def get_draw_actions_handle_cls(self) -> type[DrawActionsHandle]:
         """Return backend-specific implementation of draw actions handle."""

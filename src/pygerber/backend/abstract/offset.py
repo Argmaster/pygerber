@@ -50,7 +50,7 @@ class Offset(BaseModel):
 
     def as_pixels(self, dpi: int | Decimal) -> int:
         """Offset in pixels with respect to drawing DPI."""
-        return round(self.as_inches() * dpi)
+        return int(self.as_inches() * dpi)
 
     def _compare(
         self,
