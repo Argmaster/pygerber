@@ -23,8 +23,18 @@ class Rasterized2DDrawFlash(DrawFlash):
         """Execute draw action."""
         logging.debug("Flashing at %s with %s", self.position, self.private_handle)
 
+        box = (
+            self.position
+            # Move coordinates to +X +Y (I'st quadrant)
+            - self.backend.image_coordinates_correction
+            # Move coordinates to upper left of aperture image.
+            - (self.private_handle.get_bounding_box().get_size() / 2)
+        ).as_pixels(
+            self.backend.dpi,
+        )
+
         self.backend.image.paste(
             im=self.private_handle.image,
-            box=self.position.as_pixels(self.backend.dpi),
+            box=box,
             mask=self.private_handle.image,
         )

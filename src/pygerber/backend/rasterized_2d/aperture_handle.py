@@ -24,7 +24,7 @@ class Rasterized2DPrivateApertureHandle(PrivateApertureHandle):
     def finalize_aperture_creation(self) -> None:
         """Draw aperture and store result."""
         bbox = self.get_bounding_box()
-        size = bbox.size().as_pixels(self.backend.dpi)
+        size = bbox.get_size().as_pixels(self.backend.dpi)
 
         self.image = Image.new(mode="1", size=size, color=0)
 

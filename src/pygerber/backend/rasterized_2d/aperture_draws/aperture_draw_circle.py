@@ -24,13 +24,15 @@ class Rasterized2DApertureDrawCircle(ApertureDrawCircle):
             msg = f"Expected Rasterized2DPrivateApertureHandle got {type(handle)}"
             raise TypeError(msg)
 
-        box = (
-            self.get_bounding_box()
-            .reposition_to_zero()
-            .as_pixel_box(handle.backend.dpi, max_value_correction=-1)
+        box = self.get_bounding_box()
+        repositioned_box = box.reposition_to_zero()
+        pixel_box = repositioned_box.as_pixel_box(
+            handle.backend.dpi,
+            max_value_correction=-1,
         )
+
         handle.image_draw.ellipse(
-            xy=box,
+            xy=pixel_box,
             fill=self.polarity.get_1_color(),
             outline=None,
             width=0,

@@ -23,4 +23,4 @@ class DrawFlash(DrawAction):
 
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of draw operation."""
-        return self.private_handle.get_bounding_box().center_at(self.position)
+        return self.private_handle.get_bounding_box() + self.position

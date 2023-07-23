@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw
 
 from pygerber.backend.abstract.backend_cls import Backend, BackendOptions
 from pygerber.backend.abstract.bounding_box import BoundingBox
+from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.backend.rasterized_2d.aperture_draws.aperture_draw_circle import (
     Rasterized2DApertureDrawCircle,
 )
@@ -68,10 +69,14 @@ class Rasterized2DBackend(Backend):
 
     def draw(self, draw_actions: List[DrawAction]) -> ResultHandle:
         """Execute all draw actions to create visualization."""
-        bbox = self._get_draw_actions_bounding_box(draw_actions)
-        size = bbox.size().as_pixels(self.dpi)
+        bbox = self._get_draw_actions_bounding_box(draw_actions) * 1.2
+        size = bbox.get_size()
 
-        self.image = Image.new(mode="1", size=size, color=0)
+        self.image_coordinates_correction = Vector2D(x=bbox.min_x, y=bbox.min_y)
+
+        image_size = size.as_pixels(self.dpi)
+
+        self.image = Image.new(mode="1", size=image_size, color=0)
         return super().draw(draw_actions)
 
     def _get_draw_actions_bounding_box(

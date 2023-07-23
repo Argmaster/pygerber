@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import operator
 from decimal import Decimal
-from typing import TYPE_CHECKING, ClassVar, Sequence
+from typing import TYPE_CHECKING, Callable, ClassVar, Sequence
 
 from pydantic import BaseModel, ConfigDict
 
@@ -51,104 +52,88 @@ class Offset(BaseModel):
         """Offset in pixels with respect to drawing DPI."""
         return round(self.as_inches() * dpi)
 
+    def _compare(
+        self,
+        other: object,
+        op: Callable,
+    ) -> bool:
+        if isinstance(other, Offset):
+            return op(self.value, other.value)  # type: ignore[no-any-return]
+        if isinstance(other, (Decimal, int, float, str)):
+            return op(self.value, Decimal(other))  # type: ignore[no-any-return]
+        return NotImplemented  # type: ignore[unreachable]
+
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        return self.value == other.value
+        return self._compare(other, operator.eq)
 
     def __lt__(self, other: object) -> bool:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        return self.value < other.value
+        return self._compare(other, operator.lt)
 
     def __le__(self, other: object) -> bool:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        return self.value <= other.value
+        return self._compare(other, operator.le)
 
     def __gt__(self, other: object) -> bool:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        return self.value > other.value
+        return self._compare(other, operator.gt)
 
     def __ge__(self, other: object) -> bool:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        return self.value >= other.value
+        return self._compare(other, operator.ge)
+
+    def _operator(
+        self,
+        other: object,
+        op: Callable,
+    ) -> Offset:
+        if isinstance(other, Offset):
+            return Offset(value=op(self.value, other.value))
+        if isinstance(other, (Decimal, int, float, str)):
+            return Offset(value=op(self.value, Decimal(other)))
+        return NotImplemented  # type: ignore[unreachable]
 
     def __add__(self, other: object) -> Offset:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        return Offset(value=self.value + other.value)
+        return self._operator(other, operator.add)
 
     def __sub__(self, other: object) -> Offset:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        return Offset(value=self.value - other.value)
+        return self._operator(other, operator.sub)
 
     def __mul__(self, other: object) -> Offset:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        return Offset(value=self.value * other.value)
+        return self._operator(other, operator.mul)
 
     def __truediv__(self, other: object) -> Offset:
-        if not isinstance(other, Offset):
-            return NotImplemented
-        if other.value == 0:
-            msg = "Cannot divide by zero offset."
-            raise ZeroDivisionError(msg)
-        return Offset(value=self.value / other.value)
+        return self._operator(other, operator.truediv)
 
     def __neg__(self) -> Offset:
         return Offset(value=-self.value)
 
-    def __iadd__(self, other: object) -> Offset:
-        """In-place addition."""
-        if not isinstance(other, Offset):
-            return NotImplemented
+    def _i_operator(
+        self,
+        other: object,
+        op: Callable,
+    ) -> Offset:
+        if isinstance(other, Offset):
+            return self.model_copy(
+                update={
+                    "value": op(self.value, other.value),
+                },
+            )
+        if isinstance(other, (Decimal, int, float, str)):
+            return self.model_copy(
+                update={
+                    "value": op(self.value, Decimal(other)),
+                },
+            )
+        return NotImplemented  # type: ignore[unreachable]
 
-        return self.model_copy(
-            update={
-                "value": self.value + other.value,
-            },
-        )
+    def __iadd__(self, other: object) -> Offset:
+        return self._i_operator(other, operator.add)
 
     def __isub__(self, other: object) -> Offset:
-        """In-place subtraction."""
-        if not isinstance(other, Offset):
-            return NotImplemented
-
-        return self.model_copy(
-            update={
-                "value": self.value - other.value,
-            },
-        )
+        return self._i_operator(other, operator.sub)
 
     def __imul__(self, other: object) -> Offset:
-        """In-place multiplication."""
-        if not isinstance(other, Offset):
-            return NotImplemented
-
-        return self.model_copy(
-            update={
-                "value": self.value * other.value,
-            },
-        )
+        return self._i_operator(other, operator.mul)
 
     def __itruediv__(self, other: object) -> Offset:
-        """In-place true division."""
-        if not isinstance(other, Offset):
-            return NotImplemented
-
-        if other.value == 0:
-            msg = "Cannot divide by zero offset."
-            raise ZeroDivisionError(msg)
-
-        return self.model_copy(
-            update={
-                "value": self.value / other.value,
-            },
-        )
+        return self._i_operator(other, operator.truediv)
 
     def __str__(self) -> str:
         return f"Offset({float(self.value)})"

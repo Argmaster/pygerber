@@ -1,8 +1,9 @@
 """Utility class for calculating bounding boxes of drawing elements."""
 from __future__ import annotations
 
+import operator
 from decimal import Decimal
-from typing import ClassVar
+from typing import Callable, ClassVar, Tuple
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -33,19 +34,6 @@ class BoundingBox(BaseModel):
             min_y=Offset(value=-half_diameter),
         )
 
-    def __add__(self, other: object) -> BoundingBox:
-        """Add two bounding boxes."""
-        if not isinstance(other, BoundingBox):
-            msg = "BoundingBox can only be added to another bounding box."
-            raise TypeError(msg)
-
-        return BoundingBox(
-            max_x=max(self.max_x, other.max_x),
-            max_y=max(self.max_y, other.max_y),
-            min_x=min(self.min_x, other.min_x),
-            min_y=min(self.min_y, other.min_y),
-        )
-
     @property
     def width(self) -> Offset:
         """Return width of the bounding box."""
@@ -56,7 +44,7 @@ class BoundingBox(BaseModel):
         """Return height of the bounding box."""
         return self.max_y - self.min_y
 
-    def size(self) -> Vector2D:
+    def get_size(self) -> Vector2D:
         """Get bounding box size."""
         return Vector2D(x=self.width, y=self.height)
 
@@ -82,29 +70,59 @@ class BoundingBox(BaseModel):
         *,
         min_value_correction: int = 0,
         max_value_correction: int = 0,
-    ) -> tuple[int, int, int, int]:
+    ) -> PixelBox:
         """Return box as tuple of ints with order.
 
         [x0, y0, x1, y1], where x1 >= x0 and y1 >= y0
         """
-        return (
-            self.min_x.as_pixels(dpi) + min_value_correction,
-            self.min_y.as_pixels(dpi) + min_value_correction,
-            self.max_x.as_pixels(dpi) + max_value_correction,
-            self.max_y.as_pixels(dpi) + max_value_correction,
+        return PixelBox(
+            (
+                self.min_x.as_pixels(dpi) + min_value_correction,
+                self.min_y.as_pixels(dpi) + min_value_correction,
+                self.max_x.as_pixels(dpi) + max_value_correction,
+                self.max_y.as_pixels(dpi) + max_value_correction,
+            ),
         )
 
-    def center_at(self, position: Vector2D) -> BoundingBox:
-        """Return bounding box with same size centered at given position."""
-        dx = position.x - self.center.x
-        dy = position.y - self.center.y
+    def _operator(
+        self,
+        other: object,
+        op: Callable,
+    ) -> BoundingBox:
+        if isinstance(other, BoundingBox):
+            return BoundingBox(
+                max_x=op(self.max_x, other.max_x),
+                max_y=op(self.max_y, other.max_y),
+                min_x=op(self.min_x, other.min_x),
+                min_y=op(self.min_y, other.min_y),
+            )
+        if isinstance(other, Vector2D):
+            return BoundingBox(
+                max_x=op(self.max_x, other.x),
+                max_y=op(self.max_y, other.y),
+                min_x=op(self.min_x, other.x),
+                min_y=op(self.min_y, other.y),
+            )
+        if isinstance(other, (Offset, Decimal, int, float, str)):
+            return BoundingBox(
+                max_x=op(self.max_x, other),
+                max_y=op(self.max_y, other),
+                min_x=op(self.min_x, other),
+                min_y=op(self.min_y, other),
+            )
+        return NotImplemented  # type: ignore[unreachable]
 
-        return BoundingBox(
-            max_x=self.max_x + dx,
-            max_y=self.max_y + dy,
-            min_x=self.min_x + dx,
-            min_y=self.min_y + dy,
-        )
+    def __add__(self, other: object) -> BoundingBox:
+        return self._operator(other, operator.add)
+
+    def __sub__(self, other: object) -> BoundingBox:
+        return self._operator(other, operator.sub)
+
+    def __mul__(self, other: object) -> BoundingBox:
+        return self._operator(other, operator.mul)
+
+    def __truediv__(self, other: object) -> BoundingBox:
+        return self._operator(other, operator.truediv)
 
     def __str__(self) -> str:
         return (
@@ -119,3 +137,9 @@ BoundingBox.NULL = BoundingBox(
     min_x=Offset.NULL,
     min_y=Offset.NULL,
 )
+
+
+class PixelBox(Tuple[int, int, int, int]):
+    """Custom class for representing pixel boxes."""
+
+    __slots__ = ()
