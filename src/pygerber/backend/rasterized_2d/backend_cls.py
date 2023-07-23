@@ -86,6 +86,10 @@ class Rasterized2DBackend(Backend):
         self.image_coordinates_correction = bbox.get_min_vector()
         image_size = size.as_pixels(self.dpi)
 
+        # Image must be at least 1x1, otherwise Pillow crashes while saving.
+        x, y = image_size
+        image_size = (max(x, 0) + 1, max(y, 0) + 1)
+
         self.image = Image.new(mode="1", size=image_size, color=0)
         return super().draw(draw_actions)
 

@@ -71,12 +71,14 @@ class BoundingBox(BaseModel):
         """Return Vector2D of min_x and min_y."""
         return Vector2D(x=self.min_x, y=self.min_y)
 
-    def as_pixel_box(
+    def as_pixel_box(  # noqa: PLR0913
         self,
         dpi: int,
         *,
-        min_value_correction: int = 0,
-        max_value_correction: int = 0,
+        dx_max: int = 0,
+        dy_max: int = 0,
+        dx_min: int = 0,
+        dy_min: int = 0,
     ) -> PixelBox:
         """Return box as tuple of ints with order.
 
@@ -84,10 +86,10 @@ class BoundingBox(BaseModel):
         """
         return PixelBox(
             (
-                self.min_x.as_pixels(dpi) + min_value_correction,
-                self.min_y.as_pixels(dpi) + min_value_correction,
-                self.max_x.as_pixels(dpi) + max_value_correction,
-                self.max_y.as_pixels(dpi) + max_value_correction,
+                self.min_x.as_pixels(dpi) + dx_min,
+                self.min_y.as_pixels(dpi) + dy_min,
+                self.max_x.as_pixels(dpi) + dx_max,
+                self.max_y.as_pixels(dpi) + dy_max,
             ),
         )
 

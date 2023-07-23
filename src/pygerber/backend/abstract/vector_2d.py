@@ -21,7 +21,7 @@ class Vector2D(BaseModel):
 
     def as_pixels(self, dpi: int) -> tuple[int, int]:
         """Return size as pixels using given DPI for conversion."""
-        return (self.x.as_pixels(dpi) or 1, self.y.as_pixels(dpi) or 1)
+        return (self.x.as_pixels(dpi), self.y.as_pixels(dpi))
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Vector2D):

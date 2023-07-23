@@ -29,7 +29,6 @@ class Rasterized2DApertureDrawRectangle(ApertureDrawRectangle):
         image_space_box = box - coordinate_correction
         pixel_box = image_space_box.as_pixel_box(
             handle.backend.dpi,
-            max_value_correction=-1,
         )
 
         handle.image_draw.rectangle(
