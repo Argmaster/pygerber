@@ -1,7 +1,14 @@
 """Wrapper for aperture select token."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Iterable, Tuple
+
 from pygerber.gerberx3.tokenizer.tokens.token import Token
+
+if TYPE_CHECKING:
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.gerberx3.parser.state import State
 
 
 class BeginRegion(Token):
@@ -9,6 +16,22 @@ class BeginRegion(Token):
 
     Starts a region statement which creates a region by defining its contours.
     """
+
+    def update_drawing_state(
+        self,
+        state: State,
+        _backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
+        """Set drawing polarity."""
+        return (
+            state.model_copy(
+                update={
+                    "is_region": True,
+                },
+                deep=True,
+            ),
+            (),
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
@@ -20,6 +43,22 @@ class EndRegion(Token):
 
     Ends the region statement.
     """
+
+    def update_drawing_state(
+        self,
+        state: State,
+        _backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
+        """Set drawing polarity."""
+        return (
+            state.model_copy(
+                update={
+                    "is_region": False,
+                },
+                deep=True,
+            ),
+            (),
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
