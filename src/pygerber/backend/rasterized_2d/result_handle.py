@@ -3,13 +3,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from PIL import Image
+
 from pygerber.backend.abstract.result_handle import ResultHandle
 
 if TYPE_CHECKING:
     from io import BytesIO
     from pathlib import Path
-
-    from PIL import Image
 
 
 class Rasterized2DResultHandle(ResultHandle):
@@ -28,4 +28,4 @@ class Rasterized2DResultHandle(ResultHandle):
 
     def save(self, dest: Path | str | BytesIO) -> None:
         """Save result to destination."""
-        self.result.save(dest)
+        self.result.transpose(Image.FLIP_TOP_BOTTOM).save(dest)

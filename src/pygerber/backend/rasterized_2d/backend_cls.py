@@ -10,6 +10,9 @@ from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.backend.rasterized_2d.aperture_draws.aperture_draw_circle import (
     Rasterized2DApertureDrawCircle,
 )
+from pygerber.backend.rasterized_2d.aperture_draws.aperture_draw_polygon import (
+    Rasterized2DApertureDrawPolygon,
+)
 from pygerber.backend.rasterized_2d.aperture_draws.aperture_draw_rectangle import (
     Rasterized2DApertureDrawRectangle,
 )
@@ -28,6 +31,9 @@ if TYPE_CHECKING:
 
     from pygerber.backend.abstract.aperture_draws.aperture_draw_circle import (
         ApertureDrawCircle,
+    )
+    from pygerber.backend.abstract.aperture_draws.aperture_draw_polygon import (
+        ApertureDrawPolygon,
     )
     from pygerber.backend.abstract.aperture_draws.aperture_draw_rectangle import (
         ApertureDrawRectangle,
@@ -126,6 +132,10 @@ class Rasterized2DBackend(Backend):
     def get_aperture_draw_rectangle_cls(self) -> type[ApertureDrawRectangle]:
         """Get backend-specific implementation of aperture rectangle component class."""
         return Rasterized2DApertureDrawRectangle
+
+    def get_aperture_draw_polygon_cls(self) -> type[ApertureDrawPolygon]:
+        """Get backend-specific implementation of aperture polygon component class."""
+        return Rasterized2DApertureDrawPolygon
 
     def get_draw_actions_handle_cls(self) -> type[DrawActionsHandle]:
         """Return backend-specific implementation of draw actions handle."""

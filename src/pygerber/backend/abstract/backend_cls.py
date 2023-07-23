@@ -4,15 +4,17 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Optional, Type
 
-from pygerber.backend.abstract.aperture_draws.aperture_draw_rectangle import (
-    ApertureDrawRectangle,
-)
-
 if TYPE_CHECKING:
     from pathlib import Path
 
     from pygerber.backend.abstract.aperture_draws.aperture_draw_circle import (
         ApertureDrawCircle,
+    )
+    from pygerber.backend.abstract.aperture_draws.aperture_draw_polygon import (
+        ApertureDrawPolygon,
+    )
+    from pygerber.backend.abstract.aperture_draws.aperture_draw_rectangle import (
+        ApertureDrawRectangle,
     )
     from pygerber.backend.abstract.aperture_handle import (
         PrivateApertureHandle,
@@ -92,6 +94,10 @@ class Backend(ABC):
     @abstractmethod
     def get_aperture_draw_rectangle_cls(self) -> Type[ApertureDrawRectangle]:
         """Get backend-specific implementation of aperture rectangle component class."""
+
+    @abstractmethod
+    def get_aperture_draw_polygon_cls(self) -> Type[ApertureDrawPolygon]:
+        """Get backend-specific implementation of aperture polygon component class."""
 
     @abstractmethod
     def get_draw_actions_handle_cls(self) -> type[DrawActionsHandle]:

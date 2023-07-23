@@ -371,6 +371,45 @@ class DefinePolygon(DefineAperture):
             hole_diameter=hole_diameter,
         )
 
+    def update_drawing_state(
+        self,
+        state: State,
+        backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
+        """Update drawing state."""
+        handle = backend.create_aperture_handle(self.aperture_id)
+        handle.add_draw(
+            backend.get_aperture_draw_polygon_cls()(
+                outer_diameter=Offset.new(self.outer_diameter, state.get_units()),
+                number_of_vertices=self.number_of_vertices,
+                rotation=Decimal("0.0") if self.rotation is None else self.rotation,
+                polarity=Polarity.Dark,
+                center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
+            ),
+        )
+        if self.hole_diameter is not None:
+            handle.add_draw(
+                backend.get_aperture_draw_circle_cls()(
+                    diameter=Offset.new(self.hole_diameter, state.get_units()),
+                    polarity=Polarity.Clear,
+                    center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
+                ),
+            )
+        frozen_handle = handle.get_public_handle()
+
+        new_aperture_dict = {**state.apertures}
+        new_aperture_dict[self.aperture_id] = frozen_handle
+
+        return (
+            state.model_copy(
+                update={
+                    "apertures": new_aperture_dict,
+                },
+                deep=True,
+            ),
+            (),
+        )
+
     def __str__(self) -> str:
         """Return pretty representation of comment token."""
         suffix = ""
