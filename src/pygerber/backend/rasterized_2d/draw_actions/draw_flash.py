@@ -5,6 +5,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.draw_actions.draw_flash import DrawFlash
+from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:
     from pygerber.backend.rasterized_2d.aperture_handle import (
@@ -28,8 +29,13 @@ class Rasterized2DDrawFlash(DrawFlash):
         image_space_box = box - self.backend.image_coordinates_correction
         pixel_box = image_space_box.get_min_vector().as_pixels(self.backend.dpi)
 
+        if self.polarity == Polarity.Dark:
+            im = self.private_handle.image
+        else:
+            im = self.private_handle.image_invert
+
         self.backend.image.paste(
-            im=self.private_handle.image,
+            im=im,
             box=pixel_box,
             mask=self.private_handle.image,
         )

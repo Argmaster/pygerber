@@ -20,6 +20,7 @@ from pygerber.backend.rasterized_2d.aperture_handle import (
     Rasterized2DPrivateApertureHandle,
 )
 from pygerber.backend.rasterized_2d.draw_actions.draw_flash import Rasterized2DDrawFlash
+from pygerber.backend.rasterized_2d.draw_actions.draw_line import Rasterized2DDrawLine
 from pygerber.backend.rasterized_2d.draw_actions_handle import (
     Rasterized2DDrawActionsHandle,
 )
@@ -41,6 +42,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
     from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
     from pygerber.backend.abstract.draw_actions.draw_flash import DrawFlash
+    from pygerber.backend.abstract.draw_actions.draw_line import DrawLine
     from pygerber.backend.abstract.draw_actions_handle import DrawActionsHandle
     from pygerber.backend.abstract.result_handle import ResultHandle
 
@@ -148,3 +150,7 @@ class Rasterized2DBackend(Backend):
     def get_draw_action_flash_cls(self) -> type[DrawFlash]:
         """Return backend-specific implementation of draw action flash."""
         return Rasterized2DDrawFlash
+
+    def get_draw_action_line_cls(self) -> type[DrawLine]:
+        """Return backend-specific implementation of draw action line."""
+        return Rasterized2DDrawLine

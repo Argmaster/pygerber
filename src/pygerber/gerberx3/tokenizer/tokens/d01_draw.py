@@ -1,13 +1,20 @@
 """Wrapper for plot operation token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
+from pygerber.backend.abstract.offset import Offset
+from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.gerberx3.state_enums import DrawMode
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.gerberx3.parser.state import State
 
 
 class Draw(Token):
@@ -35,6 +42,44 @@ class Draw(Token):
         j = tokens.get("j", "0")
         j = Coordinate.new(coordinate_type=CoordinateType.Y, offset=j)
         return cls(x=x, y=y, i=i, j=j)
+
+    def update_drawing_state(
+        self,
+        state: State,
+        backend: Backend,
+    ) -> Tuple[State, Iterable[DrawAction]]:
+        """Set coordinate parser."""
+        x = Offset.new(
+            state.get_coordinate_parser().parse(self.x),
+            unit=state.get_units(),
+        )
+        y = Offset.new(
+            state.get_coordinate_parser().parse(self.y),
+            unit=state.get_units(),
+        )
+        xy_position = Vector2D(x=x, y=y)
+        start_position = state.current_position
+
+        if state.draw_mode == DrawMode.Linear:
+            draw_action = backend.get_draw_action_line_cls()(
+                state.get_current_aperture(),
+                backend,
+                state.polarity,
+                start_position,
+                xy_position,
+            )
+        else:
+            raise NotImplementedError
+
+        return (
+            state.model_copy(
+                update={
+                    "current_position": xy_position,
+                },
+                deep=True,
+            ),
+            (draw_action,),
+        )
 
     def __str__(self) -> str:
         """Return pretty representation of comment token."""

@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.bounding_box import BoundingBox
+from pygerber.gerberx3.state_enums import Polarity
 
 
 class DrawAction(ABC):
@@ -15,11 +16,13 @@ class DrawAction(ABC):
         self,
         handle: PublicApertureHandle,
         backend: Backend,
+        polarity: Polarity,
     ) -> None:
         """Initialize DrawAction object."""
         super().__init__()
         self.handle = handle
         self.backend = backend
+        self.polarity = polarity
         self.private_handle = self.backend.get_private_aperture_handle(self.handle)
 
     @abstractmethod

@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
 from pygerber.backend.abstract.offset import Offset
+from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.gerberx3.parser.errors import (
     ApertureNotSelectedError,
     CoordinateFormatNotSetError,
@@ -25,7 +26,7 @@ class State(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    current_position: Tuple[Offset, Offset] = (Offset.NULL, Offset.NULL)
+    current_position: Vector2D = Vector2D(x=Offset.NULL, y=Offset.NULL)
 
     # MO | Mode | Sets the unit to mm or inch                           | 4.2.1
     draw_units: Optional[Unit] = None

@@ -35,6 +35,8 @@ class Rasterized2DPrivateApertureHandle(PrivateApertureHandle):
         for aperture_draw in self.aperture_draws:
             aperture_draw.draw(self)
 
+        self.image = self.image
+
     @property
     def image(self) -> Image.Image:
         """Aperture image."""
@@ -46,12 +48,21 @@ class Rasterized2DPrivateApertureHandle(PrivateApertureHandle):
     def image(self, value: Image.Image) -> None:
         """Aperture image."""
         self._image = value
+        self._image_invert = self._image.point(lambda p: 1 - p)
 
     @property
     def image_draw(self) -> ImageDraw.ImageDraw:
         """Acquire drawing interface."""
         return ImageDraw.Draw(self.image)
 
+    @property
+    def image_invert(self) -> Image.Image:
+        """Inverted aperture image."""
+        if self._image_invert is None:
+            raise ApertureImageNotInitializedError
+        return self._image_invert
+
     def dump_aperture(self, dest: Path) -> None:
         """Save aperture to local file, mainly for debugging purposes."""
         self.image.save(dest / f"{self.aperture_id}_{self.private_id}.png")
+        self.image_invert.save(dest / f"{self.aperture_id}_{self.private_id}_I.png")

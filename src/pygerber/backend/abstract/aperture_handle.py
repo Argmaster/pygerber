@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel, ConfigDict
 
+from pygerber.backend.abstract.aperture_draws.aperture_draw_circle import (
+    ApertureDrawCircle,
+)
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
@@ -33,9 +36,14 @@ class PrivateApertureHandle:
         self.private_id = private_id
         self.backend = backend
         self.aperture_draws: list[ApertureDraw] = []
+        self.is_plain_circle = True
 
     def add_draw(self, draw: ApertureDraw) -> None:
         """Add circle to aperture."""
+        if self.is_plain_circle and (
+            not isinstance(draw, ApertureDrawCircle) or len(self.aperture_draws) > 1
+        ):
+            self.is_plain_circle = False
         self.aperture_draws.append(draw)
 
     @abstractmethod

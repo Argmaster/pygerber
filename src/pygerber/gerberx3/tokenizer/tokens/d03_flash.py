@@ -53,6 +53,7 @@ class Flash(Token):
         draw_action = backend.get_draw_action_flash_cls()(
             state.get_current_aperture(),
             backend,
+            state.polarity,
             position,
         )
 

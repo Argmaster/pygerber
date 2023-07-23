@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     )
     from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
     from pygerber.backend.abstract.draw_actions.draw_flash import DrawFlash
+    from pygerber.backend.abstract.draw_actions.draw_line import DrawLine
     from pygerber.backend.abstract.draw_actions_handle import DrawActionsHandle
     from pygerber.backend.abstract.result_handle import ResultHandle
     from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
@@ -106,3 +107,7 @@ class Backend(ABC):
     @abstractmethod
     def get_draw_action_flash_cls(self) -> type[DrawFlash]:
         """Return backend-specific implementation of draw action flash."""
+
+    @abstractmethod
+    def get_draw_action_line_cls(self) -> type[DrawLine]:
+        """Return backend-specific implementation of draw action line."""
