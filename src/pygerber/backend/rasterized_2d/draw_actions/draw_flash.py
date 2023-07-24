@@ -5,6 +5,9 @@ import logging
 from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.draw_actions.draw_flash import DrawFlash
+from pygerber.backend.rasterized_2d.draw_actions.draw_action_mixin import (
+    Rasterized2DDrawActionMixin,
+)
 from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:
@@ -14,7 +17,7 @@ if TYPE_CHECKING:
     from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 
 
-class Rasterized2DDrawFlash(DrawFlash):
+class Rasterized2DDrawFlash(DrawFlash, Rasterized2DDrawActionMixin):
     """Class for creating rasterized 2D flashes."""
 
     backend: Rasterized2DBackend
@@ -39,3 +42,4 @@ class Rasterized2DDrawFlash(DrawFlash):
             box=pixel_box,
             mask=self.private_handle.image,
         )
+        self._draw_bounding_box_if_requested()

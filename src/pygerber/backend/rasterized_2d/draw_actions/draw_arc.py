@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from pygerber.backend.abstract.draw_actions.draw_line import DrawLine
+from pygerber.backend.abstract.draw_actions.draw_arc import DrawArc
 from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.backend.rasterized_2d.draw_actions.draw_action_mixin import (
     Rasterized2DDrawActionMixin,
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 
 
-class Rasterized2DDrawLine(DrawLine, Rasterized2DDrawActionMixin):
+class Rasterized2DDrawArc(DrawArc, Rasterized2DDrawActionMixin):
     """Base class for creating rasterized line drawing actions."""
 
     backend: Rasterized2DBackend
@@ -39,7 +39,7 @@ class Rasterized2DDrawLine(DrawLine, Rasterized2DDrawActionMixin):
                 self.private_handle.aperture_id,
             )
 
-        self._draw_line_vertex(self.start_position)
+        self._draw_arc_vertex(self.start_position)
 
         start = (
             self.start_position - self.backend.image_coordinates_correction
@@ -53,15 +53,15 @@ class Rasterized2DDrawLine(DrawLine, Rasterized2DDrawActionMixin):
         aperture_size = self.private_handle.image.size
         width = round((aperture_size[0] + aperture_size[1]) / 2)
         self.backend.image_draw.line(
-            (start, end),
+            [start, end],
             fill=self.polarity.get_2d_rasterized_color(),
             width=width,
         )
-        self._draw_line_vertex(self.end_position)
+        self._draw_arc_vertex(self.end_position)
 
         self._draw_bounding_box_if_requested()
 
-    def _draw_line_vertex(self, position: Vector2D) -> None:
+    def _draw_arc_vertex(self, position: Vector2D) -> None:
         box = self.private_handle.get_bounding_box()
         image_space_box = box + position - self.backend.image_coordinates_correction
         pixel_box = image_space_box.get_min_vector().as_pixels(self.backend.dpi)

@@ -24,13 +24,14 @@ class Rasterized2DPrivateApertureHandle(PrivateApertureHandle):
     def finalize_aperture_creation(self) -> None:
         """Draw aperture and store result."""
         bbox = self.get_bounding_box()
+
         size = bbox.get_size().as_pixels(self.backend.dpi)
 
         # Image must be at least 1x1, otherwise Pillow crashes while saving.
         x, y = size
         size = (max(x, 0) + 1, max(y, 0) + 1)
 
-        self.image = Image.new(mode="1", size=size, color=0)
+        self.image = Image.new(mode="L", size=size, color=0)
 
         for aperture_draw in self.aperture_draws:
             aperture_draw.draw(self)

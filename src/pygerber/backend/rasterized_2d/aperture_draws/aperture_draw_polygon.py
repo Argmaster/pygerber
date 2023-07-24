@@ -37,7 +37,7 @@ class Rasterized2DApertureDrawPolygon(ApertureDrawPolygon):
             ),
             n_sides=self.number_of_vertices,
             rotation=float(-self.rotation + Decimal("-90.0")),
-            fill=self.polarity.get_1_color(),
+            fill=self.polarity.get_2d_rasterized_color(),
             outline=None,
             width=0,
         )

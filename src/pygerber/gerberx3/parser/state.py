@@ -15,6 +15,7 @@ from pygerber.gerberx3.parser.errors import (
     UnitNotSetError,
 )
 from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
+from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
@@ -86,3 +87,22 @@ class State(BaseModel):
         if self.current_aperture is None:
             raise ApertureNotSelectedError
         return self.current_aperture
+
+    def parse_coordinate(self, coordinate: Coordinate) -> Offset:
+        """Parse, include substitution with current and conversion to Offset."""
+        if coordinate.coordinate_type == CoordinateType.MISSING_X:
+            return self.current_position.x
+
+        if coordinate.coordinate_type == CoordinateType.MISSING_Y:
+            return self.current_position.y
+
+        if coordinate.coordinate_type == CoordinateType.MISSING_I:
+            return Offset.NULL
+
+        if coordinate.coordinate_type == CoordinateType.MISSING_J:
+            return Offset.NULL
+
+        return Offset.new(
+            self.get_coordinate_parser().parse(coordinate),
+            unit=self.get_units(),
+        )

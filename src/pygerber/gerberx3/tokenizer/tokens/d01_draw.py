@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
-from pygerber.backend.abstract.offset import Offset
 from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import DrawMode
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
@@ -33,14 +32,14 @@ class Draw(Token):
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        x = tokens.get("x", "0")
+        x = tokens.get("x")
         x = Coordinate.new(coordinate_type=CoordinateType.X, offset=x)
-        y = tokens.get("y", "0")
+        y = tokens.get("y")
         y = Coordinate.new(coordinate_type=CoordinateType.Y, offset=y)
-        i = tokens.get("i", "0")
-        i = Coordinate.new(coordinate_type=CoordinateType.X, offset=i)
-        j = tokens.get("j", "0")
-        j = Coordinate.new(coordinate_type=CoordinateType.Y, offset=j)
+        i = tokens.get("i")
+        i = Coordinate.new(coordinate_type=CoordinateType.I, offset=i)
+        j = tokens.get("j")
+        j = Coordinate.new(coordinate_type=CoordinateType.J, offset=j)
         return cls(x=x, y=y, i=i, j=j)
 
     def update_drawing_state(
@@ -49,14 +48,9 @@ class Draw(Token):
         backend: Backend,
     ) -> Tuple[State, Iterable[DrawAction]]:
         """Set coordinate parser."""
-        x = Offset.new(
-            state.get_coordinate_parser().parse(self.x),
-            unit=state.get_units(),
-        )
-        y = Offset.new(
-            state.get_coordinate_parser().parse(self.y),
-            unit=state.get_units(),
-        )
+        x = state.parse_coordinate(self.x)
+        y = state.parse_coordinate(self.y)
+
         xy_position = Vector2D(x=x, y=y)
         start_position = state.current_position
 

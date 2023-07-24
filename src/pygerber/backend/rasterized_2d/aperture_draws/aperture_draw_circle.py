@@ -33,7 +33,7 @@ class Rasterized2DApertureDrawCircle(ApertureDrawCircle):
 
         handle.image_draw.ellipse(
             xy=pixel_box,
-            fill=self.polarity.get_1_color(),
+            fill=self.polarity.get_2d_rasterized_color(),
             outline=None,
             width=0,
         )

@@ -108,3 +108,7 @@ class Vector2D(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}(x={self.x}, y={self.y})"
+
+    def length(self) -> Offset:
+        """Return length of vector."""
+        return Offset(value=((self.x * self.x).value + (self.y * self.y).value).sqrt())

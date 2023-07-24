@@ -16,7 +16,11 @@ from pygerber.gerberx3.parser.errors import (
     UnsupportedCoordinateTypeError,
     ZeroOmissionNotSupportedError,
 )
-from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
+from pygerber.gerberx3.tokenizer.tokens.coordinate import (
+    Coordinate,
+    CoordinateSign,
+    CoordinateType,
+)
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
@@ -150,15 +154,20 @@ class CoordinateParser(BaseModel):
 
     def parse(self, coordinate: Coordinate) -> Decimal:
         """Parse raw coordinate data."""
-        if coordinate.coordinate_type == CoordinateType.X:
-            return self._parse(self.x_format, coordinate.offset)
+        if coordinate.coordinate_type in (CoordinateType.X, CoordinateType.I):
+            return self._parse(self.x_format, coordinate.offset, coordinate.sign)
 
-        if coordinate.coordinate_type == CoordinateType.Y:
-            return self._parse(self.y_format, coordinate.offset)
+        if coordinate.coordinate_type in (CoordinateType.Y, CoordinateType.J):
+            return self._parse(self.y_format, coordinate.offset, coordinate.sign)
 
         raise UnsupportedCoordinateTypeError(coordinate.coordinate_type)
 
-    def _parse(self, axis_format: AxisFormat, offset: str) -> Decimal:
+    def _parse(
+        self,
+        axis_format: AxisFormat,
+        offset: str,
+        sign: CoordinateSign,
+    ) -> Decimal:
         total_length = axis_format.total_length
 
         if len(offset) > total_length:
@@ -168,4 +177,4 @@ class CoordinateParser(BaseModel):
         offset = offset.rjust(axis_format.total_length, "0")
         integer, decimal = offset[: axis_format.integer], offset[axis_format.integer :]
 
-        return Decimal(f"{integer}.{decimal}")
+        return Decimal(f"{sign.value}{integer}.{decimal}")

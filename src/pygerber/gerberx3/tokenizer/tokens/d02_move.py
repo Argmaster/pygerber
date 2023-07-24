@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
-from pygerber.backend.abstract.offset import Offset
 from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
 from pygerber.gerberx3.tokenizer.tokens.token import Token
@@ -41,14 +40,9 @@ class Move(Token):
         _backend: Backend,
     ) -> Tuple[State, Iterable[DrawAction]]:
         """Set coordinate parser."""
-        x = Offset.new(
-            state.get_coordinate_parser().parse(self.x),
-            unit=state.get_units(),
-        )
-        y = Offset.new(
-            state.get_coordinate_parser().parse(self.y),
-            unit=state.get_units(),
-        )
+        x = state.parse_coordinate(self.x)
+        y = state.parse_coordinate(self.y)
+
         position = Vector2D(x=x, y=y)
         return (
             state.model_copy(

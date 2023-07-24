@@ -93,6 +93,17 @@ class BoundingBox(BaseModel):
             ),
         )
 
+    def scale(self, by: Decimal) -> BoundingBox:
+        """Return scaled bounding box."""
+        dx_dy = (self.get_size() * by) / 2
+
+        return BoundingBox(
+            max_x=self.max_x + dx_dy.x,
+            max_y=self.max_y + dx_dy.y,
+            min_x=self.min_x - dx_dy.x,
+            min_y=self.min_y - dx_dy.y,
+        )
+
     def _operator(
         self,
         other: object,

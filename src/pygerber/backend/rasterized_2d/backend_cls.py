@@ -1,6 +1,7 @@
 """Backend for rasterized rendering of Gerber files."""
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import TYPE_CHECKING, List, Optional
 
 from PIL import Image, ImageDraw
@@ -19,6 +20,9 @@ from pygerber.backend.rasterized_2d.aperture_draws.aperture_draw_rectangle impor
 from pygerber.backend.rasterized_2d.aperture_handle import (
     Rasterized2DPrivateApertureHandle,
 )
+from pygerber.backend.rasterized_2d.draw_actions.draw_action_mixin import (
+    Rasterized2DDrawActionMixin,
+)
 from pygerber.backend.rasterized_2d.draw_actions.draw_flash import Rasterized2DDrawFlash
 from pygerber.backend.rasterized_2d.draw_actions.draw_line import Rasterized2DDrawLine
 from pygerber.backend.rasterized_2d.draw_actions_handle import (
@@ -26,6 +30,7 @@ from pygerber.backend.rasterized_2d.draw_actions_handle import (
 )
 from pygerber.backend.rasterized_2d.errors import ApertureImageNotInitializedError
 from pygerber.backend.rasterized_2d.result_handle import Rasterized2DResultHandle
+from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -54,9 +59,14 @@ class Rasterized2DBackendOptions(BackendOptions):
         self,
         dpi: int = 300,
         dump_apertures: Optional[Path] = None,
+        *,
+        include_debug_padding: bool = False,
+        include_bounding_boxes: bool = False,
     ) -> None:
         """Initialize options."""
         self.dpi = dpi
+        self.include_debug_padding = include_debug_padding
+        self.include_bounding_boxes = include_bounding_boxes
         super().__init__(dump_apertures=dump_apertures)
 
 
@@ -82,18 +92,31 @@ class Rasterized2DBackend(Backend):
 
     def draw(self, draw_actions: List[DrawAction]) -> ResultHandle:
         """Execute all draw actions to create visualization."""
-        bbox = self._get_draw_actions_bounding_box(draw_actions)
+        raw_bbox = self._get_draw_actions_bounding_box(draw_actions)
+
+        if self.options.include_debug_padding:
+            bbox = raw_bbox.scale(Decimal(2))
+        else:
+            bbox = raw_bbox
+
         size = bbox.get_size()
-
         self.image_coordinates_correction = bbox.get_min_vector()
-        image_size = size.as_pixels(self.dpi)
 
+        image_size = size.as_pixels(self.dpi)
         # Image must be at least 1x1, otherwise Pillow crashes while saving.
         x, y = image_size
         image_size = (max(x, 0) + 1, max(y, 0) + 1)
 
-        self.image = Image.new(mode="1", size=image_size, color=0)
-        return super().draw(draw_actions)
+        self.image = Image.new(mode="L", size=image_size, color=0)
+
+        result_handle = super().draw(draw_actions)
+        Rasterized2DDrawActionMixin.draw_bounding_box(
+            raw_bbox,
+            self,
+            Polarity.DEBUG,
+            2,  #  Just slightly bigger than bounding boxes of flashes etc.
+        )
+        return result_handle
 
     def _get_draw_actions_bounding_box(
         self,

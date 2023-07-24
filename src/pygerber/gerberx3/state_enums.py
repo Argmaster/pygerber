@@ -38,6 +38,8 @@ class Polarity(Enum):
 
     Clear = "C"
     Dark = "D"
+    DEBUG = "DBG"
+    DEBUG2 = "DBG2"
 
     def invert(self) -> Polarity:
         """Return opposite polarity."""
@@ -46,9 +48,17 @@ class Polarity(Enum):
 
         return Polarity.Clear
 
-    def get_1_color(self) -> int:
+    def get_2d_rasterized_color(self) -> int:
         """Get color for "1" mode image."""
-        return 0 if self == Polarity.Clear else 1
+        return _2d_rasterized_color_map[self]
+
+
+_2d_rasterized_color_map = {
+    Polarity.Dark: 255,
+    Polarity.Clear: 0,
+    Polarity.DEBUG: 127,
+    Polarity.DEBUG2: 75,
+}
 
 
 class Mirroring(Enum):
