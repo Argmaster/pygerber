@@ -124,3 +124,7 @@ board so far are:
      NA(24pF\50V/5%);
 - 5. Changing 5.1 eMMC at 3.3V (up from 1.8V operation) for better reliability, PWR_PC1
      jumper has to be set to position 1-2 for 3.3V operation.
+
+---
+
+Source: https://github.com/OLIMEX/OLINUXINO

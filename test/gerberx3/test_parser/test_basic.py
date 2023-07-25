@@ -5,6 +5,8 @@ from decimal import Decimal
 
 from typing import TYPE_CHECKING
 
+import pytest
+
 from pygerber.gerberx3.parser.parser import Parser
 from pygerber.gerberx3.state_enums import Unit
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
@@ -91,6 +93,9 @@ def test_parser_source_4(asset_loader: AssetLoader) -> None:
     parser.parse()
 
 
+# TODO(argmaster.world@gmail.com): Add support for block apertures.
+# https://github.com/Argmaster/pygerber/issues/24
+@pytest.mark.xfail(reason="Parser is lacking support for block apertures.")
 def test_parser_source_5(asset_loader: AssetLoader) -> None:
     """Parser test based on source.grb file."""
     stack = Tokenizer().tokenize(

@@ -1,0 +1,71 @@
+%FSLAX26Y26*%
+%MOMM*%
+G04 Rectangle background aperture *
+%ADD10R,3.0X3.0*%
+G04 Circle apertures *
+%ADD11C,0.5*%
+%ADD12C,0.5X0.25*%
+G04 Rectangle apertures *
+%ADD13R,0.6X0.3*%
+%ADD14R,0.6X0.3X0.2*%
+G04 Obround apertures *
+%ADD15O,0.6X0.3*%
+%ADD16O,0.6X0.3X0.2*%
+G04 Polygon apertures *
+%ADD17P,0.6X5*%
+%ADD18P,0.6X5X90X0.3*%
+G01*
+G04 Make dark background apertures *
+%LPD*%
+D10*
+X1500000Y1500000D03*
+X4500000Y4500000D03*
+G04 Make circle dark stamps *
+%LPD*%
+D11*
+X1000000Y5000000D03*
+D12*
+X1000000Y4000000D03*
+G04 Make circle transparent stamps *
+%LPC*%
+D11*
+X4000000Y5000000D03*
+D12*
+X4000000Y4000000D03*
+G04 Make rectangle dark stamps *
+%LPD*%
+D13*
+X2000000Y5000000D03*
+D14*
+X2000000Y4000000D03*
+G04 Make rectangle transparent stamps *
+%LPC*%
+D13*
+X5000000Y5000000D03*
+D14*
+X5000000Y4000000D03*
+G04 Make obround dark stamps *
+%LPD*%
+D15*
+X4000000Y2000000D03*
+D16*
+X4000000Y1000000D03*
+G04 Make obround transparent stamps *
+%LPC*%
+D15*
+X1000000Y2000000D03*
+D16*
+X1000000Y1000000D03*
+G04 Make polygon dark stamps *
+%LPD*%
+D17*
+X5000000Y2000000D03*
+D18*
+X5000000Y1000000D03*
+G04 Make polygon transparent stamps *
+%LPC*%
+D17*
+X2000000Y2000000D03*
+D18*
+X2000000Y1000000D03*
+M02*

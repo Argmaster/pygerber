@@ -26,6 +26,9 @@ tox = "^4.6.3"
 pre-commit = "^3.3.3"
 autoflake = "^2.2.0"
 isort = "^5.12.0"
+pytest-xdist = { extras = ["psutil"], version = "^3.3.1" }
+pytest-cov = "^4.1.0"
+types-tzlocal = "^5.0.1.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -47,6 +50,9 @@ pre-commit = [
     { cmd = "pre-commit run --all-files -v" },
 ]
 # -------------------------------------------------------------------------------------
+test = [
+    { cmd = "pytest --log-level=DEBUG -s -n auto --cov=pygerber --cov-report=term-missing:skip-covered" },
+]
 
 [tool.isort]
 profile = "black"
@@ -90,6 +96,7 @@ required-imports = ["from __future__ import annotations"]
 #          https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html          #
 # ---------------------------------------------------------------------------- #
 python_version = "3.8"
+packages = "pygerber"
 # A regular expression that matches file names, directory names and paths which
 # mypy should ignore while recursively discovering files to check. Use forward
 #slashes (/) as directory separators on all platforms.
