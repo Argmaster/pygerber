@@ -1,4 +1,4 @@
-"""Tokenizer tests based on basic Gerber code samples."""
+"""Tokenizer tests based on A64-OLinuXino-rev-G board."""
 
 from __future__ import annotations
 from pathlib import Path
@@ -19,13 +19,13 @@ IMAGE_DUMP.mkdir(mode=0o777, parents=True, exist_ok=True)
 
 @pytest.mark.parametrize(
     ["directory", "file_name"],
-    sorted(find_gerberx3_asset_files("test/assets/gerberx3/basic")),
+    sorted(find_gerberx3_asset_files("test/assets/gerberx3/ATMEGA328-Motor-Board")),
 )
 def test_sample(asset_loader: AssetLoader, directory: str, file_name: str) -> None:
     """Rasterized2D rendering test based on sample files."""
     draw_rasterized_2d(
         asset_loader,
         f"gerberx3/{directory}/{file_name}",
-        IMAGE_DUMP / directory,
-        dpi=500,
+        IMAGE_DUMP / directory / file_name[:-4],
+        dpi=1000,
     )

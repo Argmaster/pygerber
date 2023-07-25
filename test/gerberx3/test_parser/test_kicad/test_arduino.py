@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from test.conftest import AssetLoader
 
 
-def test_parser_User_Drawings(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_User_Drawings(asset_loader: AssetLoader) -> None:  # noqa: N802
     """Parser test based on User_Drawings file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/kicad/arduino/User_Drawings.gbr").decode(
@@ -24,7 +24,7 @@ def test_parser_User_Drawings(asset_loader: AssetLoader) -> None:  # noqa: N802
     parser.parse()
 
 
-def test_parser_B_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_B_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
     """Parser test based on B_Cu file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/kicad/arduino/B_Cu.gbr").decode("utf-8"),
@@ -34,7 +34,7 @@ def test_parser_B_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
     parser.parse()
 
 
-def test_parser_F_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_F_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
     """Parser test based on F_Cu file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/kicad/arduino/F_Cu.gbr").decode("utf-8"),
@@ -44,7 +44,7 @@ def test_parser_F_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
     parser.parse()
 
 
-def test_parser_F_Silkscreen(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_F_Silkscreen(asset_loader: AssetLoader) -> None:  # noqa: N802
     """Parser test based on F_Silkscreen file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/kicad/arduino/F_Silkscreen.gbr").decode(
@@ -56,7 +56,7 @@ def test_parser_F_Silkscreen(asset_loader: AssetLoader) -> None:  # noqa: N802
     parser.parse()
 
 
-def test_parser_F_Mask(asset_loader: AssetLoader) -> None:  # noqa: N802
+def test_F_Mask(asset_loader: AssetLoader) -> None:  # noqa: N802
     """Parser test based on F_Mask file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/kicad/arduino/F_Mask.gbr").decode("utf-8"),

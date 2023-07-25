@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from test.conftest import AssetLoader
 
 
-def test_parser_source_0(asset_loader: AssetLoader) -> None:
+def test_source_0(asset_loader: AssetLoader) -> None:
     """Parser test based on source.grb file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-0/source.grb").decode("utf-8"),
@@ -53,7 +53,7 @@ def test_parser_source_0(asset_loader: AssetLoader) -> None:
     assert parser.state.draw_units == Unit.Millimeters
 
 
-def test_parser_source_1(asset_loader: AssetLoader) -> None:
+def test_source_1(asset_loader: AssetLoader) -> None:
     """Parser test based on source.grb file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-1/source.grb").decode("utf-8"),
@@ -63,7 +63,7 @@ def test_parser_source_1(asset_loader: AssetLoader) -> None:
     parser.parse()
 
 
-def test_parser_source_2(asset_loader: AssetLoader) -> None:
+def test_source_2(asset_loader: AssetLoader) -> None:
     """Parser test based on source.grb file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-2/source.grb").decode("utf-8"),
@@ -73,7 +73,7 @@ def test_parser_source_2(asset_loader: AssetLoader) -> None:
     parser.parse()
 
 
-def test_parser_source_3(asset_loader: AssetLoader) -> None:
+def test_source_3(asset_loader: AssetLoader) -> None:
     """Parser test based on source.grb file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-3/source.grb").decode("utf-8"),
@@ -83,7 +83,7 @@ def test_parser_source_3(asset_loader: AssetLoader) -> None:
     parser.parse()
 
 
-def test_parser_source_4(asset_loader: AssetLoader) -> None:
+def test_source_4(asset_loader: AssetLoader) -> None:
     """Parser test based on source.grb file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-4/source.grb").decode("utf-8"),
@@ -96,7 +96,7 @@ def test_parser_source_4(asset_loader: AssetLoader) -> None:
 # TODO(argmaster.world@gmail.com): Add support for block apertures.
 # https://github.com/Argmaster/pygerber/issues/24
 @pytest.mark.xfail(reason="Parser is lacking support for block apertures.")
-def test_parser_source_5(asset_loader: AssetLoader) -> None:
+def test_source_5(asset_loader: AssetLoader) -> None:
     """Parser test based on source.grb file."""
     stack = Tokenizer().tokenize(
         asset_loader.load_asset("gerberx3/basic/sample-5/source.grb").decode("utf-8"),

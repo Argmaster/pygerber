@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from test.conftest import AssetLoader
 
 
-def test_parser_A64_OlinuXino_Rev_G_B_Mask(
+def test_A64_OlinuXino_Rev_G_B_Mask(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-B_Mask file."""
@@ -28,7 +28,7 @@ def test_parser_A64_OlinuXino_Rev_G_B_Mask(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_In3_Cu(
+def test_A64_OlinuXino_Rev_G_In3_Cu(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-In3_Cu file."""
@@ -42,7 +42,7 @@ def test_parser_A64_OlinuXino_Rev_G_In3_Cu(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_In1_Cu(
+def test_A64_OlinuXino_Rev_G_In1_Cu(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-In1_Cu file."""
@@ -56,7 +56,7 @@ def test_parser_A64_OlinuXino_Rev_G_In1_Cu(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_In4_Cu(
+def test_A64_OlinuXino_Rev_G_In4_Cu(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-In4_Cu file."""
@@ -70,7 +70,7 @@ def test_parser_A64_OlinuXino_Rev_G_In4_Cu(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_F_Paste(
+def test_A64_OlinuXino_Rev_G_F_Paste(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-F_Paste file."""
@@ -84,7 +84,7 @@ def test_parser_A64_OlinuXino_Rev_G_F_Paste(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_B_Paste(
+def test_A64_OlinuXino_Rev_G_B_Paste(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-B_Paste file."""
@@ -98,7 +98,7 @@ def test_parser_A64_OlinuXino_Rev_G_B_Paste(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_B_Cu(
+def test_A64_OlinuXino_Rev_G_B_Cu(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-B_Cu file."""
@@ -112,7 +112,7 @@ def test_parser_A64_OlinuXino_Rev_G_B_Cu(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_Edge_Cuts(
+def test_A64_OlinuXino_Rev_G_Edge_Cuts(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-Edge_Cuts file."""
@@ -126,7 +126,7 @@ def test_parser_A64_OlinuXino_Rev_G_Edge_Cuts(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_F_Cu(
+def test_A64_OlinuXino_Rev_G_F_Cu(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-F_Cu file."""
@@ -141,7 +141,7 @@ def test_parser_A64_OlinuXino_Rev_G_F_Cu(
 
 
 @pytest.mark.xfail(reason="No support for G0X merged with D01")
-def test_parser_A64_OlinuXino_Rev_G_F_SilkS(
+def test_A64_OlinuXino_Rev_G_F_SilkS(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-F_SilkS file."""
@@ -156,7 +156,7 @@ def test_parser_A64_OlinuXino_Rev_G_F_SilkS(
 
 
 @pytest.mark.xfail(reason="No support for G0X merged with D01")
-def test_parser_A64_OlinuXino_Rev_G_B_SilkS(
+def test_A64_OlinuXino_Rev_G_B_SilkS(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-B_SilkS file."""
@@ -170,7 +170,7 @@ def test_parser_A64_OlinuXino_Rev_G_B_SilkS(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_In2_Cu(
+def test_A64_OlinuXino_Rev_G_In2_Cu(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-In2_Cu file."""
@@ -184,7 +184,7 @@ def test_parser_A64_OlinuXino_Rev_G_In2_Cu(
     parser.parse()
 
 
-def test_parser_A64_OlinuXino_Rev_G_F_Mask(
+def test_A64_OlinuXino_Rev_G_F_Mask(
     asset_loader: AssetLoader,
 ) -> None:
     """Parser test based on A64-OlinuXino_Rev_G-F_Mask file."""
