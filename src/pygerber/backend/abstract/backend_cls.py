@@ -21,6 +21,7 @@ if TYPE_CHECKING:
         PublicApertureHandle,
     )
     from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.backend.abstract.draw_actions.draw_arc import DrawArc
     from pygerber.backend.abstract.draw_actions.draw_flash import DrawFlash
     from pygerber.backend.abstract.draw_actions.draw_line import DrawLine
     from pygerber.backend.abstract.draw_actions_handle import DrawActionsHandle
@@ -111,3 +112,7 @@ class Backend(ABC):
     @abstractmethod
     def get_draw_action_line_cls(self) -> type[DrawLine]:
         """Return backend-specific implementation of draw action line."""
+
+    @abstractmethod
+    def get_draw_action_arc_cls(self) -> type[DrawArc]:
+        """Return backend-specific implementation of draw action arc."""

@@ -8,7 +8,6 @@ from pygerber.backend.abstract.draw_actions.draw_flash import DrawFlash
 from pygerber.backend.rasterized_2d.draw_actions.draw_action_mixin import (
     Rasterized2DDrawActionMixin,
 )
-from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:
     from pygerber.backend.rasterized_2d.aperture_handle import (
@@ -27,19 +26,5 @@ class Rasterized2DDrawFlash(DrawFlash, Rasterized2DDrawActionMixin):
         """Execute draw action."""
         logging.debug("Flashing at %s with %s", self.position, self.private_handle)
 
-        box = self.get_bounding_box()  # Bounding box includes aperture position.
-
-        image_space_box = box - self.backend.image_coordinates_correction
-        pixel_box = image_space_box.get_min_vector().as_pixels(self.backend.dpi)
-
-        if self.polarity == Polarity.Dark:
-            im = self.private_handle.image
-        else:
-            im = self.private_handle.image_invert
-
-        self.backend.image.paste(
-            im=im,
-            box=pixel_box,
-            mask=self.private_handle.image,
-        )
+        self._draw_aperture(self.position)
         self._draw_bounding_box_if_requested()

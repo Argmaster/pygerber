@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import math
 import operator
 from decimal import Decimal
-from typing import Callable
+from typing import Callable, ClassVar
 
 from pydantic import BaseModel, ConfigDict
 
@@ -15,6 +16,10 @@ class Vector2D(BaseModel):
     """Tuple wrapper for representing size with custom accessors."""
 
     model_config = ConfigDict(frozen=True)
+
+    NULL: ClassVar[Vector2D]
+    UNIT_X: ClassVar[Vector2D]
+    UNIT_Y: ClassVar[Vector2D]
 
     x: Offset
     y: Offset
@@ -112,3 +117,28 @@ class Vector2D(BaseModel):
     def length(self) -> Offset:
         """Return length of vector."""
         return Offset(value=((self.x * self.x).value + (self.y * self.y).value).sqrt())
+
+    def angle_between_clockwise(self, other: Vector2D) -> float:
+        """Calculate angle between two vectors in degrees clockwise."""
+        self_norm = self / self.length()
+        other_norm = other / other.length()
+
+        dot = other_norm.dot(self_norm)
+        determinant = self_norm.determinant(other_norm)
+
+        theta = math.atan2(float(dot.value), float(determinant.value))
+
+        return math.degrees(theta)
+
+    def dot(self, other: Vector2D) -> Offset:
+        """Calculate dot product of two vectors."""
+        return self.x * other.x + self.y * other.y
+
+    def determinant(self, other: Vector2D) -> Offset:
+        """Calculate determinant of matrix constructed from self and other."""
+        return self.x * other.y - self.y * other.x
+
+
+Vector2D.NULL = Vector2D(x=Offset.NULL, y=Offset.NULL)
+Vector2D.UNIT_X = Vector2D(x=Offset(value=Decimal(1)), y=Offset.NULL)
+Vector2D.UNIT_Y = Vector2D(x=Offset.NULL, y=Offset(value=Decimal(1)))

@@ -51,8 +51,10 @@ class Draw(Token):
         x = state.parse_coordinate(self.x)
         y = state.parse_coordinate(self.y)
 
-        xy_position = Vector2D(x=x, y=y)
+        end_position = Vector2D(x=x, y=y)
         start_position = state.current_position
+
+        draw_action: DrawAction
 
         if state.draw_mode == DrawMode.Linear:
             draw_action = backend.get_draw_action_line_cls()(
@@ -60,15 +62,38 @@ class Draw(Token):
                 backend,
                 state.polarity,
                 start_position,
-                xy_position,
+                end_position,
             )
+
+        elif state.draw_mode in (
+            DrawMode.ClockwiseCircular,
+            DrawMode.CounterclockwiseCircular,
+        ):
+            i = state.parse_coordinate(self.i)
+            j = state.parse_coordinate(self.j)
+
+            center_offset = Vector2D(x=i, y=j)
+
+            draw_action = backend.get_draw_action_arc_cls()(
+                state.get_current_aperture(),
+                backend,
+                state.polarity,
+                start_position,
+                center_offset,
+                end_position,
+                is_clockwise=(state.draw_mode == DrawMode.ClockwiseCircular),
+                # Will require tweaking if support for single quadrant mode
+                # will be desired.
+                is_multi_quadrant=True,
+            )
+
         else:
-            raise NotImplementedError
+            raise NotImplementedError(state.draw_mode)
 
         return (
             state.model_copy(
                 update={
-                    "current_position": xy_position,
+                    "current_position": end_position,
                 },
                 deep=True,
             ),

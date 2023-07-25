@@ -21,12 +21,17 @@ class DrawArc(DrawAction):
         start_position: Vector2D,
         dx_dy_center: Vector2D,
         end_position: Vector2D,
+        *,
+        is_clockwise: bool,
+        is_multi_quadrant: bool,
     ) -> None:
         """Initialize DrawFlash object."""
         super().__init__(handle, backend, polarity)
         self.start_position = start_position
         self.dx_dy_center = dx_dy_center
         self.end_position = end_position
+        self.is_clockwise = is_clockwise
+        self.is_multi_quadrant = is_multi_quadrant
 
     @property
     def arc_center_absolute(self) -> Vector2D:

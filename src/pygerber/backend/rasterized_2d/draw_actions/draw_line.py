@@ -5,11 +5,9 @@ import logging
 from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.draw_actions.draw_line import DrawLine
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.backend.rasterized_2d.draw_actions.draw_action_mixin import (
     Rasterized2DDrawActionMixin,
 )
-from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:
     from pygerber.backend.rasterized_2d.aperture_handle import (
@@ -39,8 +37,12 @@ class Rasterized2DDrawLine(DrawLine, Rasterized2DDrawActionMixin):
                 self.private_handle.aperture_id,
             )
 
-        self._draw_line_vertex(self.start_position)
+        self._draw_aperture(self.start_position)
+        self._draw_line()
+        self._draw_aperture(self.end_position)
+        self._draw_bounding_box_if_requested()
 
+    def _draw_line(self) -> None:
         start = (
             self.start_position - self.backend.image_coordinates_correction
         ).as_pixels(
@@ -52,27 +54,9 @@ class Rasterized2DDrawLine(DrawLine, Rasterized2DDrawActionMixin):
 
         aperture_size = self.private_handle.image.size
         width = round((aperture_size[0] + aperture_size[1]) / 2)
+
         self.backend.image_draw.line(
             (start, end),
             fill=self.polarity.get_2d_rasterized_color(),
             width=width,
-        )
-        self._draw_line_vertex(self.end_position)
-
-        self._draw_bounding_box_if_requested()
-
-    def _draw_line_vertex(self, position: Vector2D) -> None:
-        box = self.private_handle.get_bounding_box()
-        image_space_box = box + position - self.backend.image_coordinates_correction
-        pixel_box = image_space_box.get_min_vector().as_pixels(self.backend.dpi)
-
-        if self.polarity == Polarity.Dark:
-            im = self.private_handle.image
-        else:
-            im = self.private_handle.image_invert
-
-        self.backend.image.paste(
-            im=im,
-            box=pixel_box,
-            mask=self.private_handle.image,
         )
