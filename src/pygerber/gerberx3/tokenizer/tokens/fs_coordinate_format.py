@@ -8,8 +8,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
-from pydantic import BaseModel
-
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.parser.errors import (
     IncrementalCoordinatesNotSupportedError,
     InvalidCoordinateLengthError,
@@ -107,7 +106,7 @@ class CoordinateMode(Enum):
     Incremental = "I"
 
 
-class AxisFormat(BaseModel):
+class AxisFormat(FrozenGeneralModel):
     """Wrapper for single axis format."""
 
     integer: int
@@ -119,7 +118,7 @@ class AxisFormat(BaseModel):
         return self.integer + self.decimal
 
 
-class CoordinateParser(BaseModel):
+class CoordinateParser(FrozenGeneralModel):
     """Coordinate Parser class."""
 
     x_format: AxisFormat

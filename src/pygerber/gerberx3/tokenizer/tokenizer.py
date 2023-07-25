@@ -71,3 +71,7 @@ class TokenStack(List[Token]):
             logging.debug("<Empty token stack>")
 
         return self
+
+    def format_gerberx3(self) -> str:
+        """Return formatted GerberX3 code."""
+        return str.join("\n", (str(token) for token in self))

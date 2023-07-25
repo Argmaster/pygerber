@@ -7,15 +7,12 @@ import operator
 from decimal import Decimal
 from typing import Callable, ClassVar
 
-from pydantic import BaseModel, ConfigDict
-
 from pygerber.backend.abstract.offset import Offset
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 
 
-class Vector2D(BaseModel):
+class Vector2D(FrozenGeneralModel):
     """Tuple wrapper for representing size with custom accessors."""
-
-    model_config = ConfigDict(frozen=True)
 
     NULL: ClassVar[Vector2D]
     UNIT_X: ClassVar[Vector2D]

@@ -4,11 +4,12 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Dict, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
 from pygerber.backend.abstract.offset import Offset
 from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.parser.errors import (
     ApertureNotSelectedError,
     CoordinateFormatNotSetError,
@@ -22,10 +23,8 @@ from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
 )
 
 
-class State(BaseModel):
+class State(FrozenGeneralModel):
     """GerberX3 interpreter state."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
 
     current_position: Vector2D = Vector2D(x=Offset.NULL, y=Offset.NULL)
 

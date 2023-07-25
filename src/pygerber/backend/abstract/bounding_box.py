@@ -5,16 +5,16 @@ import operator
 from decimal import Decimal
 from typing import Callable, ClassVar, Tuple
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from pygerber.backend.abstract.offset import Offset
 from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 
 
-class BoundingBox(BaseModel):
+class BoundingBox(FrozenGeneralModel):
     """Class for calculating bounding boxes."""
 
-    model_config = ConfigDict(frozen=True)
     NULL: ClassVar[BoundingBox]
 
     max_x: Offset = Field(default=Offset.NULL)

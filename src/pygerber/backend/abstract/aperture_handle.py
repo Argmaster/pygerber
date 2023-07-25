@@ -5,13 +5,12 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, ConfigDict
-
 from pygerber.backend.abstract.aperture_draws.aperture_draw_circle import (
     ApertureDrawCircle,
 )
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.bounding_box import BoundingBox
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 
 if TYPE_CHECKING:
@@ -82,10 +81,8 @@ class PrivateApertureHandle:
     __repr__ = __str__
 
 
-class PublicApertureHandle(BaseModel):
+class PublicApertureHandle(FrozenGeneralModel):
     """Immutable handle to drawing aperture."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
 
     aperture_id: ApertureID
     private_id: int

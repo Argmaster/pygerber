@@ -3,8 +3,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
-from pydantic import BaseModel
 from pyparsing import Group
+
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 
 if TYPE_CHECKING:
     from pyparsing import ParserElement, ParseResults
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class Token(BaseModel):
+class Token(FrozenGeneralModel):
     """Base class for creating token classes."""
 
     @classmethod

@@ -6,8 +6,7 @@ import operator
 from decimal import Decimal
 from typing import TYPE_CHECKING, Callable, ClassVar, Sequence
 
-from pydantic import BaseModel, ConfigDict
-
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.state_enums import Unit
 
 if TYPE_CHECKING:
@@ -17,10 +16,9 @@ INCH_TO_MM_MULTIPLIER = Decimal("25.39998628400740663600041656")
 MM_TO_INCH_MULTIPLIER = Decimal("0.0393701")
 
 
-class Offset(BaseModel):
+class Offset(FrozenGeneralModel):
     """Class representing offset in 2D space."""
 
-    model_config = ConfigDict(frozen=True)
     NULL: ClassVar[Offset]
 
     value: Decimal

@@ -4,13 +4,13 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class Coordinate(BaseModel):
+class Coordinate(FrozenGeneralModel):
     """Coordinate wrapper class."""
 
     coordinate_type: CoordinateType

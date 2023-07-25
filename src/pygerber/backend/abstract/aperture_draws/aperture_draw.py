@@ -4,16 +4,15 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel
-
 from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
 
 
-class ApertureDraw(BaseModel):
+class ApertureDraw(FrozenGeneralModel):
     """Description of aperture component."""
 
     center_position: Vector2D
