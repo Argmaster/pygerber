@@ -23,5 +23,4 @@ class Comment(Expression):
         return cls(content=content)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"G04 {self.content}*"

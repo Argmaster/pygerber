@@ -49,7 +49,6 @@ class PrimitiveCircle(Primitive):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         string = self.symbol
 
         string += f",{self.exposure}"
@@ -98,7 +97,6 @@ class PrimitiveVectorLine(Primitive):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         string = self.symbol
 
         string += f",{self.exposure}"
@@ -144,7 +142,6 @@ class PrimitiveCenterLine(Primitive):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         string = self.symbol
 
         string += f",{self.exposure}"
@@ -189,7 +186,6 @@ class PrimitiveOutline(Primitive):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         string = self.symbol
 
         string += f",{self.exposure}"
@@ -235,7 +231,6 @@ class PrimitivePolygon(Primitive):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         string = self.symbol
 
         string += f",{self.exposure}"
@@ -279,7 +274,6 @@ class PrimitiveThermal(Primitive):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         string = self.symbol
 
         string += f",{self.center_x}"

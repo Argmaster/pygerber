@@ -23,5 +23,4 @@ class MacroVariableName(Expression):
         return cls(name=name)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return self.name

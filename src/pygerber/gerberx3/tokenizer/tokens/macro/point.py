@@ -26,5 +26,4 @@ class Point(Expression):
         return cls(x=x, y=y)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"{self.x},{self.y}"

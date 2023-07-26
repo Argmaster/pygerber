@@ -48,7 +48,6 @@ class Token(FrozenGeneralModel):
         return cls()
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"<TOKEN {self.__class__.__qualname__}>"
 
     def __repr__(self) -> str:

@@ -30,7 +30,6 @@ class MacroDefinition(Token):
         return cls(macro_name=macro_name, macro_body=macro_body)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         str_body = "\n".join(str(e) for e in self.macro_body)
         indented_body = indent(str_body, prefix="  ")
         return f"%AM{self.macro_name}*\n{indented_body}\n%"

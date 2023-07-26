@@ -17,7 +17,25 @@ if TYPE_CHECKING:
 class LoadScaling(Token):
     """Wrapper for load scaling token.
 
-    Loads the scaling object transformation parameter.
+    ### LS Command: Scaling Graphics State Parameter
+
+    The `LS` command is employed to establish the scaling graphics state parameter.
+
+    Functionality:
+    - The command dictates the scale factor utilized during object creation.
+    - The aperture undergoes scaling, anchored at its origin. It's crucial to note that
+        this origin might not always align with its geometric center.
+
+    Usage and Persistence:
+    - The `LS` command can be invoked multiple times within a single file.
+    - Once set, the object scaling retains its value unless a subsequent `LS` command
+        modifies it.
+    - The scaling gets adjusted based on the specific value mentioned in the command and
+        doesn't accumulate with the preceding scale factor.
+
+    The LS command was introduced in revision 2016.12.
+
+    SPEC: `2023.03` SECTION: `4.9.5`
     """
 
     scaling: Decimal
@@ -45,5 +63,4 @@ class LoadScaling(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"LS{self.scaling}*"

@@ -55,5 +55,4 @@ class Move(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"{self.x}{self.y}D02*"

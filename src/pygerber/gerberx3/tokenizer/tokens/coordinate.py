@@ -35,7 +35,6 @@ class Coordinate(FrozenGeneralModel):
         return cls(coordinate_type=coordinate_type, sign=sign, offset=offset)
 
     def __str__(self) -> str:
-        """Return pretty representation of coordinate token."""
         if self.coordinate_type.is_missing():
             return ""
         return f"{self.coordinate_type.value}{self.sign.value}{self.offset}"

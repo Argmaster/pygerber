@@ -35,5 +35,4 @@ class SetClockwiseCircular(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return "G02*"

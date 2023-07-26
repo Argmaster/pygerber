@@ -101,5 +101,4 @@ class Draw(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"{self.x}{self.y}{self.i}{self.j}D01*"

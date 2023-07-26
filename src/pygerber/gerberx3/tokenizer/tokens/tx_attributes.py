@@ -40,7 +40,6 @@ class FileAttribute(AttributeToken):
         return cls(name=name, value=value)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"TF{','.join((self.name, *self.value))}*"
 
 
@@ -71,7 +70,6 @@ class ApertureAttribute(AttributeToken):
         return cls(name=name, value=value)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"TA{','.join((self.name, *self.value))}*"
 
 
@@ -100,7 +98,6 @@ class ObjectAttribute(AttributeToken):
         return cls(name=name, value=value)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"TO{','.join((self.name, *self.value))}*"
 
 
@@ -120,5 +117,4 @@ class DeleteAttribute(AttributeToken):
         return cls(name=name)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"TD{self.name if self.name is not None else ''}*"

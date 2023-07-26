@@ -35,7 +35,6 @@ class StepRepeatBegin(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"SRX{self.x_repeat}Y{self.y_repeat}I{self.x_step}J{self.y_step}*"
 
 
@@ -46,5 +45,4 @@ class StepRepeatEnd(Token):
     """
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return "SR*"

@@ -41,6 +41,7 @@ from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
 from pygerber.gerberx3.tokenizer.tokens.g75_multi_quadrant import SetMultiQuadrantMode
 from pygerber.gerberx3.tokenizer.tokens.ip_image_polarity import ImagePolarity
 from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
+from pygerber.gerberx3.tokenizer.tokens.ln_load_name import LoadName
 from pygerber.gerberx3.tokenizer.tokens.lp_load_polarity import LoadPolarity
 from pygerber.gerberx3.tokenizer.tokens.lr_load_rotation import LoadRotation
 from pygerber.gerberx3.tokenizer.tokens.ls_load_scaling import LoadScaling
@@ -360,15 +361,76 @@ AD = DefineAperture.wrap(
     ),
 )
 
+LN = LoadName.wrap(
+    wrap_statement(Literal("LN") + string.set_results_name("string")),
+)
+"""
+### Load Name (LN)
+
+Note: The LN command was deprecated in revision I4 from October 2013.
+
+The historic `LN` command doesn't influence the image in any manner and can safely be
+overlooked.
+
+Function of the `LN` command:
+- `LN` is designed to allocate a name to the following section of the file.
+- It was originally conceptualized to serve as a human-readable comment.
+- For creating human-readable comments, it's advisable to utilize the standard `G04`
+    command.
+- The `LN` command has the flexibility to be executed multiple times within a file.
+
+SPEC: `2023.03` SECTION: `8.1.6`
+"""
+
 # Loads the scale object transformation parameter.
 LS = LoadScaling.wrap(
     wrap_statement(Literal("LS") + decimal.set_results_name("scaling")),
 )
-# Loads the rotation object transformation parameter.
+"""
+### LS Command: Scaling Graphics State Parameter
+
+The `LS` command is employed to establish the scaling graphics state parameter.
+
+Functionality:
+- The command dictates the scale factor utilized during object creation.
+- The aperture undergoes scaling, anchored at its origin. It's crucial to note that this
+    origin might not always align with its geometric center.
+
+Usage and Persistence:
+- The `LS` command can be invoked multiple times within a single file.
+- Once set, the object scaling retains its value unless a subsequent `LS` command
+    modifies it.
+- The scaling gets adjusted based on the specific value mentioned in the command and
+    doesn't accumulate with the preceding scale factor.
+
+The LS command was introduced in revision 2016.12.
+
+SPEC: `2023.03` SECTION: `4.9.5`
+"""
 LR = LoadRotation.wrap(
     wrap_statement(Literal("LR") + decimal.set_results_name("rotation")),
 )
-# Loads the mirror object transformation parameter.
+"""
+### LR Command: Rotation Graphics State Parameter
+
+The `LR` command is utilized to configure the rotation graphics state parameter.
+
+Functionality:
+- This command specifies the rotation angle to be applied when crafting objects.
+- The aperture is rotated centered on its origin, which might either coincide with or
+    differ from its geometric center.
+
+Usage and Persistence:
+- The `LR` command can be invoked numerous times throughout a file.
+- Once defined, the object rotation retains its configuration unless overridden by an
+    ensuing `LR` command.
+- Rotation is strictly determined by the exact value mentioned in the command and
+    doesn't integrate with any prior rotation values.
+
+The LR command was introduced in revision 2016.12.
+
+SPEC: `2023.03` SECTION: `4.9.4`
+"""
 LM = LoadMirroring.wrap(
     wrap_statement(Literal("LM") + oneOf("N XY Y X").set_results_name("mirroring")),
 )
@@ -547,6 +609,7 @@ common = (
     | LM
     | LR
     | LS
+    | LN
     | region_statement
     | AB_statement
     | SR_statement

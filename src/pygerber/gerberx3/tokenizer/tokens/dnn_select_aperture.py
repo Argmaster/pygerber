@@ -50,7 +50,6 @@ class DNNSelectAperture(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"{self.aperture_id}*"
 
 

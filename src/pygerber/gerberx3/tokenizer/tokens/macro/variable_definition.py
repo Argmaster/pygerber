@@ -26,5 +26,4 @@ class MacroVariableDefinition(Expression):
         return cls(variable=variable, value=value)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"{self.variable}={self.value}*"

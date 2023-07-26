@@ -50,5 +50,4 @@ class ImagePolarity(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"%IP{self.image_polarity}*%"

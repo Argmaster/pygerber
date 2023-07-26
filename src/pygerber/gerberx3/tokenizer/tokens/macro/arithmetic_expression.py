@@ -65,7 +65,6 @@ class ArithmeticExpression(Expression):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"{self.left}{self.operator.value}{self.right}"
 
 
@@ -95,5 +94,4 @@ class NumericConstant(Expression):
         return cls(value=value)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return str(self.value)

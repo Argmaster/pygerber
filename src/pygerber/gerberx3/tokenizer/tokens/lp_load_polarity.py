@@ -45,5 +45,4 @@ class LoadPolarity(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"LP{self.polarity.value}*"

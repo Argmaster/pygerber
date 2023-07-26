@@ -24,5 +24,4 @@ class M00ProgramStop(Token):
         raise ExitParsingProcessInterrupt
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return "M00*"

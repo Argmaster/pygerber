@@ -56,5 +56,4 @@ class UnitMode(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"%MM{self.unit.value}*%"

@@ -34,7 +34,6 @@ class BeginRegion(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return "G36*"
 
 
@@ -61,5 +60,4 @@ class EndRegion(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return "G37*"

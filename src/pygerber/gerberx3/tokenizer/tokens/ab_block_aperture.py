@@ -24,7 +24,6 @@ class BlockApertureBegin(Token):
         return cls(identifier=identifier)
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"AB{self.identifier}*"
 
 
@@ -40,5 +39,4 @@ class BlockApertureEnd(Token):
         return cls()
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return "AB*"

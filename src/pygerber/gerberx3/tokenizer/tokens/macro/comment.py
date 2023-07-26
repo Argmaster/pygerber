@@ -10,5 +10,4 @@ class MacroComment(Comment):
     """Macro comment token."""
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"0 {self.content}*"

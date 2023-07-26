@@ -17,7 +17,25 @@ if TYPE_CHECKING:
 class LoadRotation(Token):
     """Wrapper for load rotation token.
 
-    Loads the rotation object transformation parameter.
+    ### LR Command: Rotation Graphics State Parameter
+
+    The `LR` command is utilized to configure the rotation graphics state parameter.
+
+    Functionality:
+    - This command specifies the rotation angle to be applied when crafting objects.
+    - The aperture is rotated centered on its origin, which might either coincide with
+        or differ from its geometric center.
+
+    Usage and Persistence:
+    - The `LR` command can be invoked numerous times throughout a file.
+    - Once defined, the object rotation retains its configuration unless overridden by
+        an ensuing `LR` command.
+    - Rotation is strictly determined by the exact value mentioned in the command and
+        doesn't integrate with any prior rotation values.
+
+    The LR command was introduced in revision 2016.12.
+
+    SPEC: `2023.03` SECTION: `4.9.4`
     """
 
     rotation: Decimal
@@ -45,5 +63,4 @@ class LoadRotation(Token):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"LR{self.rotation}*"

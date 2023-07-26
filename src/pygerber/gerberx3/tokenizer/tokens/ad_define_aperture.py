@@ -73,7 +73,6 @@ class DefineAperture(Token):
         return DefineMacro.from_tokens(aperture_type=aperture_type, **tokens.as_dict())
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return "<ADDefineAperture-INVALID>"
 
 
@@ -141,7 +140,6 @@ class DefineCircle(DefineAperture):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
@@ -216,7 +214,6 @@ class DefineRectangle(DefineAperture):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
@@ -330,7 +327,6 @@ class DefineObround(DefineAperture):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
@@ -411,7 +407,6 @@ class DefinePolygon(DefineAperture):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
@@ -468,5 +463,4 @@ class DefineMacro(DefineAperture):
         )
 
     def __str__(self) -> str:
-        """Return pretty representation of comment token."""
         return f"%AD{self.aperture_id}{self.aperture_type},{'X'.join(self.am_param)}"

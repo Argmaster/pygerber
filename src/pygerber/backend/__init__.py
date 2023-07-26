@@ -25,5 +25,4 @@ class BackendName(Enum):
         raise BackendNotSupportedError(str(backend))
 
     def __str__(self) -> str:
-        """Convert to string."""
         return self.value
