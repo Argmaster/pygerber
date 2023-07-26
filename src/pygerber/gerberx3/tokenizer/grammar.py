@@ -29,10 +29,12 @@ from pygerber.gerberx3.tokenizer.tokens.d02_move import Move
 from pygerber.gerberx3.tokenizer.tokens.d03_flash import Flash
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import DNNSelectAperture
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateFormat
-from pygerber.gerberx3.tokenizer.tokens.g0n_set_draw_mode import (
+from pygerber.gerberx3.tokenizer.tokens.g01_set_linear import SetLinear
+from pygerber.gerberx3.tokenizer.tokens.g02_set_clockwise_circular import (
     SetClockwiseCircular,
+)
+from pygerber.gerberx3.tokenizer.tokens.g03_set_counterclockwise_circular import (
     SetCounterclockwiseCircular,
-    SetLinear,
 )
 from pygerber.gerberx3.tokenizer.tokens.g04_comment import Comment
 from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
