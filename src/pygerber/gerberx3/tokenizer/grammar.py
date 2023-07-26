@@ -481,12 +481,12 @@ IJ = (I_coordinate + Opt(J_coordinate)) | (Opt(I_coordinate) + J_coordinate)
 # Creates a flash object with the current aperture. The
 # current point is moved to the flash point.
 D03 = Flash.wrap(
-    XY + oneOf("D3 D03 D003 D0003") + EOEX,
+    Opt(XY) + oneOf("D3 D03 D003 D0003") + EOEX,
 )
 # D02 moves the current point to the coordinate in the
 # command. It does not create an object.
 D02 = Move.wrap(
-    XY + oneOf("D2 D02 D002 D0002") + EOEX,
+    Opt(XY) + oneOf("D2 D02 D002 D0002") + EOEX,
 )
 # Outside a region statement D01 creates a draw or arc
 # object with the current aperture. Inside it adds a draw/arc
