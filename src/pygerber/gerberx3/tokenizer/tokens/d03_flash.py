@@ -11,11 +11,11 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
 
 
-class Flash(Token):
+class D03Flash(Token):
     """Wrapper for flash operation token.
 
     Creates a flash object with the current aperture. The current point is moved to the
@@ -38,17 +38,23 @@ class Flash(Token):
         self,
         state: State,
         backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set coordinate parser."""
         x = state.parse_coordinate(self.x)
         y = state.parse_coordinate(self.y)
 
         position = Vector2D(x=x, y=y)
-        draw_action = backend.get_draw_action_flash_cls()(
+        draw_commands: list[DrawCommand] = []
+        current_aperture = backend.get_private_aperture_handle(
             state.get_current_aperture(),
-            backend,
-            state.polarity,
-            position,
+        )
+        draw_commands.append(
+            backend.get_draw_paste_cls()(
+                backend=backend,
+                polarity=state.polarity,
+                center_position=position,
+                other=current_aperture.drawing_target,
+            ),
         )
 
         return (
@@ -58,7 +64,7 @@ class Flash(Token):
                 },
                 deep=True,
             ),
-            (draw_action,),
+            draw_commands,
         )
 
     def __str__(self) -> str:

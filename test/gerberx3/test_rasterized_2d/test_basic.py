@@ -27,5 +27,5 @@ def test_sample(asset_loader: AssetLoader, directory: str, file_name: str) -> No
         asset_loader,
         f"gerberx3/{directory}/{file_name}",
         IMAGE_DUMP / directory,
-        dpi=500,
+        dpi=2000,
     )

@@ -1,35 +1,43 @@
-"""Abstract base class for creating arc draw actions."""
+"""Base class for creating components for aperture creation."""
 from __future__ import annotations
 
-from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.bounding_box import BoundingBox
-from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
 from pygerber.backend.abstract.offset import Offset
 from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import Polarity
 
 
-class DrawArc(DrawAction):
-    """Abstract base class for creating arc drawing actions."""
+class DrawArc(DrawCommand):
+    """Description of aperture component."""
+
+    start_position: Vector2D
+    dx_dy_center: Vector2D
+    end_position: Vector2D
+    width: Offset
+
+    is_clockwise: bool
+    is_multi_quadrant: bool
 
     def __init__(  # noqa: PLR0913
         self,
-        handle: PublicApertureHandle,
         backend: Backend,
         polarity: Polarity,
         start_position: Vector2D,
         dx_dy_center: Vector2D,
         end_position: Vector2D,
+        width: Offset,
         *,
         is_clockwise: bool,
         is_multi_quadrant: bool,
     ) -> None:
-        """Initialize DrawFlash object."""
-        super().__init__(handle, backend, polarity)
+        """Initialize draw command."""
+        super().__init__(backend, polarity)
         self.start_position = start_position
         self.dx_dy_center = dx_dy_center
         self.end_position = end_position
+        self.width = width
         self.is_clockwise = is_clockwise
         self.is_multi_quadrant = is_multi_quadrant
 
@@ -60,8 +68,8 @@ class DrawArc(DrawAction):
 
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of draw operation."""
-        aperture_bbox = self.private_handle.get_bounding_box()
+        vertex_box = BoundingBox.from_diameter(self.width)
         radius = self.arc_radius
-        return (aperture_bbox + self.arc_center_absolute + radius) + (
-            aperture_bbox + self.arc_center_absolute - radius
+        return (vertex_box + (self.arc_center_absolute + radius)) + (
+            vertex_box + (self.arc_center_absolute - radius)
         )

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
 
 
@@ -35,7 +35,7 @@ class DNNSelectAperture(Token):
         self,
         state: State,
         _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set current aperture."""
         if self.aperture_id not in state.apertures:
             raise ApertureNotDefinedError(self.aperture_id)

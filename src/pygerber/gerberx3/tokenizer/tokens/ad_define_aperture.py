@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
 
 
@@ -106,24 +106,27 @@ class DefineCircle(DefineAperture):
         self,
         state: State,
         backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Update drawing state."""
         handle = backend.create_aperture_handle(self.aperture_id)
-        handle.add_draw(
-            backend.get_aperture_draw_circle_cls()(
-                diameter=Offset.new(self.diameter, state.get_units()),
-                polarity=Polarity.Dark,
-                center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-            ),
-        )
-        if self.hole_diameter is not None:
+        with handle:
             handle.add_draw(
-                backend.get_aperture_draw_circle_cls()(
-                    diameter=Offset.new(self.hole_diameter, state.get_units()),
-                    polarity=Polarity.Clear,
+                backend.get_draw_circle_cls()(
+                    backend=backend,
+                    diameter=Offset.new(self.diameter, state.get_units()),
+                    polarity=Polarity.Dark,
                     center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
                 ),
             )
+            if self.hole_diameter is not None:
+                handle.add_draw(
+                    backend.get_draw_circle_cls()(
+                        backend=backend,
+                        diameter=Offset.new(self.hole_diameter, state.get_units()),
+                        polarity=Polarity.Clear,
+                        center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
+                    ),
+                )
         frozen_handle = handle.get_public_handle()
 
         new_aperture_dict = {**state.apertures}
@@ -179,25 +182,28 @@ class DefineRectangle(DefineAperture):
         self,
         state: State,
         backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Update drawing state."""
         handle = backend.create_aperture_handle(self.aperture_id)
-        handle.add_draw(
-            backend.get_aperture_draw_rectangle_cls()(
-                x_size=Offset.new(self.x_size, state.get_units()),
-                y_size=Offset.new(self.y_size, state.get_units()),
-                polarity=Polarity.Dark,
-                center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-            ),
-        )
-        if self.hole_diameter is not None:
+        with handle:
             handle.add_draw(
-                backend.get_aperture_draw_circle_cls()(
-                    diameter=Offset.new(self.hole_diameter, state.get_units()),
-                    polarity=Polarity.Clear,
+                backend.get_draw_rectangle_cls()(
+                    backend=backend,
+                    x_size=Offset.new(self.x_size, state.get_units()),
+                    y_size=Offset.new(self.y_size, state.get_units()),
+                    polarity=Polarity.Dark,
                     center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
                 ),
             )
+            if self.hole_diameter is not None:
+                handle.add_draw(
+                    backend.get_draw_circle_cls()(
+                        backend=backend,
+                        diameter=Offset.new(self.hole_diameter, state.get_units()),
+                        polarity=Polarity.Clear,
+                        center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
+                    ),
+                )
         frozen_handle = handle.get_public_handle()
 
         new_aperture_dict = {**state.apertures}
@@ -253,7 +259,7 @@ class DefineObround(DefineAperture):
         self,
         state: State,
         backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Update drawing state."""
         handle = backend.create_aperture_handle(self.aperture_id)
 
@@ -280,37 +286,41 @@ class DefineObround(DefineAperture):
             circle_positive = Vector2D(x=middle_rectangle_x / 2, y=Offset.NULL)
             circle_negative = Vector2D(x=-middle_rectangle_x / 2, y=Offset.NULL)
 
-        handle.add_draw(
-            backend.get_aperture_draw_rectangle_cls()(
-                x_size=middle_rectangle_x,
-                y_size=middle_rectangle_y,
-                polarity=Polarity.Dark,
-                center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-            ),
-        )
-        handle.add_draw(
-            backend.get_aperture_draw_circle_cls()(
-                diameter=circle_diameter,
-                polarity=Polarity.Dark,
-                center_position=circle_positive,
-            ),
-        )
-        handle.add_draw(
-            backend.get_aperture_draw_circle_cls()(
-                diameter=circle_diameter,
-                polarity=Polarity.Dark,
-                center_position=circle_negative,
-            ),
-        )
-
-        if self.hole_diameter is not None:
+        with handle:
             handle.add_draw(
-                backend.get_aperture_draw_circle_cls()(
-                    diameter=Offset.new(self.hole_diameter, state.get_units()),
-                    polarity=Polarity.Clear,
+                backend.get_draw_rectangle_cls()(
+                    backend=backend,
+                    x_size=middle_rectangle_x,
+                    y_size=middle_rectangle_y,
+                    polarity=Polarity.Dark,
                     center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
                 ),
             )
+            handle.add_draw(
+                backend.get_draw_circle_cls()(
+                    backend=backend,
+                    diameter=circle_diameter,
+                    polarity=Polarity.Dark,
+                    center_position=circle_positive,
+                ),
+            )
+            handle.add_draw(
+                backend.get_draw_circle_cls()(
+                    backend=backend,
+                    diameter=circle_diameter,
+                    polarity=Polarity.Dark,
+                    center_position=circle_negative,
+                ),
+            )
+            if self.hole_diameter is not None:
+                handle.add_draw(
+                    backend.get_draw_circle_cls()(
+                        backend=backend,
+                        diameter=Offset.new(self.hole_diameter, state.get_units()),
+                        polarity=Polarity.Clear,
+                        center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
+                    ),
+                )
         frozen_handle = handle.get_public_handle()
 
         new_aperture_dict = {**state.apertures}
@@ -371,26 +381,29 @@ class DefinePolygon(DefineAperture):
         self,
         state: State,
         backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Update drawing state."""
         handle = backend.create_aperture_handle(self.aperture_id)
-        handle.add_draw(
-            backend.get_aperture_draw_polygon_cls()(
-                outer_diameter=Offset.new(self.outer_diameter, state.get_units()),
-                number_of_vertices=self.number_of_vertices,
-                rotation=Decimal("0.0") if self.rotation is None else self.rotation,
-                polarity=Polarity.Dark,
-                center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-            ),
-        )
-        if self.hole_diameter is not None:
+        with handle:
             handle.add_draw(
-                backend.get_aperture_draw_circle_cls()(
-                    diameter=Offset.new(self.hole_diameter, state.get_units()),
-                    polarity=Polarity.Clear,
+                backend.get_draw_polygon_cls()(
+                    backend=backend,
+                    outer_diameter=Offset.new(self.outer_diameter, state.get_units()),
+                    number_of_vertices=self.number_of_vertices,
+                    rotation=Decimal("0.0") if self.rotation is None else self.rotation,
+                    polarity=Polarity.Dark,
                     center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
                 ),
             )
+            if self.hole_diameter is not None:
+                handle.add_draw(
+                    backend.get_draw_circle_cls()(
+                        backend=backend,
+                        diameter=Offset.new(self.hole_diameter, state.get_units()),
+                        polarity=Polarity.Clear,
+                        center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
+                    ),
+                )
         frozen_handle = handle.get_public_handle()
 
         new_aperture_dict = {**state.apertures}
@@ -442,11 +455,13 @@ class DefineMacro(DefineAperture):
         self,
         state: State,
         backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Update drawing state."""
         handle = backend.create_aperture_handle(self.aperture_id)
-        # TODO(argmaster.world@gmail.com): Implement macro logic.
-        # https://github.com/Argmaster/pygerber/issues/23
+        with handle:
+            # TODO(argmaster.world@gmail.com): Implement macro logic.
+            # https://github.com/Argmaster/pygerber/issues/23
+            pass
         frozen_handle = handle.get_public_handle()
 
         new_aperture_dict = {**state.apertures}

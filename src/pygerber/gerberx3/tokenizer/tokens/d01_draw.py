@@ -12,11 +12,11 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
 
 
-class Draw(Token):
+class D01Draw(Token):
     """Wrapper for plot operation token.
 
     Outside a region statement D01 creates a draw or arc object with the current
@@ -46,7 +46,7 @@ class Draw(Token):
         self,
         state: State,
         backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set coordinate parser."""
         x = state.parse_coordinate(self.x)
         y = state.parse_coordinate(self.y)
@@ -54,15 +54,28 @@ class Draw(Token):
         end_position = Vector2D(x=x, y=y)
         start_position = state.current_position
 
-        draw_action: DrawAction
+        draw_commands: list[DrawCommand] = []
+        current_aperture = backend.get_private_aperture_handle(
+            state.get_current_aperture(),
+        )
+        draw_commands.append(
+            backend.get_draw_paste_cls()(
+                backend=backend,
+                polarity=state.polarity,
+                center_position=start_position,
+                other=current_aperture.drawing_target,
+            ),
+        )
 
         if state.draw_mode == DrawMode.Linear:
-            draw_action = backend.get_draw_action_line_cls()(
-                state.get_current_aperture(),
-                backend,
-                state.polarity,
-                start_position,
-                end_position,
+            draw_commands.append(
+                backend.get_draw_vector_line_cls()(
+                    backend=backend,
+                    polarity=state.polarity,
+                    start_position=start_position,
+                    end_position=end_position,
+                    width=current_aperture.get_line_width(),
+                ),
             )
 
         elif state.draw_mode in (
@@ -74,21 +87,32 @@ class Draw(Token):
 
             center_offset = Vector2D(x=i, y=j)
 
-            draw_action = backend.get_draw_action_arc_cls()(
-                state.get_current_aperture(),
-                backend,
-                state.polarity,
-                start_position,
-                center_offset,
-                end_position,
-                is_clockwise=(state.draw_mode == DrawMode.ClockwiseCircular),
-                # Will require tweaking if support for single quadrant mode
-                # will be desired.
-                is_multi_quadrant=True,
+            draw_commands.append(
+                backend.get_draw_arc_cls()(
+                    backend=backend,
+                    polarity=state.polarity,
+                    start_position=start_position,
+                    dx_dy_center=center_offset,
+                    end_position=end_position,
+                    width=current_aperture.get_line_width(),
+                    is_clockwise=(state.draw_mode == DrawMode.ClockwiseCircular),
+                    # Will require tweaking if support for single quadrant mode
+                    # will be desired.
+                    is_multi_quadrant=True,
+                ),
             )
 
         else:
             raise NotImplementedError(state.draw_mode)
+
+        draw_commands.append(
+            backend.get_draw_paste_cls()(
+                backend=backend,
+                polarity=state.polarity,
+                center_position=end_position,
+                other=current_aperture.drawing_target,
+            ),
+        )
 
         return (
             state.model_copy(
@@ -97,7 +121,7 @@ class Draw(Token):
                 },
                 deep=True,
             ),
-            (draw_action,),
+            draw_commands,
         )
 
     def __str__(self) -> str:

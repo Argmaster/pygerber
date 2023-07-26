@@ -116,12 +116,12 @@ class BoundingBox(FrozenGeneralModel):
                 min_x=op(self.min_x, other.x),
                 min_y=op(self.min_y, other.y),
             )
-        if isinstance(other, (Offset, Decimal, int, float, str)):
+        if isinstance(other, (Offset, Decimal, int, float)):
             return BoundingBox(
                 max_x=op(self.max_x, other),
                 max_y=op(self.max_y, other),
-                min_x=op(self.min_x, other),
-                min_y=op(self.min_y, other),
+                min_x=op(self.min_x, -other),
+                min_y=op(self.min_y, -other),
             )
         return NotImplemented  # type: ignore[unreachable]
 

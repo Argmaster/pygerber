@@ -24,9 +24,9 @@ from pygerber.gerberx3.tokenizer.tokens.ab_block_aperture import (
     BlockApertureEnd,
 )
 from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import DefineAperture
-from pygerber.gerberx3.tokenizer.tokens.d01_draw import Draw
-from pygerber.gerberx3.tokenizer.tokens.d02_move import Move
-from pygerber.gerberx3.tokenizer.tokens.d03_flash import Flash
+from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
+from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
+from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import DNNSelectAperture
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateFormat
 from pygerber.gerberx3.tokenizer.tokens.g01_set_linear import SetLinear
@@ -480,12 +480,12 @@ IJ = (I_coordinate + Opt(J_coordinate)) | (Opt(I_coordinate) + J_coordinate)
 
 # Creates a flash object with the current aperture. The
 # current point is moved to the flash point.
-D03 = Flash.wrap(
+D03 = D03Flash.wrap(
     Opt(XY) + oneOf("D3 D03 D003 D0003") + EOEX,
 )
 # D02 moves the current point to the coordinate in the
 # command. It does not create an object.
-D02 = Move.wrap(
+D02 = D02Move.wrap(
     Opt(XY) + oneOf("D2 D02 D002 D0002") + EOEX,
 )
 # Outside a region statement D01 creates a draw or arc
@@ -493,7 +493,7 @@ D02 = Move.wrap(
 # segment to the contour under construction. The current
 # point is moved to draw/arc end point after the creation of
 # the draw/arc.
-D01 = Draw.wrap(
+D01 = D01Draw.wrap(
     ((Opt(XY) + Opt(IJ) + oneOf("D1 D01 D001 D0001")) | (XY + Opt(IJ))) + EOEX,
 )
 

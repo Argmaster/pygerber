@@ -7,7 +7,7 @@ from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
+    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
 
 
@@ -25,7 +25,7 @@ class SetSingleQuadrantMode(Token):
         self,
         state: State,
         _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawAction]]:
+    ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set drawing polarity."""
         return (
             state.model_copy(

@@ -16,9 +16,6 @@ from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 if TYPE_CHECKING:
     from test.conftest import AssetLoader
 
-IMAGE_DUMP = Path(__file__).parent / ".images" / "basic"
-IMAGE_DUMP.mkdir(mode=0o777, parents=True, exist_ok=True)
-
 
 def draw_rasterized_2d(
     asset_loader: AssetLoader, src: str, dest: Path, dpi: int

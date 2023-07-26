@@ -8,8 +8,8 @@ from enum import Enum
 from typing import Callable, Generator, Optional
 
 from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.draw_actions.draw_action import DrawAction
-from pygerber.backend.abstract.draw_actions_handle import DrawActionsHandle
+from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
+from pygerber.backend.abstract.draw_commands_handle import DrawCommandsHandle
 from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 from pygerber.gerberx3.parser.errors import (
     ExitParsingProcessInterrupt,
@@ -45,23 +45,23 @@ class Parser:
             if self.options.initial_state is None
             else self.options.initial_state
         )
-        self.draw_actions: list[DrawAction] = []
+        self.draw_actions: list[DrawCommand] = []
 
     @property
     def backend(self) -> Backend:
         """Get reference to backend object."""
         return self.options.backend
 
-    def parse(self) -> DrawActionsHandle:
+    def parse(self) -> DrawCommandsHandle:
         """Parse token stack."""
         for _ in self.parse_iter():
             pass
 
         return self.get_draw_actions_handle()
 
-    def get_draw_actions_handle(self) -> DrawActionsHandle:
+    def get_draw_actions_handle(self) -> DrawCommandsHandle:
         """Return handle to drawing actions."""
-        return self.backend.get_draw_actions_handle_cls()(
+        return self.backend.get_draw_commands_handle_cls()(
             self.draw_actions,
             self.backend,
         )

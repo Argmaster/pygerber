@@ -38,6 +38,17 @@ class Offset(FrozenGeneralModel):
 
         return cls(value=value)
 
+    @classmethod
+    def from_pixels(
+        cls,
+        value: Decimal | float | str | tuple[int, Sequence[int], int],
+        dpi: int,
+    ) -> Self:
+        """Initialize offset with value."""
+        # Gerber spec recommends using millimeters as unit, so they are used here too.
+        value = (Decimal(value) / dpi) * INCH_TO_MM_MULTIPLIER
+        return cls(value=value)
+
     def as_millimeters(self) -> Decimal:
         """Offset in millimeters."""
         return self.value
