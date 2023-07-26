@@ -66,6 +66,9 @@ class State(FrozenGeneralModel):
     # TD  | |   Attribute deleteDelete one or all attributes in the     | 5.5
     #     | |   dictionary.                                             |
     file_attributes: Dict[str, str] = Field(default_factory=dict)
+    # G75 | |   Sets multi quadrant mode
+    # G74 | |   Sets single quadrant mode
+    is_multi_quadrant: bool = False
 
     apertures: Dict[ApertureID, PublicApertureHandle] = Field(default_factory=dict)
 

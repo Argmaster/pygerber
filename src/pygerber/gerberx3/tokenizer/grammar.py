@@ -36,6 +36,7 @@ from pygerber.gerberx3.tokenizer.tokens.g0n_set_draw_mode import (
 )
 from pygerber.gerberx3.tokenizer.tokens.g04_comment import Comment
 from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
+from pygerber.gerberx3.tokenizer.tokens.g75_multi_quadrant import SetMultiQuadrantMode
 from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
 from pygerber.gerberx3.tokenizer.tokens.lp_load_polarity import LoadPolarity
 from pygerber.gerberx3.tokenizer.tokens.lr_load_rotation import LoadRotation
@@ -378,9 +379,11 @@ DNN = DNNSelectAperture.wrap(
     aperture_identifier + EOEX,
 )
 
-# A G75 must be called before creating the first arc for backwards compatibility,
-# but we will ignore that, as it has no real impact on drawing.
-G75 = Suppress(Literal("G75") + EOEX)
+# Set's multi quadrant mode.
+G75 = SetMultiQuadrantMode.wrap(Literal("G75") + EOEX)
+# Set's single quadrant mode.
+G74 = SetMultiQuadrantMode.wrap(Literal("G74") + EOEX)
+
 # Sets linear/circular mode to counterclockwise circular.
 G03 = SetCounterclockwiseCircular.wrap(Literal("G03") + EOEX)
 # Sets linear/circular mode to clockwise circular.
@@ -458,6 +461,7 @@ block <<= ZeroOrMore(
     | G02
     | G03
     | G75
+    | G74
     | LP
     | LM
     | LR
@@ -516,6 +520,7 @@ EXPRESSIONS = (
     | G02
     | G03
     | G75
+    | G74
     | LP
     | LM
     | LR
@@ -544,6 +549,7 @@ GRAMMAR = (
     | G02
     | G03
     | G75
+    | G74
     | LP
     | LM
     | LR
