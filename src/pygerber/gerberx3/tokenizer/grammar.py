@@ -78,9 +78,9 @@ from pygerber.gerberx3.tokenizer.tokens.tx_attributes import (
     ObjectAttribute,
 )
 
-EOEX = Suppress(Literal("*"))  # End of expression.
-SOSTMT = Suppress(Literal("%"))  # Start of statement.
-EOSTMT = Suppress(Literal("%"))  # End of statement.
+EOEX = Suppress(Literal("*").set_name("End of expression"))
+SOSTMT = Suppress(Literal("%").set_name("Start of statement"))
+EOSTMT = Suppress(Literal("%").set_name("End of statement"))
 
 
 def wrap_statement(expr: ParserElement, *, eoex: bool = True) -> ParserElement:
@@ -401,27 +401,30 @@ G75 = SetMultiQuadrantMode.wrap(Literal("G75") + EOEX)
 G74 = SetMultiQuadrantMode.wrap(Literal("G74") + EOEX)
 
 # Sets linear/circular mode to counterclockwise circular.
-G03 = SetCounterclockwiseCircular.wrap(Literal("G03") + EOEX)
+G03 = SetCounterclockwiseCircular.wrap(oneOf("G3 G03 G003 G0003") + EOEX)
 # Sets linear/circular mode to clockwise circular.
-G02 = SetClockwiseCircular.wrap(Literal("G02") + EOEX)
+G02 = SetClockwiseCircular.wrap(oneOf("G2 G02 G002 G0002") + EOEX)
 # Sets linear/circular mode to linear.
-G01 = SetLinear.wrap(Literal("G01") + EOEX)
+G01 = SetLinear.wrap(oneOf("G1 G01 G001 G0001") + EOEX)
+
+X_coordinate = Literal("X") + integer.set_results_name("x").set_name("X coordinate")
+Y_coordinate = Literal("Y") + integer.set_results_name("y").set_name("Y coordinate")
+
+I_coordinate = Literal("I") + integer.set_results_name("i").set_name("I offset")
+J_coordinate = Literal("J") + integer.set_results_name("j").set_name("J offset")
+
+XY = (X_coordinate + Opt(Y_coordinate)) | (Opt(X_coordinate) + Y_coordinate)
+IJ = (I_coordinate + Opt(J_coordinate)) | (Opt(I_coordinate) + J_coordinate)
 
 # Creates a flash object with the current aperture. The
 # current point is moved to the flash point.
 D03 = Flash.wrap(
-    Opt(Literal("X") + integer.set_results_name("x"))
-    + Opt(Literal("Y") + integer.set_results_name("y"))
-    + "D03"
-    + EOEX,
+    XY + oneOf("D3 D03 D003 D0003") + EOEX,
 )
 # D02 moves the current point to the coordinate in the
 # command. It does not create an object.
 D02 = Move.wrap(
-    Opt(Literal("X") + integer.set_results_name("x"))
-    + Opt(Literal("Y") + integer.set_results_name("y"))
-    + "D02"
-    + EOEX,
+    XY + oneOf("D2 D02 D002 D0002") + EOEX,
 )
 # Outside a region statement D01 creates a draw or arc
 # object with the current aperture. Inside it adds a draw/arc
@@ -429,16 +432,7 @@ D02 = Move.wrap(
 # point is moved to draw/arc end point after the creation of
 # the draw/arc.
 D01 = Draw.wrap(
-    Opt(Literal("X") + integer.set_results_name("x"))
-    + Opt(Literal("Y") + integer.set_results_name("y"))
-    + Opt(
-        Literal("I")
-        + integer.set_results_name("i")
-        + Literal("J")
-        + integer.set_results_name("j"),
-    )
-    + "D01"
-    + EOEX,
+    ((Opt(XY) + Opt(IJ) + oneOf("D1 D01 D001 D0001")) | (XY + Opt(IJ))) + EOEX,
 )
 
 # Sets linear/circular mode to counterclockwise circular and plot.
@@ -454,17 +448,19 @@ coord_digits = Regex(r"[1-6][1-6]")
 FS = CoordinateFormat.wrap(
     wrap_statement(
         Literal("FS")
-        + Regex("[LT]").set_results_name("zeros_mode")
-        + Regex("[AI]").set_results_name("coordinate_mode")
+        + oneOf("L T").set_results_name("zeros_mode").set_name("zeros mode")
+        + oneOf("A I").set_results_name("coordinate_mode").set_name("coordinate mode")
         + "X"
-        + coord_digits.set_results_name("x_format")
+        + coord_digits.set_results_name("x_format").set_name("X coordinate format")
         + "Y"
-        + coord_digits.set_results_name("y_format"),
+        + coord_digits.set_results_name("y_format").set_name("Y coordinate format"),
     ),
 )
 # Sets the unit to mm or inch.
 MO = UnitMode.wrap(
-    wrap_statement(Literal("MO") + oneOf("MM IN").set_results_name("unit")),
+    wrap_statement(
+        Literal("MO") + oneOf("MM IN").set_results_name("unit").set_name("unit"),
+    ),
 )
 
 region_statement = Forward()
