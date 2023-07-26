@@ -37,6 +37,7 @@ from pygerber.gerberx3.tokenizer.tokens.g0n_set_draw_mode import (
 from pygerber.gerberx3.tokenizer.tokens.g04_comment import Comment
 from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
 from pygerber.gerberx3.tokenizer.tokens.g75_multi_quadrant import SetMultiQuadrantMode
+from pygerber.gerberx3.tokenizer.tokens.ip_image_polarity import ImagePolarity
 from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
 from pygerber.gerberx3.tokenizer.tokens.lp_load_polarity import LoadPolarity
 from pygerber.gerberx3.tokenizer.tokens.lr_load_rotation import LoadRotation
@@ -372,6 +373,12 @@ LM = LoadMirroring.wrap(
 # Loads the polarity object transformation parameter.
 LP = LoadPolarity.wrap(
     wrap_statement(Literal("LP") + oneOf("C D").set_results_name("polarity")),
+)
+# Sets the polarity of the whole image.
+IP = ImagePolarity.wrap(
+    wrap_statement(
+        Literal("POS") + oneOf("POS NEG").set_results_name("image_polarity"),
+    ),
 )
 
 # End of file.

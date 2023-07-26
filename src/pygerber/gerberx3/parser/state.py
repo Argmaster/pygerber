@@ -70,6 +70,17 @@ class State(FrozenGeneralModel):
     # G74 | |   Sets single quadrant mode
     is_multi_quadrant: bool = False
 
+    is_output_image_negation_required: bool = False
+    """In Gerber specification deprecated IP command is mentioned.
+    It can set image polarity to either positive, the usual one, or to negative.
+    Under negative image polarity, image generation is different. Its purpose is to
+    create a negative image, clear areas in a dark background. The entire image plane
+    in the background is initially dark instead of clear. The effect of dark and clear
+    polarity is toggled. The entire image is simply reversed, dark becomes white and
+    vice versa.
+    This effect can be achieved by simply inverting colors of output image.
+    """
+
     apertures: Dict[ApertureID, PublicApertureHandle] = Field(default_factory=dict)
 
     def get_units(self) -> Unit:
