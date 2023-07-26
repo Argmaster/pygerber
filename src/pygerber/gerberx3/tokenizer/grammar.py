@@ -441,6 +441,13 @@ D01 = Draw.wrap(
     + EOEX,
 )
 
+# Sets linear/circular mode to counterclockwise circular and plot.
+G03_D01 = SetCounterclockwiseCircular.wrap(Literal("G03")) + D01
+# Sets linear/circular mode to clockwise circular and plot.
+G02_D01 = SetClockwiseCircular.wrap(Literal("G02")) + D01
+# Sets linear/circular mode to linear and plot.
+G01_D01 = SetLinear.wrap(Literal("G01")) + D01
+
 coord_digits = Regex(r"[1-6][1-6]")
 
 # Sets the coordinate format, e.g. the number of decimals.
@@ -476,6 +483,9 @@ block <<= ZeroOrMore(
     | G01
     | G02
     | G03
+    | G01_D01
+    | G02_D01
+    | G03_D01
     | G75
     | G74
     | LP
