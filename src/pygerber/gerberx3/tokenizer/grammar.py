@@ -41,6 +41,8 @@ from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
 from pygerber.gerberx3.tokenizer.tokens.lp_load_polarity import LoadPolarity
 from pygerber.gerberx3.tokenizer.tokens.lr_load_rotation import LoadRotation
 from pygerber.gerberx3.tokenizer.tokens.ls_load_scaling import LoadScaling
+from pygerber.gerberx3.tokenizer.tokens.m00_program_stop import M00ProgramStop
+from pygerber.gerberx3.tokenizer.tokens.m01_optional_stop import M01OptionalStop
 from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
 from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
 from pygerber.gerberx3.tokenizer.tokens.macro.arithmetic_expression import (
@@ -373,7 +375,12 @@ LP = LoadPolarity.wrap(
 )
 
 # End of file.
-M02 = M02EndOfFile.wrap(Literal("M02").set_name("end of file") + EOEX)
+M02 = M02EndOfFile.wrap(Literal("M02").set_name("End of file") + EOEX)
+# Optional stop.
+M01 = M01OptionalStop.wrap(Literal("M01").set_name("Optional stop") + EOEX)
+# Program stop.
+M00 = M00ProgramStop.wrap(Literal("M00").set_name("Program stop") + EOEX)
+
 # Sets the current aperture to D code nn.
 DNN = DNNSelectAperture.wrap(
     aperture_identifier + EOEX,
@@ -506,7 +513,7 @@ G37 = EndRegion.wrap(Literal("G37") + EOEX)
 contour = D02 + ZeroOrMore(D01 | G01 | G02 | G03 | G04)
 region_statement <<= G36 + OneOrMore(contour | G04) + G37
 
-EXPRESSIONS = (
+common = (
     G04
     | MO
     | FS
@@ -532,33 +539,7 @@ EXPRESSIONS = (
     | TA
     | TO
     | TD
-    | M02
-)[0, ...]
+)
 
-GRAMMAR = (
-    G04
-    | MO
-    | FS
-    | AD
-    | AM
-    | DNN
-    | D01
-    | D02
-    | D03
-    | G01
-    | G02
-    | G03
-    | G75
-    | G74
-    | LP
-    | LM
-    | LR
-    | LS
-    | region_statement
-    | AB_statement
-    | SR_statement
-    | TF
-    | TA
-    | TO
-    | TD
-)[0, ...] + M02
+EXPRESSIONS = (common | M02 | M01 | M00)[0, ...]
+GRAMMAR = common[0, ...] + (M02 | M01 | M00)
