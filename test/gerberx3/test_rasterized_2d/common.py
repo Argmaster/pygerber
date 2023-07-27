@@ -39,8 +39,8 @@ def draw_rasterized_2d(
         )
     )
 
-    parser = Parser(stack, options=parser_options)
-    draws = parser.parse()
+    parser = Parser(options=parser_options)
+    draws = parser.parse(stack)
 
     result = draws.draw()
     result.save(dest / "output.png")

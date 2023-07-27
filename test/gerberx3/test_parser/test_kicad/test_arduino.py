@@ -20,8 +20,8 @@ def test_User_Drawings(asset_loader: AssetLoader) -> None:  # noqa: N802
         ),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_B_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -30,8 +30,8 @@ def test_B_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
         asset_loader.load_asset("gerberx3/kicad/arduino/B_Cu.gbr").decode("utf-8"),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_F_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -40,8 +40,8 @@ def test_F_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
         asset_loader.load_asset("gerberx3/kicad/arduino/F_Cu.gbr").decode("utf-8"),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_F_Silkscreen(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -52,8 +52,8 @@ def test_F_Silkscreen(asset_loader: AssetLoader) -> None:  # noqa: N802
         ),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_F_Mask(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -62,5 +62,5 @@ def test_F_Mask(asset_loader: AssetLoader) -> None:  # noqa: N802
         asset_loader.load_asset("gerberx3/kicad/arduino/F_Mask.gbr").decode("utf-8"),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)

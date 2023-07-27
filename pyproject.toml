@@ -89,6 +89,10 @@ keep-runtime-typing = true
 [tool.ruff.isort]
 required-imports = ["from __future__ import annotations"]
 
+[tool.ruff.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
+
 [tool.mypy] # ANCHOR: tool.mypy
 # ---------------------------------------------------------------------------- #
 #            https://mypy.readthedocs.io/en/stable/config_file.html            #

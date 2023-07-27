@@ -18,8 +18,8 @@ def test_F_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
         asset_loader.load_asset("gerberx3/kicad/hello/F_Cu/F_Cu.gbr").decode("utf-8"),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_B_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -28,8 +28,8 @@ def test_B_Cu(asset_loader: AssetLoader) -> None:  # noqa: N802
         asset_loader.load_asset("gerberx3/kicad/hello/B_Cu/B_Cu.gbr").decode("utf-8"),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_F_Paste(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -40,8 +40,8 @@ def test_F_Paste(asset_loader: AssetLoader) -> None:  # noqa: N802
         ),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_F_Silkscreen(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -52,8 +52,8 @@ def test_F_Silkscreen(asset_loader: AssetLoader) -> None:  # noqa: N802
         ).decode("utf-8"),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_F_Mask(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -64,8 +64,8 @@ def test_F_Mask(asset_loader: AssetLoader) -> None:  # noqa: N802
         ),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
 
 def test_Edge_Cuts(asset_loader: AssetLoader) -> None:  # noqa: N802
@@ -76,5 +76,5 @@ def test_Edge_Cuts(asset_loader: AssetLoader) -> None:  # noqa: N802
         ),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)

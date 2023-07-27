@@ -26,7 +26,6 @@ class Parser:
 
     def __init__(
         self,
-        tokens: TokenStack,
         options: Optional[ParserOptions] = None,
     ) -> None:
         """Initialize parser.
@@ -38,8 +37,22 @@ class Parser:
         options : ParserOptions | None
             Additional options for modifying parser behavior.
         """
-        self.tokens = tokens
         self.options = ParserOptions() if options is None else options
+
+    @property
+    def backend(self) -> Backend:
+        """Get reference to backend object."""
+        return self.options.backend
+
+    def parse(self, tokens: TokenStack) -> DrawCommandsHandle:
+        """Parse token stack."""
+        for _ in self.parse_iter(tokens):
+            pass
+
+        return self.get_draw_commands_handle()
+
+    def parse_iter(self, tokens: TokenStack) -> Generator[Token, None, None]:
+        """Iterate over tokens in stack and parse them."""
         self.state = (
             State()
             if self.options.initial_state is None
@@ -47,31 +60,17 @@ class Parser:
         )
         self.draw_actions: list[DrawCommand] = []
 
-    @property
-    def backend(self) -> Backend:
-        """Get reference to backend object."""
-        return self.options.backend
+        for token in tokens:
+            self._update_drawing_state(token)
 
-    def parse(self) -> DrawCommandsHandle:
-        """Parse token stack."""
-        for _ in self.parse_iter():
-            pass
+            yield token
 
-        return self.get_draw_actions_handle()
-
-    def get_draw_actions_handle(self) -> DrawCommandsHandle:
-        """Return handle to drawing actions."""
+    def get_draw_commands_handle(self) -> DrawCommandsHandle:
+        """Return handle to drawing commands."""
         return self.backend.get_draw_commands_handle_cls()(
             self.draw_actions,
             self.backend,
         )
-
-    def parse_iter(self) -> Generator[Token, None, None]:
-        """Iterate over tokens in stack and parse them."""
-        for token in self.tokens:
-            self._update_drawing_state(token)
-
-            yield token
 
     def _update_drawing_state(self, token: Token) -> None:
         try:

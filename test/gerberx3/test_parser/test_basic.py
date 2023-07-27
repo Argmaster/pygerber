@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from decimal import Decimal
+from pathlib import Path
 
 from typing import TYPE_CHECKING
 
@@ -16,6 +17,11 @@ from pygerber.gerberx3.tokenizer.tokens.coordinate import (
     CoordinateType,
 )
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import AxisFormat
+from test.gerberx3.common import (
+    find_gerberx3_asset_files,
+    save_token_stack,
+    tokenize_gerberx3,
+)
 
 if TYPE_CHECKING:
     from test.conftest import AssetLoader
@@ -27,8 +33,8 @@ def test_source_0(asset_loader: AssetLoader) -> None:
         asset_loader.load_asset("gerberx3/basic/sample-0/source.grb").decode("utf-8"),
     )
 
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
 
     assert parser.state.coordinate_parser is not None
     assert parser.state.coordinate_parser.x_format == AxisFormat(integer=2, decimal=6)
@@ -53,54 +59,14 @@ def test_source_0(asset_loader: AssetLoader) -> None:
     assert parser.state.draw_units == Unit.Millimeters
 
 
-def test_source_1(asset_loader: AssetLoader) -> None:
-    """Parser test based on source.grb file."""
-    stack = Tokenizer().tokenize(
-        asset_loader.load_asset("gerberx3/basic/sample-1/source.grb").decode("utf-8"),
-    )
+@pytest.mark.parametrize(
+    ["directory", "file_name"],
+    sorted(find_gerberx3_asset_files("test/assets/gerberx3/basic")),
+)
+def test_sample(asset_loader: AssetLoader, directory: Path, file_name: str) -> None:
+    """Test tokenizer on sample gerber code."""
+    stack = tokenize_gerberx3(asset_loader, directory, file_name)
+    save_token_stack(stack, __file__, directory, file_name)
 
-    parser = Parser(stack)
-    parser.parse()
-
-
-def test_source_2(asset_loader: AssetLoader) -> None:
-    """Parser test based on source.grb file."""
-    stack = Tokenizer().tokenize(
-        asset_loader.load_asset("gerberx3/basic/sample-2/source.grb").decode("utf-8"),
-    )
-
-    parser = Parser(stack)
-    parser.parse()
-
-
-def test_source_3(asset_loader: AssetLoader) -> None:
-    """Parser test based on source.grb file."""
-    stack = Tokenizer().tokenize(
-        asset_loader.load_asset("gerberx3/basic/sample-3/source.grb").decode("utf-8"),
-    )
-
-    parser = Parser(stack)
-    parser.parse()
-
-
-def test_source_4(asset_loader: AssetLoader) -> None:
-    """Parser test based on source.grb file."""
-    stack = Tokenizer().tokenize(
-        asset_loader.load_asset("gerberx3/basic/sample-4/source.grb").decode("utf-8"),
-    )
-
-    parser = Parser(stack)
-    parser.parse()
-
-
-# TODO(argmaster.world@gmail.com): Add support for block apertures.
-# https://github.com/Argmaster/pygerber/issues/24
-@pytest.mark.xfail(reason="Parser is lacking support for block apertures.")
-def test_source_5(asset_loader: AssetLoader) -> None:
-    """Parser test based on source.grb file."""
-    stack = Tokenizer().tokenize(
-        asset_loader.load_asset("gerberx3/basic/sample-5/source.grb").decode("utf-8"),
-    )
-
-    parser = Parser(stack)
-    parser.parse()
+    parser = Parser()
+    parser.parse(stack)
