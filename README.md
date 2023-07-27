@@ -142,32 +142,35 @@ Supported Gerber X3 features:
 
 Supported Gerber X3 features:
 
-- [ ] G04 - Comment - A human readable comment, does not affect the image.
-- [ ] MO - Mode - Sets the unit to mm or inch.
-- [ ] FS - Format specification - Sets the coordinate format, e.g. the number of
+- [x] MO - Mode - Sets the unit to mm or inch.
+- [x] FS - Format specification - Sets the coordinate format, e.g. the number of
       decimals.
-- [ ] FS (Deprecated modes)
 - [ ] AD - Aperture define - Defines a template-based aperture, assigns a D code to it.
+  - [x] Define circle.
+  - [x] Define rectangle.
+  - [x] Define obround.
+  - [x] Define polygon.
+  - [ ] Define macro.
 - [ ] AM - Aperture macro - Defines a macro aperture template.
-- [ ] Dnn (nn≥10) - Sets the current aperture to D code nn.
-- [ ] D01 - Plot operation - Outside a region statement D01 creates a draw or arc object
-      with the current aperture. Inside it adds a draw/arc segment to the contour under
-      construction. The current point is moved to draw/arc end point after the creation
-      of the draw/arc.
-- [ ] D02 - Move operation - D02 moves the current point to the coordinate in the
+- [x] Dnn (nn≥10) - Sets the current aperture to D code nn.
+- [x] D01 - Plot operation - Outside a region statement D01 creates a draw or arc object
+      with the current aperture.
+- [x] D01 - Plot operation - Inside region statement adds a draw/arc segment to the
+      contour under construction. The current point is moved to draw/arc end point after
+      the creation of the draw/arc.
+- [x] D02 - Move operation - D02 moves the current point to the coordinate in the
       command. It does not create an object.
-- [ ] D03 - Flash operation - Creates a flash object with the current aperture. The
+- [x] D03 - Flash operation - Creates a flash object with the current aperture. The
       current point is moved to the flash point.
-- [ ] G01 - Sets linear/circular mode to linear.
-- [ ] G02 - Sets linear/circular mode to clockwise circular.
-- [ ] G03 - Sets linear/circular mode to counterclockwise circular.
-- [ ] G75 - A G75 must be called before creating the first arc.
-- [ ] LP - Load polarity - Loads the polarity object transformation parameter.
-- [ ] LM - Load mirroring - Loads the mirror object transformation parameter.
-- [ ] LR - Load rotation - Loads the rotation object transformation parameter.
-- [ ] LS - Load scaling - Loads the scale object transformation parameter.
-- [ ] G36 - Starts a region statement which creates a region by defining its contours.
-- [ ] G37 - Ends the region statement.
+- [x] G01 - Sets linear/circular mode to linear.
+- [x] G02 - Sets linear/circular mode to clockwise circular.
+- [x] G03 - Sets linear/circular mode to counterclockwise circular.
+- [x] LP - Load polarity - Loads the polarity object transformation parameter.
+- [x] LM - Load mirroring - Loads the mirror object transformation parameter.
+- [x] LR - Load rotation - Loads the rotation object transformation parameter.
+- [x] LS - Load scaling - Loads the scale object transformation parameter.
+- [x] G36 - Starts a region statement which creates a region by defining its contours.
+- [x] G37 - Ends the region statement.
 - [ ] AB - Aperture block - Opens a block aperture statement and assigns its aperture
       number or closes a block aperture statement.
 - [ ] SR - Step and repeat - Open or closes a step and repeat statement.
@@ -176,7 +179,7 @@ Supported Gerber X3 features:
       it.
 - [ ] TO - Attribute on object - Add an object attribute to the dictionary or modify it.
 - [ ] TD - Attribute delete - Delete one or all attributes in the dictionary.
-- [ ] M02 - End of file.
+- [x] M02 - End of file.
 
 Supported **DEPRECATED** Gerber features:
 
@@ -227,34 +230,25 @@ Supported **DEPRECATED** Gerber features:
 - [ ] Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)
 - [ ] Macro Primitive Code 6, Moiré (Spec. 8.2.6)
 
-## Drawing
+## Rasterized2DBackend feature support
 
-- [ ] Flashes with circles
-- [ ] Flashes with rectangles
-- [ ] Flashes with obrounds
-- [ ] Flashes with polygons
-- [ ] Flashes with macros
-- [ ] Lines with circles
-- [ ] Lines with rectangles
-- [ ] Lines with obrounds
-- [ ] Lines with polygons
-- [ ] Lines with macros
-- [ ] Clockwise arcs with circles
-- [ ] Clockwise arcs with rectangles
-- [ ] Clockwise arcs with obrounds
-- [ ] Clockwise arcs with polygons
-- [ ] Clockwise arcs with macros
-- [ ] Counterclockwise arcs with circles
-- [ ] Counterclockwise arcs with rectangles
-- [ ] Counterclockwise arcs with obrounds
-- [ ] Counterclockwise arcs with polygons
-- [ ] Counterclockwise arcs with macros
-- [ ] Aperture macros with circles
-- [ ] Aperture macros with vector lines
-- [ ] Aperture macros with center lines
-- [ ] Aperture macros with outlines
-- [ ] Aperture macros with polygons
-- [ ] Aperture macros with thermals
-- [ ] Aperture macros with moiré
-- [ ] Step and repeat
-- [ ] Aperture blocks
+- [x] Aperture definition with circle
+- [x] Aperture definition with rectangle
+- [x] Aperture definition with obround
+- [x] Aperture definition with polygon
+- [ ] Aperture definition with macro
+- [ ] Block aperture definition
+- [x] Draw flash
+  - [x] circle aperture
+  - [x] rectangle aperture
+  - [x] obround aperture
+  - [x] polygon aperture
+  - [ ] macro aperture
+  - [ ] block aperture
+- [x] Draw line
+- [x] Draw clockwise arc
+- [x] Draw counterclockwise arc
+- [ ] Global mirroring
+- [ ] Global rotation
+- [ ] Global scaling
+- [ ] Create region
