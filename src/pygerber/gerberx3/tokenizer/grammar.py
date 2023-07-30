@@ -39,6 +39,12 @@ from pygerber.gerberx3.tokenizer.tokens.g03_set_counterclockwise_circular import
 from pygerber.gerberx3.tokenizer.tokens.g04_comment import Comment
 from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
 from pygerber.gerberx3.tokenizer.tokens.g75_multi_quadrant import SetMultiQuadrantMode
+from pygerber.gerberx3.tokenizer.tokens.g90_set_coordinate_absolute import (
+    SetAbsoluteNotation,
+)
+from pygerber.gerberx3.tokenizer.tokens.g91_set_coordinate_incremental import (
+    SetIncrementalNotation,
+)
 from pygerber.gerberx3.tokenizer.tokens.ip_image_polarity import ImagePolarity
 from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
 from pygerber.gerberx3.tokenizer.tokens.ln_load_name import LoadName
@@ -457,17 +463,27 @@ DNN = DNNSelectAperture.wrap(
     aperture_identifier + EOEX,
 )
 
+
+G01 = SetLinear.wrap(oneOf("G1 G01 G001 G0001") + EOEX)
+"""# Sets linear/circular mode to linear."""
+
+G02 = SetClockwiseCircular.wrap(oneOf("G2 G02 G002 G0002") + EOEX)
+"""Sets linear/circular mode to clockwise circular."""
+
+G03 = SetCounterclockwiseCircular.wrap(oneOf("G3 G03 G003 G0003") + EOEX)
+"""Sets linear/circular mode to counterclockwise circular."""
+
 # Set's multi quadrant mode.
 G75 = SetMultiQuadrantMode.wrap(Literal("G75") + EOEX)
 # Set's single quadrant mode.
 G74 = SetMultiQuadrantMode.wrap(Literal("G74") + EOEX)
 
-# Sets linear/circular mode to counterclockwise circular.
-G03 = SetCounterclockwiseCircular.wrap(oneOf("G3 G03 G003 G0003") + EOEX)
-# Sets linear/circular mode to clockwise circular.
-G02 = SetClockwiseCircular.wrap(oneOf("G2 G02 G002 G0002") + EOEX)
-# Sets linear/circular mode to linear.
-G01 = SetLinear.wrap(oneOf("G1 G01 G001 G0001") + EOEX)
+
+G90 = SetAbsoluteNotation.wrap(Literal("G90") + EOEX)
+"""Set the `Coordinate format` to `Absolute notation`."""
+
+G91 = SetIncrementalNotation.wrap(Literal("G91") + EOEX)
+"""Set the `Coordinate format` to `Incremental notation`."""
 
 X_coordinate = Literal("X") + integer.set_results_name("x").set_name("X coordinate")
 Y_coordinate = Literal("Y") + integer.set_results_name("y").set_name("Y coordinate")
@@ -497,12 +513,15 @@ D01 = D01Draw.wrap(
     ((Opt(XY) + Opt(IJ) + oneOf("D1 D01 D001 D0001")) | (XY + Opt(IJ))) + EOEX,
 )
 
-# Sets linear/circular mode to counterclockwise circular and plot.
+
 G03_D01 = SetCounterclockwiseCircular.wrap(Literal("G03")) + D01
-# Sets linear/circular mode to clockwise circular and plot.
+"""Sets linear/circular mode to counterclockwise circular and plot."""
+
 G02_D01 = SetClockwiseCircular.wrap(Literal("G02")) + D01
-# Sets linear/circular mode to linear and plot.
+"""Sets linear/circular mode to clockwise circular and plot."""
+
 G01_D01 = SetLinear.wrap(Literal("G01")) + D01
+"""Sets linear/circular mode to linear and plot."""
 
 coord_digits = Regex(r"[1-6][1-6]")
 
@@ -605,6 +624,8 @@ common = (
     | G03
     | G75
     | G74
+    | G90
+    | G91
     | LP
     | LM
     | LR
