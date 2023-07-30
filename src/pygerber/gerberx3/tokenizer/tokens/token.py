@@ -71,3 +71,11 @@ class Token(FrozenGeneralModel):
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Update drawing state."""
         return state, ()
+
+
+class GerberX3Token(Token):
+    """Base class for tokens which are part of Gerber X3 standard."""
+
+
+class DeprecatedToken(Token):
+    """Base class for tokens which are deprecated."""

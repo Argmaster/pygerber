@@ -1,8 +1,10 @@
-"""Wrapper for G74 token."""
+"""Wrapper for G71 token."""
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Iterable, Tuple
 
+from pygerber.gerberx3.state_enums import Unit
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
@@ -11,13 +13,13 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class SetSingleQuadrantMode(Token):
-    """Wrapper for G74 token.
+class SetUnitMillimeters(Token):
+    """Wrapper for G71 token.
 
-    Sets single quadrant mode - Rarely used, and then typically without effect.
-    Deprecated in 2020. (Spec. 8.1.10).
+    Set the `Unit` to millimeter.
 
-    In single quadrant mode the arc is not allowed to extend over more than 90°.
+    This historic codes perform a function handled by the MO command. See 4.2.1.
+    Sometimes used. Deprecated in 2012
     """
 
     def update_drawing_state(
@@ -26,10 +28,15 @@ class SetSingleQuadrantMode(Token):
         _backend: Backend,
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set drawing polarity."""
+        if state.draw_units is not None:
+            logging.warning(
+                "Overriding coordinate format is illegal. "
+                "(See 4.2.1 in Gerber Layer Format Specification)",
+            )
         return (
             state.model_copy(
                 update={
-                    "is_multi_quadrant": False,
+                    "draw_units": Unit.Millimeters,
                 },
                 deep=True,
             ),
@@ -37,4 +44,4 @@ class SetSingleQuadrantMode(Token):
         )
 
     def __str__(self) -> str:
-        return "G74*"
+        return "G71*"

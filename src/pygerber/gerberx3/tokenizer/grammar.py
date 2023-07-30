@@ -38,6 +38,8 @@ from pygerber.gerberx3.tokenizer.tokens.g03_set_counterclockwise_circular import
 )
 from pygerber.gerberx3.tokenizer.tokens.g04_comment import Comment
 from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
+from pygerber.gerberx3.tokenizer.tokens.g70_set_unit_inch import SetUnitInch
+from pygerber.gerberx3.tokenizer.tokens.g71_set_unit_mm import SetUnitMillimeters
 from pygerber.gerberx3.tokenizer.tokens.g75_multi_quadrant import SetMultiQuadrantMode
 from pygerber.gerberx3.tokenizer.tokens.g90_set_coordinate_absolute import (
     SetAbsoluteNotation,
@@ -473,11 +475,17 @@ G02 = SetClockwiseCircular.wrap(oneOf("G2 G02 G002 G0002") + EOEX)
 G03 = SetCounterclockwiseCircular.wrap(oneOf("G3 G03 G003 G0003") + EOEX)
 """Sets linear/circular mode to counterclockwise circular."""
 
-# Set's multi quadrant mode.
-G75 = SetMultiQuadrantMode.wrap(Literal("G75") + EOEX)
-# Set's single quadrant mode.
-G74 = SetMultiQuadrantMode.wrap(Literal("G74") + EOEX)
+G70 = SetUnitInch.wrap(Literal("G70") + EOEX)
+"""DEPRECATED: Set the `Unit` to inch."""
 
+G71 = SetUnitMillimeters.wrap(Literal("G71") + EOEX)
+"""DEPRECATED: Set the `Unit` to millimeter."""
+
+G74 = SetMultiQuadrantMode.wrap(Literal("G74") + EOEX)
+"""DEPRECATED: Set's single quadrant mode."""
+
+G75 = SetMultiQuadrantMode.wrap(Literal("G75") + EOEX)
+"""Set's multi quadrant mode."""
 
 G90 = SetAbsoluteNotation.wrap(Literal("G90") + EOEX)
 """Set the `Coordinate format` to `Absolute notation`."""
@@ -513,15 +521,20 @@ D01 = D01Draw.wrap(
     ((Opt(XY) + Opt(IJ) + oneOf("D1 D01 D001 D0001")) | (XY + Opt(IJ))) + EOEX,
 )
 
-
-G03_D01 = SetCounterclockwiseCircular.wrap(Literal("G03")) + D01
-"""Sets linear/circular mode to counterclockwise circular and plot."""
+G01_D01 = SetLinear.wrap(Literal("G01")) + D01
+"""Sets linear/circular mode to linear and plot."""
 
 G02_D01 = SetClockwiseCircular.wrap(Literal("G02")) + D01
 """Sets linear/circular mode to clockwise circular and plot."""
 
-G01_D01 = SetLinear.wrap(Literal("G01")) + D01
-"""Sets linear/circular mode to linear and plot."""
+G03_D01 = SetCounterclockwiseCircular.wrap(Literal("G03")) + D01
+"""Sets linear/circular mode to counterclockwise circular and plot."""
+
+G70_D02 = SetUnitInch.wrap(Literal("G70") + D02)
+"""DEPRECATED: Set the `Unit` to inch."""
+
+G71_D02 = SetUnitMillimeters.wrap(Literal("G71") + D02)
+"""DEPRECATED: Set the `Unit` to millimeter."""
 
 coord_digits = Regex(r"[1-6][1-6]")
 
@@ -622,10 +635,17 @@ common = (
     | G01
     | G02
     | G03
-    | G75
+    | G70
+    | G71
     | G74
+    | G75
     | G90
     | G91
+    | G01_D01
+    | G02_D01
+    | G03_D01
+    | G70_D02
+    | G71_D02
     | LP
     | LM
     | LR
