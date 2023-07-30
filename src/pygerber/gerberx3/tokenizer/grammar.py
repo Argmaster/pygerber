@@ -460,10 +460,11 @@ M01 = M01OptionalStop.wrap(Literal("M01").set_name("Optional stop") + EOEX)
 # Program stop.
 M00 = M00ProgramStop.wrap(Literal("M00").set_name("Program stop") + EOEX)
 
-# Sets the current aperture to D code nn.
-DNN = DNNSelectAperture.wrap(
-    aperture_identifier + EOEX,
-)
+DNN = DNNSelectAperture.wrap(aperture_identifier + EOEX)
+"""Sets the current aperture to D code nn."""
+
+G54DNN = DNNSelectAperture.wrap(Literal("G54") + aperture_identifier + EOEX)
+"""Sets the current aperture to D code nn."""
 
 
 G01 = SetLinear.wrap(oneOf("G1 G01 G001 G0001") + EOEX)
@@ -521,21 +522,6 @@ D01 = D01Draw.wrap(
     ((Opt(XY) + Opt(IJ) + oneOf("D1 D01 D001 D0001")) | (XY + Opt(IJ))) + EOEX,
 )
 
-G01_D01 = SetLinear.wrap(Literal("G01")) + D01
-"""Sets linear/circular mode to linear and plot."""
-
-G02_D01 = SetClockwiseCircular.wrap(Literal("G02")) + D01
-"""Sets linear/circular mode to clockwise circular and plot."""
-
-G03_D01 = SetCounterclockwiseCircular.wrap(Literal("G03")) + D01
-"""Sets linear/circular mode to counterclockwise circular and plot."""
-
-G70_D02 = SetUnitInch.wrap(Literal("G70") + D02)
-"""DEPRECATED: Set the `Unit` to inch."""
-
-G71_D02 = SetUnitMillimeters.wrap(Literal("G71") + D02)
-"""DEPRECATED: Set the `Unit` to millimeter."""
-
 coord_digits = Regex(r"[1-6][1-6]")
 
 # Sets the coordinate format, e.g. the number of decimals.
@@ -557,7 +543,11 @@ MO = UnitMode.wrap(
     ),
 )
 
-region_statement = Forward()
+# Starts a region statement which creates a region by defining its contours.
+G36 = BeginRegion.wrap(Literal("G36") + EOEX)
+# Ends the region statement.
+G37 = EndRegion.wrap(Literal("G37") + EOEX)
+
 AB_statement = Forward()
 SR_statement = Forward()
 
@@ -567,22 +557,21 @@ block <<= ZeroOrMore(
     | AD
     | AM
     | DNN
+    | G54DNN
     | D01
     | D02
     | D03
     | G01
     | G02
     | G03
-    | G01_D01
-    | G02_D01
-    | G03_D01
     | G75
     | G74
     | LP
     | LM
     | LR
     | LS
-    | region_statement
+    | G36
+    | G37
     | AB_statement
     | TF
     | TA
@@ -614,14 +603,6 @@ AB_open = BlockApertureBegin.wrap(wrap_statement(Literal("AB") + aperture_identi
 AB_close = BlockApertureEnd.wrap(wrap_statement(Literal("AB")))
 AB_statement <<= AB_open + block + AB_close
 
-# Starts a region statement which creates a region by defining its contours.
-G36 = BeginRegion.wrap(Literal("G36") + EOEX)
-# Ends the region statement.
-G37 = EndRegion.wrap(Literal("G37") + EOEX)
-
-contour = D02 + ZeroOrMore(D01 | G01 | G02 | G03 | G04)
-region_statement <<= G36 + OneOrMore(contour | G04) + G37
-
 common = (
     G04
     | MO
@@ -629,6 +610,7 @@ common = (
     | AD
     | AM
     | DNN
+    | G54DNN
     | D01
     | D02
     | D03
@@ -641,17 +623,13 @@ common = (
     | G75
     | G90
     | G91
-    | G01_D01
-    | G02_D01
-    | G03_D01
-    | G70_D02
-    | G71_D02
     | LP
     | LM
     | LR
     | LS
     | LN
-    | region_statement
+    | G36
+    | G37
     | AB_statement
     | SR_statement
     | TF
@@ -659,6 +637,16 @@ common = (
     | TO
     | TD
 )
+
+_G01 = SetLinear.wrap(Literal("G01"))
+_G02 = SetClockwiseCircular.wrap(Literal("G02"))
+_G03 = SetCounterclockwiseCircular.wrap(Literal("G03"))
+_G70 = SetUnitInch.wrap(Literal("G70"))
+_G71 = SetUnitMillimeters.wrap(Literal("G71"))
+
+for g_op in [_G01, _G02, _G03, _G70, _G71]:
+    for d_op in [D01, D02, D03]:
+        common |= g_op + d_op
 
 EXPRESSIONS = (common | M02 | M01 | M00)[0, ...]
 GRAMMAR = common[0, ...] + (M02 | M01 | M00)
