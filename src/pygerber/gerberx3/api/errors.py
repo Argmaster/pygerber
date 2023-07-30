@@ -8,3 +8,7 @@ class GerberX3APIError(Exception):
 
 class RenderingResultNotReadyError(GerberX3APIError):
     """Raised when RenderingResult is requested before it was rendered."""
+
+
+class MutuallyExclusiveViolationError(GerberX3APIError):
+    """Raised when two or more of mutually exclusive parameters are provided."""

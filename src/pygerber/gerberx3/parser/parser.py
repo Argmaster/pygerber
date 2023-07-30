@@ -107,8 +107,17 @@ class ParserOnErrorAction(Enum):
     """Possible error actions."""
 
     Ignore = "ignore"
+    """Ignore parser errors. Errors which occurred will not be signaled. May yield
+    unexpected results for broken files, with missing draw commands or even more
+    significant errors."""
+
     Warn = "warn"
+    """Warn on parser error. Parser will log warning message about what went wrong.
+    Best for supporting wide range of files without silently ignoring errors in code."""
+
     Raise = "raise"
+    """Raise exception whenever parser encounters error. Will completely break out of
+    parsing process, making it impossible to render slightly malformed files."""
 
 
 class ParserOptions:
