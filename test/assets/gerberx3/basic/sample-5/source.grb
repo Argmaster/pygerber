@@ -1,0 +1,42 @@
+G04 Ucamco copyright*
+%TF.GenerationSoftware,Ucamco,UcamX,2016.04-160425*%
+%TF.CreationDate,2016-04-25T00:00:00+01:00*%
+%FSLAX26Y26*%
+%MOMM*%
+%ADD10C,1*%
+%LPD*%
+G04 Define block aperture D12*
+%ABD12*%
+%ADD11C,0.5*%
+D10*
+G01*
+X-2500000Y-1000000D03*
+Y1000000D03*
+%LPC*%
+D11*
+X-2500000Y-1000000D03*
+%LPD*%
+X-500000Y-1000000D02*
+X2500000D01*
+G75*
+G03*
+X500000Y1000000I-2000000J0D01*
+G01*
+%AB*%
+G04 Flash block aperture D12 in four different orientation*
+D12*
+X0Y0D03*
+%LMX*%
+X10000000D03*
+%LMY*%
+%LR30.0*%
+X0Y8000000D03*
+%LMXY*%
+%LR45.0*%
+%LS0.8*%
+X10000000D03*
+%LPD*%
+%LMN*%
+%LR0.0*%
+%LS1.0*%
+M02*

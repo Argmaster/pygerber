@@ -1,0 +1,230 @@
+[tool.poetry]
+name = "pygerber"
+version = "2.0.0rc1"
+description = "Parsing, formatting and rendering toolkit for Gerber X3 file format"
+authors = ["Krzysztof Wisniewski <argmaster.world@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "^8.1.3"
+pyparsing = "^3.1.0"
+pydantic = "^2.0"
+tzlocal = "^5.0.1"
+pillow = "^10.0.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.4.1"
+poethepoet = "^0.20.0"
+pytest = "^7.4.0"
+black = "^23.3.0"
+ruff = "^0.0.278"
+jinja2 = "^3.1.2"
+pyyaml = "^6.0"
+tox = "^4.6.3"
+pre-commit = "^3.3.3"
+autoflake = "^2.2.0"
+isort = "^5.12.0"
+pytest-xdist = { extras = ["psutil"], version = "^3.3.1" }
+pytest-cov = "^4.1.0"
+types-tzlocal = "^5.0.1.1"
+ipykernel = "^6.25.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poe.tasks]
+# -------------------------------------------------------------------------------------
+# git hooks
+install-hooks = [
+    { cmd = "poetry install --sync --no-ansi" },
+    { cmd = "poetry run scripts/install_hooks.py" },
+    { cmd = "poetry run pre-commit install --install-hooks --overwrite" },
+]
+# -------------
+# hook triggers
+pre-commit = [
+    { cmd = "poetry install --sync --no-ansi" },
+    { cmd = "pre-commit run --all-files -v" },
+]
+# -------------------------------------------------------------------------------------
+test = [
+    { cmd = "pytest --log-level=DEBUG -s -n auto --cov=pygerber --cov-report=term-missing:skip-covered" },
+]
+
+[tool.isort]
+profile = "black"
+src_paths = ["src", "test"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+extend-exclude = '\.pyi?$'
+
+[tool.ruff]
+select = ["ALL"]
+ignore = [
+    "ANN401",
+    "ANN101",
+    "ANN102",
+    "D203",
+    "D205",
+    "D213",
+    "UP007",
+    "UP006",
+    "TCH001",
+    "D105",   # Adding docstrings in all magic methods doesn't make sense, as usually they are just boilerplate to support operators.
+    "FIX002",
+]
+show-fixes = true
+target-version = "py38"
+src = ["src", "test"]
+
+[tool.ruff.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
+
+[tool.ruff.isort]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
+
+[tool.ruff.flake8-type-checking]
+runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+
+
+[tool.mypy] # ANCHOR: tool.mypy
+# ---------------------------------------------------------------------------- #
+#            https://mypy.readthedocs.io/en/stable/config_file.html            #
+#            https://mypy.readthedocs.io/en/stable/command_line.html           #
+#          https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html          #
+# ---------------------------------------------------------------------------- #
+python_version = "3.8"
+packages = "pygerber"
+# A regular expression that matches file names, directory names and paths which
+# mypy should ignore while recursively discovering files to check. Use forward
+#slashes (/) as directory separators on all platforms.
+exclude = ["external/", ".tox/", ".venv/", ".vscode/"]
+# ---------------------------------------------------------------------------- #
+#                               Import discovery                               #
+# ---------------------------------------------------------------------------- #
+# Suppresses error messages about imports that cannot be resolved.
+ignore_missing_imports = true
+# Directs what to do with imports when the imported module is found as a .py file
+# and not part of the files, modules and packages provided on the command line.
+# The four possible values are normal, silent, skip and error. For explanations
+# see the discussion for the --follow-imports command line flag.
+follow_imports = "normal"
+# Enables reporting error messages generated within installed packages (see
+# :pep:`561` for more details on distributing type information). Those error
+# messages are suppressed by default, since you are usually not able to
+# control errors in 3rd party code.
+no_silence_site_packages = false
+# ---------------------------------------------------------------------------- #
+#                            Disallow dynamic typing                           #
+# ---------------------------------------------------------------------------- #
+# Disallows usage of types that come from unfollowed imports (anything imported from
+# an unfollowed import is automatically given a type of ``Any``).
+disallow_any_unimported = false
+# Disallows all expressions in the module that have type ``Any``.
+disallow_any_expr = false
+# Disallows functions that have ``Any`` in their signature after decorator transformation.
+disallow_any_decorated = false
+# Disallows explicit ``Any`` in type positions such as type annotations and generic
+# type parameters.
+disallow_any_explicit = false
+# Disallows usage of generic types that do not specify explicit type parameters.
+disallow_any_generics = false
+# Disallows subclassing a value of type ``Any``.
+disallow_subclassing_any = false
+# ---------------------------------------------------------------------------- #
+#                         Untyped definitions and calls                        #
+# ---------------------------------------------------------------------------- #
+# Disallows calling functions without type annotations from functions with type
+# annotations.
+disallow_untyped_calls = false
+# Disallows defining functions without type annotations or with incomplete type
+# annotations.
+disallow_untyped_defs = true
+# Disallows defining functions with incomplete type annotations.
+disallow_incomplete_defs = true
+# Type-checks the interior of functions without type annotations.
+check_untyped_defs = true
+# Reports an error whenever a function with type annotations is decorated with a
+# decorator without annotations.
+disallow_untyped_decorators = false
+# ---------------------------------------------------------------------------- #
+#                          None and Optional handling                          #
+# ---------------------------------------------------------------------------- #
+# Changes the treatment of arguments with a default value of ``None`` by not implicitly
+# making their type :py:data:`~typing.Optional`.
+no_implicit_optional = true
+# Enables or disables strict Optional checks. If False, mypy treats ``None``
+# as compatible with every type.
+strict_optional = true
+# ---------------------------------------------------------------------------- #
+#                                   Warnings                                   #
+# ---------------------------------------------------------------------------- #
+# warns about casting an expression to its inferred type.
+warn_redundant_casts = true
+# Warns about unneeded ``# type: ignore`` comments.
+warn_unused_ignores = false
+# Shows errors for missing return statements on some execution paths.
+no_warn_no_return = false
+# Shows a warning when returning a value with type ``Any`` from a function
+# declared with a non- ``Any`` return type.
+warn_return_any = true
+# Shows a warning when encountering any code inferred to be unreachable or
+# redundant after performing type analysis.
+warn_unreachable = true
+# ---------------------------------------------------------------------------- #
+#                        Miscellaneous strictness flags                        #
+# ---------------------------------------------------------------------------- #
+# Causes mypy to suppress errors caused by not being able to fully
+# infer the types of global and class variables.
+allow_untyped_globals = false
+# Allows variables to be redefined with an arbitrary type, as long as the redefinition
+# is in the same block and nesting level as the original definition.
+# Example where this can be useful:
+allow_redefinition = true
+# Disallows inferring variable type for ``None`` from two assignments in different scopes.
+# This is always implicitly enabled when using the :ref:`mypy daemon <mypy_daemon>`.
+local_partial_types = false
+# By default, imported values to a module are treated as exported and mypy allows
+# other modules to import them. When false, mypy will not re-export unless
+# the item is imported using from-as or is included in ``__all__``. Note that mypy
+# treats stub files as if this is always disabled. For example:
+no_implicit_reexport = false
+# Prohibit equality checks, identity checks, and container checks between
+# non-overlapping types.
+strict_equality = true
+# ---------------------------------------------------------------------------- #
+#      https://mypy.readthedocs.io/en/stable/error_codes.html#error-codes      #
+# ---------------------------------------------------------------------------- #
+# Allows disabling one or multiple error codes globally.
+# disable_error_code =
+# Allows enabling one or multiple error codes globally.
+enable_error_code = "redundant-expr"
+# ---------------------------------------------------------------------------- #
+#                          Configuring error messages                          #
+# ---------------------------------------------------------------------------- #
+# Prefixes each error with the relevant context.
+show_error_context = true
+# Shows column numbers in error messages.
+show_column_numbers = true
+# hows error codes in error messages. See :ref:`error-codes` for more information.
+show_error_codes = true
+# Use visually nicer output in error messages: use soft word wrap,
+# show source code snippets, and show error location markers.
+pretty = true
+# Shows error messages with color enabled.
+color_output = true
+# Shows a short summary line after error messages.
+error_summary = true
+# Show absolute paths to files.
+show_absolute_path = true

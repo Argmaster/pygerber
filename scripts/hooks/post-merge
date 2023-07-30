@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+while true; do
+    poetry install --sync
+    exit_status=$?
+
+    if [[ $exit_status -eq 0 ]]; then
+        echo "Dependency installation successful."
+        break
+    else
+        echo "Dependency installation failed. Retrying..."
+        sleep 5
+    fi
+done

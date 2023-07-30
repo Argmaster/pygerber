@@ -1,0 +1,210 @@
+
+# KT,  29-Jan-2022
+@@grammar    :: Gerber_2022_02_
+@@nameguard  :: False
+@@whitespace :: /\n/
+
+start =
+    {
+        | G04
+        | MO
+        | FS
+        | AD
+        | AM
+        | Dnn
+        | D01
+        | D02
+        | D03
+        | G01
+        | G02
+        | G03
+        | G75
+        | LP
+        | LM
+        | LR
+        | LS
+        | region_statement
+        | AB_statement
+        | SR_statement
+        | TF
+        | TA
+        | TO
+        | TD
+    }*
+    M02
+    $;
+
+
+# Graphics commands
+#------------------
+
+FS = '%FS' 'LA' 'X' coordinate_digits 'Y' coordinate_digits '*%';
+coordinate_digits = /[1-6][56]/;
+MO = '%MO' ('MM'|'IN') '*%';
+
+D01 = ['X' integer] ['Y' integer] ['I' integer 'J' integer] 'D01*';
+D02 = ['X' integer] ['Y' integer] 'D02*';
+D03 = ['X' integer] ['Y' integer] 'D03*';
+
+G01 = 'G01*';
+G02 = 'G02*';
+G03 = 'G03*';
+G75 = 'G75*';
+
+Dnn = aperture_identifier '*';
+
+G04 = 'G04' string '*';
+
+M02 = 'M02*';
+
+LP = '%LP' ('C'|'D') '*%';
+LM = '%LM' ('N'|'XY'|'Y'|'X') '*%';
+LR = '%LR' decimal '*%';
+LS = '%LS' decimal '*%';
+
+AD = '%AD'
+        aperture_identifier
+        (
+            | 'C' ',' decimal ['X' decimal]
+            | 'R' ',' decimal 'X' decimal ['X' decimal]
+            | 'O' ',' decimal 'X' decimal ['X' decimal]
+            | 'P' ',' decimal 'X' decimal ['X' decimal ['X' decimal]]
+            | name [',' decimal {'X' decimal}*]
+        )
+    '*%';
+
+AM = '%AM' name '*' macro_body  '%';
+macro_body = { primitive | variable_definition }+;
+variable_definition = macro_variable '=' expr '*';
+primitive =
+    | '0'  string '*'
+    | '1'  ',' expr ',' expr ',' expr ',' expr [',' expr] '*'
+    | '20' ',' expr ',' expr ',' expr ',' expr ',' expr ',' expr ',' expr '*'
+    | '21' ',' expr ',' expr ',' expr ',' expr ',' expr ',' expr '*'
+    | '4'  ',' expr ',' expr ',' expr ',' expr {',' expr ',' expr}+ ',' expr '*'
+    | '5'  ',' expr ',' expr ',' expr ',' expr ',' expr ',' expr '*'
+    | '7'  ',' expr ',' expr ',' expr ',' expr ',' expr ',' expr '*'
+    ;
+macro_variable   = /\$[0-9]*[1-9][0-9]*/;
+expr =
+    |{/[+-]/ term}+
+    |expr /[+-]/ term
+    |term
+    ;
+term =
+    |term /[x\/]/ factor
+    |factor
+    ;
+factor =
+    | '(' expr ')'
+    |macro_variable
+    |unsigned_decimal
+    ;
+
+region_statement = G36 {contour}+ G37;
+contour = D02 {D01|G01|G02|G03}*;
+G36 = 'G36*';
+G37 = 'G37*';
+
+AB_statement = AB_open  block  AB_close;
+AB_open  =     '%AB' aperture_identifier '*%';
+AB_close =     '%AB' '*%';
+
+SR_statement = SR_open  block  SR_close;
+SR_open =      '%SR' 'X' positive_integer 'Y' positive_integer 'I' decimal 'J' decimal '*%';
+SR_close =     '%SR' '*%';
+
+block =
+    {
+        | G04
+        | AD
+        | AM
+        | Dnn
+        | D01
+        | D02
+        | D03
+        | G01
+        | G02
+        | G03
+        | G75
+        | LP
+        | LM
+        | LR
+        | LS
+        | region_statement
+        | AB_statement
+        | TF
+        | TA
+        | TO
+        | TD
+    }*
+    ;
+
+
+# Attribute commands
+#-------------------
+
+TF = '%TF' file_attribute_name {',' field}* '*%';
+TA = '%TA' aperture_attribute_name {',' field}* '*%';
+TO = '%TO' object_attribute_name {',' field}* '*%';
+TD = '%TD'
+    [
+        | file_attribute_name
+        | aperture_attribute_name
+        | object_attribute_name
+        | user_name
+    ]
+    '*%';
+
+file_attribute_name =
+    | '.Part'
+    | '.FileFunction'
+    | '.FilePolarity'
+    | '.SameCoordinates'
+    | '.CreationDate'
+    | '.GenerationSoftware'
+    | '.ProjectId'
+    | '.MD5'
+    | user_name
+    ;
+aperture_attribute_name =
+    | '.AperFunction'
+    | '.DrillTolerance'
+    | '.FlashText'
+    | user_name
+    ;
+object_attribute_name =
+    | '.N'
+    | '.P'
+    | '.C' &','   # To avoid this rule also parses .CRot etc
+    | '.CRot'
+    | '.CMfr'
+    | '.CMPN'
+    | '.CVal'
+    | '.CMnt'
+    | '.CFtp'
+    | '.CPgN'
+    | '.CPgD'
+    | '.CHgt'
+    | '.CLbN'
+    | '.CLbD'
+    | '.CSup'
+    | user_name
+    ;
+
+
+# Tokens, by regex
+#-----------------
+
+unsigned_integer =       /[0-9]+/;
+positive_integer =       /[0-9]*[1-9][0-9]*/;
+integer          =  /[+-]?[0-9]+/;
+unsigned_decimal =      /((([0-9]+)(\.[0-9]*)?)|(\.[0-9]+))/;
+decimal          = /[+-]?((([0-9]+)(\.[0-9]*)?)|(\.[0-9]+))/;
+
+aperture_identifier = /D[0]*[1-9][0-9]+/;
+
+name      = /[._a-zA-Z$][._a-zA-Z0-9]*/;
+user_name =  /[_a-zA-Z$][._a-zA-Z0-9]*/; # Cannot start with a dot
+string    = /[^%*]*/; # All characters except * %
+field     = /[^%*,]*/; # All characters except * % ,

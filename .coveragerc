@@ -1,16 +1,4 @@
-[paths]
-source =
-   src
-   */site-packages
-
-[run]
-branch = true
-source =
-    pygerber
-    tests
-parallel = true
-
 [report]
-show_missing = true
-precision = 2
-omit = *migrations*
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
