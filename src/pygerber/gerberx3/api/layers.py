@@ -84,6 +84,7 @@ class LayerParams(BaseModel):
                 .resolve()
                 .read_text(encoding=self.encoding)
             )
+            return self
 
         if self.source_code:
             if self.source_path or self.source_buffer:
@@ -95,6 +96,7 @@ class LayerParams(BaseModel):
                 if isinstance(self.source_code, str)
                 else self.source_code.decode(self.encoding)
             )
+            return self
 
         if self.source_buffer:
             if self.source_path or self.source_code:
