@@ -32,8 +32,6 @@ class Parser:
 
         Parameters
         ----------
-        tokens : TokenStack
-            Gerber X3 tokens retrieved with Tokenizer.
         options : ParserOptions | None
             Additional options for modifying parser behavior.
         """

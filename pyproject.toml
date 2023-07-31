@@ -31,6 +31,18 @@ pytest-cov = "^4.1.0"
 types-tzlocal = "^5.0.1.1"
 ipykernel = "^6.25.0"
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.5.1"
+mkdocs-material = "^9.1.21"
+mkdocstrings = {extras = ["python"], version = "^0.22.0"}
+mkdocs-literate-nav = "^0.6.0"
+mkdocs-macros-plugin = "^1.0.2"
+mkdocs-gen-files = "^0.5.0"
+pygments = "^2.15.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

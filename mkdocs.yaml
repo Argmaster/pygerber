@@ -1,0 +1,109 @@
+site_name: PyGerber Documentation
+theme:
+  language: en
+
+  name: material
+
+  palette:
+    - scheme: default
+      primary: indygo
+      accent: indygo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+  features:
+    - content.action.edit
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.expand
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+  icon:
+    repo: fontawesome/brands/github
+
+use_directory_urls: false
+repo_url: https://github.com/Argmaster/pygerber
+repo_name: Argmaster/pygerber
+edit_uri: edit/main/docs/
+
+# https://squidfunk.github.io/mkdocs-material/setup/extensions/python-markdown/
+markdown_extensions:
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - md_in_html
+  - toc:
+      permalink: true
+      permalink_title: Anchor link to this section for reference
+  # https://squidfunk.github.io/mkdocs-material/reference/code-blocks
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+plugins:
+  - search:
+      lang: en
+  # https://squidfunk.github.io/mkdocs-material/setup/building-for-offline-usage/
+  - offline
+  # https://mkdocs-macros-plugin.readthedocs.io/en/latest/
+  - macros:
+      include_dir: .
+  # https://mkdocstrings.github.io/
+  - mkdocstrings:
+      handlers:
+        # https://mkdocstrings.github.io/python/
+        python:
+          # https://mkdocstrings.github.io/python/usage/configuration/docstrings/
+          options:
+            # https://mkdocstrings.github.io/python/usage/configuration/general/
+            show_bases: true
+            docstring_style: numpy
+            show_root_toc_entry: true
+            show_root_full_path: false
+            show_root_members_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            members: true
+            members_order: source
+            filters:
+              - "!^_"
+              - "^__"
+            show_signature: true
+            separate_signature: true
+            show_signature_annotations: true
+            heading_level: 2
+            show_root_heading: true
+            group_by_category: true
+  # https://oprypin.github.io/mkdocs-gen-files/
+  - gen-files:
+      scripts:
+        - docs/generate_reference_pages.py
+  # https://pypi.org/project/mkdocs-literate-nav/
+  - literate-nav:
+      nav_file: SUMMARY.md
+
+extra_css:
+  - css/mkdocstrings.css
+  - css/extra.css
+
+extra:
+  version:
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/
+    provider: mike

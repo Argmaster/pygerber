@@ -15,6 +15,12 @@
             "options": {
                 "proseWrap": "always"
             }
+        },
+        {
+            "files": ["*.css"],
+            "options": {
+                "tabWidth": 4
+            }
         }
     ]
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 while true; do
-    poetry install --sync
+    poetry install --sync --with=docs
     exit_status=$?
 
     if [[ $exit_status -eq 0 ]]; then

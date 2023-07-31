@@ -1,55 +1,162 @@
 # PyGerber
 
-PyGerber is a Python implementation of Gerber X3 and partially X2 format. Main goal of
-this project is to support widest range of Gerber-like formats possible.
+PyGerber is a Python implementation of Gerber X3/X2 format. Implementation was based on
+Ucamco's `The Gerber Layer Format Specification. Revision 2023.03` (Available on
+[Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-03_en.pdf)
+and in
+[this repository](https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-03_en.pdf)).
+The goal of this project is to provide support for wide variety of Gerber-like syntaxes,
+with support for most of deprecated features along with support for modern ones.
 
-Currently all systems are under active development.
+### Target set of tools:
 
-You can view progress of development in Support section down below. All Gerber source
-files which can be redistributed under MIT license and included in this repository for
-testing purposes will be greatly appreciated.
+- [x] Tokenizer
+- [x] Parser
+- [x] Rasterized 2D rendering engine (With
+      [Pillow](https://github.com/python-pillow/Pillow))
+- [ ] Vector 2D rendering engine (With [drawsvg](https://github.com/cduck/drawsvg))
+- [ ] Model 3D rendering engine (With [Blender](https://www.blender.org/))
+- [ ] Formatter
+- [ ] Linter (eg. deprecated syntax detection)
+
+You can view progress of development in
+[Gerber features support](#gerber-features-support) section down below. All Gerber
+source files which can be redistributed under MIT license and included in this
+repository for testing purposes will be greatly appreciated.
+
+## Syntax feature requests
 
 All deprecated features (Mainly those from X2 format) are considered optional and
-priority to implement them will be assigned based on number of requests for supporting
-them and testing resources which can be used to validate them. If your program is
-outputting code which is not Gerber spec compliant (ie. contains additional features
-incompatible with standard Gerber X3 parsers) and this feature is not already listed in
-Support paragraph, please create issue with detailed description how this feature works
-and include code samples with reference images showing how output should look like (if
-this feature causes changes to output image, otherwise image can be omitted).
+priority to implement them will be assigned based on number of requests form community.
 
-# Development
+If You needs support for syntax features which are not mentioned in
+`The Gerber Layer Format Specification. Revision 2023.03` (Available on
+[Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-03_en.pdf)
+and in
+[this repository](https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-03_en.pdf))
+and this feature is not already listed in Support paragraph, please open a new Feature
+request issue.
 
-To quickly set up development environment, first you have to install `poetry` globally:
+**Feature request Issue should contain:**
 
-```
-pip install poetry
-```
+- detailed description how requested feature works,
+- code samples for testing the feature,
+- reference images (only applies to features changing image look).
 
-Afterwards you will be able to create development virtual environment:
+**Requests which don't comply with those guidelines will be considered low priority.**
 
-```
-poetry shell
-```
+## Installation
 
-Then You have to install dependencies:
+PyGerber can be installed with `pip` from PyPI:
 
 ```
-poetry install
+pip install pygerber
 ```
 
-Last thing is installation of pre-commit hooks:
+Alternatively, it is also possible to install it directly from repository:
 
 ```
-poe install-hooks
+pip install git+https://github.com/Argmaster/pygerber
 ```
 
-Now you are good to go. Whenever you commit changes, pre-commit hooks will be invoked.
-If they fail or change files, you will have to re-add changes and commit again.
+## Usage
 
-# Support
+High level API of PyGerber allows for rendering Gerber files and saving them to files or
+buffers. Gerber source code is is a single Gerber source file with PyGerber
+configuration attached. The configuration available for a layer depends on which backend
+is used to render the source file. Type of output file also depends on chosen backend.
+For 2D rasterized rendering
+[all formats supported by Pillow](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html)
+are accepted.
 
-## Tokenizer:
+```py linenums="1" title="render_file.py"
+from pygerber.gerberx3.api.color_scheme import ColorScheme
+from pygerber.gerberx3.api.layers import (
+      Rasterized2DLayer,
+      Rasterized2DLayerParams,
+)
+
+# Path to Gerber source file.
+source_path = "main_cu.grb"
+
+Rasterized2DLayer(
+      options=Rasterized2DLayerParams(
+            source_path=source_path,
+            colors=ColorScheme.COPPER_ALPHA,
+      ),
+).render().save("output.png")
+```
+
+Example code above creates `Rasterized2DLayer` object, renders it with rasterized 2D
+backend and saves it as `PNG` image. Use of `Rasterized2DLayer` and
+`Rasterized2DLayerOptions` classes implicitly use 2D rasterized backend. To use
+different rendering backend with high level API, one must use different set of `Layer`
+and `LayerOptions` subclasses. For other backends see
+[Target set of tools](#target-set-of-tools) section, note that only checked ones are
+available.
+
+`source_path` option accepts `str` or `Path` pointing to local Gerber file. No special
+file extension is required, content is blindly loaded from specified file, so it's user
+responsibility to provide correct path. There are also `source_code` and `source_buffer`
+parameters which allow for use of raw `str` or `bytes` objects (first one) and
+`StringIO` and `BytesIO` or file descriptors (second one). `source_code`,
+`source_buffer` and `source_path` are mutually exclusive.
+
+`ColorScheme` is a class which describes what colors should be used for rendering
+different parts of image. Additionally it has a few static members which contain
+predefined colors schemes for frequently used layer types. It is not required to use
+predefined schemes, creating and passing custom `ColorScheme` object should work
+perfectly fine.
+
+Pattern of using `<Class>` and `<Class>Options`, like above, is used in many places in
+PyGerber. When initializing object like `Rasterized2DLayer` it is only valid to pass
+`Rasterized2DLayerOptions` to constructor. Passing `LayerOptions` or `Vectorized2DLayer`
+will cause undefined behavior, most likely yielding no result or raising exception.
+
+```py linenums="1" title="render_string.py"
+from pygerber.gerberx3.api.color_scheme import ColorScheme
+from pygerber.gerberx3.api.layers import (
+      Rasterized2DLayer,
+      Rasterized2DLayerParams,
+)
+
+source_code = """
+%FSLAX26Y26*%
+%MOMM*%
+%ADD100R,1.5X1.0X0.5*%
+%ADD200C,1.5X1.0*%
+%ADD300O,1.5X1.0X0.6*%
+%ADD400P,1.5X3X5.0*%
+D100*
+X0Y0D03*
+D200*
+X0Y2000000D03*
+D300*
+X2000000Y0D03*
+D400*
+X2000000Y2000000D03*
+M02*
+"""
+
+Rasterized2DLayer(
+      options=Rasterized2DLayerParams(
+            source_code=source_code,
+            colors=ColorScheme.SILK,
+            dpi=3000,
+      ),
+).render().save("output.png")
+
+```
+
+Code above renders following image:
+
+<p align="center">
+  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/56b6757b-0f97-4a18-9d43-f21711c71c71">
+</p>
+
+## Gerber features support
+
+### Tokenizer:
 
 Supported Gerber X3 features:
 
@@ -89,28 +196,31 @@ Supported Gerber X3 features:
 - [x] TD - Attribute delete - Delete one or all attributes in the dictionary.
 - [x] M02 - End of file.
 
-**DEPRECATED** Gerber features:
+Supported **DEPRECATED** Gerber features:
 
-- [ ] G54 - Select aperture - This historic code optionally precedes an aperture
+- [x] G54 - Select aperture - This historic code optionally precedes an aperture
       selection Dnn command. It has no effect. Sometimes used. Deprecated in 2012.
 - [ ] G55 - Prepare for flash - This historic code optionally precedes D03 code. It has
       no effect. Very rarely used nowadays. Deprecated in 2012.
-- [ ] G70 - Set the 'Unit' to inch - These historic codes perform a function handled by
+- [x] G70 - Set the 'Unit' to inch - These historic codes perform a function handled by
       the MO command. See 4.2.1. Sometimes used. Deprecated in 2012.
-- [ ] G71 - Set the 'Unit' to mm - This is part of the historic codes that perform a
+- [x] G71 - Set the 'Unit' to mm - This is part of the historic codes that perform a
       function handled by the MO command.
-- [ ] G90 - Set the 'Coordinate format' to 'Absolute notation' - These historic codes
+- [x] G90 - Set the 'Coordinate format' to 'Absolute notation' - These historic codes
       perform a function handled by the FS command. Very rarely used nowadays.
       Deprecated in 2012.
-- [ ] G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
+- [x] G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
       codes handled by the FS command.
-- [ ] G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
+
+      - **Important**: *Incremental notation itself is not supported and is not planned due to lack of test assets and expected complications during implementation.*
+
+- [x] G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
       Deprecated in 2020. (Spec. 8.1.10)
-- [ ] M00 - Program stop - This historic code has the same effect as M02. Very rarely,
+- [x] M00 - Program stop - This historic code has the same effect as M02. Very rarely,
       if ever, used nowadays. Deprecated in 2012.
-- [ ] M01 - Optional stop - This historic code has no effect. Very rarely, if ever, used
+- [x] M01 - Optional stop - This historic code has no effect. Very rarely, if ever, used
       nowadays. Deprecated in 2012.
-- [ ] IP - Sets the 'Image polarity' graphics state parameter - This command has no
+- [x] IP - Sets the 'Image polarity' graphics state parameter - This command has no
       effect in CAD to CAM workflows. Sometimes used, and then usually as %IPPOS\*% to
       confirm the default and then it then has no effect. Deprecated in 2013. (Spec.
       8.1.4)
@@ -123,22 +233,25 @@ Supported Gerber X3 features:
 - [ ] SF - Sets 'Scale factor' graphics state parameter (Spec. 8.1.9)
 - [ ] IN - Sets the name of the file image. Has no effect. It is comment. Sometimes
       used. Deprecated in 2013. (Spec. 8.1.3)
-- [ ] LN - Loads a name. Has no effect. It is a comment. Sometimes used. Deprecated
+- [x] LN - Loads a name. Has no effect. It is a comment. Sometimes used. Deprecated
       in 2013. (Spec. 8.1.6)
-- [ ] Combining G01/G02/G03 and D01 in a single command. (Spec 8.3.1)
-- [ ] Coordinate Data without Operation Code. (Spec 8.3.2)
-- [ ] Style Variations in Command Codes. (Spec 8.3.3)
+- [x] Combining G01/G02/G03 and D01 in a single command. (Spec 8.3.1)
+- [x] Coordinate Data without Operation Code. (Spec 8.3.2)
+- [x] Style Variations in Command Codes. (Spec 8.3.3)
 - [ ] Deprecated usage of SR. (Spec 8.3.4)
 - [ ] Deprecated Attribute Values. (Spec 8.4)
-- [ ] Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
+- [x] Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
       (Spec. 8.2)
+
+      - **Important**: *Incremental notation itself is not supported and is not planned due to lack of test assets and expected complications during implementation.*
+
 - [ ] Rectangular Hole in Standard Apertures (Spec. 8.2.2)
-- [ ] Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)
+- [x] Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)
 - [ ] Macro Primitive Code 2, Vector Line (Spec. 8.2.4)
 - [ ] Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)
 - [ ] Macro Primitive Code 6, Moiré (Spec. 8.2.6)
 
-## Parsing
+### Parsing
 
 Supported Gerber X3 features:
 
@@ -183,26 +296,29 @@ Supported Gerber X3 features:
 
 Supported **DEPRECATED** Gerber features:
 
-- [ ] G54 - Select aperture - This historic code optionally precedes an aperture
+- [x] G54 - Select aperture - This historic code optionally precedes an aperture
       selection Dnn command. It has no effect. Sometimes used. Deprecated in 2012.
 - [ ] G55 - Prepare for flash - This historic code optionally precedes D03 code. It has
       no effect. Very rarely used nowadays. Deprecated in 2012.
-- [ ] G70 - Set the 'Unit' to inch - These historic codes perform a function handled by
+- [x] G70 - Set the 'Unit' to inch - These historic codes perform a function handled by
       the MO command. See 4.2.1. Sometimes used. Deprecated in 2012.
-- [ ] G71 - Set the 'Unit' to mm - This is part of the historic codes that perform a
+- [x] G71 - Set the 'Unit' to mm - This is part of the historic codes that perform a
       function handled by the MO command.
-- [ ] G90 - Set the 'Coordinate format' to 'Absolute notation' - These historic codes
+- [x] G90 - Set the 'Coordinate format' to 'Absolute notation' - These historic codes
       perform a function handled by the FS command. Very rarely used nowadays.
       Deprecated in 2012.
-- [ ] G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
+- [x] G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
       codes handled by the FS command.
-- [ ] G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
+
+      - **Important**: *Incremental notation itself is not supported and is not planned due to lack of test assets and expected complications during implementation.*
+
+- [x] G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
       Deprecated in 2020. (Spec. 8.1.10)
-- [ ] M00 - Program stop - This historic code has the same effect as M02. Very rarely,
+- [x] M00 - Program stop - This historic code has the same effect as M02. Very rarely,
       if ever, used nowadays. Deprecated in 2012.
-- [ ] M01 - Optional stop - This historic code has no effect. Very rarely, if ever, used
+- [x] M01 - Optional stop - This historic code has no effect. Very rarely, if ever, used
       nowadays. Deprecated in 2012.
-- [ ] IP - Sets the 'Image polarity' graphics state parameter - This command has no
+- [x] IP - Sets the 'Image polarity' graphics state parameter - This command has no
       effect in CAD to CAM workflows. Sometimes used, and then usually as %IPPOS\*% to
       confirm the default and then it then has no effect. Deprecated in 2013. (Spec.
       8.1.4)
@@ -215,22 +331,29 @@ Supported **DEPRECATED** Gerber features:
 - [ ] SF - Sets 'Scale factor' graphics state parameter (Spec. 8.1.9)
 - [ ] IN - Sets the name of the file image. Has no effect. It is comment. Sometimes
       used. Deprecated in 2013. (Spec. 8.1.3)
-- [ ] LN - Loads a name. Has no effect. It is a comment. Sometimes used. Deprecated
+- [x] LN - Loads a name. Has no effect. It is a comment. Sometimes used. Deprecated
       in 2013. (Spec. 8.1.6)
-- [ ] Combining G01/G02/G03 and D01 in a single command. (Spec 8.3.1)
-- [ ] Coordinate Data without Operation Code. (Spec 8.3.2)
-- [ ] Style Variations in Command Codes. (Spec 8.3.3)
+- [x] Combining G01/G02/G03/G70/G71 and D01 in a single command. (Spec 8.3.1)
+- [x] Combining G01/G02/G03/G70/G71 and D02 in a single command.
+- [x] Combining G01/G02/G03/G70/G71 and D03 in a single command.
+- [x] Coordinate Data without Operation Code. (Spec 8.3.2)
+- [x] Style Variations in Command Codes. (Spec 8.3.3)
 - [ ] Deprecated usage of SR. (Spec 8.3.4)
 - [ ] Deprecated Attribute Values. (Spec 8.4)
 - [ ] Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
       (Spec. 8.2)
+
+      - **Important**: *Incremental notation itself is not supported and is not planned due to lack of test assets and expected complications during implementation.*
+
 - [ ] Rectangular Hole in Standard Apertures (Spec. 8.2.2)
 - [ ] Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)
 - [ ] Macro Primitive Code 2, Vector Line (Spec. 8.2.4)
 - [ ] Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)
 - [ ] Macro Primitive Code 6, Moiré (Spec. 8.2.6)
 
-## Rasterized2DBackend feature support
+### Rasterized 2D rendering
+
+Supported Gerber X3 features:
 
 - [x] Aperture definition with circle
 - [x] Aperture definition with rectangle
@@ -252,3 +375,45 @@ Supported **DEPRECATED** Gerber features:
 - [ ] Global rotation
 - [ ] Global scaling
 - [ ] Create region
+
+Supported **DEPRECATED** Gerber features:
+
+- [ ] Image polarity
+- [ ] Image rotation
+- [ ] Image mirroring
+
+**IMPORTANT** This feature list is incomplete, it will get longer over time ...
+
+## Documentation
+
+Official documentations is hosted on Github Pages and can be found
+[here](https://argmaster.github.io/pygerber/).
+
+## Development
+
+To quickly set up development environment, first you have to install `poetry` globally:
+
+```
+pip install poetry
+```
+
+Afterwards you will be able to create development virtual environment:
+
+```
+poetry shell
+```
+
+Then You have to install dependencies into this environment:
+
+```
+poetry install
+```
+
+And pre-commit hooks:
+
+```
+poe install-hooks
+```
+
+Now you are good to go. Whenever you commit changes, pre-commit hooks will be invoked.
+If they fail or change files, you will have to re-add changes and commit again.
