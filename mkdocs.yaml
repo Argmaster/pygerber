@@ -56,6 +56,11 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.pathconverter:
+      base_path: "https://raw.githubusercontent.com/Argmaster/pygerber/main/" # default: ''
+      relative_path: "" # default ''
+      absolute: true # default: false
+      tags: "a script img link object embed"
 
 plugins:
   - search:
