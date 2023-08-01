@@ -50,7 +50,6 @@ class MacroDefinition(Token):
                 update={
                     "macros": new_macros_dict,
                 },
-                deep=True,
             ),
             (),
         )

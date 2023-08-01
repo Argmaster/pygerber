@@ -62,7 +62,6 @@ class D03Flash(Token):
                 update={
                     "current_position": position,
                 },
-                deep=True,
             ),
             draw_commands,
         )

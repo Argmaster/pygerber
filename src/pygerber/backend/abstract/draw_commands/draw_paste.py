@@ -1,6 +1,8 @@
 """Base class for creating components for aperture creation."""
 from __future__ import annotations
 
+from functools import cached_property
+
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
@@ -29,4 +31,8 @@ class DrawPaste(DrawCommand):
 
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of draw operation."""
+        return self._bounding_box
+
+    @cached_property
+    def _bounding_box(self) -> BoundingBox:
         return self.other.bounding_box + self.center_position

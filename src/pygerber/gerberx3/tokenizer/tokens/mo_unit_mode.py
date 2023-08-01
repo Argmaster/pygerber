@@ -50,7 +50,6 @@ class UnitMode(Token):
                 update={
                     "draw_units": self.unit,
                 },
-                deep=True,
             ),
             (),
         )

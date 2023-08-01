@@ -80,7 +80,6 @@ class CoordinateFormat(Token):
                         y_format=self.y_format,
                     ),
                 },
-                deep=True,
             ),
             (),
         )

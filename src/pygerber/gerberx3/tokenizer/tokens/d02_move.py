@@ -49,7 +49,6 @@ class D02Move(Token):
                 update={
                     "current_position": position,
                 },
-                deep=True,
             ),
             (),
         )

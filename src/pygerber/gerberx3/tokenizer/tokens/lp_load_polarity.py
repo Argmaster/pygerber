@@ -39,7 +39,6 @@ class LoadPolarity(Token):
                 update={
                     "polarity": self.polarity,
                 },
-                deep=True,
             ),
             (),
         )

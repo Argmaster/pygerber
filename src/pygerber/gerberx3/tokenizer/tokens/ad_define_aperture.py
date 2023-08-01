@@ -137,7 +137,6 @@ class DefineCircle(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
@@ -214,7 +213,6 @@ class DefineRectangle(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
@@ -331,7 +329,6 @@ class DefineObround(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
@@ -414,7 +411,6 @@ class DefinePolygon(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
@@ -476,7 +472,6 @@ class DefineMacro(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )

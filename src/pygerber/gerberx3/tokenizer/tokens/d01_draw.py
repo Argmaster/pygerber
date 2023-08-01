@@ -119,7 +119,6 @@ class D01Draw(Token):
                 update={
                     "current_position": end_position,
                 },
-                deep=True,
             ),
             draw_commands,
         )

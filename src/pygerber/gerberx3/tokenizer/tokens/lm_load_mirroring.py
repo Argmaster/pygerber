@@ -39,7 +39,6 @@ class LoadMirroring(Token):
                 update={
                     "mirroring": self.mirroring,
                 },
-                deep=True,
             ),
             (),
         )

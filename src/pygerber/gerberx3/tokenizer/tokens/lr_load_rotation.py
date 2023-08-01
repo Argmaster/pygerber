@@ -57,7 +57,6 @@ class LoadRotation(Token):
                 update={
                     "rotation": self.rotation,
                 },
-                deep=True,
             ),
             (),
         )

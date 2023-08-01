@@ -1,6 +1,7 @@
 """Polygon component for creating apertures."""
 from __future__ import annotations
 
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.backend_cls import Backend
@@ -40,4 +41,8 @@ class DrawPolygon(DrawCommand):
 
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of draw operation."""
+        return self._bounding_box
+
+    @cached_property
+    def _bounding_box(self) -> BoundingBox:
         return BoundingBox.from_diameter(self.outer_diameter) + self.center_position

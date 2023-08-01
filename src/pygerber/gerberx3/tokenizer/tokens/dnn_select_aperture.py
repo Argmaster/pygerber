@@ -44,7 +44,6 @@ class DNNSelectAperture(Token):
                 update={
                     "current_aperture": state.apertures[self.aperture_id],
                 },
-                deep=True,
             ),
             (),
         )

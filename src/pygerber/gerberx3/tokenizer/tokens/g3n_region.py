@@ -28,7 +28,6 @@ class BeginRegion(Token):
                 update={
                     "is_region": True,
                 },
-                deep=True,
             ),
             (),
         )
@@ -54,7 +53,6 @@ class EndRegion(Token):
                 update={
                     "is_region": False,
                 },
-                deep=True,
             ),
             (),
         )

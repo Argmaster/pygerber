@@ -29,7 +29,6 @@ class SetCounterclockwiseCircular(Token):
                 update={
                     "draw_mode": DrawMode.CounterclockwiseCircular,
                 },
-                deep=True,
             ),
             (),
         )

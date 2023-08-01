@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from functools import cached_property
 from typing import TYPE_CHECKING, Optional, TypeVar
 
 from pygerber.backend.abstract.backend_cls import Backend
@@ -77,6 +78,10 @@ class PrivateApertureHandle:
 
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of draw operation."""
+        return self._bounding_box
+
+    @cached_property
+    def _bounding_box(self) -> BoundingBox:
         bbox = BoundingBox.NULL
 
         for aperture_draw in self.aperture_draws:

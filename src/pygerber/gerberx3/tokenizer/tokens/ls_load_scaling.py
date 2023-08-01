@@ -57,7 +57,6 @@ class LoadScaling(Token):
                 update={
                     "scaling": self.scaling,
                 },
-                deep=True,
             ),
             (),
         )
