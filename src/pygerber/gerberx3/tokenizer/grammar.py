@@ -87,9 +87,9 @@ from pygerber.gerberx3.tokenizer.tokens.tx_attributes import (
     ObjectAttribute,
 )
 
-EOEX = Suppress(Literal("*").set_name("End of expression"))
-SOSTMT = Suppress(Literal("%").set_name("Start of statement"))
-EOSTMT = Suppress(Literal("%").set_name("End of statement"))
+EOEX = Suppress(Literal("*").set_name("end of expression"))
+SOSTMT = Suppress(Literal("%").set_name("start of statement"))
+EOSTMT = Suppress(Literal("%").set_name("end of statement"))
 
 
 def wrap_statement(expr: ParserElement, *, eoex: bool = True) -> ParserElement:
@@ -100,12 +100,9 @@ def wrap_statement(expr: ParserElement, *, eoex: bool = True) -> ParserElement:
 unsigned_integer = Word(nums)
 positive_integer = Word("123456789", nums)
 integer = Combine(Opt(oneOf("+ -")) + Word(nums))
-unsigned_decimal = Combine(Opt(Word(nums)) + "." + Opt(Word(nums))) | Word(
-    nums,
-)
 decimal = Combine(
     Opt(oneOf("+ -")) + (Opt(Word(nums)) + "." + Opt(Word(nums)) | Word(nums)),
-)
+).set_name("decimal")
 
 aperture_identifier = (
     Combine("D" + Regex(r"[1-9][0-9]+"))
@@ -137,6 +134,7 @@ object_attribute_name = (
     )
     | user_name
 ).set_name("object_attribute_name")
+
 # Set a file attribute.
 TF = FileAttribute.wrap(
     wrap_statement(
@@ -184,20 +182,23 @@ macro_variable = MacroVariableName.wrap(
     use_group=False,
 )
 numeric_constant = NumericConstant.wrap(
-    unsigned_decimal("numeric_constant_value"),
+    decimal("numeric_constant_value"),
     use_group=False,
 )
 
 arithmetic_expression: ParserElement = infix_notation(
     macro_variable | numeric_constant,
     [
+        (oneOf("+ -"), 1, OpAssoc.RIGHT, ArithmeticExpression.new),
         (oneOf("x X /"), 2, OpAssoc.LEFT, ArithmeticExpression.new),
         (oneOf("+ -"), 2, OpAssoc.LEFT, ArithmeticExpression.new),
     ],
+).set_name("arithmetic expression")
+
+
+expr = (arithmetic_expression | macro_variable | numeric_constant).set_name(
+    "macro body expression.",
 )
-
-
-expr = arithmetic_expression | macro_variable | numeric_constant
 
 
 cs = Suppress(Literal(","))
@@ -305,16 +306,21 @@ variable_definition = MacroVariableDefinition.wrap(
     macro_variable + "=" + expr.set_results_name("value") + EOEX,
 )
 macro_body = (
-    (primitive | variable_definition | G04).set_results_name(
+    (primitive | variable_definition | G04)
+    .set_results_name(
         "macro_body",
         list_all_matches=True,
     )
+    .set_name("macro body expression")
 )[1, ...]
 
 # Defines a macro aperture template.
 AM = MacroDefinition.wrap(
     wrap_statement(
-        Literal("AM") + name.set_results_name("macro_name") + EOEX + macro_body,
+        Literal("AM")
+        + name.set_results_name("macro_name").set_name("macro name")
+        + EOEX
+        + macro_body.set_name("macro body"),
         eoex=False,
     ),
 )

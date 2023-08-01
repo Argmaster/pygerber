@@ -2,6 +2,8 @@
     "cSpell.words": [
         "Argmaster",
         "drawsvg",
+        "EOEX",
+        "EOSTMT",
         "FSLAX",
         "gerberx",
         "indygo",
@@ -14,9 +16,12 @@
         "MOMM",
         "numpy",
         "obround",
+        "pydantic",
         "pygerber",
         "pygments",
         "pymdownx",
+        "pyparsing",
+        "SOSTMT",
         "superfences",
         "tasklist",
         "Ucamco's"

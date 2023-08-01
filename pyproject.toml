@@ -37,7 +37,7 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.5.1"
 mkdocs-material = "^9.1.21"
-mkdocstrings = {extras = ["python"], version = "^0.22.0"}
+mkdocstrings = { extras = ["python"], version = "^0.22.0" }
 mkdocs-literate-nav = "^0.6.0"
 mkdocs-macros-plugin = "^1.0.2"
 mkdocs-gen-files = "^0.5.0"
@@ -107,7 +107,7 @@ required-imports = ["from __future__ import annotations"]
 ban-relative-imports = "all"
 
 [tool.ruff.flake8-type-checking]
-runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-base-classes = ["pydantic.BaseModel", "FrozenGeneralModel", "BaseModel"]
 
 
 [tool.mypy] # ANCHOR: tool.mypy

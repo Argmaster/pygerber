@@ -34,7 +34,7 @@ def draw_rasterized_2d(
                 dpi=dpi,
                 dump_apertures=dest_apertures,
                 include_debug_padding=True,
-                include_bounding_boxes=True,
+                # include_bounding_boxes=True,
             )
         )
     )

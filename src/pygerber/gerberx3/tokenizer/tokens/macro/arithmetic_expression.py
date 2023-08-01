@@ -2,26 +2,33 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from enum import Enum
 from typing import TYPE_CHECKING, Any, cast
 
+from pygerber.backend.abstract.offset import Offset
 from pygerber.gerberx3.tokenizer.errors import TokenizerError
-from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+from pygerber.gerberx3.tokenizer.tokens.macro.numeric_expression import (
+    NumericExpression,
+)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
+
 ARITHMETIC_EXPRESSION_TOKEN_COUNT = 3
-ARITHMETIC_EXPRESSION_NOT_ENOUGH_TOKEN_COUNT = 2
+ARITHMETIC_EXPRESSION_SINGLE_OPERAND_TOKEN_COUNT = 2
 
 
-class ArithmeticExpression(Expression):
+class ArithmeticExpression(NumericExpression):
     """Wrapper for arithmetic expression."""
 
-    left: Expression
+    left: NumericExpression
     operator: ArithmeticOperator
-    right: Expression
+    right: NumericExpression
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
@@ -42,18 +49,28 @@ class ArithmeticExpression(Expression):
 
     @classmethod
     def _build(cls, tokens: list[ParseResults]) -> Self:
+        left: Any
+        operator: Any
+
         (left, operator, *rest) = tokens
 
-        right: Expression
+        right: NumericExpression
 
         if len(rest) >= ARITHMETIC_EXPRESSION_TOKEN_COUNT:
             right = cls._build(rest)
 
-        elif len(rest) == ARITHMETIC_EXPRESSION_NOT_ENOUGH_TOKEN_COUNT:
+        elif len(rest) == ARITHMETIC_EXPRESSION_SINGLE_OPERAND_TOKEN_COUNT:
             raise InvalidArithmeticExpressionError
 
         elif len(rest) == 1:
-            (right,) = cast("tuple[Expression]", rest)
+            (right,) = cast("tuple[NumericExpression]", rest)
+
+        elif len(rest) == 0:
+            (left, operator, right) = (
+                NumericConstant(value=Decimal("0.0")),
+                left,
+                operator,
+            )
 
         else:
             raise AssertionError
@@ -63,6 +80,17 @@ class ArithmeticExpression(Expression):
             operator=operator,
             right=right,
         )
+
+    def evaluate_numeric(self, macro_context: MacroContext, state: State) -> Offset:
+        """Evaluate numeric value of this macro expression."""
+        left = self.left.evaluate_numeric(macro_context, state)
+        right = self.right.evaluate_numeric(macro_context, state)
+        output = self.operator.evaluate(left, right)
+
+        if not isinstance(output, Offset):
+            raise InvalidArithmeticExpressionError
+
+        return output
 
     def __str__(self) -> str:
         return f"{self.left}{self.operator.value}{self.right}"
@@ -80,18 +108,38 @@ class ArithmeticOperator(Enum):
     ADDITION = "+"
     SUBTRACTION = "-"
 
+    def evaluate(self, left: Any, right: Any) -> Any:
+        """Evaluate corresponding arithmetic operator on given operands."""
+        if self == ArithmeticOperator.MULTIPLICATION:
+            return left * right
 
-class NumericConstant(Expression):
+        if self == ArithmeticOperator.DIVISION:
+            return left / right
+
+        if self == ArithmeticOperator.ADDITION:
+            return left + right
+
+        if self == ArithmeticOperator.SUBTRACTION:
+            return left - right
+
+        raise AssertionError
+
+
+class NumericConstant(NumericExpression):
     """Wrapper around numeric constant expression token."""
 
-    value: float
+    value: Decimal
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        value: float = float(tokens["numeric_constant_value"])
+        value = Decimal(tokens["numeric_constant_value"])
 
         return cls(value=value)
+
+    def evaluate_numeric(self, _macro_context: MacroContext, state: State) -> Offset:
+        """Evaluate numeric value of this macro expression."""
+        return Offset.new(value=self.value, unit=state.get_units())
 
     def __str__(self) -> str:
         return str(self.value)

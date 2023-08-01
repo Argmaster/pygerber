@@ -459,9 +459,13 @@ class DefineMacro(DefineAperture):
         """Update drawing state."""
         handle = backend.create_aperture_handle(self.aperture_id)
         with handle:
-            # TODO(argmaster.world@gmail.com): Implement macro logic.
-            # https://github.com/Argmaster/pygerber/issues/23
-            pass
+            macro = state.macros[self.aperture_type]
+            parameters = {
+                f"${i + 1}": Offset.new(value, state.get_units())
+                for i, value in enumerate(self.am_param)
+            }
+            macro.evaluate(state, handle, parameters)
+
         frozen_handle = handle.get_public_handle()
 
         new_aperture_dict = {**state.apertures}
@@ -478,4 +482,4 @@ class DefineMacro(DefineAperture):
         )
 
     def __str__(self) -> str:
-        return f"%AD{self.aperture_id}{self.aperture_type},{'X'.join(self.am_param)}"
+        return f"%AD{self.aperture_id}{self.aperture_type},{'X'.join(self.am_param)}*%"

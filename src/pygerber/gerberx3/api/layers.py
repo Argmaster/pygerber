@@ -8,15 +8,10 @@ from typing import TYPE_CHECKING, Callable, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.bounding_box import BoundingBox
-from pygerber.backend.abstract.result_handle import ResultHandle
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.backend.rasterized_2d.backend_cls import (
     Rasterized2DBackend,
     Rasterized2DBackendOptions,
 )
-from pygerber.gerberx3.api.color_scheme import ColorScheme
 from pygerber.gerberx3.api.errors import (
     MutuallyExclusiveViolationError,
     RenderingResultNotReadyError,
@@ -27,6 +22,12 @@ from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.bounding_box import BoundingBox
+    from pygerber.backend.abstract.result_handle import ResultHandle
+    from pygerber.backend.abstract.vector_2d import Vector2D
+    from pygerber.gerberx3.api.color_scheme import ColorScheme
 
 
 class LayerParams(BaseModel):

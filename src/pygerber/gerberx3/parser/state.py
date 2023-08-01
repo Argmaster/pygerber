@@ -21,6 +21,7 @@ from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
+from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
 
 
 class State(FrozenGeneralModel):
@@ -82,6 +83,10 @@ class State(FrozenGeneralModel):
     """
 
     apertures: Dict[ApertureID, PublicApertureHandle] = Field(default_factory=dict)
+    """Collection of all apertures defined until given point in code."""
+
+    macros: Dict[str, MacroDefinition] = Field(default_factory=dict)
+    """Collection of all macros defined until given point in code."""
 
     def get_units(self) -> Unit:
         """Get drawing unit or raise UnitNotSetError."""

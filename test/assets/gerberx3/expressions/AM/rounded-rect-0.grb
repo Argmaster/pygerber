@@ -1,0 +1,26 @@
+%FSLAX26Y26*%
+%MOMM*%
+%AMBox*
+0 Rectangle with rounded corners, with rotation*
+0 The origin of the aperture is its center*
+0 $1 X-size*
+0 $2 Y-size*
+0 $3 Rounding radius*
+0 $4 Rotation angle, in degrees counterclockwise*
+0 Add two overlapping rectangle primitives as box body*
+21,1,$1,$2-$3-$3,0,0,$4*
+21,1,$1-$3-$3,$2,0,0,$4*
+0 Add four circle primitives for the rounded corners*
+$5=$1/2*
+$6=$2/2*
+$7=2x$3*
+1,1,$7,$5-$3,$6-$3,$4*
+1,1,$7,-$5+$3,$6-$3,$4*
+1,1,$7,-$5+$3,-$6+$3,$4*
+1,1,$7,$5-$3,-$6+$3,$4*%
+%ADD11Box,2.0X4.0X0.5X0*%
+D11*
+X3000000Y3000000D03*
+X-3000000Y-3000000D03*
+X0Y-3000000D03*
+M02*
