@@ -6,13 +6,9 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 
 import pytest
+from pygerber.gerberx3.parser.parser import Parser
 
-from pygerber.backend.rasterized_2d.backend_cls import (
-    Rasterized2DBackend,
-    Rasterized2DBackendOptions,
-)
 
-from pygerber.gerberx3.parser.parser import Parser, ParserOptions
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 from test.gerberx3.common import find_gerberx3_asset_files
 
@@ -20,37 +16,33 @@ if TYPE_CHECKING:
     from test.conftest import AssetLoader
 
 
-def draw_rasterized_2d(
-    asset_loader: AssetLoader, src: str, dest: Path, dpi: int
+def parse(
+    asset_loader: AssetLoader,
+    src: str,
+    dest: Path,
+    *,
+    expression: bool = False,
 ) -> None:
-    """Draw 2D rasterized image and save it."""
-    stack = Tokenizer().tokenize(
-        asset_loader.load_asset(src).decode("utf-8"),
-    )
+    """Tokenize gerber code and save debug output"""
+    source = asset_loader.load_asset(src).decode("utf-8")
+    if expression:
+        stack = Tokenizer().tokenize_expressions(source)
+    else:
+        stack = Tokenizer().tokenize(source)
 
-    dest_apertures = dest / "apertures"
-    dest_apertures.mkdir(mode=0o777, parents=True, exist_ok=True)
+    parser = Parser()
+    draw_commands = parser.parse(stack)
 
-    parser_options = ParserOptions(
-        backend=Rasterized2DBackend(
-            options=Rasterized2DBackendOptions(
-                dpi=dpi,
-                dump_apertures=dest_apertures,
-                include_debug_padding=True,
-                include_bounding_boxes=True,
-            )
-        )
-    )
-
-    parser = Parser(options=parser_options)
-    draws = parser.parse(stack)
-
-    result = draws.draw()
-    result.save(dest / "output.png")
+    with (dest / "output.cmd.txt").open("wt") as file:
+        for draw_command in draw_commands.draw_commands:
+            file.write(f"{draw_command}\n")
 
 
-def make_rasterized_2d_test(
-    test_file_path: str, path_to_assets: str, dpi: int = 2000
+def make_parser_test(
+    test_file_path: str,
+    path_to_assets: str,
+    *,
+    expression: bool = False,
 ) -> Callable[..., None]:
     """Create parametrized test case for all files from path_to_assets.
 
@@ -77,15 +69,19 @@ def make_rasterized_2d_test(
         ("directory", "file_name"),
         sorted(find_gerberx3_asset_files(path_to_assets)),
     )
-    def test_sample(asset_loader: AssetLoader, directory: str, file_name: str) -> None:
+    def test_sample(
+        asset_loader: AssetLoader,
+        directory: str,
+        file_name: str,
+    ) -> None:
         """Rasterized2D rendering test based on sample files."""
         dest = image_dump / directory / Path(file_name).with_suffix("")
         dest.mkdir(mode=0o777, parents=True, exist_ok=True)
-        draw_rasterized_2d(
+        parse(
             asset_loader,
             f"gerberx3/{directory}/{file_name}",
             dest,
-            dpi=dpi,
+            expression=expression,
         )
 
     return test_sample
