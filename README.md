@@ -1,4 +1,8 @@
-# PyGerber
+<p align="center">
+  <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/0c02944e-9c51-4cfc-b74d-5ed615cca93d">
+</p>
+
+<h1 align="center"> PyGerber </h1>
 
 PyGerber is a Python implementation of Gerber X3/X2 format. Implementation was based on
 Ucamco's `The Gerber Layer Format Specification. Revision 2023.03` (Available on
