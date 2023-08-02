@@ -27,3 +27,6 @@ class DrawCommand(ABC):
     @abstractmethod
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of draw operation."""
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__qualname__}({self.polarity})"

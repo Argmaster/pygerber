@@ -37,7 +37,7 @@ class Coordinate(FrozenGeneralModel):
     def __str__(self) -> str:
         if self.coordinate_type.is_missing():
             return ""
-        return f"{self.coordinate_type.value}{self.sign.value}{self.offset}"
+        return f"{self.coordinate_type}{self.sign}{self.offset}"
 
 
 class CoordinateType(Enum):
@@ -66,6 +66,9 @@ class CoordinateType(Enum):
             CoordinateType.MISSING_J,
         )
 
+    def __str__(self) -> str:
+        return self.value
+
 
 _coordinate_type_to_missing_map = {
     CoordinateType.X: CoordinateType.MISSING_X,
@@ -80,3 +83,6 @@ class CoordinateSign(Enum):
 
     Positive = "+"
     Negative = "-"
+
+    def __str__(self) -> str:
+        return "-" if self == CoordinateSign.Negative else ""

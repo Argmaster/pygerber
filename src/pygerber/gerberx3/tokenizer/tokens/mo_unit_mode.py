@@ -55,4 +55,4 @@ class UnitMode(Token):
         )
 
     def __str__(self) -> str:
-        return f"%MM{self.unit.value}*%"
+        return f"%MO{self.unit.value}*%"

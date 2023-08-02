@@ -97,9 +97,8 @@ def wrap_statement(expr: ParserElement, *, eoex: bool = True) -> ParserElement:
     return SOSTMT + expr + ((EOEX + EOSTMT) if eoex else EOSTMT)
 
 
-unsigned_integer = Word(nums)
-positive_integer = Word("123456789", nums)
-integer = Combine(Opt(oneOf("+ -")) + Word(nums))
+positive_integer = Word("123456789", nums).set_name("positive integer")
+integer = Combine(Opt(oneOf("+ -")) + Word(nums)).set_name("integer")
 decimal = Combine(
     Opt(oneOf("+ -")) + (Opt(Word(nums)) + "." + Opt(Word(nums)) | Word(nums)),
 ).set_name("decimal")
@@ -201,7 +200,8 @@ expr = (arithmetic_expression | macro_variable | numeric_constant).set_name(
 )
 
 
-cs = Suppress(Literal(","))
+cs = Suppress(Literal(",").set_name("comma"))
+
 primitive = (
     MacroComment.wrap("0" + string.set_results_name("string"))
     | PrimitiveCircle.wrap(
@@ -304,7 +304,8 @@ primitive = (
 
 variable_definition = MacroVariableDefinition.wrap(
     macro_variable + "=" + expr.set_results_name("value") + EOEX,
-)
+).set_name("variable definition")
+
 macro_body = (
     (primitive | variable_definition | G04)
     .set_results_name(
