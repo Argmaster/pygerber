@@ -61,13 +61,30 @@ pip install git+https://github.com/Argmaster/pygerber
 
 ## Usage
 
-High level API of PyGerber allows for rendering Gerber files and saving them to files or
-buffers. Gerber source code is is a single Gerber source file with PyGerber
-configuration attached. The configuration available for a layer depends on which backend
-is used to render the source file. Type of output file also depends on chosen backend.
-For 2D rasterized rendering
-[all formats supported by Pillow](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html)
-are accepted.
+PyGerber offers a high-level API that simplifies the process of rendering Gerber files.
+Whether you're looking to save the rendered output to a file or directly into a buffer,
+PyGerber has got you covered.
+
+- **The `Layer` Class**: At its core, the `Layer` class stands for a single Gerber
+  source file, complete with its associated PyGerber configuration.
+
+  **Important** `Layer` class represents **any** Gerber file, **not** layer of PCB. For
+  example, silkscreen Gerber file will require one instance of `Layer`, paste mask will
+  require another one, copper top yet another, etc.
+
+- **Configuration Flexibility**: The configuration possibilities you get with a `Layer`
+  are driven by the backend you choose to render your source file.
+
+- **Selecting a Backend**: PyGerber provides specialized subclasses of the `Layer` class
+  each tied to one rendering backend. For instance, if you're aiming for 2D rasterized
+  images, `Rasterized2DLayer` is your go-to choice.
+
+- **Output Types**: Keep in mind, the type of your output file is closely tied to the
+  backend you select.For 2D rasterized rendering
+  [all formats supported by Pillow](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html)
+  are accepted.
+
+### Rasterized render from file
 
 ```py linenums="1" title="render_file.py"
 from pygerber.gerberx3.api.color_scheme import ColorScheme
@@ -90,8 +107,8 @@ Rasterized2DLayer(
 Example code above creates `Rasterized2DLayer` object, renders it with rasterized 2D
 backend and saves it as `PNG` image. Use of `Rasterized2DLayer` and
 `Rasterized2DLayerOptions` classes implicitly use 2D rasterized backend. To use
-different rendering backend with high level API, one must use different set of `Layer`
-and `LayerOptions` subclasses. For other backends see
+different rendering backend with high level API, user must pick different `Layer` and
+`LayerOptions` subclasses. For other backends see
 [Target set of tools](#target-set-of-tools) section, note that only checked ones are
 available.
 
@@ -112,6 +129,8 @@ Pattern of using `<Class>` and `<Class>Options`, like above, is used in many pla
 PyGerber. When initializing object like `Rasterized2DLayer` it is only valid to pass
 `Rasterized2DLayerOptions` to constructor. Passing `LayerOptions` or `Vectorized2DLayer`
 will cause undefined behavior, most likely yielding no result or raising exception.
+
+### Rasterized render from string
 
 ```py linenums="1" title="render_string.py"
 from pygerber.gerberx3.api.color_scheme import ColorScheme
@@ -154,9 +173,20 @@ Code above renders following image:
   <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/56b6757b-0f97-4a18-9d43-f21711c71c71">
 </p>
 
+## Documentation
+
+Official documentations is hosted on Github Pages and can be found
+[here](https://argmaster.github.io/pygerber/).
+
 ## Gerber features support
 
-### Tokenizer:
+This section outlines the support for various Gerber format features in PyGerber's core
+components: [**Tokenizer**](#tokenizer), [**Parser**](#parser), and
+[**Rasterized2DBackend**](#rasterized2dbackend). We use checkboxes to indicate which
+features are currently implemented. Checked boxes represent supported features, while
+unchecked boxes denote features still under development or not available.
+
+### Tokenizer
 
 Supported Gerber X3 features:
 
@@ -251,7 +281,7 @@ Supported **DEPRECATED** Gerber features:
 - [ ] Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)
 - [ ] Macro Primitive Code 6, Moiré (Spec. 8.2.6)
 
-### Parsing
+### Parser
 
 Supported Gerber X3 features:
 
@@ -351,7 +381,7 @@ Supported **DEPRECATED** Gerber features:
 - [ ] Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)
 - [ ] Macro Primitive Code 6, Moiré (Spec. 8.2.6)
 
-### Rasterized 2D rendering
+### Rasterized2DBackend
 
 Supported Gerber X3 features:
 
@@ -384,11 +414,6 @@ Supported **DEPRECATED** Gerber features:
 
 **IMPORTANT** This feature list is incomplete, it will get longer over time ...
 
-## Documentation
-
-Official documentations is hosted on Github Pages and can be found
-[here](https://argmaster.github.io/pygerber/).
-
 ## Development
 
 To quickly set up development environment, first you have to install `poetry` globally:
@@ -417,3 +442,22 @@ poe install-hooks
 
 Now you are good to go. Whenever you commit changes, pre-commit hooks will be invoked.
 If they fail or change files, you will have to re-add changes and commit again.
+
+## Build from source
+
+To build PyGerber from source You have to set up [Development](#development) environment
+first. Make sure you have `poetry` environment activated with:
+
+```
+poetry shell
+```
+
+With environment active it should be possible to build wheel and source distribution
+with:
+
+```
+poetry build
+```
+
+Check `dist` directory within current working directory, `pygerber-x.y.z.tar.gz` and
+`pygerber-x.y.z-py3-none-any.whl` should be there.
