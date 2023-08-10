@@ -150,6 +150,23 @@ class BoundingBox(FrozenGeneralModel):
             f"min_x={self.min_x}, min_y={self.min_y})"
         )
 
+    def include_point(self, point: Vector2D) -> BoundingBox:
+        """Include point in bounding box by extending bounding box overt the point."""
+        # Check for the x-coordinate
+        new_max_x = max(self.max_x, point.x)
+        new_min_x = min(self.min_x, point.x)
+
+        # Check for the y-coordinate
+        new_max_y = max(self.max_y, point.y)
+        new_min_y = min(self.min_y, point.y)
+
+        return BoundingBox(
+            max_x=new_max_x,
+            max_y=new_max_y,
+            min_x=new_min_x,
+            min_y=new_min_y,
+        )
+
 
 BoundingBox.NULL = BoundingBox(
     max_x=Offset.NULL,

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field
 
@@ -49,6 +49,10 @@ class State(FrozenGeneralModel):
     # LR  | Load rotation |  Loads the rotation object transformation   | 4.9.4
     #                       parameter.
     rotation: Decimal = Decimal("0.0")
+
+    region_boundary_points: List[Vector2D] = Field(default_factory=list)
+    """Points defining the shape of the region."""
+
     # LS  | Load scaling |   Loads the scale object transformation      | 4.9.5
     #                       parameter
     scaling: Decimal = Decimal("1.0")

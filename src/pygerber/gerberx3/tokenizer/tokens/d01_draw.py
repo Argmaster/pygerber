@@ -77,6 +77,9 @@ class D01Draw(Token):
                     width=current_aperture.get_line_width(),
                 ),
             )
+            if state.is_region:
+                state.region_boundary_points.append(start_position)
+                state.region_boundary_points.append(end_position)
 
         elif state.draw_mode in (
             DrawMode.ClockwiseCircular,
@@ -101,6 +104,11 @@ class D01Draw(Token):
                     is_multi_quadrant=True,
                 ),
             )
+            if state.is_region:
+                state.region_boundary_points.append(start_position)
+                # TODO(argmaster.world@gmail.com): Add region boundary points for region
+                # https://github.com/Argmaster/pygerber/issues/29
+                state.region_boundary_points.append(end_position)
 
         else:
             raise NotImplementedError(state.draw_mode)
