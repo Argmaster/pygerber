@@ -1,7 +1,10 @@
 {
     "cSpell.words": [
+        "Altium",
         "Argmaster",
+        "ATMEGA",
         "drawsvg",
+        "endwith",
         "EOEX",
         "EOSTMT",
         "FSLAX",
@@ -9,7 +12,9 @@
         "indygo",
         "inlinehilite",
         "IPPOS",
+        "kicad",
         "linenums",
+        "Linu",
         "mkdocs",
         "mkdocstrings",
         "Moiré",
@@ -21,10 +26,12 @@
         "pygments",
         "pymdownx",
         "pyparsing",
+        "qualname",
         "SOSTMT",
         "superfences",
         "tasklist",
-        "Ucamco's"
+        "Ucamco's",
+        "Xino"
     ],
     "python.testing.pytestArgs": ["--log-level=DEBUG", "-s", "-n", "auto"],
     "ruff.enable": true,
