@@ -1,8 +1,9 @@
 """Common elements of Rasterized2D tests."""
 
 from __future__ import annotations
-from pathlib import Path
 
+from pathlib import Path
+from test.gerberx3.common import find_gerberx3_asset_files
 from typing import TYPE_CHECKING, Callable
 
 import pytest
@@ -11,20 +12,21 @@ from pygerber.backend.rasterized_2d.backend_cls import (
     Rasterized2DBackend,
     Rasterized2DBackendOptions,
 )
-
 from pygerber.gerberx3.parser.parser import Parser, ParserOptions
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
-from test.gerberx3.common import find_gerberx3_asset_files
 
 if TYPE_CHECKING:
     from test.conftest import AssetLoader
 
 
 def draw_rasterized_2d(
-    asset_loader: AssetLoader, src: str, dest: Path, dpi: int
+    asset_loader: AssetLoader,
+    src: str,
+    dest: Path,
+    dpi: int,
 ) -> None:
     """Draw 2D rasterized image and save it."""
-    stack = Tokenizer().tokenize(
+    stack = Tokenizer().tokenize_expressions(
         asset_loader.load_asset(src).decode("utf-8"),
     )
 
@@ -38,8 +40,8 @@ def draw_rasterized_2d(
                 dump_apertures=dest_apertures,
                 include_debug_padding=True,
                 include_bounding_boxes=True,
-            )
-        )
+            ),
+        ),
     )
 
     parser = Parser(options=parser_options)
@@ -50,7 +52,9 @@ def draw_rasterized_2d(
 
 
 def make_rasterized_2d_test(
-    test_file_path: str, path_to_assets: str, dpi: int = 2000
+    test_file_path: str,
+    path_to_assets: str,
+    dpi: int = 2000,
 ) -> Callable[..., None]:
     """Create parametrized test case for all files from path_to_assets.
 
@@ -70,7 +74,6 @@ def make_rasterized_2d_test(
     Callable[..., None]
         Test callable. Must be assigned to variable with name starting with `test_`.
     """
-
     image_dump = Path(test_file_path).parent / ".output"
 
     @pytest.mark.parametrize(

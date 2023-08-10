@@ -1,12 +1,9 @@
-""" tests based on basic examples."""
+"""tests based on basic examples."""
 from __future__ import annotations
 
-
-from test.gerberx3.test_parser.common import make_parser_test
 from decimal import Decimal
-
+from test.gerberx3.test_parser.common import make_parser_test
 from typing import TYPE_CHECKING
-
 
 from pygerber.gerberx3.parser.parser import Parser
 from pygerber.gerberx3.state_enums import Unit
@@ -40,7 +37,7 @@ def test_manual_comparison(asset_loader: AssetLoader) -> None:
             coordinate_type=CoordinateType.X,
             sign=CoordinateSign.Positive,
             offset="1100010",
-        )
+        ),
     ) == Decimal("1.100010")
 
     assert parser.state.coordinate_parser.parse(
@@ -48,7 +45,7 @@ def test_manual_comparison(asset_loader: AssetLoader) -> None:
             coordinate_type=CoordinateType.X,
             sign=CoordinateSign.Positive,
             offset="500",
-        )
+        ),
     ) == Decimal("0.000500")
 
     assert parser.state.draw_units == Unit.Millimeters

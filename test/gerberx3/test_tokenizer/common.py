@@ -1,15 +1,14 @@
 """Common elements of Rasterized2D tests."""
 
 from __future__ import annotations
-from pathlib import Path
 
+from pathlib import Path
+from test.gerberx3.common import find_gerberx3_asset_files
 from typing import TYPE_CHECKING, Callable
 
 import pytest
 
-
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
-from test.gerberx3.common import find_gerberx3_asset_files
 
 if TYPE_CHECKING:
     from test.conftest import AssetLoader
@@ -22,7 +21,7 @@ def tokenize(
     *,
     expression: bool = False,
 ) -> None:
-    """Tokenize gerber code and save debug output"""
+    """Tokenize gerber code and save debug output."""
     source = asset_loader.load_asset(src).decode("utf-8")
     if expression:
         stack = Tokenizer().tokenize_expressions(source)
@@ -62,7 +61,6 @@ def make_tokenizer_test(
     Callable[..., None]
         Test callable. Must be assigned to variable with name starting with `test_`.
     """
-
     image_dump = Path(test_file_path).parent / ".output"
 
     @pytest.mark.parametrize(

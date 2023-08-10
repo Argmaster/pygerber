@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pygerber.gerberx3.api.color_scheme import ColorScheme
 from pygerber.gerberx3.api.layers import Rasterized2DLayer, Rasterized2DLayerParams
 
