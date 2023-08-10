@@ -27,7 +27,7 @@ class Offset(FrozenGeneralModel):
     def new(
         cls,
         value: Decimal | float | str | tuple[int, Sequence[int], int],
-        unit: Unit,
+        unit: Unit = Unit.Millimeters,
     ) -> Self:
         """Initialize offset with value."""
         # Gerber spec recommends using millimeters as unit, so they are used here too.

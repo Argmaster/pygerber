@@ -1,6 +1,7 @@
 """Wrapper for aperture select token."""
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
@@ -23,10 +24,14 @@ class BeginRegion(Token):
         _backend: Backend,
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set drawing polarity."""
+        if state.is_region:
+            logging.warning("Starting region within a region is not allowed.")
+
         return (
             state.model_copy(
                 update={
                     "is_region": True,
+                    "region_boundary_points": [],
                 },
             ),
             (),
@@ -45,16 +50,29 @@ class EndRegion(Token):
     def update_drawing_state(
         self,
         state: State,
-        _backend: Backend,
+        backend: Backend,
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set drawing polarity."""
+        if not state.is_region:
+            logging.warning("Ending region which was not started.")
+
+        if len(state.region_boundary_points):
+            logging.warning("Created region with no boundaries.")
+
+        draw_command = backend.get_draw_region_cls()(
+            backend,
+            state.polarity,
+            state.region_boundary_points,
+        )
+
         return (
             state.model_copy(
                 update={
                     "is_region": False,
+                    "region_boundary_points": [],
                 },
             ),
-            (),
+            (draw_command,),
         )
 
     def __str__(self) -> str:

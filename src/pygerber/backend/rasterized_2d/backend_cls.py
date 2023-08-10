@@ -27,6 +27,9 @@ from pygerber.backend.rasterized_2d.draw_commands.draw_polygon import (
 from pygerber.backend.rasterized_2d.draw_commands.draw_rectangle import (
     Rasterized2DApertureDrawRectangle,
 )
+from pygerber.backend.rasterized_2d.draw_commands.draw_region import (
+    Rasterized2DDrawRegion,
+)
 from pygerber.backend.rasterized_2d.draw_commands.draw_vector_line import (
     Rasterized2DDrawVectorLine,
 )
@@ -52,6 +55,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.draw_commands.draw_rectangle import (
         DrawRectangle,
     )
+    from pygerber.backend.abstract.draw_commands.draw_region import DrawRegion
     from pygerber.backend.abstract.draw_commands.draw_vector_line import DrawVectorLine
     from pygerber.backend.abstract.draw_commands_handle import DrawCommandsHandle
     from pygerber.backend.abstract.drawing_target import DrawingTarget
@@ -161,6 +165,10 @@ class Rasterized2DBackend(Backend):
     def get_draw_paste_cls(self) -> type[DrawPaste]:
         """Return backend-specific implementation of draw action flash."""
         return Rasterized2DDrawPaste
+
+    def get_draw_region_cls(self) -> type[DrawRegion]:
+        """Return backend-specific implementation of draw action region."""
+        return Rasterized2DDrawRegion
 
     def get_draw_vector_line_cls(self) -> type[DrawVectorLine]:
         """Return backend-specific implementation of draw action line."""
