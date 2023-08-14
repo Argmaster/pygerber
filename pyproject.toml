@@ -107,7 +107,11 @@ required-imports = ["from __future__ import annotations"]
 ban-relative-imports = "all"
 
 [tool.ruff.flake8-type-checking]
-runtime-evaluated-base-classes = ["pydantic.BaseModel", "FrozenGeneralModel", "BaseModel"]
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "FrozenGeneralModel",
+    "BaseModel",
+]
 
 
 [tool.mypy] # ANCHOR: tool.mypy
@@ -240,3 +244,4 @@ color_output = true
 error_summary = true
 # Show absolute paths to files.
 show_absolute_path = true
+enable_incomplete_feature = "Unpack"

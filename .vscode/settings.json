@@ -27,6 +27,8 @@
         "pymdownx",
         "pyparsing",
         "qualname",
+        "RGBA",
+        "Roboto",
         "SOSTMT",
         "superfences",
         "tasklist",
@@ -75,8 +77,8 @@
             "depth": 2
         },
         {
-            "name": "flask",
-            "depth": 2
+            "name": "typing_extensions",
+            "depth": 10
         },
         {
             "name": "PIL",

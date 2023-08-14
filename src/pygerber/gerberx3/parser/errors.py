@@ -5,7 +5,13 @@ from __future__ import annotations
 
 
 class ParserError(ValueError):
-    """Base class for parser errors."""
+    """Base class for parser errors.
+
+    Exceptions derived from this exception are exclusively raised in PyGerber's Gerber
+    X3 Parser. This exception can be used in
+    `#!python try: ... except ParserError: ...` block to catch all exceptions
+    raised by Parser while allowing other exceptions to interrupt execution.
+    """
 
 
 class ZeroOmissionNotSupportedError(ParserError):

@@ -54,16 +54,13 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.pathconverter:
-      base_path: "https://raw.githubusercontent.com/Argmaster/pygerber/main/" # default: ''
-      relative_path: "" # default ''
-      absolute: true # default: false
-      tags: "a script img link object embed"
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - admonition
+  - pymdownx.details
 
 plugins:
   - search:
@@ -110,6 +107,9 @@ plugins:
 extra_css:
   - css/mkdocstrings.css
   - css/extra.css
+
+extra_js:
+  - js/extra.js
 
 extra:
   version:

@@ -9,31 +9,75 @@ from pygerber.common.rgba import RGBA
 
 
 class ColorScheme(FrozenGeneralModel):
-    """Description of colors which should be used for rendering."""
+    r"""Set of colors which should be used for rendering.
+
+    ColorScheme class contains set of colors which should be used for different parts
+    of rendered image. At the same time it also works as a container for predefined
+    color schemes commonly used for parts of PCB.
+
+    !!! info "Predefined colors"
+
+        All predefined colors have two variants - normal one and one with "\*_ALPHA"
+        suffix. Those without suffix have solid background and are not intended for
+        constructing multi-layer images out of them ie. they are not suitable for
+        rendering a project consisting of separate copper, silk, pase mask and composing
+        them into single image. For cases when rendered images are intended for stacking
+        "\*_ALPHA" schemes should be used, as background and transparent parts of image
+        will be truly transparent.
+
+    """
 
     SILK: ClassVar[ColorScheme]
-    """Default color of silk layer."""
+    """Default color of silk layer.
+
+    This schema provided non-transparent background, which results in images which
+    can not be used for stacking on top of other layers, as they would completely
+    obscure them."""
 
     SILK_ALPHA: ClassVar[ColorScheme]
-    """Default color of silk layer with alpha channel."""
+    """Default color of silk layer with alpha channel.
+
+    This schema provides transparent background. Images using this schema can be
+    stacked on top of each other without obscuring layers below."""
 
     COPPER: ClassVar[ColorScheme]
-    """Default color of copper layer."""
+    """Default color of copper layer.
+
+    This schema provided non-transparent background, which results in images which
+    can not be used for stacking on top of other layers, as they would completely
+    obscure them."""
 
     COPPER_ALPHA: ClassVar[ColorScheme]
-    """Default color of copper layer with alpha channel."""
+    """Default color of copper layer with alpha channel.
+
+    This schema provides transparent background. Images using this schema can be
+    stacked on top of each other without obscuring layers below."""
 
     PASTE_MASK: ClassVar[ColorScheme]
-    """Default color of paste mask layer."""
+    """Default color of paste mask layer.
+
+    This schema provided non-transparent background, which results in images which
+    can not be used for stacking on top of other layers, as they would completely
+    obscure them."""
 
     PASTE_MASK_ALPHA: ClassVar[ColorScheme]
-    """Default color of paste mask layer with alpha channel."""
+    """Default color of paste mask layer with alpha channel.
+
+    This schema provides transparent background. Images using this schema can be
+    stacked on top of each other without obscuring layers below."""
 
     SOLDER_MASK: ClassVar[ColorScheme]
-    """Default color of solder mask layer."""
+    """Default color of solder mask layer.
+
+    This schema provided non-transparent background, which results in images which
+    can not be used for stacking on top of other layers, as they would completely
+    obscure them."""
 
     SOLDER_MASK_ALPHA: ClassVar[ColorScheme]
-    """Default color of solder mask layer with alpha channel."""
+    """Default color of solder mask layer with alpha channel.
+
+    This schema provides transparent background. Images using this schema can be
+    stacked on top of each other without obscuring layers below."""
 
     background_color: RGBA
     """Color used as empty image background."""

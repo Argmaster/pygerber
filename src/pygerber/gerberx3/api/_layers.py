@@ -4,7 +4,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from io import BytesIO, StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
@@ -16,8 +16,8 @@ from pygerber.backend.rasterized_2d.backend_cls import (
     Rasterized2DBackend,
     Rasterized2DBackendOptions,
 )
-from pygerber.gerberx3.api.color_scheme import ColorScheme
-from pygerber.gerberx3.api.errors import (
+from pygerber.gerberx3.api._color_scheme import ColorScheme
+from pygerber.gerberx3.api._errors import (
     MutuallyExclusiveViolationError,
     RenderingResultNotReadyError,
 )
@@ -216,9 +216,23 @@ class RenderingResult:
         self._properties = properties
         self._result_handle = result_handle
 
-    def save(self, dest: Path | str | BytesIO) -> None:
-        """Save result to destination."""
-        self._result_handle.save(dest)
+    def save(
+        self,
+        dest: Path | str | BytesIO,
+        **options: Any,
+    ) -> None:
+        """Save result to specified file or buffer.
+
+        Parameters
+        ----------
+        dest : Path | str | BytesIO
+            Write target.
+        **options: Any
+            Extra parameters which will be passed to saving implementation.
+            When dest is BytesIO or alike, `format` option must be specified.
+            For Rasterized2D rendering options see [Pillow documentation](https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save).
+        """
+        self._result_handle.save(dest, **options)
 
 
 class Rasterized2DLayerParams(LayerParams):
@@ -248,7 +262,12 @@ class Rasterized2DLayerParams(LayerParams):
 
 
 class Rasterized2DLayer(Layer):
-    """Representation of Gerber X3 rasterized 2D image layer."""
+    """Representation of Gerber X3 rasterized 2D image layer.
+
+    Rasterized images can be saved in any image format supported by Pillow library.
+    For full list of supported formats please refer to
+    [Pillow documentation](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html).
+    """
 
     options: Rasterized2DLayerParams
 
