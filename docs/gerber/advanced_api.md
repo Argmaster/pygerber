@@ -128,8 +128,8 @@ this.
    stack of tokens.
 
 2. **Grammar Definitions**: Housed in `grammar.py`, these provide the rules to recognize
-   various constructs in the GerberX3 format. The library employs the `pyparsing` module
-   to facilitate this.
+   various constructs in the Gerber X3/X2 format. The library employs the `pyparsing`
+   module to facilitate this.
 
 3. **Token Class**: An abstract base class in `token.py`, which serves as the foundation
    for all token types in the library. It provides methods for wrapping parsing
@@ -137,7 +137,7 @@ this.
    representations for debugging.
 
 4. **Concrete Token Classes**: These are implementations of the abstract `Token` class.
-   Each of these corresponds to a specific construct in the GerberX3 format. For
+   Each of these corresponds to a specific construct in the Gerber X3/X2 format. For
    instance, `DNNSelectAperture` in `dnn_select_aperture.py` is a token representing the
    aperture select command in the format.
 
@@ -156,6 +156,76 @@ present in this document. Here's a high-level overview:
 
 ### Parsing
 
+Once the Gerber X3/X2 source code has been tokenized, the next crucial step is parsing.
+The `Parser` class plays a pivotal role in this phase, ensuring the sequence of tokens
+is processed to generate meaningful and actionable structures.
+
+#### The Process:
+
+1. **Parsing the Token Stack**: The `Parser` class processes the token stack produced by
+   the tokenizer. It ensures that the token sequence conforms to the grammar rules of
+   the Gerber X3/X2 format. As it progresses through the stack, it translates the tokens
+   into a set of drawing commands that encapsulate the instructions embedded within the
+   source code.
+
+2. **State Management**: An integral aspect of the parsing process is the management of
+   the drawing state. The `State` class, found in `state.py`, maintains the current
+   state of the drawing. Each token parsed potentially updates this state by
+   implementing `update_drawing_state()` method. This method returns two things:
+
+   - New instance of state if state modification was necessary or old one if it was not.
+   - Iterable of drawing commands which apply visual changes to rendering target.
+
+3. **Error Handling**: Robust error handling mechanisms are embedded within the parser.
+   It's equipped to detect discrepancies or violations in the token sequence. If the
+   sequence doesn't adhere to the expected grammar or if certain tokens are missing, the
+   parser raises specific exceptions to flag these issues.
+
+4. **Generating Drawing Commands**: Post-parsing, a sequence of drawing commands is
+   produced. These commands serve as a bridge between the Gerber X3/X2 format and the
+   rendering engines or other components of the PyGerber library. They are primed for
+   further processing or visualization.
+
+---
+
 ### Rendering
+
+After the GerberX3 source code has been tokenized into individual units and subsequently
+parsed into meaningful structures, the next pivotal step is rendering. This step
+visualizes the abstract representation of the Gerber file.
+
+#### Backend Infrastructure:
+
+The essence of the rendering process in PyGerber is encapsulated within its backend
+infrastructure. This subsystem bridges the gap between the abstract parsed structures
+and their visual representations.
+
+1. **BackendOptions**:
+
+   - **Description**: A utility class furnishing additional configurations that can
+     influence the rendering process, such as paths for dumping aperture data or other
+     specific render settings.
+
+2. **Backend**:
+
+   - **Description**: This abstract base class stands as the linchpin of the rendering
+     process. It amalgamates the essential attributes and methods imperative for
+     visualization.
+   - **Key Features**:
+     - **Aperture Management**: It safeguards a list of aperture handles and proffers
+       methods to both generate and access these handles.
+     - **Drawing Execution**: This core feature takes a suite of drawing commands and
+       metamorphoses them into their respective visual forms.
+     - **Bounding Area**: By preserving a bounding box, the backend delineates the
+       spatial constraints of the drawing.
+     - **Coordinate Management**: Orchestrating the coordinate system's origin, it
+       ensures the precise alignment and placement of visual elements.
+
+3. **Extensions & Implementations**:
+   - The generic interface provided by `Backend` lays the foundation. Concrete
+     implementations, tailored to particular rendering techniques—whether rasterized 2D
+     visuals via Pillow, vector illustrations using drawsvg, or 3D models with
+     Blender—build upon this foundation. They take the drawing commands and adapt them
+     to their unique visualization mediums.
 
 ---
