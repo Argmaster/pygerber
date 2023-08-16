@@ -2,6 +2,9 @@ site_name: PyGerber Documentation
 theme:
   language: en
 
+  logo: images/pygerber_white.png
+  favicon: images/pygerber.png
+
   name: material
 
   palette:

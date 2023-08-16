@@ -1,11 +1,11 @@
 <p align="center">
-  <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/0c02944e-9c51-4cfc-b74d-5ed615cca93d">
+  <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/b7aeb3e1-cd59-4f5b-b078-c01272461367">
 </p>
 
 <h1 align="center"> PyGerber </h1>
 
-PyGerber is a Python implementation of Gerber X3/X2 format. Implementation was based on
-Ucamco's `The Gerber Layer Format Specification. Revision 2023.03` (Available on
+PyGerber is a Python implementation of Gerber X3/X2 format. It is based on Ucamco's
+`The Gerber Layer Format Specification. Revision 2023.03` (Available on
 [Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-03_en.pdf)
 and in
 [this repository](https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-03_en.pdf)).
