@@ -7,9 +7,9 @@ from typing import Dict, List, Optional
 from pydantic import Field
 
 from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
-from pygerber.backend.abstract.offset import Offset
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser.errors import (
     ApertureNotSelectedError,
     CoordinateFormatNotSetError,

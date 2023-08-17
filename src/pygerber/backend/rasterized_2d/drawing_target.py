@@ -5,10 +5,10 @@ from typing import Optional
 
 from PIL import Image, ImageDraw
 
-from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.backend.abstract.drawing_target import DrawingTarget
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.backend.rasterized_2d.errors import ApertureImageNotInitializedError
+from pygerber.gerberx3.math.bounding_box import BoundingBox
+from pygerber.gerberx3.math.vector_2d import Vector2D
 
 
 class Rasterized2DDrawingTarget(DrawingTarget):

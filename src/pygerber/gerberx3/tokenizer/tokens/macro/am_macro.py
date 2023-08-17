@@ -6,7 +6,7 @@ from textwrap import indent
 from typing import TYPE_CHECKING, Any, Iterable, List, Tuple
 
 from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
-from pygerber.backend.abstract.offset import Offset
+from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
 from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 from pygerber.gerberx3.tokenizer.tokens.token import Token

@@ -5,7 +5,7 @@ from typing import Dict
 
 from pydantic import BaseModel, Field
 
-from pygerber.backend.abstract.offset import Offset
+from pygerber.gerberx3.math.offset import Offset
 
 
 class MacroContext(BaseModel):

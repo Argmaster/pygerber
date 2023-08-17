@@ -7,9 +7,9 @@ from typing import Callable, ClassVar, Tuple
 
 from pydantic import Field
 
-from pygerber.backend.abstract.offset import Offset
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.math.vector_2d import Vector2D
 
 
 class BoundingBox(FrozenGeneralModel):

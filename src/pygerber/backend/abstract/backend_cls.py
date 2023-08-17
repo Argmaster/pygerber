@@ -4,8 +4,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, ClassVar, List, Optional, Type
 
-from pygerber.backend.abstract.bounding_box import BoundingBox
-from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.gerberx3.math.bounding_box import BoundingBox
+from pygerber.gerberx3.math.vector_2d import Vector2D
 
 if TYPE_CHECKING:
     from pathlib import Path

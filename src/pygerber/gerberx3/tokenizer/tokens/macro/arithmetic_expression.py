@@ -6,7 +6,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import TYPE_CHECKING, Any, cast
 
-from pygerber.backend.abstract.offset import Offset
+from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.tokenizer.errors import TokenizerError
 from pygerber.gerberx3.tokenizer.tokens.macro.numeric_expression import (
     NumericExpression,

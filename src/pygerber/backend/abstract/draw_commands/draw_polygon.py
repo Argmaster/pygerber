@@ -5,10 +5,10 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-from pygerber.backend.abstract.offset import Offset
-from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.gerberx3.math.bounding_box import BoundingBox
+from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:

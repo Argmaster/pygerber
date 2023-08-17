@@ -7,8 +7,8 @@ import operator
 from decimal import Decimal
 from typing import Callable, ClassVar
 
-from pygerber.backend.abstract.offset import Offset
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.offset import Offset
 
 
 class Vector2D(FrozenGeneralModel):

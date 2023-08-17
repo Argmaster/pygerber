@@ -4,8 +4,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.backend.abstract.drawing_target import DrawingTarget
+from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.state_enums import Polarity
 
 

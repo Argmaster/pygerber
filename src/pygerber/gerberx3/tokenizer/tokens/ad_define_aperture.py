@@ -20,8 +20,8 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Tuple
 
-from pygerber.backend.abstract.offset import Offset
-from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import Polarity
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.token import Token

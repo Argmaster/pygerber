@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from pygerber.backend.abstract.offset import Offset
+from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 from pygerber.gerberx3.tokenizer.tokens.macro.numeric_expression import (

@@ -9,9 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 from pydantic import BaseModel, ConfigDict, model_validator
 
 from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.backend.abstract.result_handle import ResultHandle
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.backend.rasterized_2d.backend_cls import (
     Rasterized2DBackend,
     Rasterized2DBackendOptions,
@@ -21,6 +19,8 @@ from pygerber.gerberx3.api._errors import (
     MutuallyExclusiveViolationError,
     RenderingResultNotReadyError,
 )
+from pygerber.gerberx3.math.bounding_box import BoundingBox
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser.parser import Parser, ParserOnErrorAction, ParserOptions
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 from pygerber.gerberx3.tokenizer.tokens.token import Token

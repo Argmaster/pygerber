@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, ClassVar, Optional
 from PIL import Image
 
 from pygerber.backend.abstract.backend_cls import Backend, BackendOptions
-from pygerber.backend.abstract.offset import Offset
 from pygerber.backend.rasterized_2d.aperture_handle import (
     Rasterized2DPrivateApertureHandle,
 )
@@ -38,6 +37,7 @@ from pygerber.backend.rasterized_2d.draw_commands_handle import (
 )
 from pygerber.backend.rasterized_2d.drawing_target import Rasterized2DDrawingTarget
 from pygerber.backend.rasterized_2d.result_handle import Rasterized2DResultHandle
+from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:

@@ -7,14 +7,14 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Optional, TypeVar
 
 from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.bounding_box import BoundingBox
 from pygerber.backend.abstract.draw_commands.draw_circle import (
     DrawCircle,
 )
 from pygerber.backend.abstract.drawing_target import DrawingTarget
-from pygerber.backend.abstract.offset import Offset
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.bounding_box import BoundingBox
+from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 
 if TYPE_CHECKING:
