@@ -12,6 +12,7 @@ from pygerber.backend.rasterized_2d.backend_cls import (
     Rasterized2DBackend,
     Rasterized2DBackendOptions,
 )
+from pygerber.gerberx3.api import ColorScheme
 from pygerber.gerberx3.parser.parser import Parser, ParserOptions
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 
@@ -37,6 +38,7 @@ def draw_rasterized_2d(
         backend=Rasterized2DBackend(
             options=Rasterized2DBackendOptions(
                 dpi=dpi,
+                color_scheme=ColorScheme.DEBUG_1,
                 dump_apertures=dest_apertures,
                 include_debug_padding=True,
                 include_bounding_boxes=True,

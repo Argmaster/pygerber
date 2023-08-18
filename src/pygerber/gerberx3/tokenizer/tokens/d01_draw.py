@@ -58,10 +58,16 @@ class D01Draw(Token):
         current_aperture = backend.get_private_aperture_handle(
             state.get_current_aperture(),
         )
+
+        if state.is_region:
+            polarity = state.polarity.to_region_variant()
+        else:
+            polarity = state.polarity
+
         draw_commands.append(
             backend.get_draw_paste_cls()(
                 backend=backend,
-                polarity=state.polarity,
+                polarity=polarity,
                 center_position=start_position,
                 other=current_aperture.drawing_target,
             ),
@@ -71,7 +77,7 @@ class D01Draw(Token):
             draw_commands.append(
                 backend.get_draw_vector_line_cls()(
                     backend=backend,
-                    polarity=state.polarity,
+                    polarity=polarity,
                     start_position=start_position,
                     end_position=end_position,
                     width=current_aperture.get_line_width(),
@@ -93,7 +99,7 @@ class D01Draw(Token):
             draw_commands.append(
                 backend.get_draw_arc_cls()(
                     backend=backend,
-                    polarity=state.polarity,
+                    polarity=polarity,
                     start_position=start_position,
                     dx_dy_center=center_offset,
                     end_position=end_position,
@@ -116,7 +122,7 @@ class D01Draw(Token):
         draw_commands.append(
             backend.get_draw_paste_cls()(
                 backend=backend,
-                polarity=state.polarity,
+                polarity=polarity,
                 center_position=end_position,
                 other=current_aperture.drawing_target,
             ),

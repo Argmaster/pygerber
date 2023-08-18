@@ -48,10 +48,15 @@ class D03Flash(Token):
         current_aperture = backend.get_private_aperture_handle(
             state.get_current_aperture(),
         )
+        if state.is_region:
+            polarity = state.polarity.to_region_variant()
+        else:
+            polarity = state.polarity
+
         draw_commands.append(
             backend.get_draw_paste_cls()(
                 backend=backend,
-                polarity=state.polarity,
+                polarity=polarity,
                 center_position=position,
                 other=current_aperture.drawing_target,
             ),

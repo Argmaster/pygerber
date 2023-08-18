@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from pygerber.backend.abstract.draw_commands.draw_paste import DrawPaste
 from pygerber.backend.abstract.drawing_target import DrawingTarget
 from pygerber.backend.rasterized_2d.drawing_target import Rasterized2DDrawingTarget
+from pygerber.backend.rasterized_2d.image_tools import replace_color
 from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:
@@ -30,13 +31,28 @@ class Rasterized2DDrawPaste(DrawPaste):
         pixel_box = image_space_box.get_min_vector().as_pixels(self.backend.dpi)
 
         if self.polarity == Polarity.Dark:
-            im = self.other.target_image
+            im = self.other.image_polarity_dark
+
+        elif self.polarity == Polarity.Clear:
+            im = self.other.image_polarity_clear
+
+        elif self.polarity == Polarity.DarkRegion:
+            im = self.other.image_polarity_region_dark
+
+        elif self.polarity == Polarity.ClearRegion:
+            im = self.other.image_polarity_region_clear
+
         else:
-            im = self.other.image_invert
+            im = replace_color(
+                self.other.target_image,
+                Polarity.Dark.get_2d_rasterized_color(),
+                self.polarity.get_2d_rasterized_color(),
+                output_image_mode="L",
+            )
 
         target.target_image.paste(
             im=im,
             box=pixel_box,
-            mask=self.other.target_image,
+            mask=self.other.mask_image,
         )
         logging.debug("Adding %s to %s", self.__class__.__qualname__, target)

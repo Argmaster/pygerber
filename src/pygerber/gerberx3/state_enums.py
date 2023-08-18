@@ -45,24 +45,47 @@ class Polarity(EnumFormatValue):
 
     Clear = "C"
     Dark = "D"
+    ClearRegion = "ClearRegion"
+    DarkRegion = "DarkRegion"
+    Background = "Background"
     DEBUG = "DBG"
     DEBUG2 = "DBG2"
 
     def invert(self) -> Polarity:
         """Return opposite polarity."""
-        if self == Polarity.Clear:
-            return Polarity.Dark
+        return _polarity_invert_map[self]
 
-        return Polarity.Clear
+    def to_region_variant(self) -> Polarity:
+        """Return region variant of polarity."""
+        return _to_region_variant_map[self]
 
     def get_2d_rasterized_color(self) -> int:
         """Get color for "1" mode image."""
         return _2d_rasterized_color_map[self]
 
 
+_to_region_variant_map = {
+    Polarity.Clear: Polarity.ClearRegion,
+    Polarity.Dark: Polarity.DarkRegion,
+}
+
+_polarity_invert_map = {
+    Polarity.Clear: Polarity.Dark,
+    Polarity.Dark: Polarity.Clear,
+    Polarity.ClearRegion: Polarity.DarkRegion,
+    Polarity.DarkRegion: Polarity.ClearRegion,
+    Polarity.DEBUG: Polarity.DEBUG2,
+    Polarity.DEBUG2: Polarity.DEBUG,
+}
+
 _2d_rasterized_color_map = {
-    Polarity.Dark: 255,
-    Polarity.Clear: 0,
+    "RESERVED_BLACK": 0,
+    "RESERVED_WHITE": 255,
+    Polarity.Dark: 240,
+    Polarity.Clear: 15,
+    Polarity.DarkRegion: 230,
+    Polarity.ClearRegion: 30,
+    Polarity.Background: 0,
     Polarity.DEBUG: 127,
     Polarity.DEBUG2: 75,
 }

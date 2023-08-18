@@ -6,6 +6,7 @@ from typing import ClassVar
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.common.rgba import RGBA
+from pygerber.gerberx3.state_enums import Polarity
 
 
 class ColorScheme(FrozenGeneralModel):
@@ -79,6 +80,15 @@ class ColorScheme(FrozenGeneralModel):
     This schema provides transparent background. Images using this schema can be
     stacked on top of each other without obscuring layers below."""
 
+    DEFAULT_GRAYSCALE: ClassVar[ColorScheme]
+    """Default color scheme for files which were not assigned other color scheme."""
+
+    DEBUG_1: ClassVar[ColorScheme]
+    """Debug color scheme."""
+
+    DEBUG_1_ALPHA: ClassVar[ColorScheme]
+    """Debug color scheme with alpha channel."""
+
     background_color: RGBA
     """Color used as empty image background."""
 
@@ -99,6 +109,18 @@ class ColorScheme(FrozenGeneralModel):
 
     debug_2_color: RGBA = RGBA.from_hex("#7d7d7d")
     """Color used for debug elements."""
+
+    def get_grayscale_to_rgba_color_map(self) -> dict[int, tuple[int, int, int, int]]:
+        """Return grayscale to RGBA color map."""
+        return {
+            Polarity.Dark.get_2d_rasterized_color(): self.solid_color.as_rgba_int(),
+            Polarity.Clear.get_2d_rasterized_color(): self.clear_color.as_rgba_int(),  # noqa: E501
+            Polarity.DarkRegion.get_2d_rasterized_color(): self.solid_region_color.as_rgba_int(),  # noqa: E501
+            Polarity.ClearRegion.get_2d_rasterized_color(): self.clear_region_color.as_rgba_int(),  # noqa: E501
+            Polarity.Background.get_2d_rasterized_color(): self.background_color.as_rgba_int(),  # noqa: E501
+            Polarity.DEBUG.get_2d_rasterized_color(): self.debug_1_color.as_rgba_int(),  # noqa: E501
+            Polarity.DEBUG2.get_2d_rasterized_color(): self.debug_2_color.as_rgba_int(),  # noqa: E501
+        }
 
 
 ColorScheme.SILK = ColorScheme(
@@ -159,4 +181,24 @@ ColorScheme.SOLDER_MASK_ALPHA = ColorScheme(
     solid_color=RGBA.from_rgba(153, 153, 153, 255),
     clear_region_color=RGBA.from_rgba(0, 0, 0, 0),
     solid_region_color=RGBA.from_rgba(153, 153, 153, 255),
+)
+
+ColorScheme.DEFAULT_GRAYSCALE = ColorScheme(
+    background_color=RGBA.from_rgba(0, 0, 0, 0),
+    clear_color=RGBA.from_rgba(0, 0, 0, 0),
+    solid_color=RGBA.from_rgba(255, 255, 255, 255),
+    clear_region_color=RGBA.from_rgba(0, 0, 0, 0),
+    solid_region_color=RGBA.from_rgba(255, 255, 255, 255),
+    debug_1_color=RGBA.from_hex("#ababab"),
+    debug_2_color=RGBA.from_hex("#7d7d7d"),
+)
+
+ColorScheme.DEBUG_1 = ColorScheme(
+    background_color=RGBA.from_rgba(0, 0, 0, 0),
+    clear_color=RGBA.from_rgba(187, 8, 65, 255),
+    solid_color=RGBA.from_rgba(19, 61, 145, 255),
+    clear_region_color=RGBA.from_rgba(94, 52, 20, 255),
+    solid_region_color=RGBA.from_rgba(21, 92, 130, 255),
+    debug_1_color=RGBA.from_hex("#ababab"),
+    debug_2_color=RGBA.from_hex("#7d7d7d"),
 )

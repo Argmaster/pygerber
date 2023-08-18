@@ -152,6 +152,17 @@ ways, however they are all equivalent.
 
 ---
 
+## Obtaining layer properties
+
+I some cases it may be useful to obtain information about layer which was rendered. For
+example origin of coordinate system of image can be useful for aligning multiple layers
+on top of each other, or for other similar transformations.
+
+Those information can be extracted from `RenderingResult` object, returned from
+`Layer.render()` method. `RenderingResult` object has `get_properties()` method which
+returns `LayerProperties` object which contains all the necessary data to determine
+coordinate origins and bounding boxes of layer.
+
 ## Further reading
 
 To further extend your knowledge about how to use PyGerber you could read

@@ -11,7 +11,7 @@ to locations in the image plane.
 
 Allowed does not mean recommended, quite the contrary. If you are tempted to use a
 zero-size object, consider whether it is useful, and whether there is no proper way to
-convey the metainformation. Certainly do not abuse a zero-size object to indicate the
+convey the meta information. Certainly do not abuse a zero-size object to indicate the
 absence of an object, e.g. by flashing a zero-size aperture to indicate the absence of
 a pad. This is just confusing. If there is nothing, put nothing.
 """

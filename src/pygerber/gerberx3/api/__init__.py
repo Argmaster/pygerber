@@ -14,8 +14,8 @@ Gerber X3/X2 files.
 """  # noqa: E501
 from __future__ import annotations
 
+from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
 from pygerber.common.rgba import RGBA
-from pygerber.gerberx3.api._color_scheme import ColorScheme
 from pygerber.gerberx3.api._errors import (
     GerberX3APIError,
     MutuallyExclusiveViolationError,

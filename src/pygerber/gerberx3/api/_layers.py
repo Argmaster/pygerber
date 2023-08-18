@@ -14,7 +14,7 @@ from pygerber.backend.rasterized_2d.backend_cls import (
     Rasterized2DBackend,
     Rasterized2DBackendOptions,
 )
-from pygerber.gerberx3.api._color_scheme import ColorScheme
+from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
 from pygerber.gerberx3.api._errors import (
     MutuallyExclusiveViolationError,
     RenderingResultNotReadyError,
@@ -234,6 +234,10 @@ class RenderingResult:
         """
         self._result_handle.save(dest, **options)
 
+    def get_properties(self) -> LayerProperties:
+        """Get properties of layer."""
+        return self._properties
+
 
 class Rasterized2DLayerParams(LayerParams):
     """Parameters for Layer with 2D rendering.
@@ -284,6 +288,7 @@ class Rasterized2DLayer(Layer):
         return Rasterized2DBackend(
             Rasterized2DBackendOptions(
                 dpi=self.options.dpi,
+                color_scheme=self.options.colors,
                 dump_apertures=self.options.debug_dump_apertures,
                 include_debug_padding=self.options.debug_include_extra_padding,
                 include_bounding_boxes=self.options.debug_include_bounding_boxes,

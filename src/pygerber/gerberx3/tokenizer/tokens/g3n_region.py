@@ -61,7 +61,7 @@ class EndRegion(Token):
 
         draw_command = backend.get_draw_region_cls()(
             backend,
-            state.polarity,
+            state.polarity.to_region_variant(),
             state.region_boundary_points,
         )
 
