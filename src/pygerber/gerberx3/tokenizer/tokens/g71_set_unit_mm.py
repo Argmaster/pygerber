@@ -38,7 +38,6 @@ class SetUnitMillimeters(Token):
                 update={
                     "draw_units": Unit.Millimeters,
                 },
-                deep=True,
             ),
             (),
         )

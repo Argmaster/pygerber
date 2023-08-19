@@ -29,7 +29,6 @@ class SetLinear(Token):
                 update={
                     "draw_mode": DrawMode.Linear,
                 },
-                deep=True,
             ),
             (),
         )

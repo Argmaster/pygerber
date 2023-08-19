@@ -11,7 +11,7 @@ to locations in the image plane.
 
 Allowed does not mean recommended, quite the contrary. If you are tempted to use a
 zero-size object, consider whether it is useful, and whether there is no proper way to
-convey the metainformation. Certainly do not abuse a zero-size object to indicate the
+convey the meta information. Certainly do not abuse a zero-size object to indicate the
 absence of an object, e.g. by flashing a zero-size aperture to indicate the absence of
 a pad. This is just confusing. If there is nothing, put nothing.
 """
@@ -20,8 +20,8 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Tuple
 
-from pygerber.backend.abstract.offset import Offset
-from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import Polarity
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.token import Token
@@ -137,7 +137,6 @@ class DefineCircle(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
@@ -214,7 +213,6 @@ class DefineRectangle(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
@@ -331,7 +329,6 @@ class DefineObround(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
@@ -414,7 +411,6 @@ class DefinePolygon(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
@@ -459,9 +455,13 @@ class DefineMacro(DefineAperture):
         """Update drawing state."""
         handle = backend.create_aperture_handle(self.aperture_id)
         with handle:
-            # TODO(argmaster.world@gmail.com): Implement macro logic.
-            # https://github.com/Argmaster/pygerber/issues/23
-            pass
+            macro = state.macros[self.aperture_type]
+            parameters = {
+                f"${i + 1}": Offset.new(value, state.get_units())
+                for i, value in enumerate(self.am_param)
+            }
+            macro.evaluate(state, handle, parameters)
+
         frozen_handle = handle.get_public_handle()
 
         new_aperture_dict = {**state.apertures}
@@ -472,10 +472,9 @@ class DefineMacro(DefineAperture):
                 update={
                     "apertures": new_aperture_dict,
                 },
-                deep=True,
             ),
             (),
         )
 
     def __str__(self) -> str:
-        return f"%AD{self.aperture_id}{self.aperture_type},{'X'.join(self.am_param)}"
+        return f"%AD{self.aperture_id}{self.aperture_type},{'X'.join(self.am_param)}*%"

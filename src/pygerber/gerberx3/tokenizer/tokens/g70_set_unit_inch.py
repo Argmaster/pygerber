@@ -49,7 +49,6 @@ class SetUnitInch(Token):
                 update={
                     "draw_units": Unit.Inches,
                 },
-                deep=True,
             ),
             (),
         )

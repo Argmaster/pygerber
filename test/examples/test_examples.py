@@ -1,5 +1,10 @@
-from test.examples import render_copper_from_buffer, render_copper_from_path
-from test.examples import render_copper_from_string
+from __future__ import annotations
+
+from test.examples import (
+    render_copper_from_buffer,
+    render_copper_from_path,
+    render_copper_from_string,
+)
 
 
 def test_render_copper_from_buffer() -> None:

@@ -1,6 +1,12 @@
+from __future__ import annotations
+
 from io import BytesIO
-from pygerber.gerberx3.api.color_scheme import ColorScheme
-from pygerber.gerberx3.api.layers import Rasterized2DLayer, Rasterized2DLayerParams
+
+from pygerber.gerberx3.api import (
+    ColorScheme,
+    Rasterized2DLayer,
+    Rasterized2DLayerParams,
+)
 
 
 def render() -> None:
@@ -21,7 +27,7 @@ def render() -> None:
     D400*
     X2000000Y2000000D03*
     M02*
-    """
+    """,
     )
 
     Rasterized2DLayer(

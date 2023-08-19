@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.draw_commands.draw_arc import DrawArc
 from pygerber.backend.abstract.drawing_target import DrawingTarget
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.backend.rasterized_2d.drawing_target import Rasterized2DDrawingTarget
+from pygerber.gerberx3.math.vector_2d import Vector2D
 
 if TYPE_CHECKING:
     from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend

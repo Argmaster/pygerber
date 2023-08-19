@@ -1,18 +1,19 @@
 [tool.poetry]
 name = "pygerber"
-version = "2.0.0rc1"
+version = "2.0.0rc2"
 description = "Parsing, formatting and rendering toolkit for Gerber X3 file format"
 authors = ["Krzysztof Wisniewski <argmaster.world@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.8,<3.13"
 click = "^8.1.3"
 pyparsing = "^3.1.0"
 pydantic = "^2.0"
 tzlocal = "^5.0.1"
 pillow = "^10.0.0"
+numpy = "^1.24.4"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.4.1"
@@ -30,6 +31,18 @@ pytest-xdist = { extras = ["psutil"], version = "^3.3.1" }
 pytest-cov = "^4.1.0"
 types-tzlocal = "^5.0.1.1"
 ipykernel = "^6.25.0"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.5.1"
+mkdocs-material = "^9.1.21"
+mkdocstrings = { extras = ["python"], version = "^0.22.0" }
+mkdocs-literate-nav = "^0.6.0"
+mkdocs-macros-plugin = "^1.0.2"
+mkdocs-gen-files = "^0.5.0"
+pygments = "^2.15.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -95,7 +108,11 @@ required-imports = ["from __future__ import annotations"]
 ban-relative-imports = "all"
 
 [tool.ruff.flake8-type-checking]
-runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "FrozenGeneralModel",
+    "BaseModel",
+]
 
 
 [tool.mypy] # ANCHOR: tool.mypy
@@ -228,3 +245,4 @@ color_output = true
 error_summary = true
 # Show absolute paths to files.
 show_absolute_path = true
+enable_incomplete_feature = "Unpack"

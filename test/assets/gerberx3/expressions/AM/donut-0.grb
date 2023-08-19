@@ -1,0 +1,18 @@
+G04 Different command styles*
+%FSLAX26Y26*%
+%MOMM*%
+%AMDonut*
+1,1,$1,$2,$3*
+$4=$1x0.75*
+1,0,$4,$2,$3*%
+%ADD11Donut,0.30X0X0*%
+%ADD10C,0.1*%
+D10*
+G75*
+G02*
+X0Y0D02*
+X2000000Y0I0J1000000D01*
+G01*
+D11*
+D03*
+M02*

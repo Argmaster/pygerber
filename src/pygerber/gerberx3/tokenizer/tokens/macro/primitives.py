@@ -2,9 +2,19 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import TYPE_CHECKING, Any, ClassVar, List, Optional
 
+from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
+from pygerber.gerberx3.parser.state import State
+from pygerber.gerberx3.tokenizer.tokens.macro.arithmetic_expression import (
+    NumericConstant,
+)
 from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
+from pygerber.gerberx3.tokenizer.tokens.macro.numeric_expression import (
+    NumericExpression,
+)
 from pygerber.gerberx3.tokenizer.tokens.macro.point import Point
 from pygerber.sequence_tools import unwrap
 
@@ -23,22 +33,24 @@ class PrimitiveCircle(Primitive):
 
     symbol: ClassVar[str] = "1"
 
-    exposure: Expression
-    diameter: Expression
-    center_x: Expression
-    center_y: Expression
-    rotation: Optional[Expression]
+    exposure: NumericExpression
+    diameter: NumericExpression
+    center_x: NumericExpression
+    center_y: NumericExpression
+    rotation: NumericExpression
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        exposure: Expression = unwrap(tokens["exposure"])
-        diameter: Expression = unwrap(tokens["diameter"])
-        center_x: Expression = unwrap(tokens["center_x"])
-        center_y: Expression = unwrap(tokens["center_y"])
-        rotation: Optional[Expression] = (
+        exposure: NumericExpression = unwrap(tokens["exposure"])
+        diameter: NumericExpression = unwrap(tokens["diameter"])
+        center_x: NumericExpression = unwrap(tokens["center_x"])
+        center_y: NumericExpression = unwrap(tokens["center_y"])
+        rotation: Optional[NumericExpression] = (
             unwrap(tokens["rotation"]) if tokens.get("rotation") is not None else None
         )
+        if rotation is None:
+            rotation = NumericConstant(value=Decimal("0.0"))
 
         return cls(
             exposure=exposure,
@@ -47,6 +59,21 @@ class PrimitiveCircle(Primitive):
             center_y=center_y,
             rotation=rotation,
         )
+
+    def evaluate(
+        self,
+        macro_context: MacroContext,
+        state: State,
+        handle: PrivateApertureHandle,
+    ) -> None:
+        """Evaluate macro expression."""
+        self.exposure.evaluate_numeric(macro_context, state)
+        self.diameter.evaluate_numeric(macro_context, state)
+        self.center_x.evaluate_numeric(macro_context, state)
+        self.center_y.evaluate_numeric(macro_context, state)
+        self.rotation.evaluate_numeric(macro_context, state)
+
+        return super().evaluate(macro_context, state, handle)
 
     def __str__(self) -> str:
         string = self.symbol
@@ -67,24 +94,24 @@ class PrimitiveVectorLine(Primitive):
 
     symbol: ClassVar[str] = "20"
 
-    exposure: Expression
-    width: Expression
-    start_x: Expression
-    start_y: Expression
-    end_x: Expression
-    end_y: Expression
-    rotation: Expression
+    exposure: NumericExpression
+    width: NumericExpression
+    start_x: NumericExpression
+    start_y: NumericExpression
+    end_x: NumericExpression
+    end_y: NumericExpression
+    rotation: NumericExpression
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        exposure: Expression = unwrap(tokens["exposure"])
-        width: Expression = unwrap(tokens["width"])
-        start_x: Expression = unwrap(tokens["start_x"])
-        start_y: Expression = unwrap(tokens["start_y"])
-        end_x: Expression = unwrap(tokens["end_x"])
-        end_y: Expression = unwrap(tokens["end_y"])
-        rotation: Expression = unwrap(tokens["rotation"])
+        exposure: NumericExpression = unwrap(tokens["exposure"])
+        width: NumericExpression = unwrap(tokens["width"])
+        start_x: NumericExpression = unwrap(tokens["start_x"])
+        start_y: NumericExpression = unwrap(tokens["start_y"])
+        end_x: NumericExpression = unwrap(tokens["end_x"])
+        end_y: NumericExpression = unwrap(tokens["end_y"])
+        rotation: NumericExpression = unwrap(tokens["rotation"])
 
         return cls(
             exposure=exposure,
@@ -115,22 +142,22 @@ class PrimitiveCenterLine(Primitive):
 
     symbol: ClassVar[str] = "21"
 
-    exposure: Expression
-    width: Expression
-    hight: Expression
-    center_x: Expression
-    center_y: Expression
-    rotation: Expression
+    exposure: NumericExpression
+    width: NumericExpression
+    hight: NumericExpression
+    center_x: NumericExpression
+    center_y: NumericExpression
+    rotation: NumericExpression
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        exposure: Expression = unwrap(tokens["exposure"])
-        width: Expression = unwrap(tokens["width"])
-        hight: Expression = unwrap(tokens["hight"])
-        center_x: Expression = unwrap(tokens["center_x"])
-        center_y: Expression = unwrap(tokens["center_y"])
-        rotation: Expression = unwrap(tokens["rotation"])
+        exposure: NumericExpression = unwrap(tokens["exposure"])
+        width: NumericExpression = unwrap(tokens["width"])
+        hight: NumericExpression = unwrap(tokens["hight"])
+        center_x: NumericExpression = unwrap(tokens["center_x"])
+        center_y: NumericExpression = unwrap(tokens["center_y"])
+        rotation: NumericExpression = unwrap(tokens["rotation"])
 
         return cls(
             exposure=exposure,
@@ -159,21 +186,21 @@ class PrimitiveOutline(Primitive):
 
     symbol: ClassVar[str] = "4"
 
-    exposure: Expression
-    number_of_vertices: Expression
-    start_x: Expression
-    start_y: Expression
-    rotation: Expression
+    exposure: NumericExpression
+    number_of_vertices: NumericExpression
+    start_x: NumericExpression
+    start_y: NumericExpression
+    rotation: NumericExpression
     point: List[Point]
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        exposure: Expression = unwrap(tokens["exposure"])
-        number_of_vertices: Expression = unwrap(tokens["number_of_vertices"])
-        start_x: Expression = unwrap(tokens["start_x"])
-        start_y: Expression = unwrap(tokens["start_y"])
-        rotation: Expression = unwrap(tokens["rotation"])
+        exposure: NumericExpression = unwrap(tokens["exposure"])
+        number_of_vertices: NumericExpression = unwrap(tokens["number_of_vertices"])
+        start_x: NumericExpression = unwrap(tokens["start_x"])
+        start_y: NumericExpression = unwrap(tokens["start_y"])
+        rotation: NumericExpression = unwrap(tokens["rotation"])
         point: list[Point] = list(tokens.get("point", []))
 
         return cls(
@@ -205,22 +232,22 @@ class PrimitivePolygon(Primitive):
 
     symbol: ClassVar[str] = "5"
 
-    exposure: Expression
-    number_of_vertices: Expression
-    center_x: Expression
-    center_y: Expression
-    diameter: Expression
-    rotation: Expression
+    exposure: NumericExpression
+    number_of_vertices: NumericExpression
+    center_x: NumericExpression
+    center_y: NumericExpression
+    diameter: NumericExpression
+    rotation: NumericExpression
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        exposure: Expression = unwrap(tokens["exposure"])
-        number_of_vertices: Expression = unwrap(tokens["number_of_vertices"])
-        center_x: Expression = unwrap(tokens["center_x"])
-        center_y: Expression = unwrap(tokens["center_y"])
-        diameter: Expression = unwrap(tokens["diameter"])
-        rotation: Expression = unwrap(tokens["rotation"])
+        exposure: NumericExpression = unwrap(tokens["exposure"])
+        number_of_vertices: NumericExpression = unwrap(tokens["number_of_vertices"])
+        center_x: NumericExpression = unwrap(tokens["center_x"])
+        center_y: NumericExpression = unwrap(tokens["center_y"])
+        diameter: NumericExpression = unwrap(tokens["diameter"])
+        rotation: NumericExpression = unwrap(tokens["rotation"])
         return cls(
             exposure=exposure,
             number_of_vertices=number_of_vertices,
@@ -248,22 +275,22 @@ class PrimitiveThermal(Primitive):
 
     symbol: ClassVar[str] = "7"
 
-    center_x: Expression
-    center_y: Expression
-    outer_diameter: Expression
-    inner_diameter: Expression
-    gap: Expression
-    rotation: Expression
+    center_x: NumericExpression
+    center_y: NumericExpression
+    outer_diameter: NumericExpression
+    inner_diameter: NumericExpression
+    gap: NumericExpression
+    rotation: NumericExpression
 
     @classmethod
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
-        center_x: Expression = unwrap(tokens["center_x"])
-        center_y: Expression = unwrap(tokens["center_y"])
-        outer_diameter: Expression = unwrap(tokens["outer_diameter"])
-        inner_diameter: Expression = unwrap(tokens["inner_diameter"])
-        gap: Expression = unwrap(tokens["gap"])
-        rotation: Expression = unwrap(tokens["rotation"])
+        center_x: NumericExpression = unwrap(tokens["center_x"])
+        center_y: NumericExpression = unwrap(tokens["center_y"])
+        outer_diameter: NumericExpression = unwrap(tokens["outer_diameter"])
+        inner_diameter: NumericExpression = unwrap(tokens["inner_diameter"])
+        gap: NumericExpression = unwrap(tokens["gap"])
+        rotation: NumericExpression = unwrap(tokens["rotation"])
         return cls(
             center_x=center_x,
             center_y=center_y,

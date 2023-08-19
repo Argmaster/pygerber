@@ -2,14 +2,14 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field
 
 from pygerber.backend.abstract.aperture_handle import PublicApertureHandle
-from pygerber.backend.abstract.offset import Offset
-from pygerber.backend.abstract.vector_2d import Vector2D
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser.errors import (
     ApertureNotSelectedError,
     CoordinateFormatNotSetError,
@@ -21,6 +21,7 @@ from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
+from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
 
 
 class State(FrozenGeneralModel):
@@ -48,6 +49,10 @@ class State(FrozenGeneralModel):
     # LR  | Load rotation |  Loads the rotation object transformation   | 4.9.4
     #                       parameter.
     rotation: Decimal = Decimal("0.0")
+
+    region_boundary_points: List[Vector2D] = Field(default_factory=list)
+    """Points defining the shape of the region."""
+
     # LS  | Load scaling |   Loads the scale object transformation      | 4.9.5
     #                       parameter
     scaling: Decimal = Decimal("1.0")
@@ -82,6 +87,10 @@ class State(FrozenGeneralModel):
     """
 
     apertures: Dict[ApertureID, PublicApertureHandle] = Field(default_factory=dict)
+    """Collection of all apertures defined until given point in code."""
+
+    macros: Dict[str, MacroDefinition] = Field(default_factory=dict)
+    """Collection of all macros defined until given point in code."""
 
     def get_units(self) -> Unit:
         """Get drawing unit or raise UnitNotSetError."""

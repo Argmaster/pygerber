@@ -40,7 +40,6 @@ class SetMultiQuadrantMode(Token):
                 update={
                     "is_multi_quadrant": True,
                 },
-                deep=True,
             ),
             (),
         )

@@ -44,7 +44,6 @@ class ImagePolarity(Token):
                         self.image_polarity == ImagePolarityEnum.NEGATIVE
                     ),
                 },
-                deep=True,
             ),
             (),
         )

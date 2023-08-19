@@ -80,9 +80,14 @@ class CoordinateFormat(Token):
                         y_format=self.y_format,
                     ),
                 },
-                deep=True,
             ),
             (),
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"%FS{self.zeros_mode}{self.coordinate_mode}"
+            f"X{self.x_format}Y{self.y_format}*%"
         )
 
 
@@ -95,6 +100,9 @@ class TrailingZerosMode(Enum):
     OmitLeading = "L"
     OmitTrailing = "T"
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class CoordinateMode(Enum):
     """Coordinate format mode.
@@ -104,6 +112,9 @@ class CoordinateMode(Enum):
 
     Absolute = "A"
     Incremental = "I"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class AxisFormat(FrozenGeneralModel):
@@ -116,6 +127,9 @@ class AxisFormat(FrozenGeneralModel):
     def total_length(self) -> int:
         """Total format length."""
         return self.integer + self.decimal
+
+    def __str__(self) -> str:
+        return f"{self.integer}{self.decimal}"
 
 
 class CoordinateParser(FrozenGeneralModel):

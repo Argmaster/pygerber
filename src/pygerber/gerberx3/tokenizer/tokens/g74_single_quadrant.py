@@ -31,7 +31,6 @@ class SetSingleQuadrantMode(Token):
                 update={
                     "is_multi_quadrant": False,
                 },
-                deep=True,
             ),
             (),
         )

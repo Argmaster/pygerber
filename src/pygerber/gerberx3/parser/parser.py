@@ -5,11 +5,8 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from typing import Callable, Generator, Optional
+from typing import TYPE_CHECKING, Callable, Generator, Optional
 
-from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-from pygerber.backend.abstract.draw_commands_handle import DrawCommandsHandle
 from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 from pygerber.gerberx3.parser.errors import (
     ExitParsingProcessInterrupt,
@@ -17,8 +14,13 @@ from pygerber.gerberx3.parser.errors import (
     ParserError,
 )
 from pygerber.gerberx3.parser.state import State
-from pygerber.gerberx3.tokenizer.tokenizer import TokenStack
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+
+if TYPE_CHECKING:
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
+    from pygerber.backend.abstract.draw_commands_handle import DrawCommandsHandle
+    from pygerber.gerberx3.tokenizer.tokenizer import TokenStack
+    from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 
 class Parser:
@@ -32,8 +34,6 @@ class Parser:
 
         Parameters
         ----------
-        tokens : TokenStack
-            Gerber X3 tokens retrieved with Tokenizer.
         options : ParserOptions | None
             Additional options for modifying parser behavior.
         """

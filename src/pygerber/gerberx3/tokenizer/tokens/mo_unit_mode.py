@@ -50,10 +50,9 @@ class UnitMode(Token):
                 update={
                     "draw_units": self.unit,
                 },
-                deep=True,
             ),
             (),
         )
 
     def __str__(self) -> str:
-        return f"%MM{self.unit.value}*%"
+        return f"%MO{self.unit.value}*%"

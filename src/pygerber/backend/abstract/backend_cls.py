@@ -4,8 +4,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, ClassVar, List, Optional, Type
 
-from pygerber.backend.abstract.bounding_box import BoundingBox
-from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.gerberx3.math.bounding_box import BoundingBox
+from pygerber.gerberx3.math.vector_2d import Vector2D
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.draw_commands.draw_rectangle import (
         DrawRectangle,
     )
+    from pygerber.backend.abstract.draw_commands.draw_region import DrawRegion
     from pygerber.backend.abstract.draw_commands.draw_vector_line import DrawVectorLine
     from pygerber.backend.abstract.draw_commands_handle import DrawCommandsHandle
     from pygerber.backend.abstract.drawing_target import DrawingTarget
@@ -144,6 +145,10 @@ class Backend(ABC):
     @abstractmethod
     def get_draw_paste_cls(self) -> type[DrawPaste]:
         """Return backend-specific implementation of draw paste."""
+
+    @abstractmethod
+    def get_draw_region_cls(self) -> type[DrawRegion]:
+        """Return backend-specific implementation of draw action region."""
 
     @abstractmethod
     def get_draw_vector_line_cls(self) -> type[DrawVectorLine]:

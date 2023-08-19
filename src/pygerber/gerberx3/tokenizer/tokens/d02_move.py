@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
-from pygerber.backend.abstract.vector_2d import Vector2D
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
@@ -49,7 +49,6 @@ class D02Move(Token):
                 update={
                     "current_position": position,
                 },
-                deep=True,
             ),
             (),
         )

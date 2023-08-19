@@ -3,26 +3,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from test.gerberx3.test_tokenizer.common import make_tokenizer_test
 
-import pytest
-from pathlib import Path
-
-from test.gerberx3.common import (
-    find_gerberx3_asset_files,
-    save_token_stack,
-    tokenize_gerberx3,
+test_sample = make_tokenizer_test(
+    __file__,
+    "test/assets/gerberx3/ATMEGA328-Motor-Board",
 )
-
-if TYPE_CHECKING:
-    from test.conftest import AssetLoader
-
-
-@pytest.mark.parametrize(
-    ["directory", "file_name"],
-    sorted(find_gerberx3_asset_files("test/assets/gerberx3/ATMEGA328-Motor-Board")),
-)
-def test_sample(asset_loader: AssetLoader, directory: Path, file_name: str) -> None:
-    """Test tokenizer on sample gerber code."""
-    stack = tokenize_gerberx3(asset_loader, directory, file_name)
-    save_token_stack(stack, __file__, directory, file_name)

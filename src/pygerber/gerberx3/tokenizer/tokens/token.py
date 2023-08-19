@@ -60,6 +60,10 @@ class Token(FrozenGeneralModel):
 
         return f"<{self.__class__.__qualname__} {string!r}>"
 
+    def get_debug_format(self) -> str:
+        """Return debug formatted token object."""
+        return super().__repr__()
+
     def __getitem__(self, _: int) -> Self:
         """Index return self."""
         return self
