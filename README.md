@@ -246,7 +246,8 @@ Supported **DEPRECATED** Gerber features:
 - [x] G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
       codes handled by the FS command.
 
-      - **Important**: *Incremental notation itself is not supported and is not planned due to lack of test assets and expected complications during implementation.*
+  - **Important**: _Incremental notation itself is not supported and is not planned due
+    to lack of test assets and expected complications during implementation._
 
 - [x] G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
       Deprecated in 2020. (Spec. 8.1.10)
@@ -277,7 +278,8 @@ Supported **DEPRECATED** Gerber features:
 - [x] Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
       (Spec. 8.2)
 
-      - **Important**: *Incremental notation itself is not supported and is not planned due to lack of test assets and expected complications during implementation.*
+  - **Important**: _Incremental notation itself is not supported and is not planned due
+    to lack of test assets and expected complications during implementation._
 
 - [ ] Rectangular Hole in Standard Apertures (Spec. 8.2.2)
 - [x] Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)
@@ -344,7 +346,8 @@ Supported **DEPRECATED** Gerber features:
 - [x] G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
       codes handled by the FS command.
 
-      - **Important**: *Incremental notation itself is not supported and is not planned due to lack of test assets and expected complications during implementation.*
+  - **Important**: _Incremental notation itself is not supported and is not planned due
+    to lack of test assets and expected complications during implementation._
 
 - [x] G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
       Deprecated in 2020. (Spec. 8.1.10)
@@ -377,7 +380,8 @@ Supported **DEPRECATED** Gerber features:
 - [ ] Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
       (Spec. 8.2)
 
-      - **Important**: *Incremental notation itself is not supported and is not planned due to lack of test assets and expected complications during implementation.*
+  - **Important**: _Incremental notation itself is not supported and is not planned due
+    to lack of test assets and expected complications during implementation._
 
 - [ ] Rectangular Hole in Standard Apertures (Spec. 8.2.2)
 - [ ] Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)
@@ -395,13 +399,12 @@ Supported Gerber X3 features:
 - [x] Aperture definition with polygon
 - [ ] Aperture definition with macro
 - [ ] Block aperture definition
-- [x] Draw flash
-  - [x] circle aperture
-  - [x] rectangle aperture
-  - [x] obround aperture
-  - [x] polygon aperture
-  - [ ] macro aperture
-  - [ ] block aperture
+- [x] Draw flash with circle aperture
+- [x] Draw flash with rectangle aperture
+- [x] Draw flash with obround aperture
+- [x] Draw flash with polygon aperture
+- [ ] Draw flash with macro aperture
+- [ ] Draw flash with block aperture
 - [x] Draw line
 - [x] Draw clockwise arc
 - [x] Draw counterclockwise arc
