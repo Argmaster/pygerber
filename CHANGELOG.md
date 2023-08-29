@@ -37,7 +37,7 @@ this project adheres to [Calendar Versioning](https://calver.org/).
   README.md.
 
 - Added rendering backend capable of producing 2D rasterized images based on parser
-  instructions. Supported image elements:
+  instructions. Supported drawing elements:
   - Aperture definition with circle
   - Aperture definition with rectangle
   - Aperture definition with obround
