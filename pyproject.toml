@@ -54,7 +54,7 @@ build-backend = "poetry.core.masonry.api"
 # git hooks
 install-hooks = [
     { cmd = "poetry install --sync --no-ansi" },
-    { cmd = "poetry run scripts/install_hooks.py" },
+    { cmd = "poetry run python -m scripts.install_hooks" },
     { cmd = "poetry run pre-commit install --install-hooks --overwrite" },
 ]
 # -------------
