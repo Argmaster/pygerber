@@ -91,8 +91,8 @@ PyGerber has got you covered.
 ### Rasterized render from file
 
 ```py linenums="1" title="render_file.py"
-from pygerber.gerberx3.api.color_scheme import ColorScheme
-from pygerber.gerberx3.api.layers import (
+from pygerber.gerberx3.api import (
+      ColorScheme,
       Rasterized2DLayer,
       Rasterized2DLayerParams,
 )
@@ -137,8 +137,8 @@ will cause undefined behavior, most likely yielding no result or raising excepti
 ### Rasterized render from string
 
 ```py linenums="1" title="render_string.py"
-from pygerber.gerberx3.api.color_scheme import ColorScheme
-from pygerber.gerberx3.api.layers import (
+from pygerber.gerberx3.api import (
+      ColorScheme,
       Rasterized2DLayer,
       Rasterized2DLayerParams,
 )
