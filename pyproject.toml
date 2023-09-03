@@ -70,7 +70,7 @@ run-type-checks = [
     { cmd = "mypy src/pygerber test/ scripts/" }
 ]
 run-build-n-deploy-docs = [
-    { cmd = "mkdocs gh-deploy" }
+    { cmd = "mkdocs gh-deploy --force" }
 ]
 
 [tool.isort]
