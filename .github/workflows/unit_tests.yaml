@@ -42,6 +42,10 @@ jobs:
         os: [ubuntu-latest, windows-latest, macOS-latest]
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -62,3 +66,15 @@ jobs:
 
       - name: Run unit tests
         run: poetry run poe run-unit-tests
+
+      - name: Dump coverage
+        run: poetry run coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
+          flags: unittests
+          files: ./coverage.xml
+          verbose: true
