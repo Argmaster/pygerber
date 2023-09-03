@@ -64,7 +64,7 @@ run-code-quality-checks = [
 ]
 # -------------------------------------------------------------------------------------
 run-unit-tests = [
-    { cmd = "pytest --log-level=DEBUG -s -n auto --cov=pygerber --cov-report=term-missing:skip-covered" },
+    { cmd = "pytest --log-level=DEBUG -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered" },
 ]
 run-type-checks = [
     { cmd = "mypy src/pygerber test/ scripts/" }
