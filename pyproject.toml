@@ -73,7 +73,7 @@ ipykernel = "^6.25.0"
 optional = true
 
 [tool.poetry.group.docs.dependencies]
-mkdocs = "^1.5.1"
+mkdocs = "^1.5.2"
 mkdocs-material = "^9.1.21"
 mkdocstrings = { extras = ["python"], version = "^0.22.0" }
 mkdocs-literate-nav = "^0.6.0"
