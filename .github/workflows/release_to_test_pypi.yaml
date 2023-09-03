@@ -1,0 +1,52 @@
+---
+# https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/
+name: Publish 📦 to Test PyPI
+
+on:
+  push:
+    branches:
+      - dev
+      - release/**
+
+jobs:
+  deploy-to-pypi:
+    if: github.repository_owner == 'Argmaster'
+    name: Test deploy 📦
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.6.0
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: "3.8"
+          architecture: "x64"
+
+      - name: Install Poetry 📜
+        run: pip install poetry==1.5.1
+
+      - name: Install dependencies 🗄️
+        run: poetry install --no-cache --sync
+
+      - name: Bump Version for development 🔨 release
+        run: |
+          poetry version patch &&
+          version=$(poetry version | awk '{ print $2 }') &&
+          poetry version "$version".dev"$(date +%s)"
+
+      - name: Build distribution 📦
+        run: poetry build
+
+      - name: Detect Version of project
+        id: project-version
+        run: |
+          echo "version=$(poetry version | awk '{ print $2 }')" >> $GITHUB_OUTPUT
+
+      - name: Publish distribution 📦 to Test PyPI
+        # Executed always
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository-url: https://test.pypi.org/legacy/

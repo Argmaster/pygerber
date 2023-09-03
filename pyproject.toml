@@ -1,10 +1,47 @@
 [tool.poetry]
 name = "pygerber"
-version = "2.0.0rc2"
+version = "2.0.0rc3"
 description = "Parsing, formatting and rendering toolkit for Gerber X3 file format"
 authors = ["Krzysztof Wisniewski <argmaster.world@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://www.facebook.com/pygerber"
+repository = "https://github.com/Argmaster/pygerber"
+documentation = "https://argmaster.github.io/pygerber/"
+keywords = ["gerber", "pcb", "embedded", "images", "x3"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Manufacturing",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: File Formats",
+    "Topic :: Multimedia",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Multimedia :: Graphics :: Presentation",
+    "Topic :: Multimedia :: Graphics :: Viewers",
+    "Topic :: Printing",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Software Development :: Embedded Systems",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
 
 [tool.poetry.dependencies]
 python = "^3.8,<3.13"
@@ -54,19 +91,18 @@ build-backend = "poetry.core.masonry.api"
 # git hooks
 install-hooks = [
     { cmd = "poetry install --sync --no-ansi" },
-    { cmd = "poetry run scripts/install_hooks.py" },
+    { cmd = "poetry run python -m scripts.install_hooks" },
     { cmd = "poetry run pre-commit install --install-hooks --overwrite" },
 ]
 # -------------
 # hook triggers
-pre-commit = [
-    { cmd = "poetry install --sync --no-ansi" },
-    { cmd = "pre-commit run --all-files -v" },
-]
+run-code-quality-checks = [{ cmd = "pre-commit run --all-files -v" }]
 # -------------------------------------------------------------------------------------
-test = [
-    { cmd = "pytest --log-level=DEBUG -s -n auto --cov=pygerber --cov-report=term-missing:skip-covered" },
+run-unit-tests = [
+    { cmd = "pytest --log-level=DEBUG -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered" },
 ]
+run-type-checks = [{ cmd = "mypy src/pygerber test/ scripts/" }]
+run-build-n-deploy-docs = [{ cmd = "mkdocs gh-deploy --force" }]
 
 [tool.isort]
 profile = "black"
@@ -122,7 +158,6 @@ runtime-evaluated-base-classes = [
 #          https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html          #
 # ---------------------------------------------------------------------------- #
 python_version = "3.8"
-packages = "pygerber"
 # A regular expression that matches file names, directory names and paths which
 # mypy should ignore while recursively discovering files to check. Use forward
 #slashes (/) as directory separators on all platforms.

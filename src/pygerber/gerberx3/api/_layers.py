@@ -15,6 +15,7 @@ from pygerber.backend.rasterized_2d.backend_cls import (
     Rasterized2DBackendOptions,
 )
 from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
+from pygerber.backend.rasterized_2d.result_handle import Rasterized2DResultHandle
 from pygerber.gerberx3.api._errors import (
     MutuallyExclusiveViolationError,
     RenderingResultNotReadyError,
@@ -26,6 +27,7 @@ from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
+    from PIL import Image
     from typing_extensions import Self
 
 
@@ -171,11 +173,14 @@ class Layer:
             gerber_coordinate_origin=self.backend.coordinate_origin,
         )
 
-        self._rendering_result = RenderingResult(
+        self._rendering_result = self._get_rendering_result_cls()(
             result_handle=result_handle,
             properties=properties,
         )
         return self._rendering_result
+
+    def _get_rendering_result_cls(self) -> type[RenderingResult]:
+        return RenderingResult
 
     def get_rendering_result(self) -> RenderingResult:
         """Return result of rendering Gerber file."""
@@ -188,6 +193,24 @@ class Layer:
 
 class LayerProperties:
     """Properties of layer retrieved from Gerber source code."""
+
+    target_bounding_box: BoundingBox
+    """Bounding box of rendering target. May differ from coordinates used in Gerber
+    file as it uses rendering target coordinate space."""
+
+    target_coordinate_origin: Vector2D
+    """Offset of origin of coordinate system used by rendering target. Bottom left
+    corner of coordinate space of rendering target."""
+
+    gerber_bounding_box: BoundingBox
+    """Bounding box of drawing area in Gerber file coordinate space."""
+
+    gerber_coordinate_origin: Vector2D
+    """Origin of coordinate space of Gerber file. Equivalent to bottom left corner of
+    `gerber_bounding_box`.
+
+    Can be useful to determine how to align multiple Gerber files by calculating
+    how their coordinate origins are positioned in relation to each other."""
 
     def __init__(
         self,
@@ -294,3 +317,16 @@ class Rasterized2DLayer(Layer):
                 include_bounding_boxes=self.options.debug_include_bounding_boxes,
             ),
         )
+
+    def _get_rendering_result_cls(self) -> type[RenderingResult]:
+        return Rasterized2DRenderingResult
+
+
+class Rasterized2DRenderingResult(RenderingResult):
+    """Result of rendering of layer."""
+
+    _result_handle: Rasterized2DResultHandle
+
+    def get_image(self) -> Image.Image:
+        """Get rendered image object."""
+        return self._result_handle.get_image()
