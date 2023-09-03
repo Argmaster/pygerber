@@ -59,13 +59,18 @@ install-hooks = [
 ]
 # -------------
 # hook triggers
-pre-commit = [
-    { cmd = "poetry install --sync --no-ansi" },
+run-code-quality-checks = [
     { cmd = "pre-commit run --all-files -v" },
 ]
 # -------------------------------------------------------------------------------------
-test = [
+run-unit-tests = [
     { cmd = "pytest --log-level=DEBUG -s -n auto --cov=pygerber --cov-report=term-missing:skip-covered" },
+]
+run-type-checks = [
+    { cmd = "mypy src/pygerber test/ scripts/" }
+]
+run-build-n-deploy-docs = [
+    { cmd = "mkdocs gh-deploy" }
 ]
 
 [tool.isort]
@@ -122,7 +127,6 @@ runtime-evaluated-base-classes = [
 #          https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html          #
 # ---------------------------------------------------------------------------- #
 python_version = "3.8"
-packages = "pygerber"
 # A regular expression that matches file names, directory names and paths which
 # mypy should ignore while recursively discovering files to check. Use forward
 #slashes (/) as directory separators on all platforms.

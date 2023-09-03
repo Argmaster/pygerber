@@ -1,0 +1,64 @@
+---
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - fix/**
+      - hotfix/**
+      - feature/**
+      - release/**
+      - dependabot/**
+
+  pull_request:
+    branches:
+      - main
+      - dev
+      - fix/**
+      - hotfix/**
+      - feature/**
+      - release/**
+      - dependabot/**
+    types:
+      - opened
+      - reopened
+
+  schedule:
+    - cron: 0 12 * * 6
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.action_path }}-${{ github.ref }}-unit-tests
+  cancel-in-progress: false
+
+jobs:
+  run-unit-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.6.0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.5.1
+
+      - name: Install dependencies
+        run: poetry install --no-cache --sync
+
+      - name: Run unit tests
+        run: poetry run poe run-unit-tests
