@@ -34,10 +34,10 @@ jobs:
         run: |
           poetry version patch &&
           version=$(poetry version | awk '{ print $2 }') &&
-          poetry version $version+$(git log -1 --fromat="%H")
+          poetry version "$version".dev"$(date +%s)"
 
       - name: Build distribution 📦
-        run: poetry run poe build
+        run: poetry build
 
       - name: Detect Version of project
         id: project-version
