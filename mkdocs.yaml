@@ -111,7 +111,7 @@ extra_css:
   - css/mkdocstrings.css
   - css/extra.css
 
-extra_js:
+extra_javascript:
   - js/extra.js
 
 extra:
