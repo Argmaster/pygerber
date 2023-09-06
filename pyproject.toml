@@ -102,7 +102,6 @@ run-unit-tests = [
     { cmd = "pytest --log-level=DEBUG -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered" },
 ]
 run-type-checks = [{ cmd = "mypy src/pygerber test/ scripts/" }]
-run-build-n-deploy-docs = [{ cmd = "mkdocs gh-deploy --force" }]
 
 [tool.isort]
 profile = "black"

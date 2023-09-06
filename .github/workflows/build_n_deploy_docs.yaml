@@ -3,8 +3,8 @@ name: Build & Deploy Docs
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "^v.*$"
 
   workflow_dispatch:
 
@@ -38,5 +38,9 @@ jobs:
       - name: Install dependencies
         run: poetry install --with=docs --no-cache --sync
 
+      - name: Install Mike
+        run: poetry run pip install mike
+
       - name: Run build & deploy documentation
-        run: poetry run poe run-build-n-deploy-docs
+        run: |
+          poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') latest -F mkdocs.yaml
