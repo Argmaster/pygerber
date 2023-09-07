@@ -41,6 +41,11 @@ jobs:
       - name: Install Mike
         run: poetry run pip install mike
 
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email argmaster.world@gmail.com
+
       - name: Run build & deploy documentation
         run: |
           poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') latest -F mkdocs.yaml
