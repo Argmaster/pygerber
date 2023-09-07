@@ -7,6 +7,10 @@ this project adheres to [Calendar Versioning](https://calver.org/).
 
 ## Release 2.1.0
 
+## Release 2.0.1
+
+- Fixed names of Gerber specification files (`.pdf.pdf` extension replaced with `.pdf`)
+
 ## Release 2.0.0
 
 - Added Gerber X3 format tokenizer with support for selective feature support:
