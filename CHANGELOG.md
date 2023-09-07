@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
+## Release 2.1.0
+
 ## Release 2.0.0
 
 - Added Gerber X3 format tokenizer with support for selective feature support:
