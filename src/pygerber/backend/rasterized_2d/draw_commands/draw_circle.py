@@ -29,8 +29,11 @@ class Rasterized2DApertureDrawCircle(DrawCircle):
         image_space_box = box - target.coordinate_origin
         pixel_box = image_space_box.as_pixel_box(
             self.backend.dpi,
+            dx_max=-2,
+            dy_max=-2,
+            dx_min=+1,
+            dy_min=+1,
         )
-
         target.image_draw.ellipse(
             xy=pixel_box,
             fill=self.polarity.get_2d_rasterized_color(),
