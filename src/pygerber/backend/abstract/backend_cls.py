@@ -37,9 +37,15 @@ if TYPE_CHECKING:
 class BackendOptions:
     """Additional configuration which can be passed to backend."""
 
-    def __init__(self, dump_apertures: Optional[Path] = None) -> None:
+    def __init__(
+        self,
+        dump_apertures: Optional[Path] = None,
+        *,
+        draw_region_outlines: bool = False,
+    ) -> None:
         """Initialize options."""
         self.dump_apertures = dump_apertures
+        self.draw_region_outlines = draw_region_outlines
 
 
 class Backend(ABC):

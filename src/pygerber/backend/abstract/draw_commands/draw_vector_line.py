@@ -41,3 +41,9 @@ class DrawVectorLine(DrawCommand):
         """Return bounding box of draw operation."""
         vertex_box = BoundingBox.from_diameter(self.width)
         return (vertex_box + self.start_position) + (vertex_box + self.end_position)
+
+    def __str__(self) -> str:
+        return (
+            f"{self.__class__.__qualname__}({self.polarity}) start: "
+            "{self.start_position} end: {self.end_position}"
+        )
