@@ -65,6 +65,11 @@ class LayerParams(BaseModel):
     """Encoding of code, used when loading from file, decoding `source_code`
     provided as bytes and reading `source_buffer` provided as BytesIO."""
 
+    draw_region_outlines: bool = False
+    """When drawing regions, after filling region, draw also outline of region with
+    apertures used for region outlines. This behavior is not expected by KiCAD by
+    default but may be useful in some scenarios."""
+
     @model_validator(mode="after")
     def _load_source_code(self) -> Self:
         """Load source code.
@@ -315,6 +320,7 @@ class Rasterized2DLayer(Layer):
                 dump_apertures=self.options.debug_dump_apertures,
                 include_debug_padding=self.options.debug_include_extra_padding,
                 include_bounding_boxes=self.options.debug_include_bounding_boxes,
+                draw_region_outlines=self.options.draw_region_outlines,
             ),
         )
 
