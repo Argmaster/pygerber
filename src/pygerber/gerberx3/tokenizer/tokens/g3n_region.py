@@ -56,7 +56,7 @@ class EndRegion(Token):
         if not state.is_region:
             logging.warning("Ending region which was not started.")
 
-        if len(state.region_boundary_points):
+        if len(state.region_boundary_points) == 0:
             logging.warning("Created region with no boundaries.")
 
         draw_command = backend.get_draw_region_cls()(
