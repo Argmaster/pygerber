@@ -20,6 +20,8 @@ class D03Flash(Token):
 
     Creates a flash object with the current aperture. The current point is moved to the
     flash point.
+
+    See section 4.8.4 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     x: Coordinate

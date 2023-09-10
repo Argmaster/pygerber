@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
@@ -15,9 +16,14 @@ class SetSingleQuadrantMode(Token):
     """Wrapper for G74 token.
 
     Sets single quadrant mode - Rarely used, and then typically without effect.
-    Deprecated in 2020. (Spec. 8.1.10).
+    Deprecated in 2020.
 
     In single quadrant mode the arc is not allowed to extend over more than 90°.
+
+    See:
+    -   section 4.8 of The Gerber Layer Format Specification Revision 2020.09 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2020_09.html
+    -   section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    -   section 8.1.10 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     def update_drawing_state(
@@ -26,6 +32,7 @@ class SetSingleQuadrantMode(Token):
         _backend: Backend,
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set drawing polarity."""
+        warn_deprecated_code("G74", "8.1.10")
         return (
             state.model_copy(
                 update={

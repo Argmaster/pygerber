@@ -27,11 +27,6 @@ class UnitMode(Token):
     def from_tokens(cls, **tokens: Any) -> Self:
         """Initialize token object."""
         unit: Unit = Unit(tokens["unit"])
-        if unit == Unit.Inches:
-            logging.warning(
-                "Using metric units is recommended. Imperial units will be deprecated "
-                "in future. (See 4.2.1 in Gerber Layer Format Specification)",
-            )
         return cls(unit=unit)
 
     def update_drawing_state(
@@ -40,6 +35,12 @@ class UnitMode(Token):
         _backend: Backend,
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Update drawing state."""
+        if self.unit == Unit.Inches:
+            logging.warning(
+                "Detected use of imperial units. Using metric units is recommended. "
+                "Imperial units will be deprecated in future. "
+                "(See 4.2.1 in Gerber Layer Format Specification)",
+            )
         if state.draw_units is not None:
             logging.warning(
                 "Overriding coordinate format is illegal. "

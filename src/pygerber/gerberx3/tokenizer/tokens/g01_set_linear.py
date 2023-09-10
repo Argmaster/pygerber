@@ -16,6 +16,9 @@ class SetLinear(Token):
     """Wrapper for G01 mode set token.
 
     Sets linear/circular mode to linear.
+    See:
+    -   section 4.8 of The Gerber Layer Format Specification Revision 2020.09 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2020_09.html
+    -   section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     def update_drawing_state(

@@ -35,7 +35,7 @@ class LoadScaling(Token):
 
     The LS command was introduced in revision 2016.12.
 
-    SPEC: `2023.03` SECTION: `4.9.5`
+    See section 4.9.5 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     scaling: Decimal

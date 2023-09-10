@@ -22,6 +22,8 @@ class D01Draw(Token):
     Outside a region statement D01 creates a draw or arc object with the current
     aperture. Inside it adds a draw/arc segment to the contour under construction. The
     current point is moved to draw/arc end point after the creation of the draw/arc.
+
+    See section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     x: Coordinate
