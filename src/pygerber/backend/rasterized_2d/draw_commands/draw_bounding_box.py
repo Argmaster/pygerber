@@ -27,7 +27,11 @@ class Rasterized2DApertureDrawBoundingBox(DrawBoundingBox):
         image_space_box = box - target.coordinate_origin
         pixel_box = image_space_box.as_pixel_box(self.backend.dpi, dx_max=-1, dy_max=-1)
 
-        # Here we are using the 'rectangle' method instead of 'ellipse'
+        (min_x, min_y, max_x, max_y) = pixel_box
+        if (max_x - min_x <= 0) or (max_y - min_y <= 0):
+            logging.warning("Drawing zero surface bounding box. DPI may be too low.")
+            return
+
         target.image_draw.rectangle(
             xy=pixel_box,
             fill=None,
