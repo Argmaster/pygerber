@@ -34,10 +34,18 @@ class Rasterized2DApertureDrawCircle(DrawCircle):
             dx_min=+1,
             dy_min=+1,
         )
-        target.image_draw.ellipse(
-            xy=pixel_box,
-            fill=self.polarity.get_2d_rasterized_color(),
-            outline=None,
-            width=0,
-        )
-        logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
+        (min_x, min_y, max_x, max_y) = pixel_box
+        if (max_x - min_x <= 0) or (max_y - min_y <= 0):
+            logging.warning(
+                "Drawing zero surface rectangle. DPI may be too low. %s",
+                pixel_box,
+            )
+
+        else:
+            target.image_draw.ellipse(
+                xy=pixel_box,
+                fill=self.polarity.get_2d_rasterized_color(),
+                outline=None,
+                width=0,
+            )
+            logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
