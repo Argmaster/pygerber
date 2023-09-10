@@ -74,6 +74,10 @@ class D01Draw(Token):
         )
 
         if state.draw_mode == DrawMode.Linear:
+            if state.is_region:
+                state.region_boundary_points.append(start_position)
+                state.region_boundary_points.append(end_position)
+
             draw_commands.append(
                 backend.get_draw_vector_line_cls()(
                     backend=backend,
@@ -83,9 +87,6 @@ class D01Draw(Token):
                     width=current_aperture.get_line_width(),
                 ),
             )
-            if state.is_region:
-                state.region_boundary_points.append(start_position)
-                state.region_boundary_points.append(end_position)
 
         elif state.draw_mode in (
             DrawMode.ClockwiseCircular,
@@ -95,6 +96,12 @@ class D01Draw(Token):
             j = state.parse_coordinate(self.j)
 
             center_offset = Vector2D(x=i, y=j)
+
+            if state.is_region:
+                state.region_boundary_points.append(start_position)
+                # TODO(argmaster.world@gmail.com): Add region boundary points for region
+                # https://github.com/Argmaster/pygerber/issues/29
+                state.region_boundary_points.append(end_position)
 
             draw_commands.append(
                 backend.get_draw_arc_cls()(
@@ -110,11 +117,6 @@ class D01Draw(Token):
                     is_multi_quadrant=True,
                 ),
             )
-            if state.is_region:
-                state.region_boundary_points.append(start_position)
-                # TODO(argmaster.world@gmail.com): Add region boundary points for region
-                # https://github.com/Argmaster/pygerber/issues/29
-                state.region_boundary_points.append(end_position)
 
         else:
             raise NotImplementedError(state.draw_mode)
@@ -128,13 +130,23 @@ class D01Draw(Token):
             ),
         )
 
+        if not state.is_region or backend.options.draw_region_outlines:
+            return (
+                state.model_copy(
+                    update={
+                        "current_position": end_position,
+                    },
+                ),
+                draw_commands,
+            )
+
         return (
             state.model_copy(
                 update={
                     "current_position": end_position,
                 },
             ),
-            draw_commands,
+            (),
         )
 
     def __str__(self) -> str:

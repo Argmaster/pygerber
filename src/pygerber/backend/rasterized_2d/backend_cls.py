@@ -84,6 +84,7 @@ class Rasterized2DBackendOptions(BackendOptions):
         *,
         include_debug_padding: bool = False,
         include_bounding_boxes: bool = False,
+        draw_region_outlines: bool = False,
     ) -> None:
         """Initialize options."""
         self.dpi = dpi
@@ -91,7 +92,10 @@ class Rasterized2DBackendOptions(BackendOptions):
         self.color_mode = color_mode
         self.include_debug_padding = include_debug_padding
         self.include_bounding_boxes = include_bounding_boxes
-        super().__init__(dump_apertures=dump_apertures)
+        super().__init__(
+            dump_apertures=dump_apertures,
+            draw_region_outlines=draw_region_outlines,
+        )
 
 
 class Rasterized2DBackend(Backend):
@@ -122,7 +126,7 @@ class Rasterized2DBackend(Backend):
         raw_bbox = self.bounding_box
 
         if self.options.include_debug_padding:
-            bbox = raw_bbox.scale(Decimal(1.25))
+            bbox = raw_bbox + Decimal(1.0)
         else:
             bbox = raw_bbox
 
