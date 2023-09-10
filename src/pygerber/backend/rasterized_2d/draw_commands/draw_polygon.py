@@ -36,12 +36,17 @@ class Rasterized2DApertureDrawPolygon(DrawPolygon):
         )
         rotation = float(-self.rotation + Decimal("-90.0"))
 
-        target.image_draw.regular_polygon(
-            bounding_circle=bounding_circle,
-            n_sides=self.number_of_vertices,
-            rotation=rotation,
-            fill=self.polarity.get_2d_rasterized_color(),
-            outline=None,
-            width=0,
-        )
-        logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
+        try:
+            target.image_draw.regular_polygon(
+                bounding_circle=bounding_circle,
+                n_sides=self.number_of_vertices,
+                rotation=rotation,
+                fill=self.polarity.get_2d_rasterized_color(),
+                outline=None,
+                width=0,
+            )
+            logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
+
+        except ValueError as e:
+            logging.warning("Drawing zero surface polygon. DPI may be too low.")
+            logging.debug(e)

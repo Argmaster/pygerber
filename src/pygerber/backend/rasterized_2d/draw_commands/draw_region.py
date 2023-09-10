@@ -31,9 +31,17 @@ class Rasterized2DDrawRegion(DrawRegion):
             )
             boundary_points.append(pixel_point)
 
-        target.image_draw.polygon(
-            boundary_points,
-            fill=self.polarity.get_2d_rasterized_color(),
-        )
+        try:
+            target.image_draw.polygon(
+                boundary_points,
+                fill=self.polarity.get_2d_rasterized_color(),
+            )
+            logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
 
-        logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
+        except ValueError as e:
+            logging.warning("Drawing zero surface region. DPI may be too low.")
+            logging.debug(e)
+
+        except TypeError as e:
+            logging.warning("Drawing region with no boundary points.")
+            logging.debug(e)
