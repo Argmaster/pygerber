@@ -37,7 +37,7 @@ class Rasterized2DApertureDrawCircle(DrawCircle):
         (min_x, min_y, max_x, max_y) = pixel_box
         if (max_x - min_x <= 0) or (max_y - min_y <= 0):
             logging.warning(
-                "Drawing zero surface rectangle. DPI may be too low. %s",
+                "Drawing zero surface circle. DPI may be too low. %s",
                 pixel_box,
             )
 

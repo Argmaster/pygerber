@@ -12,6 +12,9 @@ if TYPE_CHECKING:
     from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 
 
+NUMBER_OF_VERTICES_IN_TRIANGLE = 3
+
+
 class Rasterized2DDrawRegion(DrawRegion):
     """Draw 2D rasterized vector line."""
 
@@ -31,17 +34,15 @@ class Rasterized2DDrawRegion(DrawRegion):
             )
             boundary_points.append(pixel_point)
 
-        try:
-            target.image_draw.polygon(
-                boundary_points,
-                fill=self.polarity.get_2d_rasterized_color(),
+        if len(boundary_points) < NUMBER_OF_VERTICES_IN_TRIANGLE:
+            logging.warning(
+                "Drawing invalid region, number of vertices < 3 (%s)",
+                len(boundary_points),
             )
-            logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
+            return
 
-        except ValueError as e:
-            logging.warning("Drawing zero surface region. DPI may be too low.")
-            logging.debug(e)
-
-        except TypeError as e:
-            logging.warning("Drawing region with no boundary points.")
-            logging.debug(e)
+        target.image_draw.polygon(
+            boundary_points,
+            fill=self.polarity.get_2d_rasterized_color(),
+        )
+        logging.debug("Adding %s to %s", self.__class__.__qualname__, target)

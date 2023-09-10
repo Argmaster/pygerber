@@ -15,6 +15,9 @@ if TYPE_CHECKING:
     from pygerber.backend.rasterized_2d.backend_cls import Rasterized2DBackend
 
 
+NUMBER_OF_VERTICES_IN_TRIANGLE = 3
+
+
 class Rasterized2DApertureDrawPolygon(DrawPolygon):
     """Description of polygon aperture component."""
 
@@ -36,17 +39,27 @@ class Rasterized2DApertureDrawPolygon(DrawPolygon):
         )
         rotation = float(-self.rotation + Decimal("-90.0"))
 
-        try:
-            target.image_draw.regular_polygon(
-                bounding_circle=bounding_circle,
-                n_sides=self.number_of_vertices,
-                rotation=rotation,
-                fill=self.polarity.get_2d_rasterized_color(),
-                outline=None,
-                width=0,
+        if self.number_of_vertices < NUMBER_OF_VERTICES_IN_TRIANGLE:
+            logging.warning(
+                "Drawing invalid polygon, number of vertices < 3 (%s)",
+                self.number_of_vertices,
             )
-            logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
+            return
 
-        except ValueError as e:
-            logging.warning("Drawing zero surface polygon. DPI may be too low.")
-            logging.debug(e)
+        (_, __, radius) = bounding_circle
+        if radius == 0:
+            logging.warning(
+                "Drawing zero surface polygon. DPI may be too low. %s",
+                bounding_circle,
+            )
+            return
+
+        target.image_draw.regular_polygon(
+            bounding_circle=bounding_circle,
+            n_sides=self.number_of_vertices,
+            rotation=rotation,
+            fill=self.polarity.get_2d_rasterized_color(),
+            outline=None,
+            width=0,
+        )
+        logging.debug("Adding %s to %s", self.__class__.__qualname__, target)
