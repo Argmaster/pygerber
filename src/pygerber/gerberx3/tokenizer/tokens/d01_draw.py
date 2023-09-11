@@ -1,10 +1,11 @@
 """Wrapper for plot operation token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Any, Generator, Iterable, Tuple
 
+from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
-from pygerber.gerberx3.state_enums import DrawMode
+from pygerber.gerberx3.state_enums import DrawMode, Polarity
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
@@ -55,38 +56,52 @@ class D01Draw(Token):
         start_position = state.current_position
 
         draw_commands: list[DrawCommand] = []
-        current_aperture = backend.get_private_aperture_handle(
-            state.get_current_aperture(),
-        )
 
         if state.is_region:
             polarity = state.polarity.to_region_variant()
         else:
             polarity = state.polarity
 
-        draw_commands.append(
-            backend.get_draw_paste_cls()(
-                backend=backend,
-                polarity=polarity,
-                center_position=start_position,
-                other=current_aperture.drawing_target,
-            ),
-        )
-
-        if state.draw_mode == DrawMode.Linear:
-            if state.is_region:
-                state.region_boundary_points.append(start_position)
-                state.region_boundary_points.append(end_position)
-
-            draw_commands.append(
-                backend.get_draw_vector_line_cls()(
-                    backend=backend,
-                    polarity=polarity,
-                    start_position=start_position,
-                    end_position=end_position,
-                    width=current_aperture.get_line_width(),
+        if not state.is_region or backend.options.draw_region_outlines:
+            draw_commands.extend(
+                self._create_draw_commands(
+                    state,
+                    backend,
+                    end_position,
+                    start_position,
+                    polarity,
                 ),
             )
+
+        if state.is_region:
+            self._create_region_points(
+                state,
+                backend,
+                end_position,
+                start_position,
+                polarity,
+            )
+
+        return (
+            state.model_copy(
+                update={
+                    "current_position": end_position,
+                },
+            ),
+            draw_commands,
+        )
+
+    def _create_region_points(  # noqa: PLR0913
+        self,
+        state: State,
+        backend: Backend,
+        end_position: Vector2D,
+        start_position: Vector2D,
+        polarity: Polarity,
+    ) -> None:
+        if state.draw_mode == DrawMode.Linear:
+            state.region_boundary_points.append(start_position)
+            state.region_boundary_points.append(end_position)
 
         elif state.draw_mode in (
             DrawMode.ClockwiseCircular,
@@ -97,14 +112,62 @@ class D01Draw(Token):
 
             center_offset = Vector2D(x=i, y=j)
 
-            if state.is_region:
-                state.region_boundary_points.append(start_position)
-                # TODO(argmaster.world@gmail.com): Add region boundary points for region
-                # https://github.com/Argmaster/pygerber/issues/29
-                state.region_boundary_points.append(end_position)
-
-            draw_commands.append(
+            state.region_boundary_points.extend(
                 backend.get_draw_arc_cls()(
+                    backend=backend,
+                    polarity=polarity,
+                    start_position=start_position,
+                    dx_dy_center=center_offset,
+                    end_position=end_position,
+                    width=Offset.NULL,
+                    is_clockwise=(state.draw_mode == DrawMode.ClockwiseCircular),
+                    # Will require tweaking if support for single quadrant mode
+                    # will be desired.
+                    is_multi_quadrant=True,
+                ).calculate_arc_points(),
+            )
+
+        else:
+            raise NotImplementedError(state.draw_mode)
+
+    def _create_draw_commands(  # noqa: PLR0913
+        self,
+        state: State,
+        backend: Backend,
+        end_position: Vector2D,
+        start_position: Vector2D,
+        polarity: Polarity,
+    ) -> Generator[DrawCommand, None, None]:
+        current_aperture = backend.get_private_aperture_handle(
+            state.get_current_aperture(),
+        )
+        yield backend.get_draw_paste_cls()(
+            backend=backend,
+            polarity=polarity,
+            center_position=start_position,
+            other=current_aperture.drawing_target,
+        )
+
+        if state.draw_mode == DrawMode.Linear:
+            if not state.is_region or backend.options.draw_region_outlines:
+                yield backend.get_draw_vector_line_cls()(
+                    backend=backend,
+                    polarity=polarity,
+                    start_position=start_position,
+                    end_position=end_position,
+                    width=current_aperture.get_line_width(),
+                )
+
+        elif state.draw_mode in (
+            DrawMode.ClockwiseCircular,
+            DrawMode.CounterclockwiseCircular,
+        ):
+            i = state.parse_coordinate(self.i)
+            j = state.parse_coordinate(self.j)
+
+            center_offset = Vector2D(x=i, y=j)
+            if not state.is_region or backend.options.draw_region_outlines:
+                yield backend.get_draw_arc_cls()(
                     backend=backend,
                     polarity=polarity,
                     start_position=start_position,
@@ -115,38 +178,16 @@ class D01Draw(Token):
                     # Will require tweaking if support for single quadrant mode
                     # will be desired.
                     is_multi_quadrant=True,
-                ),
-            )
+                )
 
         else:
             raise NotImplementedError(state.draw_mode)
 
-        draw_commands.append(
-            backend.get_draw_paste_cls()(
-                backend=backend,
-                polarity=polarity,
-                center_position=end_position,
-                other=current_aperture.drawing_target,
-            ),
-        )
-
-        if not state.is_region or backend.options.draw_region_outlines:
-            return (
-                state.model_copy(
-                    update={
-                        "current_position": end_position,
-                    },
-                ),
-                draw_commands,
-            )
-
-        return (
-            state.model_copy(
-                update={
-                    "current_position": end_position,
-                },
-            ),
-            (),
+        yield backend.get_draw_paste_cls()(
+            backend=backend,
+            polarity=polarity,
+            center_position=end_position,
+            other=current_aperture.drawing_target,
         )
 
     def __str__(self) -> str:
