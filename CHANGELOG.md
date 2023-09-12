@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
+## Release 2.0.1
+
+- Fixed names of Gerber specification files (`.pdf.pdf` extension replaced with `.pdf`)
+- Added `draw_region_outlines` option (disabled by default) which controls whether lines
+  which make up a region boundary should be drawn after region is filled. KiCAD seem to
+  assume that those boundaries are not drawn and region outline is 1px instead of
+  thickness of aperture.
+- Changed `Decimal` precision to 60 decimal places.
+- Changed precision of `INCH_TO_MM_MULTIPLIER` (now its 25.4) and
+  `MM_TO_INCH_MULTIPLIER` (dynamically calculated with `Decimal`).
+- Changed circle aperture to make result better match expectations and `KiCAD`
+  reference.
+- Fixed warning message logged every time a valid region was created to show up only
+  when region is not valid.
+- Added warnings for zero surface aperture draws.
+
 ## Release 2.0.0
 
 - Added Gerber X3 format tokenizer with support for selective feature support:

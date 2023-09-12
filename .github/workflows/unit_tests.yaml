@@ -11,6 +11,13 @@ on:
       - feature/**
       - release/**
       - dependabot/**
+      - maintenance/**
+    paths:
+      - src/**
+      - test/**
+      - .github/**
+      - pyproject.toml
+      - poetry.lock
 
   pull_request:
     branches:
@@ -21,6 +28,7 @@ on:
       - feature/**
       - release/**
       - dependabot/**
+      - maintenance/**
     types:
       - opened
       - reopened

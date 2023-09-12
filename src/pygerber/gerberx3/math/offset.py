@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import operator
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from typing import TYPE_CHECKING, Callable, ClassVar, Sequence
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
@@ -12,8 +12,9 @@ from pygerber.gerberx3.state_enums import Unit
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-INCH_TO_MM_MULTIPLIER = Decimal("25.39998628400740663600041656")
-MM_TO_INCH_MULTIPLIER = Decimal("0.0393701")
+getcontext().prec = 60
+INCH_TO_MM_MULTIPLIER = Decimal("25.4")
+MM_TO_INCH_MULTIPLIER = Decimal("1") / INCH_TO_MM_MULTIPLIER
 
 
 class Offset(FrozenGeneralModel):
