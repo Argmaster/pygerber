@@ -32,7 +32,7 @@ jobs:
         run: poetry install --no-cache --sync
 
       - name: Build distribution 📦
-        run: poetry run poe build
+        run: poetry run poetry build
 
       - name: Detect Version of project
         id: project-version

@@ -48,4 +48,4 @@ jobs:
 
       - name: Run build & deploy documentation
         run: |
-          poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') latest -F mkdocs.yaml
+          poetry run mike deploy --push --force --update-aliases $(poetry version | awk '{ print $2 }') latest -F mkdocs.yaml
