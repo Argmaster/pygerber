@@ -26,9 +26,15 @@ class Rasterized2DDrawArc(DrawArc):
         bbox = self.get_bounding_box() - target.coordinate_origin
         pixel_box = bbox.as_pixel_box(self.backend.dpi)
 
-        angle_start, angle_end = self._calculate_angles()
+        angle_start, angle_end = self._calculate_start_end_angles_clockwise(
+            self.arc_space_start_position,
+            self.arc_space_end_position,
+        )
 
         width = self.width.as_pixels(self.backend.dpi)
+        if not self.is_clockwise:
+            # Convert counter clockwise angles to clockwise angles used by Pillow
+            angle_start, angle_end = 360 - angle_start, 360 - angle_end
 
         target.image_draw.arc(
             xy=pixel_box,

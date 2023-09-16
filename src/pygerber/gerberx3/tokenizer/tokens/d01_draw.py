@@ -125,7 +125,7 @@ class D01Draw(Token):
                     is_clockwise=(state.draw_mode == DrawMode.ClockwiseCircular),
                     # Will require tweaking if support for single quadrant mode
                     # will be desired.
-                    is_multi_quadrant=True,
+                    is_multi_quadrant=state.is_multi_quadrant,
                 ).calculate_arc_points(),
             )
 
@@ -179,7 +179,7 @@ class D01Draw(Token):
                     is_clockwise=(state.draw_mode == DrawMode.ClockwiseCircular),
                     # Will require tweaking if support for single quadrant mode
                     # will be desired.
-                    is_multi_quadrant=True,
+                    is_multi_quadrant=state.is_multi_quadrant,
                 )
 
         else:

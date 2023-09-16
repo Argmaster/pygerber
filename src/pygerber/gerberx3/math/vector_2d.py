@@ -5,10 +5,13 @@ from __future__ import annotations
 import math
 import operator
 from decimal import Decimal
-from typing import Callable, ClassVar
+from typing import TYPE_CHECKING, Callable, ClassVar, Sequence
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.offset import Offset
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class Vector2D(FrozenGeneralModel):
@@ -20,6 +23,18 @@ class Vector2D(FrozenGeneralModel):
 
     x: Offset
     y: Offset
+
+    @classmethod
+    def new(
+        cls,
+        x: Decimal | float | str | tuple[int, Sequence[int], int],
+        y: Decimal | float | str | tuple[int, Sequence[int], int],
+    ) -> Self:
+        """Construct new Vector2D object."""
+        return cls(
+            x=Offset.new(x),
+            y=Offset.new(y),
+        )
 
     def as_pixels(self, dpi: int) -> tuple[int, int]:
         """Return size as pixels using given DPI for conversion."""
@@ -68,11 +83,17 @@ class Vector2D(FrozenGeneralModel):
     def __neg__(self) -> Vector2D:
         return Vector2D(x=-self.x, y=-self.y)
 
+    def __pos__(self) -> Vector2D:
+        return Vector2D(x=+self.x, y=+self.y)
+
+    def __abs__(self) -> Vector2D:
+        return Vector2D(x=abs(self.x), y=abs(self.y))
+
     def _i_operator(
         self,
         other: object,
         op: Callable,
-    ) -> Vector2D:
+    ) -> Self:
         if isinstance(other, Vector2D):
             return self.model_copy(
                 update={
@@ -96,17 +117,20 @@ class Vector2D(FrozenGeneralModel):
             )
         return NotImplemented  # type: ignore[unreachable]
 
-    def __iadd__(self, other: object) -> Vector2D:
+    def __iadd__(self, other: object) -> Self:
         return self._i_operator(other, operator.add)
 
-    def __isub__(self, other: object) -> Vector2D:
+    def __isub__(self, other: object) -> Self:
         return self._i_operator(other, operator.sub)
 
-    def __imul__(self, other: object) -> Vector2D:
+    def __imul__(self, other: object) -> Self:
         return self._i_operator(other, operator.mul)
 
-    def __itruediv__(self, other: object) -> Vector2D:
+    def __itruediv__(self, other: object) -> Self:
         return self._i_operator(other, operator.truediv)
+
+    def __pytest_alias__(self) -> str:
+        return f"({float(self.x)},{float(self.y)})"
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}(x={self.x}, y={self.y})"
@@ -121,17 +145,16 @@ class Vector2D(FrozenGeneralModel):
         other_norm = other / other.length()
 
         dot = other_norm.dot(self_norm)
-        determinant = self_norm.determinant(other_norm)
+        determinant = self_norm.det(other_norm)
 
-        theta = math.atan2(float(dot.value), float(determinant.value))
-
-        return math.degrees(theta)
+        theta = math.atan2(float(determinant.value), float(dot.value))
+        return -math.degrees(theta)
 
     def dot(self, other: Vector2D) -> Offset:
         """Calculate dot product of two vectors."""
         return self.x * other.x + self.y * other.y
 
-    def determinant(self, other: Vector2D) -> Offset:
+    def det(self, other: Vector2D) -> Offset:
         """Calculate determinant of matrix constructed from self and other."""
         return self.x * other.y - self.y * other.x
 

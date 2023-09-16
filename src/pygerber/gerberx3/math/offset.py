@@ -114,6 +114,15 @@ class Offset(FrozenGeneralModel):
     def __neg__(self) -> Offset:
         return Offset(value=-self.value)
 
+    def __pos__(self) -> Offset:
+        return Offset(value=+self.value)
+
+    def __abs__(self) -> Offset:
+        return Offset(value=abs(self.value))
+
+    def __float__(self) -> float:
+        return self.value.__float__()
+
     def _i_operator(
         self,
         other: object,

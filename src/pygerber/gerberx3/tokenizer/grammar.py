@@ -40,6 +40,7 @@ from pygerber.gerberx3.tokenizer.tokens.g04_comment import Comment
 from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
 from pygerber.gerberx3.tokenizer.tokens.g70_set_unit_inch import SetUnitInch
 from pygerber.gerberx3.tokenizer.tokens.g71_set_unit_mm import SetUnitMillimeters
+from pygerber.gerberx3.tokenizer.tokens.g74_single_quadrant import SetSingleQuadrantMode
 from pygerber.gerberx3.tokenizer.tokens.g75_multi_quadrant import SetMultiQuadrantMode
 from pygerber.gerberx3.tokenizer.tokens.g90_set_coordinate_absolute import (
     SetAbsoluteNotation,
@@ -489,7 +490,7 @@ G70 = SetUnitInch.wrap(Literal("G70") + EOEX)
 G71 = SetUnitMillimeters.wrap(Literal("G71") + EOEX)
 """DEPRECATED: Set the `Unit` to millimeter."""
 
-G74 = SetMultiQuadrantMode.wrap(Literal("G74") + EOEX)
+G74 = SetSingleQuadrantMode.wrap(Literal("G74") + EOEX)
 """DEPRECATED: Set's single quadrant mode."""
 
 G75 = SetMultiQuadrantMode.wrap(Literal("G75") + EOEX)
