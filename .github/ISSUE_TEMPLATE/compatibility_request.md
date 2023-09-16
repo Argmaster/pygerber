@@ -1,14 +1,14 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: Compatibility request
+about: Create request for compatibility with some other tool.
 title: ""
-labels: "bug"
+labels: ["compatibility", "question"]
 assignees: ""
 ---
 
-**Describe the bug**
+**Describe compatibility issue**
 
-A clear and concise description of what the bug is.
+A clear and concise description of what is not working the way expected.
 
 **To Reproduce**
 
