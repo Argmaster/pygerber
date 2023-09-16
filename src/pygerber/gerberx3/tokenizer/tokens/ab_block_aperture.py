@@ -17,6 +17,8 @@ class BlockApertureBegin(Token):
     """Wrapper for AB begin token.
 
     Opens a block aperture statement and assigns its aperture number.
+
+    See section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     identifier: ApertureID

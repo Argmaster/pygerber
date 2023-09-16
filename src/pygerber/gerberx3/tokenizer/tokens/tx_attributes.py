@@ -23,6 +23,8 @@ class FileAttribute(AttributeToken):
     The semantics of a file attribute specifies where it must be defined, typically in
     the header of the file. File attributes are immutable. They cannot be redefined or
     deleted.
+
+    See section 5.2 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     name: str
@@ -53,6 +55,8 @@ class ApertureAttribute(AttributeToken):
     about graphical objects via their apertures is elegant, compact and efficient. As
     region objects are created without intermediary aperture, aperture objects can be
     assigned to regions directly.
+
+    See section 5.3 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     name: str
@@ -81,6 +85,8 @@ class ObjectAttribute(AttributeToken):
     dictionary are attached to it. As attribute commands are not allowed inside a region
     statement, all regions created by that statement have the same object attributes.
     Once attached to an object they cannot be chan
+
+    See section 5.4 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     name: str
@@ -106,6 +112,8 @@ class DeleteAttribute(AttributeToken):
 
     The TD command deletes an aperture attribute or object attribute from the attributes
     dictionary. (File attributes are immutable and are not deleted.)
+
+    See section 5.5 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     name: Optional[str]

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class SetMultiQuadrantMode(Token):
-    """Wrapper for G74 token.
+    """Wrapper for G75 token.
 
     In multi quadrant mode the arc is allowed to extend over more than 90°.
     To avoid ambiguity between 0° and 360° arcs the following relation must hold:
@@ -27,6 +27,11 @@ class SetMultiQuadrantMode(Token):
     angleIf the start point of the arc is equal to the end point, the arc has length
     zero, i.e. it covers 0°. A separate operation is required for each quadrant. A
     minimum of four operations is required for a full circle.
+
+    See:
+    -   section 4.8 of The Gerber Layer Format Specification Revision 2020.09 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2020_09.html
+    -   section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    -   section 8.1.10 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     def update_drawing_state(

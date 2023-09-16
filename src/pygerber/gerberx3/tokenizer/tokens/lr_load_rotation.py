@@ -35,7 +35,7 @@ class LoadRotation(Token):
 
     The LR command was introduced in revision 2016.12.
 
-    SPEC: `2023.03` SECTION: `4.9.4`
+    See section 4.9.4 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     rotation: Decimal
