@@ -1201,13 +1201,13 @@ mkdocs = ">=1.0.3"
 
 [[package]]
 name = "mkdocs-macros-plugin"
-version = "1.0.2"
+version = "1.0.4"
 description = "Unleash the power of MkDocs with macros and variables"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs-macros-plugin-1.0.2.tar.gz", hash = "sha256:70687faff5c6c3a747a401b9c95954ac11421ce4194250eece33316174c3106a"},
-    {file = "mkdocs_macros_plugin-1.0.2-py3-none-any.whl", hash = "sha256:3894e98b673cdd032d10f99e7d379e3ab699070eb49bac2acfcd86ab961feb6b"},
+    {file = "mkdocs-macros-plugin-1.0.4.tar.gz", hash = "sha256:fc601f142b89cf98743b6b3608d5f93f24daf69b88cfa2320d503c83723c3c6d"},
+    {file = "mkdocs_macros_plugin-1.0.4-py3-none-any.whl", hash = "sha256:c8169443d17212e32df5ad68b562d901acc936d6e87f6b41139dcf13d6659890"},
 ]
 
 [package.dependencies]
