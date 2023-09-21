@@ -51,6 +51,8 @@ pydantic = "^2.3"
 tzlocal = "^5.0.1"
 pillow = "^10.0.0"
 numpy = "^1.24.4"
+pygls = { version = "^1.0.2", optional = true }
+lsprotocol = { version = "^2023.0.0a3", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.4.1"
@@ -84,12 +86,18 @@ pygments = "^2.15.1"
 pymdown-extensions = "^10.3"
 mike = "^1.1.2"
 
+[tool.poetry.extras]
+language_server = ["pygls", "lsprotocol"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 pygerber = "pygerber.__main__:main"
+pygerber_language_server = { reference = "pygerber.gerberx3.language_server.__main__:main", extras = [
+    "language_server",
+], type = "console" }
 
 [tool.poe.tasks]
 # -------------------------------------------------------------------------------------
