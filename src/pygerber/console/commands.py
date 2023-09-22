@@ -95,3 +95,13 @@ def raster_2d(
             colors=get_color_scheme_from_style(style, custom),
         ),
     ).render().save(output, format=format_)
+
+
+@main.command("is-language-server-available")
+def _is_language_server_available() -> None:
+    from pygerber.gerberx3.language_server import IS_LANGUAGE_SERVER_FEATURE_AVAILABLE
+
+    if IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:
+        click.echo("Language server is available.")
+    else:
+        click.echo("Language server is not available.")
