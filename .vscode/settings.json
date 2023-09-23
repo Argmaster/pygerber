@@ -41,9 +41,10 @@
         "superfences",
         "tasklist",
         "Ucamco's",
+        "ungroup",
         "Xino"
     ],
-    "python.testing.pytestArgs": ["--log-level=DEBUG", "-s", "-n", "auto"],
+    "python.testing.pytestArgs": ["--log-level=DEBUG", "-s"],
     "ruff.enable": true,
     "ruff.fixAll": true,
     "python.analysis.importFormat": "absolute",

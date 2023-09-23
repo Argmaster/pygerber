@@ -26,5 +26,10 @@ class M00ProgramStop(Token):
         """Exit drawing process."""
         raise ExitParsingProcessInterrupt
 
-    def __str__(self) -> str:
-        return "M00*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}M00"

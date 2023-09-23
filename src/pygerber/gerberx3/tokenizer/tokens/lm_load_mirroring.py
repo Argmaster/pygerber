@@ -1,12 +1,13 @@
 """Wrapper for load mirroring token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import Mirroring
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
@@ -22,13 +23,23 @@ class LoadMirroring(Token):
     See section 4.9.3 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
-    mirroring: Mirroring
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        mirroring: Mirroring,
+    ) -> None:
+        super().__init__(string, location)
+        self.mirroring = mirroring
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         mirroring = Mirroring(tokens["mirroring"])
-        return cls(mirroring=mirroring)
+        return cls(string=string, location=location, mirroring=mirroring)
 
     def update_drawing_state(
         self,
@@ -45,5 +56,10 @@ class LoadMirroring(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return f"LM{self.mirroring.value}*"
+    def get_gerber_code(
+        self,
+        indent: str = "",  # noqa: ARG002
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"LM{self.mirroring.value}"

@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
@@ -25,11 +23,6 @@ class SetAbsoluteNotation(Token):
 
     See section 8.1 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
-
-    @classmethod
-    def from_tokens(cls, **_tokens: Any) -> Self:
-        """Initialize token object."""
-        return cls()
 
     def update_drawing_state(
         self,
@@ -49,5 +42,10 @@ class SetAbsoluteNotation(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return "G90*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}G90*"

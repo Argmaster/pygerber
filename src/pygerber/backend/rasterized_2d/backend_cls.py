@@ -75,7 +75,7 @@ class ColorMode(Enum):
 class Rasterized2DBackendOptions(BackendOptions):
     """Additional configuration which can be passed to backend."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         dpi: int = 300,
         color_scheme: ColorScheme = ColorScheme.DEFAULT_GRAYSCALE,

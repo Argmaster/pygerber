@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, List
 
-from pygerber.gerberx3.tokenizer.grammar import EXPRESSIONS, GRAMMAR
+from pygerber.gerberx3.tokenizer.grammar import GerberGrammarBuilder
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 from pygerber.sequence_tools import flatten
 
@@ -26,20 +26,29 @@ class Tokenizer:
         logging.debug(
             "Created %s GerberX3 tokenizer.",
         )
+        self.grammar = GerberGrammarBuilder().build()
 
     def tokenize(self, source: str) -> TokenStack:
         """Convert source code into token stack.
 
         Supports only full, valid GerberX3 files.
         """
-        return self._tokenize_grammar(source, GRAMMAR, parse_all=False)
+        return self._tokenize_grammar(
+            source,
+            self.grammar.strict_grammar,
+            parse_all=False,
+        )
 
     def tokenize_expressions(self, source: str) -> TokenStack:
         """Convert source code into token stack.
 
         Supports arbitrary sequences of valid GerberX3 expressions.
         """
-        return self._tokenize_grammar(source, EXPRESSIONS, parse_all=True)
+        return self._tokenize_grammar(
+            source,
+            self.grammar.expression_grammar,
+            parse_all=True,
+        )
 
     def _tokenize_grammar(
         self,

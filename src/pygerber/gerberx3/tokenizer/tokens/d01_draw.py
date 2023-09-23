@@ -1,7 +1,7 @@
 """Wrapper for plot operation token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generator, Iterable, Tuple
+from typing import TYPE_CHECKING, Generator, Iterable, Tuple
 
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
@@ -10,6 +10,7 @@ from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, Coordinate
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
@@ -27,23 +28,56 @@ class D01Draw(Token):
     See section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
-    x: Coordinate
-    y: Coordinate
-    i: Coordinate
-    j: Coordinate
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        x: Coordinate,
+        y: Coordinate,
+        i: Coordinate,
+        j: Coordinate,
+    ) -> None:
+        super().__init__(string, location)
+        self.x = x
+        self.y = y
+        self.i = i
+        self.j = j
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         x = tokens.get("x")
-        x = Coordinate.new(coordinate_type=CoordinateType.X, offset=x)
+        x = Coordinate.new(
+            coordinate_type=CoordinateType.X,
+            offset=str(x) if x is not None else None,
+        )
         y = tokens.get("y")
-        y = Coordinate.new(coordinate_type=CoordinateType.Y, offset=y)
+        y = Coordinate.new(
+            coordinate_type=CoordinateType.Y,
+            offset=str(y) if y is not None else None,
+        )
         i = tokens.get("i")
-        i = Coordinate.new(coordinate_type=CoordinateType.I, offset=i)
+        i = Coordinate.new(
+            coordinate_type=CoordinateType.I,
+            offset=str(i) if i is not None else None,
+        )
         j = tokens.get("j")
-        j = Coordinate.new(coordinate_type=CoordinateType.J, offset=j)
-        return cls(x=x, y=y, i=i, j=j)
+        j = Coordinate.new(
+            coordinate_type=CoordinateType.J,
+            offset=str(j) if j is not None else None,
+        )
+
+        return cls(
+            string=string,
+            location=location,
+            x=x,
+            y=y,
+            i=i,
+            j=j,
+        )
 
     def update_drawing_state(
         self,
@@ -93,7 +127,7 @@ class D01Draw(Token):
             draw_commands,
         )
 
-    def _create_region_points(  # noqa: PLR0913
+    def _create_region_points(
         self,
         state: State,
         backend: Backend,
@@ -132,7 +166,7 @@ class D01Draw(Token):
         else:
             raise NotImplementedError(state.draw_mode)
 
-    def _create_draw_commands(  # noqa: PLR0913
+    def _create_draw_commands(
         self,
         state: State,
         backend: Backend,
@@ -192,5 +226,17 @@ class D01Draw(Token):
             other=current_aperture.drawing_target,
         )
 
-    def __str__(self) -> str:
-        return f"{self.x}{self.y}{self.i}{self.j}D01*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return (
+            f"{indent}"
+            f"{self.x.get_gerber_code()}"
+            f"{self.y.get_gerber_code()}"
+            f"{self.i.get_gerber_code()}"
+            f"{self.j.get_gerber_code()}"
+            "D01"
+        )

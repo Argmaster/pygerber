@@ -23,7 +23,7 @@ class DrawVectorLine(DrawCommand):
     end_position: Vector2D
     width: Offset
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         backend: Backend,
         polarity: Polarity,

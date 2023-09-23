@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
 from pygerber.gerberx3.parser.state import State
@@ -12,24 +12,40 @@ from pygerber.gerberx3.tokenizer.tokens.macro.numeric_expression import (
     NumericExpression,
 )
 from pygerber.gerberx3.tokenizer.tokens.macro.variable_name import MacroVariableName
-from pygerber.sequence_tools import unwrap
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
 
 class MacroVariableDefinition(Expression):
     """Wrapper for macro variable definition."""
 
-    variable: MacroVariableName
-    value: NumericExpression
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        variable: MacroVariableName,
+        value: NumericExpression,
+    ) -> None:
+        super().__init__(string, location)
+        self.variable = variable
+        self.value = value
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
-        variable = unwrap(tokens["macro_variable_name"])
-        value = unwrap(tokens["value"])
-        return cls(variable=variable, value=value)
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
+        variable = MacroVariableName.ensure_type(tokens["macro_variable_name"][0])
+        value = NumericExpression.ensure_type(tokens["value"][0])
+        return cls(
+            string=string,
+            location=location,
+            variable=variable,
+            value=value,
+        )
 
     def evaluate(
         self,
@@ -44,5 +60,10 @@ class MacroVariableDefinition(Expression):
 
         return super().evaluate(macro_context, state, handle)
 
-    def __str__(self) -> str:
-        return f"{self.variable}={self.value}*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}{self.variable}={self.value}*"

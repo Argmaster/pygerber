@@ -37,5 +37,10 @@ class SetCounterclockwiseCircular(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return "G03*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}G03*"

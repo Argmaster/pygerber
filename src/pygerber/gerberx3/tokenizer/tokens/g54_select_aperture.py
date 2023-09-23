@@ -30,5 +30,10 @@ class G54SelectAperture(DNNSelectAperture):
         warn_deprecated_code("G54", "8.1")
         return super().update_drawing_state(state, _backend)
 
-    def __str__(self) -> str:
-        return f"G54{self.aperture_id}*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}G54{self.aperture_id}*"

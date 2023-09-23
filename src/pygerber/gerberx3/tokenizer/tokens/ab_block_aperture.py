@@ -1,7 +1,7 @@
 """Wrapper for aperture select token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
@@ -10,6 +10,7 @@ from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
 
@@ -21,13 +22,17 @@ class BlockApertureBegin(Token):
     See section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
-    identifier: ApertureID
+    def __init__(self, string: str, location: int, identifier: ApertureID) -> None:
+        super().__init__(string, location)
+        self.identifier = identifier
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
-        identifier = ApertureID(tokens["aperture_identifier"])
-        return cls(identifier=identifier)
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
+        return cls(string, location, ApertureID(tokens["aperture_identifier"]))
 
     def update_drawing_state(
         self,
@@ -53,8 +58,13 @@ class BlockApertureBegin(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return f"AB{self.identifier}*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}AB{self.identifier.get_gerber_code()}*"
 
 
 class BlockApertureEnd(Token):
@@ -63,10 +73,10 @@ class BlockApertureEnd(Token):
     Ends block aperture statement.
     """
 
-    @classmethod
-    def from_tokens(cls, **_tokens: Any) -> Self:
-        """Initialize token object."""
-        return cls()
-
-    def __str__(self) -> str:
-        return "AB*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}AB*"

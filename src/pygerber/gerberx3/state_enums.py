@@ -1,17 +1,10 @@
 """All state-defining enumerations."""
 from __future__ import annotations
 
-from enum import Enum
+from pygerber.gerberx3.tokenizer.helpers.gerber_code_enum import GerberCodeEnum
 
 
-class EnumFormatValue(Enum):
-    """Enum subclass which when stringified shows its value."""
-
-    def __str__(self) -> str:
-        return str(self.value)
-
-
-class DrawMode(EnumFormatValue):
+class DrawMode(GerberCodeEnum):
     """Drawing mode."""
 
     Linear = "G01"
@@ -40,7 +33,7 @@ class DrawMode(EnumFormatValue):
     circular mode."""
 
 
-class Polarity(EnumFormatValue):
+class Polarity(GerberCodeEnum):
     """Aperture polarity."""
 
     Clear = "C"
@@ -91,7 +84,7 @@ _2d_rasterized_color_map = {
 }
 
 
-class Mirroring(EnumFormatValue):
+class Mirroring(GerberCodeEnum):
     """Aperture mirroring."""
 
     NoMirroring = "N"
@@ -100,14 +93,14 @@ class Mirroring(EnumFormatValue):
     Y = "Y"
 
 
-class Unit(EnumFormatValue):
+class Unit(GerberCodeEnum):
     """Aperture unit."""
 
     Millimeters = "MM"
     Inches = "IN"
 
 
-class ImagePolarityEnum(EnumFormatValue):
+class ImagePolarityEnum(GerberCodeEnum):
     """Image polarity.
 
     ### Image Polarity (IP)

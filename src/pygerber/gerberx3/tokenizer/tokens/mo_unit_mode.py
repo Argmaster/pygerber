@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import Unit
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
@@ -21,13 +22,18 @@ class UnitMode(Token):
     Sets the unit to mm or inch.
     """
 
-    unit: Unit
+    def __init__(self, string: str, location: int, unit: Unit) -> None:
+        super().__init__(string, location)
+        self.unit = unit
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         unit: Unit = Unit(tokens["unit"])
-        return cls(unit=unit)
+        return cls(string=string, location=location, unit=unit)
 
     def update_drawing_state(
         self,
@@ -55,5 +61,10 @@ class UnitMode(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return f"%MO{self.unit.value}*%"
+    def get_gerber_code(
+        self,
+        indent: str = "",  # noqa: ARG002
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"MO{self.unit.value}"

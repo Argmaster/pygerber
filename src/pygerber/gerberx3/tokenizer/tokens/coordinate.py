@@ -5,12 +5,13 @@ from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.tokenizer.gerber_code import GerberCode
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class Coordinate(FrozenGeneralModel):
+class Coordinate(GerberCode, FrozenGeneralModel):
     """Coordinate wrapper class."""
 
     coordinate_type: CoordinateType
@@ -34,10 +35,13 @@ class Coordinate(FrozenGeneralModel):
 
         return cls(coordinate_type=coordinate_type, sign=sign, offset=offset)
 
-    def __str__(self) -> str:
-        if self.coordinate_type.is_missing():
-            return ""
-        return f"{self.coordinate_type}{self.sign}{self.offset}"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}{self.coordinate_type}{self.sign}{self.offset}"
 
 
 class CoordinateType(Enum):

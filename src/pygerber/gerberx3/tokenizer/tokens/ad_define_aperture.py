@@ -18,7 +18,7 @@ a pad. This is just confusing. If there is nothing, put nothing.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Tuple
+from typing import TYPE_CHECKING, Iterable, List, Optional, Tuple
 
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
@@ -44,39 +44,6 @@ class DefineAperture(Token):
     See section 4.3 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
-    @classmethod
-    def new(
-        cls,
-        _string: str,
-        _location: int,
-        tokens: ParseResults,
-    ) -> DefineAperture:
-        """Create instance of this class.
-
-        Created to be used as callback in `ParserElement.set_parse_action()`.
-        """
-        aperture_type = tokens.pop("aperture_type")
-        if not isinstance(aperture_type, str):
-            msg = "Expected aperture type to be string."
-            raise TypeError(msg)
-
-        if aperture_type == "C":
-            return DefineCircle.from_tokens(**tokens.as_dict())
-
-        if aperture_type == "R":
-            return DefineRectangle.from_tokens(**tokens.as_dict())
-
-        if aperture_type == "O":
-            return DefineObround.from_tokens(**tokens.as_dict())
-
-        if aperture_type == "P":
-            return DefinePolygon.from_tokens(**tokens.as_dict())
-
-        return DefineMacro.from_tokens(aperture_type=aperture_type, **tokens.as_dict())
-
-    def __str__(self) -> str:
-        return "<ADDefineAperture-INVALID>"
-
 
 class DefineCircle(DefineAperture):
     """Wrapper for aperture definition token.
@@ -84,21 +51,35 @@ class DefineCircle(DefineAperture):
     Defines a circle.
     """
 
-    aperture_id: ApertureID
-    diameter: Decimal
-    hole_diameter: Optional[Decimal]
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        aperture_id: ApertureID,
+        diameter: Decimal,
+        hole_diameter: Optional[Decimal],
+    ) -> None:
+        super().__init__(string, location)
+        self.aperture_id = aperture_id
+        self.diameter = diameter
+        self.hole_diameter = hole_diameter
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         aperture_id = ApertureID(tokens["aperture_identifier"])
-        diameter: Decimal = Decimal(tokens["diameter"])
+        diameter: Decimal = Decimal(str(tokens["diameter"]))
         hole_diameter: Optional[Decimal] = (
-            Decimal(tokens["hole_diameter"])
+            Decimal(str(tokens["hole_diameter"]))
             if tokens.get("hole_diameter") is not None
             else None
         )
         return cls(
+            string=string,
+            location=location,
             aperture_id=aperture_id,
             diameter=diameter,
             hole_diameter=hole_diameter,
@@ -143,11 +124,19 @@ class DefineCircle(DefineAperture):
             (),
         )
 
-    def __str__(self) -> str:
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
-        return f"%AD{self.aperture_id}C,{self.diameter}{suffix}*%"
+        return (
+            f"{indent}%AD{self.aperture_id.get_gerber_code()}C,"
+            f"{self.diameter}{suffix}*%"
+        )
 
 
 class DefineRectangle(DefineAperture):
@@ -156,23 +145,38 @@ class DefineRectangle(DefineAperture):
     Defines a rectangle
     """
 
-    aperture_id: ApertureID
-    x_size: Decimal
-    y_size: Decimal
-    hole_diameter: Optional[Decimal]
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        aperture_id: ApertureID,
+        x_size: Decimal,
+        y_size: Decimal,
+        hole_diameter: Optional[Decimal],
+    ) -> None:
+        super().__init__(string, location)
+        self.aperture_id = aperture_id
+        self.x_size = x_size
+        self.y_size = y_size
+        self.hole_diameter = hole_diameter
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         aperture_id = ApertureID(tokens["aperture_identifier"])
-        x_size: Decimal = Decimal(tokens["x_size"])
-        y_size: Decimal = Decimal(tokens["y_size"])
+        x_size: Decimal = Decimal(str(tokens["x_size"]))
+        y_size: Decimal = Decimal(str(tokens["y_size"]))
         hole_diameter: Optional[Decimal] = (
-            Decimal(tokens["hole_diameter"])
+            Decimal(str(tokens["hole_diameter"]))
             if tokens.get("hole_diameter") is not None
             else None
         )
         return cls(
+            string=string,
+            location=location,
             aperture_id=aperture_id,
             x_size=x_size,
             y_size=y_size,
@@ -219,36 +223,59 @@ class DefineRectangle(DefineAperture):
             (),
         )
 
-    def __str__(self) -> str:
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
-        return f"%AD{self.aperture_id}R,{self.x_size}X{self.y_size}{suffix}*%"
+        return (
+            f"{indent}%AD{self.aperture_id.get_gerber_code()}R,"
+            f"{self.x_size}X{self.y_size}{suffix}*%"
+        )
 
 
 class DefineObround(DefineAperture):
     """Wrapper for aperture definition token.
 
-    Defines a obround.
+    Defines an obround.
     """
 
-    aperture_id: ApertureID
-    x_size: Decimal
-    y_size: Decimal
-    hole_diameter: Optional[Decimal]
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        aperture_id: ApertureID,
+        x_size: Decimal,
+        y_size: Decimal,
+        hole_diameter: Optional[Decimal],
+    ) -> None:
+        super().__init__(string, location)
+        self.aperture_id = aperture_id
+        self.x_size = x_size
+        self.y_size = y_size
+        self.hole_diameter = hole_diameter
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         aperture_id = ApertureID(tokens["aperture_identifier"])
-        x_size: Decimal = Decimal(tokens["x_size"])
-        y_size: Decimal = Decimal(tokens["y_size"])
+        x_size: Decimal = Decimal(str(tokens["x_size"]))
+        y_size: Decimal = Decimal(str(tokens["y_size"]))
         hole_diameter: Optional[Decimal] = (
-            Decimal(tokens["hole_diameter"])
+            Decimal(str(tokens["hole_diameter"]))
             if tokens.get("hole_diameter") is not None
             else None
         )
         return cls(
+            string=string,
+            location=location,
             aperture_id=aperture_id,
             x_size=x_size,
             y_size=y_size,
@@ -335,11 +362,19 @@ class DefineObround(DefineAperture):
             (),
         )
 
-    def __str__(self) -> str:
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
-        return f"%AD{self.aperture_id}O,{self.x_size}X{self.y_size}{suffix}*%"
+        return (
+            f"{indent}%AD{self.aperture_id.get_gerber_code()}O,"
+            f"{self.x_size}X{self.y_size}{suffix}*%"
+        )
 
 
 class DefinePolygon(DefineAperture):
@@ -348,27 +383,45 @@ class DefinePolygon(DefineAperture):
     Defines a polygon.
     """
 
-    aperture_id: ApertureID
-    outer_diameter: Decimal
-    number_of_vertices: int
-    rotation: Optional[Decimal]
-    hole_diameter: Optional[Decimal]
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        aperture_id: ApertureID,
+        outer_diameter: Decimal,
+        number_of_vertices: int,
+        rotation: Optional[Decimal],
+        hole_diameter: Optional[Decimal],
+    ) -> None:
+        super().__init__(string, location)
+        self.aperture_id = aperture_id
+        self.outer_diameter = outer_diameter
+        self.number_of_vertices = number_of_vertices
+        self.rotation = rotation
+        self.hole_diameter = hole_diameter
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         aperture_id = ApertureID(tokens["aperture_identifier"])
-        outer_diameter: Decimal = Decimal(tokens["outer_diameter"])
-        number_of_vertices: int = int(tokens["number_of_vertices"])
+        outer_diameter: Decimal = Decimal(str(tokens["outer_diameter"]))
+        number_of_vertices: int = int(str(tokens["number_of_vertices"]))
         rotation: Optional[Decimal] = (
-            Decimal(tokens["rotation"]) if tokens.get("rotation") is not None else None
+            Decimal(str(tokens["rotation"]))
+            if tokens.get("rotation") is not None
+            else None
         )
         hole_diameter: Optional[Decimal] = (
-            Decimal(tokens["hole_diameter"])
+            Decimal(str(tokens["hole_diameter"]))
             if tokens.get("hole_diameter") is not None
             else None
         )
         return cls(
+            string=string,
+            location=location,
             aperture_id=aperture_id,
             outer_diameter=outer_diameter,
             number_of_vertices=number_of_vertices,
@@ -417,12 +470,17 @@ class DefinePolygon(DefineAperture):
             (),
         )
 
-    def __str__(self) -> str:
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
         return (
-            f"%AD{self.aperture_id}P,{self.outer_diameter}"
+            f"{indent}%AD{self.aperture_id.get_gerber_code()}P,{self.outer_diameter}"
             f"X{self.number_of_vertices}X{self.rotation}{suffix}*%"
         )
 
@@ -433,17 +491,34 @@ class DefineMacro(DefineAperture):
     Defines a macro based aperture.
     """
 
-    aperture_type: str
-    aperture_id: ApertureID
-    am_param: List[str]
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        aperture_type: str,
+        aperture_id: ApertureID,
+        am_param: List[str],
+    ) -> None:
+        super().__init__(string, location)
+        self.aperture_type = aperture_type
+        self.aperture_id = aperture_id
+        self.am_param = am_param
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
-        aperture_type: str = tokens["aperture_type"]
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
+        aperture_type: str = str(tokens["aperture_type"])
         aperture_id = ApertureID(tokens["aperture_identifier"])
-        am_param: list[str] = tokens.get("am_param", [])
+
+        raw_am_param = e if (e := tokens.get("am_param")) is not None else []
+        am_param: List[str] = [str(p) for p in raw_am_param]
+
         return cls(
+            string=string,
+            location=location,
             aperture_type=aperture_type,
             aperture_id=aperture_id,
             am_param=am_param,
@@ -478,5 +553,13 @@ class DefineMacro(DefineAperture):
             (),
         )
 
-    def __str__(self) -> str:
-        return f"%AD{self.aperture_id}{self.aperture_type},{'X'.join(self.am_param)}*%"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return (
+            f"{indent}%AD{self.aperture_id.get_gerber_code()}{self.aperture_type}"
+            f",{'X'.join(self.am_param)}*%"
+        )

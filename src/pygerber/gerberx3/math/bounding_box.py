@@ -71,7 +71,7 @@ class BoundingBox(FrozenGeneralModel):
         """Return Vector2D of min_x and min_y."""
         return Vector2D(x=self.min_x, y=self.min_y)
 
-    def as_pixel_box(  # noqa: PLR0913
+    def as_pixel_box(
         self,
         dpi: int,
         *,

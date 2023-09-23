@@ -5,8 +5,7 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
-from enum import Enum
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.parser.errors import (
@@ -15,6 +14,8 @@ from pygerber.gerberx3.parser.errors import (
     UnsupportedCoordinateTypeError,
     ZeroOmissionNotSupportedError,
 )
+from pygerber.gerberx3.tokenizer.gerber_code import GerberCode
+from pygerber.gerberx3.tokenizer.helpers.gerber_code_enum import GerberCodeEnum
 from pygerber.gerberx3.tokenizer.tokens.coordinate import (
     Coordinate,
     CoordinateSign,
@@ -23,6 +24,7 @@ from pygerber.gerberx3.tokenizer.tokens.coordinate import (
 from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
@@ -41,25 +43,40 @@ class CoordinateFormat(Token):
     -   section 4.2.2 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
-    zeros_mode: TrailingZerosMode
-    coordinate_mode: CoordinateMode
-    x_format: AxisFormat
-    y_format: AxisFormat
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        zeros_mode: TrailingZerosMode,
+        coordinate_mode: CoordinateMode,
+        x_format: AxisFormat,
+        y_format: AxisFormat,
+    ) -> None:
+        super().__init__(string, location)
+        self.zeros_mode = zeros_mode
+        self.coordinate_mode = coordinate_mode
+        self.x_format = x_format
+        self.y_format = y_format
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         zeros_mode = TrailingZerosMode(tokens["zeros_mode"])
         coordinate_mode = CoordinateMode(tokens["coordinate_mode"])
         x_format = AxisFormat(
-            integer=int(tokens["x_format"][0]),
-            decimal=int(tokens["x_format"][1]),
+            integer=int(tokens["x_format"][0]),  # type: ignore[pylance]
+            decimal=int(tokens["x_format"][1]),  # type: ignore[pylance]
         )
         y_format = AxisFormat(
-            integer=int(tokens["y_format"][0]),
-            decimal=int(tokens["y_format"][1]),
+            integer=int(tokens["y_format"][0]),  # type: ignore[pylance]
+            decimal=int(tokens["y_format"][1]),  # type: ignore[pylance]
         )
         return cls(
+            string=string,
+            location=location,
             zeros_mode=zeros_mode,
             coordinate_mode=coordinate_mode,
             x_format=x_format,
@@ -89,14 +106,22 @@ class CoordinateFormat(Token):
             (),
         )
 
-    def __str__(self) -> str:
+    def get_gerber_code(
+        self,
+        indent: str = "",  # noqa: ARG002
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
         return (
-            f"%FS{self.zeros_mode}{self.coordinate_mode}"
-            f"X{self.x_format}Y{self.y_format}*%"
+            f"FS"
+            f"{self.zeros_mode.get_gerber_code()}"
+            f"{self.coordinate_mode.get_gerber_code()}"
+            f"X{self.x_format.get_gerber_code()}"
+            f"Y{self.y_format.get_gerber_code()}"
         )
 
 
-class TrailingZerosMode(Enum):
+class TrailingZerosMode(GerberCodeEnum):
     """Coordinate format mode.
 
     GerberX3 supports only one, L, the other is required for backwards compatibility.
@@ -105,11 +130,8 @@ class TrailingZerosMode(Enum):
     OmitLeading = "L"
     OmitTrailing = "T"
 
-    def __str__(self) -> str:
-        return self.value
 
-
-class CoordinateMode(Enum):
+class CoordinateMode(GerberCodeEnum):
     """Coordinate format mode.
 
     GerberX3 supports only one, A, the other required for backwards compatibility.
@@ -118,11 +140,8 @@ class CoordinateMode(Enum):
     Absolute = "A"
     Incremental = "I"
 
-    def __str__(self) -> str:
-        return self.value
 
-
-class AxisFormat(FrozenGeneralModel):
+class AxisFormat(FrozenGeneralModel, GerberCode):
     """Wrapper for single axis format."""
 
     integer: int
@@ -135,6 +154,14 @@ class AxisFormat(FrozenGeneralModel):
 
     def __str__(self) -> str:
         return f"{self.integer}{self.decimal}"
+
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}{self.integer}{self.decimal}"
 
 
 class CoordinateParser(FrozenGeneralModel):

@@ -3,9 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Iterable, Tuple
 
-from pyparsing import Group
-
-from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.tokenizer.gerber_code import GerberCode
 
 if TYPE_CHECKING:
     from pyparsing import ParserElement, ParseResults
@@ -16,57 +14,48 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class Token(FrozenGeneralModel):
+class Token(GerberCode):
     """Base class for creating token classes."""
 
     @classmethod
-    def wrap(
-        cls,
-        expr: ParserElement,
-        *,
-        use_group: bool = True,
-    ) -> ParserElement:
+    def wrap(cls, expr: ParserElement) -> ParserElement:
         """Set parse result to be instance of this class."""
-        expr = expr.set_parse_action(cls.new)
-
-        if use_group:
-            return Group(expr)
-
-        return expr
+        return expr.set_parse_action(cls.new)
 
     @classmethod
-    def new(cls, _string: str, _location: int, tokens: ParseResults) -> Self:
+    def new(cls, string: str, location: int, _tokens: ParseResults) -> Self:
         """Create instance of this class.
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
-        return cls.from_tokens(**dict(tokens))
+        return cls(string, location)
 
-    @classmethod
-    def from_tokens(cls, **_tokens: Any) -> Self:
-        """Initialize token object."""
-        return cls()
+    def __init__(self, string: str, location: int) -> None:
+        """Initialize token instance."""
+        self.string = string
+        self.location = location
 
     def __str__(self) -> str:
-        return f"<TOKEN {self.__class__.__qualname__}>"
+        return f"GerberCode::Token::{self.__class__.__qualname__}"
 
     def __repr__(self) -> str:
         """Return pretty representation of comment token."""
-        string = str(self)
-        repr_string = f"<TOKEN {self.__class__.__qualname__}>"
-
-        if repr_string == string:
-            return repr_string
-
-        return f"<{self.__class__.__qualname__} {string!r}>"
+        return self.__str__()
 
     def get_debug_format(self) -> str:
         """Return debug formatted token object."""
         return super().__repr__()
 
-    def __getitem__(self, _: int) -> Self:
-        """Index return self."""
-        return self
+    @classmethod
+    def ensure_type(cls, thing: Any) -> Self:
+        """Ensure that <thing> is a instance of NumericExpression.
+
+        Raise TypeError otherwise.
+        """
+        if not isinstance(thing, cls):
+            raise TypeError(thing)
+
+        return thing
 
     def update_drawing_state(
         self,

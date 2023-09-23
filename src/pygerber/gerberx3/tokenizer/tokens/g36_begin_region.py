@@ -39,45 +39,10 @@ class BeginRegion(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return "G36*"
-
-
-class EndRegion(Token):
-    """Wrapper for G37 token.
-
-    Ends the region statement.
-
-    See section 4.10 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
-    """
-
-    def update_drawing_state(
+    def get_gerber_code(
         self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set drawing polarity."""
-        if not state.is_region:
-            logging.warning("Ending region which was not started.")
-
-        if len(state.region_boundary_points) == 0:
-            logging.warning("Created region with no boundaries.")
-
-        draw_command = backend.get_draw_region_cls()(
-            backend,
-            state.polarity.to_region_variant(),
-            state.region_boundary_points,
-        )
-
-        return (
-            state.model_copy(
-                update={
-                    "is_region": False,
-                    "region_boundary_points": [],
-                },
-            ),
-            (draw_command,),
-        )
-
-    def __str__(self) -> str:
-        return "G37*"
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}G36*"
