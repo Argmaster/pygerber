@@ -96,8 +96,9 @@ class Parser:
             elif self.options.on_update_drawing_state_error == ParserOnErrorAction.Warn:
                 logging.warning(
                     "Encountered fatal error during call to update_drawing_state() "
-                    "of '%s' token. Parser will skip this token and continue.",
+                    "of '%s' token %s. Parser will skip this token and continue.",
                     token,
+                    token.get_token_position(),
                 )
             else:
                 self.options.on_update_drawing_state_error(e, self, token)

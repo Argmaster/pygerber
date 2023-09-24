@@ -31,7 +31,7 @@ class DeleteAttribute(AttributeToken):
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
-        name = tokens["aperture_attribute_name"]
+        name = tokens.get("attribute_name")
         if name is not None:
             name = str(name)
 
@@ -48,3 +48,6 @@ class DeleteAttribute(AttributeToken):
     ) -> str:
         """Get gerber code represented by this token."""
         return f"{indent}%TD{self.name if self.name is not None else ''}*%"
+
+    def __str__(self) -> str:
+        return f"{super().__str__()}::[{self.name}]"

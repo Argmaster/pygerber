@@ -38,7 +38,7 @@ class ApertureAttribute(AttributeToken):
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
-        name: str = str(tokens["aperture_attribute_name"])
+        name: str = str(tokens["attribute_name"])
         value = tokens.get("field", [])
 
         if isinstance(value, ParseResults):
@@ -58,3 +58,6 @@ class ApertureAttribute(AttributeToken):
     ) -> str:
         """Get gerber code represented by this token."""
         return f"{indent}%TA{','.join((self.name, *self.value))}*%"
+
+    def __str__(self) -> str:
+        return f"{super().__str__()}::[{self.name} -> {self.value}]"

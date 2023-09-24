@@ -38,8 +38,8 @@ class MacroVariableDefinition(Expression):
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
-        variable = MacroVariableName.ensure_type(tokens["macro_variable_name"][0])
-        value = NumericExpression.ensure_type(tokens["value"][0])
+        variable = MacroVariableName.ensure_type(tokens["macro_variable_name"])
+        value = NumericExpression.ensure_type(tokens["value"])
         return cls(
             string=string,
             location=location,
@@ -63,7 +63,13 @@ class MacroVariableDefinition(Expression):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}{self.variable}={self.value}*"
+        return (
+            f"{indent}{self.variable.get_gerber_code(endline=endline)}="
+            f"{self.value.get_gerber_code(endline=endline)}*"
+        )
+
+    def __str__(self) -> str:
+        return f"{super().__str__()}::[{self.variable} = {self.value}]"

@@ -34,7 +34,7 @@ class FileAttribute(AttributeToken):
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
-        name: str = str(tokens["file_attribute_name"])
+        name: str = str(tokens["attribute_name"])
         value = tokens.get("field", [])
 
         if isinstance(value, ParseResults):
@@ -54,3 +54,6 @@ class FileAttribute(AttributeToken):
     ) -> str:
         """Get gerber code represented by this token."""
         return f"{indent}%TF{','.join((self.name, *self.value))}*%"
+
+    def __str__(self) -> str:
+        return f"{super().__str__()}::[{self.name} -> {self.value}]"

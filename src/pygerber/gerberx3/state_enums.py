@@ -131,3 +131,10 @@ class ImagePolarityEnum(GerberCodeEnum):
 
     POSITIVE = "POS"
     NEGATIVE = "NEG"
+
+
+class AxisCorrespondence(GerberCodeEnum):
+    """Possible values of AS command axis correspondence."""
+
+    AXBY = "AXBY"
+    AYBX = "AYBX"

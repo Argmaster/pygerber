@@ -1,7 +1,10 @@
 """Base class for creating token classes."""
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Iterable, Tuple
+
+from pyparsing import col, lineno
 
 from pygerber.gerberx3.tokenizer.gerber_code import GerberCode
 
@@ -64,6 +67,24 @@ class Token(GerberCode):
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Update drawing state."""
         return state, ()
+
+    def get_token_position(self) -> Position:
+        """Get position of token."""
+        return Position(
+            lineno(self.location, self.string),
+            col(self.location, self.string),
+        )
+
+
+@dataclass
+class Position:
+    """Position of token in text."""
+
+    line: int
+    column: int
+
+    def __str__(self) -> str:
+        return f"[line: {self.line}, col: {self.column}]"
 
 
 class GerberX3Token(Token):

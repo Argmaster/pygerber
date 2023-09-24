@@ -29,7 +29,7 @@ class MacroVariableName(NumericExpression):
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
-        name = str(tokens["macro_variable_name"][0])
+        name = str(tokens["macro_variable_name"])
         return cls(string=string, location=location, name=name)
 
     def evaluate_numeric(self, macro_context: MacroContext, _state: State) -> Offset:

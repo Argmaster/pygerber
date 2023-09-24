@@ -33,6 +33,7 @@ from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import (
     DefinePolygon,
     DefineRectangle,
 )
+from pygerber.gerberx3.tokenizer.tokens.as_axis_select import AxisSelect
 from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
 from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
 from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
@@ -59,6 +60,7 @@ from pygerber.gerberx3.tokenizer.tokens.g90_set_coordinate_absolute import (
 from pygerber.gerberx3.tokenizer.tokens.g91_set_coordinate_incremental import (
     SetIncrementalNotation,
 )
+from pygerber.gerberx3.tokenizer.tokens.in_image_name import ImageName
 from pygerber.gerberx3.tokenizer.tokens.ip_image_polarity import ImagePolarity
 from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
 from pygerber.gerberx3.tokenizer.tokens.ln_load_name import LoadName
@@ -93,6 +95,7 @@ from pygerber.gerberx3.tokenizer.tokens.macro.variable_definition import (
 )
 from pygerber.gerberx3.tokenizer.tokens.macro.variable_name import MacroVariableName
 from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import UnitMode
+from pygerber.gerberx3.tokenizer.tokens.of_image_offset import ImageOffset
 from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
     StepRepeatBegin,
     StepRepeatEnd,
@@ -170,7 +173,7 @@ class GerberGrammarBuilder(GrammarBuilder):
         ip = self._build_stmt(
             wrapper(
                 ImagePolarity,
-                Literal("POS") + oneOf("POS NEG").set_results_name("image_polarity"),
+                Literal("IP") + oneOf("POS NEG").set_results_name("image_polarity"),
             ),
         )
         # End of file.
@@ -260,8 +263,25 @@ class GerberGrammarBuilder(GrammarBuilder):
         ln = self._build_stmt(
             wrapper(LoadName, Literal("LN") + self._build_string()),
         )
+        in_ = self._build_stmt(
+            wrapper(ImageName, Literal("IN") + self._build_string()),
+        )
+        as_ = self._build_stmt(
+            wrapper(
+                AxisSelect,
+                Literal("AS") + oneOf("AXBY AYBX").set_results_name("correspondence"),
+            ),
+        )
+        of = self._build_stmt(
+            wrapper(
+                ImageOffset,
+                Literal("OF")
+                + Opt(Literal("A") + self._build_decimal("a"))
+                + Opt(Literal("B") + self._build_decimal("b")),
+            ),
+        )
 
-        return lm | lp | ls | lr | ln
+        return lm | lp | ls | lr | as_ | of | in_ | ln
 
     def _build_format_specifier(self) -> ParserElement:
         wrapper = self.wrapper
@@ -369,46 +389,45 @@ class GerberGrammarBuilder(GrammarBuilder):
     def _build_define_aperture(self) -> ParserElement:
         wrapper = self.wrapper
 
-        am_param = self._build_decimal("am_param", list_all_matches=True)
-        # Defines a template-based aperture, assigns a D code to it.
+        ad = Literal("AD").set_name("AD code")
 
         circle = wrapper(
             DefineCircle,
-            Literal("AD")
+            ad
             + self._build_aperture_identifier()
-            + "C"
+            + Literal("C").set_results_name("aperture_type")
             + ","
             + self._build_decimal("diameter")
             + Opt("X" + self._build_decimal("hole_diameter")),
-        )
+        ).set_name("define aperture circle")
 
         rectangle = wrapper(
             DefineRectangle,
-            Literal("AD")
+            ad
             + self._build_aperture_identifier()
-            + "R"
+            + Literal("R").set_results_name("aperture_type")
             + ","
             + self._build_decimal("x_size")
             + "X"
             + self._build_decimal("y_size")
             + Opt("X" + self._build_decimal("hole_diameter")),
-        )
+        ).set_name("define aperture rectangle")
 
         obround = wrapper(
             DefineObround,
-            Literal("AD")
+            ad
             + self._build_aperture_identifier()
-            + "O"
+            + Literal("O").set_results_name("aperture_type")
             + ","
             + self._build_decimal("x_size")
             + "X"
             + self._build_decimal("y_size")
             + Opt("X" + self._build_decimal("hole_diameter")),
-        )
+        ).set_name("define aperture obround")
 
         polygon = wrapper(
             DefinePolygon,
-            Literal("AD")
+            ad
             + self._build_aperture_identifier()
             + Literal("P").set_results_name("aperture_type")
             + ","
@@ -420,37 +439,31 @@ class GerberGrammarBuilder(GrammarBuilder):
                 + self._build_decimal("rotation")
                 + Opt("X" + self._build_decimal("hole_diameter")),
             ),
-        )
+        ).set_name("define aperture polygon")
+
+        am_param = self._build_decimal("am_param", list_all_matches=True)
+        # Defines a template-based aperture, assigns a D code to it.
 
         macro = wrapper(
             DefineMacro,
-            Literal("AD")
+            ad
             + self._build_aperture_identifier()
             + self._build_name("aperture_type")
             + Opt("," + am_param + ZeroOrMore("X" + am_param)),
-        )
+        ).set_name("define aperture macro")
 
-        return circle | rectangle | obround | polygon | macro
+        return self._build_stmt(circle | rectangle | obround | polygon | macro)
 
     def _build_macro_tokens(self) -> ParserElement:
         wrapper = self.wrapper
 
         primitive = self._build_macro_primitive()
-
-        variable_definition = wrapper(
-            MacroVariableDefinition,
-            self._build_macro_variable()
-            + "="
-            + self._build_macro_expr("value")
-            + self._build_eoex(),
-        )
+        variable_definition = self._build_macro_variable_definition()
+        comment = self._build_comment_token()
 
         macro_body = (
-            (primitive | variable_definition | self._build_comment_token())
-            .set_results_name(
-                "macro_body",
-                list_all_matches=True,
-            )
+            (primitive | variable_definition | comment)
+            .set_results_name("macro_body", list_all_matches=True)
             .set_name("macro body expression")
         )[1, ...]
 
@@ -463,6 +476,15 @@ class GerberGrammarBuilder(GrammarBuilder):
                 am_start + macro_body,
             ),
             eoex=False,
+        )
+
+    def _build_macro_variable_definition(self) -> ParserElement:
+        return self.wrapper(
+            MacroVariableDefinition,
+            self._build_macro_variable()
+            + "="
+            + self._build_macro_expr("value")
+            + self._build_eoex(),
         )
 
     def _build_macro_primitive(self) -> ParserElement:
@@ -569,13 +591,17 @@ class GerberGrammarBuilder(GrammarBuilder):
         )
 
         return (
-            (primitive_comment + self._build_eoex())
-            | (primitive_circle + self._build_eoex())
-            | (primitive_vector_line + self._build_eoex())
-            | (primitive_center_line + self._build_eoex())
-            | (primitive_outline + self._build_eoex())
-            | (primitive_polygon + self._build_eoex())
-            | (primitive_thermal + self._build_eoex())
+            (primitive_comment + self._build_eoex()).set_name("primitive comment")
+            | (primitive_circle + self._build_eoex()).set_name("primitive circle")
+            | (primitive_vector_line + self._build_eoex()).set_name(
+                "primitive vector line",
+            )
+            | (primitive_center_line + self._build_eoex()).set_name(
+                "primitive center line",
+            )
+            | (primitive_outline + self._build_eoex()).set_name("primitive outline")
+            | (primitive_polygon + self._build_eoex()).set_name("primitive polygon")
+            | (primitive_thermal + self._build_eoex()).set_name("primitive thermal")
         )
 
     def _build_macro_point(self) -> ParserElement:
@@ -678,39 +704,39 @@ class GerberGrammarBuilder(GrammarBuilder):
                 .GenerationSoftware .ProjectId .MD5",
             )
             | self._build_user_name()
-        ).set_name("file_attribute_name")
+        ).set_name("file attribute name")
 
         aperture_attribute_name = (
             oneOf(".AperFunction .DrillTolerance .FlashText") | self._build_user_name()
-        ).set_name("aperture_attribute_name")
+        ).set_name("aperture attribute name")
 
         object_attribute_name = (
             oneOf(
-                ".N .P .C .CRot .CMfr .CMPN .CVal .CMnt .CFtp .CPgN .CPgD .CHgt .CLbN\
-                .CLbD .CSup",
+                ".N .P .C .CRot .CMfr .CMPN .CVal .CMnt .CFtp .CPgN .CPgD .CHgt .CLbN "
+                ".CLbD .CSup",
             )
             | self._build_user_name()
-        ).set_name("object_attribute_name")
+        ).set_name("object attribute name")
 
         # Set a file attribute.
         tf = wrapper(
             FileAttribute,
             Literal("TF")
-            + file_attribute_name
+            + file_attribute_name.set_results_name("attribute_name")
             + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
         )
         # Add an aperture attribute to the dictionary or modify it.
         ta = wrapper(
             ApertureAttribute,
             Literal("TA")
-            + aperture_attribute_name
+            + aperture_attribute_name.set_results_name("attribute_name")
             + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
         )
         # Add an object attribute to the dictionary or modify it.
         to = wrapper(
             ObjectAttribute,
             Literal("TO")
-            + object_attribute_name
+            + object_attribute_name.set_results_name("attribute_name")
             + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
         )
         # Delete one or all attributes in the dictionary.
@@ -768,7 +794,7 @@ class GerberGrammarBuilder(GrammarBuilder):
     ) -> ParserElement:
         if name is None:
             name = result_name
-        return element.set_name(name).set_results_name(name, **kwargs)
+        return element.set_name(name).set_results_name(result_name, **kwargs)
 
     def _build_decimal(
         self,
