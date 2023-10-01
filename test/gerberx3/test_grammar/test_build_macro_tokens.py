@@ -264,7 +264,7 @@ def test_am_raw(string: str, tokens: str, macro_tokens_raw: ParserElement) -> No
 
 
 TEST_DATA_EXPECTED_TOKENS = [
-    """[GerberCode::Token::Statement[GerberCode::Token::MacroDefinition::[REC1090, GerberCode::Token::PrimitiveOutline
+    """[GerberCode::Token::Statement[GerberCode::Token::MacroDefinition[GerberCode::Token::MacroBegin, GerberCode::Token::PrimitiveOutline
   GerberCode::Token::NumericConstant::[1]
   GerberCode::Token::NumericConstant::[3]
   GerberCode::Token::NumericConstant::[0.04349]
@@ -273,14 +273,12 @@ TEST_DATA_EXPECTED_TOKENS = [
     GerberCode::Token::Point::[GerberCode::Token::NegationOperator::[GerberCode::Token::NumericConstant::[0.04349]], GerberCode::Token::NegationOperator::[GerberCode::Token::NumericConstant::[0.0120]]]
     GerberCode::Token::Point::[GerberCode::Token::NumericConstant::[0.04349], GerberCode::Token::NegationOperator::[GerberCode::Token::NumericConstant::[0.0119]]]
   GerberCode::Token::NumericConstant::[0]]]]""",
-    """[GerberCode::Token::Statement[GerberCode::Token::MacroDefinition::[Donut, GerberCode::Token::PrimitiveCircle
+    """[GerberCode::Token::Statement[GerberCode::Token::MacroDefinition[GerberCode::Token::MacroBegin, GerberCode::Token::PrimitiveCircle
   GerberCode::Token::NumericConstant::[1]
   GerberCode::Token::MacroVariableName
   GerberCode::Token::MacroVariableName
   GerberCode::Token::MacroVariableName
-  GerberCode::Token::NumericConstant::[0.0]
-GerberCode::Token::MacroVariableDefinition::[GerberCode::Token::MacroVariableName = GerberCode::Token::MultiplicationOperator::[GerberCode::Token::MacroVariableName, GerberCode::Token::NumericConstant::[0.75]]]
-GerberCode::Token::PrimitiveCircle
+  GerberCode::Token::NumericConstant::[0.0], GerberCode::Token::MacroVariableDefinition::[GerberCode::Token::MacroVariableName = GerberCode::Token::MultiplicationOperator::[GerberCode::Token::MacroVariableName, GerberCode::Token::NumericConstant::[0.75]]], GerberCode::Token::PrimitiveCircle
   GerberCode::Token::NumericConstant::[0]
   GerberCode::Token::MacroVariableName
   GerberCode::Token::MacroVariableName

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 
 
-class AttributeToken(Token):
+class AttributeToken(ExtendedCommandToken):
     """Base class for all attribute manipulation tokens."""

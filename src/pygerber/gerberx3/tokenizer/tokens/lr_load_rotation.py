@@ -4,7 +4,9 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TYPE_CHECKING, Iterable, Tuple
 
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class LoadRotation(Token):
+class LoadRotation(ExtendedCommandToken):
     """Wrapper for load rotation token.
 
     ### LR Command: Rotation Graphics State Parameter

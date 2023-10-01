@@ -133,16 +133,16 @@ class Offset(FrozenGeneralModel):
             )
         return NotImplemented  # type: ignore[unreachable]
 
-    def __iadd__(self, other: object) -> Offset:
+    def __iadd__(self, other: object) -> Self:
         return self._i_operator(other, operator.add)
 
-    def __isub__(self, other: object) -> Offset:
+    def __isub__(self, other: object) -> Self:
         return self._i_operator(other, operator.sub)
 
-    def __imul__(self, other: object) -> Offset:
+    def __imul__(self, other: object) -> Self:
         return self._i_operator(other, operator.mul)
 
-    def __itruediv__(self, other: object) -> Offset:
+    def __itruediv__(self, other: object) -> Self:
         return self._i_operator(other, operator.truediv)
 
     def __str__(self) -> str:

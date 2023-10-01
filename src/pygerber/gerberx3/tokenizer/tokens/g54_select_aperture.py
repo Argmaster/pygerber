@@ -36,4 +36,4 @@ class G54SelectAperture(DNNSelectAperture):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}G54{self.aperture_id}*"
+        return f"{indent}G54{self.aperture_id}"

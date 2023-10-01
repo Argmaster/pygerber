@@ -5,14 +5,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
 
-class Comment(Expression):
+class Comment(CommandToken):
     """Comment token.
 
     See section 4.1 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
@@ -37,4 +37,4 @@ class Comment(Expression):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}G04 {self.content}*"
+        return f"{indent}G04 {self.content}"

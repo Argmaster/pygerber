@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import DrawMode
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class SetLinear(Token):
+class SetLinear(CommandToken):
     """Wrapper for G01 mode set token.
 
     Sets linear/circular mode to linear.
@@ -42,4 +42,4 @@ class SetLinear(Token):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}G01*"
+        return f"{indent}G01"

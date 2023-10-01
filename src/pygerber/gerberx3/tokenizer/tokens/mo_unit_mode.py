@@ -5,7 +5,9 @@ import logging
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import Unit
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -16,7 +18,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class UnitMode(Token):
+class UnitMode(ExtendedCommandToken):
     """Wrapper for set unit mode token.
 
     Sets the unit to mm or inch.

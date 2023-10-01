@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from enum import Enum
 
-from pygerber.gerberx3.tokenizer.gerber_code import GerberCode
+from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
 
 
 class GerberCodeEnum(GerberCode, Enum):

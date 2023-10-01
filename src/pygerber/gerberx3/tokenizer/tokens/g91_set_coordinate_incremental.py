@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Iterable, Tuple
 
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class SetIncrementalNotation(Token):
+class SetIncrementalNotation(CommandToken):
     """Wrapper for G91 token.
 
     Set the `Coordinate format` to `Incremental notation`.
@@ -47,4 +47,4 @@ class SetIncrementalNotation(Token):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}G91*"
+        return f"{indent}G91"

@@ -45,5 +45,16 @@ class Point(Expression):
             y=y,
         )
 
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",
+    ) -> str:
+        """Get gerber code from iterable of tokens."""
+        return (
+            f"{self.x.get_gerber_code(indent, endline)},"
+            f"{self.y.get_gerber_code(indent, endline)}"
+        )
+
     def __str__(self) -> str:
         return f"{super().__str__()}::[{self.x}, {self.y}]"

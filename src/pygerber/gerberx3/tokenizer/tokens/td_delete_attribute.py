@@ -43,11 +43,11 @@ class DeleteAttribute(AttributeToken):
 
     def get_gerber_code(
         self,
-        indent: str = "",
+        indent: str = "",  # noqa: ARG002
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}%TD{self.name if self.name is not None else ''}*%"
+        return f"TD{self.name if self.name is not None else ''}"
 
     def __str__(self) -> str:
         return f"{super().__str__()}::[{self.name}]"

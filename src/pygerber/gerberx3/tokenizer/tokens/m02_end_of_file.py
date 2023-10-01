@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.parser.errors import ExitParsingProcessInterrupt
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class M02EndOfFile(Token):
+class M02EndOfFile(CommandToken):
     """Wrapper for end of file token.
 
     See section 4.10 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html

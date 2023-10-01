@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import Unit
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class SetUnitInch(Token):
+class SetUnitInch(CommandToken):
     """Wrapper for G70 token.
 
     Set the `Unit` to inch.
@@ -58,4 +58,4 @@ class SetUnitInch(Token):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}G70*"
+        return f"{indent}G70"

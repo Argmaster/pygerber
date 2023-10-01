@@ -15,6 +15,10 @@ class GerberCode:
         """Get gerber code represented by this token."""
         return f"{indent}G04 {self.__class__.__qualname__} no formatting available*"
 
+    def get_gerber_code_one_line_pretty_display(self) -> str:
+        """Get gerber code represented by this token."""
+        return f"G04 {self.__class__.__qualname__} no formatting available*"
+
 
 def get_gerber_code(
     tokens: Iterable[GerberCode],

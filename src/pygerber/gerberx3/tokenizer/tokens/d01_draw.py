@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Generator, Iterable, Tuple
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import DrawMode, Polarity
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
-from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class D01Draw(Token):
+class D01Draw(CommandToken):
     """Wrapper for plot operation token.
 
     Outside a region statement D01 creates a draw or arc object with the current
@@ -229,14 +229,14 @@ class D01Draw(Token):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         return (
             f"{indent}"
-            f"{self.x.get_gerber_code()}"
-            f"{self.y.get_gerber_code()}"
-            f"{self.i.get_gerber_code()}"
-            f"{self.j.get_gerber_code()}"
+            f"{self.x.get_gerber_code(indent, endline)}"
+            f"{self.y.get_gerber_code(indent, endline)}"
+            f"{self.i.get_gerber_code(indent, endline)}"
+            f"{self.j.get_gerber_code(indent, endline)}"
             "D01"
         )

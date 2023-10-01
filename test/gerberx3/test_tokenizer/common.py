@@ -24,17 +24,16 @@ def tokenize(
     """Tokenize gerber code and save debug output."""
     source = asset_loader.load_asset(src).decode("utf-8")
     if expression:
-        stack = Tokenizer().tokenize_expressions(source)
+        ast = Tokenizer().tokenize_expressions(source)
     else:
-        stack = Tokenizer().tokenize(source)
+        ast = Tokenizer().tokenize(source)
 
     with (dest / "output.grb").open("wt") as file:
-        for token in stack:
-            file.write(f"{token}\n")
+        file.write(f"{ast.get_gerber_code()}")
 
     with (dest / "output.repr.txt").open("wt") as file:
-        for token in stack:
-            file.write(f"{token.get_debug_format()}\n")
+        for token in ast.tokens:
+            file.write(f"{token}\n")
 
 
 def make_tokenizer_test(

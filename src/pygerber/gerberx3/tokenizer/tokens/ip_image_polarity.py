@@ -4,7 +4,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import ImagePolarityEnum
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
@@ -16,7 +18,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class ImagePolarity(Token):
+class ImagePolarity(ExtendedCommandToken):
     """Wrapper for image polarity token.
 
     The IP command is deprecated.
@@ -70,7 +72,7 @@ class ImagePolarity(Token):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}%IP{self.image_polarity.get_gerber_code()}*%"
+        return f"IP{self.image_polarity.get_gerber_code(indent, endline)}"

@@ -4,7 +4,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import Mirroring
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class LoadMirroring(Token):
+class LoadMirroring(ExtendedCommandToken):
     """Wrapper for load mirroring token.
 
     Loads the mirror object transformation parameter.

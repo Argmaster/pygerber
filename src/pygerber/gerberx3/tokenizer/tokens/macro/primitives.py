@@ -27,7 +27,24 @@ class Primitive(Expression):
 
 
 class PrimitiveCircle(Primitive):
-    """Wrapper for macro circle primitive token."""
+    """## 4.5.1.3 Circle, Code 1.
+
+    A circle primitive is defined by its center point and diameter.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %AMCircle*
+    1,1,1.5,0,0,0*%
+    ```
+
+    ---
+
+    See section 4.5.1.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=60)
+
+    """
 
     symbol: ClassVar[str] = "1"
 
@@ -94,18 +111,18 @@ class PrimitiveCircle(Primitive):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         string = self.symbol
 
-        string += f",{self.exposure}"
-        string += f",{self.diameter}"
-        string += f",{self.center_x}"
-        string += f",{self.center_y}"
+        string += f",{self.exposure.get_gerber_code(indent, endline)}"
+        string += f",{self.diameter.get_gerber_code(indent, endline)}"
+        string += f",{self.center_x.get_gerber_code(indent, endline)}"
+        string += f",{self.center_y.get_gerber_code(indent, endline)}"
 
         if self.rotation is not None:
-            string += f",{self.rotation}"
+            string += f",{self.rotation.get_gerber_code(indent, endline)}"
 
         return indent + string
 
@@ -124,7 +141,26 @@ class PrimitiveCircle(Primitive):
 
 
 class PrimitiveVectorLine(Primitive):
-    """Wrapper for macro vector line primitive token."""
+    """## 4.5.1.4 Vector Line, Code 20.
+
+    A vector line is a rectangle defined by its line width, start and end points. The
+    line ends are rectangular.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %AMLine*
+    20,1,0.9,0,0.45,12,0.45,0*
+    %
+    ```
+
+    ---
+
+    See section 4.5.1.4 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=61)
+
+    """
 
     symbol: ClassVar[str] = "20"
 
@@ -178,18 +214,18 @@ class PrimitiveVectorLine(Primitive):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         string = self.symbol
 
-        string += f",{self.exposure}"
-        string += f",{self.width}"
-        string += f",{self.start_x}"
-        string += f",{self.start_y}"
-        string += f",{self.end_x}"
-        string += f",{self.end_y}"
-        string += f",{self.rotation}"
+        string += f",{self.exposure.get_gerber_code(indent, endline)}"
+        string += f",{self.width.get_gerber_code(indent, endline)}"
+        string += f",{self.start_x.get_gerber_code(indent, endline)}"
+        string += f",{self.start_y.get_gerber_code(indent, endline)}"
+        string += f",{self.end_x.get_gerber_code(indent, endline)}"
+        string += f",{self.end_y.get_gerber_code(indent, endline)}"
+        string += f",{self.rotation.get_gerber_code(indent, endline)}"
 
         return indent + string
 
@@ -208,7 +244,25 @@ class PrimitiveVectorLine(Primitive):
 
 
 class PrimitiveCenterLine(Primitive):
-    """Wrapper for macro center line primitive token."""
+    """## 4.5.1.5 Center Line, Code 21.
+
+    A center line primitive is a rectangle defined by its width, height, and center
+    point.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %AMRECTANGLE*
+    21,1,6.8,1.2,3.4,0.6,30*%
+    ```
+
+    ---
+
+    See section 4.5.1.5 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=62)
+
+    """
 
     symbol: ClassVar[str] = "21"
 
@@ -258,17 +312,17 @@ class PrimitiveCenterLine(Primitive):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         string = self.symbol
 
-        string += f",{self.exposure}"
-        string += f",{self.width}"
-        string += f",{self.hight}"
-        string += f",{self.center_x}"
-        string += f",{self.center_y}"
-        string += f",{self.rotation}"
+        string += f",{self.exposure.get_gerber_code(indent, endline)}"
+        string += f",{self.width.get_gerber_code(indent, endline)}"
+        string += f",{self.hight.get_gerber_code(indent, endline)}"
+        string += f",{self.center_x.get_gerber_code(indent, endline)}"
+        string += f",{self.center_y.get_gerber_code(indent, endline)}"
+        string += f",{self.rotation.get_gerber_code(indent, endline)}"
 
         return indent + string
 
@@ -286,7 +340,39 @@ class PrimitiveCenterLine(Primitive):
 
 
 class PrimitiveOutline(Primitive):
-    """Wrapper for macro outline primitive token."""
+    """## 4.5.1.6 Outline, Code 4.
+
+    An outline primitive is an area defined by its outline or contour. The outline is a
+    polygon, consisting of linear segments only, defined by its start vertex and n
+    subsequent vertices. The outline must be closed, i.e. the last vertex must be equal
+    to the start vertex. The outline must comply with all the requirements of a contour
+    according to [4.10.3](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=91).
+
+    The maximum number of vertices is 5000. The purpose of this primitive is to create
+    apertures to flash pads with special shapes. The purpose is not to create copper
+    pours. Use the region statement for copper pours; see
+    [4.10](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=90).
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %AMTriangle_30*
+    4,1,3,
+    1,-1,
+    1,1,
+    2,1,
+    1,-1,
+    30*
+    %
+    ```
+
+    ---
+
+    See section 4.5.1.6 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=63)
+
+    """
 
     symbol: ClassVar[str] = "4"
 
@@ -340,20 +426,20 @@ class PrimitiveOutline(Primitive):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         string = self.symbol
 
-        string += f",{self.exposure.get_gerber_code()}"
-        string += f",{self.number_of_vertices.get_gerber_code()}"
-        string += f",{self.start_x.get_gerber_code()}"
-        string += f",{self.start_y.get_gerber_code()}"
+        string += f",{self.exposure.get_gerber_code(indent, endline)}"
+        string += f",{self.number_of_vertices.get_gerber_code(indent, endline)}"
+        string += f",{self.start_x.get_gerber_code(indent, endline)}"
+        string += f",{self.start_y.get_gerber_code(indent, endline)}"
 
         for point in self.point:
-            string += f",{point.get_gerber_code()}"
+            string += f",{point.get_gerber_code(indent, endline)}"
 
-        string += f",{self.rotation.get_gerber_code()}"
+        string += f",{self.rotation.get_gerber_code(indent, endline)}"
 
         return indent + string
 
@@ -374,7 +460,25 @@ class PrimitiveOutline(Primitive):
 
 
 class PrimitivePolygon(Primitive):
-    """Wrapper for macro outline primitive token."""
+    """## 4.5.1.7 Polygon, Code 5.
+
+    A polygon primitive is a regular polygon defined by the number of vertices n, the
+    center point and the diameter of the circumscribed circle.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %AMPolygon*
+    5,1,8,0,0,8,0*%
+    ```
+
+    ---
+
+    See section 4.5.1.7 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=65)
+
+    """
 
     symbol: ClassVar[str] = "5"
 
@@ -425,17 +529,17 @@ class PrimitivePolygon(Primitive):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         string = self.symbol
 
-        string += f",{self.exposure}"
-        string += f",{self.number_of_vertices}"
-        string += f",{self.center_x}"
-        string += f",{self.center_y}"
-        string += f",{self.diameter}"
-        string += f",{self.rotation}"
+        string += f",{self.exposure.get_gerber_code(indent, endline)}"
+        string += f",{self.number_of_vertices.get_gerber_code(indent, endline)}"
+        string += f",{self.center_x.get_gerber_code(indent, endline)}"
+        string += f",{self.center_y.get_gerber_code(indent, endline)}"
+        string += f",{self.diameter.get_gerber_code(indent, endline)}"
+        string += f",{self.rotation.get_gerber_code(indent, endline)}"
 
         return indent + string
 
@@ -453,7 +557,25 @@ class PrimitivePolygon(Primitive):
 
 
 class PrimitiveThermal(Primitive):
-    """Wrapper for macro thermal primitive token."""
+    """## 4.5.1.8 Thermal, Code 7.
+
+    The thermal primitive is a ring (annulus) interrupted by four gaps. Exposure is
+    always on.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %AMThermal*
+    7,0,0,0.95,0.75,0.175,0.0*%
+    ```
+
+    ---
+
+    See section 4.5.1.8 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=66)
+
+    """
 
     symbol: ClassVar[str] = "7"
 
@@ -500,17 +622,17 @@ class PrimitiveThermal(Primitive):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         string = self.symbol
 
-        string += f",{self.center_x}"
-        string += f",{self.center_y}"
-        string += f",{self.outer_diameter}"
-        string += f",{self.inner_diameter}"
-        string += f",{self.gap}"
-        string += f",{self.rotation}"
+        string += f",{self.center_x.get_gerber_code(indent, endline)}"
+        string += f",{self.center_y.get_gerber_code(indent, endline)}"
+        string += f",{self.outer_diameter.get_gerber_code(indent, endline)}"
+        string += f",{self.inner_diameter.get_gerber_code(indent, endline)}"
+        string += f",{self.gap.get_gerber_code(indent, endline)}"
+        string += f",{self.rotation.get_gerber_code(indent, endline)}"
 
         return indent + string
 

@@ -1,12 +1,14 @@
 """Base class for creating token classes."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from functools import cached_property
+from typing import TYPE_CHECKING, Any, Iterable, Optional, Tuple
 
 from pyparsing import col, lineno
 
-from pygerber.gerberx3.tokenizer.gerber_code import GerberCode
+from pygerber.common.position import Position
+from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
+from pygerber.gerberx3.tokenizer.tokens.bases.token_accessor import TokenAccessor
 
 if TYPE_CHECKING:
     from pyparsing import ParserElement, ParseResults
@@ -18,7 +20,7 @@ if TYPE_CHECKING:
 
 
 class Token(GerberCode):
-    """Base class for creating token classes."""
+    """Base class for creating Gerber token classes."""
 
     @classmethod
     def wrap(cls, expr: ParserElement) -> ParserElement:
@@ -70,26 +72,42 @@ class Token(GerberCode):
 
     def get_token_position(self) -> Position:
         """Get position of token."""
+        return self._token_position
+
+    @cached_property
+    def _token_position(self) -> Position:
         return Position(
             lineno(self.location, self.string),
             col(self.location, self.string),
         )
 
+    def get_hover_message(self) -> str:
+        """Return language server hover message."""
+        ref_doc = "\n".join(s.strip() for s in str(self.__doc__).split("\n"))
+        op_specific_extra = self.get_operation_specific_info()
+        return (
+            "```gerber\n"
+            f"{self.get_gerber_code_one_line_pretty_display()}"
+            "\n"
+            "```"
+            "\n"
+            "---"
+            "\n"
+            f"{op_specific_extra}"
+            "\n"
+            "---"
+            "\n"
+            f"{ref_doc}"
+        )
 
-@dataclass
-class Position:
-    """Position of token in text."""
+    def get_operation_specific_info(self) -> str:
+        """Return operation specific extra information about token."""
+        return ""
 
-    line: int
-    column: int
-
-    def __str__(self) -> str:
-        return f"[line: {self.line}, col: {self.column}]"
-
-
-class GerberX3Token(Token):
-    """Base class for tokens which are part of Gerber X3 standard."""
-
-
-class DeprecatedToken(Token):
-    """Base class for tokens which are deprecated."""
+    def find_closest_token(
+        self,
+        pos: Position,  # noqa: ARG002
+        parent: Optional[TokenAccessor] = None,
+    ) -> TokenAccessor:
+        """Find token closest to specified position."""
+        return TokenAccessor(self, parent)

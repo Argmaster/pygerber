@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, List, Tuple
+from typing import TYPE_CHECKING, Iterable, Sequence, Tuple
 
 from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
 from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.tokenizer.tokens.bases.group import TokenGroup
+from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+from pygerber.gerberx3.tokenizer.tokens.macro.macro_begin import MacroBegin
 from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
-from pygerber.gerberx3.tokenizer.tokens.token import Token
-from pygerber.sequence_tools import flatten, unwrap
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -20,19 +21,26 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class MacroDefinition(Token):
+class MacroDefinition(TokenGroup):
     """Container token for macro definition."""
+
+    tokens: Sequence[Token | Expression]
 
     def __init__(
         self,
         string: str,
         location: int,
-        macro_name: str,
-        macro_body: List[Expression],
+        tokens: Sequence[Token | Expression],
     ) -> None:
-        super().__init__(string, location)
-        self.macro_name = macro_name
-        self.macro_body = macro_body
+        super().__init__(string, location, tokens)
+
+    @property
+    def macro_name(self) -> str:
+        """Name of macro item."""
+        macro_begin = self.tokens[0]
+        if not isinstance(macro_begin, MacroBegin):
+            raise TypeError(macro_begin)
+        return macro_begin.name
 
     @classmethod
     def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
@@ -40,16 +48,25 @@ class MacroDefinition(Token):
 
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
-        macro_name: str = str(tokens["macro_name"])
-        macro_body: List[Expression] = [
-            unwrap(e) for e in flatten(tokens["macro_body"])
-        ]
+        macro_begin = tokens["macro_begin"]
+        if not isinstance(macro_begin, MacroBegin):
+            raise TypeError(macro_begin)
+
+        macro_body_raw = tokens["macro_body"]
+        macro_body_tokens: list[Token] = []
+
+        for e in macro_body_raw:
+            token = e[0]
+            if not isinstance(token, Token):
+                raise TypeError(token)
+            macro_body_tokens.append(token)
+
+        macro_tokens = [macro_begin, *macro_body_tokens]
 
         return cls(
             string=string,
             location=location,
-            macro_name=macro_name,
-            macro_body=macro_body,
+            tokens=macro_tokens,
         )
 
     def update_drawing_state(
@@ -80,21 +97,6 @@ class MacroDefinition(Token):
         context = MacroContext()
         context.variables.update(parameters)
 
-        for expression in self.macro_body:
-            expression.evaluate(context, state, handle)
-
-    def get_gerber_code(
-        self,
-        indent: str = "",
-        endline: str = "\n",
-    ) -> str:
-        """Get gerber code represented by this token."""
-        body = endline.join(e.get_gerber_code(indent * 2) for e in self.macro_body)
-        return f"AM{self.macro_name}*\n{body}\n"
-
-    def __str__(self) -> str:
-        lf = "\n"
-        return (
-            f"{super().__str__()}::[{self.macro_name}, "
-            f"{lf.join(str(e) for e in self.macro_body)}]"
-        )
+        for expression in self.tokens:
+            if isinstance(expression, Expression):
+                expression.evaluate(context, state, handle)

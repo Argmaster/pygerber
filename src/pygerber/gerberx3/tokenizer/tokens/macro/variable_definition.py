@@ -19,7 +19,71 @@ if TYPE_CHECKING:
 
 
 class MacroVariableDefinition(Expression):
-    """Wrapper for macro variable definition."""
+    """## 4.5.4.3 Definition of New Variable.
+
+    New variables can be defined by an assign statement as follows: `$4=$1x1.25-$3`. The
+    right-hand side is any arithmetic expression as in the previous section.
+
+    The variable values are determined as follows:
+
+    - `$1`, `$2`, ..., `$n` take the values of the n parameters of the calling AD command.
+    - New variables get their value from their defining expression.
+    - The undefined variables are 0.
+    - Macro variables cannot be redefined.
+
+    ---
+
+    ## Example #1
+
+    ```gerber
+    %AMDONUTCAL*
+    1,1,$1,$2,$3*
+    $4=$1x1.25*
+    1,0,$4,$2,$3*%
+    ```
+
+    The AD command contains four parameters which define the first four macro variables:
+
+    ```yaml
+    $1 = 0.02
+    $2 = 0
+    $3 = 0
+    $4 = 0.06
+    ```
+
+    The variable `$5` is defined in the macro body and becomes
+
+    ```yaml
+    $5 = 0.06 x 0.25 = 0.015
+    ```
+
+    ## Example #2
+
+    ```gerber
+    %AMTEST1*
+    1,1,$1,$2,$3*
+    $4=$1x0.75*
+    $5=($2+100)x1.75*
+    1,0,$4,$5,$3*%
+    ```
+
+    ## Example #3
+
+    ```
+    %AMTEST2*
+    $4=$1x0.75*
+    $5=100+$3*
+    1,1,$1,$2,$3*
+    1,0,$4,$2,$5*
+    $6=$4x0.5*
+    1,0,$6,$2,$5*%
+    ```
+
+    ---
+
+    See section 4.5.4.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=71)
+
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -68,7 +132,7 @@ class MacroVariableDefinition(Expression):
         """Get gerber code represented by this token."""
         return (
             f"{indent}{self.variable.get_gerber_code(endline=endline)}="
-            f"{self.value.get_gerber_code(endline=endline)}*"
+            f"{self.value.get_gerber_code(endline=endline)}"
         )
 
     def __str__(self) -> str:

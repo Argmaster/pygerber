@@ -23,8 +23,10 @@ from typing import TYPE_CHECKING, Iterable, List, Optional, Tuple
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import Polarity
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
-from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -35,21 +37,82 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class DefineAperture(Token):
-    """Wrapper for aperture definition token.
+class DefineAperture(ExtendedCommandToken):
+    """## 4.3.1 AD Command.
 
-    Defines a template-based aperture, assigns a D code to it. This class is never used
-    to create objects, only its subclasses are used.
+    The AD command creates an aperture, attaches the aperture attributes at that moment in the
+    attribute dictionary to it and adds it to the apertures dictionary.
 
-    See section 4.3 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
-    """
+    ```ebnf
+    AD = '%' ('AD' aperture_ident template_call) '*%';
+    template_call = template_name [',' parameter {'X' parameter}*];
+    ```
+
+    The AD command must precede the first use of the aperture. It is recommended to put all AD
+    commands in the file header.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %ADD10C,.025*%
+    %ADD10C,0.5X0.25*%
+    ```
+
+    ---
+
+    See section 4.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=48)
+
+    """  # noqa: E501
 
 
 class DefineCircle(DefineAperture):
-    """Wrapper for aperture definition token.
+    """## 4.3.1 AD Command.
 
-    Defines a circle.
-    """
+    The AD command creates an aperture, attaches the aperture attributes at that moment in the
+    attribute dictionary to it and adds it to the apertures dictionary.
+
+    ```ebnf
+    AD = '%' ('AD' aperture_ident template_call) '*%';
+    template_call = template_name [',' parameter {'X' parameter}*];
+    ```
+
+    The AD command must precede the first use of the aperture. It is recommended to put all AD
+    commands in the file header.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %ADD10C,.025*%
+    %ADD10C,0.5X0.25*%
+    ```
+
+    ---
+
+    See section 4.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=48)
+
+    ---
+
+    ## 4.4.2 Circle
+
+    The syntax of the circle standard template call is:
+
+    ```ebnf
+    template_call = 'C' ',' diameter 'X' hole_diameter
+    ```
+
+    - `C` - Indicates the circle aperture template.
+    - `diameter` - Diameter. A decimal ≥0.
+    - `hole_diameter` - Diameter of a round hole. A decimal >0. If omitted the aperture is solid. See also section [4.4.6](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=55).
+
+    ---
+
+    See section 4.4.2 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=50)
+
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -127,23 +190,64 @@ class DefineCircle(DefineAperture):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
         return (
-            f"{indent}%AD{self.aperture_id.get_gerber_code()}C,"
-            f"{self.diameter}{suffix}*%"
+            f"AD{self.aperture_id.get_gerber_code(indent, endline)}C,"
+            f"{self.diameter}{suffix}"
         )
 
 
 class DefineRectangle(DefineAperture):
-    """Wrapper for aperture definition token.
+    """## 4.3.1 AD Command.
 
-    Defines a rectangle
-    """
+    The AD command creates an aperture, attaches the aperture attributes at that moment in the
+    attribute dictionary to it and adds it to the apertures dictionary.
+
+    ```ebnf
+    AD = '%' ('AD' aperture_ident template_call) '*%';
+    template_call = template_name [',' parameter {'X' parameter}*];
+    ```
+
+    The AD command must precede the first use of the aperture. It is recommended to put all AD
+    commands in the file header.
+
+    ---
+
+    ### Example:
+
+    ```gerber
+    %ADD22R,0.044X0.025*%
+    %ADD23R,0.044X0.025X0.019*%
+    ```
+
+    ---
+
+    See section 4.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=48)
+
+    ---
+
+    ## 4.4.3 Rectangle
+
+    The syntax of the rectangle or square standard template call is:
+
+    ```ebnf
+    template_call = 'R' ',' x_size 'X' y_size 'X' hole_diameter
+    ```
+
+    - `T` - Indicates the rectangle aperture template.
+    - `x_size`, `x_size` - X and Y sizes of the rectangle. Decimals >0. If x_size = y_size the effective shape is a square
+    - `hole_diameter` - Diameter of a round hole. A decimal >0. If omitted the aperture is solid. See also section [4.4.6](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=55).
+
+    ---
+
+    See section 4.4.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=52)
+
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -226,23 +330,64 @@ class DefineRectangle(DefineAperture):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
         return (
-            f"{indent}%AD{self.aperture_id.get_gerber_code()}R,"
-            f"{self.x_size}X{self.y_size}{suffix}*%"
+            f"AD{self.aperture_id.get_gerber_code(indent, endline)}R,"
+            f"{self.x_size}X{self.y_size}{suffix}"
         )
 
 
 class DefineObround(DefineAperture):
-    """Wrapper for aperture definition token.
+    """## 4.3.1 AD Command.
 
-    Defines an obround.
-    """
+    The AD command creates an aperture, attaches the aperture attributes at that moment in the
+    attribute dictionary to it and adds it to the apertures dictionary.
+
+    ```ebnf
+    AD = '%' ('AD' aperture_ident template_call) '*%';
+    template_call = template_name [',' parameter {'X' parameter}*];
+    ```
+
+    The AD command must precede the first use of the aperture. It is recommended to put all AD
+    commands in the file header.
+
+    ---
+
+    ### Example:
+
+    ```gerber
+    %ADD22O,0.046X0.026*%
+    %ADD22O,0.046X0.026X0.019*%
+    ```
+
+    ---
+
+    See section 4.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=48)
+
+    ---
+
+    ## 4.4.4 Obround
+
+    Obround (oval) is a rectangle where the smallest side is rounded to a half-circle. The syntax is:
+
+    ```ebnf
+    template_call = 'O' ',' x_size 'X' y_size 'X' hole_diameter
+    ```
+
+    - `O` - Indicates the obround aperture template.
+    - `x_size`, `x_size` - X and Y sizes of enclosing box. Decimals >0. If x_size = y_size the effective shape is a circle.
+    - `hole_diameter` - Diameter of a round hole. A decimal >0. If omitted the aperture is solid. See also section [4.4.6](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=55).
+
+    ---
+
+    See section 4.4.4 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=53)
+
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -365,23 +510,66 @@ class DefineObround(DefineAperture):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
         return (
-            f"{indent}%AD{self.aperture_id.get_gerber_code()}O,"
-            f"{self.x_size}X{self.y_size}{suffix}*%"
+            f"AD{self.aperture_id.get_gerber_code(indent, endline)}O,"
+            f"{self.x_size}X{self.y_size}{suffix}"
         )
 
 
 class DefinePolygon(DefineAperture):
-    """Wrapper for aperture definition token.
+    """## 4.3.1 AD Command.
 
-    Defines a polygon.
-    """
+    The AD command creates an aperture, attaches the aperture attributes at that moment in the
+    attribute dictionary to it and adds it to the apertures dictionary.
+
+    ```ebnf
+    AD = '%' ('AD' aperture_ident template_call) '*%';
+    template_call = template_name [',' parameter {'X' parameter}*];
+    ```
+
+    The AD command must precede the first use of the aperture. It is recommended to put all AD
+    commands in the file header.
+
+    ---
+
+    ### Example:
+
+    ```gerber
+    %ADD17P,.040X6*%
+    %ADD17P,.040X6X0.0X0.019*%
+    ```
+
+    ---
+
+    See section 4.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=48)
+
+    ---
+
+    ## 4.4.5 Polygon
+
+    Creates a regular polygon aperture. The syntax of the polygon template is:
+
+    ```ebnf
+    template_call = 'P' ',' outer_diameter 'X' vertices 'X' rotation 'X' hole_diameter
+    ```
+
+    - `P` - Indicates the polygon aperture template.
+    - `outer_diameter` - Diameter of the circle circumscribing the regular polygon, i.e. the circle through the polygon vertices. A decimal > 0.
+    - `vertices` - Number of vertices n, 3 ≤ n ≤ 12. An integer.
+    - `rotation` - The rotation angle, in degrees counterclockwise. A decimal. With rotation angle zero there is a vertex on the positive X-axis through the aperture center.
+    - `hole_diameter` - Diameter of a round hole. A decimal >0. If omitted the aperture is solid. See also section [4.4.6](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=55).
+
+    ---
+
+    See section 4.4.5 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=54)
+
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -473,15 +661,15 @@ class DefinePolygon(DefineAperture):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         suffix = ""
         if self.hole_diameter is not None:
             suffix += f"X{self.hole_diameter}"
         return (
-            f"{indent}%AD{self.aperture_id.get_gerber_code()}P,{self.outer_diameter}"
-            f"X{self.number_of_vertices}X{self.rotation}{suffix}*%"
+            f"AD{self.aperture_id.get_gerber_code(indent, endline)}P,"
+            f"{self.outer_diameter}X{self.number_of_vertices}X{self.rotation}{suffix}"
         )
 
 
@@ -556,10 +744,10 @@ class DefineMacro(DefineAperture):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         return (
-            f"{indent}%AD{self.aperture_id.get_gerber_code()}{self.aperture_type}"
-            f",{'X'.join(self.am_param)}*%"
+            f"AD{self.aperture_id.get_gerber_code(indent, endline)}"
+            f"{self.aperture_type},{'X'.join(self.am_param)}"
         )

@@ -3,14 +3,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
 
-class StepRepeatBegin(Token):
+class StepRepeatBegin(CommandToken):
     """Wrapper for SR begin token.
 
     Opens an SR statement and starts block accumulation.
@@ -61,7 +61,7 @@ class StepRepeatBegin(Token):
         return f"SRX{self.x_repeat}Y{self.y_repeat}I{self.x_step}J{self.y_step}"
 
 
-class StepRepeatEnd(Token):
+class StepRepeatEnd(CommandToken):
     """Wrapper for SR end token.
 
     Ends step and repeat statement.

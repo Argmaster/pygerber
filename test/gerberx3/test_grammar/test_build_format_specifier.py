@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from pygerber.gerberx3.tokenizer.gerber_code import get_gerber_code
 from pygerber.gerberx3.tokenizer.grammar import GerberGrammarBuilder
+from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import get_gerber_code
 
 if TYPE_CHECKING:
     from pyparsing import ParserElement

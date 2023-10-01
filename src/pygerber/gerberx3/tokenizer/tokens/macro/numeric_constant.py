@@ -48,5 +48,13 @@ class NumericConstant(NumericExpression):
         """Evaluate numeric value of this macro expression."""
         return Offset.new(value=self.value, unit=state.get_units())
 
+    def get_gerber_code(
+        self,
+        indent: str = "",  # noqa: ARG002
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code from iterable of tokens."""
+        return f"{self.value}"
+
     def __str__(self) -> str:
         return f"{super().__str__()}::[{self.value}]"

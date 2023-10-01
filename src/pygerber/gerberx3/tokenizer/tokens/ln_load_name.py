@@ -23,7 +23,9 @@ from typing import TYPE_CHECKING, Iterable, Tuple
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
 from pygerber.gerberx3.parser.state import State
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
@@ -31,7 +33,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class LoadName(Token):
+class LoadName(ExtendedCommandToken):
     """Comment token.
 
     ### Load Name (LN)

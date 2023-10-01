@@ -14,14 +14,16 @@ from pygerber.gerberx3.parser.errors import (
     UnsupportedCoordinateTypeError,
     ZeroOmissionNotSupportedError,
 )
-from pygerber.gerberx3.tokenizer.gerber_code import GerberCode
 from pygerber.gerberx3.tokenizer.helpers.gerber_code_enum import GerberCodeEnum
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
+from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
 from pygerber.gerberx3.tokenizer.tokens.coordinate import (
     Coordinate,
     CoordinateSign,
     CoordinateType,
 )
-from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -35,7 +37,7 @@ if TYPE_CHECKING:
 RECOMMENDED_MINIMAL_DECIMAL_PLACES = 5
 
 
-class CoordinateFormat(Token):
+class CoordinateFormat(ExtendedCommandToken):
     """Description of coordinate format token.
 
     See:
@@ -108,16 +110,16 @@ class CoordinateFormat(Token):
 
     def get_gerber_code(
         self,
-        indent: str = "",  # noqa: ARG002
-        endline: str = "\n",  # noqa: ARG002
+        indent: str = "",
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         return (
             f"FS"
-            f"{self.zeros_mode.get_gerber_code()}"
-            f"{self.coordinate_mode.get_gerber_code()}"
-            f"X{self.x_format.get_gerber_code()}"
-            f"Y{self.y_format.get_gerber_code()}"
+            f"{self.zeros_mode.get_gerber_code(indent, endline)}"
+            f"{self.coordinate_mode.get_gerber_code(indent, endline)}"
+            f"X{self.x_format.get_gerber_code(indent, endline)}"
+            f"Y{self.y_format.get_gerber_code(indent, endline)}"
         )
 
 

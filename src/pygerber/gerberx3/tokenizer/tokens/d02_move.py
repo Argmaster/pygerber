@@ -4,8 +4,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.math.vector_2d import Vector2D
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
-from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class D02Move(Token):
+class D02Move(CommandToken):
     """Wrapper for move operation token.
 
     D02 moves the current point to the coordinate in the command. No graphical object is
@@ -82,12 +82,12 @@ class D02Move(Token):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
         return (
             f"{indent}"
-            f"{self.x.get_gerber_code()}"
-            f"{self.y.get_gerber_code()}"
+            f"{self.x.get_gerber_code(indent, endline)}"
+            f"{self.y.get_gerber_code(indent, endline)}"
             "D02"
         )

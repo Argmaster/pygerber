@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING, Any, Iterable, Tuple
 from pydantic_core import CoreSchema, core_schema
 
 from pygerber.gerberx3.parser.errors import ApertureNotDefinedError
-from pygerber.gerberx3.tokenizer.gerber_code import GerberCode
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
+from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
 
 if TYPE_CHECKING:
     from pydantic import GetCoreSchemaHandler
@@ -19,13 +19,34 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class DNNSelectAperture(Token):
-    """Wrapper for aperture select token.
+class DNNSelectAperture(CommandToken):
+    """## 4.6 Current Aperture (Dnn).
 
-    Sets the current aperture to D code NN (NN ≥ 10).
+    The command Dnn (nn≥10) sets the current aperture graphics state parameter. The syntax is:
 
-    See section 4.6 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
-    """
+    ```ebnf
+    Dnn = 'D unsigned_integer '*';
+    ```
+
+    - `D` - Command code.
+    - `<aperture number>` - The aperture number (integer ≥10). An aperture with that number must be in the apertures dictionary.
+
+    D-commands 0 to 9 are reserved and cannot be used for apertures. The D01 and D03
+    commands use the current aperture to create track and flash graphical objects.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    D10*
+    ```
+
+    ---
+
+    See section 4.6 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=75)
+
+    """  # noqa: E501
 
     def __init__(self, string: str, location: int, aperture_id: ApertureID) -> None:
         super().__init__(string, location)
@@ -63,10 +84,10 @@ class DNNSelectAperture(Token):
     def get_gerber_code(
         self,
         indent: str = "",
-        endline: str = "\n",  # noqa: ARG002
+        endline: str = "\n",
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}{self.aperture_id}*"
+        return f"{indent}{self.aperture_id.get_gerber_code(indent, endline)}"
 
 
 class ApertureID(str, GerberCode):
@@ -85,8 +106,8 @@ class ApertureID(str, GerberCode):
 
     def get_gerber_code(
         self,
-        indent: str = "",
+        indent: str = "",  # noqa: ARG002
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}{self}"
+        return f"{self}"

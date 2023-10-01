@@ -56,6 +56,16 @@ class UnaryOperator(NumericExpression):
 
         return output
 
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",
+    ) -> str:
+        """Get gerber code from iterable of tokens."""
+        return (
+            f"{self.sign}{self.operand.get_gerber_code(indent=indent, endline=endline)}"
+        )
+
     def __str__(self) -> str:
         return f"{super().__str__()}::[{self.operand}]"
 
@@ -123,6 +133,17 @@ class BinaryOperator(NumericExpression):
             raise InvalidArithmeticExpressionError
 
         return output
+
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",
+    ) -> str:
+        """Get gerber code from iterable of tokens."""
+        return (
+            f"{self.left.get_gerber_code(indent=indent, endline=endline)}{self.sign}"
+            f"{self.right.get_gerber_code(indent=indent, endline=endline)}"
+        )
 
     def __str__(self) -> str:
         return f"{super().__str__()}::[{self.left}, {self.right}]"

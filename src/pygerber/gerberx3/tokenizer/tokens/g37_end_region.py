@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Iterable, Tuple
 
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class EndRegion(Token):
+class EndRegion(CommandToken):
     """Wrapper for G37 token.
 
     Ends the region statement.
@@ -54,4 +54,4 @@ class EndRegion(Token):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}G37*"
+        return f"{indent}G37"

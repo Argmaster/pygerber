@@ -6,21 +6,56 @@ from typing import TYPE_CHECKING, Iterable, Tuple
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
 from pygerber.gerberx3.parser.state import State
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
-from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
 
-class BlockApertureBegin(Token):
-    """Wrapper for AB begin token.
+class BlockApertureBegin(CommandToken):
+    """## 4.11 Block Aperture (AB).
 
-    Opens a block aperture statement and assigns its aperture number.
+    ### 4.11.1 Overview of block apertures
 
-    See section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
-    """
+    The AB command creates a block aperture. The command stream between the opening and
+    closing AB command defines a block aperture which is stored in the aperture dictionary. Thus
+    the AB commands add an aperture to the dictionary directly, without needing an AD command.
+    The LM, LR, LS and LP commands affect the flashes of block apertures as any other aperture:
+    when a block aperture is flashed, it is first transformed according to the transformation
+    parameters in the graphics state and then added to the object stream.
+
+    The origin of the block aperture is the (0,0) point of the file.
+
+    A block aperture is not a single graphical object but a set of objects. While a standard or macro
+    aperture always adds a single graphical object to the stream, a block aperture can add any
+    number of objects, each with their own polarity. Standard and macro apertures always have a
+    single polarity while block apertures can contain both dark and clear objects.
+
+    If the polarity is dark (LPD) when the block is flashed then the block aperture is inserted as is. If
+    the polarity is clear (LPC) then the polarity of all objects in the block is toggled (clear becomes
+    dark, and dark becomes clear). This toggle propagates through all nesting levels. In the
+    following example the polarity of objects in the flash of block D12 will be toggled.
+
+    ```gerber
+    %ABD12*%
+    …
+    %AB*%
+    …
+    D12*
+    %LPC*%
+    X-2500000Y-1000000D03*
+    ```
+
+    A D03 of a block aperture updates the current point but otherwise leaves the graphics state
+    unmodified, as with any other aperture.
+
+    ---
+
+    See section 4.11 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=111)
+
+    """  # noqa: E501
 
     def __init__(self, string: str, location: int, identifier: ApertureID) -> None:
         super().__init__(string, location)
@@ -64,14 +99,51 @@ class BlockApertureBegin(Token):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}AB{self.identifier.get_gerber_code()}*"
+        return f"{indent}AB{self.identifier.get_gerber_code()}"
 
 
-class BlockApertureEnd(Token):
-    """Wrapper for AB end token.
+class BlockApertureEnd(CommandToken):
+    """## 4.11 Block Aperture (AB).
 
-    Ends block aperture statement.
-    """
+    ### 4.11.1 Overview of block apertures
+
+    The AB command creates a block aperture. The command stream between the opening and
+    closing AB command defines a block aperture which is stored in the aperture dictionary. Thus
+    the AB commands add an aperture to the dictionary directly, without needing an AD command.
+    The LM, LR, LS and LP commands affect the flashes of block apertures as any other aperture:
+    when a block aperture is flashed, it is first transformed according to the transformation
+    parameters in the graphics state and then added to the object stream.
+
+    The origin of the block aperture is the (0,0) point of the file.
+
+    A block aperture is not a single graphical object but a set of objects. While a standard or macro
+    aperture always adds a single graphical object to the stream, a block aperture can add any
+    number of objects, each with their own polarity. Standard and macro apertures always have a
+    single polarity while block apertures can contain both dark and clear objects.
+
+    If the polarity is dark (LPD) when the block is flashed then the block aperture is inserted as is. If
+    the polarity is clear (LPC) then the polarity of all objects in the block is toggled (clear becomes
+    dark, and dark becomes clear). This toggle propagates through all nesting levels. In the
+    following example the polarity of objects in the flash of block D12 will be toggled.
+
+    ```gerber
+    %ABD12*%
+    …
+    %AB*%
+    …
+    D12*
+    %LPC*%
+    X-2500000Y-1000000D03*
+    ```
+
+    A D03 of a block aperture updates the current point but otherwise leaves the graphics state
+    unmodified, as with any other aperture.
+
+    ---
+
+    See section 4.11 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=111)
+
+    """  # noqa: E501
 
     def get_gerber_code(
         self,
@@ -79,4 +151,4 @@ class BlockApertureEnd(Token):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"{indent}AB*"
+        return f"{indent}AB"

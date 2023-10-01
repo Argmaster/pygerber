@@ -19,8 +19,8 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.backend.abstract.draw_commands_handle import DrawCommandsHandle
-    from pygerber.gerberx3.tokenizer.tokenizer import TokenStack
-    from pygerber.gerberx3.tokenizer.tokens.token import Token
+    from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
+    from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
 
 
 class Parser:
@@ -44,14 +44,14 @@ class Parser:
         """Get reference to backend object."""
         return self.options.backend
 
-    def parse(self, tokens: TokenStack) -> DrawCommandsHandle:
+    def parse(self, ast: AST) -> DrawCommandsHandle:
         """Parse token stack."""
-        for _ in self.parse_iter(tokens):
+        for _ in self.parse_iter(ast):
             pass
 
         return self.get_draw_commands_handle()
 
-    def parse_iter(self, tokens: TokenStack) -> Generator[Token, None, None]:
+    def parse_iter(self, ast: AST) -> Generator[Token, None, None]:
         """Iterate over tokens in stack and parse them."""
         self.state = (
             State()
@@ -60,7 +60,7 @@ class Parser:
         )
         self.draw_actions: list[DrawCommand] = []
 
-        for token in tokens:
+        for token in ast.tokens:
             self._update_drawing_state(token)
 
             yield token

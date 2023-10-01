@@ -4,7 +4,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import Polarity
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -15,7 +17,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class LoadPolarity(Token):
+class LoadPolarity(ExtendedCommandToken):
     """Wrapper for load polarity token.
 
     Loads the scale object transformation parameter.

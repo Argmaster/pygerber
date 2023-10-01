@@ -34,6 +34,7 @@ from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import (
     DefineRectangle,
 )
 from pygerber.gerberx3.tokenizer.tokens.as_axis_select import AxisSelect
+from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
 from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
 from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
@@ -60,6 +61,10 @@ from pygerber.gerberx3.tokenizer.tokens.g90_set_coordinate_absolute import (
 from pygerber.gerberx3.tokenizer.tokens.g91_set_coordinate_incremental import (
     SetIncrementalNotation,
 )
+from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
+from pygerber.gerberx3.tokenizer.tokens.groups.statement import (
+    Statement,
+)
 from pygerber.gerberx3.tokenizer.tokens.in_image_name import ImageName
 from pygerber.gerberx3.tokenizer.tokens.ip_image_polarity import ImagePolarity
 from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
@@ -80,6 +85,7 @@ from pygerber.gerberx3.tokenizer.tokens.macro.arithmetic_expression import (
     SubtractionOperator,
 )
 from pygerber.gerberx3.tokenizer.tokens.macro.comment import MacroComment
+from pygerber.gerberx3.tokenizer.tokens.macro.macro_begin import MacroBegin
 from pygerber.gerberx3.tokenizer.tokens.macro.numeric_constant import NumericConstant
 from pygerber.gerberx3.tokenizer.tokens.macro.point import Point
 from pygerber.gerberx3.tokenizer.tokens.macro.primitives import (
@@ -100,14 +106,10 @@ from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
     StepRepeatBegin,
     StepRepeatEnd,
 )
-from pygerber.gerberx3.tokenizer.tokens.statement import (
-    Statement,
-)
 from pygerber.gerberx3.tokenizer.tokens.ta_aperture_attribute import ApertureAttribute
 from pygerber.gerberx3.tokenizer.tokens.td_delete_attribute import DeleteAttribute
 from pygerber.gerberx3.tokenizer.tokens.tf_file_attribute import FileAttribute
 from pygerber.gerberx3.tokenizer.tokens.to_object_attribute import ObjectAttribute
-from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -234,8 +236,8 @@ class GerberGrammarBuilder(GrammarBuilder):
             | eoex
         )
 
-        expressions = (common | m02 | m01 | m00)[0, ...]
-        grammar = common[0, ...] + (m02 | m01 | m00)
+        expressions = self.wrapper(AST, (common | m02 | m01 | m00)[0, ...])
+        grammar = self.wrapper(AST, common[0, ...] + (m02 | m01 | m00))
 
         return GerberGrammar(grammar, expressions)
 
@@ -467,7 +469,16 @@ class GerberGrammarBuilder(GrammarBuilder):
             .set_name("macro body expression")
         )[1, ...]
 
-        am_start = Literal("AM") + self._build_name("macro_name") + self._build_eoex()
+        am_start = (
+            self._annotate_parser_element(
+                wrapper(
+                    MacroBegin,
+                    Literal("AM") + self._build_name("macro_name"),
+                ),
+                "macro_begin",
+            )
+            + self._build_eoex()
+        )
 
         # Defines a macro aperture template.
         return self._build_stmt(
@@ -476,7 +487,7 @@ class GerberGrammarBuilder(GrammarBuilder):
                 am_start + macro_body,
             ),
             eoex=False,
-        )
+        ).set_name("macro definition")
 
     def _build_macro_variable_definition(self) -> ParserElement:
         return self.wrapper(
