@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Optional
+from typing import TYPE_CHECKING, Optional, Sequence
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
@@ -15,10 +15,10 @@ class TokenAccessor:
         self,
         token: Optional[Token],
         parent: Optional[TokenAccessor] = None,
-        before: Iterable[Token] = (),
-        after: Iterable[Token] = (),
+        tokens: Sequence[Token] = (),
+        token_index: int = 0,
     ) -> None:
         self.token = token
         self.parent = parent
-        self.before = before
-        self.after = after
+        self.tokens = tokens
+        self.token_index = token_index

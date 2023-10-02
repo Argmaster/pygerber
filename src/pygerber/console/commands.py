@@ -70,12 +70,20 @@ def main() -> None:
     "\n\n"
     'eg. `"000000,000000,FFFFFF,000000,FFFFFF"`',
 )
+@click.option(
+    "-d",
+    "--dpi",
+    type=int,
+    default=1000,
+    help="DPI of output image, by default 1000.",
+)
 def raster_2d(
     source: TextIO,
     style: str,
     output: Path,
     format_: Optional[str],
     custom: Optional[str],
+    dpi: int,
 ) -> None:
     """Render rasterized 2D image from Gerber X3/X2 SOURCE file.
 
@@ -93,6 +101,7 @@ def raster_2d(
         options=Rasterized2DLayerParams(
             source_code=gerber_code,
             colors=get_color_scheme_from_style(style, custom),
+            dpi=dpi,
         ),
     ).render().save(output, format=format_)
 

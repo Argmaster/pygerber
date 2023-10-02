@@ -17,4 +17,4 @@ def test_find_closest_token(asset_loader: AssetLoader) -> None:
         ),
     )
     token = ast.find_closest_token(Position(22, 10))
-    assert isinstance(token, DNNSelectAperture)
+    assert isinstance(token.token, DNNSelectAperture)

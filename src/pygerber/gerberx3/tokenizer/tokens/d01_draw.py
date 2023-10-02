@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
+    from pygerber.gerberx3.language_server._internals.state import LanguageServerState
     from pygerber.gerberx3.parser.state import State
 
 
@@ -239,4 +240,32 @@ class D01Draw(CommandToken):
             f"{self.i.get_gerber_code(indent, endline)}"
             f"{self.j.get_gerber_code(indent, endline)}"
             "D01"
+        )
+
+    def get_operation_specific_info(
+        self,
+        state: LanguageServerState,
+    ) -> str:
+        """Return operation specific extra information about token."""
+        file_state = state.get_by_file_content(self.string)
+        _, parser_state = file_state.parse_until(lambda t, _s: t == self)
+
+        units = parser_state.get_units()
+
+        x0 = parser_state.current_position.x.as_unit(units)
+        y0 = parser_state.current_position.x.as_unit(units)
+
+        x1 = parser_state.parse_coordinate(self.x).as_unit(units)
+        y1 = parser_state.parse_coordinate(self.y).as_unit(units)
+
+        draw_mode = parser_state.draw_mode.to_human_readable()
+
+        aperture = parser_state.get_current_aperture().aperture_id
+
+        u = units.value.lower()
+        d = parser_state.draw_mode.value
+
+        return (
+            f"Draw {draw_mode} (`{d}`) from (`{x0}`{u}, `{y0}`{u}) to "
+            f"(`{x1}`{u}, `{y1}`{u}) with aperture `{aperture}`"
         )

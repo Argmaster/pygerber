@@ -51,7 +51,7 @@ class Parser:
 
         return self.get_draw_commands_handle()
 
-    def parse_iter(self, ast: AST) -> Generator[Token, None, None]:
+    def parse_iter(self, ast: AST) -> Generator[tuple[Token, State], None, None]:
         """Iterate over tokens in stack and parse them."""
         self.state = (
             State()
@@ -63,7 +63,7 @@ class Parser:
         for token in ast.tokens:
             self._update_drawing_state(token)
 
-            yield token
+            yield token, self.state
 
     def get_draw_commands_handle(self) -> DrawCommandsHandle:
         """Return handle to drawing commands."""

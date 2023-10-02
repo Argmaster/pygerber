@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Iterable, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Iterable, Iterator, Optional, Tuple
 
 from pyparsing import col, lineno
 
@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
+    from pygerber.gerberx3.language_server._internals.state import LanguageServerState
     from pygerber.gerberx3.parser.state import State
 
 
@@ -53,7 +54,7 @@ class Token(GerberCode):
 
     @classmethod
     def ensure_type(cls, thing: Any) -> Self:
-        """Ensure that <thing> is a instance of NumericExpression.
+        """Ensure that <thing> is a instance of this class.
 
         Raise TypeError otherwise.
         """
@@ -81,10 +82,10 @@ class Token(GerberCode):
             col(self.location, self.string),
         )
 
-    def get_hover_message(self) -> str:
+    def get_hover_message(self, state: LanguageServerState) -> str:
         """Return language server hover message."""
         ref_doc = "\n".join(s.strip() for s in str(self.__doc__).split("\n"))
-        op_specific_extra = self.get_operation_specific_info()
+        op_specific_extra = self.get_operation_specific_info(state)
         return (
             "```gerber\n"
             f"{self.get_gerber_code_one_line_pretty_display()}"
@@ -93,14 +94,17 @@ class Token(GerberCode):
             "\n"
             "---"
             "\n"
-            f"{op_specific_extra}"
+            f"{op_specific_extra}\n"
             "\n"
             "---"
             "\n"
             f"{ref_doc}"
         )
 
-    def get_operation_specific_info(self) -> str:
+    def get_operation_specific_info(
+        self,
+        state: LanguageServerState,  # noqa: ARG002
+    ) -> str:
         """Return operation specific extra information about token."""
         return ""
 
@@ -111,3 +115,18 @@ class Token(GerberCode):
     ) -> TokenAccessor:
         """Find token closest to specified position."""
         return TokenAccessor(self, parent)
+
+    def get_gerber_code_one_line_pretty_display(self) -> str:
+        """Get gerber code represented by this token."""
+        return self.get_gerber_code()
+
+    def __iter__(self) -> Iterator[Token]:
+        yield self
+
+    def __hash__(self) -> int:
+        return id(self)
+
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, Token):
+            return NotImplemented
+        return id(__value) == id(self)

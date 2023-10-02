@@ -1,7 +1,7 @@
 """Wrapper for flash operation token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Iterable, Iterator, List, Optional, Sequence, Tuple
 
 from pygerber.common.position import Position
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
@@ -98,6 +98,48 @@ class TokenGroup(Token):
         pos: Position,
         parent: TokenAccessor,
     ) -> TokenAccessor:
+        threshold = 10
+        if len(self.tokens) > threshold:
+            return self._find_closest_token_binary(pos, parent)
+
+        return self._find_closest_token_linear(pos, parent)
+
+    def _find_closest_token_binary(
+        self,
+        pos: Position,
+        parent: TokenAccessor,
+    ) -> TokenAccessor:
+        left = 0
+        right = len(self.tokens) - 1
+        center = (left + right) // 2
+
+        while left <= right:
+            center = (left + right) // 2
+            token = self.tokens[center]
+            token_pos = token.get_token_position()
+
+            if token_pos < pos:
+                left = center + 1
+            elif token_pos > pos:
+                right = center - 1
+            else:
+                break
+
+        while ((token := self.tokens[center]).get_token_position()) > pos:
+            center -= 1
+
+        return TokenAccessor(
+            self.tokens[center],
+            parent,
+            self.tokens,
+            center,
+        )
+
+    def _find_closest_token_linear(
+        self,
+        pos: Position,
+        parent: TokenAccessor,
+    ) -> TokenAccessor:
         i = 0
         search_pos = pos
         token = prev_token = self.tokens[i]
@@ -108,10 +150,17 @@ class TokenGroup(Token):
                 return TokenAccessor(
                     prev_token,
                     parent,
-                    self.tokens[:i],
-                    self.tokens[i + 1 :],
+                    self.tokens,
+                    i,
                 )
 
             prev_token = token
 
-        return TokenAccessor(prev_token, parent, self.tokens[:i], self.tokens[i + 1 :])
+        return TokenAccessor(prev_token, parent, self.tokens, i)
+
+    def __iter__(self) -> Iterator[Token]:
+        for token in self.tokens:
+            yield from token
+
+    def __len__(self) -> int:
+        return self.tokens.__len__()

@@ -13,9 +13,30 @@ if TYPE_CHECKING:
 
 
 class Comment(CommandToken):
-    """Comment token.
+    """## 4.1 Comment (G04).
 
-    See section 4.1 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    The G04 command is used for human readable comments. It does not affect the image.
+    The syntax for G04 is as follows.
+
+    ```ebnf
+    G04 = ('G04' string) '*';
+    ```
+
+    The string must follow the string syntax in [3.4.3](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=35).
+
+    ---
+
+    ## Example
+
+    ```gerber
+    G04 This is a comment*
+    G04 The space characters as well as "," and ";" are allowed here.*
+    ```
+
+    ---
+
+    See section 4.1 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=44)
+
     """
 
     def __init__(self, string: str, location: int, content: str) -> None:

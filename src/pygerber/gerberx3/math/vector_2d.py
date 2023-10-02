@@ -75,7 +75,7 @@ class Vector2D(FrozenGeneralModel):
         self,
         other: object,
         op: Callable,
-    ) -> Vector2D:
+    ) -> Self:
         if isinstance(other, Vector2D):
             return self.model_copy(
                 update={

@@ -58,6 +58,13 @@ class Offset(FrozenGeneralModel):
         """Offset in millimeters."""
         return self.value * MM_TO_INCH_MULTIPLIER
 
+    def as_unit(self, unit: Unit) -> Decimal:
+        """Offset in specified unit."""
+        if unit == Unit.Inches:
+            return self.as_inches()
+
+        return self.as_millimeters()
+
     def as_pixels(self, dpi: int | Decimal) -> int:
         """Offset in pixels with respect to drawing DPI."""
         return int(self.as_inches() * dpi)
@@ -118,7 +125,7 @@ class Offset(FrozenGeneralModel):
         self,
         other: object,
         op: Callable,
-    ) -> Offset:
+    ) -> Self:
         if isinstance(other, Offset):
             return self.model_copy(
                 update={

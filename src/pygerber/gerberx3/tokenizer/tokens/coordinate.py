@@ -12,7 +12,12 @@ if TYPE_CHECKING:
 
 
 class Coordinate(GerberCode, FrozenGeneralModel):
-    """Coordinate wrapper class."""
+    """## Coordinate data.
+
+    A number whose interpretation is determined by the FS command. It is used to specify
+    the X and Y coordinates of a point in the image plane and a distance
+    or offset in the X and Y direction.
+    """
 
     coordinate_type: CoordinateType
     sign: CoordinateSign

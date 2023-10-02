@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
+    from pygerber.gerberx3.language_server._internals.state import LanguageServerState
     from pygerber.gerberx3.parser.state import State
 
 
@@ -109,3 +110,22 @@ class D03Flash(CommandToken):
             f"{self.y.get_gerber_code(indent, endline)}"
             "D03"
         )
+
+    def get_operation_specific_info(
+        self,
+        state: LanguageServerState,
+    ) -> str:
+        """Return operation specific extra information about token."""
+        file_state = state.get_by_file_content(self.string)
+        _, parser_state = file_state.parse_until(lambda t, _s: t == self)
+
+        units = parser_state.get_units()
+
+        x1 = parser_state.parse_coordinate(self.x).as_unit(units)
+        y1 = parser_state.parse_coordinate(self.y).as_unit(units)
+
+        aperture = parser_state.get_current_aperture().aperture_id
+
+        u = units.value.lower()
+
+        return f"Flash `{aperture}` on (`{x1}`{u}, `{y1}`{u})"

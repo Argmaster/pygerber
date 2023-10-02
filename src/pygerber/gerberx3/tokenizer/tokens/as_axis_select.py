@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
 
 class AxisSelect(ExtendedCommandToken):
-    """### Axis Select (AS).
+    """## 8.1.2 Axis Select (AS).
 
     The AS command is deprecated since revision I1 from December 2012.
 
@@ -48,8 +48,41 @@ class AxisSelect(ExtendedCommandToken):
 
     The AS command can only be used once, at the beginning of the file.
 
-    See section 8.1.2 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
-    """
+    ### 8.1.2.1 AS Command.
+
+    The syntax for the AS command is:
+
+    ```ebnf
+    AS = '%' (AS' ('AXBY'|'AYBX')) '*%';
+    ```
+
+    - `AS` - AS for Axis Select
+    - `AXBY` - Assign output device axis A to data axis X, output device axis B to data axis Y. This is the default.
+    - `AYBX` - Assign output device axis A to data axis Y, output device axis B to data axis X.
+
+    ---
+
+    ## Example
+
+    Assign output device axis A to data axis X and output device axis B
+    to data axis Y
+
+    ```gerber
+    %ASAXBY*%
+    ```
+
+    Assign output device axis A to data axis Y and output device axis B
+    to data axis X
+
+    ```gerber
+    %ASAYBX*%
+    ```
+
+    ---
+
+    See section 8.1.2 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=175)
+
+    """  # noqa: E501
 
     def __init__(
         self,

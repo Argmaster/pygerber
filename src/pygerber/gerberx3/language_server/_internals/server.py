@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 import pygerber
@@ -12,10 +11,14 @@ from pygerber.gerberx3.language_server import IS_LANGUAGE_SERVER_FEATURE_AVAILAB
 from pygerber.gerberx3.language_server._internals.error import (
     LanguageServerNotAvailableError,
 )
-from pygerber.gerberx3.language_server._internals.tokenization import tokenize
+from pygerber.gerberx3.language_server._internals.errors import EmptyASTError
+from pygerber.gerberx3.language_server._internals.state import LanguageServerState
 
 if TYPE_CHECKING:
     from pygls.server import LanguageServer
+
+
+MAX_CACHE_SIZE = 64
 
 
 def get_language_server() -> LanguageServer:
@@ -39,13 +42,15 @@ def get_language_server() -> LanguageServer:
         MarkupKind,
         MessageType,
     )
-    from pygls import uris
     from pygls.server import LanguageServer
 
     server = LanguageServer(
         "pygerber.gerberx3.language_server",
         f"v{pygerber.__version__}",
+        max_workers=1,
     )
+
+    state = LanguageServerState()
 
     @server.feature(INITIALIZE)
     def _initialize(params: InitializeParams) -> None:
@@ -60,13 +65,8 @@ def get_language_server() -> LanguageServer:
     @server.feature(TEXT_DOCUMENT_HOVER)
     def _text_document_hover(params: HoverParams) -> Optional[Hover]:
         try:
-            file_system_path = uris.to_fs_path(params.text_document.uri)
-            if file_system_path is None:
-                return None
-
-            source = Path(file_system_path).read_text(encoding="utf-8")
-            tokens = tokenize(source=source)
-            token_accessor = tokens.find_closest_token(
+            ast = state.get_by_uri(params.text_document.uri).tokenize()
+            token_accessor = ast.find_closest_token(
                 Position.from_vscode_position(
                     params.position.line,
                     params.position.character,
@@ -82,13 +82,17 @@ def get_language_server() -> LanguageServer:
                 return Hover(
                     contents=MarkupContent(
                         kind=MarkupKind.Markdown,
-                        value=token.get_hover_message(),
+                        value=token.get_hover_message(state),
                     ),
                 )
 
             logging.info(
                 "Missing token for hover location %s",
                 params.position,
+            )
+        except EmptyASTError:
+            logging.warning(
+                "AST for this file is empty, couldn't determine hover message.",
             )
         except Exception:
             logging.exception("DOCUMENT HOVER CRASHED.")

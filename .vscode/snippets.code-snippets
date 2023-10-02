@@ -21,19 +21,23 @@
 		"body": [
 			"\"\"\"## ${1:spec section} ${2:section title}",
 			"",
-			"${3:description}",
+			"${4:description}",
+			"",
+			"```ebnf",
+			"${5:syntax}",
+			"```"
 			"",
 			"---",
 			"",
 			"## Example",
 			"",
 			"```gerber",
-			"${4:example gerber code}",
+			"${6:example gerber code}",
 			"```"
 			""
 			"---",
 			"",
-			"See section $1 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=${5:page})",
+			"See section $1 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=${3:page})",
 			"",
 			"\"\"\"  # noqa: E501",
 		]
