@@ -48,6 +48,6 @@ def save_token_stack(
     output_directory = Path(test_file_path).parent / ".output" / directory
     output_directory.mkdir(0o777, parents=True, exist_ok=True)
     token_file_path = (output_directory / file_name).with_suffix(".txt")
-    content = stack.format_gerberx3()
+    content = stack.get_gerber_code()
     token_file_path.touch(0o777, exist_ok=True)
     token_file_path.write_text(content)
