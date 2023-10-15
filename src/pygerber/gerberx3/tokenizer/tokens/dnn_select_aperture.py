@@ -6,10 +6,12 @@ from typing import TYPE_CHECKING, Any, Iterable, Tuple
 from pydantic_core import CoreSchema, core_schema
 
 from pygerber.gerberx3.parser.errors import ApertureNotDefinedError
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
+from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
 
 if TYPE_CHECKING:
     from pydantic import GetCoreSchemaHandler
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
@@ -17,21 +19,50 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class DNNSelectAperture(Token):
-    """Wrapper for aperture select token.
+class DNNSelectAperture(CommandToken):
+    """## 4.6 Current Aperture (Dnn).
 
-    Sets the current aperture to D code NN (NN ≥ 10).
+    The command Dnn (nn≥10) sets the current aperture graphics state parameter. The syntax is:
 
-    See section 4.6 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
-    """
+    ```ebnf
+    Dnn = 'D unsigned_integer '*';
+    ```
 
-    aperture_id: ApertureID
+    - `D` - Command code.
+    - `<aperture number>` - The aperture number (integer ≥10). An aperture with that number must be in the apertures dictionary.
+
+    D-commands 0 to 9 are reserved and cannot be used for apertures. The D01 and D03
+    commands use the current aperture to create track and flash graphical objects.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    D10*
+    ```
+
+    ---
+
+    See section 4.6 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=75)
+
+    """  # noqa: E501
+
+    def __init__(self, string: str, location: int, aperture_id: ApertureID) -> None:
+        super().__init__(string, location)
+        self.aperture_id = aperture_id
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
-        aperture_id: ApertureID = tokens["aperture_identifier"]
-        return cls(aperture_id=aperture_id)
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
+        return cls(
+            string=string,
+            location=location,
+            aperture_id=ApertureID(tokens["aperture_identifier"]),
+        )
 
     def update_drawing_state(
         self,
@@ -50,11 +81,16 @@ class DNNSelectAperture(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return f"{self.aperture_id}*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}{self.aperture_id.get_gerber_code(indent, endline)}"
 
 
-class ApertureID(str):
+class ApertureID(str, GerberCode):
     """Aperture ID wrapper."""
 
     __slots__ = ()
@@ -67,3 +103,11 @@ class ApertureID(str):
     ) -> CoreSchema:
         """Generate the pydantic-core schema."""
         return core_schema.no_info_after_validator_function(cls, handler(str))
+
+    def get_gerber_code(
+        self,
+        indent: str = "",  # noqa: ARG002
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{self}"

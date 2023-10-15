@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterable, Tuple
 
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class SetSingleQuadrantMode(Token):
+class SetSingleQuadrantMode(CommandToken):
     """Wrapper for G74 token.
 
     Sets single quadrant mode - Rarely used, and then typically without effect.
@@ -21,7 +21,6 @@ class SetSingleQuadrantMode(Token):
     In single quadrant mode the arc is not allowed to extend over more than 90°.
 
     See:
-    -   section 4.8 of The Gerber Layer Format Specification Revision 2020.09 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2020_09.html
     -   section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     -   section 8.1.10 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
@@ -42,5 +41,10 @@ class SetSingleQuadrantMode(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return "G74*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}G74"

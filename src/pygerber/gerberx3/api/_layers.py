@@ -24,7 +24,7 @@ from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser.parser import Parser, ParserOnErrorAction, ParserOptions
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 
 if TYPE_CHECKING:
     from PIL import Image

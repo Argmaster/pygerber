@@ -1,49 +1,127 @@
-"""Wrapper for plot operation token."""
+"""Plot (D01) logic."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generator, Iterable, Tuple
+from typing import TYPE_CHECKING, Generator, Iterable, Tuple
 
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import DrawMode, Polarity
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
-from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
+    from pygerber.gerberx3.language_server._internals.state import LanguageServerState
     from pygerber.gerberx3.parser.state import State
 
 
-class D01Draw(Token):
-    """Wrapper for plot operation token.
+class D01Draw(CommandToken):
+    """## 4.8.2 Plot (D01).
 
-    Outside a region statement D01 creates a draw or arc object with the current
-    aperture. Inside it adds a draw/arc segment to the contour under construction. The
-    current point is moved to draw/arc end point after the creation of the draw/arc.
+    Performs a plotting operation, creating a draw or an arc segment. The plot state defines which
+    type of segment is created, see 4.7. The syntax depends on the required parameters, and,
+    hence, on the plot state.
 
-    See section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
-    """
+    D01 creates a linear or circular line segment by plotting from the current point to the
+    coordinate pair in the command. Outside a region statement (see 2.3.2) these segments
+    are converted to draw or arc objects by stroking them with the current aperture (see 2.3.1).
+    Within a region statement these segments form a contour defining a region (see 4.10). The
+    effect of D01, e.g. whether a straight or circular segment is created, depends on the
+    graphics state (see 2.3.2).
 
-    x: Coordinate
-    y: Coordinate
-    i: Coordinate
-    j: Coordinate
+    ### Syntax
+
+    For linear (G01):
+
+    ```ebnf
+    D01 = (['X' x_coordinate] ['Y' y_coordinate] 'D01') '*';
+    ```
+
+    For Circular (G02|G03)
+
+    ```ebnf
+    D01 = (['X' x_coordinate] ['Y' y_coordinate] 'I' x_offset 'J' y-offset ) 'D01' '*';
+    ```
+
+    - x_coordinate - `<Coordinate>` is coordinate data - see section 0. It defines the X coordinate of the
+        new current point. The default is the X coordinate of the old current point.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    X275000Y115000D02*
+    G01*
+    X2512000Y115000D01*
+    G75*
+    G03*
+    X5005000Y3506000I3000J0D01*
+    G01*
+    X15752000D01*
+    Y12221000D01*
+    ```
+
+    ---
+
+    See section 4.8.2 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=83)
+
+    """  # noqa: E501
+
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        x: Coordinate,
+        y: Coordinate,
+        i: Coordinate,
+        j: Coordinate,
+    ) -> None:
+        super().__init__(string, location)
+        self.x = x
+        self.y = y
+        self.i = i
+        self.j = j
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         x = tokens.get("x")
-        x = Coordinate.new(coordinate_type=CoordinateType.X, offset=x)
+        x = Coordinate.new(
+            coordinate_type=CoordinateType.X,
+            offset=str(x) if x is not None else None,
+        )
         y = tokens.get("y")
-        y = Coordinate.new(coordinate_type=CoordinateType.Y, offset=y)
+        y = Coordinate.new(
+            coordinate_type=CoordinateType.Y,
+            offset=str(y) if y is not None else None,
+        )
         i = tokens.get("i")
-        i = Coordinate.new(coordinate_type=CoordinateType.I, offset=i)
+        i = Coordinate.new(
+            coordinate_type=CoordinateType.I,
+            offset=str(i) if i is not None else None,
+        )
         j = tokens.get("j")
-        j = Coordinate.new(coordinate_type=CoordinateType.J, offset=j)
-        return cls(x=x, y=y, i=i, j=j)
+        j = Coordinate.new(
+            coordinate_type=CoordinateType.J,
+            offset=str(j) if j is not None else None,
+        )
+
+        return cls(
+            string=string,
+            location=location,
+            x=x,
+            y=y,
+            i=i,
+            j=j,
+        )
 
     def update_drawing_state(
         self,
@@ -93,7 +171,7 @@ class D01Draw(Token):
             draw_commands,
         )
 
-    def _create_region_points(  # noqa: PLR0913
+    def _create_region_points(
         self,
         state: State,
         backend: Backend,
@@ -132,7 +210,7 @@ class D01Draw(Token):
         else:
             raise NotImplementedError(state.draw_mode)
 
-    def _create_draw_commands(  # noqa: PLR0913
+    def _create_draw_commands(
         self,
         state: State,
         backend: Backend,
@@ -192,5 +270,45 @@ class D01Draw(Token):
             other=current_aperture.drawing_target,
         )
 
-    def __str__(self) -> str:
-        return f"{self.x}{self.y}{self.i}{self.j}D01*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return (
+            f"{indent}"
+            f"{self.x.get_gerber_code(indent, endline)}"
+            f"{self.y.get_gerber_code(indent, endline)}"
+            f"{self.i.get_gerber_code(indent, endline)}"
+            f"{self.j.get_gerber_code(indent, endline)}"
+            "D01"
+        )
+
+    def get_operation_specific_info(
+        self,
+        state: LanguageServerState,
+    ) -> str:
+        """Return operation specific extra information about token."""
+        file_state = state.get_by_file_content(self.string)
+        _, parser_state = file_state.parse_until(lambda t, _s: t == self)
+
+        units = parser_state.get_units()
+
+        x0 = parser_state.current_position.x.as_unit(units)
+        y0 = parser_state.current_position.x.as_unit(units)
+
+        x1 = parser_state.parse_coordinate(self.x).as_unit(units)
+        y1 = parser_state.parse_coordinate(self.y).as_unit(units)
+
+        draw_mode = parser_state.draw_mode.to_human_readable()
+
+        aperture = parser_state.get_current_aperture().aperture_id
+
+        u = units.value.lower()
+        d = parser_state.draw_mode.value
+
+        return (
+            f"Draw {draw_mode} (`{d}`) from (`{x0}`{u}, `{y0}`{u}) to "
+            f"(`{x1}`{u}, `{y1}`{u}) with aperture `{aperture}`"
+        )

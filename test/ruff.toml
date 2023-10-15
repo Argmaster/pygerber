@@ -1,6 +1,8 @@
 extend = "../pyproject.toml"
 ignore = [
-    "S101", # Assertions are OK in test code.
-    "N802", # Project names are used as test names thus causing conflicts with this rule.
-    "D",    # Only limited docstrings are required.
+    "S101",   # Assertions are OK in test code.
+    "N802",   # Project names are used as test names thus causing conflicts with this rule.
+    "D",      # Only limited docstrings are required.
+    "SLF001", # Tests can access private members.
+    "E501",   # Sometimes test data cant be truncated to desired line width.
 ]

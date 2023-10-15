@@ -1,6 +1,7 @@
 """Module contains handle class to drawing instructions visualization."""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from PIL import Image
@@ -9,7 +10,6 @@ from pygerber.backend.abstract.result_handle import ResultHandle
 
 if TYPE_CHECKING:
     from io import BytesIO
-    from pathlib import Path
 
 
 class Rasterized2DResultHandle(ResultHandle):
@@ -41,7 +41,12 @@ class Rasterized2DResultHandle(ResultHandle):
             Extra parameters which will be passed to `Image.save()`.
             For details see [Pillow documentation](https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save).
         """
-        self.get_image().save(dest, **kwargs)
+        image = self.get_image()
+        if (isinstance(dest, Path) and dest.suffix in (".jpg", "jpeg")) or (
+            isinstance(dest, str) and (dest.endswith((".jpg", ".jpeg")))
+        ):
+            image = image.convert("RGB")
+        image.save(dest, **kwargs)
 
     def get_image(self) -> Image.Image:
         """Get result image object."""

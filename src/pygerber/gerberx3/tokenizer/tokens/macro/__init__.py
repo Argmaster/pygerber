@@ -1,6 +1,6 @@
 """The AM command creates a macro aperture template and adds it to the aperture template
 dictionary (see 2.2). A template is a parametrized shape. The AD command instantiates a
-template into an aperture by suppling values to the template parameters.
+template into an aperture by supplying values to the template parameters.
 
 Templates of any shape or parametrization can be created. Multiple simple shapes called
 primitives can be combined in a single template. An aperture macro can contain variables

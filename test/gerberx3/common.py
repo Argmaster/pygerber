@@ -5,7 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable
 
-from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer, TokenStack
+from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
+from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
 
 if TYPE_CHECKING:
     from test.conftest import AssetLoader
@@ -28,7 +29,7 @@ def tokenize_gerberx3(
     file_name: str,
     *,
     only_expressions: bool = False,
-) -> TokenStack:
+) -> AST:
     string = asset_loader.load_asset(f"gerberx3/{directory}/{file_name}").decode(
         "utf-8",
     )
@@ -39,7 +40,7 @@ def tokenize_gerberx3(
 
 
 def save_token_stack(
-    stack: TokenStack,
+    stack: AST,
     test_file_path: str,
     directory: Path,
     file_name: str,
@@ -47,6 +48,6 @@ def save_token_stack(
     output_directory = Path(test_file_path).parent / ".output" / directory
     output_directory.mkdir(0o777, parents=True, exist_ok=True)
     token_file_path = (output_directory / file_name).with_suffix(".txt")
-    content = stack.format_gerberx3()
+    content = stack.get_gerber_code()
     token_file_path.touch(0o777, exist_ok=True)
     token_file_path.write_text(content)

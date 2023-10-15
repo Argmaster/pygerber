@@ -19,8 +19,8 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.backend.abstract.draw_commands_handle import DrawCommandsHandle
-    from pygerber.gerberx3.tokenizer.tokenizer import TokenStack
-    from pygerber.gerberx3.tokenizer.tokens.token import Token
+    from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
+    from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
 
 
 class Parser:
@@ -38,21 +38,6 @@ class Parser:
             Additional options for modifying parser behavior.
         """
         self.options = ParserOptions() if options is None else options
-
-    @property
-    def backend(self) -> Backend:
-        """Get reference to backend object."""
-        return self.options.backend
-
-    def parse(self, tokens: TokenStack) -> DrawCommandsHandle:
-        """Parse token stack."""
-        for _ in self.parse_iter(tokens):
-            pass
-
-        return self.get_draw_commands_handle()
-
-    def parse_iter(self, tokens: TokenStack) -> Generator[Token, None, None]:
-        """Iterate over tokens in stack and parse them."""
         self.state = (
             State()
             if self.options.initial_state is None
@@ -60,10 +45,31 @@ class Parser:
         )
         self.draw_actions: list[DrawCommand] = []
 
-        for token in tokens:
+    @property
+    def backend(self) -> Backend:
+        """Get reference to backend object."""
+        return self.options.backend
+
+    def parse(self, ast: AST) -> DrawCommandsHandle:
+        """Parse token stack."""
+        for _ in self.parse_iter(ast):
+            pass
+
+        return self.get_draw_commands_handle()
+
+    def parse_iter(self, ast: AST) -> Generator[tuple[Token, State], None, None]:
+        """Iterate over tokens in stack and parse them."""
+        self.state = (
+            State()
+            if self.options.initial_state is None
+            else self.options.initial_state
+        )
+        self.draw_actions = []
+
+        for token in ast.tokens:
             self._update_drawing_state(token)
 
-            yield token
+            yield token, self.state
 
     def get_draw_commands_handle(self) -> DrawCommandsHandle:
         """Return handle to drawing commands."""
@@ -96,8 +102,9 @@ class Parser:
             elif self.options.on_update_drawing_state_error == ParserOnErrorAction.Warn:
                 logging.warning(
                     "Encountered fatal error during call to update_drawing_state() "
-                    "of '%s' token. Parser will skip this token and continue.",
+                    "of '%s' token %s. Parser will skip this token and continue.",
                     token,
+                    token.get_token_position(),
                 )
             else:
                 self.options.on_update_drawing_state_error(e, self, token)

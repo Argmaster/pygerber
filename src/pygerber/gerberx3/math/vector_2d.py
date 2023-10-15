@@ -5,10 +5,13 @@ from __future__ import annotations
 import math
 import operator
 from decimal import Decimal
-from typing import Callable, ClassVar
+from typing import TYPE_CHECKING, Callable, ClassVar
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.offset import Offset
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class Vector2D(FrozenGeneralModel):
@@ -72,7 +75,7 @@ class Vector2D(FrozenGeneralModel):
         self,
         other: object,
         op: Callable,
-    ) -> Vector2D:
+    ) -> Self:
         if isinstance(other, Vector2D):
             return self.model_copy(
                 update={
@@ -96,16 +99,16 @@ class Vector2D(FrozenGeneralModel):
             )
         return NotImplemented  # type: ignore[unreachable]
 
-    def __iadd__(self, other: object) -> Vector2D:
+    def __iadd__(self, other: object) -> Self:
         return self._i_operator(other, operator.add)
 
-    def __isub__(self, other: object) -> Vector2D:
+    def __isub__(self, other: object) -> Self:
         return self._i_operator(other, operator.sub)
 
-    def __imul__(self, other: object) -> Vector2D:
+    def __imul__(self, other: object) -> Self:
         return self._i_operator(other, operator.mul)
 
-    def __itruediv__(self, other: object) -> Vector2D:
+    def __itruediv__(self, other: object) -> Self:
         return self._i_operator(other, operator.truediv)
 
     def __str__(self) -> str:
