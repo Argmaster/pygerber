@@ -38,6 +38,12 @@ class Parser:
             Additional options for modifying parser behavior.
         """
         self.options = ParserOptions() if options is None else options
+        self.state = (
+            State()
+            if self.options.initial_state is None
+            else self.options.initial_state
+        )
+        self.draw_actions: list[DrawCommand] = []
 
     @property
     def backend(self) -> Backend:
@@ -58,7 +64,7 @@ class Parser:
             if self.options.initial_state is None
             else self.options.initial_state
         )
-        self.draw_actions: list[DrawCommand] = []
+        self.draw_actions = []
 
         for token in ast.tokens:
             self._update_drawing_state(token)
