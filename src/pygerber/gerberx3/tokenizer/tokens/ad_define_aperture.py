@@ -1,4 +1,4 @@
-"""Wrapper for aperture definition token.
+"""AD Command logic.
 
 Generally, apertures with size zero are invalid, and so are objects created with them.
 There is one exception. The C (circular) standard aperture with zero diameter is
@@ -674,10 +674,81 @@ class DefinePolygon(DefineAperture):
 
 
 class DefineMacro(DefineAperture):
-    """Wrapper for aperture definition token.
+    """## 4.3.1 AD Command.
 
-    Defines a macro based aperture.
-    """
+    The AD command creates an aperture, attaches the aperture attributes at that moment in the
+    attribute dictionary to it and adds it to the apertures dictionary.
+
+    ```ebnf
+    AD = '%' ('AD' aperture_ident template_call) '*%';
+    template_call = template_name [',' parameter {'X' parameter}*];
+    ```
+
+    The AD command must precede the first use of the aperture. It is recommended to put all AD
+    commands in the file header.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %ADD10C,.025*%
+    %ADD10C,0.5X0.25*%
+    ```
+
+    ---
+
+    See section 4.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=48)
+
+    ---
+
+    ## 4.5 Aperture Macro (AM)
+
+    The AM command creates a macro aperture template and adds it to the aperture template
+    dictionary (see 2.2). A template is a parametrized shape. The AD command instantiates a
+    template into an aperture by supplying values to the template parameters.
+
+    Templates of any shape or parametrization can be created. Multiple simple shapes called
+    primitives can be combined in a single template. An aperture macro can contain variables
+    whose actual values are defined by:
+
+    - Values provided by the AD command,
+    - Arithmetic expressions with other variables.
+
+    The template is created by positioning primitives in a coordinate space. The origin of that
+    coordinate space will be the origin of all apertures created with the state.
+
+    A template must be defined before the first AD that refers to it. The AM command can be used
+    multiple times in a file.
+
+    Attributes are not attached to templates. They are attached to the aperture at the time of its
+    creation with the AD command.
+
+    An AM command contains the following words:
+
+    - The AM declaration with the macro name
+    - Primitives with their comma-separated parameters
+    - Macro variables, defined by an arithmetic expression
+
+    ```ebnf
+    AM = '%' ('AM' macro_name macro_body) '%';
+    macro_name = name '*';
+    macro_body = {in_macro_block}+;
+    in_macro_block =
+    |primitive
+    |variable_definition
+    ;
+    variable_definition = (macro_variable '=' expression) '*';
+    macro_variable = '$' positive_integer;
+    primitive = primitive_code {',' par}*
+    par = ',' (expression);
+    ```
+
+    ---
+
+    See section 4.5 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=56)
+
+    """  # noqa: E501
 
     def __init__(
         self,

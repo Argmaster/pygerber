@@ -1,4 +1,4 @@
-"""Wrapper for plot operation token."""
+"""Plot (D01) logic."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generator, Iterable, Tuple
@@ -20,14 +20,57 @@ if TYPE_CHECKING:
 
 
 class D01Draw(CommandToken):
-    """Wrapper for plot operation token.
+    """## 4.8.2 Plot (D01).
 
-    Outside a region statement D01 creates a draw or arc object with the current
-    aperture. Inside it adds a draw/arc segment to the contour under construction. The
-    current point is moved to draw/arc end point after the creation of the draw/arc.
+    Performs a plotting operation, creating a draw or an arc segment. The plot state defines which
+    type of segment is created, see 4.7. The syntax depends on the required parameters, and,
+    hence, on the plot state.
 
-    See section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
-    """
+    D01 creates a linear or circular line segment by plotting from the current point to the
+    coordinate pair in the command. Outside a region statement (see 2.3.2) these segments
+    are converted to draw or arc objects by stroking them with the current aperture (see 2.3.1).
+    Within a region statement these segments form a contour defining a region (see 4.10). The
+    effect of D01, e.g. whether a straight or circular segment is created, depends on the
+    graphics state (see 2.3.2).
+
+    ### Syntax
+
+    For linear (G01):
+
+    ```ebnf
+    D01 = (['X' x_coordinate] ['Y' y_coordinate] 'D01') '*';
+    ```
+
+    For Circular (G02|G03)
+
+    ```ebnf
+    D01 = (['X' x_coordinate] ['Y' y_coordinate] 'I' x_offset 'J' y-offset ) 'D01' '*';
+    ```
+
+    - x_coordinate - `<Coordinate>` is coordinate data - see section 0. It defines the X coordinate of the
+        new current point. The default is the X coordinate of the old current point.
+
+    ---
+
+    ## Example
+
+    ```gerber
+    X275000Y115000D02*
+    G01*
+    X2512000Y115000D01*
+    G75*
+    G03*
+    X5005000Y3506000I3000J0D01*
+    G01*
+    X15752000D01*
+    Y12221000D01*
+    ```
+
+    ---
+
+    See section 4.8.2 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=83)
+
+    """  # noqa: E501
 
     def __init__(
         self,

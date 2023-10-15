@@ -18,12 +18,32 @@ if TYPE_CHECKING:
 
 
 class D02Move(CommandToken):
-    """Wrapper for move operation token.
+    """## 4.8.3 Move (D02).
 
-    D02 moves the current point to the coordinate in the command. No graphical object is
-    generated.
+    Moves the current point to the (X,Y) in the comment. The syntax is:
 
-    See section 4.8.3 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    ```ebnf
+    D02 = (['X' x_coordinate] ['Y' y_coordinate] 'D02') '*';
+    ```
+
+    - x_coordinate - `<Coordinate>` is coordinate data - see section 0. It defines the X
+        coordinate of the new current point. The default is the X coordinate of
+        the old current point.
+    - y_coordinate - As above, but for the Y coordinate.
+    - D02 - Move operation code
+
+    ---
+
+    ## Example
+
+    ```gerber
+    X2152000Y1215000D02*
+    ```
+
+    ---
+
+    See section 4.8.3 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=83)
+
     """
 
     def __init__(
