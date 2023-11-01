@@ -35,38 +35,19 @@ with support for most of deprecated features along with support for modern ones.
 
 - [x] Tokenizer
 - [x] Parser
+- [ ] Optimizer
 - [x] Rasterized 2D rendering engine (With
       [Pillow](https://github.com/python-pillow/Pillow))
 - [ ] Vector 2D rendering engine (With [drawsvg](https://github.com/cduck/drawsvg))
 - [ ] Model 3D rendering engine (With [Blender](https://www.blender.org/))
 - [ ] Formatter
 - [ ] Linter (eg. deprecated syntax detection)
+- [x] Gerber X3/X2 Language Server (with `language-server` extras)
 
 You can view progress of development in
 [Gerber features support](#gerber-features-support) section down below. All Gerber
 source files which can be redistributed under MIT license and included in this
 repository for testing purposes will be greatly appreciated.
-
-## Syntax feature requests
-
-All deprecated features (Mainly those from X2 format) are considered optional and
-priority to implement them will be assigned based on number of requests form community.
-
-If You needs support for syntax features which are not mentioned in
-`The Gerber Layer Format Specification. Revision 2023.03` (Available on
-[Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-03_en.pdf)
-and in
-[this repository](https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-03_en.pdf))
-and this feature is not already listed in Support paragraph, please open a new Feature
-request issue.
-
-**Feature request Issue should contain:**
-
-- detailed description how requested feature works,
-- code samples for testing the feature,
-- reference images (only applies to features changing image look).
-
-**Requests which don't comply with those guidelines will be considered low priority.**
 
 ## Installation
 
@@ -82,7 +63,54 @@ Alternatively, it is also possible to install it directly from repository:
 pip install git+https://github.com/Argmaster/pygerber
 ```
 
-## Usage
+### Language Server
+
+Since release 2.1.0 PyGerber now provides Gerber X3/X2 Language Server with
+[LSP](https://microsoft.github.io/language-server-protocol/) support. It can be enabled
+by installing PyGerber extras set `language-server` with following command:
+
+```
+pip install pygerber[language-server]
+```
+
+Afterwards you can use `pygerber is-language-server-available` to check if language
+server was correctly enabled. Please report all issues in
+[PyGerber Issues](https://github.com/Argmaster/pygerber/issues) section.
+
+## Command line usage
+
+After installing `pygerber`, depending on your environment, it should become available
+in your command line:
+
+```bash
+pygerber --version
+```
+
+Output should be similar to one below **⇩**, where `x.y.z` should match version of
+PyGerber installed.
+
+```
+$ pygerber --version
+pygerber, version x.y.z
+```
+
+Use `--help` to display help messages with lists of subcommands and subcommand options:
+
+```
+pygerber raster-2d --help
+```
+
+To render 2D PNG image of some gerber file you can simply use:
+
+```
+pygerber raster-2d gerber-source.grb
+```
+
+Image will be saved to `output.png` in current working directory.
+
+![example_pcb_image](https://github.com/Argmaster/pygerber/assets/56170852/9bca28bf-8aa6-4215-aac1-62c386490485)
+
+## API usage
 
 PyGerber offers a high-level API that simplifies the process of rendering Gerber files.
 Whether you're looking to save the rendered output to a file or directly into a buffer,
@@ -440,6 +468,27 @@ Supported **DEPRECATED** Gerber features:
 
 **IMPORTANT** This feature list is incomplete, it will get longer over time ...
 
+## Syntax feature requests
+
+All deprecated features (Mainly those from X2 format) are considered optional and
+priority to implement them will be assigned based on number of requests form community.
+
+If You needs support for syntax features which are not mentioned in
+`The Gerber Layer Format Specification. Revision 2023.08` (Available on
+[Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf)
+and in
+[this repository](https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-08_en.pdf))
+and this feature is not already listed in Support paragraph, please open a new Feature
+request issue.
+
+**Feature request Issue should contain:**
+
+- detailed description how requested feature works,
+- code samples for testing the feature,
+- reference images (only applies to features changing image look).
+
+**Requests which don't comply with those guidelines will be considered low priority.**
+
 ## Development
 
 To quickly set up development environment, first you have to install `poetry` globally:
@@ -487,3 +536,10 @@ poetry build
 
 Check `dist` directory within current working directory, `pygerber-x.y.z.tar.gz` and
 `pygerber-x.y.z-py3-none-any.whl` should be there.
+
+## Gerber reference archive
+
+This repository contains also archival reference files. Although new specs contain
+dedicated changelog section it may still be helpful in some rare cases to look through
+old Gerber specs. Archival files can be found
+[here](https://github.com/Argmaster/pygerber/tree/main/docs/gerber_specification).

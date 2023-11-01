@@ -1,12 +1,15 @@
 """Wrapper for load polarity token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import Polarity
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
@@ -14,19 +17,31 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class LoadPolarity(Token):
+class LoadPolarity(ExtendedCommandToken):
     """Wrapper for load polarity token.
 
     Loads the scale object transformation parameter.
+
+    See section 4.9.2 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
-    polarity: Polarity
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        polarity: Polarity,
+    ) -> None:
+        super().__init__(string, location)
+        self.polarity = polarity
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         polarity = Polarity(tokens["polarity"])
-        return cls(polarity=polarity)
+        return cls(string=string, location=location, polarity=polarity)
 
     def update_drawing_state(
         self,
@@ -43,5 +58,10 @@ class LoadPolarity(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return f"LP{self.polarity.value}*"
+    def get_gerber_code(
+        self,
+        indent: str = "",  # noqa: ARG002
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"LP{self.polarity.value}"

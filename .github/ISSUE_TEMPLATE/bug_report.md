@@ -30,7 +30,8 @@ If applicable, add screenshots to help explain your problem.
 **Desktop (please complete the following information):**
 
 - OS: [e.g. iOS]
-- PyGerber Version [e.g. 2.0.0]
+- Python version: [e.g. 3.8.13]
+- PyGerber version: [e.g. 2.0.0]
 
 **Additional context**
 

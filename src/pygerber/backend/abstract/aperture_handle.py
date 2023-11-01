@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from functools import cached_property
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import TYPE_CHECKING, Optional
 
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.draw_commands.draw_circle import (
@@ -22,9 +22,6 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-
-
-ExcType = TypeVar("ExcType", bound=BaseException)
 
 
 class PrivateApertureHandle:
@@ -59,8 +56,8 @@ class PrivateApertureHandle:
 
     def __exit__(
         self,
-        exc_type: Optional[type[ExcType]],
-        exc_value: Optional[ExcType],
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> None:
         if exc_type is None:

@@ -5,7 +5,8 @@ import logging
 from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import Unit
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
+from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
@@ -13,13 +14,15 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class SetUnitMillimeters(Token):
+class SetUnitMillimeters(CommandToken):
     """Wrapper for G71 token.
 
     Set the `Unit` to millimeter.
 
-    This historic codes perform a function handled by the MO command. See 4.2.1.
+    This historic codes perform a function handled by the MO command.
     Sometimes used. Deprecated in 2012
+
+    See section 4.2.1 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     def update_drawing_state(
@@ -28,10 +31,12 @@ class SetUnitMillimeters(Token):
         _backend: Backend,
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set drawing polarity."""
+        warn_deprecated_code("G71", "8.1")
         if state.draw_units is not None:
             logging.warning(
-                "Overriding coordinate format is illegal. "
-                "(See 4.2.1 in Gerber Layer Format Specification)",
+                "Overriding coordinate units is illegal. "
+                "(See section 4.2.2 of The Gerber Layer Format Specification "
+                "Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html)",
             )
         return (
             state.model_copy(
@@ -42,5 +47,10 @@ class SetUnitMillimeters(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return "G71*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}G71"

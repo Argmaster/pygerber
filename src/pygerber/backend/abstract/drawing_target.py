@@ -1,15 +1,13 @@
 """Target for Draw commands to draw into."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import TYPE_CHECKING, Optional
 
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.vector_2d import Vector2D
 
 if TYPE_CHECKING:
     from types import TracebackType
-
-ExcType = TypeVar("ExcType", bound=BaseException)
 
 
 class DrawingTarget:
@@ -28,8 +26,8 @@ class DrawingTarget:
 
     def __exit__(
         self,
-        exc_type: Optional[type[ExcType]],
-        exc_value: Optional[ExcType],
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> None:
         if exc_type is None:

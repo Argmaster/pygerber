@@ -1,7 +1,9 @@
 """Base class for creating components for aperture creation."""
 from __future__ import annotations
 
+import math
 from functools import cached_property
+from typing import Generator
 
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
@@ -79,3 +81,39 @@ class DrawArc(DrawCommand):
         return (vertex_box + (self.arc_center_absolute + radius)) + (
             vertex_box + (self.arc_center_absolute - radius)
         )
+
+    def _calculate_angles(self) -> tuple[float, float]:
+        angle_start = self.arc_space_start_position.angle_between_clockwise(
+            Vector2D.UNIT_Y,
+        )
+        angle_end = self.arc_space_end_position.angle_between_clockwise(Vector2D.UNIT_Y)
+
+        if self.is_multi_quadrant and angle_start == angle_end:
+            angle_start = 0
+            angle_end = 360
+
+        elif self.is_clockwise:
+            angle_start, angle_end = angle_end, angle_start
+
+        return angle_start, angle_end
+
+    def calculate_arc_points(self) -> Generator[Vector2D, None, None]:
+        """Calculate points on arc."""
+        angle_start, angle_end = self._calculate_angles()
+
+        angle_step = 1
+        angle_min = min(angle_start, angle_end)
+        angle_max = max(angle_start, angle_end)
+
+        angle_current = angle_min
+
+        yield self.arc_center_absolute
+
+        while angle_current < (angle_max + angle_step):
+            yield self.arc_center_absolute + Vector2D(
+                x=self.arc_radius * math.cos(math.radians(angle_current)),
+                y=self.arc_radius * math.sin(math.radians(angle_current)),
+            )
+            angle_current += angle_step
+
+        yield self.arc_center_absolute

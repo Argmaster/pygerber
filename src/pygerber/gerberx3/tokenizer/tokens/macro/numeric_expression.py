@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.math.offset import Offset
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
@@ -13,7 +13,32 @@ if TYPE_CHECKING:
 
 
 class NumericExpression(Token):
-    """Wrapper for in-macro numeric expression."""
+    """## 4.5.4.2 Arithmetic Expressions.
+
+    A parameter value can also be defined by an arithmetic expression consisting of integer and
+    decimal constants, other variables, arithmetic operators and the brackets "(" and ")". The
+    standard arithmetic precedence rules apply. The following arithmetic operators are available:
+
+    ---
+
+    ## Example
+
+    ```gerber
+    %AMRect*
+    21,1,$1,$2-2x$3,-$4,-$5+$2,0*%
+    ```
+
+    The corresponding AD command could be:
+
+    ```gerber
+    %ADD146Rect,0.0807087X0.1023622X0.0118110X0.5000000X0.3000000*%
+    ```
+
+    ---
+
+    See section 4.5.4.2 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=70)
+
+    """  # noqa: E501
 
     def evaluate_numeric(
         self,

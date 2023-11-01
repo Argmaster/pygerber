@@ -58,6 +58,13 @@ class Offset(FrozenGeneralModel):
         """Offset in millimeters."""
         return self.value * MM_TO_INCH_MULTIPLIER
 
+    def as_unit(self, unit: Unit) -> Decimal:
+        """Offset in specified unit."""
+        if unit == Unit.Inches:
+            return self.as_inches()
+
+        return self.as_millimeters()
+
     def as_pixels(self, dpi: int | Decimal) -> int:
         """Offset in pixels with respect to drawing DPI."""
         return int(self.as_inches() * dpi)
@@ -118,7 +125,7 @@ class Offset(FrozenGeneralModel):
         self,
         other: object,
         op: Callable,
-    ) -> Offset:
+    ) -> Self:
         if isinstance(other, Offset):
             return self.model_copy(
                 update={
@@ -133,16 +140,16 @@ class Offset(FrozenGeneralModel):
             )
         return NotImplemented  # type: ignore[unreachable]
 
-    def __iadd__(self, other: object) -> Offset:
+    def __iadd__(self, other: object) -> Self:
         return self._i_operator(other, operator.add)
 
-    def __isub__(self, other: object) -> Offset:
+    def __isub__(self, other: object) -> Self:
         return self._i_operator(other, operator.sub)
 
-    def __imul__(self, other: object) -> Offset:
+    def __imul__(self, other: object) -> Self:
         return self._i_operator(other, operator.mul)
 
-    def __itruediv__(self, other: object) -> Offset:
+    def __itruediv__(self, other: object) -> Self:
         return self._i_operator(other, operator.truediv)
 
     def __str__(self) -> str:

@@ -23,7 +23,7 @@ class DrawPolygon(DrawCommand):
     number_of_vertices: int
     rotation: Decimal
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         backend: Backend,
         polarity: Polarity,

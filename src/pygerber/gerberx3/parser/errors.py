@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
+
 
 class ParserError(ValueError):
     """Base class for parser errors.
@@ -40,6 +42,13 @@ class OnUpdateDrawingStateError(ParserError):
     """Raised when parser encounters fatal failure from non-parser specific
     exception during call to .update_drawing_state() call.
     """
+
+    def __init__(self, token: Token, *args: object) -> None:
+        super().__init__(*args)
+        self.token = token
+
+    def __str__(self) -> str:
+        return f"{self.token} {self.token.get_token_position()}"
 
 
 class UnitNotSetError(ParserError):

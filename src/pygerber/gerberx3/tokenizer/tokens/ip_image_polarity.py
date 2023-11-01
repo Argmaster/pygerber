@@ -1,12 +1,16 @@
 """Wrapper for image polarity token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.state_enums import ImagePolarityEnum
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
+    ExtendedCommandToken,
+)
+from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
@@ -14,22 +18,38 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class ImagePolarity(Token):
+class ImagePolarity(ExtendedCommandToken):
     """Wrapper for image polarity token.
 
     The IP command is deprecated.
 
     IP sets positive or negative polarity for the entire image. It can only be used
     once, at the beginning of the file.
+
+    See section 8.1.4 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
-    image_polarity: ImagePolarityEnum
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        image_polarity: ImagePolarityEnum,
+    ) -> None:
+        super().__init__(string, location)
+        self.image_polarity = image_polarity
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
         image_polarity = ImagePolarityEnum(tokens["image_polarity"])
-        return cls(image_polarity=image_polarity)
+        return cls(
+            string=string,
+            location=location,
+            image_polarity=image_polarity,
+        )
 
     def update_drawing_state(
         self,
@@ -37,6 +57,7 @@ class ImagePolarity(Token):
         _backend: Backend,
     ) -> Tuple[State, Iterable[DrawCommand]]:
         """Set drawing polarity."""
+        warn_deprecated_code("IP", "8.1.4")
         return (
             state.model_copy(
                 update={
@@ -48,5 +69,10 @@ class ImagePolarity(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return f"%IP{self.image_polarity}*%"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"IP{self.image_polarity.get_gerber_code(indent, endline)}"

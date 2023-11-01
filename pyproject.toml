@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pygerber"
-version = "2.0.1"
+version = "2.1.0"
 description = "Parsing, formatting and rendering toolkit for Gerber X3 file format"
 authors = ["Krzysztof Wisniewski <argmaster.world@gmail.com>"]
 license = "MIT"
@@ -50,14 +50,20 @@ pyparsing = "^3.1.0"
 pydantic = "^2.3"
 tzlocal = "^5.0.1"
 pillow = "^10.0.0"
-numpy = "^1.24.4"
+numpy = [
+    { version = "^1.24.4", markers = "python_version >= '3.8' and python_version <= '3.11'" },
+    { version = "^1.26.1", markers = "python_version >= '3.12' and python_version < '3.13'" },
+]
+pyyaml = "^6.0.1"
+pygls = { version = "^1.0.2", optional = true }
+lsprotocol = { version = "^2023.0.0a3", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.4.1"
+mypy = "^1.6.1"
 poethepoet = "^0.20.0"
 pytest = "^7.4.0"
 black = "^23.3.0"
-ruff = "^0.0.278"
+ruff = "^0.1.3"
 jinja2 = "^3.1.2"
 pyyaml = "^6.0"
 tox = "^4.6.3"
@@ -68,6 +74,7 @@ pytest-xdist = { extras = ["psutil"], version = "^3.3.1" }
 pytest-cov = "^4.1.0"
 types-tzlocal = "^5.0.1.1"
 ipykernel = "^6.25.0"
+twine = "^4.0.2"
 
 [tool.poetry.group.docs]
 optional = true
@@ -75,16 +82,26 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.5.2"
 mkdocs-material = "^9.1.21"
-mkdocstrings = { extras = ["python"], version = "^0.22.0" }
+mkdocstrings = { extras = ["python"], version = ">=0.22,<0.24" }
 mkdocs-literate-nav = "^0.6.0"
 mkdocs-macros-plugin = "^1.0.2"
 mkdocs-gen-files = "^0.5.0"
 pygments = "^2.15.1"
+pymdown-extensions = "^10.3"
+mike = "^1.1.2"
+
+[tool.poetry.extras]
+language_server = ["pygls", "lsprotocol"]
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.poetry.scripts]
+pygerber = "pygerber.__main__:main"
+pygerber_language_server = { reference = "pygerber.gerberx3.language_server.__main__:main", extras = [
+    "language_server",
+], type = "console" }
 
 [tool.poe.tasks]
 # -------------------------------------------------------------------------------------
@@ -126,10 +143,14 @@ ignore = [
     "TCH001",
     "D105",   # Adding docstrings in all magic methods doesn't make sense, as usually they are just boilerplate to support operators.
     "FIX002",
+    "D107",   # Adding docstring to __init__ doesn't make sense when class already has its docstring.
 ]
 show-fixes = true
 target-version = "py38"
 src = ["src", "test"]
+
+[tool.ruff.pylint]
+max-args = 8
 
 [tool.ruff.pyupgrade]
 # Preserve types, even if a file imports `from __future__ import annotations`.

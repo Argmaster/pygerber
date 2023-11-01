@@ -1,38 +1,65 @@
 """Wrapper for flash operation token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.math.vector_2d import Vector2D
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
-from pygerber.gerberx3.tokenizer.tokens.token import Token
 
 if TYPE_CHECKING:
+    from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
+    from pygerber.gerberx3.language_server._internals.state import LanguageServerState
     from pygerber.gerberx3.parser.state import State
 
 
-class D03Flash(Token):
+class D03Flash(CommandToken):
     """Wrapper for flash operation token.
 
     Creates a flash object with the current aperture. The current point is moved to the
     flash point.
+
+    See section 4.8.4 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
-    x: Coordinate
-    y: Coordinate
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        x: Coordinate,
+        y: Coordinate,
+    ) -> None:
+        super().__init__(string, location)
+        self.x = x
+        self.y = y
 
     @classmethod
-    def from_tokens(cls, **tokens: Any) -> Self:
-        """Initialize token object."""
-        x = tokens.get("x", "0")
-        x = Coordinate.new(coordinate_type=CoordinateType.X, offset=x)
-        y = tokens.get("y", "0")
-        y = Coordinate.new(coordinate_type=CoordinateType.Y, offset=y)
-        return cls(x=x, y=y)
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
+        x = tokens.get("x")
+        x = Coordinate.new(
+            coordinate_type=CoordinateType.X,
+            offset=str(x) if x is not None else None,
+        )
+        y = tokens.get("y")
+        y = Coordinate.new(
+            coordinate_type=CoordinateType.Y,
+            offset=str(y) if y is not None else None,
+        )
+
+        return cls(
+            string=string,
+            location=location,
+            x=x,
+            y=y,
+        )
 
     def update_drawing_state(
         self,
@@ -71,5 +98,34 @@ class D03Flash(Token):
             draw_commands,
         )
 
-    def __str__(self) -> str:
-        return f"{self.x}{self.y}D03*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return (
+            f"{indent}"
+            f"{self.x.get_gerber_code(indent, endline)}"
+            f"{self.y.get_gerber_code(indent, endline)}"
+            "D03"
+        )
+
+    def get_operation_specific_info(
+        self,
+        state: LanguageServerState,
+    ) -> str:
+        """Return operation specific extra information about token."""
+        file_state = state.get_by_file_content(self.string)
+        _, parser_state = file_state.parse_until(lambda t, _s: t == self)
+
+        units = parser_state.get_units()
+
+        x1 = parser_state.parse_coordinate(self.x).as_unit(units)
+        y1 = parser_state.parse_coordinate(self.y).as_unit(units)
+
+        aperture = parser_state.get_current_aperture().aperture_id
+
+        u = units.value.lower()
+
+        return f"Flash `{aperture}` on (`{x1}`{u}, `{y1}`{u})"

@@ -1,6 +1,8 @@
 """GerberX3 grammar."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any, Optional, TypeVar
+
 from pyparsing import (
     CharsNotIn,
     Combine,
@@ -17,17 +19,27 @@ from pyparsing import (
     infix_notation,
     nums,
     oneOf,
+    ungroup,
 )
 
 from pygerber.gerberx3.tokenizer.tokens.ab_block_aperture import (
     BlockApertureBegin,
     BlockApertureEnd,
 )
-from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import DefineAperture
+from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import (
+    DefineCircle,
+    DefineMacro,
+    DefineObround,
+    DefinePolygon,
+    DefineRectangle,
+)
+from pygerber.gerberx3.tokenizer.tokens.as_axis_select import AxisSelect
+from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
 from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
 from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import DNNSelectAperture
+from pygerber.gerberx3.tokenizer.tokens.end_of_expression import EndOfExpression
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateFormat
 from pygerber.gerberx3.tokenizer.tokens.g01_set_linear import SetLinear
 from pygerber.gerberx3.tokenizer.tokens.g02_set_clockwise_circular import (
@@ -37,7 +49,9 @@ from pygerber.gerberx3.tokenizer.tokens.g03_set_counterclockwise_circular import
     SetCounterclockwiseCircular,
 )
 from pygerber.gerberx3.tokenizer.tokens.g04_comment import Comment
-from pygerber.gerberx3.tokenizer.tokens.g3n_region import BeginRegion, EndRegion
+from pygerber.gerberx3.tokenizer.tokens.g36_begin_region import BeginRegion
+from pygerber.gerberx3.tokenizer.tokens.g37_end_region import EndRegion
+from pygerber.gerberx3.tokenizer.tokens.g54_select_aperture import G54SelectAperture
 from pygerber.gerberx3.tokenizer.tokens.g70_set_unit_inch import SetUnitInch
 from pygerber.gerberx3.tokenizer.tokens.g71_set_unit_mm import SetUnitMillimeters
 from pygerber.gerberx3.tokenizer.tokens.g75_multi_quadrant import SetMultiQuadrantMode
@@ -47,6 +61,11 @@ from pygerber.gerberx3.tokenizer.tokens.g90_set_coordinate_absolute import (
 from pygerber.gerberx3.tokenizer.tokens.g91_set_coordinate_incremental import (
     SetIncrementalNotation,
 )
+from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
+from pygerber.gerberx3.tokenizer.tokens.groups.statement import (
+    Statement,
+)
+from pygerber.gerberx3.tokenizer.tokens.in_image_name import ImageName
 from pygerber.gerberx3.tokenizer.tokens.ip_image_polarity import ImagePolarity
 from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
 from pygerber.gerberx3.tokenizer.tokens.ln_load_name import LoadName
@@ -58,10 +77,16 @@ from pygerber.gerberx3.tokenizer.tokens.m01_optional_stop import M01OptionalStop
 from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
 from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
 from pygerber.gerberx3.tokenizer.tokens.macro.arithmetic_expression import (
-    ArithmeticExpression,
-    NumericConstant,
+    AdditionOperator,
+    DivisionOperator,
+    MultiplicationOperator,
+    NegationOperator,
+    PositiveOperator,
+    SubtractionOperator,
 )
 from pygerber.gerberx3.tokenizer.tokens.macro.comment import MacroComment
+from pygerber.gerberx3.tokenizer.tokens.macro.macro_begin import MacroBegin
+from pygerber.gerberx3.tokenizer.tokens.macro.numeric_constant import NumericConstant
 from pygerber.gerberx3.tokenizer.tokens.macro.point import Point
 from pygerber.gerberx3.tokenizer.tokens.macro.primitives import (
     PrimitiveCenterLine,
@@ -76,584 +101,798 @@ from pygerber.gerberx3.tokenizer.tokens.macro.variable_definition import (
 )
 from pygerber.gerberx3.tokenizer.tokens.macro.variable_name import MacroVariableName
 from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import UnitMode
+from pygerber.gerberx3.tokenizer.tokens.of_image_offset import ImageOffset
 from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
     StepRepeatBegin,
     StepRepeatEnd,
 )
-from pygerber.gerberx3.tokenizer.tokens.tx_attributes import (
-    ApertureAttribute,
-    DeleteAttribute,
-    FileAttribute,
-    ObjectAttribute,
-)
+from pygerber.gerberx3.tokenizer.tokens.ta_aperture_attribute import ApertureAttribute
+from pygerber.gerberx3.tokenizer.tokens.td_delete_attribute import DeleteAttribute
+from pygerber.gerberx3.tokenizer.tokens.tf_file_attribute import FileAttribute
+from pygerber.gerberx3.tokenizer.tokens.to_object_attribute import ObjectAttribute
 
-EOEX = Suppress(Literal("*").set_name("end of expression"))
-SOSTMT = Suppress(Literal("%").set_name("start of statement"))
-EOSTMT = Suppress(Literal("%").set_name("end of statement"))
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
-def wrap_statement(expr: ParserElement, *, eoex: bool = True) -> ParserElement:
-    """Wrap statement in start of statement (%) and end of statement (*%) symbols."""
-    return SOSTMT + expr + ((EOEX + EOSTMT) if eoex else EOSTMT)
+T1 = TypeVar("T1")
+T2 = TypeVar("T2")
 
 
-positive_integer = Word("123456789", nums).set_name("positive integer")
-integer = Combine(Opt(oneOf("+ -")) + Word(nums)).set_name("integer")
-decimal = Combine(
-    Opt(oneOf("+ -")) + (Opt(Word(nums)) + "." + Opt(Word(nums)) | Word(nums)),
-).set_name("decimal")
+class TokenWrapper:
+    """Class for wrapping ParserElements with Token classes."""
 
-aperture_identifier = (
-    Combine("D" + Regex(r"[1-9][0-9]+"))
-    .set_name("aperture identifier")
-    .set_results_name("aperture_identifier")
-)
+    def __init__(self, *, is_raw: bool) -> None:
+        self.is_raw = is_raw
 
-name = Regex(r"[._a-zA-Z$][._a-zA-Z0-9]*").set_name("name")
-user_name = Regex(r"/[_a-zA-Z$][._a-zA-Z0-9]*/").set_name("user name")
-string = CharsNotIn("%*").set_name("string")
-field = (
-    CharsNotIn("%*,").set_name("field").set_results_name("field", list_all_matches=True)
-)
+    def __call__(
+        self,
+        token_cls: type[Token],
+        parser_element: ParserElement,
+    ) -> ParserElement:
+        """Wrap ParserElement with Token class."""
+        if self.is_raw:
+            return parser_element
 
-file_attribute_name = (
-    oneOf(
-        ".Part .FileFunction .FilePolarity .SameCoordinates .CreationDate\
-        .GenerationSoftware .ProjectId .MD5",
-    )
-    | user_name
-).set_name("file_attribute_name")
-aperture_attribute_name = (
-    oneOf(".AperFunction .DrillTolerance .FlashText") | user_name
-).set_name("aperture_attribute_name")
-object_attribute_name = (
-    oneOf(
-        ".N .P .C .CRot .CMfr .CMPN .CVal .CMnt .CFtp .CPgN .CPgD .CHgt .CLbN\
-        .CLbD .CSup",
-    )
-    | user_name
-).set_name("object_attribute_name")
+        return token_cls.wrap(parser_element)
 
-# Set a file attribute.
-TF = FileAttribute.wrap(
-    wrap_statement(
-        Literal("TF")
-        + file_attribute_name.set_results_name("file_attribute_name")
-        + ZeroOrMore("," + (field | "")),
-    ),
-)
-# Add an aperture attribute to the dictionary or modify it.
-TA = ApertureAttribute.wrap(
-    wrap_statement(
-        Literal("TA")
-        + aperture_attribute_name.set_results_name("aperture_attribute_name")
-        + ZeroOrMore("," + (field | "")),
-    ),
-)
-# Add an object attribute to the dictionary or modify it.
-TO = ObjectAttribute.wrap(
-    wrap_statement(
-        Literal("TO")
-        + object_attribute_name.set_results_name("object_attribute_name")
-        + ZeroOrMore("," + (field | "")),
-    ),
-)
-# Delete one or all attributes in the dictionary.
-TD = DeleteAttribute.wrap(
-    wrap_statement(
-        Literal("TD")
-        + Opt(
-            file_attribute_name
-            | aperture_attribute_name
-            | object_attribute_name
-            | user_name,
-        ).set_results_name("attribute_name"),
-    ),
-)
+    @classmethod
+    def build(
+        cls,
+        wrapper: Optional[Self] = None,
+        *,
+        is_raw: bool = False,
+    ) -> Self:
+        """Build TokenWrapper instance."""
+        if wrapper is not None:
+            return wrapper
 
-# A human readable comment, does not affect the image.
-G04 = Comment.wrap(
-    Suppress(Literal("G04")) + string.set_results_name("string") + EOEX,
-)
-
-macro_variable = MacroVariableName.wrap(
-    Regex(r"\$[0-9]*[1-9][0-9]*")("macro_variable_name"),
-    use_group=False,
-)
-numeric_constant = NumericConstant.wrap(
-    decimal("numeric_constant_value"),
-    use_group=False,
-)
-
-arithmetic_expression: ParserElement = infix_notation(
-    macro_variable | numeric_constant,
-    [
-        (oneOf("+ -"), 1, OpAssoc.RIGHT, ArithmeticExpression.new),
-        (oneOf("x X /"), 2, OpAssoc.LEFT, ArithmeticExpression.new),
-        (oneOf("+ -"), 2, OpAssoc.LEFT, ArithmeticExpression.new),
-    ],
-).set_name("arithmetic expression")
+        return cls(is_raw=is_raw)
 
 
-expr = (arithmetic_expression | macro_variable | numeric_constant).set_name(
-    "macro body expression.",
-)
+class GrammarBuilder:
+    """Base class for all grammar builder classes."""
+
+    def __init__(
+        self,
+        wrapper: Optional[TokenWrapper] = None,
+        *,
+        is_raw: bool = False,
+    ) -> None:
+        self.wrapper = TokenWrapper.build(wrapper=wrapper, is_raw=is_raw)
 
 
-cs = Suppress(Literal(",").set_name("comma"))
+class GerberGrammarBuilder(GrammarBuilder):
+    """Base class for all Gerber grammar builders."""
 
-primitive = (
-    MacroComment.wrap("0" + string.set_results_name("string"))
-    | PrimitiveCircle.wrap(
-        "1"  # Circle
-        + cs
-        + expr.set_results_name("exposure")  # Exposure
-        + cs
-        + expr.set_results_name("diameter")  # Diameter
-        + cs
-        + expr.set_results_name("center_x")  # Center X
-        + cs
-        + expr.set_results_name("center_y")  # Center Y
-        + Opt(cs + expr.set_results_name("rotation")),  # Rotation
-    )
-    | PrimitiveVectorLine.wrap(
-        "20"  # Vector Line
-        + cs
-        + expr.set_results_name("exposure")  # Exposure
-        + cs
-        + expr.set_results_name("width")  # Width
-        + cs
-        + expr.set_results_name("start_x")  # Start X
-        + cs
-        + expr.set_results_name("start_y")  # Start Y
-        + cs
-        + expr.set_results_name("end_x")  # End X
-        + cs
-        + expr.set_results_name("end_y")  # End Y
-        + cs
-        + expr.set_results_name("rotation"),  # Rotation
-    )
-    | PrimitiveCenterLine.wrap(
-        "21"  # Center Line
-        + cs
-        + expr.set_results_name("exposure")  # Exposure
-        + cs
-        + expr.set_results_name("width")  # Width
-        + cs
-        + expr.set_results_name("hight")  # Hight
-        + cs
-        + expr.set_results_name("center_x")  # Center X
-        + cs
-        + expr.set_results_name("center_y")  # Center Y
-        + cs
-        + expr.set_results_name("rotation"),  # Rotation
-    )
-    | PrimitiveOutline.wrap(
-        "4"  # Outline
-        + cs
-        + expr.set_results_name("exposure")  # Exposure
-        + cs
-        + expr.set_results_name("number_of_vertices")  # Number of vertices
-        + cs
-        + expr.set_results_name("start_x")  # Start X
-        + cs
-        + expr.set_results_name("start_y")  # Start Y
-        + OneOrMore(  # Subsequent points...
-            Point.wrap(
-                cs + expr.set_results_name("x") + cs + expr.set_results_name("y"),
-                use_group=False,
-            ).set_results_name(
-                "point",
-                list_all_matches=True,
+    def build(self) -> GerberGrammar:
+        """Build grammar object."""
+        wrapper = self.wrapper
+        eoex = self._build_eoex()
+
+        load_commands = self._build_load_commands()
+        # Sets the polarity of the whole image.
+        ip = self._build_stmt(
+            wrapper(
+                ImagePolarity,
+                Literal("IP") + oneOf("POS NEG").set_results_name("image_polarity"),
             ),
         )
-        + cs
-        + expr.set_results_name("rotation"),  # Rotation
-    )
-    | PrimitivePolygon.wrap(
-        "5"  # Polygon
-        + cs
-        + expr.set_results_name("exposure")  # Exposure
-        + cs
-        + expr.set_results_name("number_of_vertices")  # Number of vertices
-        + cs
-        + expr.set_results_name("center_x")  # Center X
-        + cs
-        + expr.set_results_name("center_y")  # Center Y
-        + cs
-        + expr.set_results_name("diameter")  # Diameter
-        + cs
-        + expr.set_results_name("rotation"),  # Rotation
-    )
-    | PrimitiveThermal.wrap(
-        "7"  # Thermal
-        + cs
-        + expr.set_results_name("center_x")  # Center X
-        + cs
-        + expr.set_results_name("center_y")  # Center Y
-        + cs
-        + expr.set_results_name("outer_diameter")  # Outer diameter
-        + cs
-        + expr.set_results_name("inner_diameter")  # Inner diameter
-        + cs
-        + expr.set_results_name("gap")  # Gap
-        + cs
-        + expr.set_results_name("rotation"),  # Rotation
-    )
-) + EOEX
+        # End of file.
+        m02 = wrapper(
+            M02EndOfFile,
+            Literal("M02").set_name("End of file") + eoex,
+        )
+        # Optional stop.
+        m01 = wrapper(M01OptionalStop, Literal("M01").set_name("Optional stop") + eoex)
+        # Program stop.
+        m00 = wrapper(M00ProgramStop, Literal("M00").set_name("Program stop") + eoex)
 
-variable_definition = MacroVariableDefinition.wrap(
-    macro_variable + "=" + expr.set_results_name("value") + EOEX,
-).set_name("variable definition")
+        dnn = wrapper(DNNSelectAperture, self._build_aperture_identifier() + eoex)
+        """Sets the current aperture to D code nn."""
 
-macro_body = (
-    (primitive | variable_definition | G04)
-    .set_results_name(
-        "macro_body",
-        list_all_matches=True,
-    )
-    .set_name("macro body expression")
-)[1, ...]
+        fs = self._build_format_specifier()
+        # Sets the unit to mm or inch.
+        mo = self._build_stmt(
+            wrapper(
+                UnitMode,
+                Literal("MO")
+                + oneOf("MM IN").set_results_name("unit").set_name("unit"),
+            ),
+        )
 
-# Defines a macro aperture template.
-AM = MacroDefinition.wrap(
-    wrap_statement(
-        Literal("AM")
-        + name.set_results_name("macro_name").set_name("macro name")
-        + EOEX
-        + macro_body.set_name("macro body"),
-        eoex=False,
-    ),
-)
+        # Open a step and repeat statement.
+        sr = self._build_step_repeat()
 
+        # Opens a block aperture statement and assigns its aperture number
+        ab_open = self._build_stmt(
+            wrapper(
+                BlockApertureBegin,
+                Literal("AB") + self._build_aperture_identifier(),
+            ),
+        )
+        # Closes a block aperture statement.
+        ab_close = self._build_stmt(wrapper(BlockApertureEnd, Literal("AB")))
 
-am_param = decimal.set_results_name("am_param", list_all_matches=True)
-# Defines a template-based aperture, assigns a D code to it.
-AD = DefineAperture.wrap(
-    wrap_statement(
-        Literal("AD")
-        + aperture_identifier
-        + (
-            (
-                Literal("C").set_results_name("aperture_type")
-                + ","
-                + decimal.set_results_name("diameter")
-                + Opt("X" + decimal.set_results_name("hole_diameter"))
-            )
-            | (
-                Literal("R").set_results_name("aperture_type")
-                + ","
-                + decimal.set_results_name("x_size")
+        g_codes = self._build_g_codes()
+        d_codes = self._build_d_codes()
+
+        common = (
+            self._build_comment_token()
+            | mo
+            | fs
+            | self._build_macro_tokens()
+            | self._build_define_aperture()
+            | dnn
+            | (d_codes + eoex)
+            | (g_codes + d_codes + eoex)
+            | (g_codes + eoex)
+            | load_commands
+            | ip
+            | ab_open
+            | ab_close
+            | sr
+            | self._build_attribute_tokens(statement=True)
+            | eoex
+        )
+
+        expressions = self.wrapper(AST, (common | m02 | m01 | m00)[0, ...])
+        grammar = self.wrapper(AST, common[0, ...] + (m02 | m01 | m00))
+
+        return GerberGrammar(grammar, expressions)
+
+    def _build_load_commands(self) -> ParserElement:
+        wrapper = self.wrapper
+
+        lm = self._build_stmt(
+            wrapper(
+                LoadMirroring,
+                Literal("LM") + oneOf("N XY Y X").set_results_name("mirroring"),
+            ),
+        )
+        lp = self._build_stmt(
+            wrapper(
+                LoadPolarity,
+                Literal("LP") + oneOf("C D").set_results_name("polarity"),
+            ),
+        )
+        ls = self._build_stmt(
+            wrapper(LoadScaling, Literal("LS") + self._build_decimal("scaling")),
+        )
+        lr = self._build_stmt(
+            wrapper(LoadRotation, Literal("LR") + self._build_decimal("rotation")),
+        )
+        ln = self._build_stmt(
+            wrapper(LoadName, Literal("LN") + self._build_string()),
+        )
+        in_ = self._build_stmt(
+            wrapper(ImageName, Literal("IN") + self._build_string()),
+        )
+        as_ = self._build_stmt(
+            wrapper(
+                AxisSelect,
+                Literal("AS") + oneOf("AXBY AYBX").set_results_name("correspondence"),
+            ),
+        )
+        of = self._build_stmt(
+            wrapper(
+                ImageOffset,
+                Literal("OF")
+                + Opt(Literal("A") + self._build_decimal("a"))
+                + Opt(Literal("B") + self._build_decimal("b")),
+            ),
+        )
+
+        return lm | lp | ls | lr | as_ | of | in_ | ln
+
+    def _build_format_specifier(self) -> ParserElement:
+        wrapper = self.wrapper
+
+        coord_digits = Regex(r"[1-9][1-9]")
+
+        # Sets the coordinate format, e.g. the number of decimals.
+        return self._build_stmt(
+            wrapper(
+                CoordinateFormat,
+                Literal("FS")
+                + oneOf("L T").set_results_name("zeros_mode").set_name("zeros mode")
+                + oneOf("A I")
+                .set_results_name("coordinate_mode")
+                .set_name("coordinate mode")
                 + "X"
-                + decimal.set_results_name("y_size")
-                + Opt("X" + decimal.set_results_name("hole_diameter"))
-            )
-            | (
-                Literal("O").set_results_name("aperture_type")
-                + ","
-                + decimal.set_results_name("x_size")
-                + "X"
-                + decimal.set_results_name("y_size")
-                + Opt("X" + decimal.set_results_name("hole_diameter"))
-            )
-            | (
-                Literal("P").set_results_name("aperture_type")
-                + ","
-                + decimal.set_results_name("outer_diameter")
-                + "X"
-                + decimal.set_results_name("number_of_vertices")
-                + Opt(
-                    "X"
-                    + decimal.set_results_name("rotation")
-                    + Opt("X" + decimal.set_results_name("hole_diameter")),
+                + coord_digits.set_results_name("x_format").set_name(
+                    "X coordinate format",
                 )
+                + "Y"
+                + coord_digits.set_results_name("y_format").set_name(
+                    "Y coordinate format",
+                ),
+            ),
+        )
+
+    def _build_step_repeat(self) -> ParserElement:
+        wrapper = self.wrapper
+
+        sr_open = self._build_stmt(
+            wrapper(
+                StepRepeatBegin,
+                Literal("SR")
+                + "X"
+                + self._build_integer("x_repeat")
+                + "Y"
+                + self._build_integer("y_repeat")
+                + "I"
+                + self._build_decimal("x_step")
+                + "J"
+                + self._build_decimal("y_step"),
+            ),
+        )
+        # Closes a step and repeat statement.
+        sr_close = self._build_stmt(wrapper(StepRepeatEnd, Literal("SR")))
+
+        return sr_open | sr_close
+
+    def _build_g_codes(self) -> ParserElement:
+        wrapper = self.wrapper
+
+        g54dnn = wrapper(
+            G54SelectAperture,
+            Literal("G54") + self._build_aperture_identifier(),
+        )
+        g01 = wrapper(SetLinear, Regex("G0*1"))
+        g02 = wrapper(SetClockwiseCircular, Regex("G0*2"))
+        g03 = wrapper(SetCounterclockwiseCircular, Regex("G0*3"))
+        g36 = wrapper(BeginRegion, Regex("G0*36"))
+        g37 = wrapper(EndRegion, Regex("G0*37"))
+        g70 = wrapper(SetUnitInch, Regex("G0*70"))
+        g71 = wrapper(SetUnitMillimeters, Regex("G0*71"))
+        g74 = wrapper(SetMultiQuadrantMode, Regex("G0*74"))
+        g75 = wrapper(SetMultiQuadrantMode, Regex("G0*75"))
+        g90 = wrapper(SetAbsoluteNotation, Regex("G0*90"))
+        g91 = wrapper(SetIncrementalNotation, Regex("G0*91"))
+
+        # Order is important, as g03 would match g36 if checked before g36 regex.
+        return g54dnn | g36 | g37 | g70 | g71 | g74 | g75 | g90 | g91 | g01 | g02 | g03
+
+    def _build_d_codes(self) -> ParserElement:
+        wrapper = self.wrapper
+
+        x_coordinate = Literal("X") + self._build_integer("x", "X coordinate")
+        y_coordinate = Literal("Y") + self._build_integer("y", "Y coordinate")
+
+        i_coordinate = Literal("I") + self._build_integer("i", "I offset")
+        j_coordinate = Literal("J") + self._build_integer("j", "J offset")
+
+        xy = (x_coordinate + Opt(y_coordinate)) | (Opt(x_coordinate) + y_coordinate)
+        ij = (i_coordinate + Opt(j_coordinate)) | (Opt(i_coordinate) + j_coordinate)
+
+        d01 = wrapper(
+            D01Draw,
+            ((Opt(xy) + Opt(ij) + Regex("D0*1")) | (xy + Opt(ij))),
+        )
+        d02 = wrapper(
+            D02Move,
+            Opt(xy) + Regex("D0*2"),
+        )
+        d03 = wrapper(
+            D03Flash,
+            Opt(xy) + Regex("D0*3"),
+        )
+
+        return d03 | d02 | d01
+
+    def _build_comment_token(self) -> ParserElement:
+        wrapper = self.wrapper
+        eoex = self._build_eoex()
+
+        # A human readable comment, does not affect the image.
+        return wrapper(Comment, Literal("G04") + self._build_string() + eoex)
+
+    def _build_define_aperture(self) -> ParserElement:
+        wrapper = self.wrapper
+
+        ad = Literal("AD").set_name("AD code")
+
+        circle = wrapper(
+            DefineCircle,
+            ad
+            + self._build_aperture_identifier()
+            + Literal("C").set_results_name("aperture_type")
+            + ","
+            + self._build_decimal("diameter")
+            + Opt("X" + self._build_decimal("hole_diameter")),
+        ).set_name("define aperture circle")
+
+        rectangle = wrapper(
+            DefineRectangle,
+            ad
+            + self._build_aperture_identifier()
+            + Literal("R").set_results_name("aperture_type")
+            + ","
+            + self._build_decimal("x_size")
+            + "X"
+            + self._build_decimal("y_size")
+            + Opt("X" + self._build_decimal("hole_diameter")),
+        ).set_name("define aperture rectangle")
+
+        obround = wrapper(
+            DefineObround,
+            ad
+            + self._build_aperture_identifier()
+            + Literal("O").set_results_name("aperture_type")
+            + ","
+            + self._build_decimal("x_size")
+            + "X"
+            + self._build_decimal("y_size")
+            + Opt("X" + self._build_decimal("hole_diameter")),
+        ).set_name("define aperture obround")
+
+        polygon = wrapper(
+            DefinePolygon,
+            ad
+            + self._build_aperture_identifier()
+            + Literal("P").set_results_name("aperture_type")
+            + ","
+            + self._build_decimal("outer_diameter")
+            + "X"
+            + self._build_decimal("number_of_vertices")
+            + Opt(
+                "X"
+                + self._build_decimal("rotation")
+                + Opt("X" + self._build_decimal("hole_diameter")),
+            ),
+        ).set_name("define aperture polygon")
+
+        am_param = self._build_decimal("am_param", list_all_matches=True)
+        # Defines a template-based aperture, assigns a D code to it.
+
+        macro = wrapper(
+            DefineMacro,
+            ad
+            + self._build_aperture_identifier()
+            + self._build_name("aperture_type")
+            + Opt("," + am_param + ZeroOrMore("X" + am_param)),
+        ).set_name("define aperture macro")
+
+        return self._build_stmt(circle | rectangle | obround | polygon | macro)
+
+    def _build_macro_tokens(self) -> ParserElement:
+        wrapper = self.wrapper
+
+        primitive = self._build_macro_primitive()
+        variable_definition = self._build_macro_variable_definition()
+        comment = self._build_comment_token()
+
+        macro_body = (
+            (primitive | variable_definition | comment)
+            .set_results_name("macro_body", list_all_matches=True)
+            .set_name("macro body expression")
+        )[1, ...]
+
+        am_start = (
+            self._annotate_parser_element(
+                wrapper(
+                    MacroBegin,
+                    Literal("AM") + self._build_name("macro_name"),
+                ),
+                "macro_begin",
             )
-            | (
-                name.set_results_name("aperture_type")
-                + Opt("," + am_param + ZeroOrMore("X" + am_param))
+            + self._build_eoex()
+        )
+
+        # Defines a macro aperture template.
+        return self._build_stmt(
+            wrapper(
+                MacroDefinition,
+                am_start + macro_body,
+            ),
+            eoex=False,
+        ).set_name("macro definition")
+
+    def _build_macro_variable_definition(self) -> ParserElement:
+        return self.wrapper(
+            MacroVariableDefinition,
+            self._build_macro_variable()
+            + "="
+            + self._build_macro_expr("value")
+            + self._build_eoex(),
+        )
+
+    def _build_macro_primitive(self) -> ParserElement:
+        cs = Suppress(Literal(",").set_name("comma"))
+        primitive_comment = self.wrapper(MacroComment, "0" + self._build_string())
+        primitive_circle = self.wrapper(
+            PrimitiveCircle,
+            "1"  # Circle
+            + cs
+            + self._build_macro_expr("exposure")  # Exposure
+            + cs
+            + self._build_macro_expr("diameter")  # Diameter
+            + cs
+            + self._build_macro_expr("center_x")  # Center X
+            + cs
+            + self._build_macro_expr("center_y")  # Center Y
+            + Opt(cs + self._build_macro_expr("rotation")),  # Rotation
+        )
+        primitive_vector_line = self.wrapper(
+            PrimitiveVectorLine,
+            "20"  # Vector Line
+            + cs
+            + self._build_macro_expr("exposure")  # Exposure
+            + cs
+            + self._build_macro_expr("width")  # Width
+            + cs
+            + self._build_macro_expr("start_x")  # Start X
+            + cs
+            + self._build_macro_expr("start_y")  # Start Y
+            + cs
+            + self._build_macro_expr("end_x")  # End X
+            + cs
+            + self._build_macro_expr("end_y")  # End Y
+            + cs
+            + self._build_macro_expr("rotation"),  # Rotation
+        )
+        primitive_center_line = self.wrapper(
+            PrimitiveCenterLine,
+            "21"  # Center Line
+            + cs
+            + self._build_macro_expr("exposure")  # Exposure
+            + cs
+            + self._build_macro_expr("width")  # Width
+            + cs
+            + self._build_macro_expr("hight")  # Hight
+            + cs
+            + self._build_macro_expr("center_x")  # Center X
+            + cs
+            + self._build_macro_expr("center_y")  # Center Y
+            + cs
+            + self._build_macro_expr("rotation"),  # Rotation
+        )
+        primitive_outline = self.wrapper(
+            PrimitiveOutline,
+            "4"  # Outline
+            + cs
+            + self._build_macro_expr("exposure")  # Exposure
+            + cs
+            + self._build_macro_expr("number_of_vertices")  # Number of vertices
+            + cs
+            + self._build_macro_expr("start_x")  # Start X
+            + cs
+            + self._build_macro_expr("start_y")  # Start Y
+            + OneOrMore(  # Subsequent points...
+                self._build_macro_point().set_results_name(
+                    "point",
+                    list_all_matches=True,
+                ),
             )
-        ),
-    ),
-)
+            + cs
+            + self._build_macro_expr("rotation"),  # Rotation
+        )
+        primitive_polygon = self.wrapper(
+            PrimitivePolygon,
+            "5"  # Polygon
+            + cs
+            + self._build_macro_expr("exposure")  # Exposure
+            + cs
+            + self._build_macro_expr("number_of_vertices")  # Number of vertices
+            + cs
+            + self._build_macro_expr("center_x")  # Center X
+            + cs
+            + self._build_macro_expr("center_y")  # Center Y
+            + cs
+            + self._build_macro_expr("diameter")  # Diameter
+            + cs
+            + self._build_macro_expr("rotation"),  # Rotation
+        )
+        primitive_thermal = self.wrapper(
+            PrimitiveThermal,
+            "7"  # Thermal
+            + cs
+            + self._build_macro_expr("center_x")  # Center X
+            + cs
+            + self._build_macro_expr("center_y")  # Center Y
+            + cs
+            + self._build_macro_expr("outer_diameter")  # Outer diameter
+            + cs
+            + self._build_macro_expr("inner_diameter")  # Inner diameter
+            + cs
+            + self._build_macro_expr("gap")  # Gap
+            + cs
+            + self._build_macro_expr("rotation"),  # Rotation
+        )
 
-LN = LoadName.wrap(
-    wrap_statement(Literal("LN") + string.set_results_name("string")),
-)
-"""
-### Load Name (LN)
+        return (
+            (primitive_comment + self._build_eoex()).set_name("primitive comment")
+            | (primitive_circle + self._build_eoex()).set_name("primitive circle")
+            | (primitive_vector_line + self._build_eoex()).set_name(
+                "primitive vector line",
+            )
+            | (primitive_center_line + self._build_eoex()).set_name(
+                "primitive center line",
+            )
+            | (primitive_outline + self._build_eoex()).set_name("primitive outline")
+            | (primitive_polygon + self._build_eoex()).set_name("primitive polygon")
+            | (primitive_thermal + self._build_eoex()).set_name("primitive thermal")
+        )
 
-Note: The LN command was deprecated in revision I4 from October 2013.
+    def _build_macro_point(self) -> ParserElement:
+        cs = Suppress(Literal(",").set_name("comma"))
+        return self.wrapper(
+            Point,
+            cs + self._build_macro_expr("x") + cs + self._build_macro_expr("y"),
+        )
 
-The historic `LN` command doesn't influence the image in any manner and can safely be
-overlooked.
+    _macro_expr: Optional[ParserElement] = None
 
-Function of the `LN` command:
-- `LN` is designed to allocate a name to the following section of the file.
-- It was originally conceptualized to serve as a human-readable comment.
-- For creating human-readable comments, it's advisable to utilize the standard `G04`
-    command.
-- The `LN` command has the flexibility to be executed multiple times within a file.
+    def _build_macro_expr(self, expr_name: str = "expr") -> ParserElement:
+        macro_variable = self._build_macro_variable()
+        numeric_constant = self.wrapper(
+            NumericConstant,
+            Regex(r"((([0-9]+)(\.[0-9]*)?)|(\.[0-9]+))").set_results_name(
+                "numeric_constant_value",
+            ),
+        )
 
-SPEC: `2023.03` SECTION: `8.1.6`
-"""
+        arithmetic_expression = Forward()
 
-# Loads the scale object transformation parameter.
-LS = LoadScaling.wrap(
-    wrap_statement(Literal("LS") + decimal.set_results_name("scaling")),
-)
-"""
-### LS Command: Scaling Graphics State Parameter
+        factor = macro_variable | numeric_constant
 
-The `LS` command is employed to establish the scaling graphics state parameter.
+        if self.wrapper.is_raw:
+            arithmetic_expression <<= ungroup(
+                infix_notation(
+                    factor,
+                    [
+                        ("-", 1, OpAssoc.RIGHT),
+                        ("+", 1, OpAssoc.RIGHT),
+                        ("/", 2, OpAssoc.RIGHT),
+                        (oneOf("x X"), 2, OpAssoc.RIGHT),
+                        ("-", 2, OpAssoc.RIGHT),
+                        ("+", 2, OpAssoc.RIGHT),
+                    ],
+                ),
+            )
+        else:
+            arithmetic_expression <<= ungroup(
+                infix_notation(
+                    factor,
+                    [
+                        (
+                            Suppress("-"),
+                            1,
+                            OpAssoc.RIGHT,
+                            NegationOperator.new,
+                        ),
+                        (
+                            Suppress("+"),
+                            1,
+                            OpAssoc.RIGHT,
+                            PositiveOperator.new,
+                        ),
+                        (
+                            Suppress("/"),
+                            2,
+                            OpAssoc.RIGHT,
+                            DivisionOperator.new,
+                        ),
+                        (
+                            Suppress(oneOf("x X")),
+                            2,
+                            OpAssoc.RIGHT,
+                            MultiplicationOperator.new,
+                        ),
+                        (
+                            Suppress("-"),
+                            2,
+                            OpAssoc.RIGHT,
+                            SubtractionOperator.new,
+                        ),
+                        (
+                            Suppress("+"),
+                            2,
+                            OpAssoc.RIGHT,
+                            AdditionOperator.new,
+                        ),
+                    ],
+                ),
+            )
 
-Functionality:
-- The command dictates the scale factor utilized during object creation.
-- The aperture undergoes scaling, anchored at its origin. It's crucial to note that this
-    origin might not always align with its geometric center.
+        expr = arithmetic_expression | factor
 
-Usage and Persistence:
-- The `LS` command can be invoked multiple times within a single file.
-- Once set, the object scaling retains its value unless a subsequent `LS` command
-    modifies it.
-- The scaling gets adjusted based on the specific value mentioned in the command and
-    doesn't accumulate with the preceding scale factor.
+        return expr.set_results_name(expr_name).set_name(expr_name)
 
-The LS command was introduced in revision 2016.12.
+    def _build_macro_variable(self) -> ParserElement:
+        return self.wrapper(
+            MacroVariableName,
+            Regex(r"\$[0-9]*[1-9][0-9]*")("macro_variable_name"),
+        )
 
-SPEC: `2023.03` SECTION: `4.9.5`
-"""
-LR = LoadRotation.wrap(
-    wrap_statement(Literal("LR") + decimal.set_results_name("rotation")),
-)
-"""
-### LR Command: Rotation Graphics State Parameter
+    def _build_attribute_tokens(self, *, statement: bool = False) -> ParserElement:
+        wrapper = self.wrapper
 
-The `LR` command is utilized to configure the rotation graphics state parameter.
+        file_attribute_name = (
+            oneOf(
+                ".Part .FileFunction .FilePolarity .SameCoordinates .CreationDate\
+                .GenerationSoftware .ProjectId .MD5",
+            )
+            | self._build_user_name()
+        ).set_name("file attribute name")
 
-Functionality:
-- This command specifies the rotation angle to be applied when crafting objects.
-- The aperture is rotated centered on its origin, which might either coincide with or
-    differ from its geometric center.
+        aperture_attribute_name = (
+            oneOf(".AperFunction .DrillTolerance .FlashText") | self._build_user_name()
+        ).set_name("aperture attribute name")
 
-Usage and Persistence:
-- The `LR` command can be invoked numerous times throughout a file.
-- Once defined, the object rotation retains its configuration unless overridden by an
-    ensuing `LR` command.
-- Rotation is strictly determined by the exact value mentioned in the command and
-    doesn't integrate with any prior rotation values.
+        object_attribute_name = (
+            oneOf(
+                ".N .P .C .CRot .CMfr .CMPN .CVal .CMnt .CFtp .CPgN .CPgD .CHgt .CLbN "
+                ".CLbD .CSup",
+            )
+            | self._build_user_name()
+        ).set_name("object attribute name")
 
-The LR command was introduced in revision 2016.12.
+        # Set a file attribute.
+        tf = wrapper(
+            FileAttribute,
+            Literal("TF")
+            + file_attribute_name.set_results_name("attribute_name")
+            + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
+        )
+        # Add an aperture attribute to the dictionary or modify it.
+        ta = wrapper(
+            ApertureAttribute,
+            Literal("TA")
+            + aperture_attribute_name.set_results_name("attribute_name")
+            + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
+        )
+        # Add an object attribute to the dictionary or modify it.
+        to = wrapper(
+            ObjectAttribute,
+            Literal("TO")
+            + object_attribute_name.set_results_name("attribute_name")
+            + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
+        )
+        # Delete one or all attributes in the dictionary.
+        td = wrapper(
+            DeleteAttribute,
+            Literal("TD")
+            + Opt(
+                file_attribute_name
+                | aperture_attribute_name
+                | object_attribute_name
+                | self._build_user_name(),
+            ).set_results_name("attribute_name"),
+        )
+        if statement:
+            return self._build_stmt(tf | ta | to | td)
 
-SPEC: `2023.03` SECTION: `4.9.4`
-"""
-LM = LoadMirroring.wrap(
-    wrap_statement(Literal("LM") + oneOf("N XY Y X").set_results_name("mirroring")),
-)
-# Loads the polarity object transformation parameter.
-LP = LoadPolarity.wrap(
-    wrap_statement(Literal("LP") + oneOf("C D").set_results_name("polarity")),
-)
-# Sets the polarity of the whole image.
-IP = ImagePolarity.wrap(
-    wrap_statement(
-        Literal("POS") + oneOf("POS NEG").set_results_name("image_polarity"),
-    ),
-)
+        return tf | ta | to | td
 
-# End of file.
-M02 = M02EndOfFile.wrap(Literal("M02").set_name("End of file") + EOEX)
-# Optional stop.
-M01 = M01OptionalStop.wrap(Literal("M01").set_name("Optional stop") + EOEX)
-# Program stop.
-M00 = M00ProgramStop.wrap(Literal("M00").set_name("Program stop") + EOEX)
+    def _build_eoex(self) -> ParserElement:
+        return self.wrapper(EndOfExpression, Literal("*").set_name("end of expression"))
 
-DNN = DNNSelectAperture.wrap(aperture_identifier + EOEX)
-"""Sets the current aperture to D code nn."""
+    def _build_stmt(
+        self,
+        expr: ParserElement,
+        *,
+        eoex: bool = True,
+    ) -> ParserElement:
+        begin_stmt = Literal("%")
+        end_stmt = Literal("%")
 
-G54DNN = DNNSelectAperture.wrap(Literal("G54") + aperture_identifier + EOEX)
-"""Sets the current aperture to D code nn."""
+        return self.wrapper(
+            Statement,
+            begin_stmt + expr + ((self._build_eoex() + end_stmt) if eoex else end_stmt),
+        )
+
+    def _build_integer(
+        self,
+        result_name: str = "integer",
+        name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ParserElement:
+        return self._annotate_parser_element(
+            Combine(Opt(oneOf("+ -")) + Word(nums)),
+            result_name,
+            name,
+            **kwargs,
+        )
+
+    def _annotate_parser_element(
+        self,
+        element: ParserElement,
+        result_name: str,
+        name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ParserElement:
+        if name is None:
+            name = result_name
+        return element.set_name(name).set_results_name(result_name, **kwargs)
+
+    def _build_decimal(
+        self,
+        result_name: str = "decimal",
+        name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ParserElement:
+        return self._annotate_parser_element(
+            Regex(r"[+-]?((([0-9]+)(\.[0-9]*)?)|(\.[0-9]+))"),
+            result_name,
+            name,
+            **kwargs,
+        )
+
+    def _build_aperture_identifier(
+        self,
+        result_name: str = "aperture_identifier",
+        name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ParserElement:
+        return self._annotate_parser_element(
+            Combine("D" + Regex(r"[1-9][0-9]+")),
+            result_name,
+            name,
+            **kwargs,
+        )
+
+    def _build_name(
+        self,
+        result_name: str = "name",
+        name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ParserElement:
+        return self._annotate_parser_element(
+            Regex(r"[._a-zA-Z$][\._a-zA-Z0-9]*"),
+            result_name,
+            name,
+            **kwargs,
+        )
+
+    def _build_user_name(
+        self,
+        result_name: str = "user_name",
+        name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ParserElement:
+        return self._annotate_parser_element(
+            Regex(r"[_a-zA-Z$][\._a-zA-Z0-9]*"),
+            result_name,
+            name,
+            **kwargs,
+        )
+
+    def _build_string(
+        self,
+        result_name: str = "string",
+        name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ParserElement:
+        return self._annotate_parser_element(
+            CharsNotIn("%*"),
+            result_name,
+            name,
+            **kwargs,
+        )
+
+    def _build_field(
+        self,
+        result_name: str = "field",
+        name: Optional[str] = None,
+        **kwargs: Any,
+    ) -> ParserElement:
+        return self._annotate_parser_element(
+            CharsNotIn("%*"),
+            result_name,
+            name,
+            **kwargs,
+        )
 
 
-G01 = SetLinear.wrap(oneOf("G1 G01 G001 G0001") + EOEX)
-"""# Sets linear/circular mode to linear."""
+class GerberGrammar:
+    """Gerber grammar container."""
 
-G02 = SetClockwiseCircular.wrap(oneOf("G2 G02 G002 G0002") + EOEX)
-"""Sets linear/circular mode to clockwise circular."""
-
-G03 = SetCounterclockwiseCircular.wrap(oneOf("G3 G03 G003 G0003") + EOEX)
-"""Sets linear/circular mode to counterclockwise circular."""
-
-G70 = SetUnitInch.wrap(Literal("G70") + EOEX)
-"""DEPRECATED: Set the `Unit` to inch."""
-
-G71 = SetUnitMillimeters.wrap(Literal("G71") + EOEX)
-"""DEPRECATED: Set the `Unit` to millimeter."""
-
-G74 = SetMultiQuadrantMode.wrap(Literal("G74") + EOEX)
-"""DEPRECATED: Set's single quadrant mode."""
-
-G75 = SetMultiQuadrantMode.wrap(Literal("G75") + EOEX)
-"""Set's multi quadrant mode."""
-
-G90 = SetAbsoluteNotation.wrap(Literal("G90") + EOEX)
-"""Set the `Coordinate format` to `Absolute notation`."""
-
-G91 = SetIncrementalNotation.wrap(Literal("G91") + EOEX)
-"""Set the `Coordinate format` to `Incremental notation`."""
-
-X_coordinate = Literal("X") + integer.set_results_name("x").set_name("X coordinate")
-Y_coordinate = Literal("Y") + integer.set_results_name("y").set_name("Y coordinate")
-
-I_coordinate = Literal("I") + integer.set_results_name("i").set_name("I offset")
-J_coordinate = Literal("J") + integer.set_results_name("j").set_name("J offset")
-
-XY = (X_coordinate + Opt(Y_coordinate)) | (Opt(X_coordinate) + Y_coordinate)
-IJ = (I_coordinate + Opt(J_coordinate)) | (Opt(I_coordinate) + J_coordinate)
-
-# Creates a flash object with the current aperture. The
-# current point is moved to the flash point.
-D03 = D03Flash.wrap(
-    Opt(XY) + oneOf("D3 D03 D003 D0003") + EOEX,
-)
-# D02 moves the current point to the coordinate in the
-# command. It does not create an object.
-D02 = D02Move.wrap(
-    Opt(XY) + oneOf("D2 D02 D002 D0002") + EOEX,
-)
-# Outside a region statement D01 creates a draw or arc
-# object with the current aperture. Inside it adds a draw/arc
-# segment to the contour under construction. The current
-# point is moved to draw/arc end point after the creation of
-# the draw/arc.
-D01 = D01Draw.wrap(
-    ((Opt(XY) + Opt(IJ) + oneOf("D1 D01 D001 D0001")) | (XY + Opt(IJ))) + EOEX,
-)
-
-coord_digits = Regex(r"[1-6][1-6]")
-
-# Sets the coordinate format, e.g. the number of decimals.
-FS = CoordinateFormat.wrap(
-    wrap_statement(
-        Literal("FS")
-        + oneOf("L T").set_results_name("zeros_mode").set_name("zeros mode")
-        + oneOf("A I").set_results_name("coordinate_mode").set_name("coordinate mode")
-        + "X"
-        + coord_digits.set_results_name("x_format").set_name("X coordinate format")
-        + "Y"
-        + coord_digits.set_results_name("y_format").set_name("Y coordinate format"),
-    ),
-)
-# Sets the unit to mm or inch.
-MO = UnitMode.wrap(
-    wrap_statement(
-        Literal("MO") + oneOf("MM IN").set_results_name("unit").set_name("unit"),
-    ),
-)
-
-# Starts a region statement which creates a region by defining its contours.
-G36 = BeginRegion.wrap(Literal("G36") + EOEX)
-# Ends the region statement.
-G37 = EndRegion.wrap(Literal("G37") + EOEX)
-
-AB_statement = Forward()
-SR_statement = Forward()
-
-block = Forward()
-block <<= ZeroOrMore(
-    G04
-    | AD
-    | AM
-    | DNN
-    | G54DNN
-    | D01
-    | D02
-    | D03
-    | G01
-    | G02
-    | G03
-    | G75
-    | G74
-    | LP
-    | LM
-    | LR
-    | LS
-    | G36
-    | G37
-    | AB_statement
-    | TF
-    | TA
-    | TO
-    | TD,
-)
-
-# Open a step and repeat statement.
-SR_open = StepRepeatBegin.wrap(
-    wrap_statement(
-        Literal("SR")
-        + "X"
-        + positive_integer.set_results_name("x_repeat")
-        + "Y"
-        + positive_integer.set_results_name("y_repeat")
-        + "I"
-        + decimal.set_results_name("x_step")
-        + "J"
-        + decimal.set_results_name("y_step"),
-    ),
-)
-# Closes a step and repeat statement.
-SR_close = StepRepeatEnd.wrap(wrap_statement(Literal("SR")))
-SR_statement <<= SR_open + block + SR_close
-
-# Opens a block aperture statement and assigns its aperture number
-AB_open = BlockApertureBegin.wrap(wrap_statement(Literal("AB") + aperture_identifier))
-# Closes a block aperture statement.
-AB_close = BlockApertureEnd.wrap(wrap_statement(Literal("AB")))
-AB_statement <<= AB_open + block + AB_close
-
-common = (
-    G04
-    | MO
-    | FS
-    | AD
-    | AM
-    | DNN
-    | G54DNN
-    | D01
-    | D02
-    | D03
-    | G01
-    | G02
-    | G03
-    | G70
-    | G71
-    | G74
-    | G75
-    | G90
-    | G91
-    | LP
-    | LM
-    | LR
-    | LS
-    | LN
-    | G36
-    | G37
-    | AB_statement
-    | SR_statement
-    | TF
-    | TA
-    | TO
-    | TD
-)
-
-_G01 = SetLinear.wrap(Literal("G01"))
-_G02 = SetClockwiseCircular.wrap(Literal("G02"))
-_G03 = SetCounterclockwiseCircular.wrap(Literal("G03"))
-_G70 = SetUnitInch.wrap(Literal("G70"))
-_G71 = SetUnitMillimeters.wrap(Literal("G71"))
-
-for g_op in [_G01, _G02, _G03, _G70, _G71]:
-    for d_op in [D01, D02, D03]:
-        common |= g_op + d_op
-
-EXPRESSIONS = (common | M02 | M01 | M00)[0, ...]
-GRAMMAR = common[0, ...] + (M02 | M01 | M00)
+    def __init__(
+        self,
+        strict_grammar: ParserElement,
+        expression_grammar: ParserElement,
+    ) -> None:
+        self.strict_grammar = strict_grammar
+        self.expression_grammar = expression_grammar

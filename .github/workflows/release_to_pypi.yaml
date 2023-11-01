@@ -5,7 +5,7 @@ name: Publish 📦 to PyPI
 on:
   push:
     tags:
-      - "^v.*$"
+      - "v.*"
 
   workflow_dispatch:
 
@@ -26,13 +26,13 @@ jobs:
           architecture: "x64"
 
       - name: Install Poetry 📜
-        run: pip install poetry==1.5.1
+        run: pip install poetry==1.6.1
 
       - name: Install dependencies 🗄️
         run: poetry install --no-cache --sync
 
       - name: Build distribution 📦
-        run: poetry run poe build
+        run: poetry run poetry build
 
       - name: Detect Version of project
         id: project-version

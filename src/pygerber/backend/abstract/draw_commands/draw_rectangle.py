@@ -18,7 +18,7 @@ class DrawRectangle(DrawCommand):
     x_size: Offset
     y_size: Offset
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         backend: Backend,
         polarity: Polarity,

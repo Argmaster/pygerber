@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterable, Tuple
 
-from pygerber.gerberx3.tokenizer.tokens.token import Token
+from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 
 if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
@@ -11,8 +11,8 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
 
 
-class SetMultiQuadrantMode(Token):
-    """Wrapper for G74 token.
+class SetMultiQuadrantMode(CommandToken):
+    """Wrapper for G75 token.
 
     In multi quadrant mode the arc is allowed to extend over more than 90°.
     To avoid ambiguity between 0° and 360° arcs the following relation must hold:
@@ -27,6 +27,11 @@ class SetMultiQuadrantMode(Token):
     angleIf the start point of the arc is equal to the end point, the arc has length
     zero, i.e. it covers 0°. A separate operation is required for each quadrant. A
     minimum of four operations is required for a full circle.
+
+    See:
+    -   section 4.8 of The Gerber Layer Format Specification Revision 2020.09 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2020_09.html
+    -   section 4.7 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    -   section 8.1.10 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
     """
 
     def update_drawing_state(
@@ -44,5 +49,10 @@ class SetMultiQuadrantMode(Token):
             (),
         )
 
-    def __str__(self) -> str:
-        return "G75*"
+    def get_gerber_code(
+        self,
+        indent: str = "",
+        endline: str = "\n",  # noqa: ARG002
+    ) -> str:
+        """Get gerber code represented by this token."""
+        return f"{indent}G75"
