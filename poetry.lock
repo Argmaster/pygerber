@@ -2989,4 +2989,4 @@ language-server = ["lsprotocol", "pygls"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<3.13"
-content-hash = "2ed7c2b43c1b7e43d19835326f146d9f7def7513dc76dd46353efb6bb8d7c35c"
+content-hash = "6d20e9970a29c55121fb3ec35a130ac8c79c116be12d6f1fd5d76636c3045a39"
