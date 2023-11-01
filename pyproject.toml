@@ -60,7 +60,7 @@ lsprotocol = { version = "^2023.0.0a3", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"
-poethepoet = "^0.20.0"
+poethepoet = ">=0.20,<0.25"
 pytest = "^7.4.0"
 black = "^23.3.0"
 ruff = "^0.1.3"
