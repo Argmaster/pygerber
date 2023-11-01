@@ -6,6 +6,7 @@ from enum import Enum
 from typing import TYPE_CHECKING, ClassVar, Optional
 
 import numpy as np
+import numpy.typing as npt
 from PIL import Image
 
 from pygerber.backend.abstract.backend_cls import Backend, BackendOptions
@@ -170,7 +171,10 @@ class Rasterized2DBackend(Backend):
         np_img = np.array(img)
 
         # Create an empty RGBA image with the same size as the original image
-        rgba_img = np.zeros((img.height, img.width, 4), dtype=np.uint8)
+        rgba_img: npt.NDArray[np.uint8] = np.zeros(
+            (img.height, img.width, 4),
+            dtype=np.uint8,
+        )
 
         # For each grayscale value, set the corresponding RGBA value in the new image
         for gray_value, rgba in color_map.items():

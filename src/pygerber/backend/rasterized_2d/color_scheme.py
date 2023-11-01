@@ -114,12 +114,12 @@ class ColorScheme(FrozenGeneralModel):
         """Return grayscale to RGBA color map."""
         return {
             Polarity.Dark.get_2d_rasterized_color(): self.solid_color.as_rgba_int(),
-            Polarity.Clear.get_2d_rasterized_color(): self.clear_color.as_rgba_int(),  # noqa: E501
+            Polarity.Clear.get_2d_rasterized_color(): self.clear_color.as_rgba_int(),
             Polarity.DarkRegion.get_2d_rasterized_color(): self.solid_region_color.as_rgba_int(),  # noqa: E501
             Polarity.ClearRegion.get_2d_rasterized_color(): self.clear_region_color.as_rgba_int(),  # noqa: E501
             Polarity.Background.get_2d_rasterized_color(): self.background_color.as_rgba_int(),  # noqa: E501
-            Polarity.DEBUG.get_2d_rasterized_color(): self.debug_1_color.as_rgba_int(),  # noqa: E501
-            Polarity.DEBUG2.get_2d_rasterized_color(): self.debug_2_color.as_rgba_int(),  # noqa: E501
+            Polarity.DEBUG.get_2d_rasterized_color(): self.debug_1_color.as_rgba_int(),
+            Polarity.DEBUG2.get_2d_rasterized_color(): self.debug_2_color.as_rgba_int(),
         }
 
 
