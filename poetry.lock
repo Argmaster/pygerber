@@ -1002,13 +1002,13 @@ testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)",
 
 [[package]]
 name = "lsprotocol"
-version = "2023.0.0a3"
+version = "2023.0.0b1"
 description = "Python implementation of the Language Server Protocol."
 optional = true
 python-versions = ">=3.7"
 files = [
-    {file = "lsprotocol-2023.0.0a3-py3-none-any.whl", hash = "sha256:2896c5a30c34846e3d5687e35715961f49bf7b92a36e4fb2b707ff65f19087f7"},
-    {file = "lsprotocol-2023.0.0a3.tar.gz", hash = "sha256:d704e4e00419f74bece9795de4b34d02aa555fc0131fec49f59ac9eb46816e51"},
+    {file = "lsprotocol-2023.0.0b1-py3-none-any.whl", hash = "sha256:ade2cd0fa0ede7965698cb59cd05d3adbd19178fd73e83f72ef57a032fbb9d62"},
+    {file = "lsprotocol-2023.0.0b1.tar.gz", hash = "sha256:f7a2d4655cbd5639f373ddd1789807450c543341fa0a32b064ad30dbb9f510d4"},
 ]
 
 [package.dependencies]
