@@ -7,6 +7,22 @@ this project adheres to [Calendar Versioning](https://calver.org/).
 
 ## Release 2.1.0
 
+- Fixed #37
+- Added latest Gerber spec file revision 2023.08 to documentation.
+- Added command line interface for PyGerber 2D rendering.
+- Added Gerber X3/X2 language server which can be acquired with
+  `pip install pygerber[language-server]`. Currently server capabilities include hover
+  messages with Gerber reference cited and minimal amount of suggestions. We are
+  planning to further extend this server in future releases.
+- Added `is-language-server-available` CLI command for checking if
+  `pygerber[language-sever]` is available.
+- Added support for arc region boundaries (#61).
+- Added warning messages whenever zero surface flash is created.
+- Improved documentation for many of supported Gerber commands. This documentation is
+  used by language server to provide specification reference.
+- Refactored tokenizer implementation, as a result #67 was fixed and #64 is no longer an
+  issue in some cases.
+
 ## Release 2.0.1
 
 - Fixed names of Gerber specification files (`.pdf.pdf` extension replaced with `.pdf`)
