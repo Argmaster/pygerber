@@ -3,9 +3,10 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Optional
 
-import lsprotocol.types as lspt
-
 from pygerber.common.position import Position
+from pygerber.gerberx3.language_server._internals import (
+    IS_LANGUAGE_SERVER_FEATURE_AVAILABLE,
+)
 from pygerber.gerberx3.language_server._internals.errors import EmptyASTError
 from pygerber.gerberx3.linter import diagnostic
 from pygerber.gerberx3.linter.diagnostic import Diagnostic
@@ -16,6 +17,9 @@ from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 
 if TYPE_CHECKING:
     from pygls.server import LanguageServer
+
+if IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:
+    import lsprotocol.types as lspt
 
 
 class Document:
