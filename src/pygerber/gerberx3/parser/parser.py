@@ -66,10 +66,14 @@ class Parser:
         )
         self.draw_actions = []
 
-        for token in ast.tokens:
-            self._update_drawing_state(token)
+        try:
+            for token in ast:
+                self._update_drawing_state(token)
 
-            yield token, self.state
+                yield token, self.state
+
+        except ExitParsingProcessInterrupt:
+            pass
 
     def get_draw_commands_handle(self) -> DrawCommandsHandle:
         """Return handle to drawing commands."""

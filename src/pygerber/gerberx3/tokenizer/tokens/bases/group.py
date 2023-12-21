@@ -46,23 +46,6 @@ class TokenGroup(Token):
             tokens=list(_()),
         )
 
-    def update_drawing_state(
-        self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set coordinate parser."""
-        draw_commands: List[DrawCommand] = []
-
-        for token in self.tokens:
-            state, result_commands = token.update_drawing_state(state, backend)
-            draw_commands.extend(result_commands)
-
-        return (
-            state,
-            draw_commands,
-        )
-
     def get_gerber_code(
         self,
         indent: str = "",
