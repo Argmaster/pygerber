@@ -1,7 +1,7 @@
 """Wrapper for flash operation token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Iterator, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Iterable, Iterator, Optional, Sequence
 
 from pygerber.common.position import Position
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
@@ -10,10 +10,6 @@ from pygerber.gerberx3.tokenizer.tokens.bases.token_accessor import TokenAccesso
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
-
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
 
 
 class TokenGroup(Token):

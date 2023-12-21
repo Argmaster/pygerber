@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 MAX_CACHE_SIZE = 64
 
 
-def get_language_server() -> LanguageServer:
+def get_language_server() -> LanguageServer:  # noqa: C901
     """Get instance of Gerber language server."""
     if not IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:
         raise LanguageServerNotAvailableError
