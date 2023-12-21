@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import logging
-from copy import deepcopy
 from enum import Enum
 from typing import TYPE_CHECKING, Callable, Generator, Optional
 
@@ -126,9 +125,11 @@ class StatePreservingParser(Parser):
     def parse(self, ast: AST) -> DrawCommandsHandle:
         """Parse token stack."""
         self.state_index = []
+        current_state = self.state
 
         for token, state in self.parse_iter(ast):
-            self.state_index.append((token.location, deepcopy(state)))
+            if state != current_state:
+                self.state_index.append((token.location, state))
 
         return self.get_draw_commands_handle()
 
