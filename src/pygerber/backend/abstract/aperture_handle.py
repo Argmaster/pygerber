@@ -79,12 +79,18 @@ class PrivateApertureHandle:
 
     @cached_property
     def _bounding_box(self) -> BoundingBox:
-        bbox = BoundingBox.NULL
+        bbox: Optional[BoundingBox] = None
 
         for aperture_draw in self.aperture_draws:
-            bbox += aperture_draw.get_bounding_box()
+            if bbox is not None:
+                bbox += aperture_draw.get_bounding_box()
+            else:
+                bbox = aperture_draw.get_bounding_box()
 
-        return bbox
+        if bbox is not None:
+            return bbox
+
+        return BoundingBox.NULL
 
     def _get_coordinate_origin(self) -> Vector2D:
         return self.bounding_box.get_min_vector()

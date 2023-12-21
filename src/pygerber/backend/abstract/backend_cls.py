@@ -104,12 +104,18 @@ class Backend(ABC):
             handle.finalize_aperture_creation()
 
     def _get_draws_bounding_box(self, draws: List[DrawCommand]) -> BoundingBox:
-        bbox = BoundingBox.NULL
+        bbox: Optional[BoundingBox] = None
 
         for draw in draws:
-            bbox += draw.get_bounding_box()
+            if bbox is not None:
+                bbox += draw.get_bounding_box()
+            else:
+                bbox = draw.get_bounding_box()
 
-        return bbox
+        if bbox is not None:
+            return bbox
+
+        return BoundingBox.NULL
 
     def _get_coordinate_origin(self) -> Vector2D:
         return self.bounding_box.get_min_vector()
