@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
 from enum import Enum
 from typing import TYPE_CHECKING, Callable, Generator, Optional
 
@@ -108,6 +109,40 @@ class Parser:
                 )
             else:
                 self.options.on_update_drawing_state_error(e, self, token)
+
+
+class StatePreservingParser(Parser):
+    """Parser class which preserves all states for all tokens.
+
+    Caution: High memory consumption.
+    """
+
+    state_index: list[tuple[int, State]]
+
+    def __init__(self, options: ParserOptions | None = None) -> None:
+        super().__init__(options)
+        self.state_index = []
+
+    def parse(self, ast: AST) -> DrawCommandsHandle:
+        """Parse token stack."""
+        self.state_index = []
+
+        for token, state in self.parse_iter(ast):
+            self.state_index.append((token.location, deepcopy(state)))
+
+        return self.get_draw_commands_handle()
+
+    def get_state_at(self, token: Token) -> State:
+        """Get state at given token.
+
+        Parser must have been already used to parse some AST.
+        """
+        for location, state in self.state_index:
+            if location <= token.location:
+                continue
+            return state
+
+        return self.state
 
 
 class ParserOnErrorAction(Enum):

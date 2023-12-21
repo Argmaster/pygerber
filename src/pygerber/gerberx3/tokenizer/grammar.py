@@ -66,6 +66,7 @@ from pygerber.gerberx3.tokenizer.tokens.groups.statement import (
     Statement,
 )
 from pygerber.gerberx3.tokenizer.tokens.in_image_name import ImageName
+from pygerber.gerberx3.tokenizer.tokens.invalid_token import InvalidToken
 from pygerber.gerberx3.tokenizer.tokens.ip_image_polarity import ImagePolarity
 from pygerber.gerberx3.tokenizer.tokens.lm_load_mirroring import LoadMirroring
 from pygerber.gerberx3.tokenizer.tokens.ln_load_name import LoadName
@@ -236,10 +237,19 @@ class GerberGrammarBuilder(GrammarBuilder):
             | eoex
         )
 
+        invalid_token = self.wrapper(
+            InvalidToken,
+            Regex(".+").set_results_name("content"),
+        )
+
+        resilient = self.wrapper(
+            AST,
+            (common | m02 | m01 | m00 | invalid_token)[0, ...],
+        )
         expressions = self.wrapper(AST, (common | m02 | m01 | m00)[0, ...])
         grammar = self.wrapper(AST, common[0, ...] + (m02 | m01 | m00))
 
-        return GerberGrammar(grammar, expressions)
+        return GerberGrammar(grammar, expressions, resilient)
 
     def _build_load_commands(self) -> ParserElement:
         wrapper = self.wrapper
@@ -893,6 +903,8 @@ class GerberGrammar:
         self,
         strict_grammar: ParserElement,
         expression_grammar: ParserElement,
+        resilient_grammar: ParserElement,
     ) -> None:
         self.strict_grammar = strict_grammar
         self.expression_grammar = expression_grammar
+        self.resilient_grammar = resilient_grammar

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Iterable, Iterator, Optional, Tuple
 from pyparsing import col, lineno
 
 from pygerber.common.position import Position
+from pygerber.gerberx3.linter import diagnostic
 from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
 from pygerber.gerberx3.tokenizer.tokens.bases.token_accessor import TokenAccessor
 
@@ -16,7 +17,6 @@ if TYPE_CHECKING:
 
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.language_server._internals.state import LanguageServerState
     from pygerber.gerberx3.parser.state import State
 
 
@@ -82,10 +82,10 @@ class Token(GerberCode):
             col(self.location, self.string),
         )
 
-    def get_hover_message(self, state: LanguageServerState) -> str:
+    def get_hover_message(self, state: State) -> str:
         """Return language server hover message."""
         ref_doc = "\n".join(s.strip() for s in str(self.__doc__).split("\n"))
-        op_specific_extra = self.get_operation_specific_info(state)
+        op_specific_extra = self.get_state_based_hover_message(state)
         return (
             "```gerber\n"
             f"{self.get_gerber_code_one_line_pretty_display()}"
@@ -101,9 +101,9 @@ class Token(GerberCode):
             f"{ref_doc}"
         )
 
-    def get_operation_specific_info(
+    def get_state_based_hover_message(
         self,
-        state: LanguageServerState,  # noqa: ARG002
+        state: State,  # noqa: ARG002
     ) -> str:
         """Return operation specific extra information about token."""
         return ""
@@ -119,6 +119,19 @@ class Token(GerberCode):
     def get_gerber_code_one_line_pretty_display(self) -> str:
         """Get gerber code represented by this token."""
         return self.get_gerber_code()
+
+    def get_token_diagnostics(self) -> Iterable[diagnostic.Diagnostic]:
+        """Get diagnostics for this token."""
+        return
+        yield
+
+    def get_token_end_position(self) -> Position:
+        """Get position of the end of the token."""
+        s = str(self)
+        first, *_ = s.split("\n")
+        lines_offset = 0
+        column_offset = len(first)
+        return self.get_token_position().offset(lines_offset, column_offset)
 
     def __iter__(self) -> Iterator[Token]:
         yield self
