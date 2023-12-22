@@ -123,7 +123,7 @@ class BoundingBox(FrozenGeneralModel):
                 min_x=op(self.min_x, -other),
                 min_y=op(self.min_y, -other),
             )
-        return NotImplemented  # type: ignore[unreachable]
+        return NotImplemented
 
     def __add__(self, other: object) -> BoundingBox:
         if isinstance(other, BoundingBox):

@@ -123,7 +123,7 @@ class Token(GerberCode):
     def get_token_diagnostics(self) -> Iterable[diagnostic.Diagnostic]:
         """Get diagnostics for this token."""
         return
-        yield
+        yield  # type: ignore[unreachable]
 
     def get_token_end_position(self) -> Position:
         """Get position of the end of the token."""

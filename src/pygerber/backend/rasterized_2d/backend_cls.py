@@ -112,7 +112,9 @@ class Rasterized2DBackend(Backend):
         if options is not None and not isinstance(options, Rasterized2DBackendOptions):
             msg = (  # type: ignore[unreachable]
                 "Expected Rasterized2DBackendOptions or None as options, got "
-                + str(type(options))
+                + str(
+                    type(options),
+                )
             )
             raise TypeError(msg)
         super().__init__(options)

@@ -21,12 +21,12 @@ if TYPE_CHECKING:
 
 @pytest.fixture()
 def macro_expr() -> ParserElement:
-    return GerberGrammarBuilder()._build_macro_expr()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_macro_expr()
 
 
 @pytest.fixture()
 def macro_expr_raw() -> ParserElement:
-    return GerberGrammarBuilder(is_raw=True)._build_macro_expr()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(is_raw=True)._build_macro_expr()
 
 
 TEST_DATA_MACRO_EXPR = [
@@ -116,12 +116,12 @@ def test_macro_expr(
 
 @pytest.fixture()
 def macro_primitive() -> ParserElement:
-    return GerberGrammarBuilder()._build_macro_primitive()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_macro_primitive()
 
 
 @pytest.fixture()
 def macro_primitive_raw() -> ParserElement:
-    return GerberGrammarBuilder(is_raw=True)._build_macro_primitive()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(is_raw=True)._build_macro_primitive()
 
 
 TEST_DATA_MACRO_PRIMITIVE = [
@@ -159,12 +159,12 @@ def test_macro_primitive(
 
 @pytest.fixture()
 def macro_variable_declaration() -> ParserElement:
-    return GerberGrammarBuilder()._build_macro_variable_definition()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_macro_variable_definition()
 
 
 @pytest.fixture()
 def macro_variable_declaration_raw() -> ParserElement:
-    return GerberGrammarBuilder(is_raw=True)._build_macro_variable_definition()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(is_raw=True)._build_macro_variable_definition()
 
 
 TEST_DATA_MACRO_VARIABLE_DECLARATION = [
@@ -224,12 +224,12 @@ def test_macro_variable_declaration(
 
 @pytest.fixture()
 def macro_tokens() -> ParserElement:
-    return GerberGrammarBuilder()._build_macro_tokens()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_macro_tokens()
 
 
 @pytest.fixture()
 def macro_tokens_raw() -> ParserElement:
-    return GerberGrammarBuilder(is_raw=True)._build_macro_tokens()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(is_raw=True)._build_macro_tokens()
 
 
 TEST_DATA = [

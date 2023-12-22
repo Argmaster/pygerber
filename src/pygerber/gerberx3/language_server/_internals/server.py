@@ -99,7 +99,7 @@ def get_language_server() -> LanguageServer:  # noqa: C901
                 lspt.CompletionItem(
                     label=f"G{code}*",
                     kind=lspt.CompletionItemKind.Keyword,
-                )  # type: ignore[pylance]
+                )
                 for code in [
                     "01",
                     "02",

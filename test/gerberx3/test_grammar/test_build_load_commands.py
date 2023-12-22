@@ -14,12 +14,12 @@ class TestLoadName:
     @staticmethod
     @pytest.fixture()
     def load_name() -> ParserElement:
-        return GerberGrammarBuilder()._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder()._build_load_commands()
 
     @staticmethod
     @pytest.fixture()
     def load_name_raw() -> ParserElement:
-        return GerberGrammarBuilder(is_raw=True)._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder(is_raw=True)._build_load_commands()
 
     LOAD_NAME_DATA: ClassVar[list[str]] = [
         "%LN2G09E752G0.gbl*%",
@@ -61,12 +61,12 @@ class TestLoadScaling:
     @staticmethod
     @pytest.fixture()
     def load_scale() -> ParserElement:
-        return GerberGrammarBuilder()._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder()._build_load_commands()
 
     @staticmethod
     @pytest.fixture()
     def load_scale_raw() -> ParserElement:
-        return GerberGrammarBuilder(is_raw=True)._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder(is_raw=True)._build_load_commands()
 
     LOAD_SCALE_DATA: ClassVar[list[str]] = [
         "%LS0.8*%",
@@ -108,12 +108,12 @@ class TestLoadRotation:
     @staticmethod
     @pytest.fixture()
     def load_rotation() -> ParserElement:
-        return GerberGrammarBuilder()._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder()._build_load_commands()
 
     @staticmethod
     @pytest.fixture()
     def load_rotation_raw() -> ParserElement:
-        return GerberGrammarBuilder(is_raw=True)._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder(is_raw=True)._build_load_commands()
 
     LOAD_ROTATION_DATA: ClassVar[list[str]] = [
         "%LR0.0*%",
@@ -155,12 +155,12 @@ class TestLoadMirroring:
     @staticmethod
     @pytest.fixture()
     def load_mirroring() -> ParserElement:
-        return GerberGrammarBuilder()._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder()._build_load_commands()
 
     @staticmethod
     @pytest.fixture()
     def load_mirroring_raw() -> ParserElement:
-        return GerberGrammarBuilder(is_raw=True)._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder(is_raw=True)._build_load_commands()
 
     LOAD_MIRRORING_DATA: ClassVar[list[str]] = [
         "%LMN*%",
@@ -209,12 +209,12 @@ class TestLoadPolarity:
     @staticmethod
     @pytest.fixture()
     def load_polarity() -> ParserElement:
-        return GerberGrammarBuilder()._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder()._build_load_commands()
 
     @staticmethod
     @pytest.fixture()
     def load_polarity_raw() -> ParserElement:
-        return GerberGrammarBuilder(is_raw=True)._build_load_commands()  # type: ignore[no-any-return]
+        return GerberGrammarBuilder(is_raw=True)._build_load_commands()
 
     LOAD_POLARITY_DATA: ClassVar[list[str]] = [
         "%LPC*%",

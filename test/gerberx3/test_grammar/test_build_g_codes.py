@@ -14,24 +14,24 @@ if TYPE_CHECKING:
 
 @pytest.fixture()
 def g_codes() -> ParserElement:
-    return GerberGrammarBuilder()._build_g_codes()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_g_codes()
 
 
 @pytest.fixture()
 def eoex() -> ParserElement:
-    return GerberGrammarBuilder()._build_eoex()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_eoex()
 
 
 @pytest.fixture()
 def g_codes_raw() -> ParserElement:
-    return GerberGrammarBuilder(  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(
         is_raw=True,
     )._build_g_codes()
 
 
 @pytest.fixture()
 def eoex_raw() -> ParserElement:
-    return GerberGrammarBuilder(  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(
         is_raw=True,
     )._build_eoex()
 

@@ -54,7 +54,7 @@ class Vector2D(FrozenGeneralModel):
                 x=op(self.x, Decimal(other)),
                 y=op(self.y, Decimal(other)),
             )
-        return NotImplemented  # type: ignore[unreachable]
+        return NotImplemented
 
     def __add__(self, other: object) -> Vector2D:
         return self._operator(other, operator.add)
@@ -97,7 +97,7 @@ class Vector2D(FrozenGeneralModel):
                     "y": op(self.y, Decimal(other)),
                 },
             )
-        return NotImplemented  # type: ignore[unreachable]
+        return NotImplemented
 
     def __iadd__(self, other: object) -> Self:
         return self._i_operator(other, operator.add)

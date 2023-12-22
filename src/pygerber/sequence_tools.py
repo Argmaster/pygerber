@@ -34,9 +34,9 @@ def flatten(sequence: Iterable[T]) -> Iterable[T]:
 def unwrap(item: T) -> T:
     """Unwrap item wrapped in sequences."""
     try:
-        while isinstance(item, (list, tuple, ParseResults)):  # type: ignore[index]
-            item = item[0]  # type: ignore[unreachable, return-value]
+        while isinstance(item, (list, tuple, ParseResults)):
+            item = item[0]
     except (TypeError, IndexError):
         pass
 
-    return item  # type: ignore[unreachable, return-value]
+    return item

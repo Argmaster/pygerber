@@ -35,8 +35,8 @@ class InvalidToken(Token):
         yield diagnostic.Diagnostic(
             range=(
                 diagnostic.Range(
-                    self.get_token_position(),
-                    self.get_token_end_position(),
+                    start=self.get_token_position(),
+                    end=self.get_token_end_position(),
                 )
             ),
             message="Invalid syntax.",

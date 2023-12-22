@@ -37,7 +37,7 @@ class Document:
             lspt.MessageType.Info,
         )
 
-        self.parser_error_diagnostics = []
+        self.parser_error_diagnostics: list[diagnostic.Diagnostic] = []
         self.options = ParserOptions(
             on_update_drawing_state_error=self.on_update_drawing_state_error,
         )
@@ -82,8 +82,8 @@ class Document:
             diagnostic.Diagnostic(
                 range=(
                     diagnostic.Range(
-                        token.get_token_position(),
-                        token.get_token_end_position(),
+                        start=token.get_token_position(),
+                        end=token.get_token_end_position(),
                     )
                 ),
                 message=message,

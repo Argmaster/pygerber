@@ -32,6 +32,7 @@
         "linenums",
         "Linu",
         "lsprotocol",
+        "lspt",
         "mkdocs",
         "mkdocstrings",
         "Moiré",
@@ -57,7 +58,7 @@
         "ungroup",
         "Xino"
     ],
-    "python.testing.pytestArgs": ["--log-level=DEBUG", "-s"],
+    "python.testing.pytestArgs": ["."],
     "ruff.enable": true,
     "ruff.fixAll": true,
     "python.analysis.importFormat": "absolute",
@@ -76,7 +77,7 @@
     },
     "python.analysis.fixAll": ["source.convertImportFormat"],
     "editor.codeActionsOnSave": {
-        "source.fixAll": true
+        "source.fixAll": "explicit"
     },
     "editor.formatOnSaveMode": "file",
     "editor.formatOnSave": true,
@@ -107,7 +108,7 @@
             "depth": 10
         }
     ],
-    "mypy-type-checker.importStrategy": "useBundled",
+    "mypy-type-checker.importStrategy": "fromEnvironment",
     "black-formatter.importStrategy": "useBundled",
     "cSpell.ignoreWords": ["RRGGBB", "RRGGBBAA"],
     "workbench.colorCustomizations": {
@@ -130,5 +131,8 @@
         "titleBar.inactiveForeground": "#e7e7e799"
     },
     "peacock.color": "#007fff",
-    "mypy-type-checker.args": ["--config-file=pyproject.toml"]
+    "mypy-type-checker.args": ["--config-file=pyproject.toml"],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "mypy-type-checker.reportingScope": "workspace"
 }
