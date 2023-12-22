@@ -15,6 +15,10 @@ class ParserError(ValueError):
     raised by Parser while allowing other exceptions to interrupt execution.
     """
 
+    def get_message(self) -> str:
+        """Get parser error help message."""
+        return f"{self.__class__.__qualname__}: {self.__doc__}"
+
 
 class ZeroOmissionNotSupportedError(ParserError):
     """Raised when incremental coordinates are selected. (Spec. 8.2.1.2)."""

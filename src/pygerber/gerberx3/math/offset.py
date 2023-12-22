@@ -78,7 +78,7 @@ class Offset(FrozenGeneralModel):
             return op(self.value, other.value)  # type: ignore[no-any-return]
         if isinstance(other, (Decimal, int, float, str)):
             return op(self.value, Decimal(other))  # type: ignore[no-any-return]
-        return NotImplemented  # type: ignore[unreachable]
+        return NotImplemented
 
     def __eq__(self, other: object) -> bool:
         return self._compare(other, operator.eq)
@@ -104,7 +104,7 @@ class Offset(FrozenGeneralModel):
             return Offset(value=op(self.value, other.value))
         if isinstance(other, (Decimal, int, float, str)):
             return Offset(value=op(self.value, Decimal(other)))
-        return NotImplemented  # type: ignore[unreachable]
+        return NotImplemented
 
     def __add__(self, other: object) -> Offset:
         return self._operator(other, operator.add)
@@ -138,7 +138,7 @@ class Offset(FrozenGeneralModel):
                     "value": op(self.value, Decimal(other)),
                 },
             )
-        return NotImplemented  # type: ignore[unreachable]
+        return NotImplemented
 
     def __iadd__(self, other: object) -> Self:
         return self._i_operator(other, operator.add)

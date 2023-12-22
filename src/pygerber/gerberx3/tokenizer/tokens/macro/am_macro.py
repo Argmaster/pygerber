@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Sequence, Tuple
+from typing import TYPE_CHECKING, Iterable, Iterator, Sequence, Tuple
 
 from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
 from pygerber.gerberx3.math.offset import Offset
@@ -185,6 +185,11 @@ class MacroDefinition(TokenGroup):
             ),
             (),
         )
+
+    def __iter__(self) -> Iterator[Token]:
+        yield self
+        for token in self.tokens:
+            yield from token
 
     def evaluate(
         self,

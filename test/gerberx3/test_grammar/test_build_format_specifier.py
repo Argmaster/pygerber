@@ -13,12 +13,12 @@ if TYPE_CHECKING:
 
 @pytest.fixture()
 def format_specifier() -> ParserElement:
-    return GerberGrammarBuilder()._build_format_specifier()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_format_specifier()
 
 
 @pytest.fixture()
 def format_specifier_raw() -> ParserElement:
-    return GerberGrammarBuilder(is_raw=True)._build_format_specifier()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(is_raw=True)._build_format_specifier()
 
 
 FORMAT_SPECIFIER_DATA = [

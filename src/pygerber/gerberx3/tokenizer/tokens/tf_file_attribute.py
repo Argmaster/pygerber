@@ -44,7 +44,7 @@ class FileAttribute(AttributeToken):
             string=string,
             location=location,
             name=name,
-            value=value,  # type: ignore[pylance]
+            value=value,
         )
 
     def get_gerber_code(

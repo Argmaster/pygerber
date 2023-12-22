@@ -14,12 +14,12 @@ if TYPE_CHECKING:
 
 @pytest.fixture()
 def d_codes() -> ParserElement:
-    return GerberGrammarBuilder()._build_d_codes()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_d_codes()
 
 
 @pytest.fixture()
 def d_codes_raw() -> ParserElement:
-    return GerberGrammarBuilder(  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(
         is_raw=True,
     )._build_d_codes()
 

@@ -12,12 +12,12 @@ if TYPE_CHECKING:
 
 @pytest.fixture()
 def define_aperture() -> ParserElement:
-    return GerberGrammarBuilder()._build_define_aperture()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder()._build_define_aperture()
 
 
 @pytest.fixture()
 def define_aperture_raw() -> ParserElement:
-    return GerberGrammarBuilder(is_raw=True)._build_define_aperture()  # type: ignore[no-any-return]
+    return GerberGrammarBuilder(is_raw=True)._build_define_aperture()
 
 
 TEST_DATA = [

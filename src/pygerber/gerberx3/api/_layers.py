@@ -306,9 +306,7 @@ class Rasterized2DLayer(Layer):
     def __init__(self, options: Rasterized2DLayerParams) -> None:
         """Initialize Layer object."""
         if not isinstance(options, Rasterized2DLayerParams):
-            msg = (  # type: ignore[unreachable]
-                f"Expected {Rasterized2DLayerParams} got {type(options)}."
-            )
+            msg = f"Expected {Rasterized2DLayerParams} got {type(options)}."  # type: ignore[unreachable]
             raise TypeError(msg)
         super().__init__(options)
 

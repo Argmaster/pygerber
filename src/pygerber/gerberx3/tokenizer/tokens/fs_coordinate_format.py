@@ -69,12 +69,12 @@ class CoordinateFormat(ExtendedCommandToken):
         zeros_mode = TrailingZerosMode(tokens["zeros_mode"])
         coordinate_mode = CoordinateMode(tokens["coordinate_mode"])
         x_format = AxisFormat(
-            integer=int(tokens["x_format"][0]),  # type: ignore[pylance]
-            decimal=int(tokens["x_format"][1]),  # type: ignore[pylance]
+            integer=int(tokens["x_format"][0]),
+            decimal=int(tokens["x_format"][1]),
         )
         y_format = AxisFormat(
-            integer=int(tokens["y_format"][0]),  # type: ignore[pylance]
-            decimal=int(tokens["y_format"][1]),  # type: ignore[pylance]
+            integer=int(tokens["y_format"][0]),
+            decimal=int(tokens["y_format"][1]),
         )
         return cls(
             string=string,

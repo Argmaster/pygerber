@@ -66,10 +66,14 @@ class Parser:
         )
         self.draw_actions = []
 
-        for token in ast.tokens:
-            self._update_drawing_state(token)
+        try:
+            for token in ast:
+                self._update_drawing_state(token)
 
-            yield token, self.state
+                yield token, self.state
+
+        except ExitParsingProcessInterrupt:
+            pass
 
     def get_draw_commands_handle(self) -> DrawCommandsHandle:
         """Return handle to drawing commands."""
@@ -108,6 +112,42 @@ class Parser:
                 )
             else:
                 self.options.on_update_drawing_state_error(e, self, token)
+
+
+class StatePreservingParser(Parser):
+    """Parser class which preserves all states for all tokens.
+
+    Caution: High memory consumption.
+    """
+
+    state_index: list[tuple[int, State]]
+
+    def __init__(self, options: ParserOptions | None = None) -> None:
+        super().__init__(options)
+        self.state_index = []
+
+    def parse(self, ast: AST) -> DrawCommandsHandle:
+        """Parse token stack."""
+        self.state_index = []
+        current_state = self.state
+
+        for token, state in self.parse_iter(ast):
+            if state != current_state:
+                self.state_index.append((token.location, state))
+
+        return self.get_draw_commands_handle()
+
+    def get_state_at(self, token: Token) -> State:
+        """Get state at given token.
+
+        Parser must have been already used to parse some AST.
+        """
+        for location, state in self.state_index:
+            if location <= token.location:
+                continue
+            return state
+
+        return self.state
 
 
 class ParserOnErrorAction(Enum):

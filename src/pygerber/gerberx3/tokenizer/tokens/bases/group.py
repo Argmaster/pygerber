@@ -1,7 +1,7 @@
 """Wrapper for flash operation token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Iterator, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Iterable, Iterator, Optional, Sequence
 
 from pygerber.common.position import Position
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
@@ -10,10 +10,6 @@ from pygerber.gerberx3.tokenizer.tokens.bases.token_accessor import TokenAccesso
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
-
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
 
 
 class TokenGroup(Token):
@@ -44,23 +40,6 @@ class TokenGroup(Token):
             string=string,
             location=location,
             tokens=list(_()),
-        )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set coordinate parser."""
-        draw_commands: List[DrawCommand] = []
-
-        for token in self.tokens:
-            state, result_commands = token.update_drawing_state(state, backend)
-            draw_commands.extend(result_commands)
-
-        return (
-            state,
-            draw_commands,
         )
 
     def get_gerber_code(

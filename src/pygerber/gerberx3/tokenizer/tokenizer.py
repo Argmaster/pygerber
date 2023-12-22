@@ -48,6 +48,17 @@ class Tokenizer:
             parse_all=True,
         )
 
+    def tokenize_resilient(self, source: str) -> AST:
+        """Convert source code into token stack.
+
+        Supports arbitrary sequences of valid GerberX3 expressions.
+        """
+        return self._tokenize_grammar(
+            source,
+            self.grammar.resilient_grammar,
+            parse_all=True,
+        )
+
     def _tokenize_grammar(
         self,
         source: str,

@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-import logging
+from hashlib import sha256
 from typing import TYPE_CHECKING, Optional
 
 import pygerber
-from pygerber.common.position import Position
 from pygerber.gerberx3.language_server import IS_LANGUAGE_SERVER_FEATURE_AVAILABLE
 from pygerber.gerberx3.language_server._internals.error import (
     LanguageServerNotAvailableError,
 )
-from pygerber.gerberx3.language_server._internals.errors import EmptyASTError
-from pygerber.gerberx3.language_server._internals.state import LanguageServerState
 
 if TYPE_CHECKING:
     from pygls.server import LanguageServer
@@ -21,28 +18,18 @@ if TYPE_CHECKING:
 MAX_CACHE_SIZE = 64
 
 
-def get_language_server() -> LanguageServer:
+def get_language_server() -> LanguageServer:  # noqa: C901
     """Get instance of Gerber language server."""
     if not IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:
         raise LanguageServerNotAvailableError
 
-    from lsprotocol.types import (
-        INITIALIZE,
-        TEXT_DOCUMENT_COMPLETION,
-        TEXT_DOCUMENT_HOVER,
-        CompletionItem,
-        CompletionItemKind,
-        CompletionList,
-        CompletionOptions,
-        CompletionParams,
-        Hover,
-        HoverParams,
-        InitializeParams,
-        MarkupContent,
-        MarkupKind,
-        MessageType,
-    )
+    import lsprotocol.types as lspt
     from pygls.server import LanguageServer
+
+    from pygerber.gerberx3.language_server._internals.document import Document
+
+    if TYPE_CHECKING:
+        from pygls import workspace
 
     server = LanguageServer(
         "pygerber.gerberx3.language_server",
@@ -50,67 +37,69 @@ def get_language_server() -> LanguageServer:
         max_workers=1,
     )
 
-    state = LanguageServerState()
-
-    @server.feature(INITIALIZE)
-    def _initialize(params: InitializeParams) -> None:
+    @server.feature(lspt.INITIALIZE)
+    def _initialize(params: lspt.InitializeParams) -> None:
         client_name = getattr(params.client_info, "name", "Unknown")
         client_version = getattr(params.client_info, "version", "Unknown")
         server.show_message_log(
             "Started PyGerber's Gerber Language Server version "
             f"{pygerber.__version__} for {client_name} {client_version}.",
-            MessageType.Info,
+            lspt.MessageType.Info,
         )
 
-    @server.feature(TEXT_DOCUMENT_HOVER)
-    def _text_document_hover(params: HoverParams) -> Optional[Hover]:
-        try:
-            ast = state.get_by_uri(params.text_document.uri).tokenize()
-            token_accessor = ast.find_closest_token(
-                Position.from_vscode_position(
-                    params.position.line,
-                    params.position.character,
-                ),
-            )
-            if (token := token_accessor.token) is not None:
-                logging.info(
-                    "Found token for hover location %s, %s",
-                    params.position,
-                    token.get_token_position(),
-                )
+    @server.feature(lspt.TEXT_DOCUMENT_DID_OPEN)
+    def _text_document_open(params: lspt.DidOpenTextDocumentParams) -> None:
+        document = get_document(params.text_document.uri)
+        document.publish_diagnostics()
 
-                return Hover(
-                    contents=MarkupContent(
-                        kind=MarkupKind.Markdown,
-                        value=token.get_hover_message(state),
-                    ),
-                )
+    @server.feature(lspt.TEXT_DOCUMENT_DID_CHANGE)
+    def _text_document_change(params: lspt.DidOpenTextDocumentParams) -> None:
+        document = get_document(params.text_document.uri)
+        document.publish_diagnostics()
 
-            logging.info(
-                "Missing token for hover location %s",
-                params.position,
-            )
-        except EmptyASTError:
-            logging.warning(
-                "AST for this file is empty, couldn't determine hover message.",
-            )
-        except Exception:
-            logging.exception("DOCUMENT HOVER CRASHED.")
+    cached_documents_map: dict[bytes, Document] = {}
 
-        return None
+    def get_document(uri: str) -> Document:
+        text_document: workspace.TextDocument = server.workspace.get_text_document(
+            uri,
+        )
+        digest_text_document = sha256(text_document.source.encode("utf-8")).digest()
+        digest_uri = sha256(text_document.uri.encode("utf-8")).digest()
+
+        document_id = digest_text_document + digest_uri
+        document = cached_documents_map.get(document_id)
+
+        if document is None:
+            if len(cached_documents_map) > MAX_CACHE_SIZE:
+                cached_documents_map.popitem()
+
+            cached_documents_map[document_id] = Document(
+                server,
+                text_document.source,
+                uri,
+            )
+
+        return cached_documents_map[document_id]
+
+    @server.feature(lspt.TEXT_DOCUMENT_HOVER)
+    def _text_document_hover(params: lspt.HoverParams) -> Optional[lspt.Hover]:
+        document = get_document(params.text_document.uri)
+        return document.text_document_hover(params)
 
     @server.feature(
-        TEXT_DOCUMENT_COMPLETION,
-        CompletionOptions(trigger_characters=["G"]),
+        lspt.TEXT_DOCUMENT_COMPLETION,
+        lspt.CompletionOptions(trigger_characters=["G"]),
     )
-    def _text_document_completion(_params: CompletionParams) -> CompletionList:
-        return CompletionList(
+    def _text_document_completion(
+        _params: lspt.CompletionParams,
+    ) -> lspt.CompletionList:
+        return lspt.CompletionList(
             is_incomplete=False,
             items=[
-                CompletionItem(
+                lspt.CompletionItem(
                     label=f"G{code}*",
-                    kind=CompletionItemKind.Keyword,
-                )  # type: ignore[pylance]
+                    kind=lspt.CompletionItemKind.Keyword,
+                )
                 for code in [
                     "01",
                     "02",
