@@ -4,8 +4,9 @@ from __future__ import annotations
 import enum
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
-import attrs
+from pydantic import Field
 
+from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.common.position import Position
 from pygerber.gerberx3.language_server._internals import (
     IS_LANGUAGE_SERVER_FEATURE_AVAILABLE,
@@ -18,20 +19,14 @@ if IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:
     import lsprotocol.types as lspt
 
 
-@attrs.define
-class Location:
+class Location(FrozenGeneralModel):
     """Represents a location inside a resource, such as a line
     inside a text file.
     """
 
-    uri: str = attrs.field(validator=attrs.validators.instance_of(str))
+    uri: str
 
-    range: Range = attrs.field()  # noqa: A003
-
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, Location):
-            return NotImplemented
-        return (self.uri == o.uri) and (self.range == o.range)
+    range: Range  # noqa: A003
 
     def __repr__(self) -> str:
         return f"{self.uri}:{self.range!r}"
@@ -41,17 +36,16 @@ class Location:
         return lspt.Location(uri=self.uri, range=self.range.to_lspt())
 
 
-@attrs.define
-class DiagnosticRelatedInformation:
+class DiagnosticRelatedInformation(FrozenGeneralModel):
     """Represents a related message and source code location for a diagnostic. This
     should be used to point to code locations that cause or related to a diagnostics,
     e.g when duplicating a symbol in a scope.
     """
 
-    location: Location = attrs.field()
+    location: Location
     """The location of this related diagnostic information."""
 
-    message: str = attrs.field(validator=attrs.validators.instance_of(str))
+    message: str
     """The message of this related diagnostic information."""
 
     def to_lspt(self) -> lspt.DiagnosticRelatedInformation:
@@ -62,8 +56,7 @@ class DiagnosticRelatedInformation:
         )
 
 
-@attrs.define
-class CodeDescription:
+class CodeDescription(FrozenGeneralModel):
     """Structure to capture a description for an error code.
 
     @since 3.16.0
@@ -71,7 +64,7 @@ class CodeDescription:
 
     # Since: 3.16.0
 
-    href: str = attrs.field(validator=attrs.validators.instance_of(str))
+    href: str
     """An URI to open with more information about the diagnostic error."""
 
     def to_lspt(self) -> lspt.CodeDescription:
@@ -97,8 +90,7 @@ class DiagnosticSeverity(int, enum.Enum):
         return lspt.DiagnosticSeverity(self.value)
 
 
-@attrs.define
-class Range:
+class Range(FrozenGeneralModel):
     """A range in a text document expressed as (zero-based) start and end positions.
 
     If you want to specify a range that contains a line including the line ending
@@ -112,16 +104,11 @@ class Range:
     ```
     """
 
-    start: Position = attrs.field()
+    start: Position
     """The range's start position."""
 
-    end: Position = attrs.field()
+    end: Position
     """The range's end position."""
-
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, Range):
-            return NotImplemented
-        return (self.start == o.start) and (self.end == o.end)
 
     def __repr__(self) -> str:
         return f"{self.start!r}-{self.end!r}"
@@ -154,53 +141,49 @@ class DiagnosticTag(int, enum.Enum):
         return lspt.DiagnosticTag(self.value)
 
 
-@attrs.define
-class Diagnostic:
+class Diagnostic(FrozenGeneralModel):
     """Represents a diagnostic, such as a compiler error or warning. Diagnostic objects
     are only valid in the scope of a resource.
     """
 
-    range: Range = attrs.field()  # noqa: A003
+    range: Range  # noqa: A003
     """The range at which the message applies"""
 
-    message: str = attrs.field(validator=attrs.validators.instance_of(str))
+    message: str
     """The diagnostic's message. It usually appears in the user interface"""
 
-    severity: Optional[DiagnosticSeverity] = attrs.field(default=None)
+    severity: Optional[DiagnosticSeverity] = Field(default=None)
     """The diagnostic's severity. Can be omitted. If omitted it is up to the
     client to interpret diagnostics as error, warning, info or hint."""
 
-    code: Optional[Union[int, str]] = attrs.field(default=None)
+    code: Optional[Union[int, str]] = Field(default=None)
     """The diagnostic's code, which usually appear in the user interface."""
 
-    code_description: Optional[CodeDescription] = attrs.field(default=None)
+    code_description: Optional[CodeDescription] = Field(default=None)
     """An optional property to describe the error code.
     Requires the code field (above) to be present/not null.
 
     @since 3.16.0"""
     # Since: 3.16.0
 
-    source: Optional[str] = attrs.field(
-        validator=attrs.validators.optional(attrs.validators.instance_of(str)),
-        default=None,
-    )
+    source: Optional[str] = Field(default=None)
     """A human-readable string describing the source of this
     diagnostic, e.g. 'typescript' or 'super lint'. It usually
     appears in the user interface."""
 
-    tags: Optional[List[DiagnosticTag]] = attrs.field(default=None)
+    tags: Optional[List[DiagnosticTag]] = Field(default=None)
     """Additional metadata about the diagnostic.
 
     @since 3.15.0"""
     # Since: 3.15.0
 
-    related_information: Optional[List[DiagnosticRelatedInformation]] = attrs.field(
+    related_information: Optional[List[DiagnosticRelatedInformation]] = Field(
         default=None,
     )
     """An array of related diagnostic information, e.g. when symbol-names within
     a scope collide all definitions can be marked via this property."""
 
-    data: Optional[Any] = attrs.field(default=None)
+    data: Optional[Any] = Field(default=None)
     """A data entry field that is preserved between a `textDocument/publishDiagnostics`
     notification and `textDocument/codeAction` request.
 
