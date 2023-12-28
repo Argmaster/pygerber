@@ -1,0 +1,669 @@
+"""Alternative implementation of Gerber AST parser state, version 2.
+
+Parser state is immutable and composed out of multiple sub objects. This approach allows
+for cheap storage and updates of parser state, as whenever parser state is updated, only
+one value must be changed, while rest of the structures remain unchanged and only
+references to them are copied.
+"""
+from __future__ import annotations
+
+from decimal import Decimal
+from typing import TYPE_CHECKING, Optional
+
+from pydantic import Field
+
+from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.common.immutable_map_model import ImmutableMapping
+from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.math.vector_2d import Vector2D
+from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
+from pygerber.gerberx3.parser2.errors2 import (
+    CoordinateFormatNotSet2Error,
+    UnitNotSet2Error,
+)
+from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
+from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
+from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
+from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
+    CoordinateParser,
+)
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+
+class State2Constants(FrozenGeneralModel):
+    """Collection of rarely changing (usually once per AST) parser constants.
+
+    This class represents the state constants used in the Gerber parser. It contains
+    properties for various parser constants such as draw units, coordinate format,
+    polarity, mirroring, rotation, scaling, image polarity, and file name. These
+    constants are typically set once per AST (Abstract Syntax Tree) and are used
+    throughout the parsing process.
+    """
+
+    draw_units: Optional[Unit] = None
+    """The draw units used for the Gerber file. (Spec reference: 4.2.1)"""
+
+    coordinate_parser: Optional[CoordinateParser] = None
+    """The coordinate format specification, including the number of decimals.
+    (Spec reference: 4.2.2)"""
+
+    polarity: Polarity = Polarity.Dark
+    """The polarity object transformation parameter. (Spec reference: 4.9.2)"""
+
+    mirroring: Mirroring = Mirroring.NoMirroring
+    """The mirror object transformation parameter. (Spec reference: 4.9.3)"""
+
+    rotation: Decimal = Decimal("0.0")
+    """The rotation object transformation parameter. (Spec reference: 4.9.4)"""
+
+    scaling: Decimal = Decimal("1.0")
+    """The scale object transformation parameter. (Spec reference: 4.9.5)"""
+
+    is_output_image_negation_required: bool = False
+    """Flag indicating whether image polarity flipping is required.
+    (Spec reference: 8.1.4)"""
+
+    file_name: Optional[str] = None
+    """The name of the file. (Spec reference: 8.1.6)"""
+
+    def get_draw_units(self) -> Unit:
+        """Get the draw units.
+
+        This method returns the draw units used for the Gerber file.
+
+        Returns
+        -------
+        Unit
+            The draw units.
+
+        Raises
+        ------
+        UnitNotSet2Error
+            If the draw units are not set.
+        """
+        if self.draw_units is None:
+            raise UnitNotSet2Error
+        return self.draw_units
+
+    def set_draw_units(self, draw_units: Unit) -> Self:
+        """Set the draw units for the state.
+
+        This method updates the draw units of the state and returns a new instance of
+        the state with the updated draw units.
+
+        Parameters
+        ----------
+        draw_units : Unit
+            The draw units to be set.
+
+        Returns
+        -------
+        Self
+            A new instance of the state with the updated draw units.
+        """
+        return self.model_copy(
+            update={
+                "draw_units": draw_units,
+            },
+        )
+
+    def get_coordinate_parser(self) -> CoordinateParser:
+        """Get coordinate_parser property value."""
+        if self.coordinate_parser is None:
+            raise CoordinateFormatNotSet2Error
+        return self.coordinate_parser
+
+    def set_coordinate_parser(self, coordinate_parser: CoordinateParser) -> Self:
+        """Set the coordinate_parser property value."""
+        return self.model_copy(
+            update={
+                "coordinate_parser": coordinate_parser,
+            },
+        )
+
+    def get_polarity(self) -> Polarity:
+        """Get polarity property value."""
+        return self.polarity
+
+    def set_polarity(self, polarity: Polarity) -> Self:
+        """Set the polarity property value."""
+        return self.model_copy(
+            update={
+                "polarity": polarity,
+            },
+        )
+
+    def get_mirroring(self) -> Mirroring:
+        """Get mirroring property value."""
+        return self.mirroring
+
+    def set_mirroring(self, mirroring: Mirroring) -> Self:
+        """Set the mirroring property value."""
+        return self.model_copy(
+            update={
+                "mirroring": mirroring,
+            },
+        )
+
+    def get_rotation(self) -> Decimal:
+        """Get rotation property value."""
+        return self.rotation
+
+    def set_rotation(self, rotation: Decimal) -> Self:
+        """Set the rotation property value."""
+        return self.model_copy(
+            update={
+                "rotation": rotation,
+            },
+        )
+
+    def get_scaling(self) -> Decimal:
+        """Get scaling property value."""
+        return self.scaling
+
+    def set_scaling(self, scaling: Decimal) -> Self:
+        """Set the scaling property value."""
+        return self.model_copy(
+            update={
+                "scaling": scaling,
+            },
+        )
+
+    def get_is_output_image_negation_required(self) -> bool:
+        """Get is_output_image_negation_required property value."""
+        return self.is_output_image_negation_required
+
+    def set_is_output_image_negation_required(
+        self,
+        value: bool,  # noqa: FBT001
+    ) -> Self:
+        """Set the is_output_image_negation_required property value."""
+        return self.model_copy(
+            update={
+                "is_output_image_negation_required": value,
+            },
+        )
+
+    def get_file_name(self) -> Optional[str]:
+        """Get file_name property value."""
+        return self.file_name
+
+    def set_file_name(self, file_name: Optional[str]) -> Self:
+        """Set the file_name property value."""
+        return self.model_copy(
+            update={
+                "file_name": file_name,
+            },
+        )
+
+
+class State2ApertureIndex(ImmutableMapping[ApertureID, Aperture2]):
+    """Index of all apertures defined in Gerber AST until currently parsed token."""
+
+    def set_aperture(self, __id: ApertureID, __aperture: Aperture2) -> Self:
+        """Add new aperture to apertures index."""
+        # TODO(argmaster): Add warning handling.  # noqa: TD003
+        return self.update(__id, __aperture)
+
+    def get_aperture(self, __id: ApertureID) -> Aperture2:
+        """Get existing aperture from index. When aperture is missing KeyError is
+        raised.
+        """
+        return self.mapping[__id]
+
+
+class State2DrawFlags(FrozenGeneralModel):
+    """Collection of drawing flags of Gerber AST parser, version 2.
+
+    This class represents the drawing flags used in the Gerber AST parser.
+    It contains properties to control various drawing modes and settings.
+    """
+
+    draw_mode: DrawMode = DrawMode.Linear
+    """The current draw mode (linear, clockwise circular, or counterclockwise circular).
+    """
+    is_region: bool = False
+    """Indicates whether the current statement is a region statement."""
+    is_aperture_block: bool = False
+    """Indicates whether the current statement is an aperture block statement."""
+    is_step_and_repeat: bool = False
+    """Indicates whether the current statement is a step and repeat statement."""
+    is_multi_quadrant: bool = False
+    """Indicates whether the multi-quadrant mode is enabled."""
+
+    def get_draw_mode(self) -> DrawMode:
+        """Get the current draw mode.
+
+        Returns
+        -------
+            DrawMode: The current draw mode.
+
+        """
+        return self.draw_mode
+
+    def set_draw_mode(self, draw_mode: DrawMode) -> State2DrawFlags:
+        """Set the draw mode.
+
+        Args:
+        ----
+            draw_mode (DrawMode): The new draw mode.
+
+        Returns:
+        -------
+            State2DrawFlags: A new instance of State2DrawFlags with the updated draw
+            mode.
+
+        """
+        return self.model_copy(
+            update={
+                "draw_mode": draw_mode,
+            },
+        )
+
+    def get_is_region(self) -> bool:
+        """Check if the current statement is a region statement.
+
+        Returns
+        -------
+            bool: True if the current statement is a region statement, False otherwise.
+
+        """
+        return self.is_region
+
+    def set_is_region(self, val: bool) -> State2DrawFlags:  # noqa: FBT001
+        """Set the flag indicating whether the current statement is a region statement.
+
+        Args:
+        ----
+            val (bool): True if the current statement is a region statement, False
+            otherwise.
+
+        Returns:
+        -------
+            State2DrawFlags: A new instance of State2DrawFlags with the updated flag.
+
+        """
+        return self.model_copy(
+            update={
+                "is_region": val,
+            },
+        )
+
+    def get_is_aperture_block(self) -> bool:
+        """Check if the current statement is an aperture block statement.
+
+        Returns
+        -------
+            bool: True if the current statement is an aperture block statement, False
+            otherwise.
+
+        """
+        return self.is_aperture_block
+
+    def set_is_aperture_block(self, val: bool) -> State2DrawFlags:  # noqa: FBT001
+        """Set the flag indicating whether the current statement is an aperture block
+        statement.
+
+        Args:
+        ----
+            val (bool): True if the current statement is an aperture block statement,
+            False otherwise.
+
+        Returns:
+        -------
+            State2DrawFlags: A new instance of State2DrawFlags with the updated flag.
+
+        """
+        return self.model_copy(
+            update={
+                "is_aperture_block": val,
+            },
+        )
+
+    def get_is_step_and_repeat(self) -> bool:
+        """Check if the current statement is a step and repeat statement.
+
+        Returns
+        -------
+            bool: True if the current statement is a step and repeat statement, False
+            otherwise.
+
+        """
+        return self.is_step_and_repeat
+
+    def set_is_step_and_repeat(self, val: bool) -> State2DrawFlags:  # noqa: FBT001
+        """Set the flag indicating whether the current statement is a step and repeat
+        statement.
+
+        Args:
+        ----
+            val (bool): True if the current statement is a step and repeat statement,
+            False otherwise.
+
+        Returns:
+        -------
+            State2DrawFlags: A new instance of State2DrawFlags with the updated flag.
+
+        """
+        return self.model_copy(
+            update={
+                "is_step_and_repeat": val,
+            },
+        )
+
+    def get_is_multi_quadrant(self) -> bool:
+        """Check if the multi-quadrant mode is enabled.
+
+        Returns
+        -------
+            bool: True if the multi-quadrant mode is enabled, False otherwise.
+
+        """
+        return self.is_multi_quadrant
+
+    def set_is_multi_quadrant(self, val: bool) -> Self:  # noqa: FBT001
+        """Set the flag indicating whether the multi-quadrant mode is enabled.
+
+        Args:
+        ----
+            val (bool): True to enable the multi-quadrant mode, False to disable it.
+
+        Returns:
+        -------
+            State2DrawFlags: A new instance of State2DrawFlags with the updated flag.
+
+        """
+        return self.model_copy(
+            update={
+                "is_multi_quadrant": val,
+            },
+        )
+
+
+class State2(FrozenGeneralModel):
+    """Gerber AST parser, version 2, parsing state.
+
+    This object is immutable and intended way to update the state is through setters
+    which return updated copy of state.
+    """
+
+    constants: State2Constants = Field(default_factory=State2Constants)
+    """Collection of rarely changing Gerber state constants."""
+
+    def get_constants(self) -> State2Constants:
+        """Get constants property value."""
+        return self.constants
+
+    def set_constants(self, constants: State2Constants) -> Self:
+        """Set the constants property value."""
+        return self.model_copy(
+            update={
+                "constants": constants,
+            },
+        )
+
+    def get_draw_units(self) -> Unit:
+        """Get draw_units property value."""
+        return self.get_constants().get_draw_units()
+
+    def set_draw_units(self, draw_units: Unit) -> Self:
+        """Set the draw_units property value."""
+        return self.set_constants(self.get_constants().set_draw_units(draw_units))
+
+    def get_coordinate_parser(self) -> CoordinateParser:
+        """Get coordinate_parser property value."""
+        return self.get_constants().get_coordinate_parser()
+
+    def set_coordinate_parser(self, coordinate_parser: CoordinateParser) -> Self:
+        """Set the coordinate_parser property value."""
+        return self.set_constants(
+            self.get_constants().set_coordinate_parser(coordinate_parser),
+        )
+
+    def get_polarity(self) -> Polarity:
+        """Get polarity property value."""
+        return self.get_constants().get_polarity()
+
+    def set_polarity(self, polarity: Polarity) -> Self:
+        """Set the polarity property value."""
+        return self.set_constants(self.get_constants().set_polarity(polarity))
+
+    def get_mirroring(self) -> Mirroring:
+        """Get mirroring property value."""
+        return self.get_constants().get_mirroring()
+
+    def set_mirroring(self, mirroring: Mirroring) -> Self:
+        """Set the mirroring property value."""
+        return self.set_constants(self.get_constants().set_mirroring(mirroring))
+
+    def get_rotation(self) -> Decimal:
+        """Get rotation property value."""
+        return self.get_constants().get_rotation()
+
+    def set_rotation(self, rotation: Decimal) -> Self:
+        """Set the rotation property value."""
+        return self.set_constants(self.get_constants().set_rotation(rotation))
+
+    def get_scaling(self) -> Decimal:
+        """Get scaling property value."""
+        return self.get_constants().get_scaling()
+
+    def set_scaling(self, scaling: Decimal) -> Self:
+        """Set the scaling property value."""
+        return self.set_constants(self.get_constants().set_scaling(scaling))
+
+    def get_is_output_image_negation_required(self) -> bool:
+        """Get is_output_image_negation_required property value."""
+        return self.get_constants().get_is_output_image_negation_required()
+
+    def set_is_output_image_negation_required(
+        self,
+        value: bool,  # noqa: FBT001
+    ) -> Self:
+        """Set the is_output_image_negation_required property value."""
+        return self.set_constants(
+            self.get_constants().set_is_output_image_negation_required(value),
+        )
+
+    def get_file_name(self) -> Optional[str]:
+        """Get file_name property value."""
+        return self.get_constants().get_file_name()
+
+    def set_file_name(self, file_name: Optional[str]) -> Self:
+        """Set the file_name property value."""
+        return self.set_constants(self.get_constants().set_file_name(file_name))
+
+    flags: State2DrawFlags = Field(default_factory=State2DrawFlags)
+    """Collection of more often changing Gerber state flags."""
+
+    def get_flags(self) -> State2DrawFlags:
+        """Get flags property value."""
+        return self.flags
+
+    def set_flags(self, flags: State2DrawFlags) -> Self:
+        """Set the flags property value."""
+        return self.model_copy(
+            update={
+                "flags": flags,
+            },
+        )
+
+    def get_draw_mode(self) -> DrawMode:
+        """Get draw_mode property value."""
+        return self.get_flags().get_draw_mode()
+
+    def set_draw_mode(self, draw_mode: DrawMode) -> Self:
+        """Set the draw_mode property value."""
+        return self.set_flags(self.get_flags().set_draw_mode(draw_mode))
+
+    def get_is_region(self) -> bool:
+        """Get is_region property value."""
+        return self.get_flags().get_is_region()
+
+    def set_is_region(self, is_region: bool) -> Self:  # noqa: FBT001
+        """Set the is_region property value."""
+        return self.set_flags(self.get_flags().set_is_region(is_region))
+
+    def get_is_aperture_block(self) -> bool:
+        """Get is_aperture_block property value."""
+        return self.get_flags().get_is_aperture_block()
+
+    def set_is_aperture_block(self, is_aperture_block: bool) -> Self:  # noqa: FBT001
+        """Set the is_aperture_block property value."""
+        return self.set_flags(
+            self.get_flags().set_is_aperture_block(is_aperture_block),
+        )
+
+    def get_is_step_and_repeat(self) -> bool:
+        """Get is_step_and_repeat property value."""
+        return self.get_flags().get_is_step_and_repeat()
+
+    def set_is_step_and_repeat(self, is_step_and_repeat: bool) -> Self:  # noqa: FBT001
+        """Set the is_step_and_repeat property value."""
+        return self.set_flags(
+            self.get_flags().set_is_step_and_repeat(is_step_and_repeat),
+        )
+
+    def get_is_multi_quadrant(self) -> bool:
+        """Get is_aperture_block property value."""
+        return self.get_is_multi_quadrant()
+
+    def set_is_multi_quadrant(self, is_multi_quadrant: bool) -> Self:  # noqa: FBT001
+        """Set the is_aperture_block property value."""
+        return self.set_flags(
+            self.get_flags().set_is_multi_quadrant(is_multi_quadrant),
+        )
+
+    current_position: Vector2D = Vector2D(x=Offset.NULL, y=Offset.NULL)
+    """Current position of drawing head."""
+
+    def get_current_position(self) -> Vector2D:
+        """Get current_position property value."""
+        return self.current_position
+
+    def set_current_position(self, current_position: Vector2D) -> Self:
+        """Set the current_position property value."""
+        return self.model_copy(
+            update={
+                "current_position": current_position,
+            },
+        )
+
+    current_aperture_id: Optional[ApertureID] = None
+    """Reference to currently selected aperture."""
+
+    def get_current_aperture_id(self) -> Optional[ApertureID]:
+        """Get current_aperture property value."""
+        return self.current_aperture_id
+
+    def set_current_aperture_id(self, current_aperture: Optional[ApertureID]) -> Self:
+        """Set the current_aperture property value."""
+        return self.model_copy(
+            update={
+                "current_aperture_id": current_aperture,
+            },
+        )
+
+    file_attributes: ImmutableMapping[str, str] = Field(
+        default_factory=ImmutableMapping,
+    )
+    """Collection of file level attributes. (Spec reference: 5.3 and 5.5)"""
+
+    def set_file_attribute(self, __attribute: str, __value: str) -> Self:
+        """Add a file attribute to the state.
+
+        This method adds a file attribute to the current state object.
+
+        Parameters
+        ----------
+        __id : str
+            Attribute identifier.
+        __aperture : str
+            Attribute value.
+
+        Returns
+        -------
+        Self
+            The updated state object.
+        """
+        return self.model_copy(
+            update={
+                "file_attributes": self.file_attributes.update(__attribute, __value),
+            },
+        )
+
+    def get_file_attribute(self, __id: str) -> Optional[str]:
+        """Get the file attribute with the specified ID.
+
+        This method retrieves the file attribute associated with the given ID.
+
+        Parameters
+        ----------
+        __id : str
+            The ID of the file attribute to retrieve.
+
+        Returns
+        -------
+        str
+            The file attribute with the specified ID.
+        """
+        return self.file_attributes.get(__id)
+
+    def delete_file_attribute(self, __id: str) -> Self:
+        """Delete file attribute."""
+        return self.model_copy(
+            update={
+                "file_attributes": self.file_attributes.delete(__id),
+            },
+        )
+
+    apertures: State2ApertureIndex = Field(default_factory=State2ApertureIndex)
+    """Collection of all apertures defined until given point in code."""
+
+    def parse_coordinate(self, coordinate: Coordinate) -> Offset:
+        """Parse a coordinate and convert it to an Offset.
+
+        This method parses a given coordinate and converts it to an Offset object.
+        It handles missing X, Y by substituting them with the current
+        position and missing I, J by substituting them with NULL offset.
+
+        Parameters
+        ----------
+        coordinate : Coordinate
+            The coordinate to be parsed.
+
+        Returns
+        -------
+        Offset
+            The parsed coordinate converted to an Offset object.
+        """
+        if coordinate.coordinate_type == CoordinateType.MISSING_X:
+            return self.current_position.x
+
+        if coordinate.coordinate_type == CoordinateType.MISSING_Y:
+            return self.current_position.y
+
+        if coordinate.coordinate_type == CoordinateType.MISSING_I:
+            return Offset.NULL
+
+        if coordinate.coordinate_type == CoordinateType.MISSING_J:
+            return Offset.NULL
+
+        return Offset.new(
+            self.get_coordinate_parser().parse(coordinate),
+            unit=self.get_draw_units(),
+        )
+
+    def get_aperture(self, __key: ApertureID) -> Aperture2 | None:
+        """Get apertures property value."""
+        return self.apertures.get(__key)
+
+    def set_aperture(self, __key: ApertureID, __value: Aperture2) -> Self:
+        """Set the apertures property value."""
+        return self.model_copy(
+            update={
+                "apertures": self.apertures.set_aperture(__key, __value),
+            },
+        )

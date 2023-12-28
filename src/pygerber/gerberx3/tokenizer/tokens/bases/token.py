@@ -8,6 +8,7 @@ from pyparsing import col, lineno
 
 from pygerber.common.position import Position
 from pygerber.gerberx3.linter import diagnostic
+from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
 from pygerber.gerberx3.tokenizer.tokens.bases.token_accessor import TokenAccessor
 
@@ -62,6 +63,12 @@ class Token(GerberCode):
             raise TypeError(thing)
 
         return thing
+
+    def parser2_visit_token(
+        self,
+        context: Parser2Context,
+    ) -> None:
+        """Update drawing state for Gerber AST parser, version 2."""
 
     def update_drawing_state(
         self,

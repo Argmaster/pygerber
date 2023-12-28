@@ -1,0 +1,268 @@
+"""Gerber AST parser, version 2, parsing context."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
+
+from pydantic import Field
+
+from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.vector_2d import Vector2D
+from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
+from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
+from pygerber.gerberx3.parser2.draws2.draw2 import Draw2
+from pygerber.gerberx3.parser2.hooks2 import Hooks2
+from pygerber.gerberx3.parser2.state2 import State2
+from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
+from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
+from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
+from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateParser
+
+if TYPE_CHECKING:
+    from decimal import Decimal
+
+
+class Parser2Context:
+    """Context used by Gerber AST parser, version 2."""
+
+    def __init__(self, options: Parser2ContextOptions | None = None) -> None:
+        self.options = Parser2ContextOptions() if options is None else options
+        self.state: State2 = (
+            State2()
+            if self.options.initial_state is None
+            else self.options.initial_state
+        )
+        self.command_buffer: CommandBuffer2 = (
+            CommandBuffer2()
+            if self.options.initial_command_buffer is None
+            else self.options.initial_command_buffer
+        )
+        self.hooks: Hooks2 = (
+            Hooks2() if self.options.hooks is None else self.options.hooks
+        )
+        self.current_token: Optional[Token] = None
+
+    def get_hooks(self) -> Hooks2:
+        """Get hooks object."""
+        return self.hooks
+
+    def get_current_token(self) -> Optional[Token]:
+        """Get current token object."""
+        return self.current_token
+
+    def set_current_token(self, token: Token) -> None:
+        """Get current token object."""
+        self.current_token = token
+
+    def set_state(self, state: State2) -> None:
+        """Set parser state."""
+        self.state = state
+
+    def add_command(self, __command: Draw2) -> None:
+        """Add draw command to command buffer."""
+        self.command_buffer.add_command(__command)
+
+    def get_state(self) -> State2:
+        """Get parser state."""
+        return self.state
+
+    def get_draw_units(self) -> Unit:
+        """Get draw_units property value."""
+        return self.get_state().get_draw_units()
+
+    def set_draw_units(self, draw_units: Unit) -> None:
+        """Set the draw_units property value."""
+        return self.set_state(self.get_state().set_draw_units(draw_units))
+
+    def get_coordinate_parser(self) -> CoordinateParser:
+        """Get coordinate_parser property value."""
+        return self.get_state().get_coordinate_parser()
+
+    def set_coordinate_parser(self, coordinate_parser: CoordinateParser) -> None:
+        """Set the coordinate_parser property value."""
+        return self.set_state(
+            self.get_state().set_coordinate_parser(coordinate_parser),
+        )
+
+    def get_polarity(self) -> Polarity:
+        """Get polarity property value."""
+        return self.get_state().get_polarity()
+
+    def set_polarity(self, polarity: Polarity) -> None:
+        """Set the polarity property value."""
+        return self.set_state(self.get_state().set_polarity(polarity))
+
+    def get_mirroring(self) -> Mirroring:
+        """Get mirroring property value."""
+        return self.get_state().get_mirroring()
+
+    def set_mirroring(self, mirroring: Mirroring) -> None:
+        """Set the mirroring property value."""
+        return self.set_state(self.get_state().set_mirroring(mirroring))
+
+    def get_rotation(self) -> Decimal:
+        """Get rotation property value."""
+        return self.get_state().get_rotation()
+
+    def set_rotation(self, rotation: Decimal) -> None:
+        """Set the rotation property value."""
+        return self.set_state(self.get_state().set_rotation(rotation))
+
+    def get_scaling(self) -> Decimal:
+        """Get scaling property value."""
+        return self.get_state().get_scaling()
+
+    def set_scaling(self, scaling: Decimal) -> None:
+        """Set the scaling property value."""
+        return self.set_state(self.get_state().set_scaling(scaling))
+
+    def get_is_output_image_negation_required(self) -> bool:
+        """Get is_output_image_negation_required property value."""
+        return self.get_state().get_is_output_image_negation_required()
+
+    def set_is_output_image_negation_required(self, *, value: bool) -> None:
+        """Set the is_output_image_negation_required property value."""
+        return self.set_state(
+            self.get_state().set_is_output_image_negation_required(value),
+        )
+
+    def get_file_name(self) -> Optional[str]:
+        """Get file_name property value."""
+        return self.get_state().get_file_name()
+
+    def set_file_name(self, file_name: Optional[str]) -> None:
+        """Set the file_name property value."""
+        return self.set_state(self.get_state().set_file_name(file_name))
+
+    def get_draw_mode(self) -> DrawMode:
+        """Get draw_mode property value."""
+        return self.get_state().get_draw_mode()
+
+    def set_draw_mode(self, draw_mode: DrawMode) -> None:
+        """Set the draw_mode property value."""
+        return self.set_state(self.get_state().set_draw_mode(draw_mode))
+
+    def get_is_region(self) -> bool:
+        """Get is_region property value."""
+        return self.get_state().get_is_region()
+
+    def set_is_region(self, is_region: bool) -> None:  # noqa: FBT001
+        """Set the is_region property value."""
+        return self.set_state(self.get_state().set_is_region(is_region))
+
+    def get_is_aperture_block(self) -> bool:
+        """Get is_aperture_block property value."""
+        return self.get_state().get_is_aperture_block()
+
+    def set_is_aperture_block(self, is_aperture_block: bool) -> None:  # noqa: FBT001
+        """Set the is_aperture_block property value."""
+        return self.set_state(
+            self.get_state().set_is_aperture_block(is_aperture_block),
+        )
+
+    def get_is_step_and_repeat(self) -> bool:
+        """Get is_step_and_repeat property value."""
+        return self.get_state().get_is_step_and_repeat()
+
+    def set_is_step_and_repeat(self, is_step_and_repeat: bool) -> None:  # noqa: FBT001
+        """Set the is_step_and_repeat property value."""
+        return self.set_state(
+            self.get_state().set_is_step_and_repeat(is_step_and_repeat),
+        )
+
+    def get_is_multi_quadrant(self) -> bool:
+        """Get is_aperture_block property value."""
+        return self.get_is_multi_quadrant()
+
+    def set_is_multi_quadrant(self, is_multi_quadrant: bool) -> None:  # noqa: FBT001
+        """Set the is_aperture_block property value."""
+        return self.set_state(
+            self.get_state().set_is_multi_quadrant(is_multi_quadrant),
+        )
+
+    def get_current_position(self) -> Optional[Vector2D]:
+        """Get current_position property value."""
+        return self.get_state().get_current_position()
+
+    def set_current_position(self, current_position: Vector2D) -> None:
+        """Set the current_position property value."""
+        return self.set_state(
+            self.get_state().set_current_position(current_position),
+        )
+
+    def get_current_aperture_id(self) -> Optional[ApertureID]:
+        """Get current_aperture property value."""
+        return self.get_state().get_current_aperture_id()
+
+    def set_current_aperture_id(self, current_aperture: Optional[ApertureID]) -> None:
+        """Set the current_aperture property value."""
+        return self.set_state(
+            self.get_state().set_current_aperture_id(current_aperture),
+        )
+
+    def get_file_attribute(self, key: str) -> Optional[str]:
+        """Get file attributes property."""
+        return self.get_state().get_file_attribute(key)
+
+    def delete_file_attribute(self, key: str) -> Optional[str]:
+        """Get file attributes property."""
+        return self.set_state(self.get_state().delete_file_attribute(key))
+
+    def set_file_attribute(self, key: str, value: str) -> None:
+        """Set file attributes property."""
+        return self.set_state(self.get_state().set_file_attribute(key, value))
+
+    def get_aperture(self, __key: ApertureID) -> Aperture2 | None:
+        """Get apertures property value."""
+        return self.get_state().get_aperture(__key)
+
+    def set_aperture(self, __key: ApertureID, __value: Aperture2) -> None:
+        """Set the apertures property value."""
+        return self.set_state(self.get_state().set_aperture(__key, __value))
+
+    def get_current_aperture_mutable_proxy(
+        self,
+    ) -> Aperture2MutableProxy | EmptyAperture2MutableProxy:
+        """Get current_aperture property value."""
+        aperture_id = self.get_state().get_current_aperture_id()
+        if aperture_id is not None:
+            return Aperture2MutableProxy(
+                context=self,
+                aperture_id=aperture_id,
+            )
+        return EmptyAperture2MutableProxy()
+
+
+class EmptyAperture2MutableProxy(FrozenGeneralModel):
+    """Represents one of the `None``-cases for the `current_aperture` in
+    `Parser2Context`.
+    """
+
+    def set_attribute(self, name: str, value: str) -> None:
+        """Add an attribute to aperture."""
+
+
+class Aperture2MutableProxy(EmptyAperture2MutableProxy):
+    """Represents a proxy for an aperture in the Gerber file."""
+
+    context: Parser2Context
+    """Parser context."""
+
+    aperture_id: ApertureID
+    """The ID of the aperture."""
+
+    def set_attribute(self, name: str, value: str) -> None:
+        """Add an attribute to aperture."""
+        aperture = self.context.get_aperture(self.aperture_id)
+        if aperture is not None:
+            self.context.set_aperture(
+                self.aperture_id,
+                aperture.set_attribute(name, value),
+            )
+
+
+class Parser2ContextOptions(FrozenGeneralModel):
+    """Options for Parser2Context."""
+
+    initial_state: Optional[State2] = Field(default=None)
+    initial_command_buffer: Optional[CommandBuffer2] = Field(default=None)
+    hooks: Optional[Hooks2] = Field(default=None)

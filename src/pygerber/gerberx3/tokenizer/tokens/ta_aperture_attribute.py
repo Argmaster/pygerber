@@ -12,6 +12,8 @@ from pygerber.gerberx3.tokenizer.tokens.attribute_token import AttributeToken
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+
 
 class ApertureAttribute(AttributeToken):
     """Add an aperture attribute to the dictionary or modify it.
@@ -44,12 +46,27 @@ class ApertureAttribute(AttributeToken):
         if isinstance(value, ParseResults):
             value = value.as_list()
 
+        if isinstance(value, str):
+            value = [value]
+
+        if value is None:
+            value = []
+
         return cls(
             string=string,
             location=location,
             name=name,
             value=value,
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().pre_parser_visit_add_aperture_attribute(context)
+        context.get_current_aperture_mutable_proxy().set_attribute(
+            self.name,
+            ",".join(self.value),
+        )
+        context.get_hooks().post_parser_visit_add_aperture_attribute(context)
 
     def get_gerber_code(
         self,
