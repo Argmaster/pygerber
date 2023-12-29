@@ -12,7 +12,7 @@ from pygerber.gerberx3.parser.errors import ExitParsingProcessInterrupt
 from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
 from pygerber.gerberx3.parser2.context2 import Parser2Context, Parser2ContextOptions
 from pygerber.gerberx3.parser2.errors2 import OnUpdateDrawingState2Error, Parser2Error
-from pygerber.gerberx3.parser2.hooks2 import Hooks2
+from pygerber.gerberx3.parser2.ihooks import IHooks
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
 
@@ -33,7 +33,12 @@ class Parser2:
         """
         self.options = Parser2Options() if options is None else options
         self.is_used = False
-        self.context = Parser2Context()
+        self.context = (
+            Parser2Context(self.options.context_options)
+            if self.options.initial_context is None
+            else self.options.initial_context
+        )
+        self.get_hooks().on_parser_init(self)
 
     def parse(self, ast: AST) -> CommandBuffer2:
         """Parse token stack."""
@@ -47,6 +52,7 @@ class Parser2:
         ast: AST,
     ) -> Generator[tuple[Token, Parser2Context], None, None]:
         """Iterate over tokens in stack and parse them."""
+        self.get_hooks().pre_parse(self.context)
         self.is_used = True
 
         try:
@@ -59,11 +65,13 @@ class Parser2:
         except ExitParsingProcessInterrupt:
             pass
 
+        self.get_hooks().post_parse(self.context)
+
     def _token_try_visit_except(self, token: Token) -> None:
         try:
-            self.get_hooks().pre_parser_visit_token(self.context)
+            self.get_hooks().pre_parser_visit_any_token(self.context)
             token.parser2_visit_token(self.context)
-            self.get_hooks().post_parser_visit_token(self.context)
+            self.get_hooks().post_parser_visit_any_token(self.context)
 
         except ExitParsingProcessInterrupt:
             return
@@ -102,7 +110,7 @@ class Parser2:
                 else:
                     self.get_hooks().on_other_error(self.context, e)
 
-    def get_hooks(self) -> Hooks2:
+    def get_hooks(self) -> IHooks:
         """Get hooks object."""
         return self.context.get_hooks()
 
@@ -130,5 +138,6 @@ class Parser2OnErrorAction(Enum):
 class Parser2Options(FrozenGeneralModel):
     """Container class for Gerber parser options."""
 
+    initial_context: Optional[Parser2Context] = Field(default=None)
     context_options: Optional[Parser2ContextOptions] = Field(default=None)
     on_update_drawing_state_error: Parser2OnErrorAction = Parser2OnErrorAction.Raise

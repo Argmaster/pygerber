@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class D03Flash(CommandToken):
@@ -109,6 +110,12 @@ class D03Flash(CommandToken):
             f"{self.y.get_gerber_code(indent, endline)}"
             "D03"
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().command_flash.pre_parser_visit_token(self, context)
+        context.get_hooks().command_flash.on_parser_visit_token(self, context)
+        context.get_hooks().command_flash.post_parser_visit_token(self, context)
 
     def get_state_based_hover_message(
         self,

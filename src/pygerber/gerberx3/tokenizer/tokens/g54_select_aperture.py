@@ -1,13 +1,16 @@
 """Wrapper for G70 token."""
 from __future__ import annotations
 
-from typing import Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Tuple
 
-from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import DNNSelectAperture
 from pygerber.warnings import warn_deprecated_code
+
+if TYPE_CHECKING:
+    from pygerber.backend.abstract.backend_cls import Backend
+    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
+    from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class G54SelectAperture(DNNSelectAperture):
@@ -29,6 +32,18 @@ class G54SelectAperture(DNNSelectAperture):
         """Update drawing state."""
         warn_deprecated_code("G54", "8.1")
         return super().update_drawing_state(state, _backend)
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().prepare_select_aperture.pre_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().prepare_select_aperture.on_parser_visit_token(self, context)
+        context.get_hooks().prepare_select_aperture.post_parser_visit_token(
+            self,
+            context,
+        )
 
     def get_gerber_code(
         self,

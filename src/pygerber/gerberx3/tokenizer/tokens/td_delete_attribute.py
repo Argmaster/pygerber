@@ -45,9 +45,9 @@ class DeleteAttribute(AttributeToken):
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""
-        context.get_hooks().pre_parser_visit_add_aperture_attribute(context)
-        # TODO: Implement this!  # noqa: TD002, TD003
-        context.get_hooks().post_parser_visit_add_aperture_attribute(context)
+        context.get_hooks().delete_attribute.pre_parser_visit_token(self, context)
+        context.get_hooks().delete_attribute.on_parser_visit_token(self, context)
+        context.get_hooks().delete_attribute.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

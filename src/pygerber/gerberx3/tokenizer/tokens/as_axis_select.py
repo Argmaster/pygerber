@@ -33,6 +33,8 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+
 
 class AxisSelect(ExtendedCommandToken):
     """## 8.1.2 Axis Select (AS).
@@ -116,6 +118,12 @@ class AxisSelect(ExtendedCommandToken):
         """Update drawing state."""
         warn_deprecated_code("AS", "8.1")
         return super().update_drawing_state(state, _backend)
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().axis_select.pre_parser_visit_token(self, context)
+        context.get_hooks().axis_select.on_parser_visit_token(self, context)
+        context.get_hooks().axis_select.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

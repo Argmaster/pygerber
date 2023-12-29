@@ -9,6 +9,8 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+
 
 class StepRepeatBegin(CommandToken):
     """Wrapper for SR begin token.
@@ -52,6 +54,12 @@ class StepRepeatBegin(CommandToken):
             y_step=y_step,
         )
 
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().step_repeat_begin.pre_parser_visit_token(self, context)
+        context.get_hooks().step_repeat_begin.on_parser_visit_token(self, context)
+        context.get_hooks().step_repeat_begin.post_parser_visit_token(self, context)
+
     def get_gerber_code(
         self,
         indent: str = "",  # noqa: ARG002
@@ -66,6 +74,12 @@ class StepRepeatEnd(CommandToken):
 
     Ends step and repeat statement.
     """
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().step_repeat_end.pre_parser_visit_token(self, context)
+        context.get_hooks().step_repeat_end.on_parser_visit_token(self, context)
+        context.get_hooks().step_repeat_end.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

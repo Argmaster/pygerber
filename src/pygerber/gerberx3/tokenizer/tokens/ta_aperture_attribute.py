@@ -61,12 +61,9 @@ class ApertureAttribute(AttributeToken):
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""
-        context.get_hooks().pre_parser_visit_add_aperture_attribute(context)
-        context.get_current_aperture_mutable_proxy().set_attribute(
-            self.name,
-            ",".join(self.value),
-        )
-        context.get_hooks().post_parser_visit_add_aperture_attribute(context)
+        context.get_hooks().aperture_attribute.pre_parser_visit_token(self, context)
+        context.get_hooks().aperture_attribute.on_parser_visit_token(self, context)
+        context.get_hooks().aperture_attribute.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

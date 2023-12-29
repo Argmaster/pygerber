@@ -8,7 +8,6 @@ from pyparsing import col, lineno
 
 from pygerber.common.position import Position
 from pygerber.gerberx3.linter import diagnostic
-from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
 from pygerber.gerberx3.tokenizer.tokens.bases.token_accessor import TokenAccessor
 
@@ -19,6 +18,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class Token(GerberCode):

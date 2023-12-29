@@ -18,5 +18,6 @@ class CommandBuffer2(GeneralModel):
         """Add draw command to command buffer."""
         self.commands.append(__command)
 
-    def __iter__(self) -> Iterator[Draw2]:
+    def get_commands(self) -> Iterator[Draw2]:
+        """Get list of buffered draw commands."""
         yield from self.commands

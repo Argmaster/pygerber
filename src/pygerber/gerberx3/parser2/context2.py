@@ -10,7 +10,8 @@ from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
 from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
 from pygerber.gerberx3.parser2.draws2.draw2 import Draw2
-from pygerber.gerberx3.parser2.hooks2 import Hooks2
+from pygerber.gerberx3.parser2.ihooks import IHooks
+from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
 from pygerber.gerberx3.parser2.state2 import State2
 from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
@@ -36,12 +37,12 @@ class Parser2Context:
             if self.options.initial_command_buffer is None
             else self.options.initial_command_buffer
         )
-        self.hooks: Hooks2 = (
-            Hooks2() if self.options.hooks is None else self.options.hooks
+        self.hooks: IHooks = (
+            Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )
         self.current_token: Optional[Token] = None
 
-    def get_hooks(self) -> Hooks2:
+    def get_hooks(self) -> IHooks:
         """Get hooks object."""
         return self.hooks
 
@@ -203,7 +204,7 @@ class Parser2Context:
         """Get file attributes property."""
         return self.get_state().get_file_attribute(key)
 
-    def delete_file_attribute(self, key: str) -> Optional[str]:
+    def delete_file_attribute(self, key: str) -> None:
         """Get file attributes property."""
         return self.set_state(self.get_state().delete_file_attribute(key))
 
@@ -265,4 +266,4 @@ class Parser2ContextOptions(FrozenGeneralModel):
 
     initial_state: Optional[State2] = Field(default=None)
     initial_command_buffer: Optional[CommandBuffer2] = Field(default=None)
-    hooks: Optional[Hooks2] = Field(default=None)
+    hooks: Optional[IHooks] = Field(default=None)
