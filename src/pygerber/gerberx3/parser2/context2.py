@@ -1,25 +1,30 @@
 """Gerber AST parser, version 2, parsing context."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, NoReturn, Optional
 
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
-from pygerber.gerberx3.math.vector_2d import Vector2D
-from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
 from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
-from pygerber.gerberx3.parser2.draws2.draw2 import Draw2
-from pygerber.gerberx3.parser2.ihooks import IHooks
+from pygerber.gerberx3.parser2.errors2 import (
+    ExitParsingProcess2Interrupt,
+    SkipTokenInterrupt,
+)
 from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
 from pygerber.gerberx3.parser2.state2 import State2
-from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
-from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
-from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
-from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateParser
+from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
 
 if TYPE_CHECKING:
     from decimal import Decimal
+
+    from pygerber.gerberx3.math.vector_2d import Vector2D
+    from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
+    from pygerber.gerberx3.parser2.commands2.command2 import Command2
+    from pygerber.gerberx3.parser2.ihooks import IHooks
+    from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
+    from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
+    from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateParser
 
 
 class Parser2Context:
@@ -32,15 +37,33 @@ class Parser2Context:
             if self.options.initial_state is None
             else self.options.initial_state
         )
-        self.command_buffer: CommandBuffer2 = (
+        self.main_command_buffer: CommandBuffer2 = (
             CommandBuffer2()
-            if self.options.initial_command_buffer is None
-            else self.options.initial_command_buffer
+            if self.options.initial_main_command_buffer is None
+            else self.options.initial_main_command_buffer
+        )
+        self.region_command_buffer: CommandBuffer2 = (
+            CommandBuffer2()
+            if self.options.initial_region_command_buffer is None
+            else self.options.initial_region_command_buffer
+        )
+        self.block_command_buffer: CommandBuffer2 = (
+            CommandBuffer2()
+            if self.options.initial_block_command_buffer is None
+            else self.options.initial_block_command_buffer
         )
         self.hooks: IHooks = (
             Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )
         self.current_token: Optional[Token] = None
+
+    def skip_token(self) -> NoReturn:
+        """Skip this token."""
+        raise SkipTokenInterrupt
+
+    def halt_parser(self) -> NoReturn:
+        """Halt parsing process."""
+        raise ExitParsingProcess2Interrupt
 
     def get_hooks(self) -> IHooks:
         """Get hooks object."""
@@ -58,9 +81,13 @@ class Parser2Context:
         """Set parser state."""
         self.state = state
 
-    def add_command(self, __command: Draw2) -> None:
+    def add_command(self, __command: Command2) -> None:
         """Add draw command to command buffer."""
-        self.command_buffer.add_command(__command)
+        if self.get_is_region():
+            self.region_command_buffer.add_command(__command)
+        if self.get_is_aperture_block():
+            self.block_command_buffer.add_command(__command)
+        self.main_command_buffer.add_command(__command)
 
     def get_state(self) -> State2:
         """Get parser state."""
@@ -126,6 +153,14 @@ class Parser2Context:
             self.get_state().set_is_output_image_negation_required(value),
         )
 
+    def get_image_name(self) -> Optional[str]:
+        """Get image_name property value."""
+        return self.get_state().get_image_name()
+
+    def set_image_name(self, image_name: Optional[str]) -> None:
+        """Set the image_name property value."""
+        return self.set_state(self.get_state().set_image_name(image_name))
+
     def get_file_name(self) -> Optional[str]:
         """Get file_name property value."""
         return self.get_state().get_file_name()
@@ -160,6 +195,16 @@ class Parser2Context:
             self.get_state().set_is_aperture_block(is_aperture_block),
         )
 
+    def get_aperture_block_id(self) -> Optional[ApertureID]:
+        """Get is_aperture_block property value."""
+        return self.get_state().get_aperture_block_id()
+
+    def set_aperture_block_id(self, aperture_block_id: Optional[ApertureID]) -> None:
+        """Set the is_aperture_block property value."""
+        return self.set_state(
+            self.get_state().set_aperture_block_id(aperture_block_id),
+        )
+
     def get_is_step_and_repeat(self) -> bool:
         """Get is_step_and_repeat property value."""
         return self.get_state().get_is_step_and_repeat()
@@ -180,7 +225,7 @@ class Parser2Context:
             self.get_state().set_is_multi_quadrant(is_multi_quadrant),
         )
 
-    def get_current_position(self) -> Optional[Vector2D]:
+    def get_current_position(self) -> Vector2D:
         """Get current_position property value."""
         return self.get_state().get_current_position()
 
@@ -265,5 +310,7 @@ class Parser2ContextOptions(FrozenGeneralModel):
     """Options for Parser2Context."""
 
     initial_state: Optional[State2] = Field(default=None)
-    initial_command_buffer: Optional[CommandBuffer2] = Field(default=None)
+    initial_main_command_buffer: Optional[CommandBuffer2] = Field(default=None)
+    initial_region_command_buffer: Optional[CommandBuffer2] = Field(default=None)
+    initial_block_command_buffer: Optional[CommandBuffer2] = Field(default=None)
     hooks: Optional[IHooks] = Field(default=None)

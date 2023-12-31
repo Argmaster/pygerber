@@ -1,23 +1,21 @@
 """Module contains definition of class for buffering draw commands."""
 from __future__ import annotations
 
-from typing import Iterator, List
+from typing import Iterator
 
-from pydantic import Field
-
-from pygerber.common.general_model import GeneralModel
-from pygerber.gerberx3.parser2.draws2.draw2 import Draw2
+from pygerber.gerberx3.parser2.commands2.command2 import Command2
 
 
-class CommandBuffer2(GeneralModel):
+class CommandBuffer2:
     """Container for buffering draw commands."""
 
-    commands: List[Draw2] = Field(default_factory=list)
+    def __init__(self) -> None:
+        self.commands = []
 
-    def add_command(self, __command: Draw2) -> None:
+    def add_command(self, __command: Command2) -> None:
         """Add draw command to command buffer."""
         self.commands.append(__command)
 
-    def get_commands(self) -> Iterator[Draw2]:
-        """Get list of buffered draw commands."""
+    def __iter__(self) -> Iterator[Command2]:
+        """Iterate over buffered draw commands."""
         yield from self.commands

@@ -73,5 +73,13 @@ class ApertureNotSelected2Error(Parser2Error):
     """Raised when attempting to use aperture without selecting it first."""
 
 
+class Parser2Interrupt(Exception):  # noqa: N818
+    """Base class for implementing interrupts."""
+
+
 class ExitParsingProcess2Interrupt(Exception):  # noqa: N818
     """Raised to stop parsing."""
+
+
+class SkipTokenInterrupt(Exception):  # noqa: N818
+    """Raised to skip all other actions that would be performed on current token."""

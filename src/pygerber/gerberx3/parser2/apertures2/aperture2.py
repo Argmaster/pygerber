@@ -5,6 +5,7 @@ from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.common.immutable_map_model import ImmutableMapping
+from pygerber.gerberx3.math.bounding_box import BoundingBox
 
 
 class Aperture2(FrozenGeneralModel):
@@ -23,3 +24,7 @@ class Aperture2(FrozenGeneralModel):
     def get_attribute(self, key: str) -> str | None:
         """Get aperture attribute."""
         return self.attributes.get(key)
+
+    def get_bounding_box_size(self) -> BoundingBox:
+        """Return bounding box of aperture."""
+        raise NotImplementedError

@@ -8,10 +8,14 @@ from typing import Generator, Optional
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
-from pygerber.gerberx3.parser.errors import ExitParsingProcessInterrupt
 from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
 from pygerber.gerberx3.parser2.context2 import Parser2Context, Parser2ContextOptions
-from pygerber.gerberx3.parser2.errors2 import OnUpdateDrawingState2Error, Parser2Error
+from pygerber.gerberx3.parser2.errors2 import (
+    ExitParsingProcess2Interrupt,
+    OnUpdateDrawingState2Error,
+    Parser2Error,
+    SkipTokenInterrupt,
+)
 from pygerber.gerberx3.parser2.ihooks import IHooks
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
@@ -45,7 +49,7 @@ class Parser2:
         for _ in self.parse_iter(ast):
             pass
 
-        return self.context.command_buffer
+        return self.context.main_command_buffer
 
     def parse_iter(
         self,
@@ -62,7 +66,7 @@ class Parser2:
 
                 yield token, self.context
 
-        except ExitParsingProcessInterrupt:
+        except ExitParsingProcess2Interrupt:
             pass
 
         self.get_hooks().post_parse(self.context)
@@ -73,8 +77,11 @@ class Parser2:
             token.parser2_visit_token(self.context)
             self.get_hooks().post_parser_visit_any_token(self.context)
 
-        except ExitParsingProcessInterrupt:
+        except SkipTokenInterrupt:
             return
+
+        except ExitParsingProcess2Interrupt:
+            raise
 
         except Exception as e:  # noqa: BLE001
             if (

@@ -42,30 +42,33 @@ class State2Constants(FrozenGeneralModel):
     throughout the parsing process.
     """
 
-    draw_units: Optional[Unit] = None
+    draw_units: Optional[Unit] = Field(default=None)
     """The draw units used for the Gerber file. (Spec reference: 4.2.1)"""
 
-    coordinate_parser: Optional[CoordinateParser] = None
+    coordinate_parser: Optional[CoordinateParser] = Field(default=None)
     """The coordinate format specification, including the number of decimals.
     (Spec reference: 4.2.2)"""
 
-    polarity: Polarity = Polarity.Dark
+    polarity: Polarity = Field(default=Polarity.Dark)
     """The polarity object transformation parameter. (Spec reference: 4.9.2)"""
 
-    mirroring: Mirroring = Mirroring.NoMirroring
+    mirroring: Mirroring = Field(default=Mirroring.NoMirroring)
     """The mirror object transformation parameter. (Spec reference: 4.9.3)"""
 
-    rotation: Decimal = Decimal("0.0")
+    rotation: Decimal = Field(default=Decimal("0.0"))
     """The rotation object transformation parameter. (Spec reference: 4.9.4)"""
 
-    scaling: Decimal = Decimal("1.0")
+    scaling: Decimal = Field(default=Decimal("1.0"))
     """The scale object transformation parameter. (Spec reference: 4.9.5)"""
 
-    is_output_image_negation_required: bool = False
+    is_output_image_negation_required: bool = Field(default=False)
     """Flag indicating whether image polarity flipping is required.
     (Spec reference: 8.1.4)"""
 
-    file_name: Optional[str] = None
+    image_name: Optional[str] = Field(default=None)
+    """The name of the image. (Spec reference: 8.1.3)"""
+
+    file_name: Optional[str] = Field(default=None)
     """The name of the file. (Spec reference: 8.1.6)"""
 
     def get_draw_units(self) -> Unit:
@@ -186,6 +189,18 @@ class State2Constants(FrozenGeneralModel):
             },
         )
 
+    def get_image_name(self) -> Optional[str]:
+        """Get image_name property value."""
+        return self.image_name
+
+    def set_image_name(self, image_name: Optional[str]) -> Self:
+        """Set the image_name property value."""
+        return self.model_copy(
+            update={
+                "image_name": image_name,
+            },
+        )
+
     def get_file_name(self) -> Optional[str]:
         """Get file_name property value."""
         return self.file_name
@@ -228,6 +243,8 @@ class State2DrawFlags(FrozenGeneralModel):
     """Indicates whether the current statement is a region statement."""
     is_aperture_block: bool = False
     """Indicates whether the current statement is an aperture block statement."""
+    aperture_block_id: Optional[ApertureID] = Field(default=None)
+    """The ID of the current aperture block, if any."""
     is_step_and_repeat: bool = False
     """Indicates whether the current statement is a step and repeat statement."""
     is_multi_quadrant: bool = False
@@ -319,6 +336,42 @@ class State2DrawFlags(FrozenGeneralModel):
         return self.model_copy(
             update={
                 "is_aperture_block": val,
+            },
+        )
+
+    def get_aperture_block_id(self) -> Optional[ApertureID]:
+        """Get the ID of the current aperture block.
+
+        This method returns the ID of the current aperture block.
+
+        Returns
+        -------
+        Optional[ApertureID]
+            The ID of the current aperture block, or None if no aperture block is set.
+        """
+        return self.aperture_block_id
+
+    def set_aperture_block_id(
+        self,
+        aperture_block_id: Optional[ApertureID],
+    ) -> State2DrawFlags:
+        """Set the ID of the current aperture block.
+
+        This method sets the ID of the current aperture block.
+
+        Parameters
+        ----------
+        aperture_block_id : Optional[ApertureID]
+            The ID of the current aperture block.
+
+        Returns
+        -------
+        State2DrawFlags
+            A new instance of the State2DrawFlags with the updated flag.
+        """
+        return self.model_copy(
+            update={
+                "aperture_block_id": aperture_block_id,
             },
         )
 
@@ -467,6 +520,14 @@ class State2(FrozenGeneralModel):
             self.get_constants().set_is_output_image_negation_required(value),
         )
 
+    def get_image_name(self) -> Optional[str]:
+        """Get image_name property value."""
+        return self.get_constants().get_image_name()
+
+    def set_image_name(self, image_name: Optional[str]) -> Self:
+        """Set the image_name property value."""
+        return self.set_constants(self.get_constants().set_image_name(image_name))
+
     def get_file_name(self) -> Optional[str]:
         """Get file_name property value."""
         return self.get_constants().get_file_name()
@@ -514,6 +575,16 @@ class State2(FrozenGeneralModel):
         """Set the is_aperture_block property value."""
         return self.set_flags(
             self.get_flags().set_is_aperture_block(is_aperture_block),
+        )
+
+    def get_aperture_block_id(self) -> Optional[ApertureID]:
+        """Get aperture_block_id property value."""
+        return self.get_flags().get_aperture_block_id()
+
+    def set_aperture_block_id(self, aperture_block_id: Optional[ApertureID]) -> Self:
+        """Set the aperture_block_id property value."""
+        return self.set_flags(
+            self.get_flags().set_aperture_block_id(aperture_block_id),
         )
 
     def get_is_step_and_repeat(self) -> bool:
