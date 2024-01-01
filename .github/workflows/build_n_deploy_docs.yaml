@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3.6.0
+        with:
+          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4.7.0
@@ -48,4 +50,4 @@ jobs:
 
       - name: Run build & deploy documentation
         run: |
-          poetry run mike deploy --push --force --update-aliases $(poetry version | awk '{ print $2 }') latest -F mkdocs.yaml
+          poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') latest -F mkdocs.yaml
