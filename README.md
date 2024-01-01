@@ -31,6 +31,8 @@ and in
 The goal of this project is to provide support for wide variety of Gerber-like syntaxes,
 with support for most of deprecated features along with support for modern ones.
 
+<center><a href="https://argmaster.github.io/pygerber/latest"> 📚 See online documentation 📚 </a></center>
+
 ### Target set of tools:
 
 - [x] Tokenizer
@@ -227,7 +229,7 @@ Code above renders following image:
 ## Documentation
 
 Official documentations is hosted on Github Pages and can be found
-[here](https://argmaster.github.io/pygerber/).
+[here](https://argmaster.github.io/pygerber/latest).
 
 ## Gerber features support
 
