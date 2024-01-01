@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
+## Release 2.1.1
+
+- Fixed incorrect bounding box prediction for displaced drawings (#105).
+- Added 3.12 as supported in package tags.
+- Fixed documentation links in `README.md` and `pyproject.toml`.
+
 ## Release 2.1.0
 
 - Fixed #37
