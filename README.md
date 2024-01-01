@@ -1,5 +1,5 @@
 <p align="center">
-   <img width="400" src="https://github.com/UniversityOfGdanskTeamPython/epseon_backend/assets/56170852/094eb29d-ad4d-420c-bf20-60eae2cadb0b" alt="" />
+   <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/b7aeb3e1-cd59-4f5b-b078-c01272461367" alt="" />
 </p>
 
 <h1 align="center"> PyGerber </h1>
