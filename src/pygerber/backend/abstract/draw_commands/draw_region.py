@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 from functools import cached_property
+from typing import Optional
 
 from pygerber.backend.abstract.backend_cls import Backend
 from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
 from pygerber.gerberx3.math.bounding_box import BoundingBox
-from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.state_enums import Polarity
 
@@ -32,8 +32,14 @@ class DrawRegion(DrawCommand):
 
     @cached_property
     def _bounding_box(self) -> BoundingBox:
-        box = BoundingBox.from_diameter(Offset.new(0.0))
+        box: Optional[BoundingBox] = None
         for point in self.region_boundary_points:
-            box = box.include_point(point)
+            if box is not None:
+                box = box.include_point(point)
+            else:
+                box = BoundingBox.NULL + point
 
-        return box
+        if box is not None:
+            return box
+
+        return BoundingBox.NULL

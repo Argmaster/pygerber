@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/b7aeb3e1-cd59-4f5b-b078-c01272461367">
+   <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/b7aeb3e1-cd59-4f5b-b078-c01272461367" alt="" />
 </p>
 
 <h1 align="center"> PyGerber </h1>
@@ -30,6 +30,8 @@ and in
 [this repository](https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-03_en.pdf)).
 The goal of this project is to provide support for wide variety of Gerber-like syntaxes,
 with support for most of deprecated features along with support for modern ones.
+
+<center><a href="https://argmaster.github.io/pygerber/latest"> 📚 See online documentation 📚 </a></center>
 
 ### Target set of tools:
 
@@ -227,7 +229,7 @@ Code above renders following image:
 ## Documentation
 
 Official documentations is hosted on Github Pages and can be found
-[here](https://argmaster.github.io/pygerber/).
+[here](https://argmaster.github.io/pygerber/latest).
 
 ## Gerber features support
 

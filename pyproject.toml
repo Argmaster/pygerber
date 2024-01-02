@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 homepage = "https://www.facebook.com/pygerber"
 repository = "https://github.com/Argmaster/pygerber"
-documentation = "https://argmaster.github.io/pygerber/"
+documentation = "https://argmaster.github.io/pygerber/latest"
 keywords = ["gerber", "pcb", "embedded", "images", "x3"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -29,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: File Formats",
