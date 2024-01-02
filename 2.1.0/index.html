@@ -1,0 +1,5289 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+        <link rel="next" href="Changelog.html">
+      
+      
+      <link rel="icon" href="images/pygerber.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+    
+    
+      
+        <title>PyGerber Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.4b4a2bd9.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+        <script src="https://unpkg.com/iframe-worker/shim"></script>
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="css/mkdocstrings.css">
+    
+      <link rel="stylesheet" href="css/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indygo" data-md-color-accent="indygo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#target-set-of-tools" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="PyGerber Documentation" class="md-header__button md-logo" aria-label="PyGerber Documentation" data-md-component="logo">
+      
+  <img src="images/pygerber_white.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PyGerber Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indygo" data-md-color-accent="indygo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="blue"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Argmaster/pygerber" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Argmaster/pygerber
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="PyGerber Documentation" class="md-nav__button md-logo" aria-label="PyGerber Documentation" data-md-component="logo">
+      
+  <img src="images/pygerber_white.png" alt="logo">
+
+    </a>
+    PyGerber Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Argmaster/pygerber" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Argmaster/pygerber
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="index.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#target-set-of-tools" class="md-nav__link">
+    Target set of tools:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#language-server" class="md-nav__link">
+    Language Server
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-usage" class="md-nav__link">
+    Command line usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-usage" class="md-nav__link">
+    API usage
+  </a>
+  
+    <nav class="md-nav" aria-label="API usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rasterized-render-from-file" class="md-nav__link">
+    Rasterized render from file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rasterized-render-from-string" class="md-nav__link">
+    Rasterized render from string
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    Documentation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gerber-features-support" class="md-nav__link">
+    Gerber features support
+  </a>
+  
+    <nav class="md-nav" aria-label="Gerber features support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tokenizer" class="md-nav__link">
+    Tokenizer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    Parser
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rasterized2dbackend" class="md-nav__link">
+    Rasterized2DBackend
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#syntax-feature-requests" class="md-nav__link">
+    Syntax feature requests
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    Development
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-from-source" class="md-nav__link">
+    Build from source
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gerber-reference-archive" class="md-nav__link">
+    Gerber reference archive
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="Changelog.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="LICENSE.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    License
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Gerber
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Gerber
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber/advanced_api.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Advanced API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber/high_level_api.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    High Level API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Gerber specification
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Gerber specification
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber_specification/RS-274X.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    RS-274X 2001-03
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber_specification/revision_2013_J1.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revision 2013-J1
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber_specification/revision_2016_01.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revision 2016-01
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber_specification/revision_2017_05.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revision 2017-05
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber_specification/revision_2020_09.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revision 2020-09
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber_specification/revision_2021_11.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revision 2021-11
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber_specification/revision_2023_03.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revision 2023-03
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="gerber_specification/revision_2023_08.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Revision 2023-08
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    
+    
+    
+    
+    
+      
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    pygerber
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            pygerber
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_2" id="__nav_6_1_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    backend
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            backend
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_2_2" id="__nav_6_1_2_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    abstract
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_1_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            abstract
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/aperture_handle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    aperture_handle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/backend_cls.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    backend_cls
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_2_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_2_2_4" id="__nav_6_1_2_2_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    draw_commands
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_6_1_2_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_2_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            draw_commands
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_arc.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_arc
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_bounding_box.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_bounding_box
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_circle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_circle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_command.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_command
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_paste.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_paste
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_polygon.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_polygon
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_rectangle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_rectangle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_region.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_region
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands/draw_vector_line.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_vector_line
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/draw_commands_handle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_commands_handle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/drawing_target.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    drawing_target
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/errors.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/abstract/result_handle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    result_handle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_2_3" id="__nav_6_1_2_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    rasterized_2d
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_1_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            rasterized_2d
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/aperture_handle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    aperture_handle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/backend_cls.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    backend_cls
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/color_scheme.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    color_scheme
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_2_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_2_3_5" id="__nav_6_1_2_3_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    draw_commands
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_6_1_2_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_2_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            draw_commands
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/draw_arc.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_arc
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/draw_bounding_box.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_bounding_box
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/draw_circle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_circle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/draw_paste.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_paste
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/draw_polygon.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_polygon
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/draw_rectangle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_rectangle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/draw_region.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_region
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands/draw_vector_line.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_vector_line
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/draw_commands_handle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    draw_commands_handle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/drawing_target.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    drawing_target
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/errors.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/image_tools.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    image_tools
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/backend/rasterized_2d/result_handle.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    result_handle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_3" id="__nav_6_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    common
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            common
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/common/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/common/frozen_general_model.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    frozen_general_model
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/common/position.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    position
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/common/rgba.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    rgba
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_4" id="__nav_6_1_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    console
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_1_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_4">
+            <span class="md-nav__icon md-icon"></span>
+            console
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/console/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/console/commands.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/console/raster_2d_style.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    raster_2d_style
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5" id="__nav_6_1_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    gerberx3
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_6_1_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            gerberx3
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_2" id="__nav_6_1_5_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    api
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_1_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            api
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/api/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/api/_errors.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    _errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/api/_layers.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    _layers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_3" id="__nav_6_1_5_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    language_server
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_1_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            language_server
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/language_server/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_3_2" id="__nav_6_1_5_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    _internals
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_6_1_5_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            _internals
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/language_server/_internals/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/language_server/_internals/error.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    error
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/language_server/_internals/errors.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/language_server/_internals/server.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    server
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/language_server/_internals/state.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    state
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_4" id="__nav_6_1_5_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    math
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_1_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_4">
+            <span class="md-nav__icon md-icon"></span>
+            math
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/math/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/math/bounding_box.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    bounding_box
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/math/offset.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    offset
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/math/rotate_point.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    rotate_point
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/math/vector_2d.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    vector_2d
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_5" id="__nav_6_1_5_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    optimizer
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_1_5_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_5">
+            <span class="md-nav__icon md-icon"></span>
+            optimizer
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/optimizer/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/optimizer/optimizer_pass/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    optimizer_pass
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_6" id="__nav_6_1_5_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    parser
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_1_5_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_6">
+            <span class="md-nav__icon md-icon"></span>
+            parser
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/parser/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/parser/errors.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/parser/parser.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    parser
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/parser/state.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    state
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/state_enums.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    state_enums
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_8" id="__nav_6_1_5_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    tokenizer
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_6_1_5_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_8">
+            <span class="md-nav__icon md-icon"></span>
+            tokenizer
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/errors.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    errors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/grammar.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    grammar
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_8_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_8_4" id="__nav_6_1_5_8_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    helpers
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_6_1_5_8_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_8_4">
+            <span class="md-nav__icon md-icon"></span>
+            helpers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/helpers/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/helpers/gerber_code_enum.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    gerber_code_enum
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokenizer.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    tokenizer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_8_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_8_6" id="__nav_6_1_5_8_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    tokens
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="5" aria-labelledby="__nav_6_1_5_8_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_8_6">
+            <span class="md-nav__icon md-icon"></span>
+            tokens
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/ab_block_aperture.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ab_block_aperture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/ad_define_aperture.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ad_define_aperture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/as_axis_select.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    as_axis_select
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/attribute_token.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    attribute_token
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_8_6_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_8_6_6" id="__nav_6_1_5_8_6_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    bases
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="6" aria-labelledby="__nav_6_1_5_8_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_8_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            bases
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/bases/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/bases/command.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    command
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/bases/extended_command.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    extended_command
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/bases/gerber_code.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    gerber_code
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/bases/group.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    group
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/bases/token.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    token
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/bases/token_accessor.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    token_accessor
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/coordinate.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    coordinate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/d01_draw.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d01_draw
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/d02_move.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d02_move
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/d03_flash.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    d03_flash
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/dnn_select_aperture.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    dnn_select_aperture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/end_of_expression.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    end_of_expression
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/fs_coordinate_format.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    fs_coordinate_format
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g01_set_linear.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g01_set_linear
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g02_set_clockwise_circular.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g02_set_clockwise_circular
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g03_set_counterclockwise_circular.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g03_set_counterclockwise_circular
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g04_comment.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g04_comment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g36_begin_region.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g36_begin_region
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g37_end_region.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g37_end_region
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g54_select_aperture.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g54_select_aperture
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g70_set_unit_inch.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g70_set_unit_inch
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g71_set_unit_mm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g71_set_unit_mm
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g74_single_quadrant.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g74_single_quadrant
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g75_multi_quadrant.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g75_multi_quadrant
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g90_set_coordinate_absolute.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g90_set_coordinate_absolute
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/g91_set_coordinate_incremental.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    g91_set_coordinate_incremental
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_8_6_27" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_8_6_27" id="__nav_6_1_5_8_6_27_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    groups
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="6" aria-labelledby="__nav_6_1_5_8_6_27_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_8_6_27">
+            <span class="md-nav__icon md-icon"></span>
+            groups
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/groups/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/groups/ast.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ast
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/groups/statement.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    statement
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/in_image_name.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    in_image_name
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/ip_image_polarity.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ip_image_polarity
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/lm_load_mirroring.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    lm_load_mirroring
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/ln_load_name.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ln_load_name
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/lp_load_polarity.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    lp_load_polarity
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/lr_load_rotation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    lr_load_rotation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/ls_load_scaling.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ls_load_scaling
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/m00_program_stop.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    m00_program_stop
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/m01_optional_stop.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    m01_optional_stop
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/m02_end_of_file.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    m02_end_of_file
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6_1_5_8_6_38" >
+        
+          
+          <label class="md-nav__link" for="__nav_6_1_5_8_6_38" id="__nav_6_1_5_8_6_38_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    macro
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="6" aria-labelledby="__nav_6_1_5_8_6_38_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1_5_8_6_38">
+            <span class="md-nav__icon md-icon"></span>
+            macro
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/__init__.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+      init  
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/am_macro.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    am_macro
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/arithmetic_expression.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    arithmetic_expression
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/comment.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    comment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/expression.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    expression
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/macro_begin.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    macro_begin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/macro_context.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    macro_context
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/numeric_constant.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    numeric_constant
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/numeric_expression.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    numeric_expression
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/point.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    point
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/primitives.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    primitives
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/variable_definition.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    variable_definition
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/macro/variable_name.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    variable_name
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/mo_unit_mode.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    mo_unit_mode
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/of_image_offset.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    of_image_offset
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/sr_step_repeat.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    sr_step_repeat
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/ta_aperture_attribute.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ta_aperture_attribute
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/td_delete_attribute.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    td_delete_attribute
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/tf_file_attribute.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    tf_file_attribute
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/gerberx3/tokenizer/tokens/to_object_attribute.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    to_object_attribute
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/sequence_tools.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    sequence_tools
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/pygerber/warnings.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    warnings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#target-set-of-tools" class="md-nav__link">
+    Target set of tools:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    Installation
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#language-server" class="md-nav__link">
+    Language Server
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#command-line-usage" class="md-nav__link">
+    Command line usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-usage" class="md-nav__link">
+    API usage
+  </a>
+  
+    <nav class="md-nav" aria-label="API usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rasterized-render-from-file" class="md-nav__link">
+    Rasterized render from file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rasterized-render-from-string" class="md-nav__link">
+    Rasterized render from string
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    Documentation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gerber-features-support" class="md-nav__link">
+    Gerber features support
+  </a>
+  
+    <nav class="md-nav" aria-label="Gerber features support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tokenizer" class="md-nav__link">
+    Tokenizer
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parser" class="md-nav__link">
+    Parser
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rasterized2dbackend" class="md-nav__link">
+    Rasterized2DBackend
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#syntax-feature-requests" class="md-nav__link">
+    Syntax feature requests
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    Development
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-from-source" class="md-nav__link">
+    Build from source
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gerber-reference-archive" class="md-nav__link">
+    Gerber reference archive
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+    <a href="https://github.com/Argmaster/pygerber/edit/main/docs/README.md" title="Edit this page" class="md-content__button md-icon">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
+    </a>
+  
+  
+
+
+<p align="center">
+  <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/b7aeb3e1-cd59-4f5b-b078-c01272461367">
+</p>
+
+<h1 align="center"> PyGerber </h1>
+
+<p align="center">
+  <a href="https://github.com/Argmaster/pygerber/releases/"><img src="https://img.shields.io/github/v/release/Argmaster/pygerber?style=flat" alt="GitHub release"></a>
+  <a href="https://github.com/Argmaster/pygerber/releases"><img src="https://img.shields.io/github/release-date/Argmaster/pygerber" alt="GitHub Release Date - Published_At"></a>
+  <a href="https://pypi.org/project/pygerber"><img src="https://img.shields.io/pypi/v/pygerber?style=flat" alt="PyPI release"></a>
+  <a href="https://pypi.org/project/pygerber/"><img src="https://img.shields.io/pypi/dm/pygerber.svg?label=PyPI%20downloads" alt="PyPI Downloads"></a>
+  <a href="https://pypi.org/project/pygerber"><img src="https://img.shields.io/pypi/pyversions/pygerber?style=flat" alt="Supported Python versions"></a>
+  <a href="https://pypi.org/project/pygerber"><img src="https://img.shields.io/pypi/implementation/pygerber?style=flat" alt="Supported Python implementations"></a>
+  <a href="https://github.com/argmaster/pygerber/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Argmaster/pygerber" alt="license_mit"></a>
+  <a href="https://codecov.io/gh/Argmaster/pygerber"><img src="https://codecov.io/gh/Argmaster/pygerber/branch/main/graph/badge.svg?token=VM09IHO13U" alt="coverage"></a>
+  <a href="https://img.shields.io/github/checks-status/Argmaster/pygerber/main"><img src="https://img.shields.io/github/checks-status/Argmaster/pygerber/main" alt="GitHub tag checks state"></a>
+  <a href="https://github.com/Argmaster/pygerber/pulls"><img src="https://img.shields.io/github/issues-pr/Argmaster/pygerber?style=flat" alt="Pull requests"></a>
+  <a href="https://github.com/Argmaster/pygerber/issues"><img src="https://img.shields.io/github/issues-raw/Argmaster/pygerber?style=flat" alt="Open issues"></a>
+  <a href="https://github.com/Argmaster/pygerber"><img src="https://img.shields.io/github/repo-size/Argmaster/pygerber" alt="GitHub repo size"></a>
+  <a href="https://github.com/Argmaster/pygerber"><img src="https://img.shields.io/github/languages/code-size/Argmaster/pygerber" alt="GitHub code size in bytes"></a>
+  <a href="https://github.com/Argmaster/pygerber"><img src="https://img.shields.io/github/stars/Argmaster/pygerber" alt="GitHub Repo stars"></a>
+  <a href="https://python-poetry.org/"><img src="https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json" alt="Poetry"></a>
+  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code Style"></a>
+</p>
+
+<p>PyGerber is a Python implementation of Gerber X3/X2 format. It is based on Ucamco's
+<code>The Gerber Layer Format Specification. Revision 2023.03</code> (Available on
+<a href="https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-03_en.pdf">Ucamco's webpage</a>
+and in
+<a href="https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-03_en.pdf">this repository</a>).
+The goal of this project is to provide support for wide variety of Gerber-like syntaxes,
+with support for most of deprecated features along with support for modern ones.</p>
+<h3 id="target-set-of-tools">Target set of tools:<a class="headerlink" href="#target-set-of-tools" title="Anchor link to this section for reference">&para;</a></h3>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Tokenizer</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Parser</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Optimizer</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Rasterized 2D rendering engine (With
+      <a href="https://github.com/python-pillow/Pillow">Pillow</a>)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Vector 2D rendering engine (With <a href="https://github.com/cduck/drawsvg">drawsvg</a>)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Model 3D rendering engine (With <a href="https://www.blender.org/">Blender</a>)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Formatter</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Linter (eg. deprecated syntax detection)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Gerber X3/X2 Language Server (with <code>language-server</code> extras)</li>
+</ul>
+<p>You can view progress of development in
+<a href="#gerber-features-support">Gerber features support</a> section down below. All Gerber
+source files which can be redistributed under MIT license and included in this
+repository for testing purposes will be greatly appreciated.</p>
+<h2 id="installation">Installation<a class="headerlink" href="#installation" title="Anchor link to this section for reference">&para;</a></h2>
+<p>PyGerber can be installed with <code>pip</code> from PyPI:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>pip install pygerber
+</span></code></pre></div>
+<p>Alternatively, it is also possible to install it directly from repository:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>pip install git+https://github.com/Argmaster/pygerber
+</span></code></pre></div>
+<h3 id="language-server">Language Server<a class="headerlink" href="#language-server" title="Anchor link to this section for reference">&para;</a></h3>
+<p>Since release 2.1.0 PyGerber now provides Gerber X3/X2 Language Server with
+<a href="https://microsoft.github.io/language-server-protocol/">LSP</a> support. It can be enabled
+by installing PyGerber extras set <code>language-server</code> with following command:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip install pygerber[language-server]
+</span></code></pre></div>
+<p>Afterwards you can use <code>pygerber is-language-server-available</code> to check if language
+server was correctly enabled. Please report all issues in
+<a href="https://github.com/Argmaster/pygerber/issues">PyGerber Issues</a> section.</p>
+<h2 id="command-line-usage">Command line usage<a class="headerlink" href="#command-line-usage" title="Anchor link to this section for reference">&para;</a></h2>
+<p>After installing <code>pygerber</code>, depending on your environment, it should become available
+in your command line:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pygerber<span class="w"> </span>--version
+</span></code></pre></div>
+<p>Output should be similar to one below <strong>⇩</strong>, where <code>x.y.z</code> should match version of
+PyGerber installed.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$ pygerber --version
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>pygerber, version x.y.z
+</span></code></pre></div>
+<p>Use <code>--help</code> to display help messages with lists of subcommands and subcommand options:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pygerber raster-2d --help
+</span></code></pre></div>
+<p>To render 2D PNG image of some gerber file you can simply use:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pygerber raster-2d gerber-source.grb
+</span></code></pre></div>
+<p>Image will be saved to <code>output.png</code> in current working directory.</p>
+<p><img alt="example_pcb_image" src="https://github.com/Argmaster/pygerber/assets/56170852/9bca28bf-8aa6-4215-aac1-62c386490485" /></p>
+<h2 id="api-usage">API usage<a class="headerlink" href="#api-usage" title="Anchor link to this section for reference">&para;</a></h2>
+<p>PyGerber offers a high-level API that simplifies the process of rendering Gerber files.
+Whether you're looking to save the rendered output to a file or directly into a buffer,
+PyGerber has got you covered.</p>
+<ul>
+<li><strong>The <code>Layer</code> Class</strong>: At its core, the <code>Layer</code> class stands for a single Gerber
+  source file, complete with its associated PyGerber configuration.</li>
+</ul>
+<p><strong>Important</strong> <code>Layer</code> class represents <strong>any</strong> Gerber file, <strong>not</strong> layer of PCB. For
+  example, silkscreen Gerber file will require one instance of <code>Layer</code>, paste mask will
+  require another one, copper top yet another, etc.</p>
+<ul>
+<li>
+<p><strong>Configuration Flexibility</strong>: The configuration possibilities you get with a <code>Layer</code>
+  are driven by the backend you choose to render your source file.</p>
+</li>
+<li>
+<p><strong>Selecting a Backend</strong>: PyGerber provides specialized subclasses of the <code>Layer</code> class
+  each tied to one rendering backend. For instance, if you're aiming for 2D rasterized
+  images, <code>Rasterized2DLayer</code> is your go-to choice.</p>
+</li>
+<li>
+<p><strong>Output Types</strong>: Keep in mind, the type of your output file is closely tied to the
+  backend you select.For 2D rasterized rendering
+  <a href="https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html">all formats supported by Pillow</a>
+  are accepted.</p>
+</li>
+</ul>
+<h3 id="rasterized-render-from-file">Rasterized render from file<a class="headerlink" href="#rasterized-render-from-file" title="Anchor link to this section for reference">&para;</a></h3>
+<div class="language-py highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">render_file.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-7-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-7-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-7-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-7-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-7-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-7-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-7-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-7-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-7-10">10</a></span>
+<span class="normal"><a href="#__codelineno-7-11">11</a></span>
+<span class="normal"><a href="#__codelineno-7-12">12</a></span>
+<span class="normal"><a href="#__codelineno-7-13">13</a></span>
+<span class="normal"><a href="#__codelineno-7-14">14</a></span>
+<span class="normal"><a href="#__codelineno-7-15">15</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="kn">from</span> <span class="nn">pygerber.gerberx3.api</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2"></a>      <span class="n">ColorScheme</span><span class="p">,</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3"></a>      <span class="n">Rasterized2DLayer</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4"></a>      <span class="n">Rasterized2DLayerParams</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5"></a><span class="p">)</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7"></a><span class="c1"># Path to Gerber source file.</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="n">source_path</span> <span class="o">=</span> <span class="s2">&quot;main_cu.grb&quot;</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9"></a>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10"></a><span class="n">Rasterized2DLayer</span><span class="p">(</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11"></a>      <span class="n">options</span><span class="o">=</span><span class="n">Rasterized2DLayerParams</span><span class="p">(</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12"></a>            <span class="n">source_path</span><span class="o">=</span><span class="n">source_path</span><span class="p">,</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13"></a>            <span class="n">colors</span><span class="o">=</span><span class="n">ColorScheme</span><span class="o">.</span><span class="n">COPPER_ALPHA</span><span class="p">,</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14"></a>      <span class="p">),</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15"></a><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output.png&quot;</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Example code above creates <code>Rasterized2DLayer</code> object, renders it with rasterized 2D
+backend and saves it as <code>PNG</code> image. Use of <code>Rasterized2DLayer</code> and
+<code>Rasterized2DLayerOptions</code> classes implicitly use 2D rasterized backend. To use
+different rendering backend with high level API, user must pick different <code>Layer</code> and
+<code>LayerOptions</code> subclasses. For other backends see
+<a href="#target-set-of-tools">Target set of tools</a> section, note that only checked ones are
+available.</p>
+<p><code>source_path</code> option accepts <code>str</code> or <code>Path</code> pointing to local Gerber file. No special
+file extension is required, content is blindly loaded from specified file, so it's user
+responsibility to provide correct path. There are also <code>source_code</code> and <code>source_buffer</code>
+parameters which allow for use of raw <code>str</code> or <code>bytes</code> objects (first one) and
+<code>StringIO</code> and <code>BytesIO</code> or file descriptors (second one). <code>source_code</code>,
+<code>source_buffer</code> and <code>source_path</code> are mutually exclusive.</p>
+<p><code>ColorScheme</code> is a class which describes what colors should be used for rendering
+different parts of image. Additionally it has a few static members which contain
+predefined colors schemes for frequently used layer types. It is not required to use
+predefined schemes, creating and passing custom <code>ColorScheme</code> object should work
+perfectly fine.</p>
+<p>Pattern of using <code>&lt;Class&gt;</code> and <code>&lt;Class&gt;Options</code>, like above, is used in many places in
+PyGerber. When initializing object like <code>Rasterized2DLayer</code> it is only valid to pass
+<code>Rasterized2DLayerOptions</code> to constructor. Passing <code>LayerOptions</code> or <code>Vectorized2DLayer</code>
+will cause undefined behavior, most likely yielding no result or raising exception.</p>
+<h3 id="rasterized-render-from-string">Rasterized render from string<a class="headerlink" href="#rasterized-render-from-string" title="Anchor link to this section for reference">&para;</a></h3>
+<div class="language-py highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">render_string.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-8-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-8-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-8-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-8-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-8-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-8-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-8-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-8-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-8-10">10</a></span>
+<span class="normal"><a href="#__codelineno-8-11">11</a></span>
+<span class="normal"><a href="#__codelineno-8-12">12</a></span>
+<span class="normal"><a href="#__codelineno-8-13">13</a></span>
+<span class="normal"><a href="#__codelineno-8-14">14</a></span>
+<span class="normal"><a href="#__codelineno-8-15">15</a></span>
+<span class="normal"><a href="#__codelineno-8-16">16</a></span>
+<span class="normal"><a href="#__codelineno-8-17">17</a></span>
+<span class="normal"><a href="#__codelineno-8-18">18</a></span>
+<span class="normal"><a href="#__codelineno-8-19">19</a></span>
+<span class="normal"><a href="#__codelineno-8-20">20</a></span>
+<span class="normal"><a href="#__codelineno-8-21">21</a></span>
+<span class="normal"><a href="#__codelineno-8-22">22</a></span>
+<span class="normal"><a href="#__codelineno-8-23">23</a></span>
+<span class="normal"><a href="#__codelineno-8-24">24</a></span>
+<span class="normal"><a href="#__codelineno-8-25">25</a></span>
+<span class="normal"><a href="#__codelineno-8-26">26</a></span>
+<span class="normal"><a href="#__codelineno-8-27">27</a></span>
+<span class="normal"><a href="#__codelineno-8-28">28</a></span>
+<span class="normal"><a href="#__codelineno-8-29">29</a></span>
+<span class="normal"><a href="#__codelineno-8-30">30</a></span>
+<span class="normal"><a href="#__codelineno-8-31">31</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="kn">from</span> <span class="nn">pygerber.gerberx3.api</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2"></a>      <span class="n">ColorScheme</span><span class="p">,</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3"></a>      <span class="n">Rasterized2DLayer</span><span class="p">,</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4"></a>      <span class="n">Rasterized2DLayerParams</span><span class="p">,</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5"></a><span class="p">)</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6"></a>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7"></a><span class="n">source_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8"></a><span class="si">%F</span><span class="s2">SLAX26Y26*%</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9"></a><span class="s2">%MOMM*%</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10"></a><span class="s2">%ADD100R,1.5X1.0X0.5*%</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11"></a><span class="s2">%ADD200C,1.5X1.0*%</span>
+</span><span id="__span-8-12"><a id="__codelineno-8-12" name="__codelineno-8-12"></a><span class="s2">%ADD300O,1.5X1.0X0.6*%</span>
+</span><span id="__span-8-13"><a id="__codelineno-8-13" name="__codelineno-8-13"></a><span class="s2">%ADD400P,1.5X3X5.0*%</span>
+</span><span id="__span-8-14"><a id="__codelineno-8-14" name="__codelineno-8-14"></a><span class="s2">D100*</span>
+</span><span id="__span-8-15"><a id="__codelineno-8-15" name="__codelineno-8-15"></a><span class="s2">X0Y0D03*</span>
+</span><span id="__span-8-16"><a id="__codelineno-8-16" name="__codelineno-8-16"></a><span class="s2">D200*</span>
+</span><span id="__span-8-17"><a id="__codelineno-8-17" name="__codelineno-8-17"></a><span class="s2">X0Y2000000D03*</span>
+</span><span id="__span-8-18"><a id="__codelineno-8-18" name="__codelineno-8-18"></a><span class="s2">D300*</span>
+</span><span id="__span-8-19"><a id="__codelineno-8-19" name="__codelineno-8-19"></a><span class="s2">X2000000Y0D03*</span>
+</span><span id="__span-8-20"><a id="__codelineno-8-20" name="__codelineno-8-20"></a><span class="s2">D400*</span>
+</span><span id="__span-8-21"><a id="__codelineno-8-21" name="__codelineno-8-21"></a><span class="s2">X2000000Y2000000D03*</span>
+</span><span id="__span-8-22"><a id="__codelineno-8-22" name="__codelineno-8-22"></a><span class="s2">M02*</span>
+</span><span id="__span-8-23"><a id="__codelineno-8-23" name="__codelineno-8-23"></a><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-8-24"><a id="__codelineno-8-24" name="__codelineno-8-24"></a>
+</span><span id="__span-8-25"><a id="__codelineno-8-25" name="__codelineno-8-25"></a><span class="n">Rasterized2DLayer</span><span class="p">(</span>
+</span><span id="__span-8-26"><a id="__codelineno-8-26" name="__codelineno-8-26"></a>      <span class="n">options</span><span class="o">=</span><span class="n">Rasterized2DLayerParams</span><span class="p">(</span>
+</span><span id="__span-8-27"><a id="__codelineno-8-27" name="__codelineno-8-27"></a>            <span class="n">source_code</span><span class="o">=</span><span class="n">source_code</span><span class="p">,</span>
+</span><span id="__span-8-28"><a id="__codelineno-8-28" name="__codelineno-8-28"></a>            <span class="n">colors</span><span class="o">=</span><span class="n">ColorScheme</span><span class="o">.</span><span class="n">SILK</span><span class="p">,</span>
+</span><span id="__span-8-29"><a id="__codelineno-8-29" name="__codelineno-8-29"></a>            <span class="n">dpi</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span>
+</span><span id="__span-8-30"><a id="__codelineno-8-30" name="__codelineno-8-30"></a>      <span class="p">),</span>
+</span><span id="__span-8-31"><a id="__codelineno-8-31" name="__codelineno-8-31"></a><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output.png&quot;</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<p>Code above renders following image:</p>
+<p align="center">
+  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/56b6757b-0f97-4a18-9d43-f21711c71c71">
+</p>
+
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Anchor link to this section for reference">&para;</a></h2>
+<p>Official documentations is hosted on Github Pages and can be found
+<a href="https://argmaster.github.io/pygerber/">here</a>.</p>
+<h2 id="gerber-features-support">Gerber features support<a class="headerlink" href="#gerber-features-support" title="Anchor link to this section for reference">&para;</a></h2>
+<p>This section outlines the support for various Gerber format features in PyGerber's core
+components: <a href="#tokenizer"><strong>Tokenizer</strong></a>, <a href="#parser"><strong>Parser</strong></a>, and
+<a href="#rasterized2dbackend"><strong>Rasterized2DBackend</strong></a>. We use checkboxes to indicate which
+features are currently implemented. Checked boxes represent supported features, while
+unchecked boxes denote features still under development or not available.</p>
+<h3 id="tokenizer">Tokenizer<a class="headerlink" href="#tokenizer" title="Anchor link to this section for reference">&para;</a></h3>
+<p>Supported Gerber X3 features:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G04 - Comment - A human readable comment, does not affect the image.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> MO - Mode - Sets the unit to mm or inch.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> FS - Format specification - Sets the coordinate format, e.g. the number of
+      decimals.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> FS (Deprecated modes)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> AD - Aperture define - Defines a template-based aperture, assigns a D code to it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> AM - Aperture macro - Defines a macro aperture template.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Dnn (nn≥10) - Sets the current aperture to D code nn.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> D01 - Plot operation - Outside a region statement D01 creates a draw or arc object
+      with the current aperture. Inside it adds a draw/arc segment to the contour under
+      construction. The current point is moved to draw/arc end point after the creation
+      of the draw/arc.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> D02 - Move operation - D02 moves the current point to the coordinate in the
+      command. It does not create an object.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> D03 - Flash operation - Creates a flash object with the current aperture. The
+      current point is moved to the flash point.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G01 - Sets linear/circular mode to linear.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G02 - Sets linear/circular mode to clockwise circular.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G03 - Sets linear/circular mode to counterclockwise circular.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G75 - A G75 must be called before creating the first arc.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LP - Load polarity - Loads the polarity object transformation parameter.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LM - Load mirroring - Loads the mirror object transformation parameter.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LR - Load rotation - Loads the rotation object transformation parameter.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LS - Load scaling - Loads the scale object transformation parameter.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G36 - Starts a region statement which creates a region by defining its contours.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G37 - Ends the region statement.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> AB - Aperture block - Opens a block aperture statement and assigns its aperture
+      number or closes a block aperture statement.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> SR - Step and repeat - Open or closes a step and repeat statement.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> TF - Attribute on file - Set a file attribute.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> TA - Attribute on aperture - Add an aperture attribute to the dictionary or modify
+      it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> TO - Attribute on object - Add an object attribute to the dictionary or modify it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> TD - Attribute delete - Delete one or all attributes in the dictionary.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> M02 - End of file.</li>
+</ul>
+<p>Supported <strong>DEPRECATED</strong> Gerber features:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G54 - Select aperture - This historic code optionally precedes an aperture
+      selection Dnn command. It has no effect. Sometimes used. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> G55 - Prepare for flash - This historic code optionally precedes D03 code. It has
+      no effect. Very rarely used nowadays. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G70 - Set the 'Unit' to inch - These historic codes perform a function handled by
+      the MO command. See 4.2.1. Sometimes used. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G71 - Set the 'Unit' to mm - This is part of the historic codes that perform a
+      function handled by the MO command.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G90 - Set the 'Coordinate format' to 'Absolute notation' - These historic codes
+      perform a function handled by the FS command. Very rarely used nowadays.
+      Deprecated in 2012.</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
+      codes handled by the FS command.</p>
+</li>
+<li>
+<p><strong>Important</strong>: <em>Incremental notation itself is not supported and is not planned due
+    to lack of test assets and expected complications during implementation.</em></p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
+      Deprecated in 2020. (Spec. 8.1.10)</p>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> M00 - Program stop - This historic code has the same effect as M02. Very rarely,
+      if ever, used nowadays. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> M01 - Optional stop - This historic code has no effect. Very rarely, if ever, used
+      nowadays. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> IP - Sets the 'Image polarity' graphics state parameter - This command has no
+      effect in CAD to CAM workflows. Sometimes used, and then usually as %IPPOS*% to
+      confirm the default and then it then has no effect. Deprecated in 2013. (Spec.
+      8.1.4)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> AS - Sets the 'Axes correspondence' graphics state parameter - Deprecated in 2013.
+      Rarely used nowadays. (Spec. 8.1.2)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> IR - Sets 'Image rotation' graphics state parameter - Deprecated in 2013. Rarely
+      used nowadays. (Spec. 8.1.5)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> MI - Sets 'Image mirroring' graphics state parameter (Spec. 8.1.7)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> OF - Sets 'Image offset' graphics state parameter (Spec. 8.1.8)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> SF - Sets 'Scale factor' graphics state parameter (Spec. 8.1.9)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> IN - Sets the name of the file image. Has no effect. It is comment. Sometimes
+      used. Deprecated in 2013. (Spec. 8.1.3)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LN - Loads a name. Has no effect. It is a comment. Sometimes used. Deprecated
+      in 2013. (Spec. 8.1.6)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Combining G01/G02/G03 and D01 in a single command. (Spec 8.3.1)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Coordinate Data without Operation Code. (Spec 8.3.2)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Style Variations in Command Codes. (Spec 8.3.3)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Deprecated usage of SR. (Spec 8.3.4)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Deprecated Attribute Values. (Spec 8.4)</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
+      (Spec. 8.2)</p>
+</li>
+<li>
+<p><strong>Important</strong>: <em>Incremental notation itself is not supported and is not planned due
+    to lack of test assets and expected complications during implementation.</em></p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Rectangular Hole in Standard Apertures (Spec. 8.2.2)</p>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Macro Primitive Code 2, Vector Line (Spec. 8.2.4)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Macro Primitive Code 6, Moiré (Spec. 8.2.6)</li>
+</ul>
+<h3 id="parser">Parser<a class="headerlink" href="#parser" title="Anchor link to this section for reference">&para;</a></h3>
+<p>Supported Gerber X3 features:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> MO - Mode - Sets the unit to mm or inch.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> FS - Format specification - Sets the coordinate format, e.g. the number of
+      decimals.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> AD - Aperture define - Defines a template-based aperture, assigns a D code to it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Define circle.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Define rectangle.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Define obround.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Define polygon.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Define macro.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> AM - Aperture macro - Defines a macro aperture template.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Dnn (nn≥10) - Sets the current aperture to D code nn.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> D01 - Plot operation - Outside a region statement D01 creates a draw or arc object
+      with the current aperture.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> D01 - Plot operation - Inside region statement adds a draw/arc segment to the
+      contour under construction. The current point is moved to draw/arc end point after
+      the creation of the draw/arc.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> D02 - Move operation - D02 moves the current point to the coordinate in the
+      command. It does not create an object.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> D03 - Flash operation - Creates a flash object with the current aperture. The
+      current point is moved to the flash point.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G01 - Sets linear/circular mode to linear.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G02 - Sets linear/circular mode to clockwise circular.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G03 - Sets linear/circular mode to counterclockwise circular.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LP - Load polarity - Loads the polarity object transformation parameter.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LM - Load mirroring - Loads the mirror object transformation parameter.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LR - Load rotation - Loads the rotation object transformation parameter.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LS - Load scaling - Loads the scale object transformation parameter.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G36 - Starts a region statement which creates a region by defining its contours.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G37 - Ends the region statement.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> AB - Aperture block - Opens a block aperture statement and assigns its aperture
+      number or closes a block aperture statement.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> SR - Step and repeat - Open or closes a step and repeat statement.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> TF - Attribute on file - Set a file attribute.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> TA - Attribute on aperture - Add an aperture attribute to the dictionary or modify
+      it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> TO - Attribute on object - Add an object attribute to the dictionary or modify it.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> TD - Attribute delete - Delete one or all attributes in the dictionary.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> M02 - End of file.</li>
+</ul>
+<p>Supported <strong>DEPRECATED</strong> Gerber features:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G54 - Select aperture - This historic code optionally precedes an aperture
+      selection Dnn command. It has no effect. Sometimes used. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> G55 - Prepare for flash - This historic code optionally precedes D03 code. It has
+      no effect. Very rarely used nowadays. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G70 - Set the 'Unit' to inch - These historic codes perform a function handled by
+      the MO command. See 4.2.1. Sometimes used. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G71 - Set the 'Unit' to mm - This is part of the historic codes that perform a
+      function handled by the MO command.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G90 - Set the 'Coordinate format' to 'Absolute notation' - These historic codes
+      perform a function handled by the FS command. Very rarely used nowadays.
+      Deprecated in 2012.</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G91 - Set the 'Coordinate format' to 'Incremental notation' - Part of the historic
+      codes handled by the FS command.</p>
+</li>
+<li>
+<p><strong>Important</strong>: <em>Incremental notation itself is not supported and is not planned due
+    to lack of test assets and expected complications during implementation.</em></p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> G74 - Sets single quadrant mode - Rarely used, and then typically without effect.
+      Deprecated in 2020. (Spec. 8.1.10)</p>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> M00 - Program stop - This historic code has the same effect as M02. Very rarely,
+      if ever, used nowadays. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> M01 - Optional stop - This historic code has no effect. Very rarely, if ever, used
+      nowadays. Deprecated in 2012.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> IP - Sets the 'Image polarity' graphics state parameter - This command has no
+      effect in CAD to CAM workflows. Sometimes used, and then usually as %IPPOS*% to
+      confirm the default and then it then has no effect. Deprecated in 2013. (Spec.
+      8.1.4)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> AS - Sets the 'Axes correspondence' graphics state parameter - Deprecated in 2013.
+      Rarely used nowadays. (Spec. 8.1.2)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> IR - Sets 'Image rotation' graphics state parameter - Deprecated in 2013. Rarely
+      used nowadays. (Spec. 8.1.5)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> MI - Sets 'Image mirroring' graphics state parameter (Spec. 8.1.7)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> OF - Sets 'Image offset' graphics state parameter (Spec. 8.1.8)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> SF - Sets 'Scale factor' graphics state parameter (Spec. 8.1.9)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> IN - Sets the name of the file image. Has no effect. It is comment. Sometimes
+      used. Deprecated in 2013. (Spec. 8.1.3)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> LN - Loads a name. Has no effect. It is a comment. Sometimes used. Deprecated
+      in 2013. (Spec. 8.1.6)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Combining G01/G02/G03/G70/G71 and D01 in a single command. (Spec 8.3.1)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Combining G01/G02/G03/G70/G71 and D02 in a single command.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Combining G01/G02/G03/G70/G71 and D03 in a single command.</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Coordinate Data without Operation Code. (Spec 8.3.2)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Style Variations in Command Codes. (Spec 8.3.3)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Deprecated usage of SR. (Spec 8.3.4)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Deprecated Attribute Values. (Spec 8.4)</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Format Specification (FS) Options (Trailing Zero Omission, Incremental Notation).
+      (Spec. 8.2)</p>
+</li>
+<li>
+<p><strong>Important</strong>: <em>Incremental notation itself is not supported and is not planned due
+    to lack of test assets and expected complications during implementation.</em></p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Rectangular Hole in Standard Apertures (Spec. 8.2.2)</p>
+</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Draws and Arcs with Rectangular Apertures (Spec. 8.2.3)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Macro Primitive Code 2, Vector Line (Spec. 8.2.4)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Macro Primitive Code 22, Lower Left Line (Spec. 8.2.5)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Macro Primitive Code 6, Moiré (Spec. 8.2.6)</li>
+</ul>
+<h3 id="rasterized2dbackend">Rasterized2DBackend<a class="headerlink" href="#rasterized2dbackend" title="Anchor link to this section for reference">&para;</a></h3>
+<p>Supported Gerber X3 features:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Aperture definition with circle</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Aperture definition with rectangle</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Aperture definition with obround</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Aperture definition with polygon</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Aperture definition with macro</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Block aperture definition</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Draw flash with circle aperture</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Draw flash with rectangle aperture</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Draw flash with obround aperture</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Draw flash with polygon aperture</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Draw flash with macro aperture</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Draw flash with block aperture</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Draw line</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Draw clockwise arc</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Draw counterclockwise arc</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Global mirroring</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Global rotation</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Global scaling</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create region</li>
+</ul>
+<p>Supported <strong>DEPRECATED</strong> Gerber features:</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Image polarity</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Image rotation</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Image mirroring</li>
+</ul>
+<p><strong>IMPORTANT</strong> This feature list is incomplete, it will get longer over time ...</p>
+<h2 id="syntax-feature-requests">Syntax feature requests<a class="headerlink" href="#syntax-feature-requests" title="Anchor link to this section for reference">&para;</a></h2>
+<p>All deprecated features (Mainly those from X2 format) are considered optional and
+priority to implement them will be assigned based on number of requests form community.</p>
+<p>If You needs support for syntax features which are not mentioned in
+<code>The Gerber Layer Format Specification. Revision 2023.08</code> (Available on
+<a href="https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf">Ucamco's webpage</a>
+and in
+<a href="https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-08_en.pdf">this repository</a>)
+and this feature is not already listed in Support paragraph, please open a new Feature
+request issue.</p>
+<p><strong>Feature request Issue should contain:</strong></p>
+<ul>
+<li>detailed description how requested feature works,</li>
+<li>code samples for testing the feature,</li>
+<li>reference images (only applies to features changing image look).</li>
+</ul>
+<p><strong>Requests which don't comply with those guidelines will be considered low priority.</strong></p>
+<h2 id="development">Development<a class="headerlink" href="#development" title="Anchor link to this section for reference">&para;</a></h2>
+<p>To quickly set up development environment, first you have to install <code>poetry</code> globally:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>pip install poetry
+</span></code></pre></div>
+<p>Afterwards you will be able to create development virtual environment:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>poetry shell
+</span></code></pre></div>
+<p>Then You have to install dependencies into this environment:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>poetry install
+</span></code></pre></div>
+<p>And pre-commit hooks:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>poe install-hooks
+</span></code></pre></div>
+<p>Now you are good to go. Whenever you commit changes, pre-commit hooks will be invoked.
+If they fail or change files, you will have to re-add changes and commit again.</p>
+<h2 id="build-from-source">Build from source<a class="headerlink" href="#build-from-source" title="Anchor link to this section for reference">&para;</a></h2>
+<p>To build PyGerber from source You have to set up <a href="#development">Development</a> environment
+first. Make sure you have <code>poetry</code> environment activated with:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>poetry shell
+</span></code></pre></div>
+<p>With environment active it should be possible to build wheel and source distribution
+with:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>poetry build
+</span></code></pre></div>
+<p>Check <code>dist</code> directory within current working directory, <code>pygerber-x.y.z.tar.gz</code> and
+<code>pygerber-x.y.z-py3-none-any.whl</code> should be there.</p>
+<h2 id="gerber-reference-archive">Gerber reference archive<a class="headerlink" href="#gerber-reference-archive" title="Anchor link to this section for reference">&para;</a></h2>
+<p>This repository contains also archival reference files. Although new specs contain
+dedicated changelog section it may still be helpful in some rare cases to look through
+old Gerber specs. Archival files can be found
+<a href="https://github.com/Argmaster/pygerber/tree/main/docs/gerber_specification">here</a>.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.action.edit", "navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "toc.follow", "search.suggest", "search.highlight", "search.share", "content.code.copy"], "search": "assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+        <script src="js/extra.js"></script>
+      
+    
+  </body>
+</html>
