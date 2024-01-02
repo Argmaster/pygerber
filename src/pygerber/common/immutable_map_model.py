@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Generic, Mapping, Optional, TypeVar
+from typing import TYPE_CHECKING, Dict, Generic, Mapping, Optional, TypeVar
 
-from pydantic import Field, field_validator
+from pydantic import Field, FieldSerializationInfo, field_serializer, field_validator
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 
@@ -30,6 +30,15 @@ class ImmutableMapping(FrozenGeneralModel, Generic[KeyT, ValueT]):
         if isinstance(v, dict):
             return MappingProxyType(v)
         raise TypeError(type(v))
+
+    @field_serializer("mapping", return_type=Dict[KeyT, ValueT])
+    def _serialize_mapping(
+        self,
+        mapping: Mapping[KeyT, ValueT],
+        _info: FieldSerializationInfo,
+    ) -> Dict[KeyT, ValueT]:
+        """Serialize model instance."""
+        return dict(mapping)
 
     def update(self, __key: KeyT, __value: ValueT) -> Self:
         """Update underlying mapping."""
