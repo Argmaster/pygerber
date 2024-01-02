@@ -1,12 +1,17 @@
 """Module contains definition of class for buffering draw commands."""
 from __future__ import annotations
 
-from typing import Iterator, Optional
+from typing import TYPE_CHECKING, Iterator, List, Optional
 
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.parser2.commands2.command2 import Command2
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class CommandBuffer2:
@@ -14,6 +19,11 @@ class CommandBuffer2:
 
     def __init__(self, commands: Optional[list[Command2]] = None) -> None:
         self.commands: list[Command2] = [] if commands is None else commands
+
+    @classmethod
+    def factory(cls, context: Parser2Context) -> Self:  # noqa: ARG003
+        """CommandBuffer2 factory."""
+        return cls(commands=[])
 
     def add_command(self, __command: Command2) -> None:
         """Add draw command to command buffer."""
@@ -35,4 +45,4 @@ class CommandBuffer2:
 class ReadonlyCommandBuffer2(FrozenGeneralModel):
     """Read only command buffer proxy."""
 
-    commands: list[Command2] = Field(default_factory=list)
+    commands: List[Command2] = Field(default_factory=list)

@@ -27,16 +27,6 @@ from pygerber.gerberx3.parser2.errors2 import (
 )
 from pygerber.gerberx3.parser2.ihooks import IHooks
 from pygerber.gerberx3.state_enums import DrawMode, ImagePolarityEnum, Unit
-from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import (
-    DefineCircle,
-    DefineMacro,
-    DefineObround,
-    DefinePolygon,
-    DefineRectangle,
-)
-from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
-from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
-from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
@@ -47,6 +37,16 @@ if TYPE_CHECKING:
         BlockApertureBegin,
         BlockApertureEnd,
     )
+    from pygerber.gerberx3.tokenizer.tokens.ad_define_aperture import (
+        DefineCircle,
+        DefineMacro,
+        DefineObround,
+        DefinePolygon,
+        DefineRectangle,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
+    from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
+    from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
     from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import DNNSelectAperture
     from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
         CoordinateFormat,
