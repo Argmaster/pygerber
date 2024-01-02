@@ -71,6 +71,10 @@ class UnnamedBlockApertureNotAllowedError(Parser2Error):
     """Raised when aperture block with no ID is encountered."""
 
 
+class RegionNotInitializedError(Parser2Error):
+    """Raised when region is modified without being accessed without initialization."""
+
+
 class ApertureNotDefined2Error(Parser2Error):
     """Raised when undefined aperture is selected."""
 

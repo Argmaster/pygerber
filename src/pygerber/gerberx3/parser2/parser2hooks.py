@@ -19,6 +19,7 @@ from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2, CCArc2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
 from pygerber.gerberx3.parser2.commands2.line2 import Line2
+from pygerber.gerberx3.parser2.commands2.region2 import Region2
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotSelected2Error,
     IncrementalCoordinatesNotSupported2Error,
@@ -700,6 +701,8 @@ class Parser2Hooks(IHooks):
                 The context object containing information about the parser state.
             """
             context.set_is_region(is_region=True)
+            context.set_region_command_buffer()
+
             return super().on_parser_visit_token(token, context)
 
     class EndRegionTokenHooks(IHooks.EndRegionTokenHooks):
@@ -722,6 +725,17 @@ class Parser2Hooks(IHooks):
                 The context object containing information about the parser state.
             """
             context.set_is_region(is_region=False)
+            command_buffer = context.get_region_command_buffer()
+
+            context.add_command(
+                Region2(
+                    attributes=ImmutableMapping(),
+                    polarity=context.get_polarity(),
+                    command_buffer=command_buffer.get_readonly(),
+                ),
+            )
+
+            context.unset_region_command_buffer()
             return super().on_parser_visit_token(token, context)
 
     class PrepareSelectApertureTokenHooks(IHooks.PrepareSelectApertureTokenHooks):
