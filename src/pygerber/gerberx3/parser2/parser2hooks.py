@@ -10,6 +10,7 @@ from pygerber.common.error import throw
 from pygerber.common.immutable_map_model import ImmutableMapping
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
+from pygerber.gerberx3.parser2.apertures2.block2 import Block2
 from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2
 from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
@@ -21,6 +22,7 @@ from pygerber.gerberx3.parser2.commands2.line2 import Line2
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotSelected2Error,
     IncrementalCoordinatesNotSupported2Error,
+    UnnamedBlockApertureNotAllowedError,
 )
 from pygerber.gerberx3.parser2.ihooks import IHooks
 from pygerber.gerberx3.state_enums import DrawMode, ImagePolarityEnum, Unit
@@ -116,6 +118,7 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            context.push_block_command_buffer()
             context.set_is_aperture_block(is_aperture_block=True)
             context.set_aperture_block_id(token.identifier)
             return super().on_parser_visit_token(token, context)
@@ -139,6 +142,19 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            command_buffer = context.pop_block_command_buffer()
+            identifier = context.get_aperture_block_id()
+            if identifier is None:
+                raise UnnamedBlockApertureNotAllowedError(token)
+
+            context.set_aperture(
+                identifier,
+                Block2(
+                    attributes=ImmutableMapping(),
+                    command_buffer=command_buffer.get_readonly(),
+                ),
+            )
+
             context.set_is_aperture_block(is_aperture_block=False)
             context.set_aperture_block_id(None)
             return super().on_parser_visit_token(token, context)
@@ -826,8 +842,8 @@ class Parser2Hooks(IHooks):
 
         def on_parser_visit_token(
             self,
-            token: SetIncrementalNotation,
-            context: Parser2Context,
+            token: SetIncrementalNotation,  # noqa: ARG002
+            context: Parser2Context,  # noqa: ARG002
         ) -> None:
             """Called when parser visits a token.
 
@@ -841,7 +857,6 @@ class Parser2Hooks(IHooks):
                 The context object containing information about the parser state.
             """
             raise IncrementalCoordinatesNotSupported2Error
-            return super().on_parser_visit_token(token, context)
 
     class ImageNameTokenHooks(IHooks.ImageNameTokenHooks):
         """Hooks for visiting image name token (IN)."""
@@ -1007,7 +1022,7 @@ class Parser2Hooks(IHooks):
 
         def on_parser_visit_token(
             self,
-            token: M00ProgramStop,
+            token: M00ProgramStop,  # noqa: ARG002
             context: Parser2Context,
         ) -> None:
             """Called when parser visits a token.
@@ -1022,7 +1037,6 @@ class Parser2Hooks(IHooks):
                 The context object containing information about the parser state.
             """
             context.halt_parser()
-            return super().on_parser_visit_token(token, context)
 
     class OptionalStopTokenHooks(IHooks.OptionalStopTokenHooks):
         """Hooks for visiting optional stop token (M01)."""
@@ -1032,7 +1046,7 @@ class Parser2Hooks(IHooks):
 
         def on_parser_visit_token(
             self,
-            token: M02EndOfFile,
+            token: M02EndOfFile,  # noqa: ARG002
             context: Parser2Context,
         ) -> None:
             """Called when parser visits a token.
@@ -1047,7 +1061,6 @@ class Parser2Hooks(IHooks):
                 The context object containing information about the parser state.
             """
             context.halt_parser()
-            return super().on_parser_visit_token(token, context)
 
     class UnitModeTokenHooks(IHooks.UnitModeTokenHooks):
         """Hooks for visiting unit mode token (MO)."""

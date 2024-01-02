@@ -9,6 +9,7 @@ from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
 from pygerber.gerberx3.parser2.errors2 import (
     ExitParsingProcess2Interrupt,
+    ReferencedNotInitializedBlockBufferError,
     SkipTokenInterrupt,
 )
 from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
@@ -47,15 +48,31 @@ class Parser2Context:
             if self.options.initial_region_command_buffer is None
             else self.options.initial_region_command_buffer
         )
-        self.block_command_buffer: CommandBuffer2 = (
-            CommandBuffer2()
-            if self.options.initial_block_command_buffer is None
-            else self.options.initial_block_command_buffer
-        )
+        self.block_command_buffer_stack: list[CommandBuffer2] = []
         self.hooks: IHooks = (
             Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )
         self.current_token: Optional[Token] = None
+
+    def push_block_command_buffer(self) -> None:
+        """Add new command buffer for block aperture draw commands."""
+        self.block_command_buffer_stack.append(
+            CommandBuffer2()
+            if self.options.initial_block_command_buffer is None
+            else self.options.initial_block_command_buffer.copy(),
+        )
+
+    def pop_block_command_buffer(self) -> CommandBuffer2:
+        """Return latest block aperture command buffer and delete it from the stack."""
+        if len(self.block_command_buffer_stack) == 0:
+            raise ReferencedNotInitializedBlockBufferError(self.current_token)
+        return self.block_command_buffer_stack.pop()
+
+    def first_block_command_buffer(self) -> CommandBuffer2:
+        """Return first (topmost) block aperture command buffer."""
+        if len(self.block_command_buffer_stack) == 0:
+            raise ReferencedNotInitializedBlockBufferError(self.current_token)
+        return self.block_command_buffer_stack[-1]
 
     def skip_token(self) -> NoReturn:
         """Skip this token."""
@@ -86,7 +103,7 @@ class Parser2Context:
         if self.get_is_region():
             self.region_command_buffer.add_command(__command)
         if self.get_is_aperture_block():
-            self.block_command_buffer.add_command(__command)
+            self.first_block_command_buffer().add_command(__command)
         self.main_command_buffer.add_command(__command)
 
     def get_state(self) -> State2:

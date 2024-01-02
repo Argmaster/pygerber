@@ -61,6 +61,16 @@ class UnitNotSet2Error(Parser2Error):
     """
 
 
+class ReferencedNotInitializedBlockBufferError(Parser2Error):
+    """Raised when Gerber file references block buffer which has not been
+    initialized, ie. when block aperture was not correctly started.
+    """
+
+
+class UnnamedBlockApertureNotAllowedError(Parser2Error):
+    """Raised when aperture block with no ID is encountered."""
+
+
 class ApertureNotDefined2Error(Parser2Error):
     """Raised when undefined aperture is selected."""
 
