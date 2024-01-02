@@ -23,6 +23,7 @@ from pygerber.gerberx3.parser2.commands2.region2 import Region2
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotSelected2Error,
     IncrementalCoordinatesNotSupported2Error,
+    NestedRegionNotAllowedError,
     UnnamedBlockApertureNotAllowedError,
 )
 from pygerber.gerberx3.parser2.ihooks import IHooks
@@ -30,6 +31,7 @@ from pygerber.gerberx3.state_enums import DrawMode, ImagePolarityEnum, Unit
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
+from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.parser2.context2 import Parser2Context
@@ -100,6 +102,24 @@ class Parser2Hooks(IHooks):
     class MacroDefinitionTokenHooks(IHooks.MacroDefinitionTokenHooks):
         """Hooks for visiting macro definition token (AM)."""
 
+        def on_parser_visit_token(
+            self,
+            token: MacroDefinition,
+            context: Parser2Context,
+        ) -> None:
+            """Called when parser visits a token.
+
+            This hook should perform all changes on context implicated by token type.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+            """
+            return super().on_parser_visit_token(token, context)
+
     class BeginBlockApertureTokenHooks(IHooks.BeginBlockApertureTokenHooks):
         """Hooks for visiting begin block aperture token (AB)."""
 
@@ -119,6 +139,9 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            if context.get_is_aperture_block():
+                raise NestedRegionNotAllowedError(token)
+
             context.push_block_command_buffer()
             context.set_is_aperture_block(is_aperture_block=True)
             context.set_aperture_block_id(token.identifier)
@@ -151,7 +174,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 identifier,
                 Block2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     command_buffer=command_buffer.get_readonly(),
                 ),
             )
@@ -188,7 +211,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Circle2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     diameter=Offset.new(token.diameter, context.get_draw_units()),
                     hole_diameter=hole_diameter,
                 ),
@@ -223,7 +246,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Rectangle2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     x_size=Offset.new(token.x_size, context.get_draw_units()),
                     y_size=Offset.new(token.y_size, context.get_draw_units()),
                     hole_diameter=hole_diameter,
@@ -259,7 +282,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Obround2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     x_size=Offset.new(token.x_size, context.get_draw_units()),
                     y_size=Offset.new(token.y_size, context.get_draw_units()),
                     hole_diameter=hole_diameter,
@@ -296,7 +319,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Polygon2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     outer_diameter=Offset.new(
                         token.outer_diameter,
                         context.get_draw_units(),
@@ -330,7 +353,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Macro2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                 ),
             )
             return super().on_parser_visit_token(token, context)
@@ -386,7 +409,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 Line2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     polarity=context.get_polarity(),
                     aperture_id=(
                         context.get_current_aperture_id()
@@ -429,7 +452,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 Arc2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     polarity=context.get_polarity(),
                     aperture_id=(
                         context.get_current_aperture_id()
@@ -473,7 +496,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 CCArc2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     polarity=context.get_polarity(),
                     aperture_id=(
                         context.get_current_aperture_id()
@@ -552,7 +575,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 Flash2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     polarity=context.get_polarity(),
                     aperture_id=(
                         context.get_current_aperture_id()
@@ -729,7 +752,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 Region2(
-                    attributes=ImmutableMapping(),
+                    attributes=ImmutableMapping[str, str](),
                     polarity=context.get_polarity(),
                     command_buffer=command_buffer.get_readonly(),
                 ),
