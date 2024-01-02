@@ -16,10 +16,31 @@ if TYPE_CHECKING:
     from test.conftest import AssetLoader
 
 
+def debug_dump_context(ctx: Parser2Context, dest_dir: Path) -> None:
+    """Dump parser context to JSON file."""
+    dest_dir.mkdir(exist_ok=True, parents=True)
+    (dest_dir / "state.json").write_text(
+        ctx.state.model_dump_json(indent=4),
+        encoding="utf-8",
+    )
+    (dest_dir / "main_command_buffer.json").write_text(
+        ctx.main_command_buffer.get_readonly().model_dump_json(indent=4),
+        encoding="utf-8",
+    )
+    (dest_dir / "region_command_buffer.json").write_text(
+        (
+            ctx.region_command_buffer.get_readonly().model_dump_json(indent=4)
+            if ctx.region_command_buffer
+            else "null"
+        ),
+        encoding="utf-8",
+    )
+
+
 def parse2(
     asset_loader: AssetLoader,
     src: str,
-    dest: Path,  # noqa: ARG001
+    dest: Path,
     *,
     expression: bool = False,
 ) -> None:
@@ -32,6 +53,8 @@ def parse2(
 
     parser = Parser2()
     parser.parse(stack)
+
+    debug_dump_context(parser.context, dest)
 
 
 def make_parser2_test(
