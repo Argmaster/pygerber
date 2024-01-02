@@ -1,0 +1,47 @@
+.doc-class-name::before {
+    content: "class";
+    padding: 0.3em 0.5em;
+    background-color: #d1b6191a;
+    color: #d1b619;
+    border-radius: 0.3rem;
+    font-size: 0.7rem;
+    margin: 0.3rem;
+    margin-bottom: 0.9rem;
+    vertical-align: 0.2rem;
+}
+.doc-function-name::before {
+    content: "function";
+    padding: 0.3em 0.5em;
+    background-color: #00dfa21a;
+    color: #00dfa2;
+    border-radius: 0.3rem;
+    font-size: 0.7rem;
+    margin: 0.3rem;
+    margin-bottom: 0.9rem;
+    vertical-align: 0.2rem;
+}
+.doc-attribute-name::before {
+    content: "attribute";
+    padding: 0.3em 0.5em;
+    background-color: #0079ff1a;
+    color: #0079ff;
+    border-radius: 0.3rem;
+    font-size: 0.7rem;
+    margin: 0.3rem;
+    margin-bottom: 0.9rem;
+    vertical-align: 0.2rem;
+}
+.doc-module-name::before {
+    content: "module";
+    padding: 0.3em 0.5em;
+    background-color: #ff00601a;
+    color: #ff0060;
+    border-radius: 0.3rem;
+    font-size: 0.7rem;
+    margin: 0.3rem;
+    margin-bottom: 0.9rem;
+    vertical-align: 0.2rem;
+}
+.doc-contents {
+    margin-left: 1rem;
+}
