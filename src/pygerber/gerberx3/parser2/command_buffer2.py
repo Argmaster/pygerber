@@ -46,3 +46,7 @@ class ReadonlyCommandBuffer2(FrozenGeneralModel):
     """Read only command buffer proxy."""
 
     commands: List[Command2] = Field(default_factory=list)
+
+    def __iter__(self) -> Iterator[Command2]:  # type: ignore[override]
+        """Iterate over buffered draw commands."""
+        yield from self.commands
