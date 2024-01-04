@@ -21,6 +21,7 @@ from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotDefined2Error,
     NestedRegionNotAllowedError,
+    NoValidArcCenterFoundError,
     ReferencedNotInitializedBlockBufferError,
     UnnamedBlockApertureNotAllowedError,
 )
@@ -290,11 +291,12 @@ def test_command_draw_line_token_hooks() -> None:
     )
 
 
-def test_command_draw_arc_token_hooks() -> None:
+def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
     gerber_source = """
     X156019500Y-66357500I466639J-1274902D01*
     """
     unit = Unit.Millimeters
+    is_multi_quadrant = True
     draw_mode = DrawMode.ClockwiseCircular
     coordinate_parser = CoordinateParser.new(
         x_format=AxisFormat(integer=4, decimal=6),
@@ -309,6 +311,7 @@ def test_command_draw_arc_token_hooks() -> None:
 
     context = Parser2Context()
     context.set_draw_units(unit)
+    context.set_is_multi_quadrant(is_multi_quadrant)
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
@@ -329,6 +332,141 @@ def test_command_draw_arc_token_hooks() -> None:
         end_point=end_point,
     )
     assert context.get_current_position() == end_point
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_command_draw_line_token_hooks.__qualname__,
+    )
+
+
+def test_command_draw_arc_token_hooks_single_quadrant() -> None:
+    gerber_source = """
+    X060000Y000000I000000J060000D01*
+    """
+    unit = Unit.Millimeters
+    is_multi_quadrant = False
+    draw_mode = DrawMode.ClockwiseCircular
+    coordinate_parser = CoordinateParser.new(
+        x_format=AxisFormat(integer=2, decimal=4),
+        y_format=AxisFormat(integer=2, decimal=4),
+    )
+    polarity = Polarity.Dark
+    current_aperture = ApertureID("D11")
+    aperture_mock = MagicMock()
+    start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
+    center_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
+    end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
+    expected_angle = 90.0
+
+    context = Parser2Context()
+    context.set_draw_units(unit)
+    context.set_is_multi_quadrant(is_multi_quadrant)
+    context.set_draw_mode(draw_mode)
+    context.set_coordinate_parser(coordinate_parser)
+    context.set_polarity(polarity)
+    context.set_current_aperture_id(current_aperture)
+    context.set_current_position(start_point)
+    context.set_aperture(current_aperture, aperture_mock)
+
+    parse_code(gerber_source, context)
+    cmd = context.main_command_buffer.get_readonly()
+
+    assert len(cmd) == 1
+    assert next(iter(cmd)) == Arc2(
+        attributes=ImmutableMapping[str, str](),
+        polarity=polarity,
+        aperture_id=current_aperture,
+        start_point=start_point,
+        center_point=center_point,
+        end_point=end_point,
+    )
+    assert context.get_current_position() == end_point
+    assert start_point.angle_between(end_point) == expected_angle
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_command_draw_line_token_hooks.__qualname__,
+    )
+
+
+def test_command_draw_arc_token_hooks_single_quadrant_135_degrees() -> None:
+    gerber_source = """
+    X042426Y-042426I000000J060000D01*
+    """
+    unit = Unit.Millimeters
+    is_multi_quadrant = False
+    draw_mode = DrawMode.ClockwiseCircular
+    coordinate_parser = CoordinateParser.new(
+        x_format=AxisFormat(integer=2, decimal=4),
+        y_format=AxisFormat(integer=2, decimal=4),
+    )
+    polarity = Polarity.Dark
+    current_aperture = ApertureID("D11")
+    aperture_mock = MagicMock()
+    start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
+
+    context = Parser2Context()
+    context.set_draw_units(unit)
+    context.set_is_multi_quadrant(is_multi_quadrant)
+    context.set_draw_mode(draw_mode)
+    context.set_coordinate_parser(coordinate_parser)
+    context.set_polarity(polarity)
+    context.set_current_aperture_id(current_aperture)
+    context.set_current_position(start_point)
+    context.set_aperture(current_aperture, aperture_mock)
+
+    with pytest.raises(NoValidArcCenterFoundError):
+        parse_code(gerber_source, context)
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_command_draw_line_token_hooks.__qualname__,
+    )
+
+
+def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
+    gerber_source = """
+    X042426Y042426I000000J060000D01*
+    """
+    unit = Unit.Millimeters
+    is_multi_quadrant = False
+    draw_mode = DrawMode.ClockwiseCircular
+    coordinate_parser = CoordinateParser.new(
+        x_format=AxisFormat(integer=2, decimal=4),
+        y_format=AxisFormat(integer=2, decimal=4),
+    )
+    polarity = Polarity.Dark
+    current_aperture = ApertureID("D11")
+    aperture_mock = MagicMock()
+    start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
+    center_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
+    end_point = Vector2D(x=Offset.new("4.2426"), y=Offset.new("4.2426"))
+    expected_angle = 45.0
+
+    context = Parser2Context()
+    context.set_draw_units(unit)
+    context.set_is_multi_quadrant(is_multi_quadrant)
+    context.set_draw_mode(draw_mode)
+    context.set_coordinate_parser(coordinate_parser)
+    context.set_polarity(polarity)
+    context.set_current_aperture_id(current_aperture)
+    context.set_current_position(start_point)
+    context.set_aperture(current_aperture, aperture_mock)
+
+    parse_code(gerber_source, context)
+    cmd = context.main_command_buffer.get_readonly()
+
+    assert len(cmd) == 1
+    assert next(iter(cmd)) == Arc2(
+        attributes=ImmutableMapping[str, str](),
+        polarity=polarity,
+        aperture_id=current_aperture,
+        start_point=start_point,
+        center_point=center_point,
+        end_point=end_point,
+    )
+    assert context.get_current_position() == end_point
+    assert start_point.angle_between(end_point) == expected_angle
 
     debug_dump_context(
         context,

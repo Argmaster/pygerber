@@ -152,6 +152,13 @@ class Vector2D(FrozenGeneralModel):
 
         Value returned is always between 0 and 360 (can be 0, never 360).
         """
+        return 360 - self.angle_between_cc(other)
+
+    def angle_between_cc(self, other: Vector2D) -> float:
+        """Calculate counter clockwise angle between two vectors in degrees.
+
+        Value returned is always between 0 and 360 (can be 0, never 360).
+        """
         v0 = self / self.length()
         v1 = other / other.length()
         angle_radians = math.atan2(
@@ -160,13 +167,6 @@ class Vector2D(FrozenGeneralModel):
         )
         angle_degrees = math.degrees(angle_radians)
         return angle_degrees + (360 * (angle_degrees < 0))
-
-    def angle_between_cc(self, other: Vector2D) -> float:
-        """Calculate counter clockwise angle between two vectors in degrees.
-
-        Value returned is always between 0 and 360 (can be 0, never 360).
-        """
-        return 360 - self.angle_between(other)
 
     def dot(self, other: Vector2D) -> Offset:
         """Calculate dot product of two vectors."""

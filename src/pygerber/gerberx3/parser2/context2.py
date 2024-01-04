@@ -262,7 +262,7 @@ class Parser2Context:
 
     def get_is_multi_quadrant(self) -> bool:
         """Get is_aperture_block property value."""
-        return self.get_is_multi_quadrant()
+        return self.get_state().get_is_multi_quadrant()
 
     def set_is_multi_quadrant(self, is_multi_quadrant: bool) -> None:  # noqa: FBT001
         """Set the is_aperture_block property value."""

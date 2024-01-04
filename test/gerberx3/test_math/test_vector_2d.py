@@ -130,7 +130,7 @@ def test_vector2d_angle_between_clockwise(
 
 @pytest.mark.parametrize(
     ("vector0", "vector1", "expect_degrees"),
-    ANGLE_BETWEEN_CASES,
+    [(v1, v0, ((360 - d) if d > 0 else d)) for v0, v1, d in ANGLE_BETWEEN_CASES],
 )
 def test_vector2d_angle_between(
     vector0: Vector2D,
@@ -138,7 +138,39 @@ def test_vector2d_angle_between(
     expect_degrees: float,
 ) -> None:
     assert math.isclose(
-        vector0.angle_between(vector1),
+        vector0.angle_between_cc(vector1),
+        expect_degrees,
+        rel_tol=1e-6,
+    )
+
+
+@pytest.mark.parametrize(
+    ("vector0", "vector1", "expect_degrees"),
+    ANGLE_BETWEEN_CASES,
+)
+def test_vector2d_angle_between_flipped(
+    vector0: Vector2D,
+    vector1: Vector2D,
+    expect_degrees: float,
+) -> None:
+    assert math.isclose(
+        vector0.angle_between_cc(vector1),
+        expect_degrees,
+        rel_tol=1e-6,
+    )
+
+
+@pytest.mark.parametrize(
+    ("vector0", "vector1", "expect_degrees"),
+    ANGLE_BETWEEN_CASES,
+)
+def test_vector2d_angle_between_cc(
+    vector0: Vector2D,
+    vector1: Vector2D,
+    expect_degrees: float,
+) -> None:
+    assert math.isclose(
+        vector0.angle_between_cc(vector1),
         expect_degrees,
         rel_tol=1e-6,
     )
@@ -148,13 +180,13 @@ def test_vector2d_angle_between(
     ("vector0", "vector1", "expect_degrees"),
     [(v1, v0, ((360 - d) if d > 0 else d)) for v0, v1, d in ANGLE_BETWEEN_CASES],
 )
-def test_vector2d_angle_between_flipped(
+def test_vector2d_angle_between_cc_flipped(
     vector0: Vector2D,
     vector1: Vector2D,
     expect_degrees: float,
 ) -> None:
     assert math.isclose(
-        vector0.angle_between(vector1),
+        vector0.angle_between_cc(vector1),
         expect_degrees,
         rel_tol=1e-6,
     )

@@ -99,7 +99,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.tf_file_attribute import FileAttribute
 
 
-MAX_SINGLE_QUADRANT_ANGLE = 90
+MAX_SINGLE_QUADRANT_ANGLE = 91.0
 
 
 class Parser2Hooks(IHooks):
@@ -493,7 +493,7 @@ class Parser2Hooks(IHooks):
                     if not math.isclose(
                         relative_start_point.length().value,
                         relative_end_point.length().value,
-                        rel_tol=1e-6,
+                        rel_tol=1e-3,
                     ):
                         continue
 
