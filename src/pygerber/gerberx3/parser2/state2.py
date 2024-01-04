@@ -8,7 +8,7 @@ references to them are copied.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field
 
@@ -21,7 +21,13 @@ from pygerber.gerberx3.parser2.errors2 import (
     CoordinateFormatNotSet2Error,
     UnitNotSet2Error,
 )
-from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
+from pygerber.gerberx3.state_enums import (
+    AxisCorrespondence,
+    DrawMode,
+    Mirroring,
+    Polarity,
+    Unit,
+)
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
@@ -70,6 +76,11 @@ class State2Constants(FrozenGeneralModel):
 
     file_name: Optional[str] = Field(default=None)
     """The name of the file. (Spec reference: 8.1.6)"""
+
+    axis_correspondence: AxisCorrespondence = Field(default=AxisCorrespondence.AXBY)
+    """Correspondence between the X, Y data axes and the A, B output device axes.
+    It does not affect the image in computer to computer data exchange. It only
+    has an effect how the image is positioned on an output device."""
 
     def get_draw_units(self) -> Unit:
         """Get the draw units.
@@ -213,6 +224,18 @@ class State2Constants(FrozenGeneralModel):
             },
         )
 
+    def get_axis_correspondence(self) -> AxisCorrespondence:
+        """Get token axis correspondence property value."""
+        return self.axis_correspondence
+
+    def set_axis_correspondence(self, axis_correspondence: AxisCorrespondence) -> Self:
+        """Set token axis correspondence property value."""
+        return self.model_copy(
+            update={
+                "axis_correspondence": axis_correspondence,
+            },
+        )
+
 
 class State2ApertureIndex(ImmutableMapping[ApertureID, Aperture2]):
     """Index of all apertures defined in Gerber AST until currently parsed token."""
@@ -224,6 +247,21 @@ class State2ApertureIndex(ImmutableMapping[ApertureID, Aperture2]):
 
     def get_aperture(self, __id: ApertureID) -> Aperture2:
         """Get existing aperture from index. When aperture is missing KeyError is
+        raised.
+        """
+        return self.mapping[__id]
+
+
+class State2MacroIndex(ImmutableMapping[str, Any]):
+    """Index of all macros defined in Gerber AST until currently parsed token."""
+
+    def set_macro(self, __id: str, __macro: Any) -> Self:
+        """Add new macro to macros index."""
+        # TODO(argmaster): Add warning handling.  # noqa: TD003
+        return self.update(__id, __macro)
+
+    def get_macro(self, __id: str) -> Any:
+        """Get existing macro from index. When macro is missing KeyError is
         raised.
         """
         return self.mapping[__id]
@@ -536,6 +574,16 @@ class State2(FrozenGeneralModel):
         """Set the file_name property value."""
         return self.set_constants(self.get_constants().set_file_name(file_name))
 
+    def get_axis_correspondence(self) -> AxisCorrespondence:
+        """Get token axis correspondence property value."""
+        return self.get_constants().get_axis_correspondence()
+
+    def set_axis_correspondence(self, axis_correspondence: AxisCorrespondence) -> Self:
+        """Set token axis correspondence property value."""
+        return self.set_constants(
+            self.get_constants().set_axis_correspondence(axis_correspondence),
+        )
+
     flags: State2DrawFlags = Field(default_factory=State2DrawFlags)
     """Collection of more often changing Gerber state flags."""
 
@@ -693,6 +741,33 @@ class State2(FrozenGeneralModel):
     apertures: State2ApertureIndex = Field(default_factory=State2ApertureIndex)
     """Collection of all apertures defined until given point in code."""
 
+    def get_aperture(self, __key: ApertureID) -> Aperture2:
+        """Get apertures property value."""
+        return self.apertures.get_aperture(__key)
+
+    def set_aperture(self, __key: ApertureID, __value: Aperture2) -> Self:
+        """Set the apertures property value."""
+        return self.model_copy(
+            update={
+                "apertures": self.apertures.set_aperture(__key, __value),
+            },
+        )
+
+    macros: State2MacroIndex = Field(default_factory=State2MacroIndex)
+    """Collection of all macros defined until given point in code."""
+
+    def get_macro(self, __key: str) -> Any:
+        """Get macros property value."""
+        return self.macros.get_macro(__key)
+
+    def set_macro(self, __key: str, __value: Any) -> Self:
+        """Set the macros property value."""
+        return self.model_copy(
+            update={
+                "macros": self.macros.set_macro(__key, __value),
+            },
+        )
+
     def parse_coordinate(self, coordinate: Coordinate) -> Offset:
         """Parse a coordinate and convert it to an Offset.
 
@@ -725,16 +800,4 @@ class State2(FrozenGeneralModel):
         return Offset.new(
             self.get_coordinate_parser().parse(coordinate),
             unit=self.get_draw_units(),
-        )
-
-    def get_aperture(self, __key: ApertureID) -> Aperture2 | None:
-        """Get apertures property value."""
-        return self.apertures.get(__key)
-
-    def set_aperture(self, __key: ApertureID, __value: Aperture2) -> Self:
-        """Set the apertures property value."""
-        return self.model_copy(
-            update={
-                "apertures": self.apertures.set_aperture(__key, __value),
-            },
         )

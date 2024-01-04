@@ -85,6 +85,16 @@ class ApertureNotDefined2Error(Parser2Error):
     """Raised when undefined aperture is selected."""
 
 
+class MacroNotDefinedError(Parser2Error):
+    """Raised when undefined macro is referenced."""
+
+
+class NoValidArcCenterFoundError(Parser2Error):
+    """Raised when no valid arc center point can not be deduced from IJ offset in
+    single quadrant mode (G74).
+    """
+
+
 class CoordinateFormatNotSet2Error(Parser2Error):
     """Raised when coordinate parser is requested before coordinate format was set."""
 

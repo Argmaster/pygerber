@@ -1,6 +1,7 @@
 """Module contains definition of class for buffering draw commands."""
 from __future__ import annotations
 
+import textwrap
 from typing import TYPE_CHECKING, Iterator, List, Optional
 
 from pydantic import Field
@@ -47,6 +48,15 @@ class ReadonlyCommandBuffer2(FrozenGeneralModel):
 
     commands: List[Command2] = Field(default_factory=list)
 
+    def __len__(self) -> int:
+        """Return length of buffered commands."""
+        return len(self.commands)
+
     def __iter__(self) -> Iterator[Command2]:  # type: ignore[override]
         """Iterate over buffered draw commands."""
         yield from self.commands
+
+    def debug_buffer_to_json(self, indent: int = 4) -> str:
+        """Convert buffered draw commands to JSON."""
+        command_chain = ",\n".join(c.command_to_json() for c in self)
+        return f"[\n{textwrap.indent(command_chain, ' ' * indent)}\n]"

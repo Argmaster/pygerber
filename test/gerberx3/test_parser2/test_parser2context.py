@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from test.gerberx3.test_parser2.common import parse_code
+from unittest.mock import MagicMock
 
 from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
@@ -10,7 +11,8 @@ def test_ensure_mutable_context() -> None:
     gerber_source = "D10*"
 
     initial_context = Parser2Context()
-    initial_context.set_current_aperture_id(ApertureID("D11"))
+    initial_context.set_aperture(ApertureID("D10"), MagicMock())
+    initial_context.set_current_aperture_id(ApertureID("D10"))
 
     context = parse_code(gerber_source, initial_context)
 
@@ -21,7 +23,8 @@ def test_ensure_immutable_state() -> None:
     gerber_source = "D10*"
 
     initial_context = Parser2Context()
-    initial_context.set_current_aperture_id(ApertureID("D11"))
+    initial_context.set_aperture(ApertureID("D10"), MagicMock())
+    initial_context.set_current_aperture_id(ApertureID("D10"))
 
     initial_state = initial_context.get_state()
 

@@ -1,6 +1,8 @@
 """Parser level abstraction of draw operation for Gerber AST parser, version 2."""
 from __future__ import annotations
 
+import json
+
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
@@ -12,12 +14,21 @@ from pygerber.gerberx3.state_enums import Polarity
 class Command2(FrozenGeneralModel):
     """Parser level abstraction of draw operation for Gerber AST parser, version 2."""
 
-    attributes: ImmutableMapping = Field(default_factory=ImmutableMapping)
+    attributes: ImmutableMapping[str, str] = Field(default_factory=ImmutableMapping)
     polarity: Polarity
 
     def get_bounding_box(self) -> BoundingBox:
         """Get bounding box of draw operation."""
         raise NotImplementedError
+
+    def command_to_json(self) -> str:
+        """Dump draw operation."""
+        return json.dumps(
+            {
+                "cls": f"{self.__module__}.{self.__class__.__qualname__}",
+                "dict": json.loads(self.model_dump_json()),
+            },
+        )
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}()"

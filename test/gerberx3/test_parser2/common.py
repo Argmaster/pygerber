@@ -24,17 +24,22 @@ def debug_dump_context(ctx: Parser2Context, dest_dir: Path) -> None:
         encoding="utf-8",
     )
     (dest_dir / "main_command_buffer.json").write_text(
-        ctx.main_command_buffer.get_readonly().model_dump_json(indent=4),
+        ctx.main_command_buffer.get_readonly().debug_buffer_to_json(),
         encoding="utf-8",
     )
     (dest_dir / "region_command_buffer.json").write_text(
         (
-            ctx.region_command_buffer.get_readonly().model_dump_json(indent=4)
+            ctx.region_command_buffer.get_readonly().debug_buffer_to_json()
             if ctx.region_command_buffer
             else "null"
         ),
         encoding="utf-8",
     )
+    for i, buffer in enumerate(ctx.block_command_buffer_stack):
+        (dest_dir / f"block_command_buffer_{i}.json").write_text(
+            buffer.get_readonly().debug_buffer_to_json(),
+            encoding="utf-8",
+        )
 
 
 def parse2(

@@ -2,6 +2,7 @@
 # ruff: noqa: D401
 from __future__ import annotations
 
+import math
 from decimal import Decimal
 from types import MappingProxyType
 from typing import TYPE_CHECKING
@@ -24,6 +25,7 @@ from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotSelected2Error,
     IncrementalCoordinatesNotSupported2Error,
     NestedRegionNotAllowedError,
+    NoValidArcCenterFoundError,
     UnnamedBlockApertureNotAllowedError,
 )
 from pygerber.gerberx3.parser2.ihooks import IHooks
@@ -46,6 +48,7 @@ if TYPE_CHECKING:
         DefinePolygon,
         DefineRectangle,
     )
+    from pygerber.gerberx3.tokenizer.tokens.as_axis_select import AxisSelect
     from pygerber.gerberx3.tokenizer.tokens.d01_draw import D01Draw
     from pygerber.gerberx3.tokenizer.tokens.d02_move import D02Move
     from pygerber.gerberx3.tokenizer.tokens.d03_flash import D03Flash
@@ -96,6 +99,9 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.tf_file_attribute import FileAttribute
 
 
+MAX_SINGLE_QUADRANT_ANGLE = 90
+
+
 class Parser2Hooks(IHooks):
     """Implementation of hooks for Gerber AST Parser, version 2."""
 
@@ -118,6 +124,7 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            context.set_macro(token.macro_name, "Sentinel")
             return super().on_parser_visit_token(token, context)
 
     class BeginBlockApertureTokenHooks(IHooks.BeginBlockApertureTokenHooks):
@@ -350,6 +357,7 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            context.get_macro(token.aperture_type)
             context.set_aperture(
                 token.aperture_id,
                 Macro2(
@@ -360,6 +368,23 @@ class Parser2Hooks(IHooks):
 
     class AxisSelectTokenHooksTokenHooks(IHooks.AxisSelectTokenHooksTokenHooks):
         """Hooks for visiting axis select token (AS)."""
+
+        def on_parser_visit_token(
+            self,
+            token: AxisSelect,
+            context: Parser2Context,
+        ) -> None:
+            """Perform actions on the context implicated by this token.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context on which to perform the actions.
+            """
+            context.set_axis_correspondence(token.correspondence)
+            return super().on_parser_visit_token(token, context)
 
     class CommandDrawTokenHooks(IHooks.CommandDrawTokenHooks):
         """Hooks for visiting draw token (D01)."""
@@ -419,7 +444,6 @@ class Parser2Hooks(IHooks):
                     end_point=end_point,
                 ),
             )
-
             context.set_current_position(end_point)
 
         def on_parser_visit_token_arc(
@@ -447,8 +471,52 @@ class Parser2Hooks(IHooks):
 
             start_point = context.get_current_position()
             end_point = Vector2D(x=x, y=y)
-            center_offset = Vector2D(x=i, y=j)
-            center_point = start_point + center_offset
+            final_center_point = Vector2D.NULL
+
+            if context.get_is_multi_quadrant() is False:
+                # In single quadrant mode I and J offsets are unsigned, therefore we
+                # need to check all 4 possible center points. We will choose first
+                # valid, if anyone needs behavior strictly matching this from spec,
+                # they can always create issue.
+                for center_offset in (
+                    Vector2D(x=i, y=j),
+                    Vector2D(x=-i, y=j),
+                    Vector2D(x=i, y=-j),
+                    Vector2D(x=-i, y=-j),
+                ):
+                    center_point = start_point + center_offset
+                    relative_start_point = start_point - center_point
+                    relative_end_point = end_point - center_point
+                    # Calculate radius of arc from center to start point and end point,
+                    # If they aren't equal, this center candidate is not valid and we
+                    # can skip it.
+                    if not math.isclose(
+                        relative_start_point.length().value,
+                        relative_end_point.length().value,
+                        rel_tol=1e-6,
+                    ):
+                        continue
+
+                    # Calculate angle between vector pointing from center of arc to
+                    # start, and vector pointing from center of arc to end point. If
+                    # this angle is above 90 degrees, we exceeded allowed angle size in
+                    # single quadrant mode and need to try other possible center points.
+                    clockwise_angle = relative_start_point.angle_between(
+                        relative_end_point,
+                    )
+                    if clockwise_angle > MAX_SINGLE_QUADRANT_ANGLE:
+                        continue
+
+                    final_center_point = center_point
+                    break
+                else:
+                    raise NoValidArcCenterFoundError(token)
+
+            else:
+                # In multi quadrant mode I and J offsets are signed, so we can simply
+                # use them to calculate center point relative to start point.
+                center_offset = Vector2D(x=i, y=j)
+                final_center_point = start_point + center_offset
 
             context.add_command(
                 Arc2(
@@ -460,10 +528,9 @@ class Parser2Hooks(IHooks):
                     ),
                     start_point=start_point,
                     end_point=end_point,
-                    center_point=center_point,
+                    center_point=final_center_point,
                 ),
             )
-
             context.set_current_position(end_point)
 
         def on_parser_visit_token_cc_arc(
@@ -491,8 +558,44 @@ class Parser2Hooks(IHooks):
 
             start_point = context.get_current_position()
             end_point = Vector2D(x=x, y=y)
-            center_offset = Vector2D(x=i, y=j)
-            center_point = start_point + center_offset
+            final_center_point = Vector2D.NULL
+
+            if context.get_is_multi_quadrant() is False:
+                for center_offset in (
+                    Vector2D(x=i, y=j),
+                    Vector2D(x=-i, y=j),
+                    Vector2D(x=i, y=-j),
+                    Vector2D(x=-i, y=-j),
+                ):
+                    center_point = start_point + center_offset
+                    relative_start_point = start_point - center_point
+                    relative_end_point = end_point - center_point
+
+                    if not math.isclose(
+                        relative_start_point.length().value,
+                        relative_end_point.length().value,
+                        rel_tol=1e-6,
+                    ):
+                        continue
+
+                    # Calculate angle between vector pointing from center of arc to
+                    # start, and vector pointing from center of arc to end point. If
+                    # this angle is above 90 degrees, we exceeded allowed angle size in
+                    # single quadrant mode and need to try other possible center points.
+                    clockwise_angle = relative_start_point.angle_between_cc(
+                        relative_end_point,
+                    )
+                    if clockwise_angle > MAX_SINGLE_QUADRANT_ANGLE:
+                        continue
+
+                    final_center_point = center_point
+                    break
+                else:
+                    raise NoValidArcCenterFoundError(token)
+
+            else:
+                center_offset = Vector2D(x=i, y=j)
+                final_center_point = start_point + center_offset
 
             context.add_command(
                 CCArc2(
@@ -504,7 +607,7 @@ class Parser2Hooks(IHooks):
                     ),
                     start_point=start_point,
                     end_point=end_point,
-                    center_point=center_point,
+                    center_point=final_center_point,
                 ),
             )
 
@@ -607,6 +710,9 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            context.get_aperture(
+                token.aperture_id,
+            )  # Make sure aperture exists.
             context.set_current_aperture_id(token.aperture_id)
             return super().on_parser_visit_token(token, context)
 

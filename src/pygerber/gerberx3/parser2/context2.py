@@ -1,20 +1,23 @@
 """Gerber AST parser, version 2, parsing context."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NoReturn, Optional
+from typing import TYPE_CHECKING, Any, NoReturn, Optional
 
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
 from pygerber.gerberx3.parser2.errors2 import (
+    ApertureNotDefined2Error,
     ExitParsingProcess2Interrupt,
+    MacroNotDefinedError,
     ReferencedNotInitializedBlockBufferError,
     RegionNotInitializedError,
     SkipTokenInterrupt,
 )
 from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
 from pygerber.gerberx3.parser2.state2 import State2
+from pygerber.gerberx3.state_enums import AxisCorrespondence
 from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
 
 if TYPE_CHECKING:
@@ -201,6 +204,16 @@ class Parser2Context:
         """Set the file_name property value."""
         return self.set_state(self.get_state().set_file_name(file_name))
 
+    def get_axis_correspondence(self) -> AxisCorrespondence:
+        """Get axis_correspondence property value."""
+        return self.get_state().get_axis_correspondence()
+
+    def set_axis_correspondence(self, axis_correspondence: AxisCorrespondence) -> None:
+        """Set the axis_correspondence property value."""
+        return self.set_state(
+            self.get_state().set_axis_correspondence(axis_correspondence),
+        )
+
     def get_draw_mode(self) -> DrawMode:
         """Get draw_mode property value."""
         return self.get_state().get_draw_mode()
@@ -289,13 +302,27 @@ class Parser2Context:
         """Set file attributes property."""
         return self.set_state(self.get_state().set_file_attribute(key, value))
 
-    def get_aperture(self, __key: ApertureID) -> Aperture2 | None:
+    def get_aperture(self, __key: ApertureID) -> Aperture2:
         """Get apertures property value."""
-        return self.get_state().get_aperture(__key)
+        try:
+            return self.get_state().get_aperture(__key)
+        except KeyError as e:
+            raise ApertureNotDefined2Error(self.current_token) from e
 
     def set_aperture(self, __key: ApertureID, __value: Aperture2) -> None:
         """Set the apertures property value."""
         return self.set_state(self.get_state().set_aperture(__key, __value))
+
+    def get_macro(self, __key: str) -> Any:
+        """Get macro property value."""
+        try:
+            return self.get_state().get_macro(__key)
+        except KeyError as e:
+            raise MacroNotDefinedError(self.current_token) from e
+
+    def set_macro(self, __key: str, __value: str) -> None:
+        """Set the macro property value."""
+        return self.set_state(self.get_state().set_macro(__key, __value))
 
     def get_current_aperture_mutable_proxy(
         self,

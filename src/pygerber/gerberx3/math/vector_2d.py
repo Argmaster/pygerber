@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Callable, ClassVar
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.state_enums import Unit
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -23,6 +24,19 @@ class Vector2D(FrozenGeneralModel):
 
     x: Offset
     y: Offset
+
+    @classmethod
+    def new(
+        cls,
+        x: float | str | Decimal,
+        y: float | str | Decimal,
+        unit: Unit = Unit.Millimeters,
+    ) -> Self:
+        """Create new vector with default Offset constructor."""
+        return cls(
+            x=Offset.new(Decimal(x), unit=unit),
+            y=Offset.new(Decimal(y), unit=unit),
+        )
 
     def as_pixels(self, dpi: int) -> tuple[int, int]:
         """Return size as pixels using given DPI for conversion."""
@@ -119,7 +133,10 @@ class Vector2D(FrozenGeneralModel):
         return Offset(value=((self.x * self.x).value + (self.y * self.y).value).sqrt())
 
     def angle_between_clockwise(self, other: Vector2D) -> float:
-        """Calculate angle between two vectors in degrees clockwise."""
+        """Calculate angle between two vectors in degrees clockwise.
+
+        (Bugged?)
+        """
         self_norm = self / self.length()
         other_norm = other / other.length()
 
@@ -129,6 +146,27 @@ class Vector2D(FrozenGeneralModel):
         theta = math.atan2(float(dot.value), float(determinant.value))
 
         return math.degrees(theta)
+
+    def angle_between(self, other: Vector2D) -> float:
+        """Calculate clockwise angle between two vectors in degrees clockwise.
+
+        Value returned is always between 0 and 360 (can be 0, never 360).
+        """
+        v0 = self / self.length()
+        v1 = other / other.length()
+        angle_radians = math.atan2(
+            ((v0.x * v1.y) - (v1.x * v0.y)).value,  # determinant
+            ((v0.x * v1.x) + (v0.y * v1.y)).value,  # dot product
+        )
+        angle_degrees = math.degrees(angle_radians)
+        return angle_degrees + (360 * (angle_degrees < 0))
+
+    def angle_between_cc(self, other: Vector2D) -> float:
+        """Calculate counter clockwise angle between two vectors in degrees.
+
+        Value returned is always between 0 and 360 (can be 0, never 360).
+        """
+        return 360 - self.angle_between(other)
 
     def dot(self, other: Vector2D) -> Offset:
         """Calculate dot product of two vectors."""
