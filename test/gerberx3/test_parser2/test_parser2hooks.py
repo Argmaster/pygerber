@@ -10,18 +10,24 @@ import pytest
 from pygerber.common.immutable_map_model import ImmutableMapping
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
+from pygerber.gerberx3.parser.errors import (
+    IncrementalCoordinatesNotSupportedError,
+    ZeroOmissionNotSupportedError,
+)
 from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2
 from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
 from pygerber.gerberx3.parser2.apertures2.polygon2 import Polygon2
 from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2
+from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
 from pygerber.gerberx3.parser2.commands2.line2 import Line2
 from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotDefined2Error,
     NestedRegionNotAllowedError,
     NoValidArcCenterFoundError,
+    OnUpdateDrawingState2Error,
     ReferencedNotInitializedBlockBufferError,
     UnnamedBlockApertureNotAllowedError,
 )
@@ -474,6 +480,78 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
     )
 
 
+def test_command_move_token_hooks() -> None:
+    gerber_source = """
+    X0006000000Y0006000000D02*
+    """
+    unit = Unit.Millimeters
+    coordinate_parser = CoordinateParser.new(
+        x_format=AxisFormat(integer=4, decimal=6),
+        y_format=AxisFormat(integer=4, decimal=6),
+    )
+    start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
+    end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("6.0"))
+
+    context = Parser2Context()
+    context.set_draw_units(unit)
+    context.set_coordinate_parser(coordinate_parser)
+    context.set_current_position(start_point)
+
+    parse_code(gerber_source, context)
+    cmd = context.main_command_buffer.get_readonly()
+
+    assert len(cmd) == 0
+    assert context.get_current_position() == end_point
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_command_draw_line_token_hooks.__qualname__,
+    )
+
+
+def test_command_flash_token_hooks() -> None:
+    gerber_source = """
+    X0006000000Y0006000000D03*
+    """
+    unit = Unit.Millimeters
+    draw_mode = DrawMode.Linear
+    coordinate_parser = CoordinateParser.new(
+        x_format=AxisFormat(integer=4, decimal=6),
+        y_format=AxisFormat(integer=4, decimal=6),
+    )
+    polarity = Polarity.Dark
+    current_aperture = ApertureID("D11")
+    aperture_mock = MagicMock()
+    start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
+    end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("6.0"))
+
+    context = Parser2Context()
+    context.set_draw_units(unit)
+    context.set_draw_mode(draw_mode)
+    context.set_coordinate_parser(coordinate_parser)
+    context.set_polarity(polarity)
+    context.set_current_aperture_id(current_aperture)
+    context.set_aperture(current_aperture, aperture_mock)
+    context.set_current_position(start_point)
+
+    parse_code(gerber_source, context)
+    cmd = context.main_command_buffer.get_readonly()
+
+    assert len(cmd) == 1
+    assert next(iter(cmd)) == Flash2(
+        attributes=ImmutableMapping[str, str](),
+        polarity=polarity,
+        aperture_id=current_aperture,
+        flash_point=end_point,
+    )
+    assert context.get_current_position() == end_point
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_command_draw_line_token_hooks.__qualname__,
+    )
+
+
 def test_select_aperture_token_hooks_not_defined() -> None:
     gerber_source = """
     D20*
@@ -509,4 +587,121 @@ def test_select_aperture_token_hooks() -> None:
     debug_dump_context(
         context,
         DEBUG_DUMP_DIR / test_select_aperture_token_hooks.__qualname__,
+    )
+
+
+def test_coordinate_format_token_hooks_absolute_leading() -> None:
+    gerber_source = "%FSLAX24Y24*%"
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    coordinate_parser = context.get_coordinate_parser()
+    assert coordinate_parser.x_format == AxisFormat(integer=2, decimal=4)
+    assert coordinate_parser.y_format == AxisFormat(integer=2, decimal=4)
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR
+        / test_coordinate_format_token_hooks_absolute_leading.__qualname__,
+    )
+
+
+def test_coordinate_format_token_hooks_incremental_leading() -> None:
+    gerber_source = """
+    %FSLIX24Y24*%
+    """
+
+    context = Parser2Context()
+    try:
+        parse_code(gerber_source, context)
+    except OnUpdateDrawingState2Error as e:
+        assert isinstance(  # noqa: PT017
+            e.__cause__,
+            IncrementalCoordinatesNotSupportedError,
+        )
+    else:
+        pytest.fail("Not raised OnUpdateDrawingState2Error")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR
+        / test_coordinate_format_token_hooks_absolute_leading.__qualname__,
+    )
+
+
+def test_coordinate_format_token_hooks_incremental_trailing() -> None:
+    gerber_source = """
+    %FSTAX24Y24*%
+    """
+
+    context = Parser2Context()
+    try:
+        parse_code(gerber_source, context)
+    except OnUpdateDrawingState2Error as e:
+        assert isinstance(  # noqa: PT017
+            e.__cause__,
+            ZeroOmissionNotSupportedError,
+        )
+    else:
+        pytest.fail("Not raised OnUpdateDrawingState2Error")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR
+        / test_coordinate_format_token_hooks_absolute_leading.__qualname__,
+    )
+
+
+def test_set_linear_token_hooks() -> None:
+    gerber_source = """
+    G01*
+    """
+
+    context = Parser2Context()
+    context.set_draw_mode(DrawMode.ClockwiseCircular)
+
+    parse_code(gerber_source, context)
+
+    assert context.get_draw_mode() is DrawMode.Linear
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_linear_token_hooks.__qualname__,
+    )
+
+
+def test_set_clockwise_circular_token_hooks() -> None:
+    gerber_source = """
+    G02*
+    """
+
+    context = Parser2Context()
+    context.set_draw_mode(DrawMode.Linear)
+
+    parse_code(gerber_source, context)
+
+    assert context.get_draw_mode() is DrawMode.ClockwiseCircular
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_clockwise_circular_token_hooks.__qualname__,
+    )
+
+
+def test_set_counterclockwise_circular_token_hooks() -> None:
+    gerber_source = """
+    G03*
+    """
+
+    context = Parser2Context()
+    context.set_draw_mode(DrawMode.Linear)
+
+    parse_code(gerber_source, context)
+
+    assert context.get_draw_mode() is DrawMode.CounterclockwiseCircular
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_counterclockwise_circular_token_hooks.__qualname__,
     )

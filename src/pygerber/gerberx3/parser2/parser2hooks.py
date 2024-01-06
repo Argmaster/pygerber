@@ -736,7 +736,12 @@ class Parser2Hooks(IHooks):
                 The context object containing information about the parser state.
             """
             context.set_coordinate_parser(
-                CoordinateParser.new(x_format=token.x_format, y_format=token.y_format),
+                CoordinateParser.new(
+                    x_format=token.x_format,
+                    y_format=token.y_format,
+                    coordinate_mode=token.coordinate_mode,
+                    zeros_mode=token.zeros_mode,
+                ),
             )
 
     class SetLinearTokenHooks(IHooks.SetLinearTokenHooks):
