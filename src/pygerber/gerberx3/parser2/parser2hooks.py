@@ -33,7 +33,6 @@ from pygerber.gerberx3.state_enums import DrawMode, ImagePolarityEnum, Unit
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
-from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.parser2.context2 import Parser2Context
@@ -87,7 +86,9 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.lr_load_rotation import LoadRotation
     from pygerber.gerberx3.tokenizer.tokens.ls_load_scaling import LoadScaling
     from pygerber.gerberx3.tokenizer.tokens.m00_program_stop import M00ProgramStop
+    from pygerber.gerberx3.tokenizer.tokens.m01_optional_stop import M01OptionalStop
     from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
+    from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
     from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import UnitMode
     from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
         StepRepeatBegin,
@@ -97,8 +98,6 @@ if TYPE_CHECKING:
         ApertureAttribute,
     )
     from pygerber.gerberx3.tokenizer.tokens.tf_file_attribute import FileAttribute
-
-
 MAX_SINGLE_QUADRANT_ANGLE = 91.0
 
 
@@ -442,6 +441,7 @@ class Parser2Hooks(IHooks):
                     ),
                     start_point=start_point,
                     end_point=end_point,
+                    state=context.get_state().get_command2_proxy(),
                 ),
             )
             context.set_current_position(end_point)
@@ -529,6 +529,7 @@ class Parser2Hooks(IHooks):
                     start_point=start_point,
                     end_point=end_point,
                     center_point=final_center_point,
+                    state=context.get_state().get_command2_proxy(),
                 ),
             )
             context.set_current_position(end_point)
@@ -608,6 +609,7 @@ class Parser2Hooks(IHooks):
                     start_point=start_point,
                     end_point=end_point,
                     center_point=final_center_point,
+                    state=context.get_state().get_command2_proxy(),
                 ),
             )
 
@@ -685,6 +687,7 @@ class Parser2Hooks(IHooks):
                         or throw(ApertureNotSelected2Error(token))
                     ),
                     flash_point=flash_point,
+                    state=context.get_state().get_command2_proxy(),
                 ),
             )
 
@@ -866,6 +869,7 @@ class Parser2Hooks(IHooks):
                     attributes=ImmutableMapping[str, str](),
                     polarity=context.get_polarity(),
                     command_buffer=command_buffer.get_readonly(),
+                    state=context.get_state().get_command2_proxy(),
                 ),
             )
 
@@ -1184,10 +1188,19 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            context.set_reached_program_stop()
             context.halt_parser()
 
     class OptionalStopTokenHooks(IHooks.OptionalStopTokenHooks):
         """Hooks for visiting optional stop token (M01)."""
+
+        def on_parser_visit_token(
+            self,
+            token: M01OptionalStop,  # noqa: ARG002
+            context: Parser2Context,
+        ) -> None:
+            """Handle child parsing being completed."""
+            context.set_reached_optional_stop()
 
     class EndOfFileTokenHooks(IHooks.EndOfFileTokenHooks):
         """Hooks for visiting end of file token (M02)."""
@@ -1208,6 +1221,7 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            context.set_reached_end_of_file()
             context.halt_parser()
 
     class UnitModeTokenHooks(IHooks.UnitModeTokenHooks):

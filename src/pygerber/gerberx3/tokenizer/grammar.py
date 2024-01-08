@@ -54,6 +54,7 @@ from pygerber.gerberx3.tokenizer.tokens.g37_end_region import EndRegion
 from pygerber.gerberx3.tokenizer.tokens.g54_select_aperture import G54SelectAperture
 from pygerber.gerberx3.tokenizer.tokens.g70_set_unit_inch import SetUnitInch
 from pygerber.gerberx3.tokenizer.tokens.g71_set_unit_mm import SetUnitMillimeters
+from pygerber.gerberx3.tokenizer.tokens.g74_single_quadrant import SetSingleQuadrantMode
 from pygerber.gerberx3.tokenizer.tokens.g75_multi_quadrant import SetMultiQuadrantMode
 from pygerber.gerberx3.tokenizer.tokens.g90_set_coordinate_absolute import (
     SetAbsoluteNotation,
@@ -356,7 +357,7 @@ class GerberGrammarBuilder(GrammarBuilder):
         g37 = wrapper(EndRegion, Regex("G0*37"))
         g70 = wrapper(SetUnitInch, Regex("G0*70"))
         g71 = wrapper(SetUnitMillimeters, Regex("G0*71"))
-        g74 = wrapper(SetMultiQuadrantMode, Regex("G0*74"))
+        g74 = wrapper(SetSingleQuadrantMode, Regex("G0*74"))
         g75 = wrapper(SetMultiQuadrantMode, Regex("G0*75"))
         g90 = wrapper(SetAbsoluteNotation, Regex("G0*90"))
         g91 = wrapper(SetIncrementalNotation, Regex("G0*91"))

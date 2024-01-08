@@ -22,6 +22,7 @@ from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
 from pygerber.gerberx3.parser2.commands2.line2 import Line2
+from pygerber.gerberx3.parser2.commands2.region2 import Region2
 from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotDefined2Error,
@@ -29,9 +30,17 @@ from pygerber.gerberx3.parser2.errors2 import (
     NoValidArcCenterFoundError,
     OnUpdateDrawingState2Error,
     ReferencedNotInitializedBlockBufferError,
+    RegionNotInitializedError,
+    UnitNotSet2Error,
     UnnamedBlockApertureNotAllowedError,
 )
-from pygerber.gerberx3.state_enums import AxisCorrespondence, DrawMode, Polarity, Unit
+from pygerber.gerberx3.state_enums import (
+    AxisCorrespondence,
+    DrawMode,
+    Mirroring,
+    Polarity,
+    Unit,
+)
 from pygerber.gerberx3.tokenizer.tokens.dnn_select_aperture import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     AxisFormat,
@@ -279,16 +288,16 @@ def test_command_draw_line_token_hooks() -> None:
     context.set_aperture(current_aperture, aperture_mock)
 
     parse_code(gerber_source, context)
-    cmd = context.main_command_buffer.get_readonly()
+    cmds = context.main_command_buffer.get_readonly()
 
-    assert len(cmd) == 1
-    assert next(iter(cmd)) == Line2(
-        attributes=ImmutableMapping[str, str](),
-        polarity=polarity,
-        aperture_id=current_aperture,
-        start_point=Vector2D(x=Offset.new("0"), y=Offset.new("0")),
-        end_point=end_point,
-    )
+    assert len(cmds) == 1
+    cmd = next(iter(cmds))
+    assert isinstance(cmd, Line2)
+    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.polarity == polarity
+    assert cmd.aperture_id == current_aperture
+    assert cmd.start_point == Vector2D(x=Offset.new("0"), y=Offset.new("0"))
+    assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
 
     debug_dump_context(
@@ -326,17 +335,17 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
     context.set_aperture(current_aperture, aperture_mock)
 
     parse_code(gerber_source, context)
-    cmd = context.main_command_buffer.get_readonly()
+    cmds = context.main_command_buffer.get_readonly()
 
-    assert len(cmd) == 1
-    assert next(iter(cmd)) == Arc2(
-        attributes=ImmutableMapping[str, str](),
-        polarity=polarity,
-        aperture_id=current_aperture,
-        start_point=start_point,
-        center_point=center_point,
-        end_point=end_point,
-    )
+    assert len(cmds) == 1
+    cmd = next(iter(cmds))
+    assert isinstance(cmd, Arc2)
+    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.polarity == polarity
+    assert cmd.aperture_id == current_aperture
+    assert cmd.start_point == start_point
+    assert cmd.center_point == center_point
+    assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
 
     debug_dump_context(
@@ -375,17 +384,17 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
     context.set_aperture(current_aperture, aperture_mock)
 
     parse_code(gerber_source, context)
-    cmd = context.main_command_buffer.get_readonly()
+    cmds = context.main_command_buffer.get_readonly()
 
-    assert len(cmd) == 1
-    assert next(iter(cmd)) == Arc2(
-        attributes=ImmutableMapping[str, str](),
-        polarity=polarity,
-        aperture_id=current_aperture,
-        start_point=start_point,
-        center_point=center_point,
-        end_point=end_point,
-    )
+    assert len(cmds) == 1
+    cmd = next(iter(cmds))
+    assert isinstance(cmd, Arc2)
+    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.polarity == polarity
+    assert cmd.aperture_id == current_aperture
+    assert cmd.start_point == start_point
+    assert cmd.center_point == center_point
+    assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
     assert start_point.angle_between(end_point) == expected_angle
 
@@ -460,17 +469,17 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
     context.set_aperture(current_aperture, aperture_mock)
 
     parse_code(gerber_source, context)
-    cmd = context.main_command_buffer.get_readonly()
+    cmds = context.main_command_buffer.get_readonly()
 
-    assert len(cmd) == 1
-    assert next(iter(cmd)) == Arc2(
-        attributes=ImmutableMapping[str, str](),
-        polarity=polarity,
-        aperture_id=current_aperture,
-        start_point=start_point,
-        center_point=center_point,
-        end_point=end_point,
-    )
+    assert len(cmds) == 1
+    cmd = next(iter(cmds))
+    assert isinstance(cmd, Arc2)
+    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.polarity == polarity
+    assert cmd.aperture_id == current_aperture
+    assert cmd.start_point == start_point
+    assert cmd.center_point == center_point
+    assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
     assert start_point.angle_between(end_point) == expected_angle
 
@@ -535,15 +544,15 @@ def test_command_flash_token_hooks() -> None:
     context.set_current_position(start_point)
 
     parse_code(gerber_source, context)
-    cmd = context.main_command_buffer.get_readonly()
+    cmds = context.main_command_buffer.get_readonly()
 
-    assert len(cmd) == 1
-    assert next(iter(cmd)) == Flash2(
-        attributes=ImmutableMapping[str, str](),
-        polarity=polarity,
-        aperture_id=current_aperture,
-        flash_point=end_point,
-    )
+    assert len(cmds) == 1
+    cmd = next(iter(cmds))
+    assert isinstance(cmd, Flash2)
+    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.polarity == polarity
+    assert cmd.aperture_id == current_aperture
+    assert cmd.flash_point == end_point
     assert context.get_current_position() == end_point
 
     debug_dump_context(
@@ -626,7 +635,7 @@ def test_coordinate_format_token_hooks_incremental_leading() -> None:
     debug_dump_context(
         context,
         DEBUG_DUMP_DIR
-        / test_coordinate_format_token_hooks_absolute_leading.__qualname__,
+        / test_coordinate_format_token_hooks_incremental_leading.__qualname__,
     )
 
 
@@ -649,7 +658,7 @@ def test_coordinate_format_token_hooks_incremental_trailing() -> None:
     debug_dump_context(
         context,
         DEBUG_DUMP_DIR
-        / test_coordinate_format_token_hooks_absolute_leading.__qualname__,
+        / test_coordinate_format_token_hooks_incremental_trailing.__qualname__,
     )
 
 
@@ -704,4 +713,359 @@ def test_set_counterclockwise_circular_token_hooks() -> None:
     debug_dump_context(
         context,
         DEBUG_DUMP_DIR / test_set_counterclockwise_circular_token_hooks.__qualname__,
+    )
+
+
+def test_begin_region_token_hooks() -> None:
+    gerber_source = """
+    G36*
+    """
+
+    context = Parser2Context()
+    context.set_is_region(is_region=False)
+
+    parse_code(gerber_source, context)
+    assert context.get_is_region() is True
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_begin_region_token_hooks.__qualname__,
+    )
+
+
+def test_end_region_token_hooks_fail_without_g36() -> None:
+    gerber_source = """
+    G37*
+    """
+
+    context = Parser2Context()
+    context.set_is_region(is_region=True)
+
+    with pytest.raises(RegionNotInitializedError):
+        parse_code(gerber_source, context)
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_end_region_token_hooks_fail_without_g36.__qualname__,
+    )
+
+
+def test_end_region_token_hooks() -> None:
+    gerber_source = """
+    G36*
+    G37*
+    """
+
+    context = Parser2Context()
+    context.set_is_region(is_region=True)
+
+    parse_code(gerber_source, context)
+    cmds = context.main_command_buffer.get_readonly()
+
+    assert context.get_is_region() is False
+
+    assert len(cmds) == 1
+    cmd = next(iter(cmds))
+    assert isinstance(cmd, Region2)
+    assert len(cmd.command_buffer) == 0
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_end_region_token_hooks.__qualname__,
+    )
+
+
+def test_set_unit_inches_token_hooks() -> None:
+    gerber_source = """
+    G70*
+    """
+
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    assert context.get_draw_units() is Unit.Inches
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_unit_inches_token_hooks.__qualname__,
+    )
+
+
+def test_set_unit_mm_token_hooks() -> None:
+    gerber_source = """
+    G71*
+    """
+
+    context = Parser2Context()
+    context.set_draw_units(Unit.Inches)
+
+    parse_code(gerber_source, context)
+
+    assert context.get_draw_units() is Unit.Millimeters
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_unit_mm_token_hooks.__qualname__,
+    )
+
+
+def test_set_single_quadrant_mode() -> None:
+    gerber_source = """
+    G74*
+    """
+
+    context = Parser2Context()
+    context.set_is_multi_quadrant(is_multi_quadrant=True)
+
+    parse_code(gerber_source, context)
+
+    assert context.get_is_multi_quadrant() is False
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_unit_mm_token_hooks.__qualname__,
+    )
+
+
+def test_set_multi_quadrant_mode() -> None:
+    gerber_source = """
+    G75*
+    """
+
+    context = Parser2Context()
+    context.set_is_multi_quadrant(is_multi_quadrant=False)
+
+    parse_code(gerber_source, context)
+
+    assert context.get_is_multi_quadrant() is True
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_unit_mm_token_hooks.__qualname__,
+    )
+
+
+@pytest.mark.skip(reason="G90 not properly implemented.")
+def test_set_coordinate_absolute_token_hooks() -> None:
+    gerber_source = """
+    G90*
+    """
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_coordinate_absolute_token_hooks.__qualname__,
+    )
+
+
+@pytest.mark.skip(reason="G91 not properly implemented.")
+def test_set_coordinate_relative_token_hooks() -> None:
+    gerber_source = """
+    G91*
+    """
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_set_coordinate_relative_token_hooks.__qualname__,
+    )
+
+
+def test_image_name_token_hooks() -> None:
+    gerber_source = """
+    %INfoobar*%
+    """
+
+    context = Parser2Context()
+    assert context.get_image_name() is None
+
+    parse_code(gerber_source, context)
+
+    assert context.get_image_name() == "foobar"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_image_name_token_hooks.__qualname__,
+    )
+
+
+def test_image_polarity_token_hooks() -> None:
+    gerber_source = """
+    %IPNEG*%
+    """
+
+    context = Parser2Context()
+    assert context.get_is_output_image_negation_required() is False
+
+    parse_code(gerber_source, context)
+
+    assert context.get_is_output_image_negation_required() is True
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_image_polarity_token_hooks.__qualname__,
+    )
+
+
+def test_load_mirror_token_hooks() -> None:
+    gerber_source = """
+    %LMX*%
+    """
+
+    context = Parser2Context()
+    assert context.get_mirroring() is Mirroring.NoMirroring
+
+    parse_code(gerber_source, context)
+
+    assert context.get_mirroring() is Mirroring.X
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_load_mirror_token_hooks.__qualname__,
+    )
+
+
+def test_load_name_token_hooks() -> None:
+    gerber_source = """
+    %LNfoobar*%
+    """
+
+    context = Parser2Context()
+    assert context.get_file_name() is None
+
+    parse_code(gerber_source, context)
+
+    assert context.get_file_name() == "foobar"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_load_name_token_hooks.__qualname__,
+    )
+
+
+def test_load_rotation_token_hooks() -> None:
+    gerber_source = """
+    %LR45*%
+    """
+
+    context = Parser2Context()
+    assert context.get_rotation() == Decimal("0")
+
+    parse_code(gerber_source, context)
+
+    assert context.get_rotation() == Decimal("45")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_load_name_token_hooks.__qualname__,
+    )
+
+
+def test_load_scaling_token_hooks() -> None:
+    gerber_source = """
+    %LS2*%
+    """
+
+    context = Parser2Context()
+    assert context.get_scaling() == Decimal("1")
+
+    parse_code(gerber_source, context)
+
+    assert context.get_scaling() == Decimal("2")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_load_scaling_token_hooks.__qualname__,
+    )
+
+
+def test_program_stop_token_hooks_no_commands() -> None:
+    gerber_source = """M00*"""
+
+    context = Parser2Context()
+    assert context.get_reached_program_stop() is False
+
+    parse_code(gerber_source, context)
+
+    assert context.get_reached_program_stop() is True
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_program_stop_token_hooks_no_commands.__qualname__,
+    )
+
+
+def test_optional_stop_token_hook_stop_commands() -> None:
+    gerber_source = """M01*"""
+
+    context = Parser2Context()
+    assert context.get_reached_optional_stop() is False
+
+    parse_code(gerber_source, context)
+
+    assert context.get_reached_optional_stop() is True
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_optional_stop_token_hook_stop_commands.__qualname__,
+    )
+
+
+def test_end_of_file_token_hooks() -> None:
+    gerber_source = "M02*"
+
+    context = Parser2Context()
+    assert context.get_reached_end_of_file() is False
+
+    parse_code(gerber_source, context)
+
+    assert context.get_reached_end_of_file() is True
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_end_of_file_token_hooks.__qualname__,
+    )
+
+
+def test_unit_mode_token_hooks_inch() -> None:
+    gerber_source = """
+    %MOIN*%
+    """
+
+    context = Parser2Context()
+    with pytest.raises(UnitNotSet2Error):
+        context.get_draw_units()
+
+    parse_code(gerber_source, context)
+
+    assert context.get_draw_units() is Unit.Inches
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_unit_mode_token_hooks_inch.__qualname__,
+    )
+
+
+def test_unit_mode_token_hooks_mm() -> None:
+    gerber_source = """
+        %MOMM*%
+        """
+
+    context = Parser2Context()
+    with pytest.raises(UnitNotSet2Error):
+        context.get_draw_units()
+
+    parse_code(gerber_source, context)
+
+    assert context.get_draw_units() is Unit.Millimeters
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_unit_mode_token_hooks_mm.__qualname__,
     )

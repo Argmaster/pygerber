@@ -1,11 +1,17 @@
 """Parser level abstraction of draw arc operation for Gerber AST parser, version 2."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.commands2.command2 import Command2
+from pygerber.gerberx3.state_enums import Mirroring
 from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class Arc2(Command2):
@@ -37,6 +43,16 @@ class Arc2(Command2):
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of arc."""
         return BoundingBox.from_diameter(self.get_radius() * 2) + self.center_point
+
+    def get_mirrored(self, mirror: Mirroring) -> Self:
+        """Get mirrored command."""
+        return self.model_copy(
+            update={
+                "start_point": self.start_point.get_mirrored(mirror),
+                "end_point": self.end_point.get_mirrored(mirror),
+                "center_point": self.center_point.get_mirrored(mirror),
+            },
+        )
 
 
 class CCArc2(Arc2):

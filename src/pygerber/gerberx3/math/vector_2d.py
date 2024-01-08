@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Callable, ClassVar
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.offset import Offset
-from pygerber.gerberx3.state_enums import Unit
+from pygerber.gerberx3.state_enums import Mirroring, Unit
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -37,6 +37,39 @@ class Vector2D(FrozenGeneralModel):
             x=Offset.new(Decimal(x), unit=unit),
             y=Offset.new(Decimal(y), unit=unit),
         )
+
+    def get_mirrored(self, mirror: Mirroring) -> Self:
+        """Get mirrored vector."""
+        return self._GET_MIRRORED_DISPATCH_TABLE[mirror](self)
+
+    def _get_mirrored_x(self) -> Self:
+        return self.model_copy(
+            update={
+                "x": -self.x,
+            },
+        )
+
+    def _get_mirrored_y(self) -> Self:
+        return self.model_copy(
+            update={
+                "y": -self.y,
+            },
+        )
+
+    def _get_mirrored_xy(self) -> Self:
+        return self.model_copy(
+            update={
+                "x": -self.x,
+                "y": -self.y,
+            },
+        )
+
+    _GET_MIRRORED_DISPATCH_TABLE: ClassVar[dict[Mirroring, Callable[[Self], Self]]] = {
+        Mirroring.NoMirroring: lambda s: s,
+        Mirroring.X: _get_mirrored_x,
+        Mirroring.Y: _get_mirrored_y,
+        Mirroring.XY: _get_mirrored_xy,
+    }
 
     def as_pixels(self, dpi: int) -> tuple[int, int]:
         """Return size as pixels using given DPI for conversion."""

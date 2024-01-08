@@ -801,3 +801,13 @@ class State2(FrozenGeneralModel):
             self.get_coordinate_parser().parse(coordinate),
             unit=self.get_draw_units(),
         )
+
+    def get_command2_proxy(self) -> Command2State2Proxy:
+        """Get state access proxy for Command2 objects."""
+        return Command2State2Proxy(state=self)
+
+
+class Command2State2Proxy(FrozenGeneralModel):
+    """Proxy for accessing Parser2State from the moment of creation of command."""
+
+    state: State2

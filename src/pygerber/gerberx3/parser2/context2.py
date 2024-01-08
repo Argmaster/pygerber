@@ -53,6 +53,9 @@ class Parser2Context:
             Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )
         self.current_token: Optional[Token] = None
+        self.reached_program_stop: bool = False
+        self.reached_optional_stop: bool = False
+        self.reached_end_of_file: bool = False
 
     def push_block_command_buffer(self) -> None:
         """Add new command buffer for block aperture draw commands."""
@@ -335,6 +338,30 @@ class Parser2Context:
                 aperture_id=aperture_id,
             )
         return EmptyAperture2MutableProxy()
+
+    def set_reached_program_stop(self) -> None:
+        """Set flag indicating that M00 token was reached."""
+        self.reached_program_stop = True
+
+    def get_reached_program_stop(self) -> bool:
+        """Get flag indicating that M00 token was reached."""
+        return self.reached_program_stop
+
+    def set_reached_optional_stop(self) -> None:
+        """Set flag indicating that M01 token was reached."""
+        self.reached_optional_stop = True
+
+    def get_reached_optional_stop(self) -> bool:
+        """Get flag indicating that M01 token was reached."""
+        return self.reached_optional_stop
+
+    def set_reached_end_of_file(self) -> None:
+        """Set flag indicating that M02 end of file was reached."""
+        self.reached_end_of_file = True
+
+    def get_reached_end_of_file(self) -> bool:
+        """Get flag indicating that M02 end of file was reached."""
+        return self.reached_end_of_file
 
 
 class EmptyAperture2MutableProxy(FrozenGeneralModel):
