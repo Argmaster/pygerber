@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING, Iterator, List, Optional
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.commands2.command2 import Command2
+from pygerber.gerberx3.state_enums import Mirroring
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -42,6 +44,10 @@ class CommandBuffer2:
         """Iterate over buffered draw commands."""
         yield from self.commands
 
+    def __getitem__(self, index: int) -> Command2:
+        """Get item by index from commands."""
+        return self.commands[index]
+
 
 class ReadonlyCommandBuffer2(FrozenGeneralModel):
     """Read only command buffer proxy."""
@@ -56,7 +62,23 @@ class ReadonlyCommandBuffer2(FrozenGeneralModel):
         """Iterate over buffered draw commands."""
         yield from self.commands
 
+    def __getitem__(self, index: int) -> Command2:
+        """Get item by index from commands."""
+        return self.commands[index]
+
     def debug_buffer_to_json(self, indent: int = 4) -> str:
         """Convert buffered draw commands to JSON."""
         command_chain = ",\n".join(c.command_to_json() for c in self)
         return f"[\n{textwrap.indent(command_chain, ' ' * indent)}\n]"
+
+    def get_mirrored(self, mirror: Mirroring) -> Self:
+        """Get new command buffer with all commands mirrored."""
+        return self.model_copy(
+            update={"commands": [c.get_mirrored(mirror) for c in self.commands]},
+        )
+
+    def get_transposed(self, vector: Vector2D) -> Self:
+        """Get new command buffer with all commands transposed."""
+        return self.model_copy(
+            update={"commands": [c.get_transposed(vector) for c in self.commands]},
+        )

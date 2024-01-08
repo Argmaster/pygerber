@@ -18,6 +18,8 @@ from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
 from pygerber.gerberx3.parser2.apertures2.polygon2 import Polygon2
 from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2, CCArc2
+from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
+from pygerber.gerberx3.parser2.commands2.command2 import Command2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
 from pygerber.gerberx3.parser2.commands2.line2 import Line2
 from pygerber.gerberx3.parser2.commands2.region2 import Region2
@@ -26,6 +28,7 @@ from pygerber.gerberx3.parser2.errors2 import (
     IncrementalCoordinatesNotSupported2Error,
     NestedRegionNotAllowedError,
     NoValidArcCenterFoundError,
+    StepAndRepeatNotInitializedError,
     UnnamedBlockApertureNotAllowedError,
 )
 from pygerber.gerberx3.parser2.ihooks import IHooks
@@ -1268,7 +1271,15 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
+            context.set_state_before_step_and_repeat()
+
             context.set_is_step_and_repeat(is_step_and_repeat=True)
+            context.set_x_repeat(token.x_repeat)
+            context.set_y_repeat(token.y_repeat)
+            context.set_x_step(Offset.new(token.x_step, unit=context.get_draw_units()))
+            context.set_y_step(Offset.new(token.y_step, unit=context.get_draw_units()))
+            context.set_step_and_repeat_command_buffer()
+
             return super().on_parser_visit_token(token, context)
 
     class StepRepeatEndTokenHooks(IHooks.StepRepeatEndTokenHooks):
@@ -1290,7 +1301,37 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
-            context.set_is_step_and_repeat(is_step_and_repeat=False)
+            if context.get_is_step_and_repeat() is False:
+                raise StepAndRepeatNotInitializedError(token)
+
+            command_buffer = context.get_step_and_repeat_command_buffer().get_readonly()
+            commands: list[Command2] = []
+
+            for x_index in range(context.get_x_repeat()):
+                for y_index in range(context.get_y_repeat()):
+                    buffer_command = BufferCommand2(
+                        attributes=ImmutableMapping[str, str](),
+                        polarity=context.get_polarity(),
+                        state=context.get_state().get_command2_proxy(),
+                        command_buffer=command_buffer,
+                    ).get_transposed(
+                        Vector2D(
+                            x=(context.get_x_step() * x_index),
+                            y=(context.get_y_step() * y_index),
+                        ),
+                    )
+                    commands.append(buffer_command)
+
+            # Resets all variables, including is_step_and_repeat and possibly other
+            # set during recording of SR command block. Must be done before
+            # add_command() to push SR command buffers to main command buffers.
+            context.reset_state_to_pre_step_and_repeat()
+            context.unset_state_before_step_and_repeat()
+            context.unset_step_and_repeat_command_buffer()
+
+            for command in commands:
+                context.add_command(command)
+
             return super().on_parser_visit_token(token, context)
 
     class ApertureAttributeHooks(IHooks.ApertureAttributeHooks):

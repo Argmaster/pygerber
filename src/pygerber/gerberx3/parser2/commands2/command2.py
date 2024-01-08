@@ -9,6 +9,7 @@ from pydantic import Field
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.common.immutable_map_model import ImmutableMapping
 from pygerber.gerberx3.math.bounding_box import BoundingBox
+from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.state2 import Command2State2Proxy
 from pygerber.gerberx3.state_enums import Mirroring, Polarity
 
@@ -29,6 +30,10 @@ class Command2(FrozenGeneralModel):
 
     def get_mirrored(self, mirror: Mirroring) -> Self:
         """Get mirrored command."""
+        raise NotImplementedError
+
+    def get_transposed(self, vector: Vector2D) -> Self:
+        """Get transposed command."""
         raise NotImplementedError
 
     def command_to_json(self) -> str:

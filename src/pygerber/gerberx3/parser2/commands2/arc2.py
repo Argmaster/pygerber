@@ -54,6 +54,16 @@ class Arc2(Command2):
             },
         )
 
+    def get_transposed(self, vector: Vector2D) -> Self:
+        """Get transposed command."""
+        return self.model_copy(
+            update={
+                "start_point": self.start_point + vector,
+                "end_point": self.end_point + vector,
+                "center_point": self.center_point + vector,
+            },
+        )
+
 
 class CCArc2(Arc2):
     """Parser level abstraction of draw counterclockwise arc operation for Gerber AST

@@ -36,3 +36,12 @@ class Line2(Command2):
                 "end_point": self.end_point.get_mirrored(mirror),
             },
         )
+
+    def get_transposed(self, vector: Vector2D) -> Self:
+        """Get transposed command."""
+        return self.model_copy(
+            update={
+                "start_point": self.start_point + vector,
+                "end_point": self.end_point + vector,
+            },
+        )

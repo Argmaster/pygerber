@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, NoReturn, Optional
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotDefined2Error,
@@ -14,6 +15,7 @@ from pygerber.gerberx3.parser2.errors2 import (
     ReferencedNotInitializedBlockBufferError,
     RegionNotInitializedError,
     SkipTokenInterrupt,
+    StepAndRepeatNotInitializedError,
 )
 from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
 from pygerber.gerberx3.parser2.state2 import State2
@@ -49,6 +51,8 @@ class Parser2Context:
         )
         self.region_command_buffer: Optional[CommandBuffer2] = None
         self.block_command_buffer_stack: list[CommandBuffer2] = []
+        self.step_and_repeat_command_buffer: Optional[CommandBuffer2] = None
+        self.state_before_step_and_repeat: Optional[State2] = None
         self.hooks: IHooks = (
             Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )
@@ -95,6 +99,42 @@ class Parser2Context:
             raise RegionNotInitializedError(self.current_token)
         return self.region_command_buffer
 
+    def set_step_and_repeat_command_buffer(self) -> None:
+        """Add new command buffer for block aperture draw commands."""
+        self.step_and_repeat_command_buffer = (
+            CommandBuffer2()
+            if self.options.initial_region_command_buffer is None
+            else self.options.initial_region_command_buffer.copy()
+        )
+
+    def unset_step_and_repeat_command_buffer(self) -> None:
+        """Unset step and repeat command buffer."""
+        self.step_and_repeat_command_buffer = None
+
+    def get_step_and_repeat_command_buffer(self) -> CommandBuffer2:
+        """Return step and repeat command buffer."""
+        if self.step_and_repeat_command_buffer is None:
+            raise StepAndRepeatNotInitializedError(self.current_token)
+        return self.step_and_repeat_command_buffer
+
+    def get_state_before_step_and_repeat(self) -> State2:
+        """Return step and repeat command buffer."""
+        if self.state_before_step_and_repeat is None:
+            raise StepAndRepeatNotInitializedError(self.current_token)
+        return self.state_before_step_and_repeat
+
+    def unset_state_before_step_and_repeat(self) -> None:
+        """Unset step and repeat command buffer."""
+        self.state_before_step_and_repeat = None
+
+    def set_state_before_step_and_repeat(self) -> None:
+        """Add new command buffer for block aperture draw commands."""
+        self.state_before_step_and_repeat = self.state
+
+    def reset_state_to_pre_step_and_repeat(self) -> None:
+        """Set state to state before step and repeat."""
+        self.set_state(self.get_state_before_step_and_repeat())
+
     def skip_token(self) -> NoReturn:
         """Skip this token."""
         raise SkipTokenInterrupt
@@ -123,8 +163,16 @@ class Parser2Context:
         """Add draw command to command buffer."""
         if self.get_is_region():
             self.get_region_command_buffer().add_command(__command)
+            return
+
         if self.get_is_aperture_block():
             self.first_block_command_buffer().add_command(__command)
+            return
+
+        if self.get_is_step_and_repeat():
+            self.get_step_and_repeat_command_buffer().add_command(__command)
+            return
+
         self.main_command_buffer.add_command(__command)
 
     def get_state(self) -> State2:
@@ -253,6 +301,16 @@ class Parser2Context:
             self.get_state().set_aperture_block_id(aperture_block_id),
         )
 
+    def get_is_multi_quadrant(self) -> bool:
+        """Get is_aperture_block property value."""
+        return self.get_state().get_is_multi_quadrant()
+
+    def set_is_multi_quadrant(self, is_multi_quadrant: bool) -> None:  # noqa: FBT001
+        """Set the is_aperture_block property value."""
+        return self.set_state(
+            self.get_state().set_is_multi_quadrant(is_multi_quadrant),
+        )
+
     def get_is_step_and_repeat(self) -> bool:
         """Get is_step_and_repeat property value."""
         return self.get_state().get_is_step_and_repeat()
@@ -263,15 +321,37 @@ class Parser2Context:
             self.get_state().set_is_step_and_repeat(is_step_and_repeat),
         )
 
-    def get_is_multi_quadrant(self) -> bool:
-        """Get is_aperture_block property value."""
-        return self.get_state().get_is_multi_quadrant()
+    def get_x_repeat(self) -> int:
+        """Get x_step property value."""
+        return self.get_state().get_x_repeat()
 
-    def set_is_multi_quadrant(self, is_multi_quadrant: bool) -> None:  # noqa: FBT001
-        """Set the is_aperture_block property value."""
-        return self.set_state(
-            self.get_state().set_is_multi_quadrant(is_multi_quadrant),
-        )
+    def set_x_repeat(self, x_repeat: int) -> None:
+        """Set the x_repeat property value."""
+        return self.set_state(self.get_state().set_x_repeat(x_repeat))
+
+    def get_y_repeat(self) -> int:
+        """Get y_step property value."""
+        return self.get_state().get_y_repeat()
+
+    def set_y_repeat(self, y_repeat: int) -> None:
+        """Set the y_repeat property value."""
+        return self.set_state(self.get_state().set_y_repeat(y_repeat))
+
+    def get_x_step(self) -> Offset:
+        """Get x_step property value."""
+        return self.get_state().get_x_step()
+
+    def set_x_step(self, x_step: Offset) -> None:
+        """Set the x_step property value."""
+        return self.set_state(self.get_state().set_x_step(x_step))
+
+    def get_y_step(self) -> Offset:
+        """Get y_step property value."""
+        return self.get_state().get_y_step()
+
+    def set_y_step(self, y_step: Offset) -> None:
+        """Set the y_step property value."""
+        return self.set_state(self.get_state().set_y_step(y_step))
 
     def get_current_position(self) -> Vector2D:
         """Get current_position property value."""

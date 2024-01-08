@@ -20,6 +20,7 @@ from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
 from pygerber.gerberx3.parser2.apertures2.polygon2 import Polygon2
 from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2
+from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
 from pygerber.gerberx3.parser2.commands2.line2 import Line2
 from pygerber.gerberx3.parser2.commands2.region2 import Region2
@@ -31,6 +32,7 @@ from pygerber.gerberx3.parser2.errors2 import (
     OnUpdateDrawingState2Error,
     ReferencedNotInitializedBlockBufferError,
     RegionNotInitializedError,
+    StepAndRepeatNotInitializedError,
     UnitNotSet2Error,
     UnnamedBlockApertureNotAllowedError,
 )
@@ -297,6 +299,52 @@ def test_command_draw_line_token_hooks() -> None:
     assert cmd.polarity == polarity
     assert cmd.aperture_id == current_aperture
     assert cmd.start_point == Vector2D(x=Offset.new("0"), y=Offset.new("0"))
+    assert cmd.end_point == end_point
+    assert context.get_current_position() == end_point
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_command_draw_line_token_hooks.__qualname__,
+    )
+
+
+def test_command_draw_line_token_hooks_6() -> None:
+    gerber_source = """
+    X060000Y000000I000000J060000D01*
+    """
+    unit = Unit.Millimeters
+    is_multi_quadrant = False
+    draw_mode = DrawMode.Linear
+    coordinate_parser = CoordinateParser.new(
+        x_format=AxisFormat(integer=2, decimal=4),
+        y_format=AxisFormat(integer=2, decimal=4),
+    )
+    polarity = Polarity.Dark
+    current_aperture = ApertureID("D11")
+    aperture_mock = MagicMock()
+    start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
+    end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
+
+    context = Parser2Context()
+    context.set_draw_units(unit)
+    context.set_is_multi_quadrant(is_multi_quadrant)
+    context.set_draw_mode(draw_mode)
+    context.set_coordinate_parser(coordinate_parser)
+    context.set_polarity(polarity)
+    context.set_current_aperture_id(current_aperture)
+    context.set_current_position(start_point)
+    context.set_aperture(current_aperture, aperture_mock)
+
+    parse_code(gerber_source, context)
+    cmds = context.main_command_buffer.get_readonly()
+
+    assert len(cmds) == 1
+    cmd = next(iter(cmds))
+    assert isinstance(cmd, Line2)
+    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.polarity == polarity
+    assert cmd.aperture_id == current_aperture
+    assert cmd.start_point == start_point
     assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
 
@@ -1068,4 +1116,116 @@ def test_unit_mode_token_hooks_mm() -> None:
     debug_dump_context(
         context,
         DEBUG_DUMP_DIR / test_unit_mode_token_hooks_mm.__qualname__,
+    )
+
+
+def test_step_and_repeat_token_hooks() -> None:
+    gerber_source = """
+    %SRX3Y2I5.0J4.0*%
+    """
+
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    assert context.get_is_step_and_repeat() is True
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_step_and_repeat_token_hooks.__qualname__,
+    )
+
+
+def test_step_and_repeat_token_hooks_fail_uninitialized_sr() -> None:
+    gerber_source = """
+    %SR*%
+    """
+
+    context = Parser2Context()
+
+    with pytest.raises(StepAndRepeatNotInitializedError):
+        parse_code(gerber_source, context)
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_step_and_repeat_token_hooks.__qualname__,
+    )
+
+
+def test_step_and_repeat_token_hooks_with_lines() -> None:
+    x_repeats = 3
+    y_repeats = 2
+    step_x = Offset.new("1.0")
+    step_y = Offset.new("2.0")
+
+    gerber_source = f"""
+    %SRX{x_repeats}Y{y_repeats}I{step_x.value:.1f}J{step_y.value:.1f}*%
+    D11*
+    X060000Y000000I000000J060000D01*
+    %SR*%
+    """
+    unit = Unit.Millimeters
+    is_multi_quadrant = False
+    draw_mode = DrawMode.Linear
+    coordinate_parser = CoordinateParser.new(
+        x_format=AxisFormat(integer=2, decimal=4),
+        y_format=AxisFormat(integer=2, decimal=4),
+    )
+    polarity = Polarity.Dark
+    current_aperture = ApertureID("D11")
+    aperture_mock = MagicMock()
+    start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
+    end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
+    expected_command_count = 6
+
+    context = Parser2Context()
+    context.set_draw_units(unit)
+    context.set_is_multi_quadrant(is_multi_quadrant)
+    context.set_draw_mode(draw_mode)
+    context.set_coordinate_parser(coordinate_parser)
+    context.set_polarity(polarity)
+    context.set_current_aperture_id(current_aperture)
+    context.set_current_position(start_point)
+    context.set_aperture(current_aperture, aperture_mock)
+
+    parse_code(gerber_source, context)
+    main_cmd_buffer = context.main_command_buffer.get_readonly()
+
+    assert len(main_cmd_buffer) == expected_command_count
+
+    i = 0
+
+    for xi in range(x_repeats):
+        for yi in range(y_repeats):
+            sr_cmd_buffer = main_cmd_buffer[i]
+            offset = Vector2D(
+                x=step_x * xi,
+                y=step_y * yi,
+            )
+
+            assert isinstance(sr_cmd_buffer, BufferCommand2)
+            assert len(sr_cmd_buffer.command_buffer) == 1
+
+            for cmd in sr_cmd_buffer:
+                assert isinstance(cmd, Line2)
+                assert cmd.attributes == ImmutableMapping[str, str]()
+                assert cmd.polarity == polarity
+                assert cmd.aperture_id == current_aperture
+                assert cmd.start_point == start_point + offset
+                assert cmd.end_point == end_point + offset
+
+            i += 1
+
+    assert context.get_is_step_and_repeat() is False
+
+    with pytest.raises(StepAndRepeatNotInitializedError):
+        context.get_step_and_repeat_command_buffer()
+
+    with pytest.raises(StepAndRepeatNotInitializedError):
+        context.get_state_before_step_and_repeat()
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_command_draw_line_token_hooks.__qualname__,
     )

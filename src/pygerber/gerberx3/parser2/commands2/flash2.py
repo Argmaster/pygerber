@@ -27,3 +27,11 @@ class Flash2(Command2):
                 "flash_point": self.flash_point.get_mirrored(mirror),
             },
         )
+
+    def get_transposed(self, vector: Vector2D) -> Self:
+        """Get transposed command."""
+        return self.model_copy(
+            update={
+                "flash_point": self.flash_point + vector,
+            },
+        )

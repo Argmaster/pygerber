@@ -103,6 +103,10 @@ class ApertureNotSelected2Error(Parser2Error):
     """Raised when attempting to use aperture without selecting it first."""
 
 
+class StepAndRepeatNotInitializedError(Parser2Error):
+    """Raised when step and repeat block is closed without being correctly opened."""
+
+
 class Parser2Interrupt(Exception):  # noqa: N818
     """Base class for implementing interrupts."""
 

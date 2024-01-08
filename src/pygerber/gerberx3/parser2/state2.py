@@ -283,8 +283,6 @@ class State2DrawFlags(FrozenGeneralModel):
     """Indicates whether the current statement is an aperture block statement."""
     aperture_block_id: Optional[ApertureID] = Field(default=None)
     """The ID of the current aperture block, if any."""
-    is_step_and_repeat: bool = False
-    """Indicates whether the current statement is a step and repeat statement."""
     is_multi_quadrant: bool = False
     """Indicates whether the multi-quadrant mode is enabled."""
 
@@ -413,37 +411,6 @@ class State2DrawFlags(FrozenGeneralModel):
             },
         )
 
-    def get_is_step_and_repeat(self) -> bool:
-        """Check if the current statement is a step and repeat statement.
-
-        Returns
-        -------
-            bool: True if the current statement is a step and repeat statement, False
-            otherwise.
-
-        """
-        return self.is_step_and_repeat
-
-    def set_is_step_and_repeat(self, val: bool) -> State2DrawFlags:  # noqa: FBT001
-        """Set the flag indicating whether the current statement is a step and repeat
-        statement.
-
-        Args:
-        ----
-            val (bool): True if the current statement is a step and repeat statement,
-            False otherwise.
-
-        Returns:
-        -------
-            State2DrawFlags: A new instance of State2DrawFlags with the updated flag.
-
-        """
-        return self.model_copy(
-            update={
-                "is_step_and_repeat": val,
-            },
-        )
-
     def get_is_multi_quadrant(self) -> bool:
         """Check if the multi-quadrant mode is enabled.
 
@@ -469,6 +436,104 @@ class State2DrawFlags(FrozenGeneralModel):
         return self.model_copy(
             update={
                 "is_multi_quadrant": val,
+            },
+        )
+
+
+class StepAndRepeatState2(FrozenGeneralModel):
+    """Step and Repeat state maintainer."""
+
+    is_step_and_repeat: bool = False
+    """Indicates whether the current statement is a step and repeat statement."""
+
+    x_repeat: int = 0
+    """Number of repeats in the X direction."""
+
+    y_repeat: int = 0
+    """Number of repeats in the Y direction."""
+
+    x_step: Offset = Offset.NULL
+    """Step repeat distance in X direction."""
+
+    y_step: Offset = Offset.NULL
+    """Step repeat distance in Y direction."""
+
+    def get_is_step_and_repeat(self) -> bool:
+        """Check if the current statement is a step and repeat statement.
+
+        Returns
+        -------
+            bool: True if the current statement is a step and repeat statement, False
+            otherwise.
+
+        """
+        return self.is_step_and_repeat
+
+    def set_is_step_and_repeat(self, val: bool) -> StepAndRepeatState2:  # noqa: FBT001
+        """Set the flag indicating whether the current statement is a step and repeat
+        statement.
+
+        Args:
+        ----
+            val (bool): True if the current statement is a step and repeat statement,
+            False otherwise.
+
+        Returns:
+        -------
+            State2DrawFlags: A new instance of State2DrawFlags with the updated flag.
+
+        """
+        return self.model_copy(
+            update={
+                "is_step_and_repeat": val,
+            },
+        )
+
+    def get_x_repeat(self) -> int:
+        """Get x_repeat property value."""
+        return self.x_repeat
+
+    def set_x_repeat(self, val: int) -> StepAndRepeatState2:
+        """Set the x_repeat property value."""
+        return self.model_copy(
+            update={
+                "x_repeat": val,
+            },
+        )
+
+    def get_y_repeat(self) -> int:
+        """Get y_repeat property value."""
+        return self.y_repeat
+
+    def set_y_repeat(self, val: int) -> StepAndRepeatState2:
+        """Set the y_repeat property value."""
+        return self.model_copy(
+            update={
+                "y_repeat": val,
+            },
+        )
+
+    def get_x_step(self) -> Offset:
+        """Get x_step property value."""
+        return self.x_step
+
+    def set_x_step(self, val: Offset) -> StepAndRepeatState2:
+        """Set the x_step property value."""
+        return self.model_copy(
+            update={
+                "x_step": val,
+            },
+        )
+
+    def get_y_step(self) -> Offset:
+        """Get y_step property value."""
+        return self.y_step
+
+    def set_y_step(self, val: Offset) -> Self:
+        """Set the y_step property value."""
+        return self.model_copy(
+            update={
+                "y_step": val,
             },
         )
 
@@ -635,16 +700,6 @@ class State2(FrozenGeneralModel):
             self.get_flags().set_aperture_block_id(aperture_block_id),
         )
 
-    def get_is_step_and_repeat(self) -> bool:
-        """Get is_step_and_repeat property value."""
-        return self.get_flags().get_is_step_and_repeat()
-
-    def set_is_step_and_repeat(self, is_step_and_repeat: bool) -> Self:  # noqa: FBT001
-        """Set the is_step_and_repeat property value."""
-        return self.set_flags(
-            self.get_flags().set_is_step_and_repeat(is_step_and_repeat),
-        )
-
     def get_is_multi_quadrant(self) -> bool:
         """Get is_aperture_block property value."""
         return self.get_flags().get_is_multi_quadrant()
@@ -653,6 +708,70 @@ class State2(FrozenGeneralModel):
         """Set the is_aperture_block property value."""
         return self.set_flags(
             self.get_flags().set_is_multi_quadrant(is_multi_quadrant),
+        )
+
+    step_repeat: StepAndRepeatState2 = Field(default_factory=StepAndRepeatState2)
+
+    def get_step_and_repeat(self) -> StepAndRepeatState2:
+        """Get step_repeat property value."""
+        return self.step_repeat
+
+    def set_step_and_repeat(self, step_and_repeat: StepAndRepeatState2) -> Self:
+        """Set step_repeat property value."""
+        return self.model_copy(
+            update={
+                "step_repeat": step_and_repeat,
+            },
+        )
+
+    def get_is_step_and_repeat(self) -> bool:
+        """Get is_step_and_repeat property value."""
+        return self.get_step_and_repeat().get_is_step_and_repeat()
+
+    def set_is_step_and_repeat(self, is_step_and_repeat: bool) -> Self:  # noqa: FBT001
+        """Set the is_step_and_repeat property value."""
+        return self.set_step_and_repeat(
+            self.get_step_and_repeat().set_is_step_and_repeat(is_step_and_repeat),
+        )
+
+    def get_x_repeat(self) -> int:
+        """Get x_repeat property value."""
+        return self.get_step_and_repeat().get_x_repeat()
+
+    def set_x_repeat(self, value: int) -> Self:
+        """Set the x_repeat property value."""
+        return self.set_step_and_repeat(
+            self.get_step_and_repeat().set_x_repeat(value),
+        )
+
+    def get_y_repeat(self) -> int:
+        """Get y_repeat property value."""
+        return self.get_step_and_repeat().get_y_repeat()
+
+    def set_y_repeat(self, value: int) -> Self:
+        """Set the y_repeat property value."""
+        return self.set_step_and_repeat(
+            self.get_step_and_repeat().set_y_repeat(value),
+        )
+
+    def get_x_step(self) -> Offset:
+        """Get x_step property value."""
+        return self.get_step_and_repeat().get_x_step()
+
+    def set_x_step(self, value: Offset) -> Self:
+        """Set the x_repeat property value."""
+        return self.set_step_and_repeat(
+            self.get_step_and_repeat().set_x_step(value),
+        )
+
+    def get_y_step(self) -> Offset:
+        """Get y_step property value."""
+        return self.get_step_and_repeat().get_y_step()
+
+    def set_y_step(self, value: Offset) -> Self:
+        """Set the y_repeat property value."""
+        return self.set_step_and_repeat(
+            self.get_step_and_repeat().set_y_step(value),
         )
 
     current_position: Vector2D = Vector2D(x=Offset.NULL, y=Offset.NULL)
