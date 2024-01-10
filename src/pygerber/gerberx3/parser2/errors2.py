@@ -107,6 +107,22 @@ class StepAndRepeatNotInitializedError(Parser2Error):
     """Raised when step and repeat block is closed without being correctly opened."""
 
 
+class StandardAttributeError(Parser2Error):
+    """Raised when parser encounters an error while processing a standard attribute."""
+
+
+class MissingNameFieldError(StandardAttributeError):
+    """Raised when a missing name field is detected."""
+
+
+class MissingGuidFieldError(StandardAttributeError):
+    """Raised when a missing name field is detected."""
+
+
+class MissingRevisionFieldError(StandardAttributeError):
+    """Raised when a missing name field is detected."""
+
+
 class Parser2Interrupt(Exception):  # noqa: N818
     """Base class for implementing interrupts."""
 

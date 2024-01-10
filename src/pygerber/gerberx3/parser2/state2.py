@@ -804,59 +804,6 @@ class State2(FrozenGeneralModel):
             },
         )
 
-    file_attributes: ImmutableMapping[str, str] = Field(
-        default_factory=ImmutableMapping,
-    )
-    """Collection of file level attributes. (Spec reference: 5.3 and 5.5)"""
-
-    def set_file_attribute(self, __attribute: str, __value: str) -> Self:
-        """Add a file attribute to the state.
-
-        This method adds a file attribute to the current state object.
-
-        Parameters
-        ----------
-        __id : str
-            Attribute identifier.
-        __aperture : str
-            Attribute value.
-
-        Returns
-        -------
-        Self
-            The updated state object.
-        """
-        return self.model_copy(
-            update={
-                "file_attributes": self.file_attributes.update(__attribute, __value),
-            },
-        )
-
-    def get_file_attribute(self, __id: str) -> Optional[str]:
-        """Get the file attribute with the specified ID.
-
-        This method retrieves the file attribute associated with the given ID.
-
-        Parameters
-        ----------
-        __id : str
-            The ID of the file attribute to retrieve.
-
-        Returns
-        -------
-        str
-            The file attribute with the specified ID.
-        """
-        return self.file_attributes.get(__id)
-
-    def delete_file_attribute(self, __id: str) -> Self:
-        """Delete file attribute."""
-        return self.model_copy(
-            update={
-                "file_attributes": self.file_attributes.delete(__id),
-            },
-        )
-
     apertures: State2ApertureIndex = Field(default_factory=State2ApertureIndex)
     """Collection of all apertures defined until given point in code."""
 
@@ -930,3 +877,7 @@ class Command2State2Proxy(FrozenGeneralModel):
     """Proxy for accessing Parser2State from the moment of creation of command."""
 
     state: State2
+
+    def get_aperture(self, aperture_id: ApertureID) -> Aperture2:
+        """Get aperture from state."""
+        return self.state.get_aperture(aperture_id)

@@ -7,7 +7,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from pygerber.common.immutable_map_model import ImmutableMapping
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser.errors import (
@@ -19,6 +18,10 @@ from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
 from pygerber.gerberx3.parser2.apertures2.polygon2 import Polygon2
 from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
+from pygerber.gerberx3.parser2.attributes2 import (
+    AperFunctionAttribute,
+    ObjectAttributes,
+)
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2
 from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
@@ -295,7 +298,7 @@ def test_command_draw_line_token_hooks() -> None:
     assert len(cmds) == 1
     cmd = next(iter(cmds))
     assert isinstance(cmd, Line2)
-    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.attributes == ObjectAttributes()
     assert cmd.polarity == polarity
     assert cmd.aperture_id == current_aperture
     assert cmd.start_point == Vector2D(x=Offset.new("0"), y=Offset.new("0"))
@@ -341,7 +344,7 @@ def test_command_draw_line_token_hooks_6() -> None:
     assert len(cmds) == 1
     cmd = next(iter(cmds))
     assert isinstance(cmd, Line2)
-    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.attributes == ObjectAttributes()
     assert cmd.polarity == polarity
     assert cmd.aperture_id == current_aperture
     assert cmd.start_point == start_point
@@ -388,7 +391,7 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
     assert len(cmds) == 1
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
-    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.attributes == ObjectAttributes()
     assert cmd.polarity == polarity
     assert cmd.aperture_id == current_aperture
     assert cmd.start_point == start_point
@@ -437,7 +440,7 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
     assert len(cmds) == 1
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
-    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.attributes == ObjectAttributes()
     assert cmd.polarity == polarity
     assert cmd.aperture_id == current_aperture
     assert cmd.start_point == start_point
@@ -522,7 +525,7 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
     assert len(cmds) == 1
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
-    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.attributes == ObjectAttributes()
     assert cmd.polarity == polarity
     assert cmd.aperture_id == current_aperture
     assert cmd.start_point == start_point
@@ -597,7 +600,7 @@ def test_command_flash_token_hooks() -> None:
     assert len(cmds) == 1
     cmd = next(iter(cmds))
     assert isinstance(cmd, Flash2)
-    assert cmd.attributes == ImmutableMapping[str, str]()
+    assert cmd.attributes == ObjectAttributes()
     assert cmd.polarity == polarity
     assert cmd.aperture_id == current_aperture
     assert cmd.flash_point == end_point
@@ -1209,7 +1212,7 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
 
             for cmd in sr_cmd_buffer:
                 assert isinstance(cmd, Line2)
-                assert cmd.attributes == ImmutableMapping[str, str]()
+                assert cmd.attributes == ObjectAttributes()
                 assert cmd.polarity == polarity
                 assert cmd.aperture_id == current_aperture
                 assert cmd.start_point == start_point + offset
@@ -1228,4 +1231,205 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
     debug_dump_context(
         context,
         DEBUG_DUMP_DIR / test_command_draw_line_token_hooks.__qualname__,
+    )
+
+
+def test_aperture_attribute_token_hooks_AperFunction_EtchedComponent() -> None:
+    gerber_source = """
+    %TA.AperFunction,EtchedComponent*%
+    """
+
+    context = Parser2Context()
+
+    parse_code(gerber_source, context)
+
+    aper_function = context.aperture_attributes.AperFunction
+    assert aper_function is not None
+    assert aper_function.function == AperFunctionAttribute.Function.SMDPad
+    assert aper_function.field == "CuDef"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR
+        / test_aperture_attribute_token_hooks_AperFunction_EtchedComponent.__qualname__,
+    )
+
+
+def test_aperture_attribute_token_hooks_AperFunction_SMDPad() -> None:
+    gerber_source = """
+    %TA.AperFunction,SMDPad,CuDef*%
+    """
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    aper_function = context.aperture_attributes.AperFunction
+    assert aper_function is not None
+    assert aper_function.function == AperFunctionAttribute.Function.SMDPad
+    assert aper_function.field == "CuDef"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR
+        / test_aperture_attribute_token_hooks_AperFunction_SMDPad.__qualname__,
+    )
+
+
+def test_object_attributes_token_hooks_N() -> None:
+    gerber_source = r"""
+    %TO.N,/NAND Flash \002C eMMC\002C T-Card and Audio/NAND0-ALE\005CSDC2-DS*%
+    """
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    name = context.object_attributes.N
+    assert name is not None
+    assert name == r"/NAND Flash \002C eMMC\002C T-Card and Audio/NAND0-ALE\005CSDC2-DS"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_object_attributes_token_hooks_N.__qualname__,
+    )
+
+
+def test_object_attributes_token_hooks_P() -> None:
+    gerber_source = r"""
+    %TO.P,LAN1,10*%
+    """
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    pin = context.object_attributes.P
+    assert pin is not None
+    assert pin == r"LAN1,10"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_object_attributes_token_hooks_P.__qualname__,
+    )
+
+
+def test_object_attributes_token_hooks_C() -> None:
+    gerber_source = r"""
+    %TO.C,C123*%
+    """
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    attribute_c = context.object_attributes.C
+    assert attribute_c is not None
+    assert attribute_c == "C123"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_object_attributes_token_hooks_C.__qualname__,
+    )
+
+
+def test_object_attributes_token_hooks_update_C() -> None:
+    gerber_source = r"""
+    %TO.C,C123*%
+    %TO.C,FID4*%
+    """
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    attribute_c = context.object_attributes.C
+    assert attribute_c is not None
+    assert attribute_c == "FID4"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_object_attributes_token_hooks_C.__qualname__,
+    )
+
+
+def test_file_attributes_token_hooks() -> None:
+    gerber_source = r"""
+    %TF.GenerationSoftware,KiCad,Pcbnew,5.1.5-52549c5~84~ubuntu18.04.1*%
+    %TF.CreationDate,2020-02-11T15:54:30+02:00*%
+    %TF.ProjectId,A64-OlinuXino_Rev_G,4136342d-4f6c-4696-9e75-58696e6f5f52,G*%
+    %TF.SameCoordinates,Original*%
+    %TF.FileFunction,Soldermask,Bot*%
+    %TF.FilePolarity,Negative*%
+    """
+
+    context = Parser2Context()
+    parse_code(gerber_source, context)
+
+    assert (
+        context.file_attributes.GenerationSoftware
+        == "KiCad,Pcbnew,5.1.5-52549c5~84~ubuntu18.04.1"
+    )
+    assert context.file_attributes.CreationDate == "2020-02-11T15:54:30+02:00"
+    assert (
+        context.file_attributes.ProjectId
+        == "A64-OlinuXino_Rev_G,4136342d-4f6c-4696-9e75-58696e6f5f52,G"
+    )
+    assert context.file_attributes.SameCoordinates == "Original"
+    assert context.file_attributes.FileFunction == "Soldermask,Bot"
+    assert context.file_attributes.FilePolarity == "Negative"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_file_attributes_token_hooks.__qualname__,
+    )
+
+
+def test_delete_attribute_token_hooks_C() -> None:
+    gerber_source = r"""
+    %TO.C,C123*%
+    %TO.P,LAN1,10*%
+    %TD.C*%
+    """
+
+    context = Parser2Context()
+    context.set_object_attribute("C", "C123")
+    parse_code(gerber_source, context)
+
+    attribute_c = context.object_attributes.C
+    assert attribute_c is None
+
+    pin = context.object_attributes.P
+    assert pin is not None
+    assert pin.refdes == "LAN1"
+    assert pin.number == "10"
+    assert pin.function is None
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_object_attributes_token_hooks_C.__qualname__,
+    )
+
+
+def test_delete_attribute_token_hooks_all() -> None:
+    gerber_source = r"""
+    %TF.GenerationSoftware,KiCad,Pcbnew,5.1.5-52549c5~84~ubuntu18.04.1*%
+    %TO.C,C123*%
+    %TO.P,LAN1,10*%
+    %TD*%
+    """
+
+    context = Parser2Context()
+    context.set_object_attribute("C", "C123")
+    parse_code(gerber_source, context)
+
+    attribute_c = context.object_attributes.C
+    assert attribute_c is None
+
+    pin = context.object_attributes.P
+    assert pin is None
+
+    gen_sw = context.file_attributes.GenerationSoftware
+
+    assert gen_sw is not None
+    assert gen_sw.name == "KiCad"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_object_attributes_token_hooks_C.__qualname__,
     )

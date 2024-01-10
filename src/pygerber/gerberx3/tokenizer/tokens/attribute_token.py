@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Optional
+
 from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
     ExtendedCommandToken,
 )
+
+if TYPE_CHECKING:
+    from pyparsing import ParseResults
+    from typing_extensions import Self
 
 
 class AttributeToken(ExtendedCommandToken):
@@ -75,3 +81,36 @@ class AttributeToken(ExtendedCommandToken):
     See section 5.1 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=122)
 
     """  # noqa: E501
+
+
+class SetAttributeToken(AttributeToken):
+    """Base class for all classes which set some kind of attribute."""
+
+    def __init__(
+        self,
+        string: str,
+        location: int,
+        name: str,
+        value: Optional[str],
+    ) -> None:
+        super().__init__(string, location)
+        self.name = name
+        self.value = value
+
+    @classmethod
+    def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
+        """Create instance of this class.
+
+        Created to be used as callback in `ParserElement.set_parse_action()`.
+        """
+        name: str = str(tokens["attribute_name"])
+        value = tokens.get("field", None)
+        if value is not None:
+            value = str(value)
+
+        return cls(
+            string=string,
+            location=location,
+            name=name,
+            value=value,
+        )

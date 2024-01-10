@@ -4,10 +4,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from pydantic import Field
-
 from pygerber.common.frozen_general_model import FrozenGeneralModel
-from pygerber.common.immutable_map_model import ImmutableMapping
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.state2 import Command2State2Proxy
@@ -20,7 +17,6 @@ if TYPE_CHECKING:
 class Command2(FrozenGeneralModel):
     """Parser level abstraction of draw operation for Gerber AST parser, version 2."""
 
-    attributes: ImmutableMapping[str, str] = Field(default_factory=ImmutableMapping)
     polarity: Polarity
     state: Command2State2Proxy
 

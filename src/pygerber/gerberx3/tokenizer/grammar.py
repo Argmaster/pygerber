@@ -720,56 +720,40 @@ class GerberGrammarBuilder(GrammarBuilder):
     def _build_attribute_tokens(self, *, statement: bool = False) -> ParserElement:
         wrapper = self.wrapper
 
-        file_attribute_name = (
-            oneOf(
-                ".Part .FileFunction .FilePolarity .SameCoordinates .CreationDate\
-                .GenerationSoftware .ProjectId .MD5",
-            )
-            | self._build_user_name()
-        ).set_name("file attribute name")
-
-        aperture_attribute_name = (
-            oneOf(".AperFunction .DrillTolerance .FlashText") | self._build_user_name()
-        ).set_name("aperture attribute name")
-
-        object_attribute_name = (
-            oneOf(
-                ".N .P .C .CRot .CMfr .CMPN .CVal .CMnt .CFtp .CPgN .CPgD .CHgt .CLbN "
-                ".CLbD .CSup",
-            )
-            | self._build_user_name()
-        ).set_name("object attribute name")
+        file_attribute_name = self._build_name().set_name("file attribute name")
+        aperture_attribute_name = self._build_name().set_name("aperture attribute name")
+        object_attribute_name = self._build_name().set_name("object attribute name")
 
         # Set a file attribute.
         tf = wrapper(
             FileAttribute,
             Literal("TF")
             + file_attribute_name.set_results_name("attribute_name")
-            + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
+            + Literal(",")
+            + self._build_field(),
         )
         # Add an aperture attribute to the dictionary or modify it.
         ta = wrapper(
             ApertureAttribute,
             Literal("TA")
             + aperture_attribute_name.set_results_name("attribute_name")
-            + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
+            + Literal(",")
+            + self._build_field(),
         )
         # Add an object attribute to the dictionary or modify it.
         to = wrapper(
             ObjectAttribute,
             Literal("TO")
             + object_attribute_name.set_results_name("attribute_name")
-            + ZeroOrMore("," + (self._build_field(list_all_matches=True) | "")),
+            + Literal(",")
+            + self._build_field(),
         )
         # Delete one or all attributes in the dictionary.
         td = wrapper(
             DeleteAttribute,
             Literal("TD")
             + Opt(
-                file_attribute_name
-                | aperture_attribute_name
-                | object_attribute_name
-                | self._build_user_name(),
+                file_attribute_name | aperture_attribute_name | object_attribute_name,
             ).set_results_name("attribute_name"),
         )
         if statement:
@@ -852,19 +836,6 @@ class GerberGrammarBuilder(GrammarBuilder):
     ) -> ParserElement:
         return self._annotate_parser_element(
             Regex(r"[._a-zA-Z$][\._a-zA-Z0-9]*"),
-            result_name,
-            name,
-            **kwargs,
-        )
-
-    def _build_user_name(
-        self,
-        result_name: str = "user_name",
-        name: Optional[str] = None,
-        **kwargs: Any,
-    ) -> ParserElement:
-        return self._annotate_parser_element(
-            Regex(r"[_a-zA-Z$][\._a-zA-Z0-9]*"),
             result_name,
             name,
             **kwargs,

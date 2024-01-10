@@ -139,19 +139,6 @@ def test_set_current_aperture_id() -> None:
     assert new_state.get_current_aperture_id() == ApertureID("D10")
 
 
-def test_set_file_attribute() -> None:
-    state = State2()
-    new_state = state.set_file_attribute("attribute", "value")
-    assert new_state.get_file_attribute("attribute") == "value"
-
-
-def test_delete_file_attribute() -> None:
-    state = State2()
-    new_state = state.set_file_attribute("attribute", "value")
-    new_state = new_state.delete_file_attribute("attribute")
-    assert new_state.get_file_attribute("attribute") is None
-
-
 def test_set_aperture() -> None:
     state = State2()
     mm = MagicMock()

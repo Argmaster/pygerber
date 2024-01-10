@@ -8,7 +8,6 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from pygerber.common.error import throw
-from pygerber.common.immutable_map_model import ImmutableMapping
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.apertures2.block2 import Block2
@@ -36,6 +35,8 @@ from pygerber.gerberx3.state_enums import DrawMode, ImagePolarityEnum, Unit
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
+from pygerber.gerberx3.tokenizer.tokens.td_delete_attribute import DeleteAttribute
+from pygerber.gerberx3.tokenizer.tokens.to_object_attribute import ObjectAttribute
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.parser2.context2 import Parser2Context
@@ -183,7 +184,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 identifier,
                 Block2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.aperture_attributes,
                     command_buffer=command_buffer.get_readonly(),
                 ),
             )
@@ -220,7 +221,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Circle2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.aperture_attributes,
                     diameter=Offset.new(token.diameter, context.get_draw_units()),
                     hole_diameter=hole_diameter,
                 ),
@@ -255,7 +256,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Rectangle2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.aperture_attributes,
                     x_size=Offset.new(token.x_size, context.get_draw_units()),
                     y_size=Offset.new(token.y_size, context.get_draw_units()),
                     hole_diameter=hole_diameter,
@@ -291,7 +292,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Obround2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.aperture_attributes,
                     x_size=Offset.new(token.x_size, context.get_draw_units()),
                     y_size=Offset.new(token.y_size, context.get_draw_units()),
                     hole_diameter=hole_diameter,
@@ -328,7 +329,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Polygon2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.aperture_attributes,
                     outer_diameter=Offset.new(
                         token.outer_diameter,
                         context.get_draw_units(),
@@ -363,7 +364,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture(
                 token.aperture_id,
                 Macro2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.aperture_attributes,
                 ),
             )
             return super().on_parser_visit_token(token, context)
@@ -436,7 +437,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 Line2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.object_attributes,
                     polarity=context.get_polarity(),
                     aperture_id=(
                         context.get_current_aperture_id()
@@ -523,7 +524,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 Arc2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.object_attributes,
                     polarity=context.get_polarity(),
                     aperture_id=(
                         context.get_current_aperture_id()
@@ -603,7 +604,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 CCArc2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.object_attributes,
                     polarity=context.get_polarity(),
                     aperture_id=(
                         context.get_current_aperture_id()
@@ -683,7 +684,7 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 Flash2(
-                    attributes=ImmutableMapping[str, str](),
+                    attributes=context.object_attributes,
                     polarity=context.get_polarity(),
                     aperture_id=(
                         context.get_current_aperture_id()
@@ -869,7 +870,8 @@ class Parser2Hooks(IHooks):
 
             context.add_command(
                 Region2(
-                    attributes=ImmutableMapping[str, str](),
+                    aperture_attributes=context.aperture_attributes,
+                    object_attributes=context.object_attributes,
                     polarity=context.get_polarity(),
                     command_buffer=command_buffer.get_readonly(),
                     state=context.get_state().get_command2_proxy(),
@@ -1310,7 +1312,6 @@ class Parser2Hooks(IHooks):
             for x_index in range(context.get_x_repeat()):
                 for y_index in range(context.get_y_repeat()):
                     buffer_command = BufferCommand2(
-                        attributes=ImmutableMapping[str, str](),
                         polarity=context.get_polarity(),
                         state=context.get_state().get_command2_proxy(),
                         command_buffer=command_buffer,
@@ -1353,14 +1354,35 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
-            context.get_current_aperture_mutable_proxy().set_attribute(
-                token.name,
-                ",".join(token.value),
-            )
+            context.set_aperture_attribute(token.name, token.value)
             return super().on_parser_visit_token(token, context)
 
     class DeleteAttributeHooks(IHooks.DeleteAttributeHooks):
         """Hooks for visiting delete attribute token (TD)."""
+
+        def on_parser_visit_token(
+            self,
+            token: DeleteAttribute,
+            context: Parser2Context,
+        ) -> None:
+            """Called when parser visits a token.
+
+            This hook should perform all changes on context implicated by token type.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+            """
+            if token.name is not None:
+                context.delete_aperture_attribute(token.name)
+                context.delete_object_attribute(token.name)
+            else:
+                context.clear_aperture_attributes()
+                context.clear_object_attributes()
+            return super().on_parser_visit_token(token, context)
 
     class FileAttributeHooks(IHooks.FileAttributeHooks):
         """Hooks for visiting file attribute token (TF)."""
@@ -1381,8 +1403,27 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
-            context.set_file_attribute(token.name, ",".join(token.value))
+            context.set_file_attribute(token.name, token.value)
             return super().on_parser_visit_token(token, context)
 
     class ObjectAttributeHooks(IHooks.ObjectAttributeHooks):
         """Hooks for visiting object attribute token (TO)."""
+
+        def on_parser_visit_token(
+            self,
+            token: ObjectAttribute,
+            context: Parser2Context,
+        ) -> None:
+            """Called when parser visits a token.
+
+            This hook should perform all changes on context implicated by token type.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+            """
+            context.set_object_attribute(token.name, token.value)
+            return super().on_parser_visit_token(token, context)

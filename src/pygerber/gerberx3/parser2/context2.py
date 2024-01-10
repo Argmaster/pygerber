@@ -7,6 +7,11 @@ from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.parser2.attributes2 import (
+    ApertureAttributes,
+    FileAttributes,
+    ObjectAttributes,
+)
 from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotDefined2Error,
@@ -60,6 +65,10 @@ class Parser2Context:
         self.reached_program_stop: bool = False
         self.reached_optional_stop: bool = False
         self.reached_end_of_file: bool = False
+
+        self.file_attributes = FileAttributes()
+        self.aperture_attributes = ApertureAttributes()
+        self.object_attributes = ObjectAttributes()
 
     def push_block_command_buffer(self) -> None:
         """Add new command buffer for block aperture draw commands."""
@@ -373,18 +382,6 @@ class Parser2Context:
             self.get_state().set_current_aperture_id(current_aperture),
         )
 
-    def get_file_attribute(self, key: str) -> Optional[str]:
-        """Get file attributes property."""
-        return self.get_state().get_file_attribute(key)
-
-    def delete_file_attribute(self, key: str) -> None:
-        """Get file attributes property."""
-        return self.set_state(self.get_state().delete_file_attribute(key))
-
-    def set_file_attribute(self, key: str, value: str) -> None:
-        """Set file attributes property."""
-        return self.set_state(self.get_state().set_file_attribute(key, value))
-
     def get_aperture(self, __key: ApertureID) -> Aperture2:
         """Get apertures property value."""
         try:
@@ -406,18 +403,6 @@ class Parser2Context:
     def set_macro(self, __key: str, __value: str) -> None:
         """Set the macro property value."""
         return self.set_state(self.get_state().set_macro(__key, __value))
-
-    def get_current_aperture_mutable_proxy(
-        self,
-    ) -> Aperture2MutableProxy | EmptyAperture2MutableProxy:
-        """Get current_aperture property value."""
-        aperture_id = self.get_state().get_current_aperture_id()
-        if aperture_id is not None:
-            return Aperture2MutableProxy(
-                context=self,
-                aperture_id=aperture_id,
-            )
-        return EmptyAperture2MutableProxy()
 
     def set_reached_program_stop(self) -> None:
         """Set flag indicating that M00 token was reached."""
@@ -443,33 +428,49 @@ class Parser2Context:
         """Get flag indicating that M02 end of file was reached."""
         return self.reached_end_of_file
 
+    def get_file_attribute(self, key: str) -> Optional[str]:
+        """Get file attributes property."""
+        return self.file_attributes.get(key)
 
-class EmptyAperture2MutableProxy(FrozenGeneralModel):
-    """Represents one of the `None``-cases for the `current_aperture` in
-    `Parser2Context`.
-    """
+    def delete_file_attribute(self, key: str) -> None:
+        """Get file attributes property."""
+        self.file_attributes = self.file_attributes.delete(key)
 
-    def set_attribute(self, name: str, value: str) -> None:
-        """Add an attribute to aperture."""
+    def set_file_attribute(self, key: str, value: Optional[str]) -> None:
+        """Set file attributes property."""
+        self.file_attributes = self.file_attributes.update(key, value)
 
+    def get_aperture_attribute(self, key: str) -> Optional[str]:
+        """Get aperture attributes property."""
+        return self.aperture_attributes.get(key)
 
-class Aperture2MutableProxy(EmptyAperture2MutableProxy):
-    """Represents a proxy for an aperture in the Gerber file."""
+    def delete_aperture_attribute(self, key: str) -> None:
+        """Delete aperture attributes property."""
+        self.aperture_attributes = self.aperture_attributes.delete(key)
 
-    context: Parser2Context
-    """Parser context."""
+    def clear_aperture_attributes(self) -> None:
+        """Clear aperture attributes property."""
+        self.aperture_attributes = ApertureAttributes()
 
-    aperture_id: ApertureID
-    """The ID of the aperture."""
+    def set_aperture_attribute(self, key: str, value: Optional[str]) -> None:
+        """Set aperture attributes property."""
+        self.aperture_attributes = self.aperture_attributes.update(key, value)
 
-    def set_attribute(self, name: str, value: str) -> None:
-        """Add an attribute to aperture."""
-        aperture = self.context.get_aperture(self.aperture_id)
-        if aperture is not None:
-            self.context.set_aperture(
-                self.aperture_id,
-                aperture.set_attribute(name, value),
-            )
+    def get_object_attribute(self, key: str) -> Optional[str]:
+        """Get object attributes property."""
+        return self.object_attributes.get(key)
+
+    def delete_object_attribute(self, key: str) -> None:
+        """Delete object attributes property."""
+        self.object_attributes = self.object_attributes.delete(key)
+
+    def set_object_attribute(self, key: str, value: Optional[str]) -> None:
+        """Set object attributes property."""
+        self.object_attributes = self.object_attributes.update(key, value)
+
+    def clear_object_attributes(self) -> None:
+        """Clear object attributes property."""
+        self.object_attributes = ObjectAttributes()
 
 
 class Parser2ContextOptions(FrozenGeneralModel):
