@@ -20,6 +20,9 @@ if TYPE_CHECKING:
 class AttributesDictionary(ImmutableMapping[str, Optional[str]]):
     """Base class for container holding attributes."""
 
+    def __str__(self) -> str:
+        return f"{self.__class__.__qualname__}({self.mapping})"
+
 
 class StandardAttributeBase(FrozenGeneralModel):
     """Class for wrapping standard attribute content."""

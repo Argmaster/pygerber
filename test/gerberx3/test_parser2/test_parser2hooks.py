@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from decimal import Decimal
 from pathlib import Path
 from test.gerberx3.test_parser2.common import debug_dump_context, parse_code
@@ -1245,8 +1246,8 @@ def test_aperture_attribute_token_hooks_AperFunction_EtchedComponent() -> None:
 
     aper_function = context.aperture_attributes.AperFunction
     assert aper_function is not None
-    assert aper_function.function == AperFunctionAttribute.Function.SMDPad
-    assert aper_function.field == "CuDef"
+    assert aper_function.function == AperFunctionAttribute.Function.EtchedComponent
+    assert aper_function.field == ""
 
     debug_dump_context(
         context,
@@ -1303,7 +1304,9 @@ def test_object_attributes_token_hooks_P() -> None:
 
     pin = context.object_attributes.P
     assert pin is not None
-    assert pin == r"LAN1,10"
+    assert pin.refdes == "LAN1"
+    assert pin.number == "10"
+    assert pin.function is None
 
     debug_dump_context(
         context,
@@ -1361,11 +1364,15 @@ def test_file_attributes_token_hooks() -> None:
     context = Parser2Context()
     parse_code(gerber_source, context)
 
-    assert (
-        context.file_attributes.GenerationSoftware
-        == "KiCad,Pcbnew,5.1.5-52549c5~84~ubuntu18.04.1"
+    gs = context.file_attributes.GenerationSoftware
+    assert gs is not None
+    assert gs.name == "KiCad"
+    assert gs.guid == "Pcbnew"
+    assert gs.revision == "5.1.5-52549c5~84~ubuntu18.04.1"
+
+    assert context.file_attributes.CreationDate == datetime.datetime.fromisoformat(
+        "2020-02-11T15:54:30+02:00",
     )
-    assert context.file_attributes.CreationDate == "2020-02-11T15:54:30+02:00"
     assert (
         context.file_attributes.ProjectId
         == "A64-OlinuXino_Rev_G,4136342d-4f6c-4696-9e75-58696e6f5f52,G"

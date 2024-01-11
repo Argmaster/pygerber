@@ -35,6 +35,7 @@ from pygerber.gerberx3.state_enums import DrawMode, ImagePolarityEnum, Unit
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
+from pygerber.gerberx3.tokenizer.tokens.g54_select_aperture import G54SelectAperture
 from pygerber.gerberx3.tokenizer.tokens.td_delete_attribute import DeleteAttribute
 from pygerber.gerberx3.tokenizer.tokens.to_object_attribute import ObjectAttribute
 
@@ -883,6 +884,25 @@ class Parser2Hooks(IHooks):
 
     class PrepareSelectApertureTokenHooks(IHooks.PrepareSelectApertureTokenHooks):
         """Hooks for visiting prepare select aperture token (G54)."""
+
+        def on_parser_visit_token(
+            self,
+            token: G54SelectAperture,
+            context: Parser2Context,
+        ) -> None:
+            """Called when parser visits a token.
+
+            This hook should perform all changes on context implicated by token type.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+            """
+            self.hooks.select_aperture.on_parser_visit_token(token, context)
+            return super().on_parser_visit_token(token, context)
 
     class SetUnitInchTokenHooks(IHooks.SetUnitInchTokenHooks):
         """Hooks for visiting set unit inch token (G70)."""

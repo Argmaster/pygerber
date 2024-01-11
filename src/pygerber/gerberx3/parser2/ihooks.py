@@ -2,7 +2,7 @@
 # ruff: noqa: D401
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, Union
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -78,6 +78,9 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.to_object_attribute import ObjectAttribute
 
 
+__all__ = ["TokenHooksBase", "IHooks"]
+
+
 BlockApertureEndT: TypeAlias = "BlockApertureEnd"
 BlockApertureBeginT: TypeAlias = "BlockApertureBegin"
 DefineCircleT: TypeAlias = "DefineCircle"
@@ -85,6 +88,13 @@ DefineRectangleT: TypeAlias = "DefineRectangle"
 DefineObroundT: TypeAlias = "DefineObround"
 DefinePolygonT: TypeAlias = "DefinePolygon"
 DefineMacroT: TypeAlias = "DefineMacro"
+DefineAnyT = Union[
+    DefineCircleT,
+    DefineRectangleT,
+    DefineObroundT,
+    DefinePolygonT,
+    DefineMacroT,
+]
 AxisSelectT: TypeAlias = "AxisSelect"
 D01DrawT: TypeAlias = "D01Draw"
 D02MoveT: TypeAlias = "D02Move"
@@ -199,6 +209,7 @@ class IHooks:
         self.define_obround_aperture = self.DefineApertureObroundTokenHooks(self)
         self.define_polygon_aperture = self.DefineAperturePolygonTokenHooks(self)
         self.define_macro_aperture = self.DefineApertureMacroTokenHooks(self)
+        self.define_aperture = self.DefineApertureTokenHooks(self)
         self.axis_select = self.AxisSelectTokenHooksTokenHooks(self)
         self.command_draw = self.CommandDrawTokenHooks(self)
         self.command_move = self.CommandMoveTokenHooks(self)
@@ -250,6 +261,7 @@ class IHooks:
         self.define_obround_aperture.post_hooks_init()
         self.define_polygon_aperture.post_hooks_init()
         self.define_macro_aperture.post_hooks_init()
+        self.define_aperture.post_hooks_init()
         self.axis_select.post_hooks_init()
         self.command_draw.post_hooks_init()
         self.command_move.post_hooks_init()
@@ -333,6 +345,9 @@ class IHooks:
 
     class DefineApertureMacroTokenHooks(TokenHooksBase[DefineMacroT]):
         """Hooks for visiting macro aperture definition token (ADD)."""
+
+    class DefineApertureTokenHooks(TokenHooksBase[DefineAnyT]):
+        """Hooks for visiting any aperture definition token (ADD)."""
 
     class AxisSelectTokenHooksTokenHooks(TokenHooksBase[AxisSelectT]):
         """Hooks for visiting axis select token (AS)."""
