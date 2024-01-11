@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+
 
 class DeleteAttribute(AttributeToken):
     """Delete one or all attributes in the dictionary.
@@ -40,6 +42,12 @@ class DeleteAttribute(AttributeToken):
             location=location,
             name=name,
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().delete_attribute.pre_parser_visit_token(self, context)
+        context.get_hooks().delete_attribute.on_parser_visit_token(self, context)
+        context.get_hooks().delete_attribute.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

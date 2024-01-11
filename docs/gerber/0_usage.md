@@ -1,4 +1,4 @@
-# High Level API
+# Public API Usage
 
 PyGerber offers simple high-level API for rendering Gerber files. All necessary tools
 can be imported from `pygerber.gerberx3.api` module. See

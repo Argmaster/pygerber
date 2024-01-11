@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class D01Draw(CommandToken):
@@ -268,6 +269,12 @@ class D01Draw(CommandToken):
             center_position=end_position,
             other=current_aperture.drawing_target,
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().command_draw.pre_parser_visit_token(self, context)
+        context.get_hooks().command_draw.on_parser_visit_token(self, context)
+        context.get_hooks().command_draw.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class DefineAperture(ExtendedCommandToken):
@@ -187,6 +188,20 @@ class DefineCircle(DefineAperture):
             (),
         )
 
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().define_circle_aperture.pre_parser_visit_token(self, context)
+        context.get_hooks().define_aperture.pre_parser_visit_token(self, context)
+
+        context.get_hooks().define_circle_aperture.on_parser_visit_token(self, context)
+        context.get_hooks().define_aperture.on_parser_visit_token(self, context)
+
+        context.get_hooks().define_circle_aperture.post_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().define_aperture.post_parser_visit_token(self, context)
+
     def get_gerber_code(
         self,
         indent: str = "",
@@ -326,6 +341,26 @@ class DefineRectangle(DefineAperture):
             ),
             (),
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().define_rectangle_aperture.pre_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().define_aperture.pre_parser_visit_token(self, context)
+
+        context.get_hooks().define_rectangle_aperture.on_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().define_aperture.on_parser_visit_token(self, context)
+
+        context.get_hooks().define_rectangle_aperture.post_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().define_aperture.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,
@@ -507,6 +542,23 @@ class DefineObround(DefineAperture):
             (),
         )
 
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().define_obround_aperture.pre_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().define_aperture.pre_parser_visit_token(self, context)
+
+        context.get_hooks().define_obround_aperture.on_parser_visit_token(self, context)
+        context.get_hooks().define_aperture.on_parser_visit_token(self, context)
+
+        context.get_hooks().define_obround_aperture.post_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().define_aperture.post_parser_visit_token(self, context)
+
     def get_gerber_code(
         self,
         indent: str = "",
@@ -657,6 +709,23 @@ class DefinePolygon(DefineAperture):
             ),
             (),
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().define_polygon_aperture.pre_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().define_aperture.pre_parser_visit_token(self, context)
+
+        context.get_hooks().define_polygon_aperture.on_parser_visit_token(self, context)
+        context.get_hooks().define_aperture.on_parser_visit_token(self, context)
+
+        context.get_hooks().define_polygon_aperture.post_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().define_aperture.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,
@@ -811,6 +880,17 @@ class DefineMacro(DefineAperture):
             ),
             (),
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().define_macro_aperture.pre_parser_visit_token(self, context)
+        context.get_hooks().define_aperture.pre_parser_visit_token(self, context)
+
+        context.get_hooks().define_macro_aperture.on_parser_visit_token(self, context)
+        context.get_hooks().define_aperture.on_parser_visit_token(self, context)
+
+        context.get_hooks().define_macro_aperture.post_parser_visit_token(self, context)
+        context.get_hooks().define_aperture.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

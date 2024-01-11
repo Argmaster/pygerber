@@ -1,17 +1,6 @@
 """`pygerber.gerberx3.api` module provides simple, high-level API for rendering
 Gerber X3/X2 files.
-
-!!! info "Supported features"
-
-    For list of supported Gerber format features please see
-    [Gerber features support](../../../../README.md#gerber-features-support) section.
-
-!!! info "Tutorial"
-
-    For tutorial on how to use high level API see
-    [Gerber X3 High Level API](../../../../gerber/high_level_api.md#gerber-x3-high-level-api)
-    section.
-"""  # noqa: E501
+"""
 from __future__ import annotations
 
 from pygerber.backend.rasterized_2d.color_scheme import ColorScheme

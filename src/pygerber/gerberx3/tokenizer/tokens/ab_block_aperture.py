@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+
 
 class BlockApertureBegin(CommandToken):
     """## 4.11 Block Aperture (AB).
@@ -93,6 +95,12 @@ class BlockApertureBegin(CommandToken):
             (),
         )
 
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().begin_block_aperture.pre_parser_visit_token(self, context)
+        context.get_hooks().begin_block_aperture.on_parser_visit_token(self, context)
+        context.get_hooks().begin_block_aperture.post_parser_visit_token(self, context)
+
     def get_gerber_code(
         self,
         indent: str = "",
@@ -144,6 +152,12 @@ class BlockApertureEnd(CommandToken):
     See section 4.11 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=111)
 
     """  # noqa: E501
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().end_block_aperture.pre_parser_visit_token(self, context)
+        context.get_hooks().end_block_aperture.on_parser_visit_token(self, context)
+        context.get_hooks().end_block_aperture.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

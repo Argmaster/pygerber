@@ -32,6 +32,8 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+
 
 class ImageName(ExtendedCommandToken):
     """### Image Name (IN).
@@ -69,6 +71,12 @@ class ImageName(ExtendedCommandToken):
         """Update drawing state."""
         warn_deprecated_code("IN", "8.1")
         return super().update_drawing_state(state, _backend)
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().image_name.pre_parser_visit_token(self, context)
+        context.get_hooks().image_name.on_parser_visit_token(self, context)
+        context.get_hooks().image_name.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

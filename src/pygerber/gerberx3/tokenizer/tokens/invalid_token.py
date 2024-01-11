@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+
 
 class InvalidToken(Token):
     """Invalid syntax.
@@ -42,6 +44,12 @@ class InvalidToken(Token):
             message="Invalid syntax.",
             severity=diagnostic.DiagnosticSeverity.Error,
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().invalid_token.pre_parser_visit_token(self, context)
+        context.get_hooks().invalid_token.on_parser_visit_token(self, context)
+        context.get_hooks().invalid_token.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

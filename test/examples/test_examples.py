@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from test.examples import (
+    introspect_minimal_example,
+    introspect_mixed_inheritance,
     render_copper_from_buffer,
     render_copper_from_buffer_into_buffer,
     render_copper_from_path,
@@ -43,3 +45,11 @@ def test_render_copper_from_string_into_buffer() -> None:
 
 def test_render_copper_from_path_into_buffer() -> None:
     render_copper_from_path_into_buffer.render()
+
+
+def test_introspect_minimal_example() -> None:
+    introspect_minimal_example.main()
+
+
+def test_introspect_mixed_inheritance() -> None:
+    introspect_mixed_inheritance.main()

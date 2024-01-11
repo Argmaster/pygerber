@@ -1,22 +1,20 @@
 """Wrapper for aperture select token."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterable, Tuple
-
-from pydantic_core import CoreSchema, core_schema
+from typing import TYPE_CHECKING, Iterable, Tuple
 
 from pygerber.gerberx3.parser.errors import ApertureNotDefinedError
+from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
-from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
 
 if TYPE_CHECKING:
-    from pydantic import GetCoreSchemaHandler
     from pyparsing import ParseResults
     from typing_extensions import Self
 
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class DNNSelectAperture(CommandToken):
@@ -81,6 +79,12 @@ class DNNSelectAperture(CommandToken):
             (),
         )
 
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().select_aperture.pre_parser_visit_token(self, context)
+        context.get_hooks().select_aperture.on_parser_visit_token(self, context)
+        context.get_hooks().select_aperture.post_parser_visit_token(self, context)
+
     def get_gerber_code(
         self,
         indent: str = "",
@@ -88,26 +92,3 @@ class DNNSelectAperture(CommandToken):
     ) -> str:
         """Get gerber code represented by this token."""
         return f"{indent}{self.aperture_id.get_gerber_code(indent, endline)}"
-
-
-class ApertureID(str, GerberCode):
-    """Aperture ID wrapper."""
-
-    __slots__ = ()
-
-    @classmethod
-    def __get_pydantic_core_schema__(
-        cls,
-        source_type: Any,
-        handler: GetCoreSchemaHandler,
-    ) -> CoreSchema:
-        """Generate the pydantic-core schema."""
-        return core_schema.no_info_after_validator_function(cls, handler(str))
-
-    def get_gerber_code(
-        self,
-        indent: str = "",  # noqa: ARG002
-        endline: str = "\n",  # noqa: ARG002
-    ) -> str:
-        """Get gerber code represented by this token."""
-        return f"{self}"

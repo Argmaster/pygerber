@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 RECOMMENDED_MINIMAL_DECIMAL_PLACES = 5
@@ -69,12 +70,12 @@ class CoordinateFormat(ExtendedCommandToken):
         zeros_mode = TrailingZerosMode(tokens["zeros_mode"])
         coordinate_mode = CoordinateMode(tokens["coordinate_mode"])
         x_format = AxisFormat(
-            integer=int(tokens["x_format"][0]),
-            decimal=int(tokens["x_format"][1]),
+            integer=int(str(tokens["x_format"][0])),
+            decimal=int(str(tokens["x_format"][1])),
         )
         y_format = AxisFormat(
-            integer=int(tokens["y_format"][0]),
-            decimal=int(tokens["y_format"][1]),
+            integer=int(str(tokens["y_format"][0])),
+            decimal=int(str(tokens["y_format"][1])),
         )
         return cls(
             string=string,
@@ -107,6 +108,12 @@ class CoordinateFormat(ExtendedCommandToken):
             ),
             (),
         )
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().coordinate_format.pre_parser_visit_token(self, context)
+        context.get_hooks().coordinate_format.on_parser_visit_token(self, context)
+        context.get_hooks().coordinate_format.post_parser_visit_token(self, context)
 
     def get_gerber_code(
         self,

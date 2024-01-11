@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from pygerber.backend.abstract.backend_cls import Backend
     from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class Token(GerberCode):
@@ -62,6 +63,12 @@ class Token(GerberCode):
             raise TypeError(thing)
 
         return thing
+
+    def parser2_visit_token(
+        self,
+        context: Parser2Context,
+    ) -> None:
+        """Update drawing state for Gerber AST parser, version 2."""
 
     def update_drawing_state(
         self,

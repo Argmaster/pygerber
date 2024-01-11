@@ -7,13 +7,26 @@ Specification`.
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.tokenizer.grammar import GerberGrammarBuilder
+from pygerber.gerberx3.tokenizer.grammar import (
+    GerberGrammarBuilder,
+    GerberGrammarBuilderOptions,
+)
 from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
 
 if TYPE_CHECKING:
     from pyparsing import ParserElement
+
+
+@dataclass
+class TokenizerOptions:
+    """Tokenizer options."""
+
+    grammar_options: GerberGrammarBuilderOptions = field(
+        default_factory=GerberGrammarBuilderOptions,
+    )
 
 
 class Tokenizer:

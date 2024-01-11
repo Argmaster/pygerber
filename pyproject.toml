@@ -119,7 +119,7 @@ run-code-quality-checks = [{ cmd = "pre-commit run --all-files -v" }]
 run-unit-tests = [
     { cmd = "pytest --log-level=DEBUG -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered" },
 ]
-run-type-checks = [{ cmd = "mypy src/pygerber test/ scripts/" }]
+run-type-checks = [{ cmd = "mypy src/pygerber test/" }]
 
 [tool.isort]
 profile = "black"
@@ -182,7 +182,7 @@ python_version = "3.8"
 # A regular expression that matches file names, directory names and paths which
 # mypy should ignore while recursively discovering files to check. Use forward
 #slashes (/) as directory separators on all platforms.
-exclude = ["external/", ".tox/", ".venv/", ".vscode/"]
+exclude = ["external/", ".tox/", ".venv/", ".vscode/", "docs/", "scripts/"]
 # ---------------------------------------------------------------------------- #
 #                               Import discovery                               #
 # ---------------------------------------------------------------------------- #
@@ -198,6 +198,11 @@ follow_imports = "normal"
 # messages are suppressed by default, since you are usually not able to
 # control errors in 3rd party code.
 no_silence_site_packages = false
+# This flag tells mypy that top-level packages will be based in either the current
+# directory, or a member of the MYPYPATH environment variable or mypy_path config
+# option. This option is only useful in the absence of __init__.py. See Mapping file
+# paths to modules for details.
+explicit_package_bases = false
 # ---------------------------------------------------------------------------- #
 #                            Disallow dynamic typing                           #
 # ---------------------------------------------------------------------------- #
@@ -248,7 +253,7 @@ warn_redundant_casts = true
 # Warns about unneeded ``# type: ignore`` comments.
 warn_unused_ignores = false
 # Shows errors for missing return statements on some execution paths.
-no_warn_no_return = false
+warn_no_return = true
 # Shows a warning when returning a value with type ``Any`` from a function
 # declared with a non- ``Any`` return type.
 warn_return_any = true
@@ -301,4 +306,3 @@ color_output = true
 error_summary = true
 # Show absolute paths to files.
 show_absolute_path = true
-enable_incomplete_feature = "Unpack"
