@@ -38,6 +38,7 @@ with support for most of deprecated features along with support for modern ones.
 - [x] Tokenizer
 - [x] Parser
 - [ ] Optimizer
+- [x] [Introspection API](https://argmaster.github.io/pygerber/latest/gerber/introspection/0_usage.html)
 - [x] Rasterized 2D rendering engine (With
       [Pillow](https://github.com/python-pillow/Pillow))
 - [ ] Vector 2D rendering engine (With [drawsvg](https://github.com/cduck/drawsvg))
@@ -240,16 +241,6 @@ Please refer to documentation for
 and
 [Parser2](https://argmaster.github.io/pygerber/2.1.1/gerber/feature_support/parser2.html)
 for detailed list of features which are supported/not supported.
-
-Supported **DEPRECATED** Gerber features:
-
-- [ ] Image polarity
-- [ ] Image rotation
-- [ ] Image mirroring
-
-**IMPORTANT** This feature list is incomplete, it will get longer over time ...
-
----
 
 ## Syntax feature requests
 

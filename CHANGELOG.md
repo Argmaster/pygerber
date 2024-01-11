@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
+## Release 2.2.0
+
+- Added new implementation of Gerber AST parser, Parser2, with wider support for Gerber
+  constructs and hook based interface for Gerber code introspection. (#108)
+
+## Release 2.1.1
+
+- Fixed incorrect bounding box prediction for displaced drawings (#105).
+- Added 3.12 as supported in package tags.
+- Fixed documentation links in `README.md` and `pyproject.toml`.
+
 ## Release 2.1.0
 
 - Fixed #37
@@ -22,6 +33,12 @@ this project adheres to [Calendar Versioning](https://calver.org/).
   used by language server to provide specification reference.
 - Refactored tokenizer implementation, as a result #67 was fixed and #64 is no longer an
   issue in some cases.
+
+## Release 2.0.2
+
+- Fixed incorrect bounding box prediction for displaced drawings (#105).
+- Added 3.12 as supported in package tags.
+- Fixed documentation links in `README.md` and `pyproject.toml`.
 
 ## Release 2.0.1
 
