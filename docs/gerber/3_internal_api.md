@@ -1,10 +1,10 @@
-# Advanced API
+# PyGerber internal API
 
 ## Stability
 
-PyGerber's Gerber advanced API is not as stable as high level API. This is because the
+PyGerber's Gerber internal API is not as stable as high level API. This is because the
 implementation of subsequent functionalities may force changes in the structure of the
-code. However, our goal is to guarantee advanced API **stability between patch**
+code. However, our goal is to guarantee internal API **stability between patch**
 releases.
 
 !!! warning "Security"

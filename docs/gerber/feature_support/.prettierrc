@@ -1,0 +1,15 @@
+{
+  "semi": true,
+  "useTabs": false,
+  "endOfLine": "lf",
+  "printWidth": 88,
+  "overrides": [
+    {
+      "files": ["*.md"],
+      "options": {
+        "tabWidth": 4,
+        "proseWrap": "always"
+      }
+    }
+  ]
+}
