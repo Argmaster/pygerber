@@ -9,10 +9,12 @@ from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+    from pygerber.gerberx3.parser2.macro2.expressions2.expression2 import Expression2
     from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 
 
-class NumericExpression(Token):
+class MacroExpressionToken(Token):
     """## 4.5.4.2 Arithmetic Expressions.
 
     A parameter value can also be defined by an arithmetic expression consisting of integer and
@@ -39,6 +41,10 @@ class NumericExpression(Token):
     See section 4.5.4.2 of [The Gerber Layer Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=70)
 
     """  # noqa: E501
+
+    def to_parser2_expression(self, context: Parser2Context) -> Expression2:
+        """Convert to `Expression2` descendant class."""
+        raise NotImplementedError
 
     def evaluate_numeric(
         self,

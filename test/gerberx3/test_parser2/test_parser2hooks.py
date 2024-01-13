@@ -40,6 +40,18 @@ from pygerber.gerberx3.parser2.errors2 import (
     UnitNotSet2Error,
     UnnamedBlockApertureNotAllowedError,
 )
+from pygerber.gerberx3.parser2.macro2.expressions2.constant2 import Constant2
+from pygerber.gerberx3.parser2.macro2.expressions2.unary2 import Negation2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_1_circle2 import Code1Circle2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_4_outline2 import Code4Outline2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_5_polygon2 import Code5Polygon2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_7_thermal2 import Code7Thermal2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_20_vector_line2 import (
+    Code20VectorLine2,
+)
+from pygerber.gerberx3.parser2.macro2.primitives2.code_21_center_line2 import (
+    Code21CenterLine2,
+)
 from pygerber.gerberx3.state_enums import (
     AxisCorrespondence,
     DrawMode,
@@ -55,6 +67,259 @@ from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
 
 DEBUG_DUMP_DIR = Path(__file__).parent / ".output" / "test_parser2hooks"
 DEBUG_DUMP_DIR.mkdir(exist_ok=True, parents=True)
+
+
+def test_macro_definition_token_hooks_one_circle() -> None:
+    gerber_source = """
+    %AMCircle*
+    1,1,1.5,0,0,0*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Circle")
+
+    assert macro.name == "Circle"
+    assert len(macro.statements) == 1
+
+    c = macro.statements[0]
+
+    assert isinstance(c, Code1Circle2)
+
+    assert isinstance(c.diameter, Constant2)
+    assert c.diameter.value == Offset.new("1.5")
+
+    assert isinstance(c.center_x, Constant2)
+    assert c.center_x.value == Offset.new("0")
+
+    assert isinstance(c.center_y, Constant2)
+    assert c.center_y.value == Offset.new("0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_4_outline() -> None:
+    gerber_source = """
+    %AMTriangle_30*
+    4,1,3,
+    1,-1,
+    1,1,
+    2,1,
+    1,-1,
+    30*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Triangle_30")
+    assert macro.name == "Triangle_30"
+
+    assert len(macro.statements) == 1
+
+    outline = macro.statements[0]
+    assert isinstance(outline, Code4Outline2)
+    assert isinstance(outline.exposure, Constant2)
+    assert outline.exposure.value == Offset.new("1")
+    assert isinstance(outline.vertex_count, Constant2)
+    assert outline.vertex_count.value == Offset.new("3")
+
+    assert isinstance(outline.start_x, Constant2)
+    assert outline.start_x.value == Offset.new("1")
+
+    assert isinstance(outline.start_y, Negation2)
+    assert isinstance(outline.start_y.op, Constant2)
+    assert outline.start_y.op.value == Offset.new("1")
+
+    assert isinstance(outline.points[0].x, Constant2)
+    assert outline.points[0].x.value == Offset.new("1")
+
+    assert isinstance(outline.points[0].y, Constant2)
+    assert outline.points[0].y.value == Offset.new("1")
+
+    assert isinstance(outline.points[1].x, Constant2)
+    assert outline.points[1].x.value == Offset.new("2")
+
+    assert isinstance(outline.points[1].y, Constant2)
+    assert outline.points[1].y.value == Offset.new("1")
+
+    assert isinstance(outline.points[2].x, Constant2)
+    assert outline.points[2].x.value == Offset.new("1")
+
+    assert isinstance(outline.points[2].y, Negation2)
+    assert isinstance(outline.points[2].y.op, Constant2)
+    assert outline.points[2].y.op.value == Offset.new("1")
+
+    assert isinstance(outline.rotation, Constant2)
+    assert outline.rotation.value == Offset.new("30")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_5_polygon() -> None:
+    gerber_source = """
+    %AMPolygon*
+    5,1,8,0,0,8,0*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Polygon")
+    assert macro.name == "Polygon"
+    assert len(macro.statements) == 1
+
+    poly = macro.statements[0]
+    assert isinstance(poly, Code5Polygon2)
+
+    assert isinstance(poly.exposure, Constant2)
+    assert poly.exposure.value == Offset.new("1")
+
+    assert isinstance(poly.number_of_vertices, Constant2)
+    assert poly.number_of_vertices.value == Offset.new("8")
+
+    assert isinstance(poly.center_x, Constant2)
+    assert poly.center_x.value == Offset.new("0")
+
+    assert isinstance(poly.center_y, Constant2)
+    assert poly.center_y.value == Offset.new("0")
+
+    assert isinstance(poly.diameter, Constant2)
+    assert poly.diameter.value == Offset.new("8")
+
+    assert isinstance(poly.rotation, Constant2)
+    assert poly.rotation.value == Offset.new("0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_7_thermal() -> None:
+    gerber_source = """
+    %AMThermal*
+    7,0,0,0.95,0.75,0.175,0.0*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Thermal")
+    assert macro.name == "Thermal"
+    assert len(macro.statements) == 1
+
+    thermal = macro.statements[0]
+    assert isinstance(thermal, Code7Thermal2)
+
+    assert isinstance(thermal.center_x, Constant2)
+    assert thermal.center_x.value == Offset.new("0")
+
+    assert isinstance(thermal.center_y, Constant2)
+    assert thermal.center_y.value == Offset.new("0")
+
+    assert isinstance(thermal.outer_diameter, Constant2)
+    assert thermal.outer_diameter.value == Offset.new("0.95")
+
+    assert isinstance(thermal.inner_diameter, Constant2)
+    assert thermal.inner_diameter.value == Offset.new("0.75")
+
+    assert isinstance(thermal.gap, Constant2)
+    assert thermal.gap.value == Offset.new("0.175")
+
+    assert isinstance(thermal.rotation, Constant2)
+    assert thermal.rotation.value == Offset.new("0.0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_20_vector_line() -> None:
+    gerber_source = """
+    %AMLine*
+    20,1,0.9,0,0.45,12,0.45,0*
+    %
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Line")
+
+    assert macro.name == "Line"
+    assert len(macro.statements) == 1
+
+    vl = macro.statements[0]
+
+    assert isinstance(vl, Code20VectorLine2)
+    assert isinstance(vl.exposure, Constant2)
+    assert vl.exposure.value == Offset.new("1")
+    assert isinstance(vl.width, Constant2)
+    assert vl.width.value == Offset.new("0.9")
+    assert isinstance(vl.start_x, Constant2)
+    assert vl.start_x.value == Offset.new("0")
+    assert isinstance(vl.start_y, Constant2)
+    assert vl.start_y.value == Offset.new("0.45")
+    assert isinstance(vl.end_x, Constant2)
+    assert vl.end_x.value == Offset.new("12")
+    assert isinstance(vl.end_y, Constant2)
+    assert vl.end_y.value == Offset.new("0.45")
+    assert isinstance(vl.rotation, Constant2)
+    assert vl.rotation.value == Offset.new("0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_21_center_line() -> None:
+    gerber_source = """
+    %AMRECTANGLE*
+    21,1,6.8,1.2,3.4,0.6,30*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("RECTANGLE")
+    assert macro.name == "RECTANGLE"
+
+    center_line = macro.statements[0]
+    assert isinstance(center_line, Code21CenterLine2)
+
+    assert isinstance(center_line.exposure, Constant2)
+    assert center_line.exposure.value == Offset.new("1")
+    assert isinstance(center_line.width, Constant2)
+    assert center_line.width.value == Offset.new("6.8")
+    assert isinstance(center_line.height, Constant2)
+    assert center_line.height.value == Offset.new("1.2")
+    assert isinstance(center_line.center_x, Constant2)
+    assert center_line.center_x.value == Offset.new("3.4")
+    assert isinstance(center_line.center_y, Constant2)
+    assert center_line.center_y.value == Offset.new("0.6")
+    assert isinstance(center_line.rotation, Constant2)
+    assert center_line.rotation.value == Offset.new("30")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
 
 
 def test_begin_block_aperture_token_hooks() -> None:

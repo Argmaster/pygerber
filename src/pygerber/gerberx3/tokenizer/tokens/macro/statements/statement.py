@@ -1,4 +1,4 @@
-"""In-macro expression token."""
+"""Macro statement token."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 
 
-class Expression(CommandToken):
+class MacroStatementToken(CommandToken):
     """Wrapper for in-macro expression."""
 
     def evaluate(
@@ -22,7 +22,7 @@ class Expression(CommandToken):
         handle: PrivateApertureHandle,
         /,
     ) -> None:
-        """Evaluate macro expression."""
+        """Evaluate macro statement."""
 
     def get_gerber_code(
         self,

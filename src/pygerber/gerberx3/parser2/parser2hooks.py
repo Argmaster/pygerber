@@ -31,13 +31,29 @@ from pygerber.gerberx3.parser2.errors2 import (
     UnnamedBlockApertureNotAllowedError,
 )
 from pygerber.gerberx3.parser2.ihooks import IHooks
+from pygerber.gerberx3.parser2.macro2.assignment2 import Assignment2
+from pygerber.gerberx3.parser2.macro2.macro2 import ApertureMacro2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_1_circle2 import Code1Circle2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_2_vector_line2 import (
+    Code2VectorLine2,
+)
+from pygerber.gerberx3.parser2.macro2.primitives2.code_4_outline2 import Code4Outline2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_5_polygon2 import Code5Polygon2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_6_moire2 import Code6Moire2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_7_thermal2 import Code7Thermal2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_20_vector_line2 import (
+    Code20VectorLine2,
+)
+from pygerber.gerberx3.parser2.macro2.primitives2.code_21_center_line2 import (
+    Code21CenterLine2,
+)
+from pygerber.gerberx3.parser2.macro2.primitives2.code_22_lower_left_line2 import (
+    Code22LowerLeftLine2,
+)
 from pygerber.gerberx3.state_enums import DrawMode, ImagePolarityEnum, Unit
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
-from pygerber.gerberx3.tokenizer.tokens.g54_select_aperture import G54SelectAperture
-from pygerber.gerberx3.tokenizer.tokens.td_delete_attribute import DeleteAttribute
-from pygerber.gerberx3.tokenizer.tokens.to_object_attribute import ObjectAttribute
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.parser2.context2 import Parser2Context
@@ -69,6 +85,7 @@ if TYPE_CHECKING:
     )
     from pygerber.gerberx3.tokenizer.tokens.g36_begin_region import BeginRegion
     from pygerber.gerberx3.tokenizer.tokens.g37_end_region import EndRegion
+    from pygerber.gerberx3.tokenizer.tokens.g54_select_aperture import G54SelectAperture
     from pygerber.gerberx3.tokenizer.tokens.g70_set_unit_inch import SetUnitInch
     from pygerber.gerberx3.tokenizer.tokens.g71_set_unit_mm import SetUnitMillimeters
     from pygerber.gerberx3.tokenizer.tokens.g74_single_quadrant import (
@@ -94,6 +111,37 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.m01_optional_stop import M01OptionalStop
     from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
     from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
+    from pygerber.gerberx3.tokenizer.tokens.macro.macro_begin import MacroBegin
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_1_circle import (
+        Code1CircleToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_2_vector_line import (
+        Code2VectorLineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_4_outline import (
+        Code4OutlineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_5_polygon import (
+        Code5PolygonToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_6_moire import (
+        Code6MoireToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_7_thermal import (
+        Code7ThermalToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_20_vector_line import (  # noqa: E501
+        Code20VectorLineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_21_center_line import (  # noqa: E501
+        Code21CenterLineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_22_lower_left_line import (  # noqa: E501
+        Code22LowerLeftLineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.variable_assignment import (  # noqa: E501
+        MacroVariableAssignment,
+    )
     from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import UnitMode
     from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
         StepRepeatBegin,
@@ -102,12 +150,314 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.ta_aperture_attribute import (
         ApertureAttribute,
     )
+    from pygerber.gerberx3.tokenizer.tokens.td_delete_attribute import DeleteAttribute
     from pygerber.gerberx3.tokenizer.tokens.tf_file_attribute import FileAttribute
+    from pygerber.gerberx3.tokenizer.tokens.to_object_attribute import ObjectAttribute
+
 MAX_SINGLE_QUADRANT_ANGLE = 91.0
 
 
 class Parser2Hooks(IHooks):
     """Implementation of hooks for Gerber AST Parser, version 2."""
+
+    class MacroBeginTokenHooks(IHooks.MacroBeginTokenHooks):
+        """Hooks for visiting macro begin token (AM)."""
+
+        def on_parser_visit_token(
+            self,
+            token: MacroBegin,
+            context: Parser2Context,
+        ) -> None:
+            """Called when parser visits a token.
+
+            This hook should perform all changes on context implicated by token type.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+            """
+            context.set_macro_statement_buffer()
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode1CircleTokenHooks(IHooks.MacroCode1CircleTokenHooks):
+        """Hooks for visiting macro primitive code 0 circle."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code1CircleToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Code1Circle2(
+                    exposure=token.exposure.to_parser2_expression(context),
+                    diameter=token.diameter.to_parser2_expression(context),
+                    center_x=token.center_x.to_parser2_expression(context),
+                    center_y=token.center_y.to_parser2_expression(context),
+                    rotation=token.rotation.to_parser2_expression(context),
+                ),
+            )
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode2VectorLineTokenHooks(IHooks.MacroCode2VectorLineTokenHooks):
+        """Hooks for visiting macro primitive code 2 vector line."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code2VectorLineToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: Code2VectorLine
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Code2VectorLine2(),
+            )
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode4OutlineTokenHooks(IHooks.MacroCode4OutlineTokenHooks):
+        """Hooks for visiting macro primitive code 4 outline."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code4OutlineToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Code4Outline2(
+                    exposure=token.exposure.to_parser2_expression(context),
+                    vertex_count=token.number_of_vertices.to_parser2_expression(
+                        context,
+                    ),
+                    start_x=token.start_x.to_parser2_expression(context),
+                    start_y=token.start_y.to_parser2_expression(context),
+                    points=[point.to_parser2_point2(context) for point in token.point],
+                    rotation=token.rotation.to_parser2_expression(context),
+                ),
+            )
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode5PolygonTokenHooks(IHooks.MacroCode5PolygonTokenHooks):
+        """Hooks for visiting macro primitive code 5 polygon."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code5PolygonToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Code5Polygon2(
+                    exposure=token.exposure.to_parser2_expression(context),
+                    number_of_vertices=token.number_of_vertices.to_parser2_expression(
+                        context,
+                    ),
+                    center_x=token.center_x.to_parser2_expression(context),
+                    center_y=token.center_y.to_parser2_expression(context),
+                    diameter=token.diameter.to_parser2_expression(context),
+                    rotation=token.rotation.to_parser2_expression(context),
+                ),
+            )
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode6MoireTokenHooks(IHooks.MacroCode6MoireTokenHooks):
+        """Hooks for visiting macro primitive code 6 moire."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code6MoireToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Code6Moire2(),
+            )
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode7ThermalTokenHooks(IHooks.MacroCode7ThermalTokenHooks):
+        """Hooks for visiting macro primitive code 7 thermal."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code7ThermalToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Code7Thermal2(
+                    center_x=token.center_x.to_parser2_expression(context),
+                    center_y=token.center_y.to_parser2_expression(context),
+                    outer_diameter=token.outer_diameter.to_parser2_expression(context),
+                    inner_diameter=token.inner_diameter.to_parser2_expression(context),
+                    gap=token.gap.to_parser2_expression(context),
+                    rotation=token.rotation.to_parser2_expression(context),
+                ),
+            )
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode20VectorLineTokenHooks(IHooks.MacroCode20VectorLineTokenHooks):
+        """Hooks for visiting macro primitive code 20 vector line."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code20VectorLineToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Code20VectorLine2(
+                    exposure=token.exposure.to_parser2_expression(context),
+                    width=token.width.to_parser2_expression(context),
+                    start_x=token.start_x.to_parser2_expression(context),
+                    start_y=token.start_y.to_parser2_expression(context),
+                    end_x=token.end_x.to_parser2_expression(context),
+                    end_y=token.end_y.to_parser2_expression(context),
+                    rotation=token.rotation.to_parser2_expression(context),
+                ),
+            )
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode21CenterLineTokenHooks(IHooks.MacroCode21CenterLineTokenHooks):
+        """Hooks for visiting macro primitive code 21 center line."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code21CenterLineToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Code21CenterLine2(
+                    exposure=token.exposure.to_parser2_expression(context),
+                    width=token.width.to_parser2_expression(context),
+                    height=token.height.to_parser2_expression(context),
+                    center_x=token.center_x.to_parser2_expression(context),
+                    center_y=token.center_y.to_parser2_expression(context),
+                    rotation=token.rotation.to_parser2_expression(context),
+                ),
+            )
+            return super().on_parser_visit_token(token, context)
+
+    class MacroCode22LowerLeftLineTokenHooks(IHooks.MacroCode22LowerLeftLineTokenHooks):
+        """Hooks for visiting macro primitive code 22 lower left line."""
+
+        def on_parser_visit_token(
+            self,
+            token: Code22LowerLeftLineToken,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(Code22LowerLeftLine2())
+            return super().on_parser_visit_token(token, context)
+
+    class MacroVariableAssignment(IHooks.MacroVariableAssignment):
+        """Hooks for visiting macro variable assignment token."""
+
+        def on_parser_visit_token(
+            self,
+            token: MacroVariableAssignment,
+            context: Parser2Context,
+        ) -> None:
+            """Adds the primitive to the statement buffer.
+
+            Parameters
+            ----------
+            token: TokenT
+                The token that is being visited.
+            context : Parser2Context
+                The context object containing information about the parser state.
+
+            """
+            context.get_macro_statement_buffer().add_statement(
+                Assignment2(
+                    variable_name=token.variable.name,
+                    value=token.value.to_parser2_expression(context),
+                ),
+            )
+            return super().on_parser_visit_token(token, context)
 
     class MacroDefinitionTokenHooks(IHooks.MacroDefinitionTokenHooks):
         """Hooks for visiting macro definition token (AM)."""
@@ -128,7 +478,14 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
-            context.set_macro(token.macro_name, "Sentinel")
+            stmt_buff = context.get_macro_statement_buffer()
+            macro_name = token.macro_name
+
+            context.set_macro(
+                macro_name,
+                ApertureMacro2(name=macro_name, statements=stmt_buff.get_readonly()),
+            )
+            context.unset_macro_statement_buffer()
             return super().on_parser_visit_token(token, context)
 
     class BeginBlockApertureTokenHooks(IHooks.BeginBlockApertureTokenHooks):

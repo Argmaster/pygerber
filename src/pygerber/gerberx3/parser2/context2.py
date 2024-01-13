@@ -1,7 +1,8 @@
 """Gerber AST parser, version 2, parsing context."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NoReturn, Optional
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, NoReturn, Optional, Type
 
 from pydantic import Field
 
@@ -17,11 +18,24 @@ from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotDefined2Error,
     ExitParsingProcess2Interrupt,
     MacroNotDefinedError,
+    MacroNotInitializedError,
     ReferencedNotInitializedBlockBufferError,
     RegionNotInitializedError,
     SkipTokenInterrupt,
     StepAndRepeatNotInitializedError,
 )
+from pygerber.gerberx3.parser2.ihooks import IHooks
+from pygerber.gerberx3.parser2.macro2.expressions2.binary2 import (
+    Addition2,
+    Division2,
+    Multiplication2,
+    Subtraction2,
+)
+from pygerber.gerberx3.parser2.macro2.expressions2.constant2 import Constant2
+from pygerber.gerberx3.parser2.macro2.expressions2.unary2 import Negation2, Positive2
+from pygerber.gerberx3.parser2.macro2.expressions2.variable_name import VariableName2
+from pygerber.gerberx3.parser2.macro2.macro2 import ApertureMacro2
+from pygerber.gerberx3.parser2.macro2.statement_buffer2 import StatementBuffer2
 from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
 from pygerber.gerberx3.parser2.state2 import State2
 from pygerber.gerberx3.state_enums import AxisCorrespondence
@@ -33,7 +47,6 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.math.vector_2d import Vector2D
     from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
     from pygerber.gerberx3.parser2.commands2.command2 import Command2
-    from pygerber.gerberx3.parser2.ihooks import IHooks
     from pygerber.gerberx3.state_enums import DrawMode, Mirroring, Polarity, Unit
     from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
     from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateParser
@@ -58,6 +71,7 @@ class Parser2Context:
         self.block_command_buffer_stack: list[CommandBuffer2] = []
         self.step_and_repeat_command_buffer: Optional[CommandBuffer2] = None
         self.state_before_step_and_repeat: Optional[State2] = None
+        self.macro_statement_buffer: Optional[StatementBuffer2] = None
         self.hooks: IHooks = (
             Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )
@@ -69,6 +83,12 @@ class Parser2Context:
         self.file_attributes = FileAttributes()
         self.aperture_attributes = ApertureAttributes()
         self.object_attributes = ObjectAttributes()
+
+        self.macro_expressions = (
+            Parser2ContextMacroExpressionFactories()
+            if self.options.custom_macro_expression_factories is None
+            else self.options.custom_macro_expression_factories
+        )
 
     def push_block_command_buffer(self) -> None:
         """Add new command buffer for block aperture draw commands."""
@@ -143,6 +163,24 @@ class Parser2Context:
     def reset_state_to_pre_step_and_repeat(self) -> None:
         """Set state to state before step and repeat."""
         self.set_state(self.get_state_before_step_and_repeat())
+
+    def get_macro_statement_buffer(self) -> StatementBuffer2:
+        """Return macro statement buffer."""
+        if self.macro_statement_buffer is None:
+            raise MacroNotInitializedError(self.current_token)
+        return self.macro_statement_buffer
+
+    def set_macro_statement_buffer(self) -> None:
+        """Add new command buffer for block aperture draw commands."""
+        self.macro_statement_buffer = (
+            StatementBuffer2()
+            if self.options.initial_macro_statement_buffer is None
+            else self.options.initial_macro_statement_buffer
+        )
+
+    def unset_macro_statement_buffer(self) -> None:
+        """Unset step and repeat command buffer."""
+        self.macro_statement_buffer = None
 
     def skip_token(self) -> NoReturn:
         """Skip this token."""
@@ -393,14 +431,14 @@ class Parser2Context:
         """Set the apertures property value."""
         return self.set_state(self.get_state().set_aperture(__key, __value))
 
-    def get_macro(self, __key: str) -> Any:
+    def get_macro(self, __key: str) -> ApertureMacro2:
         """Get macro property value."""
         try:
             return self.get_state().get_macro(__key)
         except KeyError as e:
             raise MacroNotDefinedError(self.current_token) from e
 
-    def set_macro(self, __key: str, __value: str) -> None:
+    def set_macro(self, __key: str, __value: ApertureMacro2) -> None:
         """Set the macro property value."""
         return self.set_state(self.get_state().set_macro(__key, __value))
 
@@ -473,6 +511,20 @@ class Parser2Context:
         self.object_attributes = ObjectAttributes()
 
 
+@dataclass
+class Parser2ContextMacroExpressionFactories:
+    """Collection of factories for all macro expressions."""
+
+    constant: Type[Constant2] = Constant2
+    variable_name: Type[VariableName2] = VariableName2
+    addition: Type[Addition2] = Addition2
+    subtraction: Type[Subtraction2] = Subtraction2
+    multiplication: Type[Multiplication2] = Multiplication2
+    division: Type[Division2] = Division2
+    negation: Type[Negation2] = Negation2
+    positive: Type[Positive2] = Positive2
+
+
 class Parser2ContextOptions(FrozenGeneralModel):
     """Options for Parser2Context."""
 
@@ -480,4 +532,10 @@ class Parser2ContextOptions(FrozenGeneralModel):
     initial_main_command_buffer: Optional[CommandBuffer2] = Field(default=None)
     initial_region_command_buffer: Optional[CommandBuffer2] = Field(default=None)
     initial_block_command_buffer: Optional[CommandBuffer2] = Field(default=None)
+    initial_macro_statement_buffer: Optional[StatementBuffer2] = Field(default=None)
+    custom_macro_expression_factories: Optional[
+        Parser2ContextMacroExpressionFactories
+    ] = Field(
+        default=None,
+    )
     hooks: Optional[IHooks] = Field(default=None)

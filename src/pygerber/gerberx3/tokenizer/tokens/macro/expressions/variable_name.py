@@ -6,17 +6,20 @@ from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.parser.state import State
-from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
-from pygerber.gerberx3.tokenizer.tokens.macro.numeric_expression import (
-    NumericExpression,
+from pygerber.gerberx3.tokenizer.tokens.macro.expressions.macro_expression import (
+    MacroExpressionToken,
 )
+from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+    from pygerber.gerberx3.parser2.macro2.expressions2.expression2 import Expression2
 
-class MacroVariableName(NumericExpression):
+
+class MacroVariableName(MacroExpressionToken):
     """## 4.5.4.1 Variable Values from the AD Command.
 
     description
@@ -61,6 +64,10 @@ class MacroVariableName(NumericExpression):
         """
         name = str(tokens["macro_variable_name"])
         return cls(string=string, location=location, name=name)
+
+    def to_parser2_expression(self, context: Parser2Context) -> Expression2:
+        """Convert to `Expression2` descendant class."""
+        return context.macro_expressions.variable_name(name=self.name)
 
     def evaluate_numeric(self, macro_context: MacroContext, _state: State) -> Offset:
         """Evaluate numeric value of this macro expression."""

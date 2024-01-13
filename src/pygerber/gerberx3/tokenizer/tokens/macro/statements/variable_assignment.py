@@ -6,19 +6,25 @@ from typing import TYPE_CHECKING
 
 from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
 from pygerber.gerberx3.parser.state import State
-from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
-from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
-from pygerber.gerberx3.tokenizer.tokens.macro.numeric_expression import (
-    NumericExpression,
+from pygerber.gerberx3.tokenizer.tokens.macro.expressions.macro_expression import (
+    MacroExpressionToken,
 )
-from pygerber.gerberx3.tokenizer.tokens.macro.variable_name import MacroVariableName
+from pygerber.gerberx3.tokenizer.tokens.macro.expressions.variable_name import (
+    MacroVariableName,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.statement import (
+    MacroStatementToken,
+)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
-class MacroVariableDefinition(Expression):
+
+class MacroVariableAssignment(MacroStatementToken):
     """## 4.5.4.3 Definition of New Variable.
 
     New variables can be defined by an assign statement as follows: `$4=$1x1.25-$3`. The
@@ -90,7 +96,7 @@ class MacroVariableDefinition(Expression):
         string: str,
         location: int,
         variable: MacroVariableName,
-        value: NumericExpression,
+        value: MacroExpressionToken,
     ) -> None:
         super().__init__(string, location)
         self.variable = variable
@@ -103,7 +109,7 @@ class MacroVariableDefinition(Expression):
         Created to be used as callback in `ParserElement.set_parse_action()`.
         """
         variable = MacroVariableName.ensure_type(tokens["macro_variable_name"])
-        value = NumericExpression.ensure_type(tokens["value"])
+        value = MacroExpressionToken.ensure_type(tokens["value"])
         return cls(
             string=string,
             location=location,
@@ -123,6 +129,21 @@ class MacroVariableDefinition(Expression):
         macro_context.variables[name] = value
 
         return super().evaluate(macro_context, state, handle)
+
+    def parser2_visit_token(self, context: Parser2Context) -> None:
+        """Perform actions on the context implicated by this token."""
+        context.get_hooks().macro_variable_assignment.pre_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().macro_variable_assignment.on_parser_visit_token(
+            self,
+            context,
+        )
+        context.get_hooks().macro_variable_assignment.post_parser_visit_token(
+            self,
+            context,
+        )
 
     def get_gerber_code(
         self,

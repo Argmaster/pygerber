@@ -8,7 +8,7 @@ references to them are copied.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import Field
 
@@ -21,6 +21,7 @@ from pygerber.gerberx3.parser2.errors2 import (
     CoordinateFormatNotSet2Error,
     UnitNotSet2Error,
 )
+from pygerber.gerberx3.parser2.macro2.macro2 import ApertureMacro2
 from pygerber.gerberx3.state_enums import (
     AxisCorrespondence,
     DrawMode,
@@ -252,15 +253,15 @@ class State2ApertureIndex(ImmutableMapping[ApertureID, Aperture2]):
         return self.mapping[__id]
 
 
-class State2MacroIndex(ImmutableMapping[str, Any]):
+class State2MacroIndex(ImmutableMapping[str, ApertureMacro2]):
     """Index of all macros defined in Gerber AST until currently parsed token."""
 
-    def set_macro(self, __id: str, __macro: Any) -> Self:
+    def set_macro(self, __id: str, __macro: ApertureMacro2) -> Self:
         """Add new macro to macros index."""
         # TODO(argmaster): Add warning handling.  # noqa: TD003
         return self.update(__id, __macro)
 
-    def get_macro(self, __id: str) -> Any:
+    def get_macro(self, __id: str) -> ApertureMacro2:
         """Get existing macro from index. When macro is missing KeyError is
         raised.
         """
@@ -822,11 +823,11 @@ class State2(FrozenGeneralModel):
     macros: State2MacroIndex = Field(default_factory=State2MacroIndex)
     """Collection of all macros defined until given point in code."""
 
-    def get_macro(self, __key: str) -> Any:
+    def get_macro(self, __key: str) -> ApertureMacro2:
         """Get macros property value."""
         return self.macros.get_macro(__key)
 
-    def set_macro(self, __key: str, __value: Any) -> Self:
+    def set_macro(self, __key: str, __value: ApertureMacro2) -> Self:
         """Set the macros property value."""
         return self.model_copy(
             update={

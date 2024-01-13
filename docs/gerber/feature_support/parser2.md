@@ -124,14 +124,14 @@ of hook based interface.
 ### Macros
 
 -   ❌ Parameters.
--   ❌ Primitives:
-    -   ❌ Code 0, Comment
-    -   ❌ Code 1, Circle
-    -   ❌ Code 20, Vector line
-    -   ❌ Code 21, Center Line
-    -   ❌ Code 4, Outline
-    -   ❌ Code 5, Polygon
-    -   ❌ Code 7, Thermal
+-   ✅ Primitives:
+    -   ✅ Code 0, Comment
+    -   ✅ Code 1, Circle
+    -   ✅ Code 20, Vector line
+    -   ✅ Code 21, Center Line
+    -   ✅ Code 4, Outline
+    -   ✅ Code 5, Polygon
+    -   ✅ Code 7, Thermal
 -   ❌ Rotation around macro origin:
     -   ❌ Code 0, Comment
     -   ❌ Code 1, Circle
@@ -140,7 +140,7 @@ of hook based interface.
     -   ❌ Code 4, Outline
     -   ❌ Code 5, Polygon
     -   ❌ Code 7, Thermal
--   ❌ Constants.
+-   ✅ Constants.
 -   ❌ Variables.
 -   ❌ Variable definitions.
 

@@ -64,6 +64,37 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.m01_optional_stop import M01OptionalStop
     from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
     from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
+    from pygerber.gerberx3.tokenizer.tokens.macro.macro_begin import MacroBegin
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_1_circle import (
+        Code1CircleToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_2_vector_line import (
+        Code2VectorLineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_4_outline import (
+        Code4OutlineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_5_polygon import (
+        Code5PolygonToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_6_moire import (
+        Code6MoireToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_7_thermal import (
+        Code7ThermalToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_20_vector_line import (  # noqa: E501
+        Code20VectorLineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_21_center_line import (  # noqa: E501
+        Code21CenterLineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_22_lower_left_line import (  # noqa: E501
+        Code22LowerLeftLineToken,
+    )
+    from pygerber.gerberx3.tokenizer.tokens.macro.statements.variable_assignment import (  # noqa: E501
+        MacroVariableAssignment,
+    )
     from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import UnitMode
     from pygerber.gerberx3.tokenizer.tokens.of_image_offset import ImageOffset
     from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
@@ -125,6 +156,17 @@ LoadScalingT: TypeAlias = "LoadScaling"
 M00ProgramStopT: TypeAlias = "M00ProgramStop"
 M01OptionalStopT: TypeAlias = "M01OptionalStop"
 M02EndOfFileT: TypeAlias = "M02EndOfFile"
+MacroBeginT: TypeAlias = "MacroBegin"
+Code1CircleTokenT: TypeAlias = "Code1CircleToken"
+Code2VectorLineTokenT: TypeAlias = "Code2VectorLineToken"
+Code4OutlineTokenT: TypeAlias = "Code4OutlineToken"
+Code5PolygonTokenT: TypeAlias = "Code5PolygonToken"
+Code6MoireTokenT: TypeAlias = "Code6MoireToken"
+Code7ThermalTokenT: TypeAlias = "Code7ThermalToken"
+Code20VectorLineTokenT: TypeAlias = "Code20VectorLineToken"
+Code21CenterLineTokenT: TypeAlias = "Code21CenterLineToken"
+Code22LowerLeftLineTokenT: TypeAlias = "Code22LowerLeftLineToken"
+MacroVariableAssignmentT: TypeAlias = "MacroVariableAssignment"
 MacroDefinitionT: TypeAlias = "MacroDefinition"
 UnitModeT: TypeAlias = "UnitMode"
 ImageOffsetT: TypeAlias = "ImageOffset"
@@ -199,103 +241,157 @@ class TokenHooksBase(Generic[TokenT]):
 class IHooks:
     """Collection of overridable hooks for Gerber AST parser, version 2."""
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # noqa: PLR0915
         super().__init__()
+        self.macro_begin = self.MacroBeginTokenHooks(self)
+        self.macro_code_1_circle = self.MacroCode1CircleTokenHooks(self)
+        self.macro_code_2_vector_line = self.MacroCode2VectorLineTokenHooks(self)
+        self.macro_code_4_outline = self.MacroCode4OutlineTokenHooks(self)
+        self.macro_code_5_polygon = self.MacroCode5PolygonTokenHooks(self)
+        self.macro_code_6_moire = self.MacroCode6MoireTokenHooks(self)
+        self.macro_code_7_thermal = self.MacroCode7ThermalTokenHooks(self)
+        self.macro_code_20_vector_line = self.MacroCode20VectorLineTokenHooks(self)
+        self.macro_code_21_center_line = self.MacroCode21CenterLineTokenHooks(self)
+        self.macro_code_22_lower_left_line = self.MacroCode22LowerLeftLineTokenHooks(
+            self,
+        )
+        self.macro_variable_assignment = self.MacroVariableAssignment(self)
         self.macro_definition = self.MacroDefinitionTokenHooks(self)
+
         self.end_block_aperture = self.EndBlockApertureTokenHooks(self)
         self.begin_block_aperture = self.BeginBlockApertureTokenHooks(self)
+
         self.define_circle_aperture = self.DefineApertureCircleTokenHooks(self)
         self.define_rectangle_aperture = self.DefineApertureRectangleTokenHooks(self)
         self.define_obround_aperture = self.DefineApertureObroundTokenHooks(self)
         self.define_polygon_aperture = self.DefineAperturePolygonTokenHooks(self)
         self.define_macro_aperture = self.DefineApertureMacroTokenHooks(self)
         self.define_aperture = self.DefineApertureTokenHooks(self)
+
         self.axis_select = self.AxisSelectTokenHooksTokenHooks(self)
+
         self.command_draw = self.CommandDrawTokenHooks(self)
         self.command_move = self.CommandMoveTokenHooks(self)
         self.command_flash = self.CommandFlashTokenHooks(self)
+
         self.select_aperture = self.SelectApertureTokenHooks(self)
         self.coordinate_format = self.CoordinateFormatTokenHooks(self)
+
         self.set_linear = self.SetLinearTokenHooks(self)
         self.set_clockwise_circular = self.SetClockwiseCircularTokenHooks(self)
         self.set_counter_clockwise_circular = (
             self.SetCounterClockwiseCircularTokenHooks(self)
         )
+
         self.comment = self.CommentTokenHooks(self)
         self.begin_region = self.BeginRegionTokenHooks(self)
         self.end_region = self.EndRegionTokenHooks(self)
         self.prepare_select_aperture = self.PrepareSelectApertureTokenHooks(self)
         self.set_unit_inch = self.SetUnitInchTokenHooks(self)
         self.set_unit_millimeters = self.SetUnitMillimetersTokenHooks(self)
+
         self.set_single_quadrant_mode = self.SetSingleQuadrantModeTokenHooks(self)
         self.set_multi_quadrant_mode = self.SetMultiQuadrantModeTokenHooks(self)
+
         self.set_coordinate_absolute = self.SetCoordinateAbsoluteTokenHooks(self)
         self.set_coordinate_incremental = self.SetCoordinateIncrementalTokenHooks(self)
+
         self.image_name = self.ImageNameTokenHooks(self)
         self.invalid_token = self.InvalidTokenHooks(self)
         self.image_polarity = self.ImagePolarityTokenHooks(self)
-        self.load_mirroring = self.LoadMirroringTokenHooks(self)
         self.load_name = self.LoadNameTokenHooks(self)
+
+        self.load_mirroring = self.LoadMirroringTokenHooks(self)
         self.load_polarity = self.LoadPolarityTokenHooks(self)
         self.load_rotation = self.LoadRotationTokenHooks(self)
         self.load_scaling = self.LoadScalingTokenHooks(self)
+
         self.program_stop = self.ProgramStopTokenHooks(self)
         self.optional_stop = self.OptionalStopTokenHooks(self)
         self.end_of_file = self.EndOfFileTokenHooks(self)
         self.unit_mode = self.UnitModeTokenHooks(self)
         self.image_offset = self.ImageOffsetTokenHooks(self)
+
         self.step_repeat_begin = self.StepRepeatBeginTokenHooks(self)
         self.step_repeat_end = self.StepRepeatEndTokenHooks(self)
+
         self.aperture_attribute = self.ApertureAttributeHooks(self)
         self.delete_attribute = self.DeleteAttributeHooks(self)
         self.file_attribute = self.FileAttributeHooks(self)
         self.object_attribute = self.ObjectAttributeHooks(self)
+
         self._call_post_hooks_init()
 
-    def _call_post_hooks_init(self) -> None:
+    def _call_post_hooks_init(self) -> None:  # noqa: PLR0915
+        self.macro_begin.post_hooks_init()
+        self.macro_code_1_circle.post_hooks_init()
+        self.macro_code_2_vector_line.post_hooks_init()
+        self.macro_code_4_outline.post_hooks_init()
+        self.macro_code_5_polygon.post_hooks_init()
+        self.macro_code_6_moire.post_hooks_init()
+        self.macro_code_7_thermal.post_hooks_init()
+        self.macro_code_20_vector_line.post_hooks_init()
+        self.macro_code_21_center_line.post_hooks_init()
+        self.macro_code_22_lower_left_line.post_hooks_init()
+        self.macro_variable_assignment.post_hooks_init()
         self.macro_definition.post_hooks_init()
+
         self.end_block_aperture.post_hooks_init()
         self.begin_block_aperture.post_hooks_init()
+
         self.define_circle_aperture.post_hooks_init()
         self.define_rectangle_aperture.post_hooks_init()
         self.define_obround_aperture.post_hooks_init()
         self.define_polygon_aperture.post_hooks_init()
         self.define_macro_aperture.post_hooks_init()
         self.define_aperture.post_hooks_init()
+
         self.axis_select.post_hooks_init()
+
         self.command_draw.post_hooks_init()
         self.command_move.post_hooks_init()
         self.command_flash.post_hooks_init()
+
         self.select_aperture.post_hooks_init()
         self.coordinate_format.post_hooks_init()
+
         self.set_linear.post_hooks_init()
         self.set_clockwise_circular.post_hooks_init()
         self.set_counter_clockwise_circular.post_hooks_init()
+
         self.comment.post_hooks_init()
         self.begin_region.post_hooks_init()
         self.end_region.post_hooks_init()
         self.prepare_select_aperture.post_hooks_init()
+
         self.set_unit_inch.post_hooks_init()
         self.set_unit_millimeters.post_hooks_init()
+
         self.set_single_quadrant_mode.post_hooks_init()
         self.set_multi_quadrant_mode.post_hooks_init()
+
         self.set_coordinate_absolute.post_hooks_init()
         self.set_coordinate_incremental.post_hooks_init()
+
         self.image_name.post_hooks_init()
         self.invalid_token.post_hooks_init()
         self.image_polarity.post_hooks_init()
-        self.load_mirroring.post_hooks_init()
         self.load_name.post_hooks_init()
+
+        self.load_mirroring.post_hooks_init()
         self.load_polarity.post_hooks_init()
         self.load_rotation.post_hooks_init()
         self.load_scaling.post_hooks_init()
+
         self.program_stop.post_hooks_init()
         self.optional_stop.post_hooks_init()
         self.end_of_file.post_hooks_init()
         self.unit_mode.post_hooks_init()
         self.image_offset.post_hooks_init()
+
         self.step_repeat_begin.post_hooks_init()
         self.step_repeat_end.post_hooks_init()
+
         self.aperture_attribute.post_hooks_init()
         self.delete_attribute.post_hooks_init()
         self.file_attribute.post_hooks_init()
@@ -321,6 +417,39 @@ class IHooks:
 
     def post_parser_visit_any_token(self, context: Parser2Context) -> None:
         """Called after parser visits any token."""
+
+    class MacroBeginTokenHooks(TokenHooksBase[MacroBeginT]):
+        """Hooks for visiting macro definition begin token (AM)."""
+
+    class MacroCode1CircleTokenHooks(TokenHooksBase[Code1CircleTokenT]):
+        """Hooks for visiting macro primitive code 0 circle."""
+
+    class MacroCode2VectorLineTokenHooks(TokenHooksBase[Code2VectorLineTokenT]):
+        """Hooks for visiting macro primitive code 2 vector line."""
+
+    class MacroCode4OutlineTokenHooks(TokenHooksBase[Code4OutlineTokenT]):
+        """Hooks for visiting macro primitive code 4 outline."""
+
+    class MacroCode5PolygonTokenHooks(TokenHooksBase[Code5PolygonTokenT]):
+        """Hooks for visiting macro primitive code 5 polygon."""
+
+    class MacroCode6MoireTokenHooks(TokenHooksBase[Code6MoireTokenT]):
+        """Hooks for visiting macro primitive code 6 moire."""
+
+    class MacroCode7ThermalTokenHooks(TokenHooksBase[Code7ThermalTokenT]):
+        """Hooks for visiting macro primitive code 7 thermal."""
+
+    class MacroCode20VectorLineTokenHooks(TokenHooksBase[Code20VectorLineTokenT]):
+        """Hooks for visiting macro primitive code 20 vector line."""
+
+    class MacroCode21CenterLineTokenHooks(TokenHooksBase[Code21CenterLineTokenT]):
+        """Hooks for visiting macro primitive code 21 center line."""
+
+    class MacroCode22LowerLeftLineTokenHooks(TokenHooksBase[Code22LowerLeftLineTokenT]):
+        """Hooks for visiting macro primitive code 22 lower left line."""
+
+    class MacroVariableAssignment(TokenHooksBase[MacroVariableAssignmentT]):
+        """Hooks for visiting macro variable assignment token."""
 
     class MacroDefinitionTokenHooks(TokenHooksBase[MacroDefinitionT]):
         """Hooks for visiting macro definition token (AM)."""
