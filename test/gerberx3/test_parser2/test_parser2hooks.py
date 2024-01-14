@@ -40,8 +40,15 @@ from pygerber.gerberx3.parser2.errors2 import (
     UnitNotSet2Error,
     UnnamedBlockApertureNotAllowedError,
 )
+from pygerber.gerberx3.parser2.macro2.assignment2 import Assignment2
+from pygerber.gerberx3.parser2.macro2.expressions2.binary2 import (
+    Addition2,
+    Multiplication2,
+    Subtraction2,
+)
 from pygerber.gerberx3.parser2.macro2.expressions2.constant2 import Constant2
 from pygerber.gerberx3.parser2.macro2.expressions2.unary2 import Negation2
+from pygerber.gerberx3.parser2.macro2.expressions2.variable_name import VariableName2
 from pygerber.gerberx3.parser2.macro2.primitives2.code_1_circle2 import Code1Circle2
 from pygerber.gerberx3.parser2.macro2.primitives2.code_4_outline2 import Code4Outline2
 from pygerber.gerberx3.parser2.macro2.primitives2.code_5_polygon2 import Code5Polygon2
@@ -299,6 +306,7 @@ def test_macro_definition_token_hooks_one_code_21_center_line() -> None:
 
     macro = context.get_macro("RECTANGLE")
     assert macro.name == "RECTANGLE"
+    assert len(macro.statements) == 1
 
     center_line = macro.statements[0]
     assert isinstance(center_line, Code21CenterLine2)
@@ -319,6 +327,183 @@ def test_macro_definition_token_hooks_one_code_21_center_line() -> None:
     debug_dump_context(
         context,
         DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_with_variables() -> None:
+    gerber_source = """
+    %AMRect*
+    21,1,$1,$2-2x$3,-$4,-$5+$2,0*%
+    """
+    expected_statement_count = 1
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Rect")
+    assert macro.name == "Rect"
+    assert len(macro.statements) == expected_statement_count
+
+    stmt = macro.statements[0]
+    assert isinstance(stmt, Code21CenterLine2)
+
+    assert isinstance(stmt.exposure, Constant2)
+    assert stmt.exposure.value == Offset.new("1.0")
+
+    assert isinstance(stmt.width, VariableName2)
+    assert stmt.width.name == "$1"
+
+    assert isinstance(stmt.height, Subtraction2)
+    assert isinstance(stmt.height.lhs, VariableName2)
+    assert stmt.height.lhs.name == "$2"
+
+    assert isinstance(stmt.height.rhs, Multiplication2)
+    assert isinstance(stmt.height.rhs.lhs, Constant2)
+    assert stmt.height.rhs.lhs.value == Offset.new("2")
+
+    assert isinstance(stmt.height.rhs.rhs, VariableName2)
+    assert stmt.height.rhs.rhs.name == "$3"
+
+    assert isinstance(stmt.center_x, Negation2)
+    assert isinstance(stmt.center_x.op, VariableName2)
+    assert stmt.center_x.op.name == "$4"
+
+    assert isinstance(stmt.center_y, Addition2)
+    assert isinstance(stmt.center_y.lhs, Negation2)
+    assert isinstance(stmt.center_y.lhs.op, VariableName2)
+    assert stmt.center_y.lhs.op.name == "$5"
+    assert isinstance(stmt.center_y.rhs, VariableName2)
+    assert stmt.center_y.rhs.name == "$2"
+
+    assert isinstance(stmt.rotation, Constant2)
+    assert stmt.rotation.value == Offset.new("0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_assignment() -> None:
+    gerber_source = """
+    %AMDONUTCAL*
+    1,1,$1,$2,$3*
+    $4=$1x1.25*
+    1,0,$4,$2,$3*%
+    """
+    expected_statement_count = 3
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("DONUTCAL")
+    assert macro.name == "DONUTCAL"
+    assert len(macro.statements) == expected_statement_count
+
+    stmt = macro.statements[0]
+    assert isinstance(stmt, Code1Circle2)
+
+    stmt = macro.statements[1]
+    assert isinstance(stmt, Assignment2)
+
+    assert stmt.variable_name == "$4"
+    assert isinstance(stmt.value, Multiplication2)
+    assert isinstance(stmt.value.lhs, VariableName2)
+    assert isinstance(stmt.value.rhs, Constant2)
+    assert stmt.value.rhs.value == Offset.new("1.25")
+
+    stmt = macro.statements[2]
+    assert isinstance(stmt, Code1Circle2)
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_box_macro() -> None:
+    gerber_source = """
+    %AMBox*
+    0 Rectangle with rounded corners, with rotation*
+    0 The origin of the aperture is its center*
+    0 $1 X-size*
+    0 $2 Y-size*
+    0 $3 Rounding radius*
+    0 $4 Rotation angle, in degrees counterclockwise*
+    0 Add two overlapping rectangle primitives as box body*
+    21,1,$1,$2-$3-$3,0,0,$4*
+    21,1,$1-$3-$3,$2,0,0,$4*
+    0 Add four circle primitives for the rounded corners*
+    $5=$1/2*
+    $6=$2/2*
+    $7=2x$3*
+    1,1,$7,$5-$3,$6-$3,$4*
+    1,1,$7,-$5+$3,$6-$3,$4*
+    1,1,$7,-$5+$3,-$6+$3,$4*
+    1,1,$7,$5-$3,-$6+$3,$4*
+    %
+    """
+    expected_statement_count = 9
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Box")
+    assert macro.name == "Box"
+    assert len(macro.statements) == expected_statement_count
+
+    stmt = macro.statements[0]
+    assert isinstance(stmt, Code21CenterLine2)
+
+    stmt = macro.statements[1]
+    assert isinstance(stmt, Code21CenterLine2)
+
+    stmt = macro.statements[2]
+    assert isinstance(stmt, Assignment2)
+
+    stmt = macro.statements[3]
+    assert isinstance(stmt, Assignment2)
+
+    stmt = macro.statements[4]
+    assert isinstance(stmt, Assignment2)
+
+    stmt = macro.statements[5]
+    assert isinstance(stmt, Code1Circle2)
+
+    stmt = macro.statements[6]
+    assert isinstance(stmt, Code1Circle2)
+
+    stmt = macro.statements[7]
+    assert isinstance(stmt, Code1Circle2)
+
+    stmt = macro.statements[8]
+    assert isinstance(stmt, Code1Circle2)
+
+    assert isinstance(stmt.diameter, VariableName2)
+    assert stmt.diameter.name == "$7"
+
+    assert isinstance(stmt.center_x, Subtraction2)
+    assert isinstance(stmt.center_x.lhs, VariableName2)
+    assert stmt.center_x.lhs.name == "$5"
+    assert isinstance(stmt.center_x.rhs, VariableName2)
+    assert stmt.center_x.rhs.name == "$3"
+
+    assert isinstance(stmt.center_y, Addition2)
+    assert isinstance(stmt.center_y.lhs, Negation2)
+    assert isinstance(stmt.center_y.lhs.op, VariableName2)
+    assert stmt.center_y.lhs.op.name == "$6"
+    assert isinstance(stmt.center_y.rhs, VariableName2)
+    assert stmt.center_y.rhs.name == "$3"
+
+    assert isinstance(stmt.rotation, VariableName2)
+    assert stmt.rotation.name == "$4"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_box_macro.__qualname__,
     )
 
 
