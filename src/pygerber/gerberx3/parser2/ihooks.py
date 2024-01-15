@@ -9,6 +9,30 @@ if TYPE_CHECKING:
 
     from pygerber.gerberx3.parser2.context2 import Parser2Context
     from pygerber.gerberx3.parser2.errors2 import Parser2Error
+    from pygerber.gerberx3.parser2.macro2.assignment2 import Assignment2
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_1_circle2 import Code1Circle2
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_2_vector_line2 import (
+        Code2VectorLine2,
+    )
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_4_outline2 import (
+        Code4Outline2,
+    )
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_5_polygon2 import (
+        Code5Polygon2,
+    )
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_6_moire2 import Code6Moire2
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_7_thermal2 import (
+        Code7Thermal2,
+    )
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_20_vector_line2 import (
+        Code20VectorLine2,
+    )
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_21_center_line2 import (
+        Code21CenterLine2,
+    )
+    from pygerber.gerberx3.parser2.macro2.primitives2.code_22_lower_left_line2 import (
+        Code22LowerLeftLine2,
+    )
     from pygerber.gerberx3.parser2.parser2 import Parser2
     from pygerber.gerberx3.tokenizer.tokens.ab_block_aperture import (
         BlockApertureBegin,
@@ -257,6 +281,7 @@ class IHooks:
         )
         self.macro_variable_assignment = self.MacroVariableAssignment(self)
         self.macro_definition = self.MacroDefinitionTokenHooks(self)
+        self.macro_eval = self.MacroEvalHooks()
 
         self.end_block_aperture = self.EndBlockApertureTokenHooks(self)
         self.begin_block_aperture = self.BeginBlockApertureTokenHooks(self)
@@ -453,6 +478,79 @@ class IHooks:
 
     class MacroDefinitionTokenHooks(TokenHooksBase[MacroDefinitionT]):
         """Hooks for visiting macro definition token (AM)."""
+
+    class MacroEvalHooks:
+        """Hooks called when evaluating macro aperture."""
+
+        def on_code_1_circle(
+            self,
+            context: Parser2Context,
+            primitive: Code1Circle2,
+        ) -> None:
+            """Evaluate code 1 circle primitive."""
+
+        def on_code_2_vector_line(
+            self,
+            context: Parser2Context,
+            primitive: Code2VectorLine2,
+        ) -> None:
+            """Evaluate code 2 vector line primitive."""
+
+        def on_code_4_outline(
+            self,
+            context: Parser2Context,
+            primitive: Code4Outline2,
+        ) -> None:
+            """Evaluate code 4 outline primitive."""
+
+        def on_code_5_polygon(
+            self,
+            context: Parser2Context,
+            primitive: Code5Polygon2,
+        ) -> None:
+            """Evaluate code 5 polygon primitive."""
+
+        def on_code_6_moire(
+            self,
+            context: Parser2Context,
+            primitive: Code6Moire2,
+        ) -> None:
+            """Evaluate code 6 moire primitive."""
+
+        def on_code_7_thermal(
+            self,
+            context: Parser2Context,
+            primitive: Code7Thermal2,
+        ) -> None:
+            """Evaluate code 7 thermal primitive."""
+
+        def on_code_20_vector_line(
+            self,
+            context: Parser2Context,
+            primitive: Code20VectorLine2,
+        ) -> None:
+            """Evaluate code 20 vector line primitive."""
+
+        def on_code_21_center_line(
+            self,
+            context: Parser2Context,
+            primitive: Code21CenterLine2,
+        ) -> None:
+            """Evaluate code 21 center line primitive."""
+
+        def on_code_22_lower_left_line(
+            self,
+            context: Parser2Context,
+            primitive: Code22LowerLeftLine2,
+        ) -> None:
+            """Evaluate code 22 lower left line primitive."""
+
+        def on_assignment(
+            self,
+            context: Parser2Context,
+            assignment: Assignment2,
+        ) -> None:
+            """Evaluate macro variable assignment statement."""
 
     class BeginBlockApertureTokenHooks(TokenHooksBase[BlockApertureBeginT]):
         """Hooks for visiting begin block aperture token (AB)."""

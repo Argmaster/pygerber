@@ -11,11 +11,12 @@ from pygerber.common.error import throw
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.apertures2.block2 import Block2
-from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2
+from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2, NoCircle2
 from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
 from pygerber.gerberx3.parser2.apertures2.polygon2 import Polygon2
 from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
+from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2, CCArc2
 from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
 from pygerber.gerberx3.parser2.commands2.command2 import Command2
@@ -33,6 +34,7 @@ from pygerber.gerberx3.parser2.errors2 import (
 from pygerber.gerberx3.parser2.ihooks import IHooks
 from pygerber.gerberx3.parser2.macro2.assignment2 import Assignment2
 from pygerber.gerberx3.parser2.macro2.macro2 import ApertureMacro2
+from pygerber.gerberx3.parser2.macro2.point2 import Point2
 from pygerber.gerberx3.parser2.macro2.primitives2.code_1_circle2 import Code1Circle2
 from pygerber.gerberx3.parser2.macro2.primitives2.code_2_vector_line2 import (
     Code2VectorLine2,
@@ -50,7 +52,14 @@ from pygerber.gerberx3.parser2.macro2.primitives2.code_21_center_line2 import (
 from pygerber.gerberx3.parser2.macro2.primitives2.code_22_lower_left_line2 import (
     Code22LowerLeftLine2,
 )
-from pygerber.gerberx3.state_enums import DrawMode, ImagePolarityEnum, Unit
+from pygerber.gerberx3.parser2.state2 import ApertureTransform
+from pygerber.gerberx3.state_enums import (
+    DrawMode,
+    ImagePolarityEnum,
+    Mirroring,
+    Polarity,
+    Unit,
+)
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
@@ -718,14 +727,271 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
-            context.get_macro(token.aperture_type)
+            macro = context.get_macro(token.aperture_type)
+            context.set_macro_eval_buffer()
+            context.macro_variable_buffer = {
+                f"${i}": Offset.new(param, context.get_draw_units())
+                for i, param in enumerate(token.am_param, 1)
+            }
+            macro.on_parser2_eval_macro(context)
+
             context.set_aperture(
                 token.aperture_id,
                 Macro2(
                     attributes=context.aperture_attributes,
+                    command_buffer=context.get_macro_eval_buffer().get_readonly(),
                 ),
             )
+
+            context.unset_macro_eval_buffer()
+            context.macro_variable_buffer = {}
+
             return super().on_parser_visit_token(token, context)
+
+    class MacroEvalHooks:
+        """Hooks called when evaluating macro aperture."""
+
+        def on_code_1_circle(
+            self,
+            context: Parser2Context,
+            primitive: Code1Circle2,
+        ) -> None:
+            """Evaluate code 1 circle primitive."""
+            exposure = primitive.exposure.on_parser2_eval_expression(context)
+            polarity = (
+                Polarity.Clear
+                if math.isclose(exposure.value, Decimal("0.0"))
+                else Polarity.Dark
+            )
+            context.get_macro_eval_buffer().add_command(
+                Flash2(
+                    transform=ApertureTransform(
+                        polarity=polarity,
+                        mirroring=Mirroring.NoMirroring,
+                        rotation=Decimal("0.0"),
+                        scaling=Decimal("1.0"),
+                    ),
+                    aperture=Circle2(
+                        diameter=primitive.diameter.on_parser2_eval_expression(context),
+                        hole_diameter=None,
+                    ),
+                    flash_point=Vector2D(
+                        x=primitive.center_x.on_parser2_eval_expression(context),
+                        y=primitive.center_y.on_parser2_eval_expression(context),
+                    ),
+                ),
+            )
+
+        def on_code_2_vector_line(
+            self,
+            context: Parser2Context,
+            primitive: Code2VectorLine2,
+        ) -> None:
+            """Evaluate code 2 vector line primitive."""
+
+        def on_code_4_outline(
+            self,
+            context: Parser2Context,
+            primitive: Code4Outline2,
+        ) -> None:
+            """Evaluate code 4 outline primitive."""
+            exposure = primitive.exposure.on_parser2_eval_expression(context)
+            polarity = (
+                Polarity.Clear
+                if math.isclose(exposure.value, Decimal("0.0"))
+                else Polarity.Dark
+            )
+            transform = ApertureTransform(
+                polarity=polarity,
+                mirroring=Mirroring.NoMirroring,
+                rotation=Decimal("0.0"),
+                scaling=Decimal("1.0"),
+            )
+            aperture = Circle2(
+                diameter=Offset.NULL,
+                hole_diameter=None,
+            )
+            context.get_macro_eval_buffer().add_command(
+                Region2(
+                    transform=ApertureTransform(
+                        polarity=polarity,
+                        mirroring=Mirroring.NoMirroring,
+                        rotation=Decimal("0.0"),
+                        scaling=Decimal("1.0"),
+                    ),
+                    command_buffer=CommandBuffer2(
+                        [
+                            Line2(
+                                transform=transform,
+                                aperture=aperture,
+                                start_point=Vector2D(
+                                    x=start_point.x.on_parser2_eval_expression(
+                                        context,
+                                    ),
+                                    y=start_point.y.on_parser2_eval_expression(
+                                        context,
+                                    ),
+                                ),
+                                end_point=Vector2D(
+                                    x=end_point.x.on_parser2_eval_expression(
+                                        context,
+                                    ),
+                                    y=end_point.y.on_parser2_eval_expression(
+                                        context,
+                                    ),
+                                ),
+                            )
+                            for start_point, end_point in zip(
+                                [
+                                    Point2(x=primitive.start_x, y=primitive.start_y),
+                                    *primitive.points,
+                                ],
+                                [
+                                    *primitive.points,
+                                    Point2(x=primitive.start_x, y=primitive.start_y),
+                                ],
+                            )
+                        ],
+                    ).get_readonly(),
+                ),
+            )
+
+        def on_code_5_polygon(
+            self,
+            context: Parser2Context,
+            primitive: Code5Polygon2,
+        ) -> None:
+            """Evaluate code 5 polygon primitive."""
+            exposure = primitive.exposure.on_parser2_eval_expression(context)
+            polarity = (
+                Polarity.Clear
+                if math.isclose(exposure.value, Decimal("0.0"))
+                else Polarity.Dark
+            )
+            context.get_macro_eval_buffer().add_command(
+                Flash2(
+                    transform=ApertureTransform(
+                        polarity=polarity,
+                        mirroring=Mirroring.NoMirroring,
+                        rotation=Decimal("0.0"),
+                        scaling=Decimal("1.0"),
+                    ),
+                    aperture=Polygon2(
+                        outer_diameter=primitive.diameter.on_parser2_eval_expression(
+                            context,
+                        ),
+                        number_vertices=round(
+                            primitive.number_of_vertices.on_parser2_eval_expression(
+                                context,
+                            ).value,
+                        ),
+                        rotation=Decimal("0.0"),
+                        hole_diameter=None,
+                    ),
+                    flash_point=Vector2D(
+                        x=primitive.center_x.on_parser2_eval_expression(context),
+                        y=primitive.center_y.on_parser2_eval_expression(context),
+                    ),
+                ),
+            )
+
+        def on_code_6_moire(
+            self,
+            context: Parser2Context,
+            primitive: Code6Moire2,
+        ) -> None:
+            """Evaluate code 6 moire primitive."""
+
+        def on_code_7_thermal(
+            self,
+            context: Parser2Context,
+            primitive: Code7Thermal2,
+        ) -> None:
+            """Evaluate code 7 thermal primitive."""
+
+        def on_code_20_vector_line(
+            self,
+            context: Parser2Context,
+            primitive: Code20VectorLine2,
+        ) -> None:
+            """Evaluate code 20 vector line primitive."""
+            exposure = primitive.exposure.on_parser2_eval_expression(context)
+            polarity = (
+                Polarity.Clear
+                if math.isclose(exposure.value, Decimal("0.0"))
+                else Polarity.Dark
+            )
+            context.get_macro_eval_buffer().add_command(
+                Line2(
+                    transform=ApertureTransform(
+                        polarity=polarity,
+                        mirroring=Mirroring.NoMirroring,
+                        rotation=Decimal("0.0"),
+                        scaling=Decimal("1.0"),
+                    ),
+                    aperture=NoCircle2(
+                        diameter=primitive.width.on_parser2_eval_expression(context),
+                        hole_diameter=None,
+                    ),
+                    start_point=Vector2D(
+                        x=primitive.start_x.on_parser2_eval_expression(context),
+                        y=primitive.start_y.on_parser2_eval_expression(context),
+                    ),
+                    end_point=Vector2D(
+                        x=primitive.start_x.on_parser2_eval_expression(context),
+                        y=primitive.start_y.on_parser2_eval_expression(context),
+                    ),
+                ),
+            )
+
+        def on_code_21_center_line(
+            self,
+            context: Parser2Context,
+            primitive: Code21CenterLine2,
+        ) -> None:
+            """Evaluate code 21 center line primitive."""
+            exposure = primitive.exposure.on_parser2_eval_expression(context)
+            polarity = (
+                Polarity.Clear
+                if math.isclose(exposure.value, Decimal("0.0"))
+                else Polarity.Dark
+            )
+            context.get_macro_eval_buffer().add_command(
+                Flash2(
+                    transform=ApertureTransform(
+                        polarity=polarity,
+                        mirroring=Mirroring.NoMirroring,
+                        rotation=Decimal("0.0"),
+                        scaling=Decimal("1.0"),
+                    ),
+                    aperture=Rectangle2(
+                        x_size=primitive.width.on_parser2_eval_expression(context),
+                        y_size=primitive.height.on_parser2_eval_expression(context),
+                        hole_diameter=None,
+                    ),
+                    flash_point=Vector2D(
+                        x=primitive.center_x.on_parser2_eval_expression(context),
+                        y=primitive.center_y.on_parser2_eval_expression(context),
+                    ),
+                ),
+            )
+
+        def on_code_22_lower_left_line(
+            self,
+            context: Parser2Context,
+            primitive: Code22LowerLeftLine2,
+        ) -> None:
+            """Evaluate code 22 lower left line primitive."""
+
+        def on_assignment(
+            self,
+            context: Parser2Context,
+            assignment: Assignment2,
+        ) -> None:
+            """Evaluate macro variable assignment statement."""
+            context.macro_variable_buffer[
+                assignment.variable_name
+            ] = assignment.value.on_parser2_eval_expression(context)
 
     class AxisSelectTokenHooksTokenHooks(IHooks.AxisSelectTokenHooksTokenHooks):
         """Hooks for visiting axis select token (AS)."""
@@ -793,17 +1059,18 @@ class Parser2Hooks(IHooks):
             start_point = context.get_current_position()
             end_point = Vector2D(x=x, y=y)
 
+            aperture_id = context.get_current_aperture_id() or throw(
+                ApertureNotSelected2Error(token),
+            )
+            aperture = context.get_aperture(aperture_id)
+
             context.add_command(
                 Line2(
                     attributes=context.object_attributes,
-                    polarity=context.get_polarity(),
-                    aperture_id=(
-                        context.get_current_aperture_id()
-                        or throw(ApertureNotSelected2Error(token))
-                    ),
+                    aperture=aperture,
                     start_point=start_point,
                     end_point=end_point,
-                    state=context.get_state().get_command2_proxy(),
+                    transform=context.get_state().get_aperture_transform(),
                 ),
             )
             context.set_current_position(end_point)
@@ -880,18 +1147,19 @@ class Parser2Hooks(IHooks):
                 center_offset = Vector2D(x=i, y=j)
                 final_center_point = start_point + center_offset
 
+            aperture_id = context.get_current_aperture_id() or throw(
+                ApertureNotSelected2Error(token),
+            )
+            aperture = context.get_aperture(aperture_id)
+
             context.add_command(
                 Arc2(
                     attributes=context.object_attributes,
-                    polarity=context.get_polarity(),
-                    aperture_id=(
-                        context.get_current_aperture_id()
-                        or throw(ApertureNotSelected2Error(token))
-                    ),
+                    aperture=aperture,
                     start_point=start_point,
                     end_point=end_point,
                     center_point=final_center_point,
-                    state=context.get_state().get_command2_proxy(),
+                    transform=context.get_state().get_aperture_transform(),
                 ),
             )
             context.set_current_position(end_point)
@@ -960,18 +1228,19 @@ class Parser2Hooks(IHooks):
                 center_offset = Vector2D(x=i, y=j)
                 final_center_point = start_point + center_offset
 
+            aperture_id = context.get_current_aperture_id() or throw(
+                ApertureNotSelected2Error(token),
+            )
+            aperture = context.get_aperture(aperture_id)
+
             context.add_command(
                 CCArc2(
                     attributes=context.object_attributes,
-                    polarity=context.get_polarity(),
-                    aperture_id=(
-                        context.get_current_aperture_id()
-                        or throw(ApertureNotSelected2Error(token))
-                    ),
+                    aperture=aperture,
                     start_point=start_point,
                     end_point=end_point,
                     center_point=final_center_point,
-                    state=context.get_state().get_command2_proxy(),
+                    transform=context.get_state().get_aperture_transform(),
                 ),
             )
 
@@ -1040,16 +1309,17 @@ class Parser2Hooks(IHooks):
 
             flash_point = Vector2D(x=x, y=y)
 
+            aperture_id = context.get_current_aperture_id() or throw(
+                ApertureNotSelected2Error(token),
+            )
+            aperture = context.get_aperture(aperture_id)
+
             context.add_command(
                 Flash2(
                     attributes=context.object_attributes,
-                    polarity=context.get_polarity(),
-                    aperture_id=(
-                        context.get_current_aperture_id()
-                        or throw(ApertureNotSelected2Error(token))
-                    ),
+                    aperture=aperture,
                     flash_point=flash_point,
-                    state=context.get_state().get_command2_proxy(),
+                    transform=context.get_state().get_aperture_transform(),
                 ),
             )
 
@@ -1230,9 +1500,8 @@ class Parser2Hooks(IHooks):
                 Region2(
                     aperture_attributes=context.aperture_attributes,
                     object_attributes=context.object_attributes,
-                    polarity=context.get_polarity(),
                     command_buffer=command_buffer.get_readonly(),
-                    state=context.get_state().get_command2_proxy(),
+                    transform=context.get_state().get_aperture_transform(),
                 ),
             )
 
@@ -1689,8 +1958,7 @@ class Parser2Hooks(IHooks):
             for x_index in range(context.get_x_repeat()):
                 for y_index in range(context.get_y_repeat()):
                     buffer_command = BufferCommand2(
-                        polarity=context.get_polarity(),
-                        state=context.get_state().get_command2_proxy(),
+                        transform=context.get_state().get_aperture_transform(),
                         command_buffer=command_buffer,
                     ).get_transposed(
                         Vector2D(

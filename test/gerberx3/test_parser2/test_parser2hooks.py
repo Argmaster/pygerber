@@ -4,7 +4,6 @@ import datetime
 from decimal import Decimal
 from pathlib import Path
 from test.gerberx3.test_parser2.common import debug_dump_context, parse_code
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -731,17 +730,17 @@ def test_command_draw_line_token_hooks() -> None:
         y_format=AxisFormat(integer=4, decimal=6),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
     end_point = Vector2D(x=Offset.new("151.892000"), y=Offset.new("-57.6580000"))
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
 
     context = Parser2Context()
     context.set_draw_units(unit)
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_current_aperture_id(current_aperture_id)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -750,8 +749,8 @@ def test_command_draw_line_token_hooks() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Line2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == Vector2D(x=Offset.new("0"), y=Offset.new("0"))
     assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
@@ -774,8 +773,8 @@ def test_command_draw_line_token_hooks_6() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
 
@@ -785,9 +784,9 @@ def test_command_draw_line_token_hooks_6() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -796,8 +795,8 @@ def test_command_draw_line_token_hooks_6() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Line2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == start_point
     assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
@@ -820,8 +819,8 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
         y_format=AxisFormat(integer=4, decimal=6),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("156.019500"), y=Offset.new("156.019500"))
     center_point = Vector2D(x=Offset.new("156.486139"), y=Offset.new("154.744598"))
     end_point = Vector2D(x=Offset.new("156.019500"), y=Offset.new("-66.357500"))
@@ -832,9 +831,9 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -843,8 +842,8 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == start_point
     assert cmd.center_point == center_point
     assert cmd.end_point == end_point
@@ -868,8 +867,8 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     center_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
@@ -881,9 +880,9 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -892,8 +891,8 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == start_point
     assert cmd.center_point == center_point
     assert cmd.end_point == end_point
@@ -918,8 +917,8 @@ def test_command_draw_arc_token_hooks_single_quadrant_135_degrees() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
 
     context = Parser2Context()
@@ -928,9 +927,9 @@ def test_command_draw_arc_token_hooks_single_quadrant_135_degrees() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     with pytest.raises(NoValidArcCenterFoundError):
         parse_code(gerber_source, context)
@@ -953,8 +952,8 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     center_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("4.2426"), y=Offset.new("4.2426"))
@@ -966,9 +965,9 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -977,8 +976,8 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == start_point
     assert cmd.center_point == center_point
     assert cmd.end_point == end_point
@@ -1031,8 +1030,8 @@ def test_command_flash_token_hooks() -> None:
         y_format=AxisFormat(integer=4, decimal=6),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("6.0"))
 
@@ -1041,8 +1040,8 @@ def test_command_flash_token_hooks() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_current_aperture_id(current_aperture_id)
+    context.set_aperture(current_aperture_id, current_aperture)
     context.set_current_position(start_point)
 
     parse_code(gerber_source, context)
@@ -1052,8 +1051,8 @@ def test_command_flash_token_hooks() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Flash2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.flash_point == end_point
     assert context.get_current_position() == end_point
 
@@ -1627,8 +1626,8 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
     expected_command_count = 6
@@ -1639,9 +1638,9 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     main_cmd_buffer = context.main_command_buffer.get_readonly()
@@ -1664,8 +1663,8 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
             for cmd in sr_cmd_buffer:
                 assert isinstance(cmd, Line2)
                 assert cmd.attributes == ObjectAttributes()
-                assert cmd.polarity == polarity
-                assert cmd.aperture_id == current_aperture
+                assert cmd.transform.polarity == polarity
+                assert cmd.aperture == current_aperture
                 assert cmd.start_point == start_point + offset
                 assert cmd.end_point == end_point + offset
 

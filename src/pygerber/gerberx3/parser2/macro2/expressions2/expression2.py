@@ -8,8 +8,13 @@ evaluation.
 """
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.parser2.macro2.element2 import Element2
+
+if TYPE_CHECKING:
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
 class Expression2(Element2):
@@ -22,6 +27,6 @@ class Expression2(Element2):
     evaluation.
     """
 
-    def visit_evaluate(self) -> Offset:
+    def on_parser2_eval_expression(self, context: Parser2Context) -> Offset:
         """Reduce expression to numerical value."""
         raise NotImplementedError

@@ -72,6 +72,8 @@ class Parser2Context:
         self.step_and_repeat_command_buffer: Optional[CommandBuffer2] = None
         self.state_before_step_and_repeat: Optional[State2] = None
         self.macro_statement_buffer: Optional[StatementBuffer2] = None
+        self.macro_eval_buffer: Optional[CommandBuffer2] = None
+        self.macro_variable_buffer: dict[str, Offset] = {}
         self.hooks: IHooks = (
             Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )
@@ -181,6 +183,24 @@ class Parser2Context:
     def unset_macro_statement_buffer(self) -> None:
         """Unset step and repeat command buffer."""
         self.macro_statement_buffer = None
+
+    def get_macro_eval_buffer(self) -> CommandBuffer2:
+        """Return macro evaluation buffer."""
+        if self.macro_eval_buffer is None:
+            raise MacroNotInitializedError(self.current_token)
+        return self.macro_eval_buffer
+
+    def set_macro_eval_buffer(self) -> None:
+        """Add new command buffer for block aperture draw commands."""
+        self.macro_eval_buffer = (
+            CommandBuffer2()
+            if self.options.initial_macro_eval_buffer is None
+            else self.options.initial_macro_eval_buffer
+        )
+
+    def unset_macro_eval_buffer(self) -> None:
+        """Unset step and repeat command buffer."""
+        self.macro_eval_buffer = None
 
     def skip_token(self) -> NoReturn:
         """Skip this token."""
@@ -533,6 +553,7 @@ class Parser2ContextOptions(FrozenGeneralModel):
     initial_region_command_buffer: Optional[CommandBuffer2] = Field(default=None)
     initial_block_command_buffer: Optional[CommandBuffer2] = Field(default=None)
     initial_macro_statement_buffer: Optional[StatementBuffer2] = Field(default=None)
+    initial_macro_eval_buffer: Optional[CommandBuffer2] = Field(default=None)
     custom_macro_expression_factories: Optional[
         Parser2ContextMacroExpressionFactories
     ] = Field(

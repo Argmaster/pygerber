@@ -22,7 +22,7 @@ class Region2(BufferCommand2):
     def command_to_json(self) -> str:
         """Dump draw operation."""
         return f"""{{ "cls": "{self.__module__}.{self.__class__.__qualname__}", "dict": {{
-        "polarity": "{self.polarity.value}",
+        "polarity": "{self.transform.polarity.value}",
         "aperture_attributes": {self.aperture_attributes.model_dump_json()},
         "command_buffer": {self.command_buffer.model_dump_json()},
         "command_buffer": {
