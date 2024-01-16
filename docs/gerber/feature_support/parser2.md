@@ -123,7 +123,17 @@ of hook based interface.
 
 ### Macros
 
--   ❌ Parameters.
+-   ✅ Parameters.
+-   👽 Primitives:
+    -   ✅ Code 1, Circle
+    -   ❌ Code 2, Vector line
+    -   ✅ Code 4, Outline
+    -   ✅ Code 5, Polygon
+    -   ❌ Code 6, Moire
+    -   ❌ Code 7, Thermal
+    -   ✅ Code 20, Vector line
+    -   ✅ Code 21, Center Line
+    -   ❌ Code 22, Lower Left Line
 -   ✅ Primitives:
     -   ✅ Code 0, Comment
     -   ✅ Code 1, Circle
@@ -141,8 +151,9 @@ of hook based interface.
     -   ❌ Code 5, Polygon
     -   ❌ Code 7, Thermal
 -   ✅ Constants.
--   ❌ Variables.
--   ❌ Variable definitions.
+-   ✅ Constants.
+-   ✅ Variables.
+-   ✅ Variable definitions.
 
 ### Aperture blocks
 
