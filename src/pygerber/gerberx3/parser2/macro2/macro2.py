@@ -16,7 +16,7 @@ class ApertureMacro2(FrozenGeneralModel):
     name: str
     statements: ReadonlyStatementBuffer2
 
-    def on_parser2_eval_macro(self, context: Parser2Context) -> None:
+    def on_parser2_eval_statement(self, context: Parser2Context) -> None:
         """Evaluate macro to create concrete macro aperture."""
         for stmt in self.statements:
-            stmt.on_parser2_eval_macro(context)
+            stmt.on_parser2_eval_statement(context)

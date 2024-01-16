@@ -21,6 +21,6 @@ class Code20VectorLine2(Primitive2):
     end_y: Expression2
     rotation: Expression2
 
-    def on_parser2_eval_macro(self, context: Parser2Context) -> None:
+    def on_parser2_eval_statement(self, context: Parser2Context) -> None:
         """Evaluate macro to create concrete macro aperture."""
         context.hooks.macro_eval.on_code_20_vector_line(context, self)

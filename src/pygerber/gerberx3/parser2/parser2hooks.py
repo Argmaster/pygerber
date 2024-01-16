@@ -733,7 +733,7 @@ class Parser2Hooks(IHooks):
                 f"${i}": Offset.new(param, context.get_draw_units())
                 for i, param in enumerate(token.am_param, 1)
             }
-            macro.on_parser2_eval_macro(context)
+            macro.on_parser2_eval_statement(context)
 
             context.set_aperture(
                 token.aperture_id,

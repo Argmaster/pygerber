@@ -18,6 +18,6 @@ class Assignment2(Statement2):
     variable_name: str
     value: Expression2
 
-    def on_parser2_eval_macro(self, context: Parser2Context) -> None:
+    def on_parser2_eval_statement(self, context: Parser2Context) -> None:
         """Evaluate macro to create concrete macro aperture."""
         context.hooks.macro_eval.on_assignment(context, self)

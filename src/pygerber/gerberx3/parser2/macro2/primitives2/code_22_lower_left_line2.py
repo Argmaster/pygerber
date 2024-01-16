@@ -12,6 +12,6 @@ if TYPE_CHECKING:
 class Code22LowerLeftLine2(Primitive2):
     """Code 22 lower left line macro primitive."""
 
-    def on_parser2_eval_macro(self, context: Parser2Context) -> None:
+    def on_parser2_eval_statement(self, context: Parser2Context) -> None:
         """Evaluate macro to create concrete macro aperture."""
         context.hooks.macro_eval.on_code_22_lower_left_line(context, self)
