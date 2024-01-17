@@ -124,7 +124,17 @@ of hook based interface.
 ### Macros
 
 -   ✅ Parameters.
--   👽 Primitives:
+-   👽 Primitives in definition:
+    -   ✅ Code 1, Circle
+    -   ❌ Code 2, Vector line
+    -   ✅ Code 4, Outline
+    -   ✅ Code 5, Polygon
+    -   ❌ Code 6, Moire
+    -   ✅ Code 7, Thermal
+    -   ✅ Code 20, Vector line
+    -   ✅ Code 21, Center Line
+    -   ❌ Code 22, Lower Left Line
+-   👽 Primitives in aperture instance:
     -   ✅ Code 1, Circle
     -   ❌ Code 2, Vector line
     -   ✅ Code 4, Outline
@@ -134,25 +144,25 @@ of hook based interface.
     -   ✅ Code 20, Vector line
     -   ✅ Code 21, Center Line
     -   ❌ Code 22, Lower Left Line
--   ✅ Primitives:
-    -   ✅ Code 0, Comment
-    -   ✅ Code 1, Circle
-    -   ✅ Code 20, Vector line
-    -   ✅ Code 21, Center Line
-    -   ✅ Code 4, Outline
-    -   ✅ Code 5, Polygon
-    -   ✅ Code 7, Thermal
 -   ❌ Rotation around macro origin:
-    -   ❌ Code 0, Comment
     -   ❌ Code 1, Circle
-    -   ❌ Code 20, Vector line
-    -   ❌ Code 21, Center Line
+    -   ❌ Code 2, Vector line
     -   ❌ Code 4, Outline
     -   ❌ Code 5, Polygon
+    -   ❌ Code 6, Moire
     -   ❌ Code 7, Thermal
--   ✅ Constants.
--   ✅ Constants.
--   ✅ Variables.
+    -   ❌ Code 20, Vector line
+    -   ❌ Code 21, Center Line
+    -   ❌ Code 22, Lower Left Line
+-   ✅ Expressions.
+    -   ✅ Constants.
+    -   ✅ Variables.
+    -   ✅ Addition.
+    -   ✅ Subtraction.
+    -   ✅ Multiplication.
+    -   ✅ Division.
+    -   ✅ Unary + operator.
+    -   ✅ Negation.
 -   ✅ Variable definitions.
 
 ### Aperture blocks
