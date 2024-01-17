@@ -1,13 +1,12 @@
 """`constant2` module contain class wrapping constant value in macro definition."""
 from __future__ import annotations
 
+from decimal import Decimal  # noqa: TCH003
 from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.parser2.macro2.expressions2.expression2 import Expression2
 
 if TYPE_CHECKING:
-    from decimal import Decimal
-
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
