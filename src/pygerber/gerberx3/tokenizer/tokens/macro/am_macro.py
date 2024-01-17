@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Iterator, Sequence, Tuple
+from typing import TYPE_CHECKING, Iterable, Iterator, List, Tuple
 
 from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.tokenizer.tokens.bases.group import TokenGroup
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
-from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
 from pygerber.gerberx3.tokenizer.tokens.macro.macro_begin import MacroBegin
 from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.statement import (
+    MacroStatementToken,
+)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -124,23 +126,23 @@ class MacroDefinition(TokenGroup):
 
     """  # noqa: E501
 
-    tokens: Sequence[Token | Expression]
+    begin: MacroBegin
+    tokens: List[Token]
 
     def __init__(
         self,
         string: str,
         location: int,
-        tokens: Sequence[Token | Expression],
+        macro_begin: MacroBegin,
+        tokens: List[Token],
     ) -> None:
         super().__init__(string, location, tokens)
+        self.macro_begin = macro_begin
 
     @property
     def macro_name(self) -> str:
         """Name of macro item."""
-        macro_begin = self.tokens[0]
-        if not isinstance(macro_begin, MacroBegin):
-            raise TypeError(macro_begin)
-        return macro_begin.name
+        return self.macro_begin.name
 
     @classmethod
     def new(cls, string: str, location: int, tokens: ParseResults) -> Self:
@@ -161,12 +163,11 @@ class MacroDefinition(TokenGroup):
                 raise TypeError(token)
             macro_body_tokens.append(token)
 
-        macro_tokens = [macro_begin, *macro_body_tokens]
-
         return cls(
             string=string,
             location=location,
-            tokens=macro_tokens,
+            macro_begin=macro_begin,
+            tokens=macro_body_tokens,
         )
 
     def update_drawing_state(
@@ -194,9 +195,10 @@ class MacroDefinition(TokenGroup):
         context.get_hooks().macro_definition.post_parser_visit_token(self, context)
 
     def __iter__(self) -> Iterator[Token]:
-        yield self
+        yield self.macro_begin
         for token in self.tokens:
             yield from token
+        yield self
 
     def evaluate(
         self,
@@ -209,5 +211,5 @@ class MacroDefinition(TokenGroup):
         context.variables.update(parameters)
 
         for expression in self.tokens:
-            if isinstance(expression, Expression):
+            if isinstance(expression, MacroStatementToken):
                 expression.evaluate(context, state, handle)

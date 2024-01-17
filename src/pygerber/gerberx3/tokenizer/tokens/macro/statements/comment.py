@@ -5,14 +5,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.tokenizer.tokens.macro.expression import Expression
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.statement import (
+    MacroStatementToken,
+)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
 
-class MacroComment(Expression):
+class MacroComment(MacroStatementToken):
     """## 4.5.1.2 Comment, Code 0.
 
     The comment primitive has no effect on the image but adds human-readable comments

@@ -12,3 +12,9 @@ class Circle2(Aperture2):
 
     diameter: Offset
     hole_diameter: Optional[Offset]
+
+
+class NoCircle2(Circle2):
+    """Dummy aperture representing case when aperture is not needed but has to be
+    given to denote width of draw line command.
+    """

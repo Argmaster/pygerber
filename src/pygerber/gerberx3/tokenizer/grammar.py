@@ -79,30 +79,46 @@ from pygerber.gerberx3.tokenizer.tokens.m00_program_stop import M00ProgramStop
 from pygerber.gerberx3.tokenizer.tokens.m01_optional_stop import M01OptionalStop
 from pygerber.gerberx3.tokenizer.tokens.m02_end_of_file import M02EndOfFile
 from pygerber.gerberx3.tokenizer.tokens.macro.am_macro import MacroDefinition
-from pygerber.gerberx3.tokenizer.tokens.macro.arithmetic_expression import (
+from pygerber.gerberx3.tokenizer.tokens.macro.expressions.binary import (
     AdditionOperator,
     DivisionOperator,
     MultiplicationOperator,
-    NegationOperator,
-    PositiveOperator,
     SubtractionOperator,
 )
-from pygerber.gerberx3.tokenizer.tokens.macro.comment import MacroComment
+from pygerber.gerberx3.tokenizer.tokens.macro.expressions.numeric_constant import (
+    NumericConstant,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.expressions.unary import (
+    NegationOperator,
+    PositiveOperator,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.expressions.variable_name import (
+    MacroVariableName,
+)
 from pygerber.gerberx3.tokenizer.tokens.macro.macro_begin import MacroBegin
-from pygerber.gerberx3.tokenizer.tokens.macro.numeric_constant import NumericConstant
 from pygerber.gerberx3.tokenizer.tokens.macro.point import Point
-from pygerber.gerberx3.tokenizer.tokens.macro.primitives import (
-    PrimitiveCenterLine,
-    PrimitiveCircle,
-    PrimitiveOutline,
-    PrimitivePolygon,
-    PrimitiveThermal,
-    PrimitiveVectorLine,
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_1_circle import (
+    Code1CircleToken,
 )
-from pygerber.gerberx3.tokenizer.tokens.macro.variable_definition import (
-    MacroVariableDefinition,
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_4_outline import (
+    Code4OutlineToken,
 )
-from pygerber.gerberx3.tokenizer.tokens.macro.variable_name import MacroVariableName
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_5_polygon import (
+    Code5PolygonToken,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_7_thermal import (
+    Code7ThermalToken,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_20_vector_line import (
+    Code20VectorLineToken,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.code_21_center_line import (
+    Code21CenterLineToken,
+)
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.comment import MacroComment
+from pygerber.gerberx3.tokenizer.tokens.macro.statements.variable_assignment import (
+    MacroVariableAssignment,
+)
 from pygerber.gerberx3.tokenizer.tokens.mo_unit_mode import UnitMode
 from pygerber.gerberx3.tokenizer.tokens.of_image_offset import ImageOffset
 from pygerber.gerberx3.tokenizer.tokens.sr_step_repeat import (
@@ -231,13 +247,13 @@ class GerberGrammarBuilderOptions(GrammarBuilderOptions):
     macro_begin_token_cls: Type[Token] = MacroBegin
     macro_numeric_constant_token_cls: Type[Token] = NumericConstant
     macro_point_token_cls: Type[Token] = Point
-    macro_primitive_center_line_token_cls: Type[Token] = PrimitiveCenterLine
-    macro_primitive_circle_token_cls: Type[Token] = PrimitiveCircle
-    macro_primitive_outline_token_cls: Type[Token] = PrimitiveOutline
-    macro_primitive_polygon_token_cls: Type[Token] = PrimitivePolygon
-    macro_primitive_thermal_token_cls: Type[Token] = PrimitiveThermal
-    macro_primitive_vector_line_token_cls: Type[Token] = PrimitiveVectorLine
-    macro_variable_definition_token_cls: Type[Token] = MacroVariableDefinition
+    macro_primitive_center_line_token_cls: Type[Token] = Code21CenterLineToken
+    macro_primitive_circle_token_cls: Type[Token] = Code1CircleToken
+    macro_primitive_outline_token_cls: Type[Token] = Code4OutlineToken
+    macro_primitive_polygon_token_cls: Type[Token] = Code5PolygonToken
+    macro_primitive_thermal_token_cls: Type[Token] = Code7ThermalToken
+    macro_primitive_vector_line_token_cls: Type[Token] = Code20VectorLineToken
+    macro_variable_definition_token_cls: Type[Token] = MacroVariableAssignment
     macro_variable_name_token_cls: Type[Token] = MacroVariableName
     mo_unit_mode_token_cls: Type[Token] = UnitMode
     step_repeat_begin_token_cls: Type[Token] = StepRepeatBegin
@@ -698,7 +714,7 @@ class GerberGrammarBuilder(GrammarBuilder):
             + cs
             + self._build_macro_expr("width")  # Width
             + cs
-            + self._build_macro_expr("hight")  # Hight
+            + self._build_macro_expr("height")  # height
             + cs
             + self._build_macro_expr("center_x")  # Center X
             + cs

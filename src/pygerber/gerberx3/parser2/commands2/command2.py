@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.vector_2d import Vector2D
-from pygerber.gerberx3.parser2.state2 import Command2State2Proxy
-from pygerber.gerberx3.state_enums import Mirroring, Polarity
+from pygerber.gerberx3.parser2.state2 import ApertureTransform
+from pygerber.gerberx3.state_enums import Mirroring
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -17,8 +17,7 @@ if TYPE_CHECKING:
 class Command2(FrozenGeneralModel):
     """Parser level abstraction of draw operation for Gerber AST parser, version 2."""
 
-    polarity: Polarity
-    state: Command2State2Proxy
+    transform: ApertureTransform
 
     def get_bounding_box(self) -> BoundingBox:
         """Get bounding box of draw operation."""

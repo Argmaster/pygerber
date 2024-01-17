@@ -4,7 +4,6 @@ import datetime
 from decimal import Decimal
 from pathlib import Path
 from test.gerberx3.test_parser2.common import debug_dump_context, parse_code
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -40,6 +39,25 @@ from pygerber.gerberx3.parser2.errors2 import (
     UnitNotSet2Error,
     UnnamedBlockApertureNotAllowedError,
 )
+from pygerber.gerberx3.parser2.macro2.assignment2 import Assignment2
+from pygerber.gerberx3.parser2.macro2.expressions2.binary2 import (
+    Addition2,
+    Multiplication2,
+    Subtraction2,
+)
+from pygerber.gerberx3.parser2.macro2.expressions2.constant2 import Constant2
+from pygerber.gerberx3.parser2.macro2.expressions2.unary2 import Negation2
+from pygerber.gerberx3.parser2.macro2.expressions2.variable_name import VariableName2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_1_circle2 import Code1Circle2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_4_outline2 import Code4Outline2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_5_polygon2 import Code5Polygon2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_7_thermal2 import Code7Thermal2
+from pygerber.gerberx3.parser2.macro2.primitives2.code_20_vector_line2 import (
+    Code20VectorLine2,
+)
+from pygerber.gerberx3.parser2.macro2.primitives2.code_21_center_line2 import (
+    Code21CenterLine2,
+)
 from pygerber.gerberx3.state_enums import (
     AxisCorrespondence,
     DrawMode,
@@ -55,6 +73,437 @@ from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
 
 DEBUG_DUMP_DIR = Path(__file__).parent / ".output" / "test_parser2hooks"
 DEBUG_DUMP_DIR.mkdir(exist_ok=True, parents=True)
+
+
+def test_macro_definition_token_hooks_one_circle() -> None:
+    gerber_source = """
+    %AMCircle*
+    1,1,1.5,0,0,0*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Circle")
+
+    assert macro.name == "Circle"
+    assert len(macro.statements) == 1
+
+    c = macro.statements[0]
+
+    assert isinstance(c, Code1Circle2)
+
+    assert isinstance(c.diameter, Constant2)
+    assert c.diameter.value == Offset.new("1.5")
+
+    assert isinstance(c.center_x, Constant2)
+    assert c.center_x.value == Offset.new("0")
+
+    assert isinstance(c.center_y, Constant2)
+    assert c.center_y.value == Offset.new("0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_4_outline() -> None:
+    gerber_source = """
+    %AMTriangle_30*
+    4,1,3,
+    1,-1,
+    1,1,
+    2,1,
+    1,-1,
+    30*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Triangle_30")
+    assert macro.name == "Triangle_30"
+
+    assert len(macro.statements) == 1
+
+    outline = macro.statements[0]
+    assert isinstance(outline, Code4Outline2)
+    assert isinstance(outline.exposure, Constant2)
+    assert outline.exposure.value == Offset.new("1")
+    assert isinstance(outline.vertex_count, Constant2)
+    assert outline.vertex_count.value == Offset.new("3")
+
+    assert isinstance(outline.start_x, Constant2)
+    assert outline.start_x.value == Offset.new("1")
+
+    assert isinstance(outline.start_y, Negation2)
+    assert isinstance(outline.start_y.op, Constant2)
+    assert outline.start_y.op.value == Offset.new("1")
+
+    assert isinstance(outline.points[0].x, Constant2)
+    assert outline.points[0].x.value == Offset.new("1")
+
+    assert isinstance(outline.points[0].y, Constant2)
+    assert outline.points[0].y.value == Offset.new("1")
+
+    assert isinstance(outline.points[1].x, Constant2)
+    assert outline.points[1].x.value == Offset.new("2")
+
+    assert isinstance(outline.points[1].y, Constant2)
+    assert outline.points[1].y.value == Offset.new("1")
+
+    assert isinstance(outline.points[2].x, Constant2)
+    assert outline.points[2].x.value == Offset.new("1")
+
+    assert isinstance(outline.points[2].y, Negation2)
+    assert isinstance(outline.points[2].y.op, Constant2)
+    assert outline.points[2].y.op.value == Offset.new("1")
+
+    assert isinstance(outline.rotation, Constant2)
+    assert outline.rotation.value == Offset.new("30")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_5_polygon() -> None:
+    gerber_source = """
+    %AMPolygon*
+    5,1,8,0,0,8,0*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Polygon")
+    assert macro.name == "Polygon"
+    assert len(macro.statements) == 1
+
+    poly = macro.statements[0]
+    assert isinstance(poly, Code5Polygon2)
+
+    assert isinstance(poly.exposure, Constant2)
+    assert poly.exposure.value == Offset.new("1")
+
+    assert isinstance(poly.number_of_vertices, Constant2)
+    assert poly.number_of_vertices.value == Offset.new("8")
+
+    assert isinstance(poly.center_x, Constant2)
+    assert poly.center_x.value == Offset.new("0")
+
+    assert isinstance(poly.center_y, Constant2)
+    assert poly.center_y.value == Offset.new("0")
+
+    assert isinstance(poly.diameter, Constant2)
+    assert poly.diameter.value == Offset.new("8")
+
+    assert isinstance(poly.rotation, Constant2)
+    assert poly.rotation.value == Offset.new("0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_7_thermal() -> None:
+    gerber_source = """
+    %AMThermal*
+    7,0,0,0.95,0.75,0.175,0.0*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Thermal")
+    assert macro.name == "Thermal"
+    assert len(macro.statements) == 1
+
+    thermal = macro.statements[0]
+    assert isinstance(thermal, Code7Thermal2)
+
+    assert isinstance(thermal.center_x, Constant2)
+    assert thermal.center_x.value == Offset.new("0")
+
+    assert isinstance(thermal.center_y, Constant2)
+    assert thermal.center_y.value == Offset.new("0")
+
+    assert isinstance(thermal.outer_diameter, Constant2)
+    assert thermal.outer_diameter.value == Offset.new("0.95")
+
+    assert isinstance(thermal.inner_diameter, Constant2)
+    assert thermal.inner_diameter.value == Offset.new("0.75")
+
+    assert isinstance(thermal.gap, Constant2)
+    assert thermal.gap.value == Offset.new("0.175")
+
+    assert isinstance(thermal.rotation, Constant2)
+    assert thermal.rotation.value == Offset.new("0.0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_20_vector_line() -> None:
+    gerber_source = """
+    %AMLine*
+    20,1,0.9,0,0.45,12,0.45,0*
+    %
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Line")
+
+    assert macro.name == "Line"
+    assert len(macro.statements) == 1
+
+    vl = macro.statements[0]
+
+    assert isinstance(vl, Code20VectorLine2)
+    assert isinstance(vl.exposure, Constant2)
+    assert vl.exposure.value == Offset.new("1")
+    assert isinstance(vl.width, Constant2)
+    assert vl.width.value == Offset.new("0.9")
+    assert isinstance(vl.start_x, Constant2)
+    assert vl.start_x.value == Offset.new("0")
+    assert isinstance(vl.start_y, Constant2)
+    assert vl.start_y.value == Offset.new("0.45")
+    assert isinstance(vl.end_x, Constant2)
+    assert vl.end_x.value == Offset.new("12")
+    assert isinstance(vl.end_y, Constant2)
+    assert vl.end_y.value == Offset.new("0.45")
+    assert isinstance(vl.rotation, Constant2)
+    assert vl.rotation.value == Offset.new("0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_one_code_21_center_line() -> None:
+    gerber_source = """
+    %AMRECTANGLE*
+    21,1,6.8,1.2,3.4,0.6,30*%
+    """
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("RECTANGLE")
+    assert macro.name == "RECTANGLE"
+    assert len(macro.statements) == 1
+
+    center_line = macro.statements[0]
+    assert isinstance(center_line, Code21CenterLine2)
+
+    assert isinstance(center_line.exposure, Constant2)
+    assert center_line.exposure.value == Offset.new("1")
+    assert isinstance(center_line.width, Constant2)
+    assert center_line.width.value == Offset.new("6.8")
+    assert isinstance(center_line.height, Constant2)
+    assert center_line.height.value == Offset.new("1.2")
+    assert isinstance(center_line.center_x, Constant2)
+    assert center_line.center_x.value == Offset.new("3.4")
+    assert isinstance(center_line.center_y, Constant2)
+    assert center_line.center_y.value == Offset.new("0.6")
+    assert isinstance(center_line.rotation, Constant2)
+    assert center_line.rotation.value == Offset.new("30")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_with_variables() -> None:
+    gerber_source = """
+    %AMRect*
+    21,1,$1,$2-2x$3,-$4,-$5+$2,0*%
+    """
+    expected_statement_count = 1
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Rect")
+    assert macro.name == "Rect"
+    assert len(macro.statements) == expected_statement_count
+
+    stmt = macro.statements[0]
+    assert isinstance(stmt, Code21CenterLine2)
+
+    assert isinstance(stmt.exposure, Constant2)
+    assert stmt.exposure.value == Offset.new("1.0")
+
+    assert isinstance(stmt.width, VariableName2)
+    assert stmt.width.name == "$1"
+
+    assert isinstance(stmt.height, Subtraction2)
+    assert isinstance(stmt.height.lhs, VariableName2)
+    assert stmt.height.lhs.name == "$2"
+
+    assert isinstance(stmt.height.rhs, Multiplication2)
+    assert isinstance(stmt.height.rhs.lhs, Constant2)
+    assert stmt.height.rhs.lhs.value == Offset.new("2")
+
+    assert isinstance(stmt.height.rhs.rhs, VariableName2)
+    assert stmt.height.rhs.rhs.name == "$3"
+
+    assert isinstance(stmt.center_x, Negation2)
+    assert isinstance(stmt.center_x.op, VariableName2)
+    assert stmt.center_x.op.name == "$4"
+
+    assert isinstance(stmt.center_y, Addition2)
+    assert isinstance(stmt.center_y.lhs, Negation2)
+    assert isinstance(stmt.center_y.lhs.op, VariableName2)
+    assert stmt.center_y.lhs.op.name == "$5"
+    assert isinstance(stmt.center_y.rhs, VariableName2)
+    assert stmt.center_y.rhs.name == "$2"
+
+    assert isinstance(stmt.rotation, Constant2)
+    assert stmt.rotation.value == Offset.new("0")
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_assignment() -> None:
+    gerber_source = """
+    %AMDONUTCAL*
+    1,1,$1,$2,$3*
+    $4=$1x1.25*
+    1,0,$4,$2,$3*%
+    """
+    expected_statement_count = 3
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("DONUTCAL")
+    assert macro.name == "DONUTCAL"
+    assert len(macro.statements) == expected_statement_count
+
+    stmt = macro.statements[0]
+    assert isinstance(stmt, Code1Circle2)
+
+    stmt = macro.statements[1]
+    assert isinstance(stmt, Assignment2)
+
+    assert stmt.variable_name == "$4"
+    assert isinstance(stmt.value, Multiplication2)
+    assert isinstance(stmt.value.lhs, VariableName2)
+    assert isinstance(stmt.value.rhs, Constant2)
+    assert stmt.value.rhs.value == Offset.new("1.25")
+
+    stmt = macro.statements[2]
+    assert isinstance(stmt, Code1Circle2)
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_one_circle.__qualname__,
+    )
+
+
+def test_macro_definition_token_hooks_box_macro() -> None:
+    gerber_source = """
+    %AMBox*
+    0 Rectangle with rounded corners, with rotation*
+    0 The origin of the aperture is its center*
+    0 $1 X-size*
+    0 $2 Y-size*
+    0 $3 Rounding radius*
+    0 $4 Rotation angle, in degrees counterclockwise*
+    0 Add two overlapping rectangle primitives as box body*
+    21,1,$1,$2-$3-$3,0,0,$4*
+    21,1,$1-$3-$3,$2,0,0,$4*
+    0 Add four circle primitives for the rounded corners*
+    $5=$1/2*
+    $6=$2/2*
+    $7=2x$3*
+    1,1,$7,$5-$3,$6-$3,$4*
+    1,1,$7,-$5+$3,$6-$3,$4*
+    1,1,$7,-$5+$3,-$6+$3,$4*
+    1,1,$7,$5-$3,-$6+$3,$4*
+    %
+    """
+    expected_statement_count = 9
+    context = Parser2Context()
+    context.set_draw_units(Unit.Millimeters)
+
+    parse_code(gerber_source, context)
+
+    macro = context.get_macro("Box")
+    assert macro.name == "Box"
+    assert len(macro.statements) == expected_statement_count
+
+    stmt = macro.statements[0]
+    assert isinstance(stmt, Code21CenterLine2)
+
+    stmt = macro.statements[1]
+    assert isinstance(stmt, Code21CenterLine2)
+
+    stmt = macro.statements[2]
+    assert isinstance(stmt, Assignment2)
+
+    stmt = macro.statements[3]
+    assert isinstance(stmt, Assignment2)
+
+    stmt = macro.statements[4]
+    assert isinstance(stmt, Assignment2)
+
+    stmt = macro.statements[5]
+    assert isinstance(stmt, Code1Circle2)
+
+    stmt = macro.statements[6]
+    assert isinstance(stmt, Code1Circle2)
+
+    stmt = macro.statements[7]
+    assert isinstance(stmt, Code1Circle2)
+
+    stmt = macro.statements[8]
+    assert isinstance(stmt, Code1Circle2)
+
+    assert isinstance(stmt.diameter, VariableName2)
+    assert stmt.diameter.name == "$7"
+
+    assert isinstance(stmt.center_x, Subtraction2)
+    assert isinstance(stmt.center_x.lhs, VariableName2)
+    assert stmt.center_x.lhs.name == "$5"
+    assert isinstance(stmt.center_x.rhs, VariableName2)
+    assert stmt.center_x.rhs.name == "$3"
+
+    assert isinstance(stmt.center_y, Addition2)
+    assert isinstance(stmt.center_y.lhs, Negation2)
+    assert isinstance(stmt.center_y.lhs.op, VariableName2)
+    assert stmt.center_y.lhs.op.name == "$6"
+    assert isinstance(stmt.center_y.rhs, VariableName2)
+    assert stmt.center_y.rhs.name == "$3"
+
+    assert isinstance(stmt.rotation, VariableName2)
+    assert stmt.rotation.name == "$4"
+
+    debug_dump_context(
+        context,
+        DEBUG_DUMP_DIR / test_macro_definition_token_hooks_box_macro.__qualname__,
+    )
 
 
 def test_begin_block_aperture_token_hooks() -> None:
@@ -281,17 +730,17 @@ def test_command_draw_line_token_hooks() -> None:
         y_format=AxisFormat(integer=4, decimal=6),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
     end_point = Vector2D(x=Offset.new("151.892000"), y=Offset.new("-57.6580000"))
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
 
     context = Parser2Context()
     context.set_draw_units(unit)
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_current_aperture_id(current_aperture_id)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -300,8 +749,8 @@ def test_command_draw_line_token_hooks() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Line2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == Vector2D(x=Offset.new("0"), y=Offset.new("0"))
     assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
@@ -324,8 +773,8 @@ def test_command_draw_line_token_hooks_6() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
 
@@ -335,9 +784,9 @@ def test_command_draw_line_token_hooks_6() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -346,8 +795,8 @@ def test_command_draw_line_token_hooks_6() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Line2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == start_point
     assert cmd.end_point == end_point
     assert context.get_current_position() == end_point
@@ -370,8 +819,8 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
         y_format=AxisFormat(integer=4, decimal=6),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("156.019500"), y=Offset.new("156.019500"))
     center_point = Vector2D(x=Offset.new("156.486139"), y=Offset.new("154.744598"))
     end_point = Vector2D(x=Offset.new("156.019500"), y=Offset.new("-66.357500"))
@@ -382,9 +831,9 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -393,8 +842,8 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == start_point
     assert cmd.center_point == center_point
     assert cmd.end_point == end_point
@@ -418,8 +867,8 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     center_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
@@ -431,9 +880,9 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -442,8 +891,8 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == start_point
     assert cmd.center_point == center_point
     assert cmd.end_point == end_point
@@ -468,8 +917,8 @@ def test_command_draw_arc_token_hooks_single_quadrant_135_degrees() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
 
     context = Parser2Context()
@@ -478,9 +927,9 @@ def test_command_draw_arc_token_hooks_single_quadrant_135_degrees() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     with pytest.raises(NoValidArcCenterFoundError):
         parse_code(gerber_source, context)
@@ -503,8 +952,8 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     center_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("4.2426"), y=Offset.new("4.2426"))
@@ -516,9 +965,9 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     cmds = context.main_command_buffer.get_readonly()
@@ -527,8 +976,8 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Arc2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.start_point == start_point
     assert cmd.center_point == center_point
     assert cmd.end_point == end_point
@@ -581,8 +1030,8 @@ def test_command_flash_token_hooks() -> None:
         y_format=AxisFormat(integer=4, decimal=6),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("6.0"))
 
@@ -591,8 +1040,8 @@ def test_command_flash_token_hooks() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_current_aperture_id(current_aperture_id)
+    context.set_aperture(current_aperture_id, current_aperture)
     context.set_current_position(start_point)
 
     parse_code(gerber_source, context)
@@ -602,8 +1051,8 @@ def test_command_flash_token_hooks() -> None:
     cmd = next(iter(cmds))
     assert isinstance(cmd, Flash2)
     assert cmd.attributes == ObjectAttributes()
-    assert cmd.polarity == polarity
-    assert cmd.aperture_id == current_aperture
+    assert cmd.transform.polarity == polarity
+    assert cmd.aperture == current_aperture
     assert cmd.flash_point == end_point
     assert context.get_current_position() == end_point
 
@@ -1177,8 +1626,8 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
         y_format=AxisFormat(integer=2, decimal=4),
     )
     polarity = Polarity.Dark
-    current_aperture = ApertureID("D11")
-    aperture_mock = MagicMock()
+    current_aperture_id = ApertureID("D11")
+    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
     expected_command_count = 6
@@ -1189,9 +1638,9 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
     context.set_draw_mode(draw_mode)
     context.set_coordinate_parser(coordinate_parser)
     context.set_polarity(polarity)
-    context.set_current_aperture_id(current_aperture)
+    context.set_current_aperture_id(current_aperture_id)
     context.set_current_position(start_point)
-    context.set_aperture(current_aperture, aperture_mock)
+    context.set_aperture(current_aperture_id, current_aperture)
 
     parse_code(gerber_source, context)
     main_cmd_buffer = context.main_command_buffer.get_readonly()
@@ -1214,8 +1663,8 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
             for cmd in sr_cmd_buffer:
                 assert isinstance(cmd, Line2)
                 assert cmd.attributes == ObjectAttributes()
-                assert cmd.polarity == polarity
-                assert cmd.aperture_id == current_aperture
+                assert cmd.transform.polarity == polarity
+                assert cmd.aperture == current_aperture
                 assert cmd.start_point == start_point + offset
                 assert cmd.end_point == end_point + offset
 

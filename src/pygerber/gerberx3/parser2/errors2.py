@@ -107,6 +107,12 @@ class StepAndRepeatNotInitializedError(Parser2Error):
     """Raised when step and repeat block is closed without being correctly opened."""
 
 
+class MacroNotInitializedError(Parser2Error):
+    """Raised when macro statement buffer is requested without being correctly
+    initialized.
+    """
+
+
 class StandardAttributeError(Parser2Error):
     """Raised when parser encounters an error while processing a standard attribute."""
 

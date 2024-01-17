@@ -23,13 +23,13 @@ of hook based interface.
 
 | Symbol | Count |
 | ------ | ----- |
-| ✅     | 92    |
+| ✅     | 116   |
 | 🚧     | 0     |
 | 🚫     | 4     |
-| ❌     | 47    |
-| 👽     | 34    |
+| ❌     | 45    |
+| 👽     | 39    |
 | 👾     | 0     |
-| total  | 185   |
+| total  | 204   |
 
 ## Supported Gerber X3 features
 
@@ -123,26 +123,47 @@ of hook based interface.
 
 ### Macros
 
--   ❌ Parameters.
--   ❌ Primitives:
-    -   ❌ Code 0, Comment
-    -   ❌ Code 1, Circle
-    -   ❌ Code 20, Vector line
-    -   ❌ Code 21, Center Line
-    -   ❌ Code 4, Outline
-    -   ❌ Code 5, Polygon
+-   ✅ Parameters.
+-   👽 Primitives in definition:
+    -   ✅ Code 1, Circle
+    -   ❌ Code 2, Vector line
+    -   ✅ Code 4, Outline
+    -   ✅ Code 5, Polygon
+    -   ❌ Code 6, Moire
+    -   ✅ Code 7, Thermal
+    -   ✅ Code 20, Vector line
+    -   ✅ Code 21, Center Line
+    -   ❌ Code 22, Lower Left Line
+-   👽 Primitives in aperture instance:
+    -   ✅ Code 1, Circle
+    -   ❌ Code 2, Vector line
+    -   ✅ Code 4, Outline
+    -   ✅ Code 5, Polygon
+    -   ❌ Code 6, Moire
     -   ❌ Code 7, Thermal
+    -   ✅ Code 20, Vector line
+    -   ✅ Code 21, Center Line
+    -   ❌ Code 22, Lower Left Line
 -   ❌ Rotation around macro origin:
-    -   ❌ Code 0, Comment
     -   ❌ Code 1, Circle
-    -   ❌ Code 20, Vector line
-    -   ❌ Code 21, Center Line
+    -   ❌ Code 2, Vector line
     -   ❌ Code 4, Outline
     -   ❌ Code 5, Polygon
+    -   ❌ Code 6, Moire
     -   ❌ Code 7, Thermal
--   ❌ Constants.
--   ❌ Variables.
--   ❌ Variable definitions.
+    -   ❌ Code 20, Vector line
+    -   ❌ Code 21, Center Line
+    -   ❌ Code 22, Lower Left Line
+-   ✅ Expressions.
+    -   ✅ Constants.
+    -   ✅ Variables.
+    -   ✅ Addition.
+    -   ✅ Subtraction.
+    -   ✅ Multiplication.
+    -   ✅ Division.
+    -   ✅ Unary + operator.
+    -   ✅ Negation.
+-   ✅ Variable definitions.
 
 ### Aperture blocks
 

@@ -193,7 +193,7 @@ def test_macro_variable_declaration_raw(
 
 
 TEST_DATA_MACRO_VARIABLE_DECLARATION_EXPECTED_TOKENS = [
-    "[GerberCode::Token::MacroVariableDefinition::[GerberCode::Token::MacroVariableName = GerberCode::Token::MultiplicationOperator::[GerberCode::Token::MacroVariableName, GerberCode::Token::NumericConstant::[0.75]]]]",
+    "[GerberCode::Token::MacroVariableAssignment::[GerberCode::Token::MacroVariableName = GerberCode::Token::MultiplicationOperator::[GerberCode::Token::MacroVariableName, GerberCode::Token::NumericConstant::[0.75]]]]",
 ]
 
 
@@ -261,36 +261,3 @@ TEST_DATA_EXPECTED_TOKENS_RAW = [
 def test_am_raw(string: str, tokens: str, macro_tokens_raw: ParserElement) -> None:
     result = macro_tokens_raw.parse_string(string)
     assert str(result) == tokens
-
-
-TEST_DATA_EXPECTED_TOKENS = [
-    """[GerberCode::Token::Statement[GerberCode::Token::MacroDefinition[GerberCode::Token::MacroBegin, GerberCode::Token::PrimitiveOutline
-  GerberCode::Token::NumericConstant::[1]
-  GerberCode::Token::NumericConstant::[3]
-  GerberCode::Token::NumericConstant::[0.04349]
-  GerberCode::Token::NumericConstant::[0.0120]
-    GerberCode::Token::Point::[GerberCode::Token::NegationOperator::[GerberCode::Token::NumericConstant::[0.04349]], GerberCode::Token::NumericConstant::[0.0119]]
-    GerberCode::Token::Point::[GerberCode::Token::NegationOperator::[GerberCode::Token::NumericConstant::[0.04349]], GerberCode::Token::NegationOperator::[GerberCode::Token::NumericConstant::[0.0120]]]
-    GerberCode::Token::Point::[GerberCode::Token::NumericConstant::[0.04349], GerberCode::Token::NegationOperator::[GerberCode::Token::NumericConstant::[0.0119]]]
-  GerberCode::Token::NumericConstant::[0]]]]""",
-    """[GerberCode::Token::Statement[GerberCode::Token::MacroDefinition[GerberCode::Token::MacroBegin, GerberCode::Token::PrimitiveCircle
-  GerberCode::Token::NumericConstant::[1]
-  GerberCode::Token::MacroVariableName
-  GerberCode::Token::MacroVariableName
-  GerberCode::Token::MacroVariableName
-  GerberCode::Token::NumericConstant::[0.0], GerberCode::Token::MacroVariableDefinition::[GerberCode::Token::MacroVariableName = GerberCode::Token::MultiplicationOperator::[GerberCode::Token::MacroVariableName, GerberCode::Token::NumericConstant::[0.75]]], GerberCode::Token::PrimitiveCircle
-  GerberCode::Token::NumericConstant::[0]
-  GerberCode::Token::MacroVariableName
-  GerberCode::Token::MacroVariableName
-  GerberCode::Token::MacroVariableName
-  GerberCode::Token::NumericConstant::[0.0]]]]""",
-]
-
-
-@pytest.mark.parametrize(
-    ("string", "tokens"),
-    zip(TEST_DATA, TEST_DATA_EXPECTED_TOKENS),
-)
-def test_am(string: str, tokens: str, macro_tokens: ParserElement) -> None:
-    result = macro_tokens.parse_string(string)
-    assert str(result) == tokens, str(result)

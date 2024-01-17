@@ -8,7 +8,7 @@ references to them are copied.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import Field
 
@@ -21,6 +21,7 @@ from pygerber.gerberx3.parser2.errors2 import (
     CoordinateFormatNotSet2Error,
     UnitNotSet2Error,
 )
+from pygerber.gerberx3.parser2.macro2.macro2 import ApertureMacro2
 from pygerber.gerberx3.state_enums import (
     AxisCorrespondence,
     DrawMode,
@@ -54,18 +55,6 @@ class State2Constants(FrozenGeneralModel):
     coordinate_parser: Optional[CoordinateParser] = Field(default=None)
     """The coordinate format specification, including the number of decimals.
     (Spec reference: 4.2.2)"""
-
-    polarity: Polarity = Field(default=Polarity.Dark)
-    """The polarity object transformation parameter. (Spec reference: 4.9.2)"""
-
-    mirroring: Mirroring = Field(default=Mirroring.NoMirroring)
-    """The mirror object transformation parameter. (Spec reference: 4.9.3)"""
-
-    rotation: Decimal = Field(default=Decimal("0.0"))
-    """The rotation object transformation parameter. (Spec reference: 4.9.4)"""
-
-    scaling: Decimal = Field(default=Decimal("1.0"))
-    """The scale object transformation parameter. (Spec reference: 4.9.5)"""
 
     is_output_image_negation_required: bool = Field(default=False)
     """Flag indicating whether image polarity flipping is required.
@@ -137,54 +126,6 @@ class State2Constants(FrozenGeneralModel):
             },
         )
 
-    def get_polarity(self) -> Polarity:
-        """Get polarity property value."""
-        return self.polarity
-
-    def set_polarity(self, polarity: Polarity) -> Self:
-        """Set the polarity property value."""
-        return self.model_copy(
-            update={
-                "polarity": polarity,
-            },
-        )
-
-    def get_mirroring(self) -> Mirroring:
-        """Get mirroring property value."""
-        return self.mirroring
-
-    def set_mirroring(self, mirroring: Mirroring) -> Self:
-        """Set the mirroring property value."""
-        return self.model_copy(
-            update={
-                "mirroring": mirroring,
-            },
-        )
-
-    def get_rotation(self) -> Decimal:
-        """Get rotation property value."""
-        return self.rotation
-
-    def set_rotation(self, rotation: Decimal) -> Self:
-        """Set the rotation property value."""
-        return self.model_copy(
-            update={
-                "rotation": rotation,
-            },
-        )
-
-    def get_scaling(self) -> Decimal:
-        """Get scaling property value."""
-        return self.scaling
-
-    def set_scaling(self, scaling: Decimal) -> Self:
-        """Set the scaling property value."""
-        return self.model_copy(
-            update={
-                "scaling": scaling,
-            },
-        )
-
     def get_is_output_image_negation_required(self) -> bool:
         """Get is_output_image_negation_required property value."""
         return self.is_output_image_negation_required
@@ -237,6 +178,70 @@ class State2Constants(FrozenGeneralModel):
         )
 
 
+class ApertureTransform(FrozenGeneralModel):
+    """Proxy for accessing Parser2State from the moment of creation of command."""
+
+    polarity: Polarity = Field(default=Polarity.Dark)
+    """The polarity object transformation parameter. (Spec reference: 4.9.2)"""
+
+    mirroring: Mirroring = Field(default=Mirroring.NoMirroring)
+    """The mirror object transformation parameter. (Spec reference: 4.9.3)"""
+
+    rotation: Decimal = Field(default=Decimal("0.0"))
+    """The rotation object transformation parameter. (Spec reference: 4.9.4)"""
+
+    scaling: Decimal = Field(default=Decimal("1.0"))
+    """The scale object transformation parameter. (Spec reference: 4.9.5)"""
+
+    def get_polarity(self) -> Polarity:
+        """Get polarity property value."""
+        return self.polarity
+
+    def set_polarity(self, polarity: Polarity) -> Self:
+        """Set the polarity property value."""
+        return self.model_copy(
+            update={
+                "polarity": polarity,
+            },
+        )
+
+    def get_mirroring(self) -> Mirroring:
+        """Get mirroring property value."""
+        return self.mirroring
+
+    def set_mirroring(self, mirroring: Mirroring) -> Self:
+        """Set the mirroring property value."""
+        return self.model_copy(
+            update={
+                "mirroring": mirroring,
+            },
+        )
+
+    def get_rotation(self) -> Decimal:
+        """Get rotation property value."""
+        return self.rotation
+
+    def set_rotation(self, rotation: Decimal) -> Self:
+        """Set the rotation property value."""
+        return self.model_copy(
+            update={
+                "rotation": rotation,
+            },
+        )
+
+    def get_scaling(self) -> Decimal:
+        """Get scaling property value."""
+        return self.scaling
+
+    def set_scaling(self, scaling: Decimal) -> Self:
+        """Set the scaling property value."""
+        return self.model_copy(
+            update={
+                "scaling": scaling,
+            },
+        )
+
+
 class State2ApertureIndex(ImmutableMapping[ApertureID, Aperture2]):
     """Index of all apertures defined in Gerber AST until currently parsed token."""
 
@@ -252,15 +257,15 @@ class State2ApertureIndex(ImmutableMapping[ApertureID, Aperture2]):
         return self.mapping[__id]
 
 
-class State2MacroIndex(ImmutableMapping[str, Any]):
+class State2MacroIndex(ImmutableMapping[str, ApertureMacro2]):
     """Index of all macros defined in Gerber AST until currently parsed token."""
 
-    def set_macro(self, __id: str, __macro: Any) -> Self:
+    def set_macro(self, __id: str, __macro: ApertureMacro2) -> Self:
         """Add new macro to macros index."""
         # TODO(argmaster): Add warning handling.  # noqa: TD003
         return self.update(__id, __macro)
 
-    def get_macro(self, __id: str) -> Any:
+    def get_macro(self, __id: str) -> ApertureMacro2:
         """Get existing macro from index. When macro is missing KeyError is
         raised.
         """
@@ -578,37 +583,59 @@ class State2(FrozenGeneralModel):
             self.get_constants().set_coordinate_parser(coordinate_parser),
         )
 
+    aperture_transform: ApertureTransform = Field(default_factory=ApertureTransform)
+
+    def get_aperture_transform(self) -> ApertureTransform:
+        """Get aperture_transform property value."""
+        return self.aperture_transform
+
+    def set_aperture_transform(self, aperture_transform: ApertureTransform) -> Self:
+        """Set the aperture_transform property value."""
+        return self.model_copy(
+            update={
+                "aperture_transform": aperture_transform,
+            },
+        )
+
     def get_polarity(self) -> Polarity:
         """Get polarity property value."""
-        return self.get_constants().get_polarity()
+        return self.get_aperture_transform().get_polarity()
 
     def set_polarity(self, polarity: Polarity) -> Self:
         """Set the polarity property value."""
-        return self.set_constants(self.get_constants().set_polarity(polarity))
+        return self.set_aperture_transform(
+            self.get_aperture_transform().set_polarity(polarity),
+        )
 
     def get_mirroring(self) -> Mirroring:
         """Get mirroring property value."""
-        return self.get_constants().get_mirroring()
+        return self.get_aperture_transform().get_mirroring()
 
     def set_mirroring(self, mirroring: Mirroring) -> Self:
         """Set the mirroring property value."""
-        return self.set_constants(self.get_constants().set_mirroring(mirroring))
+        return self.set_aperture_transform(
+            self.get_aperture_transform().set_mirroring(mirroring),
+        )
 
     def get_rotation(self) -> Decimal:
         """Get rotation property value."""
-        return self.get_constants().get_rotation()
+        return self.get_aperture_transform().get_rotation()
 
     def set_rotation(self, rotation: Decimal) -> Self:
         """Set the rotation property value."""
-        return self.set_constants(self.get_constants().set_rotation(rotation))
+        return self.set_aperture_transform(
+            self.get_aperture_transform().set_rotation(rotation),
+        )
 
     def get_scaling(self) -> Decimal:
         """Get scaling property value."""
-        return self.get_constants().get_scaling()
+        return self.get_aperture_transform().get_scaling()
 
     def set_scaling(self, scaling: Decimal) -> Self:
         """Set the scaling property value."""
-        return self.set_constants(self.get_constants().set_scaling(scaling))
+        return self.set_aperture_transform(
+            self.get_aperture_transform().set_scaling(scaling),
+        )
 
     def get_is_output_image_negation_required(self) -> bool:
         """Get is_output_image_negation_required property value."""
@@ -822,11 +849,11 @@ class State2(FrozenGeneralModel):
     macros: State2MacroIndex = Field(default_factory=State2MacroIndex)
     """Collection of all macros defined until given point in code."""
 
-    def get_macro(self, __key: str) -> Any:
+    def get_macro(self, __key: str) -> ApertureMacro2:
         """Get macros property value."""
         return self.macros.get_macro(__key)
 
-    def set_macro(self, __key: str, __value: Any) -> Self:
+    def set_macro(self, __key: str, __value: ApertureMacro2) -> Self:
         """Set the macros property value."""
         return self.model_copy(
             update={
@@ -867,17 +894,3 @@ class State2(FrozenGeneralModel):
             self.get_coordinate_parser().parse(coordinate),
             unit=self.get_draw_units(),
         )
-
-    def get_command2_proxy(self) -> Command2State2Proxy:
-        """Get state access proxy for Command2 objects."""
-        return Command2State2Proxy(state=self)
-
-
-class Command2State2Proxy(FrozenGeneralModel):
-    """Proxy for accessing Parser2State from the moment of creation of command."""
-
-    state: State2
-
-    def get_aperture(self, aperture_id: ApertureID) -> Aperture2:
-        """Get aperture from state."""
-        return self.state.get_aperture(aperture_id)

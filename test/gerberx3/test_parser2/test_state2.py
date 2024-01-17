@@ -146,12 +146,6 @@ def test_set_aperture() -> None:
     assert new_state.get_aperture(ApertureID("D10")) == mm
 
 
-def test_set_macro() -> None:
-    state = State2()
-    new_state = state.set_macro("macro", "value")
-    assert new_state.get_macro("macro") == "value"
-
-
 def test_parse_coordinate() -> None:
     coordinate_parser = CoordinateParser.new(
         x_format=AxisFormat(integer=4, decimal=6),

@@ -6,8 +6,8 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.math.offset import Offset
-from pygerber.gerberx3.tokenizer.tokens.macro.numeric_expression import (
-    NumericExpression,
+from pygerber.gerberx3.tokenizer.tokens.macro.expressions.macro_expression import (
+    MacroExpressionToken,
 )
 
 if TYPE_CHECKING:
@@ -15,10 +15,12 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.gerberx3.parser.state import State
+    from pygerber.gerberx3.parser2.context2 import Parser2Context
+    from pygerber.gerberx3.parser2.macro2.expressions2.expression2 import Expression2
     from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 
 
-class NumericConstant(NumericExpression):
+class NumericConstant(MacroExpressionToken):
     """Wrapper around numeric constant expression token."""
 
     def __init__(
@@ -42,6 +44,12 @@ class NumericConstant(NumericExpression):
             string=string,
             location=location,
             value=value,
+        )
+
+    def to_parser2_expression(self, context: Parser2Context) -> Expression2:
+        """Convert to `Expression2` descendant class."""
+        return context.macro_expressions.constant(
+            value=self.value,
         )
 
     def evaluate_numeric(self, _macro_context: MacroContext, state: State) -> Offset:
