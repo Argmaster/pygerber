@@ -49,7 +49,7 @@ class NumericConstant(MacroExpressionToken):
     def to_parser2_expression(self, context: Parser2Context) -> Expression2:
         """Convert to `Expression2` descendant class."""
         return context.macro_expressions.constant(
-            value=Offset.new(self.value, unit=context.get_draw_units()),
+            value=self.value,
         )
 
     def evaluate_numeric(self, _macro_context: MacroContext, state: State) -> Offset:

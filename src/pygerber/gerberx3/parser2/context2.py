@@ -73,7 +73,7 @@ class Parser2Context:
         self.state_before_step_and_repeat: Optional[State2] = None
         self.macro_statement_buffer: Optional[StatementBuffer2] = None
         self.macro_eval_buffer: Optional[CommandBuffer2] = None
-        self.macro_variable_buffer: dict[str, Offset] = {}
+        self.macro_variable_buffer: dict[str, Decimal] = {}
         self.hooks: IHooks = (
             Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )

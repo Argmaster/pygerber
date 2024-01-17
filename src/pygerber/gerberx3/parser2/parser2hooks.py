@@ -730,8 +730,7 @@ class Parser2Hooks(IHooks):
             macro = context.get_macro(token.aperture_type)
             context.set_macro_eval_buffer()
             context.macro_variable_buffer = {
-                f"${i}": Offset.new(param, context.get_draw_units())
-                for i, param in enumerate(token.am_param, 1)
+                f"${i}": Decimal(param) for i, param in enumerate(token.am_param, 1)
             }
             macro.on_parser2_eval_statement(context)
 
@@ -760,7 +759,7 @@ class Parser2Hooks(IHooks):
             exposure = primitive.exposure.on_parser2_eval_expression(context)
             polarity = (
                 Polarity.Clear
-                if math.isclose(exposure.value, Decimal("0.0"))
+                if math.isclose(exposure, Decimal("0.0"))
                 else Polarity.Dark
             )
             context.get_macro_eval_buffer().add_command(
@@ -772,12 +771,21 @@ class Parser2Hooks(IHooks):
                         scaling=Decimal("1.0"),
                     ),
                     aperture=Circle2(
-                        diameter=primitive.diameter.on_parser2_eval_expression(context),
+                        diameter=Offset.new(
+                            primitive.diameter.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
                         hole_diameter=None,
                     ),
                     flash_point=Vector2D(
-                        x=primitive.center_x.on_parser2_eval_expression(context),
-                        y=primitive.center_y.on_parser2_eval_expression(context),
+                        x=Offset.new(
+                            primitive.center_x.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
+                        y=Offset.new(
+                            primitive.center_y.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
                     ),
                 ),
             )
@@ -798,7 +806,7 @@ class Parser2Hooks(IHooks):
             exposure = primitive.exposure.on_parser2_eval_expression(context)
             polarity = (
                 Polarity.Clear
-                if math.isclose(exposure.value, Decimal("0.0"))
+                if math.isclose(exposure, Decimal("0.0"))
                 else Polarity.Dark
             )
             transform = ApertureTransform(
@@ -825,19 +833,31 @@ class Parser2Hooks(IHooks):
                                 transform=transform,
                                 aperture=aperture,
                                 start_point=Vector2D(
-                                    x=start_point.x.on_parser2_eval_expression(
-                                        context,
+                                    x=Offset.new(
+                                        start_point.x.on_parser2_eval_expression(
+                                            context,
+                                        ),
+                                        context.get_draw_units(),
                                     ),
-                                    y=start_point.y.on_parser2_eval_expression(
-                                        context,
+                                    y=Offset.new(
+                                        start_point.y.on_parser2_eval_expression(
+                                            context,
+                                        ),
+                                        context.get_draw_units(),
                                     ),
                                 ),
                                 end_point=Vector2D(
-                                    x=end_point.x.on_parser2_eval_expression(
-                                        context,
+                                    x=Offset.new(
+                                        end_point.x.on_parser2_eval_expression(
+                                            context,
+                                        ),
+                                        context.get_draw_units(),
                                     ),
-                                    y=end_point.y.on_parser2_eval_expression(
-                                        context,
+                                    y=Offset.new(
+                                        end_point.y.on_parser2_eval_expression(
+                                            context,
+                                        ),
+                                        context.get_draw_units(),
                                     ),
                                 ),
                             )
@@ -865,7 +885,7 @@ class Parser2Hooks(IHooks):
             exposure = primitive.exposure.on_parser2_eval_expression(context)
             polarity = (
                 Polarity.Clear
-                if math.isclose(exposure.value, Decimal("0.0"))
+                if math.isclose(exposure, Decimal("0.0"))
                 else Polarity.Dark
             )
             context.get_macro_eval_buffer().add_command(
@@ -877,20 +897,28 @@ class Parser2Hooks(IHooks):
                         scaling=Decimal("1.0"),
                     ),
                     aperture=Polygon2(
-                        outer_diameter=primitive.diameter.on_parser2_eval_expression(
-                            context,
+                        outer_diameter=Offset.new(
+                            primitive.diameter.on_parser2_eval_expression(
+                                context,
+                            ),
                         ),
                         number_vertices=round(
                             primitive.number_of_vertices.on_parser2_eval_expression(
                                 context,
-                            ).value,
+                            ),
                         ),
                         rotation=Decimal("0.0"),
                         hole_diameter=None,
                     ),
                     flash_point=Vector2D(
-                        x=primitive.center_x.on_parser2_eval_expression(context),
-                        y=primitive.center_y.on_parser2_eval_expression(context),
+                        x=Offset.new(
+                            primitive.center_x.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
+                        y=Offset.new(
+                            primitive.center_y.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
                     ),
                 ),
             )
@@ -918,7 +946,7 @@ class Parser2Hooks(IHooks):
             exposure = primitive.exposure.on_parser2_eval_expression(context)
             polarity = (
                 Polarity.Clear
-                if math.isclose(exposure.value, Decimal("0.0"))
+                if math.isclose(exposure, Decimal("0.0"))
                 else Polarity.Dark
             )
             context.get_macro_eval_buffer().add_command(
@@ -930,16 +958,31 @@ class Parser2Hooks(IHooks):
                         scaling=Decimal("1.0"),
                     ),
                     aperture=NoCircle2(
-                        diameter=primitive.width.on_parser2_eval_expression(context),
+                        diameter=Offset.new(
+                            primitive.width.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
                         hole_diameter=None,
                     ),
                     start_point=Vector2D(
-                        x=primitive.start_x.on_parser2_eval_expression(context),
-                        y=primitive.start_y.on_parser2_eval_expression(context),
+                        x=Offset.new(
+                            primitive.start_x.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
+                        y=Offset.new(
+                            primitive.start_y.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
                     ),
                     end_point=Vector2D(
-                        x=primitive.start_x.on_parser2_eval_expression(context),
-                        y=primitive.start_y.on_parser2_eval_expression(context),
+                        x=Offset.new(
+                            primitive.start_x.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
+                        y=Offset.new(
+                            primitive.start_y.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
                     ),
                 ),
             )
@@ -953,7 +996,7 @@ class Parser2Hooks(IHooks):
             exposure = primitive.exposure.on_parser2_eval_expression(context)
             polarity = (
                 Polarity.Clear
-                if math.isclose(exposure.value, Decimal("0.0"))
+                if math.isclose(exposure, Decimal("0.0"))
                 else Polarity.Dark
             )
             context.get_macro_eval_buffer().add_command(
@@ -965,13 +1008,25 @@ class Parser2Hooks(IHooks):
                         scaling=Decimal("1.0"),
                     ),
                     aperture=Rectangle2(
-                        x_size=primitive.width.on_parser2_eval_expression(context),
-                        y_size=primitive.height.on_parser2_eval_expression(context),
+                        x_size=Offset.new(
+                            primitive.width.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
+                        y_size=Offset.new(
+                            primitive.height.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
                         hole_diameter=None,
                     ),
                     flash_point=Vector2D(
-                        x=primitive.center_x.on_parser2_eval_expression(context),
-                        y=primitive.center_y.on_parser2_eval_expression(context),
+                        x=Offset.new(
+                            primitive.center_x.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
+                        y=Offset.new(
+                            primitive.center_y.on_parser2_eval_expression(context),
+                            context.get_draw_units(),
+                        ),
                     ),
                 ),
             )
