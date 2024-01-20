@@ -156,3 +156,11 @@ class RGBA(FrozenGeneralModel):
             float(Decimal(self.b) / Decimal(255)),
             float(Decimal(self.a) / Decimal(255)),
         )
+
+    def to_hex(self) -> str:
+        """Return color as hexadecimal string."""
+        r = f"{self.r:0{2}x}"
+        g = f"{self.g:0{2}x}"
+        b = f"{self.b:0{2}x}"
+        a = f"{self.a:0{2}x}"
+        return f"#{r}{g}{b}{a}"

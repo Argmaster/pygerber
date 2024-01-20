@@ -58,6 +58,7 @@ numpy = [
 pyyaml = "^6.0.1"
 pygls = { version = "^1.0.2", optional = true }
 lsprotocol = { version = "^2023.0.0a3", optional = true }
+drawsvg = { version = "^2.3.0", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"
@@ -93,6 +94,7 @@ mike = "^1.1.2"
 
 [tool.poetry.extras]
 language_server = ["pygls", "lsprotocol"]
+svg = ["drawsvg"]
 
 [build-system]
 requires = ["poetry-core"]

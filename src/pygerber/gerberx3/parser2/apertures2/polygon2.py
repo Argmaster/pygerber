@@ -4,11 +4,15 @@ version 2.
 from __future__ import annotations
 
 from decimal import Decimal  # noqa: TCH003
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
+
+if TYPE_CHECKING:
+    from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
+    from pygerber.gerberx3.renderer2.abstract import Renderer2
 
 
 class Polygon2(Aperture2):
@@ -19,6 +23,10 @@ class Polygon2(Aperture2):
     rotation: Decimal
     hole_diameter: Optional[Offset]
 
-    def get_bounding_box_size(self) -> BoundingBox:
+    def render_flash(self, renderer: Renderer2, command: Flash2) -> None:
+        """Render draw operation."""
+        renderer.hooks.render_flash_polygon(command, self)
+
+    def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of aperture."""
         return BoundingBox.from_diameter(self.outer_diameter)

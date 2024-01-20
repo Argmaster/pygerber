@@ -3,11 +3,16 @@ version 2.
 """
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pydantic import Field
 
 from pygerber.gerberx3.parser2.attributes2 import ApertureAttributes, ObjectAttributes
 from pygerber.gerberx3.parser2.command_buffer2 import ReadonlyCommandBuffer2
 from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
+
+if TYPE_CHECKING:
+    from pygerber.gerberx3.renderer2.abstract import Renderer2
 
 
 class Region2(BufferCommand2):
@@ -29,3 +34,7 @@ class Region2(BufferCommand2):
             self.command_buffer.debug_buffer_to_json(8)}
     }}
 }}"""  # noqa: E501
+
+    def render(self, renderer: Renderer2) -> None:
+        """Render draw operation."""
+        renderer.hooks.render_region(self)

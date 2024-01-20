@@ -209,6 +209,29 @@ class Vector2D(FrozenGeneralModel):
         """Calculate determinant of matrix constructed from self and other."""
         return self.x * other.y - self.y * other.x
 
+    def perpendicular(self) -> Vector2D:
+        """Return perpendicular vector to self."""
+        return Vector2D(x=self.y, y=-self.x)
+
+    def normalize(self) -> Vector2D:
+        """Return normalized (unit length) vector."""
+        if self == Vector2D.NULL:
+            return Vector2D.UNIT_X
+
+        return self / self.length()
+
+    def as_float_tuple(self) -> tuple[float, float]:
+        """Return x, y Offset as tuple."""
+        return (float(self.x.value), float(self.y.value))
+
+    def rotate_around_origin(self, angle_degrees: Decimal) -> Vector2D:
+        """Return vector rotated x degrees around origin."""
+        angle_radians = math.radians(angle_degrees)
+        return Vector2D(
+            x=self.x * math.cos(angle_radians) - self.y * math.sin(angle_radians),
+            y=self.x * math.sin(angle_radians) + self.y * math.cos(angle_radians),
+        )
+
 
 Vector2D.NULL = Vector2D(x=Offset.NULL, y=Offset.NULL)
 Vector2D.UNIT_X = Vector2D(x=Offset(value=Decimal(1)), y=Offset.NULL)

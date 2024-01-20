@@ -4,7 +4,9 @@ from typing import Generator
 
 import pytest
 
-from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
+from pygerber.gerberx3.parser2.command_buffer2 import (
+    ReadonlyCommandBuffer2,
+)
 from pygerber.gerberx3.parser2.parser2 import (
     Parser2,
     Parser2OnErrorAction,
@@ -31,8 +33,8 @@ def test_parser_parse(parser: Parser2) -> None:
 
         """,
     )
-    command_buffer: CommandBuffer2 = parser.parse(ast)
-    assert isinstance(command_buffer, CommandBuffer2)
+    command_buffer: ReadonlyCommandBuffer2 = parser.parse(ast)
+    assert isinstance(command_buffer, ReadonlyCommandBuffer2)
 
 
 def test_parser_parse_iter(parser: Parser2) -> None:
