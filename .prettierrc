@@ -5,7 +5,7 @@
     "printWidth": 88,
     "overrides": [
         {
-            "files": ["*.html", "*.js", "*.json", "*.prettierrc"],
+            "files": ["*.html", "*.js", "*.json", "*.prettierrc", "*.overrides"],
             "options": {
                 "tabWidth": 4
             }

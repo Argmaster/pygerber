@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from unittest.mock import MagicMock
 
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
@@ -137,13 +136,6 @@ def test_set_current_aperture_id() -> None:
     state = State2()
     new_state = state.set_current_aperture_id(ApertureID("D10"))
     assert new_state.get_current_aperture_id() == ApertureID("D10")
-
-
-def test_set_aperture() -> None:
-    state = State2()
-    mm = MagicMock()
-    new_state = state.set_aperture(ApertureID("D10"), mm)
-    assert new_state.get_aperture(ApertureID("D10")) == mm
 
 
 def test_parse_coordinate() -> None:

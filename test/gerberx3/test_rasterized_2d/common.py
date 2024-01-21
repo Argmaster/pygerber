@@ -38,6 +38,9 @@ def draw_rasterized_2d(
     dest_apertures = dest / "apertures"
     dest_apertures.mkdir(mode=0o777, parents=True, exist_ok=True)
 
+    config_overrides = asset_loader.load_asset_overrides(src)
+    dpi = config_overrides.get("dpi", dpi)
+
     parser_options = ParserOptions(
         backend=Rasterized2DBackend(
             options=Rasterized2DBackendOptions(

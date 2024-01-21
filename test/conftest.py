@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import datetime
+import json
 import logging
 from pathlib import Path
+from typing import Any
 
 import pytest
 import tzlocal
@@ -32,6 +34,19 @@ class AssetLoader:
             asset = self._load_asset(src)
 
         return asset
+
+    def load_asset_overrides(self, src: str) -> dict[str, Any]:
+        src = f"{src}.overrides"
+        asset = self.asset_cache.get(src)
+        if asset is None:
+            try:
+                asset = self._load_asset(src)
+            except FileNotFoundError:
+                asset = b"{}"
+
+        config = json.loads(asset)
+        assert isinstance(config, dict)
+        return config
 
     def _load_asset(self, src: str) -> bytes:
         return (self.assets_directory / src).read_bytes()
