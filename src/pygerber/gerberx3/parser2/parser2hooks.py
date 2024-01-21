@@ -26,7 +26,6 @@ from pygerber.gerberx3.parser2.commands2.region2 import Region2
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotSelected2Error,
     IncrementalCoordinatesNotSupported2Error,
-    NestedRegionNotAllowedError,
     NoValidArcCenterFoundError,
     StepAndRepeatNotInitializedError,
     UnnamedBlockApertureNotAllowedError,
@@ -516,12 +515,14 @@ class Parser2Hooks(IHooks):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
-            if context.get_is_aperture_block():
-                raise NestedRegionNotAllowedError(token)
-
             context.push_block_command_buffer()
+            # Save state from before block definition started.
+            context.push_block_state()
+
+            context.set_current_position(Vector2D.NULL)
             context.set_is_aperture_block(is_aperture_block=True)
             context.set_aperture_block_id(token.identifier)
+
             return super().on_parser_visit_token(token, context)
 
     class EndBlockApertureTokenHooks(IHooks.EndBlockApertureTokenHooks):
@@ -555,9 +556,8 @@ class Parser2Hooks(IHooks):
                     command_buffer=command_buffer.get_readonly(),
                 ),
             )
-
-            context.set_is_aperture_block(is_aperture_block=False)
-            context.set_aperture_block_id(None)
+            # Restore context state from before the block definition.
+            context.set_state(context.pop_block_state())
             return super().on_parser_visit_token(token, context)
 
     class DefineApertureCircleTokenHooks(IHooks.DefineApertureCircleTokenHooks):
@@ -1369,14 +1369,25 @@ class Parser2Hooks(IHooks):
             )
             aperture = context.get_aperture(aperture_id)
 
-            context.add_command(
-                Flash2(
-                    attributes=context.object_attributes,
-                    aperture=aperture,
-                    flash_point=flash_point,
-                    transform=context.get_state().get_aperture_transform(),
-                ),
-            )
+            if isinstance(aperture, Block2):
+                context.add_command(
+                    BufferCommand2(
+                        transform=context.get_state().get_aperture_transform(),
+                        command_buffer=aperture.command_buffer.get_transposed(
+                            flash_point,
+                        ),
+                    ),
+                )
+
+            else:
+                context.add_command(
+                    Flash2(
+                        attributes=context.object_attributes,
+                        aperture=aperture,
+                        flash_point=flash_point,
+                        transform=context.get_state().get_aperture_transform(),
+                    ),
+                )
 
             context.set_current_position(flash_point)
             return super().on_parser_visit_token(token, context)

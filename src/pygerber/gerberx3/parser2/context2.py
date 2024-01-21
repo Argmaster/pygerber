@@ -69,6 +69,7 @@ class Parser2Context:
         )
         self.region_command_buffer: Optional[CommandBuffer2] = None
         self.block_command_buffer_stack: list[CommandBuffer2] = []
+        self.block_state_stack: list[State2] = []
         self.step_and_repeat_command_buffer: Optional[CommandBuffer2] = None
         self.state_before_step_and_repeat: Optional[State2] = None
         self.macro_statement_buffer: Optional[StatementBuffer2] = None
@@ -91,6 +92,7 @@ class Parser2Context:
             if self.options.custom_macro_expression_factories is None
             else self.options.custom_macro_expression_factories
         )
+        self.apertures: dict[ApertureID, Aperture2] = {}
 
     def push_block_command_buffer(self) -> None:
         """Add new command buffer for block aperture draw commands."""
@@ -111,6 +113,16 @@ class Parser2Context:
         if len(self.block_command_buffer_stack) == 0:
             raise ReferencedNotInitializedBlockBufferError(self.current_token)
         return self.block_command_buffer_stack[-1]
+
+    def push_block_state(self) -> None:
+        """Add new command buffer for block aperture draw commands."""
+        self.block_state_stack.append(self.state)
+
+    def pop_block_state(self) -> State2:
+        """Return latest block aperture command buffer and delete it from the stack."""
+        if len(self.block_state_stack) == 0:
+            raise ReferencedNotInitializedBlockBufferError(self.current_token)
+        return self.block_state_stack.pop()
 
     def set_region_command_buffer(self) -> None:
         """Add new command buffer for block aperture draw commands."""
@@ -443,13 +455,13 @@ class Parser2Context:
     def get_aperture(self, __key: ApertureID) -> Aperture2:
         """Get apertures property value."""
         try:
-            return self.get_state().get_aperture(__key)
+            return self.apertures[__key]
         except KeyError as e:
             raise ApertureNotDefined2Error(self.current_token) from e
 
     def set_aperture(self, __key: ApertureID, __value: Aperture2) -> None:
         """Set the apertures property value."""
-        return self.set_state(self.get_state().set_aperture(__key, __value))
+        self.apertures[__key] = __value
 
     def get_macro(self, __key: str) -> ApertureMacro2:
         """Get macro property value."""

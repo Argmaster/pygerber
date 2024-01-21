@@ -16,7 +16,6 @@ from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.common.immutable_map_model import ImmutableMapping
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
-from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
 from pygerber.gerberx3.parser2.errors2 import (
     CoordinateFormatNotSet2Error,
     UnitNotSet2Error,
@@ -240,21 +239,6 @@ class ApertureTransform(FrozenGeneralModel):
                 "scaling": scaling,
             },
         )
-
-
-class State2ApertureIndex(ImmutableMapping[ApertureID, Aperture2]):
-    """Index of all apertures defined in Gerber AST until currently parsed token."""
-
-    def set_aperture(self, __id: ApertureID, __aperture: Aperture2) -> Self:
-        """Add new aperture to apertures index."""
-        # TODO(argmaster): Add warning handling.  # noqa: TD003
-        return self.update(__id, __aperture)
-
-    def get_aperture(self, __id: ApertureID) -> Aperture2:
-        """Get existing aperture from index. When aperture is missing KeyError is
-        raised.
-        """
-        return self.mapping[__id]
 
 
 class State2MacroIndex(ImmutableMapping[str, ApertureMacro2]):
@@ -828,21 +812,6 @@ class State2(FrozenGeneralModel):
         return self.model_copy(
             update={
                 "current_aperture_id": current_aperture,
-            },
-        )
-
-    apertures: State2ApertureIndex = Field(default_factory=State2ApertureIndex)
-    """Collection of all apertures defined until given point in code."""
-
-    def get_aperture(self, __key: ApertureID) -> Aperture2:
-        """Get apertures property value."""
-        return self.apertures.get_aperture(__key)
-
-    def set_aperture(self, __key: ApertureID, __value: Aperture2) -> Self:
-        """Set the apertures property value."""
-        return self.model_copy(
-            update={
-                "apertures": self.apertures.set_aperture(__key, __value),
             },
         )
 

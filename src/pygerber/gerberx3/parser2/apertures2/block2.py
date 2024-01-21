@@ -22,7 +22,8 @@ class Block2(Aperture2):
 
     def render_flash(self, renderer: Renderer2, command: Flash2) -> None:
         """Render draw operation."""
-        renderer.hooks.render_flash_block(command, self)
+        # Block apertures are resolved into series of commands at parser level.
+        raise NotImplementedError
 
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of aperture."""

@@ -6,7 +6,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, BinaryIO, Generator, Optional
 
-from pygerber.gerberx3.parser2.apertures2.block2 import Block2
 from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2, NoCircle2
 from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
@@ -61,9 +60,6 @@ class Renderer2HooksABC:
     def init(self, renderer: Renderer2, command_buffer: ReadonlyCommandBuffer2) -> None:
         """Initialize rendering."""
 
-    def render_buffer(self, command: BufferCommand2) -> None:
-        """Render command buffer to target image."""
-
     def render_line(self, command: Line2) -> None:
         """Render line to target image."""
 
@@ -91,8 +87,8 @@ class Renderer2HooksABC:
     def render_flash_macro(self, command: Flash2, aperture: Macro2) -> None:
         """Render flash macro aperture to target image."""
 
-    def render_flash_block(self, command: Flash2, aperture: Block2) -> None:
-        """Render flash block aperture to target image."""
+    def render_buffer(self, command: BufferCommand2) -> None:
+        """Render buffer command, performing no writes."""
 
     def render_region(self, command: Region2) -> None:
         """Render region to target image."""

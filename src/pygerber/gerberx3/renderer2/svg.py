@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import importlib.util
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import BinaryIO, Optional
 
 from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
+from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
-from pygerber.gerberx3.parser2.apertures2.block2 import Block2
 from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2, NoCircle2
 from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
@@ -26,6 +27,7 @@ from pygerber.gerberx3.renderer2.abstract import (
     Renderer2,
     Renderer2HooksABC,
 )
+from pygerber.gerberx3.renderer2.errors2 import DRAWSVGNotAvailableError
 from pygerber.gerberx3.state_enums import Polarity
 
 IS_SVG_BACKEND_AVAILABLE: bool = False
@@ -53,6 +55,21 @@ class SvgRenderer2(Renderer2):
         super().__init__(hooks)
 
 
+if IS_SVG_BACKEND_AVAILABLE:
+    import drawsvg
+
+    @dataclass
+    class SvgRenderingFrame:
+        """Rendering variable container."""
+
+        command_buffer: ReadonlyCommandBuffer2
+        bounding_box: BoundingBox
+        normalize_origin_to_0_0: bool
+        mask: drawsvg.Mask = field(default_factory=drawsvg.Mask)
+        layer: drawsvg.Group = field(default_factory=drawsvg.Group)
+        polarity: Optional[Polarity] = None
+
+
 class SvgRenderer2Hooks(Renderer2HooksABC):
     """Rendering backend hooks used to render SVG images."""
 
@@ -65,6 +82,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         *,
         flip_y: bool = True,
     ) -> None:
+        if not IS_SVG_BACKEND_AVAILABLE:
+            raise DRAWSVGNotAvailableError
         self.color_scheme = color_scheme
         self.scale = scale
         self.flip_y = flip_y
@@ -80,21 +99,59 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
         self.renderer = renderer
         self.command_buffer = command_buffer
-
-        self.bounding_box = self.command_buffer.get_bounding_box()
-
-        self.mask = drawsvg.Mask()
-        self.layer = drawsvg.Group()
-        self.current_polarity: Optional[Polarity] = None
-
+        self.rendering_stack: list[SvgRenderingFrame] = [
+            SvgRenderingFrame(
+                command_buffer=self.command_buffer,
+                bounding_box=self.command_buffer.get_bounding_box(),
+                normalize_origin_to_0_0=True,
+            ),
+        ]
         self.is_region: bool = False
-
         self.apertures: dict[str, drawsvg.Group] = {}
+
+    def push_render_frame(
+        self,
+        cmd: ReadonlyCommandBuffer2,
+        *,
+        normalize_origin_to_0_0: bool = True,
+    ) -> None:
+        """Push new segment render frame."""
+        self.rendering_stack.append(
+            SvgRenderingFrame(
+                command_buffer=cmd,
+                bounding_box=cmd.get_bounding_box(),
+                normalize_origin_to_0_0=normalize_origin_to_0_0,
+            ),
+        )
+
+    def pop_render_frame(self) -> SvgRenderingFrame:
+        """Pop segment render frame."""
+        if len(self.rendering_stack) <= 1:
+            raise RuntimeError
+        return self.rendering_stack.pop()
+
+    @property
+    def frame(self) -> SvgRenderingFrame:
+        """Get current rendering stack frame."""
+        return self.rendering_stack[-1]
 
     def get_layer(self, polarity: Polarity) -> drawsvg.Group | drawsvg.Mask:
         """Get image layer."""
-        if self.current_polarity is None or polarity != self.current_polarity:
-            self.current_polarity = polarity
+        if self.frame.polarity is None or polarity != self.frame.polarity:
+            self.frame.polarity = polarity
+            if polarity == Polarity.Dark:
+                self._new_layer(with_mask=False)
+            else:
+                self._new_layer(with_mask=True)
+
+        if self.frame.polarity == Polarity.Dark:
+            return self.frame.layer
+
+        return self.frame.mask
+
+    def _new_layer(self, *, with_mask: bool) -> None:
+        """Create new layer including previous layer."""
+        if with_mask:
             new_mask = drawsvg.Mask()
             # Add solid background for mask to not mask anything by default.
             # Following writes to mask will be black to hide parts of the mask.
@@ -102,38 +159,42 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                 drawsvg.Rectangle(
                     0,
                     0,
-                    self.convert_size(self.bounding_box.width),
-                    self.convert_size(self.bounding_box.height),
+                    self.convert_size(self.frame.bounding_box.width),
+                    self.convert_size(self.frame.bounding_box.height),
                     fill="white",
                 ),
             )
+            self.frame.mask = new_mask
             new_layer = drawsvg.Group(mask=new_mask)
-            new_layer.append(self.layer)
+        else:
+            new_layer = drawsvg.Group()
 
-            self.layer = new_layer
-            self.mask = new_mask
+        new_layer.append(self.frame.layer)
 
-        if self.current_polarity == Polarity.Dark:
-            return self.layer
-
-        return self.mask
+        self.frame.layer = new_layer
 
     def convert_x(self, x: Offset) -> Decimal:
         """Convert x offset to pixel x coordinate."""
-        return (
-            x.as_millimeters() - self.bounding_box.min_x.as_millimeters()
-        ) * self.scale
+        if self.frame.normalize_origin_to_0_0:
+            origin_offset_x = self.frame.bounding_box.min_x.as_millimeters()
+        else:
+            origin_offset_x = Decimal(0)
+
+        return (x.as_millimeters() - origin_offset_x) * self.scale
 
     def convert_y(self, y: Offset) -> Decimal:
         """Convert y offset to pixel y coordinate."""
+        if self.frame.normalize_origin_to_0_0:
+            origin_offset_y = self.frame.bounding_box.min_y.as_millimeters()
+        else:
+            origin_offset_y = Decimal(0)
+
         if self.flip_y:
             return (
-                self.bounding_box.height.as_millimeters()
-                - (y.as_millimeters() - self.bounding_box.min_y.as_millimeters())
+                self.frame.bounding_box.height.as_millimeters()
+                - (y.as_millimeters() - origin_offset_y)
             ) * self.scale
-        return (
-            y.as_millimeters() - self.bounding_box.min_y.as_millimeters()
-        ) * self.scale
+        return (y.as_millimeters() - origin_offset_y) * self.scale
 
     def convert_size(self, diameter: Offset) -> Decimal:
         """Convert y offset to pixel y coordinate."""
@@ -166,9 +227,6 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
     ) -> None:
         """Set SVG group representing aperture."""
         self.apertures[self._get_aperture_id(aperture_id, color)] = aperture
-
-    def render_buffer(self, command: BufferCommand2) -> None:
-        """Render command buffer to target image."""
 
     def render_line(self, command: Line2) -> None:
         """Render line to target image."""
@@ -222,6 +280,33 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
     def render_arc(self, command: Arc2) -> None:
         """Render arc to target image."""
         color = self.get_color(command.transform.polarity)
+        # Arcs which start and end point overlaps are completely invisible in SVG.
+        # Therefore we need to replace them with two half-full-arcs.
+        # THB spec recommends doing it when exporting Gerber files, to avoid problems
+        # with floating point numbers, but I guess nobody does that.
+        if command.start_point == command.end_point:
+            # This is a vector from center to start point, so we can invert it and
+            # apply it twice to get the point on the opposite side of the center point.
+            relative = command.get_relative_start_point()
+            # Now we cen recursively invoke self with two modified copies of this
+            # command.
+            self.render_arc(
+                command.model_copy(
+                    update={
+                        "start_point": command.start_point,
+                        "end_point": command.start_point - (relative * 2),
+                    },
+                ),
+            )
+            self.render_arc(
+                command.model_copy(
+                    update={
+                        "start_point": command.start_point - (relative * 2),
+                        "end_point": command.start_point,
+                    },
+                ),
+            )
+            return
 
         command.aperture.render_flash(
             self.renderer,
@@ -232,7 +317,14 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                 flash_point=command.start_point,
             ),
         )
-
+        # First we calculate perpendicular vector. This vector is always pointing
+        # from the center, thus it is perpendicular to arc.
+        # Then we can normalize it and multiply by half of aperture diameter,
+        # effectively giving us vector pointing to inner/outer edge of line.
+        # We can ignore the fact that we don't know which point (inner/outer) we
+        # have, as long as we get the same every time, then we can pair it with
+        # corresponding vector made from end point and create single arc,
+        # Then invert both vectors and draw second arc.
         start_perpendicular_vector = command.get_relative_start_point()
         start_normalized_perpendicular_vector = start_perpendicular_vector.normalize()
         start_point_offset = start_normalized_perpendicular_vector * (
@@ -445,9 +537,32 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     def render_flash_macro(self, command: Flash2, aperture: Macro2) -> None:
         """Render flash macro aperture to target image."""
+        color = self.get_color(command.transform.polarity)
+        aperture_group = self.get_aperture(id(aperture), color)
 
-    def render_flash_block(self, command: Flash2, aperture: Block2) -> None:
-        """Render flash block aperture to target image."""
+        if aperture_group is None:
+            self.push_render_frame(
+                aperture.command_buffer,
+                normalize_origin_to_0_0=False,
+            )
+            for cmd in aperture.command_buffer:
+                cmd.render(self.renderer)
+
+            frame = self.pop_render_frame()
+            self.set_aperture(id(aperture), color, frame.layer)
+
+        self.get_layer(command.transform.polarity).append(
+            drawsvg.Use(
+                aperture_group,
+                self.convert_x(command.flash_point.x),
+                self.convert_y(command.flash_point.y),
+            ),
+        )
+
+    def render_buffer(self, command: BufferCommand2) -> None:
+        """Render buffer command, performing no writes."""
+        for cmd in command:
+            cmd.render(self.renderer)
 
     def render_region(self, command: Region2) -> None:
         """Render region to target image."""
@@ -543,8 +658,13 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     def finalize(self) -> None:
         """Finalize rendering."""
-        width = self.convert_size(self.bounding_box.width)
-        height = self.convert_size(self.bounding_box.height)
+        if len(self.rendering_stack) > 1:
+            self.rendering_stack = [self.rendering_stack[0]]
+        elif len(self.rendering_stack) < 1:
+            raise RuntimeError
+
+        width = self.convert_size(self.frame.bounding_box.width)
+        height = self.convert_size(self.frame.bounding_box.height)
         self.drawing = drawsvg.Drawing(
             width=width,
             height=height,
