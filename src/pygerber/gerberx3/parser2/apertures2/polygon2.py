@@ -30,3 +30,7 @@ class Polygon2(Aperture2):
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of aperture."""
         return BoundingBox.from_diameter(self.outer_diameter)
+
+    def get_stroke_width(self) -> Offset:
+        """Get stroke width of command."""
+        return self.outer_diameter

@@ -6,6 +6,7 @@ from decimal import Decimal
 from typing import BinaryIO, Optional
 
 from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
+from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.apertures2.block2 import Block2
 from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2, NoCircle2
@@ -47,10 +48,8 @@ class SvgRenderer2(Renderer2):
     def __init__(
         self,
         hooks: Optional[SvgRenderer2Hooks] = None,
-        color_scheme: ColorScheme = ColorScheme.DEBUG_1,
     ) -> None:
         hooks = SvgRenderer2Hooks() if hooks is None else hooks
-        self.color_scheme = color_scheme
         super().__init__(hooks)
 
 
@@ -59,27 +58,36 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     renderer: SvgRenderer2
 
+    def __init__(
+        self,
+        color_scheme: ColorScheme = ColorScheme.DEBUG_1,
+        scale: Decimal = Decimal("1"),
+        *,
+        flip_y: bool = True,
+    ) -> None:
+        self.color_scheme = color_scheme
+        self.scale = scale
+        self.flip_y = flip_y
+
     def init(
         self,
         renderer: Renderer2,
         command_buffer: ReadonlyCommandBuffer2,
     ) -> None:
-        """Initialize rendering."""
+        """Initialize rendering hooks."""
         if not isinstance(renderer, SvgRenderer2):
             raise NotImplementedError
 
         self.renderer = renderer
         self.command_buffer = command_buffer
+
         self.bounding_box = self.command_buffer.get_bounding_box()
-        self.color_scheme = self.renderer.color_scheme
 
         self.mask = drawsvg.Mask()
         self.layer = drawsvg.Group()
         self.current_polarity: Optional[Polarity] = None
 
-        self.region_point_buffer: list[Decimal] = []
         self.is_region: bool = False
-        self.scale = Decimal("10")
 
         self.apertures: dict[str, drawsvg.Group] = {}
 
@@ -92,10 +100,10 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             # Following writes to mask will be black to hide parts of the mask.
             new_mask.append(
                 drawsvg.Rectangle(
-                    self.bounding_box.min_x.as_millimeters(),
-                    self.bounding_box.min_y.as_millimeters(),
-                    self.bounding_box.width.as_millimeters(),
-                    self.bounding_box.height.as_millimeters(),
+                    0,
+                    0,
+                    self.convert_size(self.bounding_box.width),
+                    self.convert_size(self.bounding_box.height),
                     fill="white",
                 ),
             )
@@ -109,6 +117,27 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             return self.layer
 
         return self.mask
+
+    def convert_x(self, x: Offset) -> Decimal:
+        """Convert x offset to pixel x coordinate."""
+        return (
+            x.as_millimeters() - self.bounding_box.min_x.as_millimeters()
+        ) * self.scale
+
+    def convert_y(self, y: Offset) -> Decimal:
+        """Convert y offset to pixel y coordinate."""
+        if self.flip_y:
+            return (
+                self.bounding_box.height.as_millimeters()
+                - (y.as_millimeters() - self.bounding_box.min_y.as_millimeters())
+            ) * self.scale
+        return (
+            y.as_millimeters() - self.bounding_box.min_y.as_millimeters()
+        ) * self.scale
+
+    def convert_size(self, diameter: Offset) -> Decimal:
+        """Convert y offset to pixel y coordinate."""
+        return diameter.as_millimeters() * self.scale
 
     def get_color(self, polarity: Polarity) -> str:
         """Get color for specified polarity."""
@@ -168,14 +197,14 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         p3 = command.end_point - point_offset
 
         rectangle = drawsvg.Lines(
-            p0.x.as_millimeters(),
-            p0.y.as_millimeters(),
-            p1.x.as_millimeters(),
-            p1.y.as_millimeters(),
-            p2.x.as_millimeters(),
-            p2.y.as_millimeters(),
-            p3.x.as_millimeters(),
-            p3.y.as_millimeters(),
+            self.convert_x(p0.x),
+            self.convert_y(p0.y),
+            self.convert_x(p1.x),
+            self.convert_y(p1.y),
+            self.convert_x(p2.x),
+            self.convert_y(p2.y),
+            self.convert_x(p3.x),
+            self.convert_y(p3.y),
             fill=color,
         )
         self.get_layer(command.transform.polarity).append(rectangle)
@@ -192,9 +221,93 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     def render_arc(self, command: Arc2) -> None:
         """Render arc to target image."""
+        color = self.get_color(command.transform.polarity)
+
+        command.aperture.render_flash(
+            self.renderer,
+            Flash2(
+                transform=command.transform,
+                attributes=command.attributes,
+                aperture=command.aperture,
+                flash_point=command.start_point,
+            ),
+        )
+
+        start_perpendicular_vector = command.get_relative_start_point()
+        start_normalized_perpendicular_vector = start_perpendicular_vector.normalize()
+        start_point_offset = start_normalized_perpendicular_vector * (
+            command.aperture.get_stroke_width() / 2.0
+        )
+
+        end_perpendicular_vector = command.get_relative_end_point()
+        end_normalized_perpendicular_vector = end_perpendicular_vector.normalize()
+        end_point_offset = end_normalized_perpendicular_vector * (
+            command.aperture.get_stroke_width() / 2.0
+        )
+
+        arc_path = drawsvg.Path(fill=color)
+
+        # Determine start point of inner arc.
+        start_inner = command.start_point + start_point_offset
+        end_inner = command.end_point + end_point_offset
+        # Move path ptr to inner arc start point.
+        arc_path.M(
+            self.convert_x(start_inner.x),
+            self.convert_y(start_inner.y),
+        )
+        self.render_arc_to_path(
+            command.model_copy(
+                update={
+                    "start_point": start_inner,
+                    "end_point": end_inner,
+                },
+            ),
+            arc_path,
+        )
+        # Determine start point of outer arc.
+        # This arc have to be in reverse direction, so we swap start/end points.
+        start_outer = command.end_point - end_point_offset
+        end_outer = command.start_point - start_point_offset
+        # Draw line between end of inner arc and start of outer arc.
+        arc_path.L(
+            self.convert_x(start_outer.x),
+            self.convert_y(start_outer.y),
+        )
+        self.render_cc_arc_to_path(
+            CCArc2(
+                transform=command.transform,
+                attributes=command.attributes,
+                aperture=command.aperture,
+                start_point=start_outer,
+                center_point=command.center_point,
+                end_point=end_outer,
+            ),
+            arc_path,
+        )
+        # Close arc box by drawing line between end of outer arc and start of inner
+        arc_path.Z()
+        self.get_layer(command.transform.polarity).append(arc_path)
+
+        command.aperture.render_flash(
+            self.renderer,
+            Flash2(
+                transform=command.transform,
+                attributes=command.attributes,
+                aperture=command.aperture,
+                flash_point=command.end_point,
+            ),
+        )
 
     def render_cc_arc(self, command: Arc2) -> None:
         """Render arc to target image."""
+        self.render_arc(
+            command.model_copy(
+                update={
+                    "start_point": command.end_point,
+                    "end_point": command.start_point,
+                },
+            ),
+        )
 
     def render_flash_circle(self, command: Flash2, aperture: Circle2) -> None:
         """Render flash circle to target image."""
@@ -207,7 +320,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                 drawsvg.Circle(
                     0,
                     0,
-                    aperture.diameter.as_millimeters() / Decimal("2.0"),
+                    self.convert_size(aperture.diameter) / Decimal("2.0"),
                     fill=color,
                 ),
             )
@@ -216,8 +329,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
                 aperture_group,
-                command.flash_point.x.as_millimeters(),
-                command.flash_point.y.as_millimeters(),
+                self.convert_x(command.flash_point.x),
+                self.convert_y(command.flash_point.y),
             ),
         )
 
@@ -229,17 +342,14 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         color = self.get_color(command.transform.polarity)
         aperture_group = self.get_aperture(id(aperture), color)
 
-        x_size = aperture.x_size.as_millimeters()
-        y_size = aperture.y_size.as_millimeters()
-
         if aperture_group is None:
             aperture_group = drawsvg.Group()
             aperture_group.append(
                 drawsvg.Rectangle(
-                    Decimal("0.0"),
-                    Decimal("0.0"),
-                    x_size,
-                    y_size,
+                    0,
+                    0,
+                    self.convert_size(aperture.x_size),
+                    self.convert_size(aperture.y_size),
                     fill=color,
                 ),
             )
@@ -248,8 +358,10 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
                 aperture_group,
-                command.flash_point.x.as_millimeters() - (x_size / Decimal("2.0")),
-                command.flash_point.y.as_millimeters() - (y_size / Decimal("2.0")),
+                self.convert_x(command.flash_point.x)
+                - self.convert_size(aperture.x_size / Decimal("2.0")),
+                self.convert_y(command.flash_point.y)
+                - self.convert_size(aperture.y_size / Decimal("2.0")),
             ),
         )
 
@@ -258,16 +370,16 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         color = self.get_color(command.transform.polarity)
         aperture_group = self.get_aperture(id(aperture), color)
 
-        x_size = aperture.x_size.as_millimeters()
-        y_size = aperture.y_size.as_millimeters()
-
         if aperture_group is None:
             aperture_group = drawsvg.Group()
+            x_size = self.convert_size(aperture.x_size)
+            y_size = self.convert_size(aperture.y_size)
             radius = x_size.min(y_size) / Decimal("2.0")
+
             aperture_group.append(
                 drawsvg.Rectangle(
-                    Decimal("0.0"),
-                    Decimal("0.0"),
+                    0,
+                    0,
                     x_size,
                     y_size,
                     fill=color,
@@ -280,8 +392,10 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
                 aperture_group,
-                command.flash_point.x.as_millimeters() - (x_size / Decimal("2.0")),
-                command.flash_point.y.as_millimeters() - (y_size / Decimal("2.0")),
+                self.convert_x(command.flash_point.x)
+                - self.convert_size(aperture.x_size / Decimal("2.0")),
+                self.convert_y(command.flash_point.y)
+                - self.convert_size(aperture.y_size / Decimal("2.0")),
             ),
         )
 
@@ -290,21 +404,20 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         color = self.get_color(command.transform.polarity)
         aperture_group = self.get_aperture(id(aperture), color)
 
-        outer_diameter = aperture.outer_diameter.as_millimeters()
-
         if aperture_group is None:
             aperture_group = drawsvg.Group()
 
             number_of_vertices = aperture.number_vertices
             initial_angle = aperture.rotation
             inner_angle = Decimal("360") / Decimal(number_of_vertices)
-            radius_vector = Vector2D.UNIT_X * (outer_diameter / Decimal("2.0"))
+
+            radius_vector = Vector2D.UNIT_X * (aperture.outer_diameter / Decimal("2.0"))
+            rotated_radius_vector = radius_vector.rotate_around_origin(initial_angle)
 
             p = drawsvg.Path(fill=color)
-            rotated_radius_vector = radius_vector.rotate_around_origin(initial_angle)
             p.M(
-                rotated_radius_vector.x.as_millimeters(),
-                rotated_radius_vector.y.as_millimeters(),
+                self.convert_size(rotated_radius_vector.x),
+                self.convert_size(rotated_radius_vector.y),
             )
 
             for i in range(1, number_of_vertices):
@@ -313,8 +426,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     rotation_angle,
                 )
                 p.L(
-                    rotated_radius_vector.x.as_millimeters(),
-                    rotated_radius_vector.y.as_millimeters(),
+                    self.convert_size(rotated_radius_vector.x),
+                    self.convert_size(rotated_radius_vector.y),
                 )
 
             p.Z()
@@ -325,8 +438,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
                 aperture_group,
-                command.flash_point.x.as_millimeters(),
-                command.flash_point.y.as_millimeters(),
+                self.convert_x(command.flash_point.x),
+                self.convert_y(command.flash_point.y),
             ),
         )
 
@@ -338,51 +451,91 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     def render_region(self, command: Region2) -> None:
         """Render region to target image."""
+        if len(command.command_buffer) == 0:
+            return
+
         self.is_region = True
-        self.region_point_buffer = []
+
+        color = self.get_color(command.transform.polarity)
+        region = drawsvg.Path(fill=color)
+
+        for cmd in command.command_buffer:
+            if isinstance(cmd, (Line2, Arc2, CCArc2)):
+                region.M(
+                    self.convert_x(cmd.start_point.x),
+                    self.convert_y(cmd.start_point.y),
+                )
+                break
 
         for cmd in command.command_buffer:
             if isinstance(cmd, Line2):
-                self.render_region_line(cmd)
+                self.render_line_to_path(cmd, region)
             elif isinstance(cmd, Arc2):
-                self.render_region_arc(cmd)
+                self.render_arc_to_path(cmd, region)
             elif isinstance(cmd, CCArc2):
-                self.render_region_cc_arc(cmd)
+                self.render_cc_arc_to_path(cmd, region)
             else:
                 raise NotImplementedError
 
-        color = self.get_color(command.transform.polarity)
-
-        region = drawsvg.Lines(
-            *self.region_point_buffer,
-            fill=color,
-            close=True,
-        )
+        region.Z()
         self.get_layer(command.transform.polarity).append(region)
 
         self.is_region = False
-        self.region_point_buffer = []
 
-    def render_region_line(self, command: Line2) -> None:
+    def render_line_to_path(self, command: Line2, path: drawsvg.Path) -> None:
         """Render line region boundary."""
-        self.region_point_buffer.append(command.start_point.x.as_millimeters())
-        self.region_point_buffer.append(command.start_point.y.as_millimeters())
-        self.region_point_buffer.append(command.end_point.x.as_millimeters())
-        self.region_point_buffer.append(command.end_point.y.as_millimeters())
+        path.L(
+            self.convert_x(command.end_point.x),
+            self.convert_y(command.end_point.y),
+        )
 
-    def render_region_arc(self, command: Arc2) -> None:
+    def render_arc_to_path(self, command: Arc2, path: drawsvg.Path) -> None:
         """Render line region boundary."""
-        self.region_point_buffer.append(command.start_point.x.as_millimeters())
-        self.region_point_buffer.append(command.start_point.y.as_millimeters())
-        self.region_point_buffer.append(command.end_point.x.as_millimeters())
-        self.region_point_buffer.append(command.end_point.y.as_millimeters())
+        relative_start_vector = command.get_relative_start_point()
+        relative_end_vector = command.get_relative_end_point()
 
-    def render_region_cc_arc(self, command: CCArc2) -> None:
+        angle_clockwise = relative_start_vector.angle_between(relative_end_vector)
+        angle_counter_clockwise = relative_start_vector.angle_between_cc(
+            relative_end_vector,
+        )
+        # We want to render clockwise angle, so if cc angle is bigger, we need to
+        # choose small angle.
+        large_arc = angle_clockwise >= angle_counter_clockwise
+        sweep = 1
+
+        path.A(
+            rx=self.convert_size(command.get_radius()),
+            ry=self.convert_size(command.get_radius()),
+            ex=self.convert_x(command.end_point.x),
+            ey=self.convert_y(command.end_point.y),
+            rot=0,
+            large_arc=large_arc,
+            sweep=sweep,
+        )
+
+    def render_cc_arc_to_path(self, command: CCArc2, path: drawsvg.Path) -> None:
         """Render line region boundary."""
-        self.region_point_buffer.append(command.start_point.x.as_millimeters())
-        self.region_point_buffer.append(command.start_point.y.as_millimeters())
-        self.region_point_buffer.append(command.end_point.x.as_millimeters())
-        self.region_point_buffer.append(command.end_point.y.as_millimeters())
+        relative_start_vector = command.get_relative_start_point()
+        relative_end_vector = command.get_relative_end_point()
+
+        angle_clockwise = relative_start_vector.angle_between(relative_end_vector)
+        angle_counter_clockwise = relative_start_vector.angle_between_cc(
+            relative_end_vector,
+        )
+        # We want to render clockwise angle, so if cc angle is bigger, we need to
+        # choose small angle.
+        large_arc = not (angle_clockwise >= angle_counter_clockwise)
+        sweep = 0
+
+        path.A(
+            rx=self.convert_size(command.get_radius()),
+            ry=self.convert_size(command.get_radius()),
+            ex=self.convert_x(command.end_point.x),
+            ey=self.convert_y(command.end_point.y),
+            rot=0,
+            large_arc=large_arc,
+            sweep=sweep,
+        )
 
     def get_image_ref(self) -> ImageRef:
         """Get reference to render image."""
@@ -390,15 +543,11 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     def finalize(self) -> None:
         """Finalize rendering."""
-        width = self.bounding_box.width.as_millimeters()
-        height = self.bounding_box.height.as_millimeters()
+        width = self.convert_size(self.bounding_box.width)
+        height = self.convert_size(self.bounding_box.height)
         self.drawing = drawsvg.Drawing(
             width=width,
             height=height,
-            origin=(
-                self.bounding_box.min_x.as_millimeters(),
-                self.bounding_box.min_y.as_millimeters(),
-            ),
         )
         self.drawing.append(self.get_layer(Polarity.Dark))
 

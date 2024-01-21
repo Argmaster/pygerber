@@ -44,7 +44,12 @@ class Arc2(ApertureDrawCommand2):
 
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of arc."""
-        return BoundingBox.from_diameter(self.get_radius() * 2) + self.center_point
+        return (
+            BoundingBox.from_diameter(
+                (self.get_radius() * 2) + (self.aperture.get_stroke_width() * 2),
+            )
+            + self.center_point
+        )
 
     def get_mirrored(self, mirror: Mirroring) -> Self:
         """Get mirrored command."""
