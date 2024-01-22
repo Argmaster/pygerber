@@ -68,6 +68,8 @@ if IS_SVG_BACKEND_AVAILABLE:
         mask: drawsvg.Mask = field(default_factory=drawsvg.Mask)
         layer: drawsvg.Group = field(default_factory=drawsvg.Group)
         polarity: Optional[Polarity] = None
+        is_region: bool = False
+        flip_y: bool = True
 
 
 class SvgRenderer2Hooks(Renderer2HooksABC):
@@ -104,16 +106,17 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                 command_buffer=self.command_buffer,
                 bounding_box=self.command_buffer.get_bounding_box(),
                 normalize_origin_to_0_0=True,
+                flip_y=self.flip_y,
             ),
         ]
-        self.is_region: bool = False
         self.apertures: dict[str, drawsvg.Group] = {}
 
     def push_render_frame(
         self,
         cmd: ReadonlyCommandBuffer2,
         *,
-        normalize_origin_to_0_0: bool = True,
+        normalize_origin_to_0_0: bool,
+        flip_y: bool,
     ) -> None:
         """Push new segment render frame."""
         self.rendering_stack.append(
@@ -121,6 +124,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                 command_buffer=cmd,
                 bounding_box=cmd.get_bounding_box(),
                 normalize_origin_to_0_0=normalize_origin_to_0_0,
+                flip_y=flip_y,
             ),
         )
 
@@ -157,10 +161,10 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             # Following writes to mask will be black to hide parts of the mask.
             new_mask.append(
                 drawsvg.Rectangle(
-                    0,
-                    0,
-                    self.convert_size(self.frame.bounding_box.width),
-                    self.convert_size(self.frame.bounding_box.height),
+                    x=self.convert_x(self.frame.bounding_box.min_x),
+                    y=self.convert_y(self.frame.bounding_box.min_y),
+                    width=self.convert_size(self.frame.bounding_box.width),
+                    height=self.convert_size(self.frame.bounding_box.height),
                     fill="white",
                 ),
             )
@@ -180,7 +184,9 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         else:
             origin_offset_x = Decimal(0)
 
-        return (x.as_millimeters() - origin_offset_x) * self.scale
+        corrected_position_x = x.as_millimeters() - origin_offset_x
+
+        return corrected_position_x * self.scale
 
     def convert_y(self, y: Offset) -> Decimal:
         """Convert y offset to pixel y coordinate."""
@@ -189,12 +195,14 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         else:
             origin_offset_y = Decimal(0)
 
-        if self.flip_y:
-            return (
-                self.frame.bounding_box.height.as_millimeters()
-                - (y.as_millimeters() - origin_offset_y)
-            ) * self.scale
-        return (y.as_millimeters() - origin_offset_y) * self.scale
+        corrected_position_y = y.as_millimeters() - origin_offset_y
+
+        if self.frame.flip_y:
+            flipped_position_y = (
+                self.frame.bounding_box.height.as_millimeters() - corrected_position_y
+            )
+            return flipped_position_y * self.scale
+        return corrected_position_y * self.scale
 
     def convert_size(self, diameter: Offset) -> Decimal:
         """Convert y offset to pixel y coordinate."""
@@ -202,7 +210,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     def get_color(self, polarity: Polarity) -> str:
         """Get color for specified polarity."""
-        if self.is_region:
+        if self.frame.is_region:
             if polarity == Polarity.Dark:
                 return self.color_scheme.solid_region_color.to_hex()
             return "black"
@@ -264,6 +272,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             self.convert_x(p3.x),
             self.convert_y(p3.y),
             fill=color,
+            close=True,
         )
         self.get_layer(command.transform.polarity).append(rectangle)
 
@@ -410,9 +419,9 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             aperture_group = drawsvg.Group()
             aperture_group.append(
                 drawsvg.Circle(
-                    0,
-                    0,
-                    self.convert_size(aperture.diameter) / Decimal("2.0"),
+                    cx=0,
+                    cy=0,
+                    r=self.convert_size(aperture.diameter) / Decimal("2.0"),
                     fill=color,
                 ),
             )
@@ -421,8 +430,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
                 aperture_group,
-                self.convert_x(command.flash_point.x),
-                self.convert_y(command.flash_point.y),
+                x=self.convert_x(command.flash_point.x),
+                y=self.convert_y(command.flash_point.y),
             ),
         )
 
@@ -544,6 +553,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             self.push_render_frame(
                 aperture.command_buffer,
                 normalize_origin_to_0_0=False,
+                flip_y=False,
             )
             for cmd in aperture.command_buffer:
                 cmd.render(self.renderer)
@@ -554,8 +564,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
                 aperture_group,
-                self.convert_x(command.flash_point.x),
-                self.convert_y(command.flash_point.y),
+                x=self.convert_x(command.flash_point.x),
+                y=self.convert_y(command.flash_point.y),
             ),
         )
 
@@ -569,7 +579,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         if len(command.command_buffer) == 0:
             return
 
-        self.is_region = True
+        self.frame.is_region = True
 
         color = self.get_color(command.transform.polarity)
         region = drawsvg.Path(fill=color)
@@ -595,7 +605,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         region.Z()
         self.get_layer(command.transform.polarity).append(region)
 
-        self.is_region = False
+        self.frame.is_region = False
 
     def render_line_to_path(self, command: Line2, path: drawsvg.Path) -> None:
         """Render line region boundary."""

@@ -976,11 +976,11 @@ class Parser2Hooks(IHooks):
                     ),
                     end_point=Vector2D(
                         x=Offset.new(
-                            primitive.start_x.on_parser2_eval_expression(context),
+                            primitive.end_x.on_parser2_eval_expression(context),
                             context.get_draw_units(),
                         ),
                         y=Offset.new(
-                            primitive.start_y.on_parser2_eval_expression(context),
+                            primitive.end_y.on_parser2_eval_expression(context),
                             context.get_draw_units(),
                         ),
                     ),

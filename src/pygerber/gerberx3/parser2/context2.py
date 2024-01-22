@@ -8,6 +8,7 @@ from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.parser2.apertures2.circle2 import NoCircle2
 from pygerber.gerberx3.parser2.attributes2 import (
     ApertureAttributes,
     FileAttributes,
@@ -52,6 +53,9 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateParser
 
 
+REGION_OUTLINE_DEFAULT_APERTURE_ID = ApertureID("%*__REGION_OUTLINE_APERTURE__*%")
+
+
 class Parser2Context:
     """Context used by Gerber AST parser, version 2."""
 
@@ -92,7 +96,12 @@ class Parser2Context:
             if self.options.custom_macro_expression_factories is None
             else self.options.custom_macro_expression_factories
         )
-        self.apertures: dict[ApertureID, Aperture2] = {}
+        self.apertures: dict[ApertureID, Aperture2] = {
+            REGION_OUTLINE_DEFAULT_APERTURE_ID: NoCircle2(
+                diameter=Offset.NULL,
+                hole_diameter=None,
+            ),
+        }
 
     def push_block_command_buffer(self) -> None:
         """Add new command buffer for block aperture draw commands."""
@@ -444,7 +453,11 @@ class Parser2Context:
 
     def get_current_aperture_id(self) -> Optional[ApertureID]:
         """Get current_aperture property value."""
-        return self.get_state().get_current_aperture_id()
+        current_aperture_id = self.get_state().get_current_aperture_id()
+        if current_aperture_id is None and self.get_is_region():
+            return REGION_OUTLINE_DEFAULT_APERTURE_ID
+
+        return current_aperture_id
 
     def set_current_aperture_id(self, current_aperture: Optional[ApertureID]) -> None:
         """Set the current_aperture property value."""

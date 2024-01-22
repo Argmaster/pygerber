@@ -192,8 +192,8 @@ class Vector2D(FrozenGeneralModel):
 
         Value returned is always between 0 and 360 (can be 0, never 360).
         """
-        v0 = self / self.length()
-        v1 = other / other.length()
+        v0 = self.normalize()
+        v1 = other.normalize()
         angle_radians = math.atan2(
             ((v0.x * v1.y) - (v1.x * v0.y)).value,  # determinant
             ((v0.x * v1.x) + (v0.y * v1.y)).value,  # dot product

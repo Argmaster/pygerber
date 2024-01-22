@@ -26,6 +26,10 @@ class Rectangle2(Aperture2):
         """Render draw operation."""
         renderer.hooks.render_flash_rectangle(command, self)
 
+    def get_stroke_width(self) -> Offset:
+        """Return stroke width of aperture."""
+        return (self.x_size + self.y_size) / 2
+
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of aperture."""
         return BoundingBox.from_rectangle(self.x_size, self.y_size)
