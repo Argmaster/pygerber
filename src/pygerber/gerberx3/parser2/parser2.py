@@ -18,7 +18,7 @@ from pygerber.gerberx3.parser2.errors2 import (
     Parser2Error,
     SkipTokenInterrupt,
 )
-from pygerber.gerberx3.parser2.ihooks import IHooks
+from pygerber.gerberx3.parser2.parser2hooks_base import Parser2HooksBase
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
 
@@ -119,7 +119,7 @@ class Parser2:
                 else:
                     self.get_hooks().on_other_error(self.context, e)
 
-    def get_hooks(self) -> IHooks:
+    def get_hooks(self) -> Parser2HooksBase:
         """Get hooks object."""
         return self.context.get_hooks()
 

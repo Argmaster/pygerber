@@ -1,20 +1,20 @@
-"""Example for introspection with selective inheritance from IHooks and Parser2Hooks."""
+"""Example for introspection with selective inheritance from Parser2HooksBase and Parser2Hooks."""
 from __future__ import annotations
 
 from pygerber.gerberx3.parser2.attributes2 import ApertureAttributes
 from pygerber.gerberx3.parser2.context2 import Parser2Context, Parser2ContextOptions
-from pygerber.gerberx3.parser2.ihooks import DefineAnyT, IHooks
 from pygerber.gerberx3.parser2.parser2 import (
     Parser2,
     Parser2OnErrorAction,
     Parser2Options,
 )
 from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
+from pygerber.gerberx3.parser2.parser2hooks_base import DefineAnyT, Parser2HooksBase
 from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 
 
-class CustomHooks(IHooks):
+class CustomHooks(Parser2HooksBase):
     def __init__(self) -> None:
         super().__init__()
         self.aperture_attributes: dict[ApertureID, ApertureAttributes] = {}
@@ -31,7 +31,7 @@ class CustomHooks(IHooks):
     class DeleteAttributeHooks(Parser2Hooks.DeleteAttributeHooks):
         pass
 
-    class DefineApertureTokenHooks(IHooks.DefineApertureTokenHooks):
+    class DefineApertureTokenHooks(Parser2HooksBase.DefineApertureTokenHooks):
         hooks: CustomHooks
 
         def on_parser_visit_token(

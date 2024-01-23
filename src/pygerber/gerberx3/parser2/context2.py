@@ -25,7 +25,6 @@ from pygerber.gerberx3.parser2.errors2 import (
     SkipTokenInterrupt,
     StepAndRepeatNotInitializedError,
 )
-from pygerber.gerberx3.parser2.ihooks import IHooks
 from pygerber.gerberx3.parser2.macro2.expressions2.binary2 import (
     Addition2,
     Division2,
@@ -38,6 +37,7 @@ from pygerber.gerberx3.parser2.macro2.expressions2.variable_name import Variable
 from pygerber.gerberx3.parser2.macro2.macro2 import ApertureMacro2
 from pygerber.gerberx3.parser2.macro2.statement_buffer2 import StatementBuffer2
 from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
+from pygerber.gerberx3.parser2.parser2hooks_base import Parser2HooksBase
 from pygerber.gerberx3.parser2.state2 import State2
 from pygerber.gerberx3.state_enums import AxisCorrespondence
 from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
@@ -79,7 +79,7 @@ class Parser2Context:
         self.macro_statement_buffer: Optional[StatementBuffer2] = None
         self.macro_eval_buffer: Optional[CommandBuffer2] = None
         self.macro_variable_buffer: dict[str, Decimal] = {}
-        self.hooks: IHooks = (
+        self.hooks: Parser2HooksBase = (
             Parser2Hooks() if self.options.hooks is None else self.options.hooks
         )
         self.current_token: Optional[Token] = None
@@ -231,7 +231,7 @@ class Parser2Context:
         """Halt parsing process."""
         raise ExitParsingProcess2Interrupt
 
-    def get_hooks(self) -> IHooks:
+    def get_hooks(self) -> Parser2HooksBase:
         """Get hooks object."""
         return self.hooks
 
@@ -584,4 +584,4 @@ class Parser2ContextOptions(FrozenGeneralModel):
     ] = Field(
         default=None,
     )
-    hooks: Optional[IHooks] = Field(default=None)
+    hooks: Optional[Parser2HooksBase] = Field(default=None)

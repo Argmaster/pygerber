@@ -30,7 +30,6 @@ from pygerber.gerberx3.parser2.errors2 import (
     StepAndRepeatNotInitializedError,
     UnnamedBlockApertureNotAllowedError,
 )
-from pygerber.gerberx3.parser2.ihooks import IHooks
 from pygerber.gerberx3.parser2.macro2.assignment2 import Assignment2
 from pygerber.gerberx3.parser2.macro2.macro2 import ApertureMacro2
 from pygerber.gerberx3.parser2.macro2.point2 import Point2
@@ -51,6 +50,7 @@ from pygerber.gerberx3.parser2.macro2.primitives2.code_21_center_line2 import (
 from pygerber.gerberx3.parser2.macro2.primitives2.code_22_lower_left_line2 import (
     Code22LowerLeftLine2,
 )
+from pygerber.gerberx3.parser2.parser2hooks_base import Parser2HooksBase
 from pygerber.gerberx3.parser2.state2 import ApertureTransform
 from pygerber.gerberx3.state_enums import (
     DrawMode,
@@ -165,10 +165,10 @@ if TYPE_CHECKING:
 MAX_SINGLE_QUADRANT_ANGLE = 91.0
 
 
-class Parser2Hooks(IHooks):
+class Parser2Hooks(Parser2HooksBase):
     """Implementation of hooks for Gerber AST Parser, version 2."""
 
-    class MacroBeginTokenHooks(IHooks.MacroBeginTokenHooks):
+    class MacroBeginTokenHooks(Parser2HooksBase.MacroBeginTokenHooks):
         """Hooks for visiting macro begin token (AM)."""
 
         def on_parser_visit_token(
@@ -190,7 +190,7 @@ class Parser2Hooks(IHooks):
             context.set_macro_statement_buffer()
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode1CircleTokenHooks(IHooks.MacroCode1CircleTokenHooks):
+    class MacroCode1CircleTokenHooks(Parser2HooksBase.MacroCode1CircleTokenHooks):
         """Hooks for visiting macro primitive code 0 circle."""
 
         def on_parser_visit_token(
@@ -219,7 +219,9 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode2VectorLineTokenHooks(IHooks.MacroCode2VectorLineTokenHooks):
+    class MacroCode2VectorLineTokenHooks(
+        Parser2HooksBase.MacroCode2VectorLineTokenHooks,
+    ):
         """Hooks for visiting macro primitive code 2 vector line."""
 
         def on_parser_visit_token(
@@ -242,7 +244,7 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode4OutlineTokenHooks(IHooks.MacroCode4OutlineTokenHooks):
+    class MacroCode4OutlineTokenHooks(Parser2HooksBase.MacroCode4OutlineTokenHooks):
         """Hooks for visiting macro primitive code 4 outline."""
 
         def on_parser_visit_token(
@@ -274,7 +276,7 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode5PolygonTokenHooks(IHooks.MacroCode5PolygonTokenHooks):
+    class MacroCode5PolygonTokenHooks(Parser2HooksBase.MacroCode5PolygonTokenHooks):
         """Hooks for visiting macro primitive code 5 polygon."""
 
         def on_parser_visit_token(
@@ -306,7 +308,7 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode6MoireTokenHooks(IHooks.MacroCode6MoireTokenHooks):
+    class MacroCode6MoireTokenHooks(Parser2HooksBase.MacroCode6MoireTokenHooks):
         """Hooks for visiting macro primitive code 6 moire."""
 
         def on_parser_visit_token(
@@ -329,7 +331,7 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode7ThermalTokenHooks(IHooks.MacroCode7ThermalTokenHooks):
+    class MacroCode7ThermalTokenHooks(Parser2HooksBase.MacroCode7ThermalTokenHooks):
         """Hooks for visiting macro primitive code 7 thermal."""
 
         def on_parser_visit_token(
@@ -359,7 +361,9 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode20VectorLineTokenHooks(IHooks.MacroCode20VectorLineTokenHooks):
+    class MacroCode20VectorLineTokenHooks(
+        Parser2HooksBase.MacroCode20VectorLineTokenHooks,
+    ):
         """Hooks for visiting macro primitive code 20 vector line."""
 
         def on_parser_visit_token(
@@ -390,7 +394,9 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode21CenterLineTokenHooks(IHooks.MacroCode21CenterLineTokenHooks):
+    class MacroCode21CenterLineTokenHooks(
+        Parser2HooksBase.MacroCode21CenterLineTokenHooks,
+    ):
         """Hooks for visiting macro primitive code 21 center line."""
 
         def on_parser_visit_token(
@@ -420,7 +426,9 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroCode22LowerLeftLineTokenHooks(IHooks.MacroCode22LowerLeftLineTokenHooks):
+    class MacroCode22LowerLeftLineTokenHooks(
+        Parser2HooksBase.MacroCode22LowerLeftLineTokenHooks,
+    ):
         """Hooks for visiting macro primitive code 22 lower left line."""
 
         def on_parser_visit_token(
@@ -441,7 +449,7 @@ class Parser2Hooks(IHooks):
             context.get_macro_statement_buffer().add_statement(Code22LowerLeftLine2())
             return super().on_parser_visit_token(token, context)
 
-    class MacroVariableAssignment(IHooks.MacroVariableAssignment):
+    class MacroVariableAssignment(Parser2HooksBase.MacroVariableAssignment):
         """Hooks for visiting macro variable assignment token."""
 
         def on_parser_visit_token(
@@ -467,7 +475,7 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class MacroDefinitionTokenHooks(IHooks.MacroDefinitionTokenHooks):
+    class MacroDefinitionTokenHooks(Parser2HooksBase.MacroDefinitionTokenHooks):
         """Hooks for visiting macro definition token (AM)."""
 
         def on_parser_visit_token(
@@ -496,7 +504,7 @@ class Parser2Hooks(IHooks):
             context.unset_macro_statement_buffer()
             return super().on_parser_visit_token(token, context)
 
-    class BeginBlockApertureTokenHooks(IHooks.BeginBlockApertureTokenHooks):
+    class BeginBlockApertureTokenHooks(Parser2HooksBase.BeginBlockApertureTokenHooks):
         """Hooks for visiting begin block aperture token (AB)."""
 
         def on_parser_visit_token(
@@ -525,7 +533,7 @@ class Parser2Hooks(IHooks):
 
             return super().on_parser_visit_token(token, context)
 
-    class EndBlockApertureTokenHooks(IHooks.EndBlockApertureTokenHooks):
+    class EndBlockApertureTokenHooks(Parser2HooksBase.EndBlockApertureTokenHooks):
         """Hooks for visiting end block aperture token (AB)."""
 
         def on_parser_visit_token(
@@ -560,7 +568,9 @@ class Parser2Hooks(IHooks):
             context.set_state(context.pop_block_state())
             return super().on_parser_visit_token(token, context)
 
-    class DefineApertureCircleTokenHooks(IHooks.DefineApertureCircleTokenHooks):
+    class DefineApertureCircleTokenHooks(
+        Parser2HooksBase.DefineApertureCircleTokenHooks,
+    ):
         """Hooks for visiting circle aperture definition token (ADD)."""
 
         def on_parser_visit_token(
@@ -595,7 +605,9 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class DefineApertureRectangleTokenHooks(IHooks.DefineApertureRectangleTokenHooks):
+    class DefineApertureRectangleTokenHooks(
+        Parser2HooksBase.DefineApertureRectangleTokenHooks,
+    ):
         """Hooks for visiting rectangle aperture definition token (ADD)."""
 
         def on_parser_visit_token(
@@ -631,7 +643,9 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class DefineApertureObroundTokenHooks(IHooks.DefineApertureObroundTokenHooks):
+    class DefineApertureObroundTokenHooks(
+        Parser2HooksBase.DefineApertureObroundTokenHooks,
+    ):
         """Hooks for visiting obround aperture definition token (ADD)."""
 
         def on_parser_visit_token(
@@ -667,7 +681,9 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class DefineAperturePolygonTokenHooks(IHooks.DefineAperturePolygonTokenHooks):
+    class DefineAperturePolygonTokenHooks(
+        Parser2HooksBase.DefineAperturePolygonTokenHooks,
+    ):
         """Hooks for visiting polygon aperture definition token (ADD)."""
 
         def on_parser_visit_token(
@@ -708,7 +724,7 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class DefineApertureMacroTokenHooks(IHooks.DefineApertureMacroTokenHooks):
+    class DefineApertureMacroTokenHooks(Parser2HooksBase.DefineApertureMacroTokenHooks):
         """Hooks for visiting macro aperture definition token (ADD)."""
 
         def on_parser_visit_token(
@@ -1048,7 +1064,9 @@ class Parser2Hooks(IHooks):
                 assignment.variable_name
             ] = assignment.value.on_parser2_eval_expression(context)
 
-    class AxisSelectTokenHooksTokenHooks(IHooks.AxisSelectTokenHooksTokenHooks):
+    class AxisSelectTokenHooksTokenHooks(
+        Parser2HooksBase.AxisSelectTokenHooksTokenHooks,
+    ):
         """Hooks for visiting axis select token (AS)."""
 
         def on_parser_visit_token(
@@ -1068,7 +1086,7 @@ class Parser2Hooks(IHooks):
             context.set_axis_correspondence(token.correspondence)
             return super().on_parser_visit_token(token, context)
 
-    class CommandDrawTokenHooks(IHooks.CommandDrawTokenHooks):
+    class CommandDrawTokenHooks(Parser2HooksBase.CommandDrawTokenHooks):
         """Hooks for visiting draw token (D01)."""
 
         def on_parser_visit_token(
@@ -1309,7 +1327,7 @@ class Parser2Hooks(IHooks):
             },
         )
 
-    class CommandMoveTokenHooks(IHooks.CommandMoveTokenHooks):
+    class CommandMoveTokenHooks(Parser2HooksBase.CommandMoveTokenHooks):
         """Hooks for visiting move token (D02)."""
 
         def on_parser_visit_token(
@@ -1338,7 +1356,7 @@ class Parser2Hooks(IHooks):
             context.set_current_position(destination_point)
             return super().on_parser_visit_token(token, context)
 
-    class CommandFlashTokenHooks(IHooks.CommandFlashTokenHooks):
+    class CommandFlashTokenHooks(Parser2HooksBase.CommandFlashTokenHooks):
         """Hooks for visiting flash token (D03)."""
 
         def on_parser_visit_token(
@@ -1392,7 +1410,7 @@ class Parser2Hooks(IHooks):
             context.set_current_position(flash_point)
             return super().on_parser_visit_token(token, context)
 
-    class SelectApertureTokenHooks(IHooks.SelectApertureTokenHooks):
+    class SelectApertureTokenHooks(Parser2HooksBase.SelectApertureTokenHooks):
         """Hooks for visiting select aperture token (DNN)."""
 
         def on_parser_visit_token(
@@ -1417,7 +1435,7 @@ class Parser2Hooks(IHooks):
             context.set_current_aperture_id(token.aperture_id)
             return super().on_parser_visit_token(token, context)
 
-    class CoordinateFormatTokenHooks(IHooks.CoordinateFormatTokenHooks):
+    class CoordinateFormatTokenHooks(Parser2HooksBase.CoordinateFormatTokenHooks):
         """Hooks for visiting coordinate format token (FS)."""
 
         def on_parser_visit_token(
@@ -1445,7 +1463,7 @@ class Parser2Hooks(IHooks):
                 ),
             )
 
-    class SetLinearTokenHooks(IHooks.SetLinearTokenHooks):
+    class SetLinearTokenHooks(Parser2HooksBase.SetLinearTokenHooks):
         """Hooks for visiting set linear token (G01)."""
 
         def on_parser_visit_token(
@@ -1467,7 +1485,9 @@ class Parser2Hooks(IHooks):
             context.set_draw_mode(DrawMode.Linear)
             return super().on_parser_visit_token(token, context)
 
-    class SetClockwiseCircularTokenHooks(IHooks.SetClockwiseCircularTokenHooks):
+    class SetClockwiseCircularTokenHooks(
+        Parser2HooksBase.SetClockwiseCircularTokenHooks,
+    ):
         """Hooks for visiting set clockwise circular token (G02)."""
 
         def on_parser_visit_token(
@@ -1490,7 +1510,7 @@ class Parser2Hooks(IHooks):
             return super().on_parser_visit_token(token, context)
 
     class SetCounterClockwiseCircularTokenHooks(
-        IHooks.SetCounterClockwiseCircularTokenHooks,
+        Parser2HooksBase.SetCounterClockwiseCircularTokenHooks,
     ):
         """Hooks for visiting set counter clockwise circular token (G03)."""
 
@@ -1513,10 +1533,10 @@ class Parser2Hooks(IHooks):
             context.set_draw_mode(DrawMode.CounterclockwiseCircular)
             return super().on_parser_visit_token(token, context)
 
-    class CommentTokenHooks(IHooks.CommentTokenHooks):
+    class CommentTokenHooks(Parser2HooksBase.CommentTokenHooks):
         """Hooks for visiting comment token (G04)."""
 
-    class BeginRegionTokenHooks(IHooks.BeginRegionTokenHooks):
+    class BeginRegionTokenHooks(Parser2HooksBase.BeginRegionTokenHooks):
         """Hooks for visiting begin region token (G36)."""
 
         def on_parser_visit_token(
@@ -1540,7 +1560,7 @@ class Parser2Hooks(IHooks):
 
             return super().on_parser_visit_token(token, context)
 
-    class EndRegionTokenHooks(IHooks.EndRegionTokenHooks):
+    class EndRegionTokenHooks(Parser2HooksBase.EndRegionTokenHooks):
         """Hooks for visiting end region token (G37)."""
 
         def on_parser_visit_token(
@@ -1574,7 +1594,9 @@ class Parser2Hooks(IHooks):
             context.unset_region_command_buffer()
             return super().on_parser_visit_token(token, context)
 
-    class PrepareSelectApertureTokenHooks(IHooks.PrepareSelectApertureTokenHooks):
+    class PrepareSelectApertureTokenHooks(
+        Parser2HooksBase.PrepareSelectApertureTokenHooks,
+    ):
         """Hooks for visiting prepare select aperture token (G54)."""
 
         def on_parser_visit_token(
@@ -1596,7 +1618,7 @@ class Parser2Hooks(IHooks):
             self.hooks.select_aperture.on_parser_visit_token(token, context)
             return super().on_parser_visit_token(token, context)
 
-    class SetUnitInchTokenHooks(IHooks.SetUnitInchTokenHooks):
+    class SetUnitInchTokenHooks(Parser2HooksBase.SetUnitInchTokenHooks):
         """Hooks for visiting set unit inch token (G70)."""
 
         def on_parser_visit_token(
@@ -1618,7 +1640,7 @@ class Parser2Hooks(IHooks):
             context.set_draw_units(Unit.Inches)
             return super().on_parser_visit_token(token, context)
 
-    class SetUnitMillimetersTokenHooks(IHooks.SetUnitMillimetersTokenHooks):
+    class SetUnitMillimetersTokenHooks(Parser2HooksBase.SetUnitMillimetersTokenHooks):
         """Hooks for visiting set unit millimeters token (G71)."""
 
         def on_parser_visit_token(
@@ -1640,7 +1662,9 @@ class Parser2Hooks(IHooks):
             context.set_draw_units(Unit.Millimeters)
             return super().on_parser_visit_token(token, context)
 
-    class SetSingleQuadrantModeTokenHooks(IHooks.SetSingleQuadrantModeTokenHooks):
+    class SetSingleQuadrantModeTokenHooks(
+        Parser2HooksBase.SetSingleQuadrantModeTokenHooks,
+    ):
         """Hooks for visiting set single-quadrant mode token (G74)."""
 
         def on_parser_visit_token(
@@ -1662,7 +1686,9 @@ class Parser2Hooks(IHooks):
             context.set_is_multi_quadrant(is_multi_quadrant=False)
             return super().on_parser_visit_token(token, context)
 
-    class SetMultiQuadrantModeTokenHooks(IHooks.SetMultiQuadrantModeTokenHooks):
+    class SetMultiQuadrantModeTokenHooks(
+        Parser2HooksBase.SetMultiQuadrantModeTokenHooks,
+    ):
         """Hooks for visiting set multi-quadrant mode token (G75)."""
 
         def on_parser_visit_token(
@@ -1684,7 +1710,9 @@ class Parser2Hooks(IHooks):
             context.set_is_multi_quadrant(is_multi_quadrant=True)
             return super().on_parser_visit_token(token, context)
 
-    class SetCoordinateAbsoluteTokenHooks(IHooks.SetCoordinateAbsoluteTokenHooks):
+    class SetCoordinateAbsoluteTokenHooks(
+        Parser2HooksBase.SetCoordinateAbsoluteTokenHooks,
+    ):
         """Hooks for visiting set coordinate absolute token (G90)."""
 
         def on_parser_visit_token(
@@ -1706,7 +1734,9 @@ class Parser2Hooks(IHooks):
             # NOOP - only absolute format supported.
             return super().on_parser_visit_token(token, context)
 
-    class SetCoordinateIncrementalTokenHooks(IHooks.SetCoordinateIncrementalTokenHooks):
+    class SetCoordinateIncrementalTokenHooks(
+        Parser2HooksBase.SetCoordinateIncrementalTokenHooks,
+    ):
         """Hooks for visiting set coordinate incremental token (G91)."""
 
         def on_parser_visit_token(
@@ -1727,7 +1757,7 @@ class Parser2Hooks(IHooks):
             """
             raise IncrementalCoordinatesNotSupported2Error
 
-    class ImageNameTokenHooks(IHooks.ImageNameTokenHooks):
+    class ImageNameTokenHooks(Parser2HooksBase.ImageNameTokenHooks):
         """Hooks for visiting image name token (IN)."""
 
         def on_parser_visit_token(
@@ -1749,10 +1779,10 @@ class Parser2Hooks(IHooks):
             context.set_image_name(token.content)
             return super().on_parser_visit_token(token, context)
 
-    class InvalidTokenHooks(IHooks.InvalidTokenHooks):
+    class InvalidTokenHooks(Parser2HooksBase.InvalidTokenHooks):
         """Hooks for visiting invalid token."""
 
-    class ImagePolarityTokenHooks(IHooks.ImagePolarityTokenHooks):
+    class ImagePolarityTokenHooks(Parser2HooksBase.ImagePolarityTokenHooks):
         """Hooks for visiting image polarity token (IP)."""
 
         def on_parser_visit_token(
@@ -1776,7 +1806,7 @@ class Parser2Hooks(IHooks):
             )
             return super().on_parser_visit_token(token, context)
 
-    class LoadMirroringTokenHooks(IHooks.LoadMirroringTokenHooks):
+    class LoadMirroringTokenHooks(Parser2HooksBase.LoadMirroringTokenHooks):
         """Hooks for visiting load mirroring token (LM)."""
 
         def on_parser_visit_token(
@@ -1798,7 +1828,7 @@ class Parser2Hooks(IHooks):
             context.set_mirroring(token.mirroring)
             return super().on_parser_visit_token(token, context)
 
-    class LoadNameTokenHooks(IHooks.LoadNameTokenHooks):
+    class LoadNameTokenHooks(Parser2HooksBase.LoadNameTokenHooks):
         """Hooks for visiting load name token (LN)."""
 
         def on_parser_visit_token(
@@ -1820,7 +1850,7 @@ class Parser2Hooks(IHooks):
             context.set_file_name(token.content)
             return super().on_parser_visit_token(token, context)
 
-    class LoadPolarityTokenHooks(IHooks.LoadPolarityTokenHooks):
+    class LoadPolarityTokenHooks(Parser2HooksBase.LoadPolarityTokenHooks):
         """Hooks for visiting load polarity token (LP)."""
 
         def on_parser_visit_token(
@@ -1842,7 +1872,7 @@ class Parser2Hooks(IHooks):
             context.set_polarity(token.polarity)
             return super().on_parser_visit_token(token, context)
 
-    class LoadRotationTokenHooks(IHooks.LoadRotationTokenHooks):
+    class LoadRotationTokenHooks(Parser2HooksBase.LoadRotationTokenHooks):
         """Hooks for visiting load rotation token (LR)."""
 
         def on_parser_visit_token(
@@ -1864,7 +1894,7 @@ class Parser2Hooks(IHooks):
             context.set_rotation(token.rotation)
             return super().on_parser_visit_token(token, context)
 
-    class LoadScalingTokenHooks(IHooks.LoadScalingTokenHooks):
+    class LoadScalingTokenHooks(Parser2HooksBase.LoadScalingTokenHooks):
         """Hooks for visiting load scaling token (LS)."""
 
         def on_parser_visit_token(
@@ -1886,7 +1916,7 @@ class Parser2Hooks(IHooks):
             context.set_scaling(token.scaling)
             return super().on_parser_visit_token(token, context)
 
-    class ProgramStopTokenHooks(IHooks.ProgramStopTokenHooks):
+    class ProgramStopTokenHooks(Parser2HooksBase.ProgramStopTokenHooks):
         """Hooks for visiting program stop token (M00)."""
 
         def on_parser_visit_token(
@@ -1908,7 +1938,7 @@ class Parser2Hooks(IHooks):
             context.set_reached_program_stop()
             context.halt_parser()
 
-    class OptionalStopTokenHooks(IHooks.OptionalStopTokenHooks):
+    class OptionalStopTokenHooks(Parser2HooksBase.OptionalStopTokenHooks):
         """Hooks for visiting optional stop token (M01)."""
 
         def on_parser_visit_token(
@@ -1919,7 +1949,7 @@ class Parser2Hooks(IHooks):
             """Handle child parsing being completed."""
             context.set_reached_optional_stop()
 
-    class EndOfFileTokenHooks(IHooks.EndOfFileTokenHooks):
+    class EndOfFileTokenHooks(Parser2HooksBase.EndOfFileTokenHooks):
         """Hooks for visiting end of file token (M02)."""
 
         def on_parser_visit_token(
@@ -1941,7 +1971,7 @@ class Parser2Hooks(IHooks):
             context.set_reached_end_of_file()
             context.halt_parser()
 
-    class UnitModeTokenHooks(IHooks.UnitModeTokenHooks):
+    class UnitModeTokenHooks(Parser2HooksBase.UnitModeTokenHooks):
         """Hooks for visiting unit mode token (MO)."""
 
         def on_parser_visit_token(
@@ -1963,10 +1993,10 @@ class Parser2Hooks(IHooks):
             context.set_draw_units(token.unit)
             return super().on_parser_visit_token(token, context)
 
-    class ImageOffsetTokenHooks(IHooks.ImageOffsetTokenHooks):
+    class ImageOffsetTokenHooks(Parser2HooksBase.ImageOffsetTokenHooks):
         """Hooks for visiting image offset token (OF)."""
 
-    class StepRepeatBeginTokenHooks(IHooks.StepRepeatBeginTokenHooks):
+    class StepRepeatBeginTokenHooks(Parser2HooksBase.StepRepeatBeginTokenHooks):
         """Hooks for visiting step and repeat begin token (SR)."""
 
         def on_parser_visit_token(
@@ -1996,7 +2026,7 @@ class Parser2Hooks(IHooks):
 
             return super().on_parser_visit_token(token, context)
 
-    class StepRepeatEndTokenHooks(IHooks.StepRepeatEndTokenHooks):
+    class StepRepeatEndTokenHooks(Parser2HooksBase.StepRepeatEndTokenHooks):
         """Hooks for visiting step and repeat end token (SR)."""
 
         def on_parser_visit_token(
@@ -2046,7 +2076,7 @@ class Parser2Hooks(IHooks):
 
             return super().on_parser_visit_token(token, context)
 
-    class ApertureAttributeHooks(IHooks.ApertureAttributeHooks):
+    class ApertureAttributeHooks(Parser2HooksBase.ApertureAttributeHooks):
         """Hooks for visiting aperture attribute token (TA)."""
 
         def on_parser_visit_token(
@@ -2068,7 +2098,7 @@ class Parser2Hooks(IHooks):
             context.set_aperture_attribute(token.name, token.value)
             return super().on_parser_visit_token(token, context)
 
-    class DeleteAttributeHooks(IHooks.DeleteAttributeHooks):
+    class DeleteAttributeHooks(Parser2HooksBase.DeleteAttributeHooks):
         """Hooks for visiting delete attribute token (TD)."""
 
         def on_parser_visit_token(
@@ -2095,7 +2125,7 @@ class Parser2Hooks(IHooks):
                 context.clear_object_attributes()
             return super().on_parser_visit_token(token, context)
 
-    class FileAttributeHooks(IHooks.FileAttributeHooks):
+    class FileAttributeHooks(Parser2HooksBase.FileAttributeHooks):
         """Hooks for visiting file attribute token (TF)."""
 
         def on_parser_visit_token(
@@ -2117,7 +2147,7 @@ class Parser2Hooks(IHooks):
             context.set_file_attribute(token.name, token.value)
             return super().on_parser_visit_token(token, context)
 
-    class ObjectAttributeHooks(IHooks.ObjectAttributeHooks):
+    class ObjectAttributeHooks(Parser2HooksBase.ObjectAttributeHooks):
         """Hooks for visiting object attribute token (TO)."""
 
         def on_parser_visit_token(

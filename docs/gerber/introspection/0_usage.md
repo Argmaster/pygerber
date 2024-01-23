@@ -5,11 +5,11 @@
 Since release 2.2.0 PyGerber offers interface designed for Gerber code introspection
 based on `Parser2` class and
 [visitor pattern](https://refactoring.guru/design-patterns/visitor). API is build around
-`IHooks` class from `pygerber.gerberx3.parser2.ihooks` module and descendant classes
-passed to `Parser2` class. `Parser2` visits all tokens in Gerber AST created by
-`Tokenizer` and invokes particular hooks from provided hooks class. `IHooks` itself
-doesn't implement any Gerber specific behaviors. It is just a collection of classes with
-empty hook methods which can be used to implement behaviors explained in
+`Parser2HooksBase` class from `pygerber.gerberx3.parser2.ihooks` module and descendant
+classes passed to `Parser2` class. `Parser2` visits all tokens in Gerber AST created by
+`Tokenizer` and invokes particular hooks from provided hooks class. `Parser2HooksBase`
+itself doesn't implement any Gerber specific behaviors. It is just a collection of
+classes with empty hook methods which can be used to implement behaviors explained in
 [The Gerber Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=71).
 PyGerber provides such implementation in form of `Parser2Hooks` class, available in
 `pygerber.gerberx3.parser2.parser2` module.
@@ -88,10 +88,10 @@ is considered a comment, including leading spaces.
 ## Mixed inheritance
 
 By default `Parser2` is using `Parser2Hooks`, however, for some use cases it may be more
-beneficial to use `IHooks` class to reduce time required to traverse single Gerber file.
-This is the case when one needs only selected Gerber features, eg. attribute support. In
-such case, you can create new `IHooks` derived class and for some hook classes inherit
-from `Parser2Hooks` nested classes.
+beneficial to use `Parser2HooksBase` class to reduce time required to traverse single
+Gerber file. This is the case when one needs only selected Gerber features, eg.
+attribute support. In such case, you can create new `Parser2HooksBase` derived class and
+for some hook classes inherit from `Parser2Hooks` nested classes.
 
 For example let's assume we want to extract attributes of all apertures in Gerber file.
 To do it we need a working attribute cumulation logic, but at the same time let's try to

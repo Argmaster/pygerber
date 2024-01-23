@@ -1,4 +1,4 @@
-"""Example for introspection with selective inheritance from IHooks and Parser2Hooks."""
+"""Example for introspection with selective inheritance from Parser2HooksBase and Parser2Hooks."""
 from __future__ import annotations
 
 from pygerber.gerberx3.parser2.context2 import Parser2Context, Parser2ContextOptions

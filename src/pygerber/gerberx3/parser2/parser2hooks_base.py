@@ -133,7 +133,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.to_object_attribute import ObjectAttribute
 
 
-__all__ = ["TokenHooksBase", "IHooks"]
+__all__ = ["TokenHooksBase", "Parser2HooksBase"]
 
 
 BlockApertureEndT: TypeAlias = "BlockApertureEnd"
@@ -208,7 +208,7 @@ TokenT = TypeVar("TokenT")
 class TokenHooksBase(Generic[TokenT]):
     """Class for creating token visit hooks."""
 
-    def __init__(self, hooks: IHooks) -> None:
+    def __init__(self, hooks: Parser2HooksBase) -> None:
         self.hooks = hooks
 
     def post_hooks_init(self) -> None:
@@ -262,7 +262,7 @@ class TokenHooksBase(Generic[TokenT]):
         """
 
 
-class IHooks:
+class Parser2HooksBase:
     """Collection of overridable hooks for Gerber AST parser, version 2."""
 
     def __init__(self) -> None:  # noqa: PLR0915
