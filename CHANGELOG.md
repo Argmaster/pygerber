@@ -7,8 +7,18 @@ this project adheres to [Calendar Versioning](https://calver.org/).
 
 ## Release 2.2.0
 
-- Added new implementation of Gerber AST parser, Parser2, with wider support for Gerber
-  constructs and hook based interface for Gerber code introspection. (#108)
+- Added alternative parser implementation, `pygerber.gerberx3.parser2.parser2.Parser2`
+  class.
+- Added introspection interface based on new Parser2 class.
+- Added macro support to Parser2 class which was not previously available in Parser
+  class.
+- Added API for customizing Token classes used by Tokenizer. `Tokenizer` class now
+  accepts optional `options` parameter of class `TokenizerOptions`.
+- Added documentation for introspection.
+- Added experimental SVG backend for Gerber code with Parser2 generated command buffers.
+- Changed documentation layout to improve readability.
+- Fixed switching to single quadrant mode being ignored.
+- Refactored feature support documentation.
 
 ## Release 2.1.1
 
