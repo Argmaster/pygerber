@@ -156,20 +156,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
     def _new_layer(self, *, with_mask: bool) -> None:
         """Create new layer including previous layer."""
         if with_mask:
-            new_mask = drawsvg.Mask()
-            # Add solid background for mask to not mask anything by default.
-            # Following writes to mask will be black to hide parts of the mask.
-            new_mask.append(
-                drawsvg.Rectangle(
-                    x=self.convert_x(self.frame.bounding_box.min_x),
-                    y=self.convert_y(self.frame.bounding_box.min_y),
-                    width=self.convert_size(self.frame.bounding_box.width),
-                    height=self.convert_size(self.frame.bounding_box.height),
-                    fill="white",
-                ),
-            )
-            self.frame.mask = new_mask
-            new_layer = drawsvg.Group(mask=new_mask)
+            self.frame.mask = self._make_mask(self.frame.bounding_box)
+            new_layer = drawsvg.Group(mask=self.frame.mask)
         else:
             new_layer = drawsvg.Group()
 
@@ -178,7 +166,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.frame.layer = new_layer
 
     def convert_x(self, x: Offset) -> Decimal:
-        """Convert x offset to pixel x coordinate."""
+        """Convert y offset to y coordinate in image space."""
         if self.frame.normalize_origin_to_0_0:
             origin_offset_x = self.frame.bounding_box.min_x.as_millimeters()
         else:
@@ -189,15 +177,29 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         return corrected_position_x * self.scale
 
     def convert_y(self, y: Offset) -> Decimal:
+        """Convert y offset to y coordinate in image space."""
+        return self._convert_y(
+            y,
+            normalize_origin_to_0_0=self.frame.normalize_origin_to_0_0,
+            flip_y=self.frame.flip_y,
+        )
+
+    def _convert_y(
+        self,
+        y: Offset,
+        *,
+        normalize_origin_to_0_0: bool,
+        flip_y: bool,
+    ) -> Decimal:
         """Convert y offset to pixel y coordinate."""
-        if self.frame.normalize_origin_to_0_0:
+        if normalize_origin_to_0_0:
             origin_offset_y = self.frame.bounding_box.min_y.as_millimeters()
         else:
             origin_offset_y = Decimal(0)
 
         corrected_position_y = y.as_millimeters() - origin_offset_y
 
-        if self.frame.flip_y:
+        if flip_y:
             flipped_position_y = (
                 self.frame.bounding_box.height.as_millimeters() - corrected_position_y
             )
@@ -416,7 +418,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         aperture_group = self.get_aperture(id(aperture), color)
 
         if aperture_group is None:
-            aperture_group = drawsvg.Group()
+            mask = self._make_mask(aperture.get_bounding_box(), aperture.hole_diameter)
+            aperture_group = drawsvg.Group(mask=mask)
             aperture_group.append(
                 drawsvg.Circle(
                     cx=0,
@@ -435,6 +438,31 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             ),
         )
 
+    def _make_mask(
+        self,
+        bbox: BoundingBox,
+        hole_diameter: Optional[Offset] = None,
+    ) -> drawsvg.Mask:
+        mask = drawsvg.Mask()
+        mask.append(
+            drawsvg.Rectangle(
+                x=self.convert_size(bbox.min_x),
+                y=self.convert_size(bbox.min_y),
+                width=self.convert_size(bbox.width),
+                height=self.convert_size(bbox.height),
+                fill="white",
+            ),
+        )
+        if hole_diameter is not None:
+            central_circle = drawsvg.Circle(
+                cx=0,
+                cy=0,
+                r=self.convert_size(hole_diameter) / 2,
+                fill="black",
+            )
+            mask.append(central_circle)
+        return mask
+
     def render_flash_no_circle(self, command: Flash2, aperture: NoCircle2) -> None:
         """Render flash no circle aperture to target image."""
 
@@ -444,11 +472,12 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         aperture_group = self.get_aperture(id(aperture), color)
 
         if aperture_group is None:
-            aperture_group = drawsvg.Group()
+            mask = self._make_mask(aperture.get_bounding_box(), aperture.hole_diameter)
+            aperture_group = drawsvg.Group(mask=mask)
             aperture_group.append(
                 drawsvg.Rectangle(
-                    0,
-                    0,
+                    -self.convert_size(aperture.x_size) / 2,
+                    -self.convert_size(aperture.y_size) / 2,
                     self.convert_size(aperture.x_size),
                     self.convert_size(aperture.y_size),
                     fill=color,
@@ -459,10 +488,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
                 aperture_group,
-                self.convert_x(command.flash_point.x)
-                - self.convert_size(aperture.x_size / Decimal("2.0")),
-                self.convert_y(command.flash_point.y)
-                - self.convert_size(aperture.y_size / Decimal("2.0")),
+                self.convert_x(command.flash_point.x),
+                self.convert_y(command.flash_point.y),
             ),
         )
 
@@ -472,15 +499,16 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         aperture_group = self.get_aperture(id(aperture), color)
 
         if aperture_group is None:
-            aperture_group = drawsvg.Group()
+            mask = self._make_mask(aperture.get_bounding_box(), aperture.hole_diameter)
+            aperture_group = drawsvg.Group(mask=mask)
             x_size = self.convert_size(aperture.x_size)
             y_size = self.convert_size(aperture.y_size)
             radius = x_size.min(y_size) / Decimal("2.0")
 
             aperture_group.append(
                 drawsvg.Rectangle(
-                    0,
-                    0,
+                    -self.convert_size(aperture.x_size) / 2,
+                    -self.convert_size(aperture.y_size) / 2,
                     x_size,
                     y_size,
                     fill=color,
@@ -493,10 +521,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
                 aperture_group,
-                self.convert_x(command.flash_point.x)
-                - self.convert_size(aperture.x_size / Decimal("2.0")),
-                self.convert_y(command.flash_point.y)
-                - self.convert_size(aperture.y_size / Decimal("2.0")),
+                self.convert_x(command.flash_point.x),
+                self.convert_y(command.flash_point.y),
             ),
         )
 
@@ -506,7 +532,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         aperture_group = self.get_aperture(id(aperture), color)
 
         if aperture_group is None:
-            aperture_group = drawsvg.Group()
+            mask = self._make_mask(aperture.get_bounding_box(), aperture.hole_diameter)
+            aperture_group = drawsvg.Group(mask=mask)
 
             number_of_vertices = aperture.number_vertices
             initial_angle = aperture.rotation
