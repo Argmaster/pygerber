@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from pygerber.gerberx3.tokenizer.grammar import (
     GerberGrammarBuilder,
@@ -32,12 +32,13 @@ class TokenizerOptions:
 class Tokenizer:
     """GerberX3 format tokenizer."""
 
-    def __init__(self) -> None:
+    def __init__(self, options: Optional[TokenizerOptions] = None) -> None:
         """GerberX3 format tokenizer."""
-        logging.debug(
-            "Created %s GerberX3 tokenizer.",
-        )
-        self.grammar = GerberGrammarBuilder().build()
+        logging.debug("Created %s GerberX3 tokenizer.")
+        self.options = TokenizerOptions() if options is None else options
+        self.grammar = GerberGrammarBuilder(
+            options=self.options.grammar_options,
+        ).build()
 
     def tokenize(self, source: str) -> AST:
         """Convert source code into token stack.
