@@ -13,6 +13,8 @@ from pygerber.gerberx3.state_enums import Mirroring
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from pygerber.gerberx3.renderer2.abstract import Renderer2
+
 
 class Command2(FrozenGeneralModel):
     """Parser level abstraction of draw operation for Gerber AST parser, version 2."""
@@ -29,6 +31,10 @@ class Command2(FrozenGeneralModel):
 
     def get_transposed(self, vector: Vector2D) -> Self:
         """Get transposed command."""
+        raise NotImplementedError
+
+    def render(self, hooks: Renderer2) -> None:
+        """Render draw operation."""
         raise NotImplementedError
 
     def command_to_json(self) -> str:

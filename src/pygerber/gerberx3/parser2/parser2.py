@@ -8,7 +8,9 @@ from typing import Generator, Optional
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
-from pygerber.gerberx3.parser2.command_buffer2 import CommandBuffer2
+from pygerber.gerberx3.parser2.command_buffer2 import (
+    ReadonlyCommandBuffer2,
+)
 from pygerber.gerberx3.parser2.context2 import Parser2Context, Parser2ContextOptions
 from pygerber.gerberx3.parser2.errors2 import (
     ExitParsingProcess2Interrupt,
@@ -44,12 +46,12 @@ class Parser2:
         )
         self.get_hooks().on_parser_init(self)
 
-    def parse(self, ast: AST) -> CommandBuffer2:
+    def parse(self, ast: AST) -> ReadonlyCommandBuffer2:
         """Parse token stack."""
         for _ in self.parse_iter(ast):
             pass
 
-        return self.context.main_command_buffer
+        return self.context.main_command_buffer.get_readonly()
 
     def parse_iter(
         self,

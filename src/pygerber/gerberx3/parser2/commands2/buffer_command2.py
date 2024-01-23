@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterator
 
+from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.parser2.command_buffer2 import ReadonlyCommandBuffer2
 from pygerber.gerberx3.parser2.commands2.command2 import Command2
 from pygerber.gerberx3.state_enums import Mirroring
@@ -13,6 +14,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.gerberx3.math.vector_2d import Vector2D
+    from pygerber.gerberx3.renderer2.abstract import Renderer2
 
 
 class BufferCommand2(Command2):
@@ -37,6 +39,14 @@ class BufferCommand2(Command2):
                 "command_buffer": self.command_buffer.get_transposed(vector),
             },
         )
+
+    def get_bounding_box(self) -> BoundingBox:
+        """Get bounding box of draw operation."""
+        return self.command_buffer.get_bounding_box()
+
+    def render(self, renderer: Renderer2) -> None:
+        """Render draw operation."""
+        renderer.hooks.render_buffer(self)
 
     def __len__(self) -> int:
         """Return length of buffered commands."""

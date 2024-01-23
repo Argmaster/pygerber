@@ -75,12 +75,6 @@ class RegionNotInitializedError(Parser2Error):
     """Raised when region is modified without being accessed without initialization."""
 
 
-class NestedRegionNotAllowedError(Parser2Error):
-    """Raised when attempting to define region while another region was already
-    started.
-    """
-
-
 class ApertureNotDefined2Error(Parser2Error):
     """Raised when undefined aperture is selected."""
 

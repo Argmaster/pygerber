@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Iterator, List, Optional
 from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
+from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.parser2.commands2.command2 import Command2
 from pygerber.gerberx3.state_enums import Mirroring
@@ -82,3 +83,15 @@ class ReadonlyCommandBuffer2(FrozenGeneralModel):
         return self.model_copy(
             update={"commands": [c.get_transposed(vector) for c in self.commands]},
         )
+
+    def get_bounding_box(self) -> BoundingBox:
+        """Get bounding box of command buffer."""
+        bbox: Optional[BoundingBox] = None
+
+        for command in self:
+            if bbox is None:
+                bbox = command.get_bounding_box()
+            else:
+                bbox += command.get_bounding_box()
+
+        return BoundingBox.NULL if bbox is None else bbox

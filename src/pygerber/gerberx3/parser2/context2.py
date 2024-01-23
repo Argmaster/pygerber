@@ -8,6 +8,7 @@ from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.offset import Offset
+from pygerber.gerberx3.parser2.apertures2.circle2 import NoCircle2
 from pygerber.gerberx3.parser2.attributes2 import (
     ApertureAttributes,
     FileAttributes,
@@ -52,6 +53,9 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import CoordinateParser
 
 
+REGION_OUTLINE_DEFAULT_APERTURE_ID = ApertureID("%*__REGION_OUTLINE_APERTURE__*%")
+
+
 class Parser2Context:
     """Context used by Gerber AST parser, version 2."""
 
@@ -69,6 +73,7 @@ class Parser2Context:
         )
         self.region_command_buffer: Optional[CommandBuffer2] = None
         self.block_command_buffer_stack: list[CommandBuffer2] = []
+        self.block_state_stack: list[State2] = []
         self.step_and_repeat_command_buffer: Optional[CommandBuffer2] = None
         self.state_before_step_and_repeat: Optional[State2] = None
         self.macro_statement_buffer: Optional[StatementBuffer2] = None
@@ -91,6 +96,12 @@ class Parser2Context:
             if self.options.custom_macro_expression_factories is None
             else self.options.custom_macro_expression_factories
         )
+        self.apertures: dict[ApertureID, Aperture2] = {
+            REGION_OUTLINE_DEFAULT_APERTURE_ID: NoCircle2(
+                diameter=Offset.NULL,
+                hole_diameter=None,
+            ),
+        }
 
     def push_block_command_buffer(self) -> None:
         """Add new command buffer for block aperture draw commands."""
@@ -111,6 +122,16 @@ class Parser2Context:
         if len(self.block_command_buffer_stack) == 0:
             raise ReferencedNotInitializedBlockBufferError(self.current_token)
         return self.block_command_buffer_stack[-1]
+
+    def push_block_state(self) -> None:
+        """Add new command buffer for block aperture draw commands."""
+        self.block_state_stack.append(self.state)
+
+    def pop_block_state(self) -> State2:
+        """Return latest block aperture command buffer and delete it from the stack."""
+        if len(self.block_state_stack) == 0:
+            raise ReferencedNotInitializedBlockBufferError(self.current_token)
+        return self.block_state_stack.pop()
 
     def set_region_command_buffer(self) -> None:
         """Add new command buffer for block aperture draw commands."""
@@ -432,7 +453,11 @@ class Parser2Context:
 
     def get_current_aperture_id(self) -> Optional[ApertureID]:
         """Get current_aperture property value."""
-        return self.get_state().get_current_aperture_id()
+        current_aperture_id = self.get_state().get_current_aperture_id()
+        if current_aperture_id is None and self.get_is_region():
+            return REGION_OUTLINE_DEFAULT_APERTURE_ID
+
+        return current_aperture_id
 
     def set_current_aperture_id(self, current_aperture: Optional[ApertureID]) -> None:
         """Set the current_aperture property value."""
@@ -443,13 +468,13 @@ class Parser2Context:
     def get_aperture(self, __key: ApertureID) -> Aperture2:
         """Get apertures property value."""
         try:
-            return self.get_state().get_aperture(__key)
+            return self.apertures[__key]
         except KeyError as e:
             raise ApertureNotDefined2Error(self.current_token) from e
 
     def set_aperture(self, __key: ApertureID, __value: Aperture2) -> None:
         """Set the apertures property value."""
-        return self.set_state(self.get_state().set_aperture(__key, __value))
+        self.apertures[__key] = __value
 
     def get_macro(self, __key: str) -> ApertureMacro2:
         """Get macro property value."""

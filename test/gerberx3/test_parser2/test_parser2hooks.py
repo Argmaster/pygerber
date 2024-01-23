@@ -30,7 +30,6 @@ from pygerber.gerberx3.parser2.commands2.region2 import Region2
 from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotDefined2Error,
-    NestedRegionNotAllowedError,
     NoValidArcCenterFoundError,
     OnUpdateDrawingState2Error,
     ReferencedNotInitializedBlockBufferError,
@@ -524,20 +523,6 @@ def test_begin_block_aperture_token_hooks() -> None:
     )
 
 
-def test_begin_block_aperture_token_hooks_nested_region() -> None:
-    gerber_source = "%ABD10*%%ABD11*%"
-
-    context = Parser2Context()
-
-    with pytest.raises(NestedRegionNotAllowedError):
-        parse_code(gerber_source, context)
-
-    debug_dump_context(
-        context,
-        DEBUG_DUMP_DIR / test_begin_block_aperture_token_hooks.__qualname__,
-    )
-
-
 def test_end_block_aperture_token_hooks_uninitialized_block() -> None:
     gerber_source = "%AB*%"
 
@@ -573,6 +558,7 @@ def test_end_block_aperture_token_hooks() -> None:
 
     context = Parser2Context()
     context.push_block_command_buffer()
+    context.push_block_state()
     context.set_is_aperture_block(is_aperture_block=True)
     context.set_aperture_block_id(ApertureID("D10"))
 

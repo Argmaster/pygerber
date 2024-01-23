@@ -192,8 +192,8 @@ class Vector2D(FrozenGeneralModel):
 
         Value returned is always between 0 and 360 (can be 0, never 360).
         """
-        v0 = self / self.length()
-        v1 = other / other.length()
+        v0 = self.normalize()
+        v1 = other.normalize()
         angle_radians = math.atan2(
             ((v0.x * v1.y) - (v1.x * v0.y)).value,  # determinant
             ((v0.x * v1.x) + (v0.y * v1.y)).value,  # dot product
@@ -208,6 +208,29 @@ class Vector2D(FrozenGeneralModel):
     def determinant(self, other: Vector2D) -> Offset:
         """Calculate determinant of matrix constructed from self and other."""
         return self.x * other.y - self.y * other.x
+
+    def perpendicular(self) -> Vector2D:
+        """Return perpendicular vector to self."""
+        return Vector2D(x=self.y, y=-self.x)
+
+    def normalize(self) -> Vector2D:
+        """Return normalized (unit length) vector."""
+        if self == Vector2D.NULL:
+            return Vector2D.UNIT_X
+
+        return self / self.length()
+
+    def as_float_tuple(self) -> tuple[float, float]:
+        """Return x, y Offset as tuple."""
+        return (float(self.x.value), float(self.y.value))
+
+    def rotate_around_origin(self, angle_degrees: Decimal) -> Vector2D:
+        """Return vector rotated x degrees around origin."""
+        angle_radians = math.radians(angle_degrees)
+        return Vector2D(
+            x=self.x * math.cos(angle_radians) - self.y * math.sin(angle_radians),
+            y=self.x * math.sin(angle_radians) + self.y * math.cos(angle_radians),
+        )
 
 
 Vector2D.NULL = Vector2D(x=Offset.NULL, y=Offset.NULL)

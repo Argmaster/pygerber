@@ -14,6 +14,8 @@ from pygerber.gerberx3.state_enums import Mirroring
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from pygerber.gerberx3.renderer2.abstract import Renderer2
+
 
 class Arc2(ApertureDrawCommand2):
     """Parser level abstraction of draw arc operation for Gerber AST parser,
@@ -42,7 +44,12 @@ class Arc2(ApertureDrawCommand2):
 
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of arc."""
-        return BoundingBox.from_diameter(self.get_radius() * 2) + self.center_point
+        return (
+            BoundingBox.from_diameter(
+                (self.get_radius() * 2) + (self.aperture.get_stroke_width() * 2),
+            )
+            + self.center_point
+        )
 
     def get_mirrored(self, mirror: Mirroring) -> Self:
         """Get mirrored command."""
@@ -64,8 +71,16 @@ class Arc2(ApertureDrawCommand2):
             },
         )
 
+    def render(self, renderer: Renderer2) -> None:
+        """Render draw operation."""
+        renderer.hooks.render_arc(self)
+
 
 class CCArc2(Arc2):
     """Parser level abstraction of draw counterclockwise arc operation for Gerber AST
     parser, version 2.
     """
+
+    def render(self, renderer: Renderer2) -> None:
+        """Render draw operation."""
+        renderer.hooks.render_cc_arc(self)
