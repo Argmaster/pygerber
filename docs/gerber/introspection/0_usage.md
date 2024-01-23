@@ -5,11 +5,12 @@
 Since release 2.2.0 PyGerber offers interface designed for Gerber code introspection
 based on `Parser2` class and
 [visitor pattern](https://refactoring.guru/design-patterns/visitor). API is build around
-`Parser2HooksBase` class from `pygerber.gerberx3.parser2.ihooks` module and descendant
-classes passed to `Parser2` class. `Parser2` visits all tokens in Gerber AST created by
-`Tokenizer` and invokes particular hooks from provided hooks class. `Parser2HooksBase`
-itself doesn't implement any Gerber specific behaviors. It is just a collection of
-classes with empty hook methods which can be used to implement behaviors explained in
+`Parser2HooksBase` class from `pygerber.gerberx3.parser2.parser2hooks_base` module and
+descendant classes passed to `Parser2` class. `Parser2` visits all tokens in Gerber AST
+created by `Tokenizer` and invokes particular hooks from provided hooks class.
+`Parser2HooksBase` itself doesn't implement any Gerber specific behaviors. It is just a
+collection of classes with empty hook methods which can be used to implement behaviors
+explained in
 [The Gerber Format Specification](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf#page=71).
 PyGerber provides such implementation in form of `Parser2Hooks` class, available in
 `pygerber.gerberx3.parser2.parser2` module.
