@@ -401,7 +401,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             ),
         )
 
-    def render_cc_arc(self, command: Arc2) -> None:
+    def render_cc_arc(self, command: CCArc2) -> None:
         """Render arc to target image."""
         self.render_arc(
             command.model_copy(
@@ -586,7 +586,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                 cmd.render(self.renderer)
 
             frame = self.pop_render_frame()
-            self.set_aperture(id(aperture), color, frame.layer)
+            aperture_group = frame.layer
+            self.set_aperture(id(aperture), color, aperture_group)
 
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(

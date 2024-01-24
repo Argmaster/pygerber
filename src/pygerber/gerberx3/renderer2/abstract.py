@@ -14,7 +14,7 @@ from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
 from pygerber.gerberx3.parser2.command_buffer2 import (
     ReadonlyCommandBuffer2,
 )
-from pygerber.gerberx3.parser2.commands2.arc2 import Arc2
+from pygerber.gerberx3.parser2.commands2.arc2 import Arc2, CCArc2
 from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
 from pygerber.gerberx3.parser2.commands2.command2 import Command2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
@@ -66,7 +66,7 @@ class Renderer2HooksABC:
     def render_arc(self, command: Arc2) -> None:
         """Render arc to target image."""
 
-    def render_cc_arc(self, command: Arc2) -> None:
+    def render_cc_arc(self, command: CCArc2) -> None:
         """Render arc to target image."""
 
     def render_flash_circle(self, command: Flash2, aperture: Circle2) -> None:
