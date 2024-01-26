@@ -5,16 +5,19 @@ images.
 from __future__ import annotations
 
 import math
+from contextlib import contextmanager
 from decimal import Decimal
 from enum import Enum
-from typing import TYPE_CHECKING, BinaryIO, Optional
+from typing import TYPE_CHECKING, Any, BinaryIO, ContextManager, Generator, Optional
 
 from PIL import Image, ImageDraw
 
 from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
+from pygerber.common.error import throw
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
+from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
 from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2, NoCircle2
 from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
@@ -23,9 +26,11 @@ from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
 from pygerber.gerberx3.parser2.command_buffer2 import ReadonlyCommandBuffer2
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2, CCArc2
 from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
+from pygerber.gerberx3.parser2.commands2.command2 import Command2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
 from pygerber.gerberx3.parser2.commands2.line2 import Line2
 from pygerber.gerberx3.parser2.commands2.region2 import Region2
+from pygerber.gerberx3.parser2.state2 import ApertureTransform
 from pygerber.gerberx3.renderer2.abstract import (
     FormatOptions,
     ImageRef,
@@ -49,21 +54,43 @@ class RasterRenderer2(Renderer2):
         super().__init__(hooks)
 
 
+HALF = Decimal("0.5")
+
+
+def custom_round(value: Decimal | float) -> int:
+    """Round value to jason integer."""
+    int_val = int(value)
+    diff = abs(int_val - value)
+
+    if diff > HALF:
+        return int_val + 1
+
+    return int_val
+
+
 class RasterRenderingFrameBuilder:
     """Builder for RasterRenderingFrame."""
 
-    def __init__(
-        self,
-        command_buffer: ReadonlyCommandBuffer2,
-    ) -> None:
-        self.command_buffer = command_buffer
+    def __init__(self) -> None:
+        self.command_buffer: Optional[ReadonlyCommandBuffer2] = None
         self.bounding_box: Optional[BoundingBox] = None
         self.image: Optional[Image.Image] = None
         self.mask: Optional[Image.Image] = None
-        self.polarity: Optional[Polarity] = None
+        self.color_scheme: Optional[ColorScheme] = None
         self.is_region: bool = False
         self.dpmm = 1
         self.scale = Decimal("1")
+        self.polarity: Optional[Polarity] = None
+
+    def set_command_buffer(self, command_buffer: ReadonlyCommandBuffer2) -> Self:
+        """Specify source buffer."""
+        self.command_buffer = command_buffer
+        return self
+
+    def set_command_buffer_from_list(self, commands: list[Command2]) -> Self:
+        """Specify source buffer."""
+        self.command_buffer = ReadonlyCommandBuffer2(commands=commands)
+        return self
 
     def set_dpmm(self, dpmm: int) -> Self:
         """Specify image dpmm."""
@@ -73,11 +100,6 @@ class RasterRenderingFrameBuilder:
     def set_scale(self, scale: Decimal) -> Self:
         """Specify rendering scale."""
         self.scale = scale
-        return self
-
-    def set_bounding_box(self, bounding_box: BoundingBox) -> Self:
-        """Specify bounding box."""
-        self.bounding_box = bounding_box
         return self
 
     def set_image(self, image: Image.Image) -> Self:
@@ -90,26 +112,36 @@ class RasterRenderingFrameBuilder:
         self.mask = mask
         return self
 
-    def set_polarity(self, polarity: Optional[Polarity]) -> Self:
-        """Specify polarity."""
-        self.polarity = polarity
-        return self
-
     def set_region(self, *, is_region: bool) -> Self:
         """Specify region."""
         self.is_region = is_region
         return self
 
+    def set_color_scheme(self, color_scheme: ColorScheme) -> Self:
+        """Specify color scheme."""
+        self.color_scheme = color_scheme
+        return self
+
+    def set_polarity(self, polarity: Polarity) -> Self:
+        """Specify polarity."""
+        self.polarity = polarity
+        return self
+
     def build(self) -> RasterRenderingFrame:
         """Build final rendering frame container."""
+        command_buffer = (
+            self.command_buffer
+            if self.command_buffer is not None
+            else throw(RuntimeError("Command buffer not set."))
+        )
         bbox = (
-            self.command_buffer.get_bounding_box()
+            command_buffer.get_bounding_box()
             if self.bounding_box is None
             else self.bounding_box
         )
         dimensions = (
-            max(int(bbox.width.as_millimeters() * self.dpmm * self.scale), 1),
-            max(int(bbox.height.as_millimeters() * self.dpmm * self.scale), 1),
+            max(custom_round(bbox.width.as_millimeters() * self.dpmm * self.scale), 1),
+            max(custom_round(bbox.height.as_millimeters() * self.dpmm * self.scale), 1),
         )
         image = (
             Image.new("RGBA", dimensions, (0, 0, 0, 0))
@@ -121,14 +153,19 @@ class RasterRenderingFrameBuilder:
             if self.mask is None
             else self.mask
         )
+        color_scheme = self.color_scheme or throw(RuntimeError("Missing color schema."))
+        polarity = self.polarity or throw(RuntimeError("Missing polarity."))
+        # Unset command buffer to prevent unintended reuse.
+        self.command_buffer = None
+        self.polarity = None
+
         return RasterRenderingFrame(
-            command_buffer=self.command_buffer,
+            command_buffer=command_buffer,
             bounding_box=bbox,
             image=image,
-            layer=ImageDraw.ImageDraw(image),
             mask=mask,
-            mask_draw=ImageDraw.ImageDraw(mask),
-            polarity=self.polarity,
+            color_scheme=color_scheme,
+            polarity=polarity,
             is_region=self.is_region,
         )
 
@@ -136,31 +173,119 @@ class RasterRenderingFrameBuilder:
 class RasterRenderingFrame:
     """Container for rendering variables."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         command_buffer: ReadonlyCommandBuffer2,
         bounding_box: BoundingBox,
         image: Image.Image,
-        layer: ImageDraw.ImageDraw,
         mask: Image.Image,
-        mask_draw: ImageDraw.ImageDraw,
-        polarity: Optional[Polarity] = None,
+        color_scheme: ColorScheme,
+        polarity: Polarity,
         *,
         is_region: bool = False,
     ) -> None:
         self.command_buffer = command_buffer
         self.bounding_box = bounding_box
         self.image = image
-        self.layer = layer
+        self.layer = ImageDraw.ImageDraw(image)
         self.mask = mask
-        self.mask_draw = mask_draw
-        self.layer = layer
+        self.mask_draw = ImageDraw.ImageDraw(mask)
+        self.color_scheme = color_scheme
         self.polarity = polarity
         self.is_region = is_region
 
     def get_aperture(self) -> RasterAperture:
         """Return aperture."""
         return RasterAperture(image=self.image, mask=self.mask)
+
+    def get_color(self, polarity: Polarity) -> str:
+        """Get color for specified polarity."""
+        if self.polarity == Polarity.Dark:
+            return self._get_color(polarity)
+        return self._get_color(polarity.invert())
+
+    def _get_color(self, polarity: Polarity) -> str:
+        if self.is_region:
+            if polarity == Polarity.Dark:
+                return self.color_scheme.solid_region_color.to_hex()
+            return self.color_scheme.clear_region_color.to_hex()
+
+        if polarity == Polarity.Dark:
+            return self.color_scheme.solid_color.to_hex()
+        return self.color_scheme.clear_color.to_hex()
+
+    def get_mask_color(self, polarity: Polarity) -> str:
+        """Get color for specified polarity."""
+        if polarity == Polarity.Dark:
+            return "#FFFFFFFF"
+        return "#00000000"
+
+    def line(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
+        """Draw line on image."""
+        kwargs["fill"] = self.get_color(polarity)
+        self.layer.line(*args, **kwargs)
+        kwargs["fill"] = self.get_mask_color(polarity)
+        self.mask_draw.line(*args, **kwargs)
+
+    def arc(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
+        """Draw arc on image."""
+        kwargs["fill"] = self.get_color(polarity)
+        self.layer.arc(*args, **kwargs)
+        kwargs["fill"] = self.get_mask_color(polarity)
+        self.mask_draw.arc(*args, **kwargs)
+
+    def ellipse(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
+        """Draw ellipse on image."""
+        kwargs["fill"] = self.get_color(polarity)
+        self.layer.ellipse(*args, **kwargs)
+        kwargs["fill"] = self.get_mask_color(polarity)
+        self.mask_draw.ellipse(*args, **kwargs)
+
+    def rectangle(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
+        """Draw rectangle on image."""
+        kwargs["fill"] = self.get_color(polarity)
+        self.layer.rectangle(*args, **kwargs)
+        kwargs["fill"] = self.get_mask_color(polarity)
+        self.mask_draw.rectangle(*args, **kwargs)
+
+    def rounded_rectangle(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
+        """Draw rounded rectangle on image."""
+        kwargs["fill"] = self.get_color(polarity)
+        self.layer.rounded_rectangle(*args, **kwargs)
+        kwargs["fill"] = self.get_mask_color(polarity)
+        self.mask_draw.rounded_rectangle(*args, **kwargs)
+
+    def regular_polygon(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
+        """Draw regular polygon on image."""
+        kwargs["fill"] = self.get_color(polarity)
+        self.layer.regular_polygon(*args, **kwargs)
+        kwargs["fill"] = self.get_mask_color(polarity)
+        self.mask_draw.regular_polygon(*args, **kwargs)
+
+    def polygon(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
+        """Draw polygon on image."""
+        kwargs["fill"] = self.get_color(polarity)
+        self.layer.polygon(*args, **kwargs)
+        kwargs["fill"] = self.get_mask_color(polarity)
+        self.mask_draw.polygon(*args, **kwargs)
+
+    def paste(self, *args: Any, **kwargs: Any) -> None:
+        """Draw polygon on image."""
+        self.image.paste(*args, **kwargs)
+        self.mask.paste(*args, **kwargs)
+        self.layer = ImageDraw.ImageDraw(self.image)
+        self.mask_draw = ImageDraw.ImageDraw(self.mask)
+
+    def region_mode(self) -> ContextManager[None]:
+        """Set rendering mode to region."""
+
+        @contextmanager
+        def _with() -> Generator[None, None, None]:
+            self.is_region = True
+            yield
+            self.is_region = False
+
+        return _with()
 
 
 class RasterAperture:
@@ -186,6 +311,12 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         self.scale = scale
         self.dpmm = dpmm
         self.flip_y = flip_y
+        self.frame_builder = (
+            RasterRenderingFrameBuilder()
+            .set_dpmm(self.dpmm)
+            .set_scale(self.scale)
+            .set_color_scheme(self.color_scheme)
+        )
 
     def init(
         self,
@@ -200,9 +331,8 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         self.command_buffer = command_buffer
         self.rendering_stack: list[RasterRenderingFrame] = []
         self.push_render_frame(
-            RasterRenderingFrameBuilder(command_buffer=self.command_buffer)
-            .set_dpmm(self.dpmm)
-            .set_scale(self.scale)
+            self.frame_builder.set_polarity(Polarity.Dark)
+            .set_command_buffer(command_buffer)
             .build(),
         )
         self.apertures: dict[str, RasterAperture] = {}
@@ -222,37 +352,21 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         """Get current rendering stack frame."""
         return self.rendering_stack[-1]
 
-    def get_layer(self) -> ImageDraw.ImageDraw:
-        """Get image layer."""
-        return self.frame.layer
-
-    def get_image(self) -> Image.Image:
-        """Get image layer."""
-        return self.frame.image
-
-    def get_mask(self) -> Image.Image:
-        """Get mask layer."""
-        return self.frame.mask
-
-    def get_mask_draw(self) -> ImageDraw.ImageDraw:
-        """Get mask layer."""
-        return self.frame.mask_draw
-
     def convert_x(self, x: Offset) -> int:
         """Convert y offset to y coordinate in image space."""
         origin_offset_x = self.frame.bounding_box.min_x.as_millimeters()
         corrected_position_x = x.as_millimeters() - origin_offset_x
-        return int(corrected_position_x * self.scale * self.dpmm)
+        return custom_round(corrected_position_x * self.scale * self.dpmm)
 
     def convert_y(self, y: Offset) -> int:
         """Convert y offset to y coordinate in image space."""
         origin_offset_y = self.frame.bounding_box.min_y.as_millimeters()
         corrected_position_y = y.as_millimeters() - origin_offset_y
-        return int(corrected_position_y * self.scale * self.dpmm)
+        return custom_round(corrected_position_y * self.scale * self.dpmm)
 
     def convert_size(self, diameter: Offset) -> int:
         """Convert y offset to pixel y coordinate."""
-        return int(diameter.as_millimeters() * self.scale * self.dpmm)
+        return max(custom_round(diameter.as_millimeters() * self.scale * self.dpmm), 1)
 
     def convert_bbox(self, bbox: BoundingBox) -> tuple[int, int, int, int]:
         """Convert bounding box region to pixel coordinates bbox."""
@@ -263,39 +377,23 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
             self.convert_y(bbox.max_y),
         )
 
-    def get_color(self, polarity: Polarity) -> str:
-        """Get color for specified polarity."""
-        if self.frame.is_region:
-            if polarity == Polarity.Dark:
-                return self.color_scheme.solid_region_color.to_hex()
-            return self.color_scheme.clear_region_color.to_hex()
-
-        if polarity == Polarity.Dark:
-            return self.color_scheme.solid_color.to_hex()
-        return self.color_scheme.clear_color.to_hex()
-
-    def get_mask_color(self, polarity: Polarity) -> str:
-        """Get color for specified polarity."""
-        if polarity == Polarity.Dark:
-            return "#FFFFFFFF"
-        return "#000000FF"
-
-    def get_aperture(self, aperture_id: int, color: str) -> Optional[RasterAperture]:
+    def get_aperture(self, aperture_id: str) -> Optional[RasterAperture]:
         """Get SVG group representing aperture."""
-        return self.apertures.get(self._get_aperture_id(aperture_id, color))
+        return self.apertures.get(aperture_id)
 
     def set_aperture(
         self,
-        aperture_id: int,
-        color: str,
-        aperture: RasterAperture,
+        aperture_id: str,
+        raster_aperture: RasterAperture,
     ) -> None:
         """Set SVG group representing aperture."""
-        self.apertures[self._get_aperture_id(aperture_id, color)] = aperture
+        self.apertures[aperture_id] = raster_aperture
 
-    def _get_aperture_id(self, aperture_id: int, color: str) -> str:
+    def get_aperture_id(self, aperture: Aperture2, transform: ApertureTransform) -> str:
         """Return combined ID for listed aperture."""
-        return f"{color}+{aperture_id}"
+        return (
+            f"{aperture.identifier}%{transform.polarity.value}%{self.frame.is_region}"
+        )
 
     def render_line(self, command: Line2) -> None:
         """Render line to target image."""
@@ -309,23 +407,16 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
             ),
         )
 
-        for img, color in (
-            (self.get_layer(), self.get_color(command.transform.polarity)),
+        self.frame.line(
+            command.transform.polarity,
             (
-                self.get_mask_draw(),
-                self.get_mask_color(command.transform.polarity),
+                self.convert_x(command.start_point.x),
+                self.convert_y(command.start_point.y),
+                self.convert_x(command.end_point.x),
+                self.convert_y(command.end_point.y),
             ),
-        ):
-            img.line(
-                (
-                    self.convert_x(command.start_point.x),
-                    self.convert_y(command.start_point.y),
-                    self.convert_x(command.end_point.x),
-                    self.convert_y(command.end_point.y),
-                ),
-                width=self.convert_size(command.aperture.get_stroke_width()),
-                fill=color,
-            )
+            width=self.convert_size(command.aperture.get_stroke_width()),
+        )
 
         command.aperture.render_flash(
             self.renderer,
@@ -371,20 +462,13 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         if end_angle <= start_angle:
             end_angle += 360
 
-        for img, color in (
-            (self.get_layer(), self.get_color(command.transform.polarity)),
-            (
-                self.get_mask_draw(),
-                self.get_mask_color(command.transform.polarity),
-            ),
-        ):
-            img.arc(
-                bbox,
-                start_angle,
-                end_angle,
-                fill=color,
-                width=self.convert_size(command.aperture.get_stroke_width()),
-            )
+        self.frame.arc(
+            command.transform.polarity,
+            bbox,
+            start_angle,
+            end_angle,
+            width=self.convert_size(command.aperture.get_stroke_width()),
+        )
 
         command.aperture.render_flash(
             self.renderer,
@@ -409,39 +493,52 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
 
     def render_flash_circle(self, command: Flash2, aperture: Circle2) -> None:
         """Render flash circle to target image."""
-        aperture_color = self.get_color(command.transform.polarity)
-        aperture_image = self.get_aperture(id(aperture), aperture_color)
+        aperture_id = self.get_aperture_id(aperture, command.transform)
+        raster_aperture = self.get_aperture(aperture_id)
 
-        if aperture_image is None:
+        if raster_aperture is None:
             self.push_render_frame(
-                RasterRenderingFrameBuilder(ReadonlyCommandBuffer2(commands=[command]))
-                .set_dpmm(self.dpmm)
-                .set_scale(self.scale)
+                self.frame_builder.set_polarity(command.transform.polarity)
+                .set_command_buffer_from_list([command])
                 .build(),
             )
 
-            for img, fill_color in (
-                (self.get_layer(), self.get_color(command.transform.polarity)),
-                (
-                    self.get_mask_draw(),
-                    self.get_mask_color(command.transform.polarity),
-                ),
-            ):
-                img.ellipse(
-                    self.convert_bbox(command.get_bounding_box()),
-                    fill=fill_color,
-                )
+            self.frame.ellipse(
+                Polarity.Dark,
+                self.convert_bbox(command.get_bounding_box()),
+            )
+            self._make_hole(command, aperture)
 
             frame = self.pop_render_frame()
-            aperture_image = frame.get_aperture()
-            self.set_aperture(id(aperture), aperture_color, aperture_image)
+            raster_aperture = frame.get_aperture()
+            self.set_aperture(aperture_id, raster_aperture)
 
-        self._paste_aperture(command, aperture_image)
+        self._paste_aperture(command, raster_aperture)
+
+    def _make_hole(
+        self,
+        command: Flash2,
+        aperture: Circle2 | Rectangle2 | Obround2 | Polygon2,
+    ) -> None:
+        if aperture.hole_diameter is None or aperture.hole_diameter == 0:
+            return
+        self.frame.ellipse(
+            Polarity.Clear,
+            self.convert_bbox(
+                BoundingBox(
+                    min_x=-aperture.hole_diameter / 2,
+                    min_y=-aperture.hole_diameter / 2,
+                    max_x=aperture.hole_diameter / 2,
+                    max_y=aperture.hole_diameter / 2,
+                )
+                + command.flash_point,
+            ),
+        )
 
     def _paste_aperture(self, command: Flash2, aperture_image: RasterAperture) -> None:
         bbox = command.get_bounding_box()
         origin_x, origin_y = self.convert_bbox(bbox)[0:2]
-        self.get_image().paste(
+        self.frame.paste(
             aperture_image.image,
             (origin_x + 1, origin_y + 1),
             mask=aperture_image.mask,
@@ -452,123 +549,103 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
 
     def render_flash_rectangle(self, command: Flash2, aperture: Rectangle2) -> None:
         """Render flash rectangle to target image."""
-        color = self.get_color(command.transform.polarity)
-        aperture_image = self.get_aperture(id(aperture), color)
+        aperture_id = self.get_aperture_id(aperture, command.transform)
+        raster_aperture = self.get_aperture(aperture_id)
 
-        if aperture_image is None:
+        if raster_aperture is None:
             self.push_render_frame(
-                RasterRenderingFrameBuilder(ReadonlyCommandBuffer2(commands=[command]))
-                .set_dpmm(self.dpmm)
-                .set_scale(self.scale)
+                self.frame_builder.set_polarity(command.transform.polarity)
+                .set_command_buffer_from_list([command])
                 .build(),
             )
 
-            for img, fill_color in (
-                (self.get_layer(), self.get_color(command.transform.polarity)),
-                (
-                    self.get_mask_draw(),
-                    self.get_mask_color(command.transform.polarity),
-                ),
-            ):
-                img.rectangle(
-                    self.convert_bbox(command.get_bounding_box()),
-                    fill=fill_color,
-                )
+            self.frame.rectangle(
+                Polarity.Dark,
+                self.convert_bbox(command.get_bounding_box()),
+            )
+            self._make_hole(command, aperture)
 
             frame = self.pop_render_frame()
-            aperture_image = frame.get_aperture()
-            self.set_aperture(id(aperture), color, aperture_image)
+            raster_aperture = frame.get_aperture()
+            self.set_aperture(aperture_id, raster_aperture)
 
-        self._paste_aperture(command, aperture_image)
+        self._paste_aperture(command, raster_aperture)
 
     def render_flash_obround(self, command: Flash2, aperture: Obround2) -> None:
         """Render flash obround to target image."""
-        color = self.get_color(command.transform.polarity)
-        aperture_image = self.get_aperture(id(aperture), color)
+        aperture_id = self.get_aperture_id(aperture, command.transform)
+        aperture_image = self.get_aperture(aperture_id)
 
         if aperture_image is None:
             self.push_render_frame(
-                RasterRenderingFrameBuilder(ReadonlyCommandBuffer2(commands=[command]))
-                .set_dpmm(self.dpmm)
-                .set_scale(self.scale)
+                self.frame_builder.set_polarity(command.transform.polarity)
+                .set_command_buffer_from_list([command])
                 .build(),
             )
-            for img, fill_color in (
-                (self.get_layer(), self.get_color(command.transform.polarity)),
-                (
-                    self.get_mask_draw(),
-                    self.get_mask_color(command.transform.polarity),
-                ),
-            ):
-                img.rounded_rectangle(
-                    self.convert_bbox(command.get_bounding_box()),
-                    radius=min(
-                        self.convert_size(aperture.x_size),
-                        self.convert_size(aperture.y_size),
-                    )
-                    // 2,
-                    fill=fill_color,
+
+            self.frame.rounded_rectangle(
+                Polarity.Dark,
+                self.convert_bbox(command.get_bounding_box()),
+                radius=min(
+                    self.convert_size(aperture.x_size),
+                    self.convert_size(aperture.y_size),
                 )
+                / 2,
+            )
+            self._make_hole(command, aperture)
+
             frame = self.pop_render_frame()
             aperture_image = frame.get_aperture()
-            self.set_aperture(id(aperture), color, aperture_image)
+            self.set_aperture(aperture_id, aperture_image)
 
         self._paste_aperture(command, aperture_image)
 
     def render_flash_polygon(self, command: Flash2, aperture: Polygon2) -> None:
         """Render flash polygon to target image."""
-        color = self.get_color(command.transform.polarity)
-        aperture_image = self.get_aperture(id(aperture), color)
+        aperture_id = self.get_aperture_id(aperture, command.transform)
+        aperture_image = self.get_aperture(aperture_id)
 
         if aperture_image is None:
             self.push_render_frame(
-                RasterRenderingFrameBuilder(ReadonlyCommandBuffer2(commands=[command]))
-                .set_dpmm(self.dpmm)
-                .set_scale(self.scale)
+                self.frame_builder.set_polarity(command.transform.polarity)
+                .set_command_buffer_from_list([command])
                 .build(),
             )
 
-            outer_diameter = self.convert_size(aperture.outer_diameter)
-            radius = outer_diameter // 2
+            outer_diameter = aperture.outer_diameter
+            radius = self.convert_size(outer_diameter / 2)
             # In PIL rotation angle goes in opposite direction than in Gerber and
             # starts from different orientation.
             rotation = -float(aperture.rotation) - 90.0
             bbox = command.get_bounding_box()
 
-            for img, fill_color in (
-                (self.get_layer(), self.get_color(command.transform.polarity)),
+            self.frame.regular_polygon(
+                Polarity.Dark,
                 (
-                    self.get_mask_draw(),
-                    self.get_mask_color(command.transform.polarity),
+                    self.convert_x(bbox.min_x) + radius,
+                    self.convert_y(bbox.min_y) + radius,
+                    radius,
                 ),
-            ):
-                img.regular_polygon(
-                    (
-                        self.convert_x(bbox.min_x) + radius,
-                        self.convert_y(bbox.min_y) + radius,
-                        radius,
-                    ),
-                    n_sides=aperture.number_vertices,
-                    rotation=rotation,
-                    fill=fill_color,
-                )
+                n_sides=aperture.number_vertices,
+                rotation=rotation,
+            )
+            self._make_hole(command, aperture)
 
             frame = self.pop_render_frame()
             aperture_image = frame.get_aperture()
-            self.set_aperture(id(aperture), color, aperture_image)
+            self.set_aperture(aperture_id, aperture_image)
 
         self._paste_aperture(command, aperture_image)
 
     def render_flash_macro(self, command: Flash2, aperture: Macro2) -> None:
         """Render flash macro aperture to target image."""
-        color = self.get_color(command.transform.polarity)
-        aperture_image = self.get_aperture(id(aperture), color)
+        aperture_id = self.get_aperture_id(aperture, command.transform)
+        aperture_image = self.get_aperture(aperture_id)
 
         if aperture_image is None:
             self.push_render_frame(
-                RasterRenderingFrameBuilder(ReadonlyCommandBuffer2(commands=[command]))
-                .set_dpmm(self.dpmm)
-                .set_scale(self.scale)
+                self.frame_builder.set_polarity(command.transform.polarity)
+                .set_command_buffer(aperture.command_buffer)
                 .build(),
             )
 
@@ -577,7 +654,7 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
 
             frame = self.pop_render_frame()
             aperture_image = frame.get_aperture()
-            self.set_aperture(id(aperture), color, aperture_image)
+            self.set_aperture(aperture_id, aperture_image)
 
         self._paste_aperture(command, aperture_image)
 
@@ -591,21 +668,20 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         if len(command.command_buffer) == 0:
             return
 
-        self.frame.is_region = True
-        color = self.get_color(command.transform.polarity)
-        points: list[tuple[int, int]] = []
+        with self.frame.region_mode():
+            points: list[tuple[int, int]] = []
 
-        for cmd in command.command_buffer:
-            if isinstance(cmd, Line2):
-                self.generate_line_points(cmd, points)
-            elif isinstance(cmd, Arc2):
-                self.generate_arc_points(cmd, points)
-            elif isinstance(cmd, CCArc2):
-                self.generate_cc_arc_points(cmd, points)
-            else:
-                raise NotImplementedError
+            for cmd in command.command_buffer:
+                if isinstance(cmd, Line2):
+                    self.generate_line_points(cmd, points)
+                elif isinstance(cmd, Arc2):
+                    self.generate_arc_points(cmd, points)
+                elif isinstance(cmd, CCArc2):
+                    self.generate_cc_arc_points(cmd, points)
+                else:
+                    raise NotImplementedError
 
-        self.get_layer().polygon(points, fill=color)
+            self.frame.polygon(command.transform.polarity, points)
 
     def generate_line_points(
         self,
@@ -639,7 +715,7 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         )
         angle_ratio = angle / 360
         arc_length = (command.get_radius() * 2 * math.pi) * angle_ratio
-        point_count = self.convert_size(arc_length) // 10
+        point_count = self.convert_size(arc_length / 1.618)
         angle_step = Decimal(angle) / Decimal(point_count)
 
         current_point = command.get_relative_start_point()
@@ -679,7 +755,7 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         )
         angle_ratio = angle / 360
         arc_length = (command.get_radius() * 2 * math.pi) * angle_ratio
-        point_count = self.convert_size(arc_length) // 10
+        point_count = self.convert_size(arc_length / 2)
         angle_step = Decimal(angle) / Decimal(point_count)
 
         current_point = command.get_relative_start_point()

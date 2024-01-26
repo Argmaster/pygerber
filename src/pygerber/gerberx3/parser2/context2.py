@@ -98,6 +98,7 @@ class Parser2Context:
         )
         self.apertures: dict[ApertureID, Aperture2] = {
             REGION_OUTLINE_DEFAULT_APERTURE_ID: NoCircle2(
+                identifier=REGION_OUTLINE_DEFAULT_APERTURE_ID,
                 diameter=Offset.NULL,
                 hole_diameter=None,
             ),
