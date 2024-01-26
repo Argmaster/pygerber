@@ -202,3 +202,12 @@ ColorScheme.DEBUG_1 = ColorScheme(
     debug_1_color=RGBA.from_hex("#ababab"),
     debug_2_color=RGBA.from_hex("#7d7d7d"),
 )
+ColorScheme.DEBUG_1_ALPHA = ColorScheme(
+    background_color=RGBA.from_rgba(0, 0, 0, 0),
+    clear_color=RGBA.from_rgba(0, 0, 0, 0),
+    solid_color=RGBA.from_rgba(19, 61, 145, 255),
+    clear_region_color=RGBA.from_rgba(0, 0, 0, 0),
+    solid_region_color=RGBA.from_rgba(21, 92, 130, 255),
+    debug_1_color=RGBA.from_hex("#ababab"),
+    debug_2_color=RGBA.from_hex("#7d7d7d"),
+)
