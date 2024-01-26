@@ -4,6 +4,7 @@ images.
 
 from __future__ import annotations
 
+import gc
 import math
 from contextlib import contextmanager
 from decimal import Decimal
@@ -60,7 +61,7 @@ HALF = Decimal("0.5")
 def custom_round(value: Decimal | float) -> int:
     """Round value to jason integer."""
     int_val = int(value)
-    diff = abs(int_val - value)
+    diff = abs(int_val - Decimal(value))
 
     if diff > HALF:
         return int_val + 1
@@ -127,7 +128,7 @@ class RasterRenderingFrameBuilder:
         self.polarity = polarity
         return self
 
-    def build(self) -> RasterRenderingFrame:
+    def build(self, *, with_mask: bool = True) -> RasterRenderingFrame:
         """Build final rendering frame container."""
         command_buffer = (
             self.command_buffer
@@ -149,9 +150,13 @@ class RasterRenderingFrameBuilder:
             else self.image
         )
         mask = (
-            Image.new("RGBA", dimensions, (0, 0, 0, 0))
-            if self.mask is None
-            else self.mask
+            (
+                Image.new("RGBA", dimensions, (0, 0, 0, 0))
+                if self.mask is None
+                else self.mask
+            )
+            if with_mask
+            else None
         )
         color_scheme = self.color_scheme or throw(RuntimeError("Missing color schema."))
         polarity = self.polarity or throw(RuntimeError("Missing polarity."))
@@ -178,7 +183,7 @@ class RasterRenderingFrame:
         command_buffer: ReadonlyCommandBuffer2,
         bounding_box: BoundingBox,
         image: Image.Image,
-        mask: Image.Image,
+        mask: Optional[Image.Image],
         color_scheme: ColorScheme,
         polarity: Polarity,
         *,
@@ -189,13 +194,16 @@ class RasterRenderingFrame:
         self.image = image
         self.layer = ImageDraw.ImageDraw(image)
         self.mask = mask
-        self.mask_draw = ImageDraw.ImageDraw(mask)
+        self.mask_draw = None if mask is None else ImageDraw.ImageDraw(mask)
         self.color_scheme = color_scheme
         self.polarity = polarity
         self.is_region = is_region
 
     def get_aperture(self) -> RasterAperture:
         """Return aperture."""
+        if self.mask is None:
+            msg = "Invalid aperture mask."
+            raise RuntimeError(msg)
         return RasterAperture(image=self.image, mask=self.mask)
 
     def get_color(self, polarity: Polarity) -> str:
@@ -224,57 +232,63 @@ class RasterRenderingFrame:
         """Draw line on image."""
         kwargs["fill"] = self.get_color(polarity)
         self.layer.line(*args, **kwargs)
-        kwargs["fill"] = self.get_mask_color(polarity)
-        self.mask_draw.line(*args, **kwargs)
+        if self.mask_draw is not None:
+            kwargs["fill"] = self.get_mask_color(polarity)
+            self.mask_draw.line(*args, **kwargs)
 
     def arc(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
         """Draw arc on image."""
         kwargs["fill"] = self.get_color(polarity)
         self.layer.arc(*args, **kwargs)
-        kwargs["fill"] = self.get_mask_color(polarity)
-        self.mask_draw.arc(*args, **kwargs)
+        if self.mask_draw is not None:
+            kwargs["fill"] = self.get_mask_color(polarity)
+            self.mask_draw.arc(*args, **kwargs)
 
     def ellipse(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
         """Draw ellipse on image."""
         kwargs["fill"] = self.get_color(polarity)
         self.layer.ellipse(*args, **kwargs)
-        kwargs["fill"] = self.get_mask_color(polarity)
-        self.mask_draw.ellipse(*args, **kwargs)
+        if self.mask_draw is not None:
+            kwargs["fill"] = self.get_mask_color(polarity)
+            self.mask_draw.ellipse(*args, **kwargs)
 
     def rectangle(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
         """Draw rectangle on image."""
         kwargs["fill"] = self.get_color(polarity)
         self.layer.rectangle(*args, **kwargs)
-        kwargs["fill"] = self.get_mask_color(polarity)
-        self.mask_draw.rectangle(*args, **kwargs)
+        if self.mask_draw is not None:
+            kwargs["fill"] = self.get_mask_color(polarity)
+            self.mask_draw.rectangle(*args, **kwargs)
 
     def rounded_rectangle(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
         """Draw rounded rectangle on image."""
         kwargs["fill"] = self.get_color(polarity)
         self.layer.rounded_rectangle(*args, **kwargs)
-        kwargs["fill"] = self.get_mask_color(polarity)
-        self.mask_draw.rounded_rectangle(*args, **kwargs)
+        if self.mask_draw is not None:
+            kwargs["fill"] = self.get_mask_color(polarity)
+            self.mask_draw.rounded_rectangle(*args, **kwargs)
 
     def regular_polygon(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
         """Draw regular polygon on image."""
         kwargs["fill"] = self.get_color(polarity)
         self.layer.regular_polygon(*args, **kwargs)
-        kwargs["fill"] = self.get_mask_color(polarity)
-        self.mask_draw.regular_polygon(*args, **kwargs)
+        if self.mask_draw is not None:
+            kwargs["fill"] = self.get_mask_color(polarity)
+            self.mask_draw.regular_polygon(*args, **kwargs)
 
     def polygon(self, polarity: Polarity, *args: Any, **kwargs: Any) -> None:
         """Draw polygon on image."""
         kwargs["fill"] = self.get_color(polarity)
         self.layer.polygon(*args, **kwargs)
-        kwargs["fill"] = self.get_mask_color(polarity)
-        self.mask_draw.polygon(*args, **kwargs)
+        if self.mask_draw is not None:
+            kwargs["fill"] = self.get_mask_color(polarity)
+            self.mask_draw.polygon(*args, **kwargs)
 
     def paste(self, *args: Any, **kwargs: Any) -> None:
         """Draw polygon on image."""
         self.image.paste(*args, **kwargs)
-        self.mask.paste(*args, **kwargs)
-        self.layer = ImageDraw.ImageDraw(self.image)
-        self.mask_draw = ImageDraw.ImageDraw(self.mask)
+        if self.mask is not None:
+            self.mask.paste(*args, **kwargs)
 
     def region_mode(self) -> ContextManager[None]:
         """Set rendering mode to region."""
@@ -333,7 +347,7 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         self.push_render_frame(
             self.frame_builder.set_polarity(Polarity.Dark)
             .set_command_buffer(command_buffer)
-            .build(),
+            .build(with_mask=False),
         )
         self.apertures: dict[str, RasterAperture] = {}
 
@@ -778,6 +792,14 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
 
     def finalize(self) -> None:
         """Finalize renderer."""
+        self.apertures.clear()
+        gc.collect(0)
+        gc.collect(1)
+        gc.collect(2)
+        self.frame.image = self.frame.image.transpose(Image.FLIP_TOP_BOTTOM)
+        gc.collect(0)
+        gc.collect(1)
+        gc.collect(2)
 
     def get_image_ref(self) -> ImageRef:
         """Get reference to render image."""
@@ -825,7 +847,7 @@ class PixelFormat(Enum):
     RGBA = "RGBA"
 
 
-class RasterFormatOptions:
+class RasterFormatOptions(FormatOptions):
     """Raster Format specific options."""
 
     def __init__(
