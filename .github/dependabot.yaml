@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "daily"
 
-    target-branch: "dev"
+    target-branch: "main"
 
     labels:
       - "dependencies"
