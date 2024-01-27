@@ -23,13 +23,13 @@ of hook based interface.
 
 | Symbol | Count |
 | ------ | ----- |
-| ✅     | 116   |
+| ✅     | 114   |
 | 🚧     | 0     |
 | 🚫     | 4     |
-| ❌     | 45    |
+| ❌     | 44    |
 | 👽     | 39    |
 | 👾     | 0     |
-| total  | 204   |
+| total  | 201   |
 
 ## Supported Gerber X3 features
 

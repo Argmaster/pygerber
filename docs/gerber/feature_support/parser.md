@@ -27,13 +27,13 @@ other users are encouraged to stick with old Parser class.
 
 | Symbol | Count |
 | ------ | ----- |
-| ✅     | 92    |
+| ✅     | 60    |
 | 🚧     | 0     |
 | 🚫     | 4     |
-| ❌     | 47    |
-| 👽     | 34    |
+| ❌     | 90    |
+| 👽     | 26    |
 | 👾     | 0     |
-| total  | 162   |
+| total  | 180   |
 
 ## Supported Gerber X3 features
 
