@@ -370,13 +370,17 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         """Convert y offset to y coordinate in image space."""
         origin_offset_x = self.frame.bounding_box.min_x.as_millimeters()
         corrected_position_x = x.as_millimeters() - origin_offset_x
-        return custom_round(corrected_position_x * self.scale * self.dpmm)
+        return custom_round(
+            corrected_position_x * self.scale * self.dpmm - Decimal(0.5),
+        )
 
     def convert_y(self, y: Offset) -> int:
         """Convert y offset to y coordinate in image space."""
         origin_offset_y = self.frame.bounding_box.min_y.as_millimeters()
         corrected_position_y = y.as_millimeters() - origin_offset_y
-        return custom_round(corrected_position_y * self.scale * self.dpmm)
+        return custom_round(
+            corrected_position_y * self.scale * self.dpmm - Decimal(0.5),
+        )
 
     def convert_size(self, diameter: Offset) -> int:
         """Convert y offset to pixel y coordinate."""
@@ -823,7 +827,10 @@ class RasterImageRef(ImageRef):
             else:
                 image = self.image
 
-            image.save(output, format=options.image_format.value)
+            kwargs = {}
+            if options.image_format != ImageFormat.AUTO:
+                kwargs["format"] = options.image_format.value
+            image.save(output, **kwargs)
             return
 
         self.image.save(output)
@@ -838,6 +845,7 @@ class ImageFormat(Enum):
 
     PNG = "png"
     JPEG = "jpg"
+    AUTO = "auto"
 
 
 class PixelFormat(Enum):
@@ -852,7 +860,7 @@ class RasterFormatOptions(FormatOptions):
 
     def __init__(
         self,
-        image_format: ImageFormat = ImageFormat.PNG,
+        image_format: ImageFormat = ImageFormat.AUTO,
         pixel_format: PixelFormat = PixelFormat.RGBA,
     ) -> None:
         self.image_format = image_format

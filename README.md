@@ -241,6 +241,7 @@ Please refer to documentation for
 - [Rasterized2DBackend](https://argmaster.github.io/pygerber/latest/gerber/feature_support/rasterized_2d.html),
 - [Parser2](https://argmaster.github.io/pygerber/latest/gerber/feature_support/parser2.html),
 - [SvgRenderer2](https://argmaster.github.io/pygerber/latest/gerber/feature_support/svgrenderer2.html),
+- [RasterRenderer2](https://argmaster.github.io/pygerber/latest/gerber/feature_support/rasterrenderer2.html),
 
 for detailed list of features which are supported/not supported by each tool.
 

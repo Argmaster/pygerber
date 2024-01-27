@@ -10,6 +10,8 @@ from test.examples import (
     render_copper_from_path_into_buffer,
     render_copper_from_string,
     render_copper_from_string_into_buffer,
+    renderer_2_raster_render,
+    renderer_2_svg_render,
 )
 
 DIRECTORY = Path(__file__).parent
@@ -53,3 +55,11 @@ def test_introspect_minimal_example() -> None:
 
 def test_introspect_mixed_inheritance() -> None:
     introspect_mixed_inheritance.main()
+
+
+def test_renderer_2_raster_render() -> None:
+    renderer_2_raster_render.render()
+
+
+def test_renderer_2_svg_render() -> None:
+    renderer_2_svg_render.render()
