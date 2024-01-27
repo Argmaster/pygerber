@@ -41,7 +41,7 @@ with support for most of deprecated features along with support for modern ones.
 - [x] [Introspection API](https://argmaster.github.io/pygerber/latest/gerber/introspection/0_usage.html)
 - [x] Rasterized 2D rendering engine (With
       [Pillow](https://github.com/python-pillow/Pillow))
-- [ ] Vector 2D rendering engine (With [drawsvg](https://github.com/cduck/drawsvg))
+- [x] Vector 2D rendering engine (With [drawsvg](https://github.com/cduck/drawsvg))
 - [ ] Model 3D rendering engine (With [Blender](https://www.blender.org/))
 - [ ] Formatter
 - [ ] Linter (eg. deprecated syntax detection)
@@ -235,12 +235,14 @@ Official documentations is hosted on Github Pages and can be found
 ## Gerber features support
 
 Please refer to documentation for
-[Tokenizer](https://argmaster.github.io/pygerber/2.1.1/gerber/feature_support/tokenizer.html),
-[Parser](https://argmaster.github.io/pygerber/2.1.1/gerber/feature_support/parser.html),
-[Rasterized2DBackend](https://argmaster.github.io/pygerber/2.1.1/gerber/feature_support/rasterized_2d.html)
-and
-[Parser2](https://argmaster.github.io/pygerber/2.1.1/gerber/feature_support/parser2.html)
-for detailed list of features which are supported/not supported.
+
+- [Tokenizer](https://argmaster.github.io/pygerber/latest/gerber/feature_support/tokenizer.html),
+- [Parser](https://argmaster.github.io/pygerber/latest/gerber/feature_support/parser.html),
+- [Rasterized2DBackend](https://argmaster.github.io/pygerber/latest/gerber/feature_support/rasterized_2d.html),
+- [Parser2](https://argmaster.github.io/pygerber/latest/gerber/feature_support/parser2.html),
+- [SvgRenderer2](https://argmaster.github.io/pygerber/latest/gerber/feature_support/svgrenderer2.html),
+
+for detailed list of features which are supported/not supported by each tool.
 
 ## Syntax feature requests
 
