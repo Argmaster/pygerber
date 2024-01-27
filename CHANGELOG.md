@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
+## Release 2.2.1
+
+- Fixed rendering of first macro flash.
+- Added reference page for SvgRenderer2 in docs.
+- Fixed duplicated element prefixes in docs.
+- Fixed supported feature counts in docs.
+- Updated `README.md` feature support links.
+
 ## Release 2.2.0
 
 - Added alternative parser implementation, `pygerber.gerberx3.parser2.parser2.Parser2`
