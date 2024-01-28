@@ -22,13 +22,13 @@ Parser and Parser2 classes.
 
 | Symbol | Count |
 | ------ | ----- |
-| ✅     | 169   |
+| ✅     | 170   |
 | 🚧     | 0     |
 | 🚫     | 2     |
 | ❌     | 7     |
-| 👽     | 2     |
+| 👽     | 1     |
 | 👾     | 0     |
-| total  | 185   |
+| total  | 186   |
 
 ## Supported Gerber X3 features
 

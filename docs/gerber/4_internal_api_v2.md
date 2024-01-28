@@ -24,9 +24,9 @@ Additionally state is divided into multiple sub-objects each representing relate
 state properties (compliant to Gerber standard). This separation simplifies process of
 sharing information about states with interested parties, eg. draw commands.
 
-## Rendering
+## Limited Renderer Coupling
 
-`Parser2` does not rely in any way on `Renderer2`, differently than how `Parser`
+`Parser2` does not rely directly on `Renderer2`, differently than how `Parser`
 interacted with `AbstractBackend`. API V2 parser generates command buffer containing
 draw commands which describe what should appear in the image. Those commands are later
 interpreted by `Renderer2`, but latter one knows nothing about the source of commands,
@@ -42,36 +42,36 @@ draws. This happens for SR blocks and AB apertures. These concepts doesn't exist
 draw commands. Macros however remain as apertures and are used to create flashes
 consisting of multiple simple commands.
 
-## Usage
+## SVG Rendering
+
+Since release 2.2.0 PyGerber supports converting Gerber files into SVG images with
+`SvgRenderer2` class.
+
+To render SVG image from Parser2 output command buffer you need to instantiate
+`SvgRenderer2` and feed command buffer object into its `render()` method. In general
+`SvgRenderer2` is expected to be one time use only, so using it twice may result in
+malformed image.
 
 Here's some sample code showing how to manually create objects from API V2 to parse and
-render Gerber file.
+render Gerber file as SVG image.
 
 ```python
-from pygerber.gerberx3.parser2.parser2 import Parser2
-from pygerber.gerberx3.renderer2.svg import SvgRenderer2
-from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
-
-source = r"""
-%FSLAX26Y26*%
-%MOMM*%
-%ADD100R,1.5X1.0X0.5*%
-%ADD200C,1.5X1.0*%
-%ADD300O,1.5X1.0X0.6*%
-%ADD400P,1.5X3X5.0*%
-D100*
-X0Y0D03*
-D200*
-X0Y2000000D03*
-D300*
-X2000000Y0D03*
-D400*
-X2000000Y2000000D03*
-M02*
-"""
-
-ast = Tokenizer().tokenize(source)
-cmd_buf = Parser2().parse(ast)
-img_ref = SvgRenderer2().render(cmd_buf)
-img_ref.save_to("output.png")
+{{ include_file("test/examples/renderer_2_svg_render.py") }}
 ```
+
+## Raster Rendering
+
+Since release 2.3.0 PyGerber also supports raster (PNG/JPEG) rendering of images
+`RasterRenderer2`.
+
+To render raster image from Parser2 output command buffer you need to instantiate
+`RasterRenderer2` and feed command buffer object into its `render()` method. In general
+`RasterRenderer2` is expected to be one time use only, so using it twice may result in
+malformed image.
+
+```python
+{{ include_file("test/examples/renderer_2_raster_render.py") }}
+```
+
+`dpmm` option specifies _dots per millimeter_ value used to calculate how many pixels
+should single millimeter should contain.

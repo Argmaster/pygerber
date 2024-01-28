@@ -59,6 +59,7 @@ from pygerber.gerberx3.state_enums import (
     Polarity,
     Unit,
 )
+from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     CoordinateParser,
 )
@@ -560,6 +561,7 @@ class Parser2Hooks(Parser2HooksBase):
             context.set_aperture(
                 identifier,
                 Block2(
+                    identifier=identifier,
                     attributes=context.aperture_attributes,
                     command_buffer=command_buffer.get_readonly(),
                 ),
@@ -598,6 +600,7 @@ class Parser2Hooks(Parser2HooksBase):
             context.set_aperture(
                 token.aperture_id,
                 Circle2(
+                    identifier=token.aperture_id,
                     attributes=context.aperture_attributes,
                     diameter=Offset.new(token.diameter, context.get_draw_units()),
                     hole_diameter=hole_diameter,
@@ -635,6 +638,7 @@ class Parser2Hooks(Parser2HooksBase):
             context.set_aperture(
                 token.aperture_id,
                 Rectangle2(
+                    identifier=token.aperture_id,
                     attributes=context.aperture_attributes,
                     x_size=Offset.new(token.x_size, context.get_draw_units()),
                     y_size=Offset.new(token.y_size, context.get_draw_units()),
@@ -673,6 +677,7 @@ class Parser2Hooks(Parser2HooksBase):
             context.set_aperture(
                 token.aperture_id,
                 Obround2(
+                    identifier=token.aperture_id,
                     attributes=context.aperture_attributes,
                     x_size=Offset.new(token.x_size, context.get_draw_units()),
                     y_size=Offset.new(token.y_size, context.get_draw_units()),
@@ -712,6 +717,7 @@ class Parser2Hooks(Parser2HooksBase):
             context.set_aperture(
                 token.aperture_id,
                 Polygon2(
+                    identifier=token.aperture_id,
                     attributes=context.aperture_attributes,
                     outer_diameter=Offset.new(
                         token.outer_diameter,
@@ -753,6 +759,7 @@ class Parser2Hooks(Parser2HooksBase):
             context.set_aperture(
                 token.aperture_id,
                 Macro2(
+                    identifier=token.aperture_id,
                     attributes=context.aperture_attributes,
                     command_buffer=context.get_macro_eval_buffer().get_readonly(),
                 ),
@@ -765,6 +772,15 @@ class Parser2Hooks(Parser2HooksBase):
 
     class MacroEvalHooks:
         """Hooks called when evaluating macro aperture."""
+
+        def __init__(self) -> None:
+            self.macro_id_counter = 0
+
+        def get_next_id(self) -> ApertureID:
+            """Get next aperture id for macro."""
+            next_id = ApertureID(self.macro_id_counter)
+            self.macro_id_counter += 1
+            return next_id
 
         def on_code_1_circle(
             self,
@@ -787,6 +803,7 @@ class Parser2Hooks(Parser2HooksBase):
                         scaling=Decimal("1.0"),
                     ),
                     aperture=Circle2(
+                        identifier=ApertureID(self.get_next_id()),
                         diameter=Offset.new(
                             primitive.diameter.on_parser2_eval_expression(context),
                             context.get_draw_units(),
@@ -832,6 +849,7 @@ class Parser2Hooks(Parser2HooksBase):
                 scaling=Decimal("1.0"),
             )
             aperture = Circle2(
+                identifier=ApertureID(self.get_next_id()),
                 diameter=Offset.NULL,
                 hole_diameter=None,
             )
@@ -913,6 +931,7 @@ class Parser2Hooks(Parser2HooksBase):
                         scaling=Decimal("1.0"),
                     ),
                     aperture=Polygon2(
+                        identifier=ApertureID(self.get_next_id()),
                         outer_diameter=Offset.new(
                             primitive.diameter.on_parser2_eval_expression(
                                 context,
@@ -974,6 +993,7 @@ class Parser2Hooks(Parser2HooksBase):
                         scaling=Decimal("1.0"),
                     ),
                     aperture=NoCircle2(
+                        identifier=ApertureID(self.get_next_id()),
                         diameter=Offset.new(
                             primitive.width.on_parser2_eval_expression(context),
                             context.get_draw_units(),
@@ -1024,6 +1044,7 @@ class Parser2Hooks(Parser2HooksBase):
                         scaling=Decimal("1.0"),
                     ),
                     aperture=Rectangle2(
+                        identifier=ApertureID(self.get_next_id()),
                         x_size=Offset.new(
                             primitive.width.on_parser2_eval_expression(context),
                             context.get_draw_units(),

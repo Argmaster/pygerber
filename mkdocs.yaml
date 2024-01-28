@@ -73,6 +73,7 @@ plugins:
   # https://mkdocs-macros-plugin.readthedocs.io/en/latest/
   - macros:
       include_dir: .
+      module_name: "./docs/macros/main"
   # https://mkdocstrings.github.io/
   - mkdocstrings:
       handlers:
@@ -108,7 +109,6 @@ plugins:
       nav_file: SUMMARY.md
 
 extra_css:
-  - css/mkdocstrings.css
   - css/extra.css
 
 extra_javascript:

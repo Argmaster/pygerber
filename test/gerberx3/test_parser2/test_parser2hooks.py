@@ -718,7 +718,11 @@ def test_command_draw_line_token_hooks() -> None:
     polarity = Polarity.Dark
     current_aperture_id = ApertureID("D11")
     end_point = Vector2D(x=Offset.new("151.892000"), y=Offset.new("-57.6580000"))
-    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
+    current_aperture = Circle2(
+        identifier=current_aperture_id,
+        diameter=Offset.new("10"),
+        hole_diameter=None,
+    )
 
     context = Parser2Context()
     context.set_draw_units(unit)
@@ -760,7 +764,11 @@ def test_command_draw_line_token_hooks_6() -> None:
     )
     polarity = Polarity.Dark
     current_aperture_id = ApertureID("D11")
-    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
+    current_aperture = Circle2(
+        identifier=current_aperture_id,
+        diameter=Offset.new("10"),
+        hole_diameter=None,
+    )
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
 
@@ -806,7 +814,11 @@ def test_command_draw_arc_token_hooks_multi_quadrant() -> None:
     )
     polarity = Polarity.Dark
     current_aperture_id = ApertureID("D11")
-    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
+    current_aperture = Circle2(
+        identifier=current_aperture_id,
+        diameter=Offset.new("10"),
+        hole_diameter=None,
+    )
     start_point = Vector2D(x=Offset.new("156.019500"), y=Offset.new("156.019500"))
     center_point = Vector2D(x=Offset.new("156.486139"), y=Offset.new("154.744598"))
     end_point = Vector2D(x=Offset.new("156.019500"), y=Offset.new("-66.357500"))
@@ -854,7 +866,11 @@ def test_command_draw_arc_token_hooks_single_quadrant() -> None:
     )
     polarity = Polarity.Dark
     current_aperture_id = ApertureID("D11")
-    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
+    current_aperture = Circle2(
+        identifier=current_aperture_id,
+        diameter=Offset.new("10"),
+        hole_diameter=None,
+    )
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     center_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
@@ -904,7 +920,11 @@ def test_command_draw_arc_token_hooks_single_quadrant_135_degrees() -> None:
     )
     polarity = Polarity.Dark
     current_aperture_id = ApertureID("D11")
-    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
+    current_aperture = Circle2(
+        identifier=current_aperture_id,
+        diameter=Offset.new("10"),
+        hole_diameter=None,
+    )
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
 
     context = Parser2Context()
@@ -939,7 +959,11 @@ def test_command_draw_arc_token_hooks_single_quadrant_45_degrees() -> None:
     )
     polarity = Polarity.Dark
     current_aperture_id = ApertureID("D11")
-    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
+    current_aperture = Circle2(
+        identifier=current_aperture_id,
+        diameter=Offset.new("10"),
+        hole_diameter=None,
+    )
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     center_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("4.2426"), y=Offset.new("4.2426"))
@@ -1017,7 +1041,11 @@ def test_command_flash_token_hooks() -> None:
     )
     polarity = Polarity.Dark
     current_aperture_id = ApertureID("D11")
-    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
+    current_aperture = Circle2(
+        identifier=current_aperture_id,
+        diameter=Offset.new("10"),
+        hole_diameter=None,
+    )
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("0.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("6.0"))
 
@@ -1613,7 +1641,11 @@ def test_step_and_repeat_token_hooks_with_lines() -> None:
     )
     polarity = Polarity.Dark
     current_aperture_id = ApertureID("D11")
-    current_aperture = Circle2(diameter=Offset.new("10"), hole_diameter=None)
+    current_aperture = Circle2(
+        identifier=current_aperture_id,
+        diameter=Offset.new("10"),
+        hole_diameter=None,
+    )
     start_point = Vector2D(x=Offset.new("0.0"), y=Offset.new("6.0"))
     end_point = Vector2D(x=Offset.new("6.0"), y=Offset.new("0.0"))
     expected_command_count = 6

@@ -23,13 +23,14 @@ files. It is compatible only with Parser class (incompatible with Parser2 class)
 
 | Symbol | Count |
 | ------ | ----- |
-| ✅     | 169   |
+| ✅     | 22    |
 | 🚧     | 0     |
 | 🚫     | 2     |
-| ❌     | 7     |
-| 👽     | 2     |
-| 👾     | 0     |
-| total  | 185   |
+| ❌     | 87    |
+| 👽     | 16    |
+| 👾     | 6     |
+| ⛔     | 47    |
+| total  | 180   |
 
 ## Supported Gerber X3 features
 

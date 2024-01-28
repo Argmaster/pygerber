@@ -10,6 +10,7 @@ from pygerber.common.immutable_map_model import ImmutableMapping
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.parser2.attributes2 import ApertureAttributes
+from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
@@ -19,6 +20,7 @@ if TYPE_CHECKING:
 class Aperture2(FrozenGeneralModel):
     """Parser level abstraction of aperture info."""
 
+    identifier: ApertureID
     attributes: ApertureAttributes = Field(default_factory=ImmutableMapping)
 
     def render_flash(self, renderer: Renderer2, command: Flash2) -> None:
