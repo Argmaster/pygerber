@@ -11,6 +11,10 @@ from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
 
 if TYPE_CHECKING:
+    from decimal import Decimal
+
+    from typing_extensions import Self
+
     from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
     from pygerber.gerberx3.renderer2.abstract import Renderer2
 
@@ -33,3 +37,15 @@ class Rectangle2(Aperture2):
     def get_bounding_box(self) -> BoundingBox:
         """Return bounding box of aperture."""
         return BoundingBox.from_rectangle(self.x_size, self.y_size)
+
+    def get_scaled(self, scale: Decimal) -> Self:
+        """Get copy of this aperture scaled by factor."""
+        return self.model_copy(
+            update={
+                "x_size": self.x_size * scale,
+                "y_size": self.y_size * scale,
+                "hole_diameter": (
+                    None if self.hole_diameter is None else self.hole_diameter * scale
+                ),
+            },
+        )

@@ -429,7 +429,7 @@ class Parser2HooksBase:
         """Called before parsing starts."""
 
     def post_parse(self, context: Parser2Context) -> None:
-        """Called after parsing starts."""
+        """Called after parsing finishes."""
 
     def on_parser_error(self, context: Parser2Context, error: Parser2Error) -> None:
         """Called when parsing error is thrown."""

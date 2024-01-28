@@ -410,7 +410,8 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
     def get_aperture_id(self, aperture: Aperture2, transform: ApertureTransform) -> str:
         """Return combined ID for listed aperture."""
         return (
-            f"{aperture.identifier}%{transform.polarity.value}%{self.frame.is_region}"
+            f"{aperture.identifier}%{transform.polarity.value}"
+            f"%{transform.get_transform_key()}"
         )
 
     def render_line(self, command: Line2) -> None:
@@ -538,14 +539,14 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         command: Flash2,
         aperture: Circle2 | Rectangle2 | Obround2 | Polygon2,
     ) -> None:
-        if aperture.hole_diameter is None or aperture.hole_diameter == 0:
+        if aperture.hole_diameter is None:
             return
         self.frame.ellipse(
             Polarity.Clear,
             self.convert_bbox(
                 BoundingBox(
-                    min_x=-aperture.hole_diameter / 2,
-                    min_y=-aperture.hole_diameter / 2,
+                    min_x=-(aperture.hole_diameter / 2),
+                    min_y=-(aperture.hole_diameter / 2),
                     max_x=aperture.hole_diameter / 2,
                     max_y=aperture.hole_diameter / 2,
                 )
@@ -558,7 +559,7 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         origin_x, origin_y = self.convert_bbox(bbox)[0:2]
         self.frame.paste(
             aperture_image.image,
-            (origin_x + 1, origin_y + 1),
+            (origin_x, origin_y),
             mask=aperture_image.mask,
         )
 

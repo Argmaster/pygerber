@@ -10,6 +10,7 @@ from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
+from pygerber.gerberx3.parser2.apertures2.aperture2 import Aperture2
 from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2, NoCircle2
 from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
@@ -21,6 +22,7 @@ from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
 from pygerber.gerberx3.parser2.commands2.line2 import Line2
 from pygerber.gerberx3.parser2.commands2.region2 import Region2
+from pygerber.gerberx3.parser2.state2 import ApertureTransform
 from pygerber.gerberx3.renderer2.abstract import (
     FormatOptions,
     ImageRef,
@@ -221,22 +223,24 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             return self.color_scheme.solid_color.to_hex()
         return "black"
 
-    def get_aperture(self, aperture_id: int, color: str) -> Optional[drawsvg.Group]:
-        """Get SVG group representing aperture."""
-        return self.apertures.get(self._get_aperture_id(aperture_id, color))
+    def get_aperture_id(self, aperture: Aperture2, transform: ApertureTransform) -> str:
+        """Get unique ID for aperture."""
+        return (
+            f"{aperture.identifier}%"
+            f"{transform.get_transform_key()}%{transform.polarity}"
+        )
 
-    def _get_aperture_id(self, aperture_id: int, color: str) -> str:
-        """Return combined ID for listed aperture."""
-        return f"{color}+{aperture_id}"
+    def get_aperture(self, aperture_id: str) -> Optional[drawsvg.Group]:
+        """Get SVG group representing aperture."""
+        return self.apertures.get(aperture_id)
 
     def set_aperture(
         self,
-        aperture_id: int,
-        color: str,
+        aperture_id: str,
         aperture: drawsvg.Group,
     ) -> None:
         """Set SVG group representing aperture."""
-        self.apertures[self._get_aperture_id(aperture_id, color)] = aperture
+        self.apertures[aperture_id] = aperture
 
     def render_line(self, command: Line2) -> None:
         """Render line to target image."""
@@ -415,7 +419,9 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
     def render_flash_circle(self, command: Flash2, aperture: Circle2) -> None:
         """Render flash circle to target image."""
         color = self.get_color(command.transform.polarity)
-        aperture_group = self.get_aperture(id(aperture), color)
+        transform = command.transform
+        aperture_id = self.get_aperture_id(aperture, transform)
+        aperture_group = self.get_aperture(aperture_id)
 
         if aperture_group is None:
             mask = self._make_mask(aperture.get_bounding_box(), aperture.hole_diameter)
@@ -428,7 +434,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     fill=color,
                 ),
             )
-            self.set_aperture(id(aperture), color, aperture_group)
+            self.set_aperture(aperture_id, aperture_group)
 
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
@@ -469,7 +475,9 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
     def render_flash_rectangle(self, command: Flash2, aperture: Rectangle2) -> None:
         """Render flash rectangle to target image."""
         color = self.get_color(command.transform.polarity)
-        aperture_group = self.get_aperture(id(aperture), color)
+        transform = command.transform
+        aperture_id = self.get_aperture_id(aperture, transform)
+        aperture_group = self.get_aperture(aperture_id)
 
         if aperture_group is None:
             mask = self._make_mask(aperture.get_bounding_box(), aperture.hole_diameter)
@@ -483,7 +491,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     fill=color,
                 ),
             )
-            self.set_aperture(id(aperture), color, aperture_group)
+            self.set_aperture(aperture_id, aperture_group)
 
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
@@ -496,7 +504,9 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
     def render_flash_obround(self, command: Flash2, aperture: Obround2) -> None:
         """Render flash obround to target image."""
         color = self.get_color(command.transform.polarity)
-        aperture_group = self.get_aperture(id(aperture), color)
+        transform = command.transform
+        aperture_id = self.get_aperture_id(aperture, transform)
+        aperture_group = self.get_aperture(aperture_id)
 
         if aperture_group is None:
             mask = self._make_mask(aperture.get_bounding_box(), aperture.hole_diameter)
@@ -516,7 +526,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     ry=radius,
                 ),
             )
-            self.set_aperture(id(aperture), color, aperture_group)
+            self.set_aperture(aperture_id, aperture_group)
 
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
@@ -529,7 +539,9 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
     def render_flash_polygon(self, command: Flash2, aperture: Polygon2) -> None:
         """Render flash polygon to target image."""
         color = self.get_color(command.transform.polarity)
-        aperture_group = self.get_aperture(id(aperture), color)
+        transform = command.transform
+        aperture_id = self.get_aperture_id(aperture, transform)
+        aperture_group = self.get_aperture(aperture_id)
 
         if aperture_group is None:
             mask = self._make_mask(aperture.get_bounding_box(), aperture.hole_diameter)
@@ -561,7 +573,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             p.Z()
 
             aperture_group.append(p)
-            self.set_aperture(id(aperture), color, aperture_group)
+            self.set_aperture(aperture_id, aperture_group)
 
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(
@@ -573,8 +585,9 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     def render_flash_macro(self, command: Flash2, aperture: Macro2) -> None:
         """Render flash macro aperture to target image."""
-        color = self.get_color(command.transform.polarity)
-        aperture_group = self.get_aperture(id(aperture), color)
+        transform = command.transform
+        aperture_id = self.get_aperture_id(aperture, transform)
+        aperture_group = self.get_aperture(aperture_id)
 
         if aperture_group is None:
             self.push_render_frame(
@@ -587,7 +600,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
             frame = self.pop_render_frame()
             aperture_group = frame.layer
-            self.set_aperture(id(aperture), color, aperture_group)
+            self.set_aperture(aperture_id, aperture_group)
 
         self.get_layer(command.transform.polarity).append(
             drawsvg.Use(

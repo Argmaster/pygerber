@@ -240,6 +240,25 @@ class ApertureTransform(FrozenGeneralModel):
             },
         )
 
+    def get_scaled(self, scale: Decimal) -> Self:
+        """Get copy of object scaled by factor."""
+        return self.model_copy(
+            update={
+                "scaling": self.scaling * scale,
+            },
+        )
+
+    def get_transform_key(self) -> str:
+        """Get key describing rotation and scaling."""
+        return (
+            f"*%{self.get_rotation():.3f}*%{self.get_scaling():.3f}"
+            f"*%{self.get_mirroring()}"
+        )
+
+    def has_mirroring_enabled(self) -> bool:
+        """Check if there is any mirroring set."""
+        return self.get_mirroring() is not Mirroring.NoMirroring
+
 
 class State2MacroIndex(ImmutableMapping[str, ApertureMacro2]):
     """Index of all macros defined in Gerber AST until currently parsed token."""
