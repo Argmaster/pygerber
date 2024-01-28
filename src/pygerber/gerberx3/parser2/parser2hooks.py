@@ -1410,11 +1410,11 @@ class Parser2Hooks(Parser2HooksBase):
             aperture = context.get_aperture(aperture_id, transform)
 
             if isinstance(aperture, Block2):
-                aperture = aperture.command_buffer.get_transposed(flash_point)
+                cmd_buffer = aperture.command_buffer.get_transposed(flash_point)
                 context.add_command(
                     BufferCommand2(
                         transform=transform,
-                        command_buffer=aperture,
+                        command_buffer=cmd_buffer,
                     ),
                 )
 

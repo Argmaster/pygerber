@@ -7,6 +7,7 @@ G04 Ucamco copyright*
 %LPD*%
 G04 Define block aperture D12*
 %ABD12*%
+%LR45.0*%
 %ADD11C,0.5*%
 D10*
 G01*
@@ -22,6 +23,7 @@ G75*
 G03*
 X500000Y1000000I-2000000J0D01*
 G01*
+%LR0.0*%
 %AB*%
 G04 Flash block aperture D12 in four different orientation*
 D12*
