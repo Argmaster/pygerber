@@ -1,4 +1,5 @@
 """GerberX3 grammar."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -892,24 +893,21 @@ class GerberGrammarBuilder(GrammarBuilder):
             self.options.tf_file_attribute_token_cls,
             Literal("TF")
             + file_attribute_name.set_results_name("attribute_name")
-            + Literal(",")
-            + Opt(self._build_field()),
+            + Opt(Literal(",") + self._build_field()),
         )
         # Add an aperture attribute to the dictionary or modify it.
         ta = wrapper(
             self.options.ta_aperture_attribute_token_cls,
             Literal("TA")
             + aperture_attribute_name.set_results_name("attribute_name")
-            + Literal(",")
-            + Opt(self._build_field()),
+            + Opt(Literal(",") + self._build_field()),
         )
         # Add an object attribute to the dictionary or modify it.
         to = wrapper(
             self.options.to_object_attribute_token_cls,
             Literal("TO")
             + object_attribute_name.set_results_name("attribute_name")
-            + Literal(",")
-            + Opt(self._build_field()),
+            + Opt(Literal(",") + self._build_field()),
         )
         # Delete one or all attributes in the dictionary.
         td = wrapper(

@@ -1,6 +1,5 @@
 """Comment token."""
 
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
@@ -55,7 +54,8 @@ class DeleteAttribute(AttributeToken):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"TD{self.name if self.name is not None else ''}"
+        name = self.name if self.name is not None else ""
+        return f"TD{name}"
 
     def __str__(self) -> str:
         return f"{super().__str__()}::[{self.name}]"

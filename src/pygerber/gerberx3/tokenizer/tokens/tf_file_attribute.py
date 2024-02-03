@@ -1,6 +1,5 @@
 """Comment token."""
 
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -35,7 +34,8 @@ class FileAttribute(SetAttributeToken):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"TF{self.name},{self.value}"
+        value = f",{self.value}" if self.value else ""
+        return f"TF{self.name}{value}"
 
     def __str__(self) -> str:
         return f"{super().__str__()}::[{self.name} -> {self.value}]"
