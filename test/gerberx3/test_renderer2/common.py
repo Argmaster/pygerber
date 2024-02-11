@@ -12,7 +12,11 @@ import pytest
 from pygerber.gerberx3.parser2.parser2 import Parser2
 from pygerber.gerberx3.renderer2.abstract import ImageRef
 from pygerber.gerberx3.renderer2.raster import RasterRenderer2, RasterRenderer2Hooks
-from pygerber.gerberx3.renderer2.svg import SvgRenderer2, SvgRenderer2Hooks
+from pygerber.gerberx3.renderer2.svg import (
+    IS_SVG_BACKEND_AVAILABLE,
+    SvgRenderer2,
+    SvgRenderer2Hooks,
+)
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 
 if TYPE_CHECKING:
@@ -72,6 +76,10 @@ def make_svg_renderer2_test(
     """
     debug_output_directory = Path(test_file_path).parent / ".output" / "svg"
 
+    @pytest.mark.skipif(
+        IS_SVG_BACKEND_AVAILABLE is False,
+        reason="No SVG backend available",
+    )
     @pytest.mark.parametrize(
         ("directory", "file_name"),
         sorted(find_gerberx3_asset_files(path_to_assets)),
