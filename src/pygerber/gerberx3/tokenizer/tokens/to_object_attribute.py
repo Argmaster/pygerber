@@ -37,7 +37,8 @@ class ObjectAttribute(SetAttributeToken):
         endline: str = "\n",  # noqa: ARG002
     ) -> str:
         """Get gerber code represented by this token."""
-        return f"TO{self.name},{self.value}"
+        value = f",{self.value}" if self.value else ""
+        return f"TO{self.name}{value}"
 
     def __str__(self) -> str:
         return f"{super().__str__()}::[{self.name} -> {self.value}]"
