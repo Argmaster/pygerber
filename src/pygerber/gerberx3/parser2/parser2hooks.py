@@ -1156,17 +1156,18 @@ class Parser2Hooks(Parser2HooksBase):
             aperture_id = context.get_current_aperture_id() or throw(
                 ApertureNotSelected2Error(token),
             )
-            aperture = context.get_aperture(aperture_id)
+            transform = context.get_state().get_aperture_transform()
+            aperture = context.get_aperture(aperture_id, transform)
 
-            context.add_command(
-                Line2(
-                    attributes=context.object_attributes,
-                    aperture=aperture,
-                    start_point=start_point,
-                    end_point=end_point,
-                    transform=context.get_state().get_aperture_transform(),
-                ),
-            )
+            command = Line2(
+                attributes=context.object_attributes,
+                aperture=aperture,
+                start_point=start_point,
+                end_point=end_point,
+                transform=transform,
+            ).get_mirrored(transform.get_mirroring())
+
+            context.add_command(command)
             context.set_current_position(end_point)
 
         def on_parser_visit_token_arc(
@@ -1244,18 +1245,18 @@ class Parser2Hooks(Parser2HooksBase):
             aperture_id = context.get_current_aperture_id() or throw(
                 ApertureNotSelected2Error(token),
             )
-            aperture = context.get_aperture(aperture_id)
+            transform = context.get_state().get_aperture_transform()
+            aperture = context.get_aperture(aperture_id, transform)
+            command = Arc2(
+                attributes=context.object_attributes,
+                aperture=aperture,
+                start_point=start_point,
+                end_point=end_point,
+                center_point=final_center_point,
+                transform=context.get_state().get_aperture_transform(),
+            ).get_mirrored(transform.get_mirroring())
 
-            context.add_command(
-                Arc2(
-                    attributes=context.object_attributes,
-                    aperture=aperture,
-                    start_point=start_point,
-                    end_point=end_point,
-                    center_point=final_center_point,
-                    transform=context.get_state().get_aperture_transform(),
-                ),
-            )
+            context.add_command(command)
             context.set_current_position(end_point)
 
         def on_parser_visit_token_cc_arc(
@@ -1325,19 +1326,18 @@ class Parser2Hooks(Parser2HooksBase):
             aperture_id = context.get_current_aperture_id() or throw(
                 ApertureNotSelected2Error(token),
             )
-            aperture = context.get_aperture(aperture_id)
+            transform = context.get_state().get_aperture_transform()
+            aperture = context.get_aperture(aperture_id, transform)
+            command = CCArc2(
+                attributes=context.object_attributes,
+                aperture=aperture,
+                start_point=start_point,
+                end_point=end_point,
+                center_point=final_center_point,
+                transform=context.get_state().get_aperture_transform(),
+            ).get_mirrored(transform.get_mirroring())
 
-            context.add_command(
-                CCArc2(
-                    attributes=context.object_attributes,
-                    aperture=aperture,
-                    start_point=start_point,
-                    end_point=end_point,
-                    center_point=final_center_point,
-                    transform=context.get_state().get_aperture_transform(),
-                ),
-            )
-
+            context.add_command(command)
             context.set_current_position(end_point)
 
         DRAW_MODE_DISPATCH_TABLE = MappingProxyType(
@@ -1406,15 +1406,15 @@ class Parser2Hooks(Parser2HooksBase):
             aperture_id = context.get_current_aperture_id() or throw(
                 ApertureNotSelected2Error(token),
             )
-            aperture = context.get_aperture(aperture_id)
+            transform = context.get_state().get_aperture_transform()
+            aperture = context.get_aperture(aperture_id, transform)
 
             if isinstance(aperture, Block2):
+                cmd_buffer = aperture.command_buffer.get_transposed(flash_point)
                 context.add_command(
                     BufferCommand2(
-                        transform=context.get_state().get_aperture_transform(),
-                        command_buffer=aperture.command_buffer.get_transposed(
-                            flash_point,
-                        ),
+                        transform=transform,
+                        command_buffer=cmd_buffer,
                     ),
                 )
 
@@ -1424,7 +1424,7 @@ class Parser2Hooks(Parser2HooksBase):
                         attributes=context.object_attributes,
                         aperture=aperture,
                         flash_point=flash_point,
-                        transform=context.get_state().get_aperture_transform(),
+                        transform=transform,
                     ),
                 )
 
@@ -1450,9 +1450,6 @@ class Parser2Hooks(Parser2HooksBase):
             context : Parser2Context
                 The context object containing information about the parser state.
             """
-            context.get_aperture(
-                token.aperture_id,
-            )  # Make sure aperture exists.
             context.set_current_aperture_id(token.aperture_id)
             return super().on_parser_visit_token(token, context)
 

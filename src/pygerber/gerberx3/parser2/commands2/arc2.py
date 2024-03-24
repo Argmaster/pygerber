@@ -1,6 +1,7 @@
 """Parser level abstraction of draw arc operation for Gerber AST parser, version 2."""
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.math.bounding_box import BoundingBox
@@ -52,12 +53,41 @@ class Arc2(ApertureDrawCommand2):
         )
 
     def get_mirrored(self, mirror: Mirroring) -> Self:
-        """Get mirrored command."""
+        """Get mirrored command.
+
+        Mirroring is a NOOP if mirror is `Mirroring.NoMirroring`.
+        """
+        if mirror == Mirroring.NoMirroring:
+            return self
+
+        new_end_point = self.end_point.get_mirrored(mirror)
+        new_start_point = self.start_point.get_mirrored(mirror)
+        new_center_point = self.center_point.get_mirrored(mirror)
+
+        if mirror == Mirroring.XY:
+            return self.model_copy(
+                update={
+                    "end_point": new_end_point,
+                    "start_point": new_start_point,
+                    "center_point": new_center_point,
+                },
+            )
+
         return self.model_copy(
             update={
-                "start_point": self.start_point.get_mirrored(mirror),
-                "end_point": self.end_point.get_mirrored(mirror),
-                "center_point": self.center_point.get_mirrored(mirror),
+                "end_point": new_start_point,
+                "start_point": new_end_point,
+                "center_point": new_center_point,
+            },
+        )
+
+    def get_rotated(self, angle: Decimal) -> Self:
+        """Get copy of this command rotated around (0, 0)."""
+        return self.model_copy(
+            update={
+                "start_point": self.start_point.get_rotated(angle),
+                "end_point": self.end_point.get_rotated(angle),
+                "center_point": self.center_point.get_rotated(angle),
             },
         )
 
@@ -68,6 +98,20 @@ class Arc2(ApertureDrawCommand2):
                 "start_point": self.start_point + vector,
                 "end_point": self.end_point + vector,
                 "center_point": self.center_point + vector,
+            },
+        )
+
+    def get_scaled(self, scale: Decimal) -> Self:
+        """Get copy of this aperture scaled by factor."""
+        if scale == Decimal("1.0"):
+            return self
+        return self.model_copy(
+            update={
+                "start_point": self.start_point.get_scaled(scale),
+                "end_point": self.end_point.get_scaled(scale),
+                "center_point": self.center_point.get_scaled(scale),
+                "aperture": self.aperture.get_scaled(scale),
+                "transform": self.transform.get_scaled(scale),
             },
         )
 

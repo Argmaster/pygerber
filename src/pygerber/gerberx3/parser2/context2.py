@@ -38,7 +38,7 @@ from pygerber.gerberx3.parser2.macro2.macro2 import ApertureMacro2
 from pygerber.gerberx3.parser2.macro2.statement_buffer2 import StatementBuffer2
 from pygerber.gerberx3.parser2.parser2hooks import Parser2Hooks
 from pygerber.gerberx3.parser2.parser2hooks_base import Parser2HooksBase
-from pygerber.gerberx3.parser2.state2 import State2
+from pygerber.gerberx3.parser2.state2 import ApertureTransform, State2
 from pygerber.gerberx3.state_enums import AxisCorrespondence
 from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
 
@@ -466,12 +466,35 @@ class Parser2Context:
             self.get_state().set_current_aperture_id(current_aperture),
         )
 
-    def get_aperture(self, __key: ApertureID) -> Aperture2:
+    def get_aperture(
+        self,
+        __key: ApertureID,
+        transform: ApertureTransform,
+    ) -> Aperture2:
         """Get apertures property value."""
+        key_with_transform = ApertureID(
+            f"{__key}+{transform.get_transform_key()}",
+        )
+        transformed_aperture = self.apertures.get(key_with_transform)
+        if transformed_aperture is None:
+            # Retrieve aperture with no transform and create a transformed copy.
+            # If transform is all default, no copy is made.
+            aperture = self._get_aperture(__key)
+            transformed_aperture = (
+                aperture.get_mirrored(transform.mirroring)
+                .get_rotated(transform.rotation)
+                .get_scaled(transform.scaling)
+            )
+            self.set_aperture(key_with_transform, transformed_aperture)
+
+        return transformed_aperture
+
+    def _get_aperture(self, __key: ApertureID) -> Aperture2:
         try:
-            return self.apertures[__key]
+            aperture = self.apertures[__key]
         except KeyError as e:
             raise ApertureNotDefined2Error(self.current_token) from e
+        return aperture
 
     def set_aperture(self, __key: ApertureID, __value: Aperture2) -> None:
         """Set the apertures property value."""

@@ -1,6 +1,7 @@
 """Parser level abstraction of flash operation for Gerber AST parser, version 2."""
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.math.bounding_box import BoundingBox
@@ -24,10 +25,16 @@ class Flash2(ApertureDrawCommand2):
     flash_point: Vector2D
 
     def get_mirrored(self, mirror: Mirroring) -> Self:
-        """Get mirrored command."""
+        """Get mirrored command.
+
+        Mirroring is a NOOP if mirror is `Mirroring.NoMirroring`.
+        """
+        if mirror == Mirroring.NoMirroring:
+            return self
         return self.model_copy(
             update={
                 "flash_point": self.flash_point.get_mirrored(mirror),
+                "aperture": self.aperture.get_mirrored(mirror),
             },
         )
 
@@ -36,6 +43,27 @@ class Flash2(ApertureDrawCommand2):
         return self.model_copy(
             update={
                 "flash_point": self.flash_point + vector,
+            },
+        )
+
+    def get_rotated(self, angle: Decimal) -> Self:
+        """Get copy of this command rotated around (0, 0)."""
+        return self.model_copy(
+            update={
+                "flash_point": self.flash_point.get_rotated(angle),
+                "aperture": self.aperture.get_rotated(angle),
+            },
+        )
+
+    def get_scaled(self, scale: Decimal) -> Self:
+        """Get copy of this aperture scaled by factor."""
+        if scale == Decimal("1.0"):
+            return self
+        return self.model_copy(
+            update={
+                "flash_point": self.flash_point.get_scaled(scale),
+                "aperture": self.aperture.get_scaled(scale),
+                "transform": self.transform.get_scaled(scale),
             },
         )
 
