@@ -9,6 +9,9 @@ from typing import TYPE_CHECKING, Callable
 
 import pytest
 
+from pygerber.gerberx3.parser2.commands2.aperture_draw_command2 import (
+    ApertureDrawCommand2,
+)
 from pygerber.gerberx3.parser2.parser2 import Parser2
 from pygerber.gerberx3.renderer2.abstract import ImageRef
 from pygerber.gerberx3.renderer2.raster import RasterRenderer2, RasterRenderer2Hooks
@@ -31,6 +34,7 @@ def render_svg(
     dest: Path,
     *,
     expression: bool = False,
+    incremental: bool = False,
 ) -> None:
     """Tokenize gerber code and save debug output."""
     source = asset_loader.load_asset(src).decode("utf-8")
@@ -41,9 +45,27 @@ def render_svg(
 
     parser = Parser2()
     cmd_buf = parser.parse(stack)
-    ref = SvgRenderer2(SvgRenderer2Hooks(scale=Decimal("10"))).render(cmd_buf)
 
-    debug_dump_output_svg(ref, dest)
+    if incremental:
+        (dest / "incremental").mkdir(mode=0o777, parents=True, exist_ok=True)
+
+        for i, _ in enumerate(
+            SvgRenderer2(SvgRenderer2Hooks(scale=Decimal("10"))).render_iter(cmd_buf),
+        ):
+            renderer = SvgRenderer2(SvgRenderer2Hooks(scale=Decimal("10")))
+            for j, c in enumerate(renderer.render_iter(cmd_buf)):
+                if i == j:
+                    renderer.hooks.finalize()
+                    assert isinstance(c, ApertureDrawCommand2)
+                    renderer.get_image_ref().save_to(
+                        dest
+                        / "incremental"
+                        / f"dump_{i}_{c.__class__.__qualname__}_{c.transform.polarity.value}.svg",
+                    )
+                    break
+    else:
+        ref = SvgRenderer2(SvgRenderer2Hooks(scale=Decimal("10"))).render(cmd_buf)
+        debug_dump_output_svg(ref, dest)
 
 
 def make_svg_renderer2_test(

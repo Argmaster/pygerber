@@ -1,6 +1,7 @@
 """Module contains base class Rendering backend for Parser2 based Gerber data
 structures.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -49,8 +50,7 @@ class Renderer2:
         """Iterate over commands in buffer and render image for each command."""
         self.hooks.init(self, command_buffer)
         for command in command_buffer:
-            command.render(self)
-            yield command
+            yield from command.render_iter(self)
         self.hooks.finalize()
 
 
@@ -59,6 +59,8 @@ class Renderer2HooksABC:
 
     def init(self, renderer: Renderer2, command_buffer: ReadonlyCommandBuffer2) -> None:
         """Initialize rendering."""
+        self.renderer = renderer
+        self.command_buffer = command_buffer
 
     def render_line(self, command: Line2) -> None:
         """Render line to target image."""
@@ -87,8 +89,11 @@ class Renderer2HooksABC:
     def render_flash_macro(self, command: Flash2, aperture: Macro2) -> None:
         """Render flash macro aperture to target image."""
 
-    def render_buffer(self, command: BufferCommand2) -> None:
+    def render_buffer(self, command: BufferCommand2) -> Generator[Command2, None, None]:
         """Render buffer command, performing no writes."""
+        for cmd in command:
+            cmd.render(self.renderer)
+            yield cmd
 
     def render_region(self, command: Region2) -> None:
         """Render region to target image."""

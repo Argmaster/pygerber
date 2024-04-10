@@ -1,8 +1,9 @@
 """Parser level abstraction of draw operation for Gerber AST parser, version 2."""
+
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.gerberx3.math.bounding_box import BoundingBox
@@ -46,9 +47,17 @@ class Command2(FrozenGeneralModel):
         """Get copy of this aperture scaled by factor."""
         raise NotImplementedError
 
-    def render(self, hooks: Renderer2) -> None:
+    def render(self, renderer: Renderer2) -> None:
         """Render draw operation."""
         raise NotImplementedError
+
+    def render_iter(
+        self,
+        renderer: Renderer2,  # noqa: ARG002
+    ) -> Generator[Command2, None, None]:
+        """Render draw operation."""
+        raise NotImplementedError
+        yield
 
     def command_to_json(self) -> str:
         """Dump draw operation."""

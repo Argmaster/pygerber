@@ -1,9 +1,10 @@
 """Parser level abstraction of command that consists of multiple commands for Gerber AST
 parser, version 2.
 """
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Generator, Iterator
 
 from pygerber.gerberx3.math.bounding_box import BoundingBox
 from pygerber.gerberx3.parser2.command_buffer2 import ReadonlyCommandBuffer2
@@ -69,7 +70,12 @@ class BufferCommand2(Command2):
 
     def render(self, renderer: Renderer2) -> None:
         """Render draw operation."""
-        renderer.hooks.render_buffer(self)
+        for _ in renderer.hooks.render_buffer(self):
+            pass
+
+    def render_iter(self, renderer: Renderer2) -> Generator[Command2, None, None]:
+        """Render draw operation."""
+        yield from renderer.hooks.render_buffer(self)
 
     def __len__(self) -> int:
         """Return length of buffered commands."""
