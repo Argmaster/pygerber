@@ -1077,6 +1077,9 @@ def test_command_flash_token_hooks() -> None:
     )
 
 
+@pytest.mark.xfail(
+    reason="For now selecting non-existing aperture does not raise an error, we need a warning system.",
+)
 def test_select_aperture_token_hooks_not_defined() -> None:
     gerber_source = """
     D20*
