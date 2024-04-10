@@ -6,16 +6,10 @@
     "configurations": [
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Debug Unit Test",
-            "type": "python",
-            "request": "test",
             "justMyCode": false
         }
     ]
