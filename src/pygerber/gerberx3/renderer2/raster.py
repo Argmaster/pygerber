@@ -26,7 +26,6 @@ from pygerber.gerberx3.parser2.apertures2.polygon2 import Polygon2
 from pygerber.gerberx3.parser2.apertures2.rectangle2 import Rectangle2
 from pygerber.gerberx3.parser2.command_buffer2 import ReadonlyCommandBuffer2
 from pygerber.gerberx3.parser2.commands2.arc2 import Arc2, CCArc2
-from pygerber.gerberx3.parser2.commands2.buffer_command2 import BufferCommand2
 from pygerber.gerberx3.parser2.commands2.command2 import Command2
 from pygerber.gerberx3.parser2.commands2.flash2 import Flash2
 from pygerber.gerberx3.parser2.commands2.line2 import Line2
@@ -410,7 +409,8 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
     def get_aperture_id(self, aperture: Aperture2, transform: ApertureTransform) -> str:
         """Return combined ID for listed aperture."""
         return (
-            f"{aperture.identifier}%{transform.polarity.value}%{self.frame.is_region}"
+            f"{aperture.identifier}%{transform.polarity.value}"
+            f"%{transform.get_transform_key()}"
         )
 
     def render_line(self, command: Line2) -> None:
@@ -538,14 +538,14 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         command: Flash2,
         aperture: Circle2 | Rectangle2 | Obround2 | Polygon2,
     ) -> None:
-        if aperture.hole_diameter is None or aperture.hole_diameter == 0:
+        if aperture.hole_diameter is None:
             return
         self.frame.ellipse(
             Polarity.Clear,
             self.convert_bbox(
                 BoundingBox(
-                    min_x=-aperture.hole_diameter / 2,
-                    min_y=-aperture.hole_diameter / 2,
+                    min_x=-(aperture.hole_diameter / 2),
+                    min_y=-(aperture.hole_diameter / 2),
                     max_x=aperture.hole_diameter / 2,
                     max_y=aperture.hole_diameter / 2,
                 )
@@ -558,7 +558,7 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         origin_x, origin_y = self.convert_bbox(bbox)[0:2]
         self.frame.paste(
             aperture_image.image,
-            (origin_x + 1, origin_y + 1),
+            (origin_x, origin_y),
             mask=aperture_image.mask,
         )
 
@@ -675,11 +675,6 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
             self.set_aperture(aperture_id, aperture_image)
 
         self._paste_aperture(command, aperture_image)
-
-    def render_buffer(self, command: BufferCommand2) -> None:
-        """Render buffer command, performing no writes."""
-        for cmd in command:
-            cmd.render(self.renderer)
 
     def render_region(self, command: Region2) -> None:
         """Render region to target image."""

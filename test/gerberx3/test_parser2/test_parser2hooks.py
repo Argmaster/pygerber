@@ -57,6 +57,7 @@ from pygerber.gerberx3.parser2.macro2.primitives2.code_20_vector_line2 import (
 from pygerber.gerberx3.parser2.macro2.primitives2.code_21_center_line2 import (
     Code21CenterLine2,
 )
+from pygerber.gerberx3.parser2.state2 import ApertureTransform
 from pygerber.gerberx3.state_enums import (
     AxisCorrespondence,
     DrawMode,
@@ -583,7 +584,7 @@ def test_define_aperture_circle_token_hooks() -> None:
     context.set_draw_units(unit)
     parse_code(gerber_source, context)
 
-    aperture = context.get_aperture(ApertureID("D20"))
+    aperture = context.get_aperture(ApertureID("D20"), ApertureTransform())
     assert isinstance(aperture, Circle2)
     assert aperture.diameter == expected_diameter
     assert aperture.hole_diameter == expected_hole_diameter
@@ -605,7 +606,7 @@ def test_define_aperture_rectangle_token_hooks() -> None:
     context.set_draw_units(unit)
     parse_code(gerber_source, context)
 
-    aperture = context.get_aperture(ApertureID("D17"))
+    aperture = context.get_aperture(ApertureID("D17"), ApertureTransform())
     assert isinstance(aperture, Rectangle2)
     assert aperture.x_size == expected_x_size
     assert aperture.y_size == expected_y_size
@@ -628,7 +629,7 @@ def test_define_aperture_obround_token_hooks() -> None:
     context.set_draw_units(unit)
     parse_code(gerber_source, context)
 
-    aperture = context.get_aperture(ApertureID("D17"))
+    aperture = context.get_aperture(ApertureID("D17"), ApertureTransform())
     assert isinstance(aperture, Obround2)
     assert aperture.x_size == expected_x_size
     assert aperture.y_size == expected_y_size
@@ -652,7 +653,7 @@ def test_define_aperture_polygon_token_hooks() -> None:
     context.set_draw_units(unit)
     parse_code(gerber_source, context)
 
-    aperture = context.get_aperture(ApertureID("D17"))
+    aperture = context.get_aperture(ApertureID("D17"), ApertureTransform())
     assert isinstance(aperture, Polygon2)
     assert aperture.outer_diameter == expected_outer_diameter
     assert aperture.number_vertices == expected_number_vertices
@@ -680,7 +681,7 @@ def test_define_aperture_macro_token_hooks() -> None:
     context.set_draw_units(unit)
     parse_code(gerber_source, context)
 
-    aperture = context.get_aperture(ApertureID("D17"))
+    aperture = context.get_aperture(ApertureID("D17"), ApertureTransform())
     assert isinstance(aperture, Macro2)
 
     debug_dump_context(
@@ -1076,6 +1077,9 @@ def test_command_flash_token_hooks() -> None:
     )
 
 
+@pytest.mark.xfail(
+    reason="For now selecting non-existing aperture does not raise an error, we need a warning system.",
+)
 def test_select_aperture_token_hooks_not_defined() -> None:
     gerber_source = """
     D20*

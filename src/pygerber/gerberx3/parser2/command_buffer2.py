@@ -13,6 +13,8 @@ from pygerber.gerberx3.parser2.commands2.command2 import Command2
 from pygerber.gerberx3.state_enums import Mirroring
 
 if TYPE_CHECKING:
+    from decimal import Decimal
+
     from typing_extensions import Self
 
     from pygerber.gerberx3.parser2.context2 import Parser2Context
@@ -82,6 +84,18 @@ class ReadonlyCommandBuffer2(FrozenGeneralModel):
         """Get new command buffer with all commands transposed."""
         return self.model_copy(
             update={"commands": [c.get_transposed(vector) for c in self.commands]},
+        )
+
+    def get_rotated(self, angle: Decimal) -> Self:
+        """Get copy of this command rotated around (0, 0)."""
+        return self.model_copy(
+            update={"commands": [c.get_rotated(angle) for c in self.commands]},
+        )
+
+    def get_scaled(self, scale: Decimal) -> Self:
+        """Get copy of this aperture scaled by factor."""
+        return self.model_copy(
+            update={"commands": [c.get_scaled(scale) for c in self.commands]},
         )
 
     def get_bounding_box(self) -> BoundingBox:

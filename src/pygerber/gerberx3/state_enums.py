@@ -1,4 +1,5 @@
 """All state-defining enumerations."""
+
 from __future__ import annotations
 
 from pygerber.gerberx3.tokenizer.helpers.gerber_code_enum import GerberCodeEnum
@@ -67,6 +68,10 @@ class Polarity(GerberCodeEnum):
         """Get color for "1" mode image."""
         return _2d_rasterized_color_map[self]
 
+    def is_solid(self) -> bool:
+        """Check if polarity represents solid surface."""
+        return _is_solid_map[self]
+
 
 _to_region_variant_map = {
     Polarity.Clear: Polarity.ClearRegion,
@@ -92,6 +97,16 @@ _2d_rasterized_color_map = {
     Polarity.Background: 0,
     Polarity.DEBUG: 127,
     Polarity.DEBUG2: 75,
+}
+
+_is_solid_map = {
+    Polarity.Clear: False,
+    Polarity.Dark: True,
+    Polarity.ClearRegion: False,
+    Polarity.DarkRegion: True,
+    Polarity.Background: True,
+    Polarity.DEBUG: True,
+    Polarity.DEBUG2: True,
 }
 
 
