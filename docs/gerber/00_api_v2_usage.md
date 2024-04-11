@@ -21,7 +21,7 @@ Running code above will create `output.jpg` file in current working directory wh
 should look like this:
 
 <p align="center">
-  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/d17ebee8-e851-4c86-b110-8cd8aeca993e">
+  <img height="400" src="https://github.com/Argmaster/pygerber/assets/56170852/d17ebee8-e851-4c86-b110-8cd8aeca993e">
 </p>
 
 ### PNG
@@ -46,7 +46,7 @@ GerberFile.from_file(
 Code above renders following image:
 
 <p align="center">
-  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/0a5a42f3-8792-4b9a-be61-bac12f0e1c03">
+  <img height="400" src="https://github.com/Argmaster/pygerber/assets/56170852/0a5a42f3-8792-4b9a-be61-bac12f0e1c03">
 </p>
 
 ### SVG
@@ -96,7 +96,7 @@ Project(
 Here is the result:
 
 <p align="center">
-  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/9b3f3823-67b3-49f1-8c76-e2bddaca81fe">
+  <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/9b3f3823-67b3-49f1-8c76-e2bddaca81fe">
 </p>
 
 More detailed descriptions of interfaces can be found in
