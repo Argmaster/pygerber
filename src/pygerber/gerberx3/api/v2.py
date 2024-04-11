@@ -9,21 +9,33 @@ manual interaction with the parser and renderers.
 from __future__ import annotations
 
 from pygerber.gerberx3.api._v2 import (
+    COLOR_MAP_T,
+    DEFAULT_ALPHA_COLOR_MAP,
+    DEFAULT_COLOR_MAP,
     ColorScheme,
+    FileTypeEnum,
     GerberFile,
     GerberFileInfo,
     ImageFormatEnum,
     OnParserErrorEnum,
     ParsedFile,
+    ParsedProject,
     PixelFormatEnum,
+    Project,
 )
 
 __all__ = [
-    "OnParserErrorEnum",
-    "GerberFile",
-    "ImageFormatEnum",
-    "PixelFormatEnum",
-    "ParsedFile",
-    "GerberFileInfo",
+    "COLOR_MAP_T",
+    "DEFAULT_ALPHA_COLOR_MAP",
+    "DEFAULT_COLOR_MAP",
     "ColorScheme",
+    "FileTypeEnum",
+    "GerberFile",
+    "GerberFileInfo",
+    "ImageFormatEnum",
+    "OnParserErrorEnum",
+    "ParsedFile",
+    "ParsedProject",
+    "PixelFormatEnum",
+    "Project",
 ]

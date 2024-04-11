@@ -6,7 +6,9 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, unique
 from pathlib import Path
-from typing import TYPE_CHECKING, Self, TextIO
+from typing import TYPE_CHECKING, Dict, List, Self, TextIO, TypeAlias
+
+from PIL import Image
 
 from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
 from pygerber.gerberx3.parser2.command_buffer2 import ReadonlyCommandBuffer2
@@ -19,6 +21,7 @@ from pygerber.gerberx3.renderer2.raster import (
     ImageFormat,
     PixelFormat,
     RasterFormatOptions,
+    RasterImageRef,
     RasterRenderer2,
     RasterRenderer2Hooks,
 )
@@ -47,6 +50,23 @@ class OnParserErrorEnum(Enum):
     parsing process, making it impossible to render slightly malformed files."""
 
 
+@unique
+class FileTypeEnum(Enum):
+    """Enumeration of possible Gerber file types.
+
+    If file type is not listed here you can request adding it by creating an issue on
+    https://github.com/Argmaster/pygerber/issues
+    """
+
+    COPPER = "COPPER"
+    MASK = "MASK"
+    PASTE = "PASTE"
+    SILK = "SILK"
+    EDGE = "EDGE"
+    OTHER = "OTHER"
+    UNDEFINED = "UNDEFINED"
+
+
 @dataclass
 class GerberFile:
     """Generic representation of Gerber file.
@@ -55,22 +75,35 @@ class GerberFile:
     """
 
     source_code: str
+    file_type: FileTypeEnum
 
     @classmethod
-    def from_file(cls, file_path: str | Path) -> Self:
+    def from_file(
+        cls,
+        file_path: str | Path,
+        file_type: FileTypeEnum = FileTypeEnum.UNDEFINED,
+    ) -> Self:
         """Initialize object with Gerber source code loaded from file on disk."""
         file_path = Path(file_path)
-        return cls(file_path.read_text(encoding="utf-8"))
+        return cls(file_path.read_text(encoding="utf-8"), file_type)
 
     @classmethod
-    def from_str(cls, source_code: str) -> Self:
+    def from_str(
+        cls,
+        source_code: str,
+        file_type: FileTypeEnum = FileTypeEnum.UNDEFINED,
+    ) -> Self:
         """Initialize object with Gerber source code from string."""
-        return cls(source_code)
+        return cls(source_code, file_type)
 
     @classmethod
-    def from_buffer(cls, buffer: TextIO) -> Self:
+    def from_buffer(
+        cls,
+        buffer: TextIO,
+        file_type: FileTypeEnum = FileTypeEnum.UNDEFINED,
+    ) -> Self:
         """Initialize object with Gerber source code from readable buffer."""
-        return cls(buffer.read())
+        return cls(buffer.read(), file_type)
 
     def parse(
         self,
@@ -90,6 +123,7 @@ class GerberFile:
         return ParsedFile(
             GerberFileInfo.from_readonly_command_buffer(command_buffer),
             command_buffer,
+            self.file_type,
         )
 
 
@@ -118,10 +152,15 @@ class ParsedFile:
 
     _info: GerberFileInfo
     _command_buffer: ReadonlyCommandBuffer2
+    _file_type: FileTypeEnum
 
     def get_info(self) -> GerberFileInfo:
         """Get information about Gerber file."""
         return self._info
+
+    def get_file_type(self) -> FileTypeEnum:
+        """Get type of Gerber file."""
+        return self._file_type
 
     def render_svg(
         self,
@@ -219,3 +258,176 @@ class GerberFileInfo:
             bbox.width.as_millimeters(),
             bbox.height.as_millimeters(),
         )
+
+
+class Project:
+    """Multi file project representation.
+
+    This object can be used to render multiple Gerber files to single image.
+    It automatically performs alignment and merging of files.
+    Files should be ordered bottom up, topmost layer last, like if adding one layer on
+    top of previous.
+    """
+
+    def __init__(self, files: List[GerberFile]) -> None:
+        self.files = files
+
+    def parse(
+        self,
+        *,
+        on_parser_error: OnParserErrorEnum = OnParserErrorEnum.Ignore,
+    ) -> ParsedProject:
+        """Parse all Gerber files one by one."""
+        return ParsedProject(
+            [f.parse(on_parser_error=on_parser_error) for f in self.files],
+        )
+
+
+COLOR_MAP_T: TypeAlias = Dict[FileTypeEnum, ColorScheme]
+DEFAULT_COLOR_MAP: COLOR_MAP_T = {
+    FileTypeEnum.COPPER: ColorScheme.COPPER,
+    FileTypeEnum.MASK: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.PASTE: ColorScheme.PASTE_MASK,
+    FileTypeEnum.SILK: ColorScheme.SILK,
+    FileTypeEnum.EDGE: ColorScheme.DEBUG_1_ALPHA,
+    FileTypeEnum.OTHER: ColorScheme.DEBUG_1_ALPHA,
+    FileTypeEnum.UNDEFINED: ColorScheme.DEBUG_1_ALPHA,
+}
+DEFAULT_ALPHA_COLOR_MAP: COLOR_MAP_T = {
+    FileTypeEnum.COPPER: ColorScheme.COPPER_ALPHA,
+    FileTypeEnum.MASK: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.PASTE: ColorScheme.PASTE_MASK_ALPHA,
+    FileTypeEnum.SILK: ColorScheme.SILK_ALPHA,
+    FileTypeEnum.EDGE: ColorScheme.DEBUG_1_ALPHA,
+    FileTypeEnum.OTHER: ColorScheme.DEBUG_1_ALPHA,
+    FileTypeEnum.UNDEFINED: ColorScheme.DEBUG_1_ALPHA,
+}
+
+
+class ParsedProject:
+    """Multi file project representation.
+
+    This object can be used to render multiple Gerber files to single image.
+    It automatically performs alignment and merging of files.
+    """
+
+    def __init__(self, files: List[ParsedFile]) -> None:
+        self.files = files
+
+    def render_raster(
+        self,
+        destination: BytesIO | Path | str,
+        *,
+        color_map: COLOR_MAP_T = DEFAULT_COLOR_MAP,
+        dpmm: int = 20,
+        image_format: ImageFormatEnum = ImageFormatEnum.AUTO,
+        pixel_format: PixelFormatEnum = PixelFormatEnum.RGB,
+    ) -> None:
+        """Render all Gerber file, align them and merge into single file.
+
+        Resulting image will be saved to given `destination`.
+
+        Parameters
+        ----------
+        destination : BytesIO | Path | str
+            Destination to save file to. When BytesIO is provided, file will be saved
+            to buffer. When Path or str is provided, they are treated as file path
+            and will be used to open and save file on disk.
+        color_map : COLOR_MAP_T, optional
+            Mapping from image type to color scheme, by default DEFAULT_COLOR_MAP
+        dpmm : int, optional
+            Resolution of image in dots per millimeter, by default 96
+        image_format : ImageFormatEnum, optional
+            Image format to save, by default ImageFormatEnum.AUTO
+        pixel_format : PixelFormatEnum, optional
+            Pixel format, by default PixelFormatEnum.RGB
+
+        """
+        min_x_mm = (
+            min(
+                self.files,
+                key=lambda f: f.get_info().min_x_mm,
+            )
+            .get_info()
+            .min_x_mm
+        )
+
+        min_y_mm = (
+            min(
+                self.files,
+                key=lambda f: f.get_info().min_y_mm,
+            )
+            .get_info()
+            .min_y_mm
+        )
+
+        max_x_mm = (
+            max(
+                self.files,
+                key=lambda f: f.get_info().max_x_mm,
+            )
+            .get_info()
+            .max_x_mm
+        )
+
+        max_y_mm = (
+            max(
+                self.files,
+                key=lambda f: f.get_info().max_y_mm,
+            )
+            .get_info()
+            .max_y_mm
+        )
+
+        width_mm = max_x_mm - min_x_mm
+        height_mm = max_y_mm - min_y_mm
+
+        images = [
+            self._render_raster(f, color_map=color_map, dpmm=dpmm) for f in self.files
+        ]
+        base_image = Image.new(
+            "RGBA",
+            (
+                int(width_mm * dpmm),
+                int(height_mm * dpmm),
+            ),
+            (0, 0, 0, 0),
+        )
+
+        for image, file in zip(images, self.files):
+            offset_x_mm = abs(min_x_mm - file.get_info().min_x_mm)
+            offset_y_mm = abs(max_y_mm - file.get_info().max_y_mm)
+            base_image.paste(
+                image.image,
+                (int(offset_x_mm * dpmm), int(offset_y_mm * dpmm)),
+                image.image,
+            )
+
+        RasterImageRef(base_image).save_to(
+            destination,
+            options=RasterFormatOptions(
+                image_format=ImageFormat(image_format.value),
+                pixel_format=PixelFormat(pixel_format.value),
+            ),
+        )
+
+    def _render_raster(
+        self,
+        file: ParsedFile,
+        *,
+        color_map: COLOR_MAP_T,
+        dpmm: int = 20,
+    ) -> RasterImageRef:
+        output = RasterRenderer2(
+            RasterRenderer2Hooks(
+                color_scheme=color_map[file.get_file_type()],
+                dpmm=dpmm,
+            ),
+        ).render(
+            file._command_buffer,  # noqa: SLF001
+        )
+        if not isinstance(output, RasterImageRef):
+            msg = "Expected RasterImageRef"
+            raise TypeError(msg)
+
+        return output

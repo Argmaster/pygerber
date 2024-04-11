@@ -11,6 +11,10 @@ class ExamplesEnum(Enum):
 
     UCAMCO_ex_2_Shapes = "ucamco_ex_2_shapes.grb"
     ShapeFlashes = "shape_flashes.grb"
+    simple_2layer_F_Cu = "simple_2layer-F_Cu.gbr"  # noqa: N815
+    simple_2layer_F_Mask = "simple_2layer-F_Mask.gbr"  # noqa: N815
+    simple_2layer_F_Paste = "simple_2layer-F_Paste.gbr"  # noqa: N815
+    simple_2layer_F_Silkscreen = "simple_2layer-F_Silkscreen.gbr"  # noqa: N815
 
 
 DIRECTORY = Path(__file__).parent

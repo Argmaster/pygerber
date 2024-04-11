@@ -101,3 +101,9 @@ def test_pygerber_api_v2_jpg() -> None:
     with cd_to_tempdir():
         exec((DIRECTORY / "pygerber_api_v2_jpg.py").read_text())  # noqa: S102
         assert Path("output.jpg").exists()
+
+
+def test_pygerber_api_v2_png_project() -> None:
+    with cd_to_tempdir():
+        exec((DIRECTORY / "pygerber_api_v2_png_project.py").read_text())  # noqa: S102
+        assert Path("output.png").exists()
