@@ -1,4 +1,4 @@
-# Parser2 feature support
+# Parser feature support (legacy)
 
 ## Introduction
 

@@ -1,4 +1,4 @@
-# Rasterized2DBackend feature support
+# Rasterized2DBackend feature support (legacy)
 
 ## Introduction
 
