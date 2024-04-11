@@ -57,7 +57,7 @@ class Command2(FrozenGeneralModel):
     ) -> Generator[Command2, None, None]:
         """Render draw operation."""
         raise NotImplementedError
-        yield
+        yield  # type: ignore[unreachable]
 
     def command_to_json(self) -> str:
         """Dump draw operation."""
