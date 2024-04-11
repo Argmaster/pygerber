@@ -1,11 +1,19 @@
-# Parser2 feature support
+# Parser feature support (legacy)
+
+!!! warning "Deprecation warning"
+
+    This is a legacy Gerber format Parser, it will be removed in PyGerber 3.0.
 
 ## Introduction
 
-Parser2 is an alternative implementation of Gerber AST parser redesigned to make process
-of implementation of Gerber features easier and quicker in addition to much better
-extension interface. Moreover it provides a easy way to introspect Gerber code with use
-of hook based interface.
+Parser is a implementation of Gerber format AST parser written in Python. It first
+appeared in PyGerber 2.0.0 and until release of 2.2.0 was only parser in PyGerber.
+However, since 2.2.0, Parser2 class is available as an alternative. It has a better
+design, better API and most importantly it has wider Gerber format support.
+Unfortunately it doesn't provide rendering support yet (however it is planned).
+Therefore Parser2 is recommended over Parser class for users interested in Gerber code
+introspection and building other code-centric tools. Until rendering support is added,
+other users are encouraged to stick with old Parser class.
 
 !!! tip "Contributing"
 
@@ -23,13 +31,13 @@ of hook based interface.
 
 | Symbol | Count |
 | ------ | ----- |
-| ✅     | 114   |
+| ✅     | 60    |
 | 🚧     | 0     |
 | 🚫     | 4     |
-| ❌     | 44    |
-| 👽     | 39    |
+| ❌     | 90    |
+| 👽     | 26    |
 | 👾     | 0     |
-| total  | 201   |
+| total  | 180   |
 
 ## Supported Gerber X3 features
 
@@ -123,104 +131,83 @@ of hook based interface.
 
 ### Macros
 
--   ✅ Parameters.
--   👽 Primitives in definition:
-    -   ✅ Code 1, Circle
-    -   ❌ Code 2, Vector line
-    -   ✅ Code 4, Outline
-    -   ✅ Code 5, Polygon
-    -   ❌ Code 6, Moire
-    -   ✅ Code 7, Thermal
-    -   ✅ Code 20, Vector line
-    -   ✅ Code 21, Center Line
-    -   ❌ Code 22, Lower Left Line
--   👽 Primitives in aperture instance:
-    -   ✅ Code 1, Circle
-    -   ❌ Code 2, Vector line
-    -   ✅ Code 4, Outline
-    -   ✅ Code 5, Polygon
-    -   ❌ Code 6, Moire
-    -   ❌ Code 7, Thermal
-    -   ✅ Code 20, Vector line
-    -   ✅ Code 21, Center Line
-    -   ❌ Code 22, Lower Left Line
--   ❌ Rotation around macro origin:
+-   ❌ Parameters.
+-   ❌ Primitives:
+    -   ❌ Code 0, Comment
     -   ❌ Code 1, Circle
-    -   ❌ Code 2, Vector line
-    -   ❌ Code 4, Outline
-    -   ❌ Code 5, Polygon
-    -   ❌ Code 6, Moire
-    -   ❌ Code 7, Thermal
     -   ❌ Code 20, Vector line
     -   ❌ Code 21, Center Line
-    -   ❌ Code 22, Lower Left Line
--   ✅ Expressions.
-    -   ✅ Constants.
-    -   ✅ Variables.
-    -   ✅ Addition.
-    -   ✅ Subtraction.
-    -   ✅ Multiplication.
-    -   ✅ Division.
-    -   ✅ Unary + operator.
-    -   ✅ Negation.
--   ✅ Variable definitions.
+    -   ❌ Code 4, Outline
+    -   ❌ Code 5, Polygon
+    -   ❌ Code 7, Thermal
+-   ❌ Rotation around macro origin:
+    -   ❌ Code 0, Comment
+    -   ❌ Code 1, Circle
+    -   ❌ Code 20, Vector line
+    -   ❌ Code 21, Center Line
+    -   ❌ Code 4, Outline
+    -   ❌ Code 5, Polygon
+    -   ❌ Code 7, Thermal
+-   ❌ Constants.
+-   ❌ Variables.
+-   ❌ Variable definitions.
 
 ### Aperture blocks
 
--   👽 Nested Line, aperture:
-    -   ✅ circle,
-    -   ✅ rectangle,
-    -   ✅ obround,
-    -   ✅ polygon,
+-   ❌ Nested Line, aperture:
+    -   ❌ circle,
+    -   ❌ rectangle,
+    -   ❌ obround,
+    -   ❌ polygon,
     -   ❌ macro.
--   👽 Nested Arc, aperture:
-    -   ✅ circle,
-    -   ✅ rectangle,
-    -   ✅ obround,
-    -   ✅ polygon,
+-   ❌ Nested Arc, aperture:
+    -   ❌ circle,
+    -   ❌ rectangle,
+    -   ❌ obround,
+    -   ❌ polygon,
     -   ❌ macro.
--   👽 Nested Counter clockwise arc, aperture:
-    -   ✅ circle,
-    -   ✅ rectangle,
-    -   ✅ obround,
-    -   ✅ polygon,
+-   ❌ Nested Counter clockwise arc, aperture:
+    -   ❌ circle,
+    -   ❌ rectangle,
+    -   ❌ obround,
+    -   ❌ polygon,
     -   ❌ macro.
--   👽 Nested Flash:
-    -   ✅ circle,
-    -   ✅ rectangle,
-    -   ✅ obround,
-    -   ✅ polygon,
+-   ❌ Nested Flash:
+    -   ❌ circle,
+    -   ❌ rectangle,
+    -   ❌ obround,
+    -   ❌ polygon,
     -   ❌ macro.
--   👽 Nested regions (missing macro support).
+-   ❌ Nested regions (missing macro support).
 
 ### Step and repeat
 
--   👽 Nested Line, aperture:
-    -   ✅ circle,
-    -   ✅ rectangle,
-    -   ✅ obround,
-    -   ✅ polygon,
+-   ❌ Nested Line, aperture:
+    -   ❌ circle,
+    -   ❌ rectangle,
+    -   ❌ obround,
+    -   ❌ polygon,
     -   ❌ macro.
--   👽 Nested Arc, aperture:
-    -   ✅ circle,
-    -   ✅ rectangle,
-    -   ✅ obround,
-    -   ✅ polygon,
+-   ❌ Nested Arc, aperture:
+    -   ❌ circle,
+    -   ❌ rectangle,
+    -   ❌ obround,
+    -   ❌ polygon,
     -   ❌ macro.
--   👽 Nested Counter clockwise arc, aperture:
-    -   ✅ circle,
-    -   ✅ rectangle,
-    -   ✅ obround,
-    -   ✅ polygon,
+-   ❌ Nested Counter clockwise arc, aperture:
+    -   ❌ circle,
+    -   ❌ rectangle,
+    -   ❌ obround,
+    -   ❌ polygon,
     -   ❌ macro.
--   👽 Nested Flash:
-    -   ✅ circle,
-    -   ✅ rectangle,
-    -   ✅ obround,
-    -   ✅ polygon,
+-   ❌ Nested Flash:
+    -   ❌ circle,
+    -   ❌ rectangle,
+    -   ❌ obround,
+    -   ❌ polygon,
     -   ❌ macro.
--   👽 Nested regions (missing macro support).
--   👽 Nested blocks (missing macro support).
+-   ❌ Nested regions (missing macro support).
+-   ❌ Nested blocks (missing macro support).
 
 ## Supported DEPRECATED Gerber features
 

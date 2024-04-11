@@ -1,4 +1,8 @@
-# PyGerber internal API V1
+# PyGerber internal API V1 (legacy)
+
+!!! warning "Deprecation warning"
+
+    API V1 is legacy API, it will be removed in PyGerber 3.0.
 
 ## Stability
 
