@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
+# Release 2.3.0
+
+- Added full support for transforms (LP, LM, LR, LS commands) in Parser2.
+- Fixed titles in Parser2 and Parser feature support documentation. They were swapped.
+- Fixed bug causing SvgRenderer2 to incorrectly render masks in some cases.
+- Optimized SvgRenderer2 group and mask usage to reduce file size and memory usage of
+  software displaying output SVGs.
+- Fixed parsing of attributes without value.
+- Updated documentation to mention deprecation of API V1 elements and changed order of
+  pages to better expose API V2.
+- Added example files shipped with PyGerber for testing and demonstration purposes. They
+  can be accessed via `pygerber.examples` module.
+- Added new `pygerber.gerberx3.api.v2` module with new high level utilizing API V2
+  capabilities. This module is mend to replace API V1 in future releases.
+- Added new API for rendering multiple Gerber files at once into single image. Available
+  as part of `pygerber.gerberx3.api.v2` module with use of `Project` class.
+
 ## Release 2.2.1
 
 - Fixed rendering of first macro flash.
