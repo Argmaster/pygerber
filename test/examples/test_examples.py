@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import os
+from contextlib import contextmanager
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from test.examples import (
     introspect_minimal_example,
     introspect_mixed_inheritance,
@@ -13,6 +16,7 @@ from test.examples import (
     renderer_2_raster_render,
     renderer_2_svg_render,
 )
+from typing import Generator
 
 import pytest
 
@@ -68,3 +72,32 @@ def test_renderer_2_raster_render() -> None:
 @pytest.mark.skipif(not IS_SVG_BACKEND_AVAILABLE, reason="SVG backend required")
 def test_renderer_2_svg_render() -> None:
     renderer_2_svg_render.render()
+
+
+@contextmanager
+def cd_to_tempdir() -> Generator[None, None, None]:
+    original_cwd = Path.cwd().as_posix()
+
+    with TemporaryDirectory() as tempdir:
+        os.chdir(tempdir)
+        yield
+
+    os.chdir(original_cwd)
+
+
+def test_pygerber_api_v2_svg() -> None:
+    with cd_to_tempdir():
+        exec((DIRECTORY / "pygerber_api_v2_svg.py").read_text())  # noqa: S102
+        assert Path("output.svg").exists()
+
+
+def test_pygerber_api_v2_png() -> None:
+    with cd_to_tempdir():
+        exec((DIRECTORY / "pygerber_api_v2_png.py").read_text())  # noqa: S102
+        assert Path("output.png").exists()
+
+
+def test_pygerber_api_v2_jpg() -> None:
+    with cd_to_tempdir():
+        exec((DIRECTORY / "pygerber_api_v2_jpg.py").read_text())  # noqa: S102
+        assert Path("output.jpg").exists()
