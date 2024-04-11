@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, unique
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Self, TextIO, TypeAlias
+from typing import TYPE_CHECKING, Dict, List, TextIO
 
 from PIL import Image
 
@@ -30,6 +30,8 @@ from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 
 if TYPE_CHECKING:
     from io import BytesIO
+
+    from typing_extensions import Self, TypeAlias
 
 
 @unique
