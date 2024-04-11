@@ -113,119 +113,111 @@ Image will be saved to `output.png` in current working directory.
 
 ![example_pcb_image](https://github.com/Argmaster/pygerber/assets/56170852/9bca28bf-8aa6-4215-aac1-62c386490485)
 
-## API usage
+## Programmatic usage
 
-PyGerber offers a high-level API that simplifies the process of rendering Gerber files.
-Whether you're looking to save the rendered output to a file or directly into a buffer,
-PyGerber has got you covered.
+### JPG
 
-- **The `Layer` Class**: At its core, the `Layer` class stands for a single Gerber
-  source file, complete with its associated PyGerber configuration.
+PyGerber can be used programmatically to render Gerber files. Below is an minimalistic
+example of how to render one of the example files included with PyGerber release to JPEG
+image:
 
-  **Important** `Layer` class represents **any** Gerber file, **not** layer of PCB. For
-  example, silkscreen Gerber file will require one instance of `Layer`, paste mask will
-  require another one, copper top yet another, etc.
+```python
+from pygerber.examples import ExamplesEnum, get_example_path
+from pygerber.gerberx3.api.v2 import GerberFile
 
-- **Configuration Flexibility**: The configuration possibilities you get with a `Layer`
-  are driven by the backend you choose to render your source file.
-
-- **Selecting a Backend**: PyGerber provides specialized subclasses of the `Layer` class
-  each tied to one rendering backend. For instance, if you're aiming for 2D rasterized
-  images, `Rasterized2DLayer` is your go-to choice.
-
-- **Output Types**: Keep in mind, the type of your output file is closely tied to the
-  backend you select.For 2D rasterized rendering
-  [all formats supported by Pillow](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html)
-  are accepted.
-
-### Rasterized render from file
-
-```py linenums="1" title="render_file.py"
-from pygerber.gerberx3.api import (
-      ColorScheme,
-      Rasterized2DLayer,
-      Rasterized2DLayerParams,
-)
-
-# Path to Gerber source file.
-source_path = "main_cu.grb"
-
-Rasterized2DLayer(
-      options=Rasterized2DLayerParams(
-            source_path=source_path,
-            colors=ColorScheme.COPPER_ALPHA,
-      ),
-).render().save("output.png")
+GerberFile.from_file(
+    get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes),
+).parse().render_raster("output.jpg")
 ```
 
-Example code above creates `Rasterized2DLayer` object, renders it with rasterized 2D
-backend and saves it as `PNG` image. Use of `Rasterized2DLayer` and
-`Rasterized2DLayerOptions` classes implicitly use 2D rasterized backend. To use
-different rendering backend with high level API, user must pick different `Layer` and
-`LayerOptions` subclasses. For other backends see
-[Target set of tools](#target-set-of-tools) section, note that only checked ones are
-available.
+Running code above will create `output.jpg` file in current working directory which
+should look like this:
 
-`source_path` option accepts `str` or `Path` pointing to local Gerber file. No special
-file extension is required, content is blindly loaded from specified file, so it's user
-responsibility to provide correct path. There are also `source_code` and `source_buffer`
-parameters which allow for use of raw `str` or `bytes` objects (first one) and
-`StringIO` and `BytesIO` or file descriptors (second one). `source_code`,
-`source_buffer` and `source_path` are mutually exclusive.
+<p align="center">
+  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/d17ebee8-e851-4c86-b110-8cd8aeca993e">
+</p>
 
-`ColorScheme` is a class which describes what colors should be used for rendering
-different parts of image. Additionally it has a few static members which contain
-predefined colors schemes for frequently used layer types. It is not required to use
-predefined schemes, creating and passing custom `ColorScheme` object should work
-perfectly fine.
+### PNG
 
-Pattern of using `<Class>` and `<Class>Options`, like above, is used in many places in
-PyGerber. When initializing object like `Rasterized2DLayer` it is only valid to pass
-`Rasterized2DLayerOptions` to constructor. Passing `LayerOptions` or `Vectorized2DLayer`
-will cause undefined behavior, most likely yielding no result or raising exception.
+It is also possible to render Gerber files to PNG with custom resolution and different
+color schemes:
 
-### Rasterized render from string
+```python
+from pygerber.examples import ExamplesEnum, get_example_path
+from pygerber.gerberx3.api.v2 import ColorScheme, GerberFile, PixelFormatEnum
 
-```py linenums="1" title="render_string.py"
-from pygerber.gerberx3.api import (
-      ColorScheme,
-      Rasterized2DLayer,
-      Rasterized2DLayerParams,
+GerberFile.from_file(
+    get_example_path(ExamplesEnum.ShapeFlashes),
+).parse().render_raster(
+    "output.png",
+    dpmm=100,
+    color_scheme=ColorScheme.COPPER_ALPHA,
+    pixel_format=PixelFormatEnum.RGBA,
 )
-
-source_code = """
-%FSLAX26Y26*%
-%MOMM*%
-%ADD100R,1.5X1.0X0.5*%
-%ADD200C,1.5X1.0*%
-%ADD300O,1.5X1.0X0.6*%
-%ADD400P,1.5X3X5.0*%
-D100*
-X0Y0D03*
-D200*
-X0Y2000000D03*
-D300*
-X2000000Y0D03*
-D400*
-X2000000Y2000000D03*
-M02*
-"""
-
-Rasterized2DLayer(
-      options=Rasterized2DLayerParams(
-            source_code=source_code,
-            colors=ColorScheme.SILK,
-            dpi=3000,
-      ),
-).render().save("output.png")
-
 ```
 
 Code above renders following image:
 
 <p align="center">
-  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/56b6757b-0f97-4a18-9d43-f21711c71c71">
+  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/0a5a42f3-8792-4b9a-be61-bac12f0e1c03">
 </p>
+
+### SVG
+
+Finally you can also create SVG files with PyGerber:
+
+```python
+from pygerber.examples import ExamplesEnum, load_example
+from pygerber.gerberx3.api.v2 import GerberFile
+
+source_code = load_example(ExamplesEnum.UCAMCO_ex_2_Shapes)
+GerberFile.from_str(source_code).parse().render_svg("output.svg")
+
+```
+
+### Multiple layers
+
+PyGerber can also render multiple layers to single image. Below is an example of how to
+render four layers to single PNG image with use of `Project` class:
+
+```python
+from pygerber.examples import ExamplesEnum, load_example
+from pygerber.gerberx3.api.v2 import FileTypeEnum, GerberFile, Project
+
+Project(
+    [
+        GerberFile.from_str(
+            load_example(ExamplesEnum.simple_2layer_F_Cu),
+            FileTypeEnum.COPPER,
+        ),
+        GerberFile.from_str(
+            load_example(ExamplesEnum.simple_2layer_F_Mask),
+            FileTypeEnum.MASK,
+        ),
+        GerberFile.from_str(
+            load_example(ExamplesEnum.simple_2layer_F_Paste),
+            FileTypeEnum.PASTE,
+        ),
+        GerberFile.from_str(
+            load_example(ExamplesEnum.simple_2layer_F_Silkscreen),
+            FileTypeEnum.SILK,
+        ),
+    ],
+).parse().render_raster("output.png", dpmm=40)
+```
+
+Here is the result:
+
+<p align="center">
+  <img width="414" height="384" src="https://github.com/Argmaster/pygerber/assets/56170852/9b3f3823-67b3-49f1-8c76-e2bddaca81fe">
+</p>
+
+### Advanced usage
+
+Additionally to examples presented above which use high level API, PyGerber provides low
+level API which allows to directly access PyGerber internals and change behavior of
+parser, tokenizer and renderers. This can be used for code introspection and potentially
+other purposed. Check out documentation for more information.
 
 ## Documentation
 
