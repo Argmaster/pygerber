@@ -3,8 +3,8 @@
 ## Introduction
 
 Tokenizer class is responsible for converting input Gerber string into sequence of
-tokens suitable for consumption by Parser class. Tokenizer class is compatible with both
-Parser and Parser2 classes.
+tokens suitable for consumption by `Parser` class. Tokenizer class is compatible with
+both `Parser` and `Parser2` classes.
 
 !!! tip "Contributing"
 
