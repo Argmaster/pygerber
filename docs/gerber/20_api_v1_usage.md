@@ -1,4 +1,8 @@
-# Public API Usage
+# API V1 Usage (legacy)
+
+!!! warning "Deprecation warning"
+
+    This is a legacy Gerber API, it will be removed in PyGerber 3.0.
 
 PyGerber offers simple high-level API for rendering Gerber files. All necessary tools
 can be imported from `pygerber.gerberx3.api` module. See
