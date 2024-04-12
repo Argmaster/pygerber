@@ -69,6 +69,10 @@ class Offset(FrozenGeneralModel):
         """Offset in pixels with respect to drawing DPI."""
         return int(self.as_inches() * dpi)
 
+    def sqrt(self) -> Offset:
+        """Return square root of the offset."""
+        return Offset(value=self.value.sqrt())
+
     def _compare(
         self,
         other: object,
@@ -120,6 +124,9 @@ class Offset(FrozenGeneralModel):
 
     def __neg__(self) -> Offset:
         return Offset(value=-self.value)
+
+    def __pow__(self, other: object) -> Offset:
+        return self._operator(other, operator.pow)
 
     def _i_operator(
         self,

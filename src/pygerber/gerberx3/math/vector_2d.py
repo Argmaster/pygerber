@@ -73,6 +73,8 @@ class Vector2D(FrozenGeneralModel):
 
     def get_rotated(self, angle: Decimal) -> Self:
         """Get copy of this vector rotated around (0, 0)."""
+        if angle == Decimal("0.0"):
+            return self
         return self.rotate_around_origin(angle)
 
     def get_scaled(self, scale: Decimal) -> Vector2D:
