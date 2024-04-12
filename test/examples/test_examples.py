@@ -78,11 +78,10 @@ def test_renderer_2_svg_render() -> None:
 def cd_to_tempdir() -> Generator[None, None, None]:
     original_cwd = Path.cwd().as_posix()
 
-    with TemporaryDirectory(ignore_cleanup_errors=True) as tempdir:
+    with TemporaryDirectory() as tempdir:
         os.chdir(tempdir)
         yield
-
-    os.chdir(original_cwd)
+        os.chdir(original_cwd)
 
 
 def test_pygerber_api_v2_svg() -> None:
