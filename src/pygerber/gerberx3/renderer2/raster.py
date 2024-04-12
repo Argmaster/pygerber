@@ -620,7 +620,10 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
 
             self.frame.rounded_rectangle(
                 Polarity.Dark,
-                self.convert_bbox(command.get_bounding_box()),
+                self.convert_bbox(
+                    BoundingBox.from_rectangle(aperture.x_size, aperture.y_size)
+                    + command.flash_point,
+                ),
                 radius=min(
                     self.convert_size(aperture.x_size),
                     self.convert_size(aperture.y_size),
