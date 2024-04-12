@@ -1,6 +1,8 @@
 """Utility class for calculating bounding boxes of drawing elements."""
+
 from __future__ import annotations
 
+import math
 import operator
 from decimal import Decimal
 from typing import Callable, ClassVar, Tuple
@@ -70,6 +72,10 @@ class BoundingBox(FrozenGeneralModel):
     def get_min_vector(self) -> Vector2D:
         """Return Vector2D of min_x and min_y."""
         return Vector2D(x=self.min_x, y=self.min_y)
+
+    def get_max_vector(self) -> Vector2D:
+        """Return Vector2D of min_x and min_y."""
+        return Vector2D(x=self.max_x, y=self.max_y)
 
     def as_pixel_box(
         self,
@@ -154,6 +160,28 @@ class BoundingBox(FrozenGeneralModel):
             max_y=new_max_y,
             min_x=new_min_x,
             min_y=new_min_y,
+        )
+
+    def get_rotated(self, angle: Decimal) -> BoundingBox:
+        """Return bounding box rotated around (0, 0)."""
+        angle_radians = math.radians(angle)
+        max_x = self.max_x * math.cos(angle_radians) - self.max_y * math.sin(
+            angle_radians,
+        )
+        max_y = self.max_x * math.sin(angle_radians) - self.max_y * math.cos(
+            angle_radians,
+        )
+        min_x = self.min_x * math.cos(angle_radians) - self.min_y * math.sin(
+            angle_radians,
+        )
+        min_y = self.min_x * math.sin(angle_radians) - self.min_y * math.cos(
+            angle_radians,
+        )
+        return BoundingBox(
+            max_x=max(max_x, min_x),
+            max_y=max(max_y, min_y),
+            min_x=min(max_x, min_x),
+            min_y=min(max_y, min_y),
         )
 
 

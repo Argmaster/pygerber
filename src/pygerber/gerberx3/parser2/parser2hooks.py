@@ -1,4 +1,5 @@
 """Implementation of hooks for Gerber AST Parser, version 2."""
+
 # ruff: noqa: D401
 from __future__ import annotations
 
@@ -187,6 +188,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_macro_statement_buffer()
             return super().on_parser_visit_token(token, context)
@@ -494,6 +496,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             stmt_buff = context.get_macro_statement_buffer()
             macro_name = token.macro_name
@@ -523,6 +526,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.push_block_command_buffer()
             # Save state from before block definition started.
@@ -552,6 +556,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             command_buffer = context.pop_block_command_buffer()
             identifier = context.get_aperture_block_id()
@@ -590,6 +595,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             hole_diameter = (
                 None
@@ -628,6 +634,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             hole_diameter = (
                 None
@@ -667,6 +674,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             hole_diameter = (
                 None
@@ -706,6 +714,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             hole_diameter = (
                 None
@@ -748,6 +757,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             macro = context.get_macro(token.aperture_type)
             context.set_macro_eval_buffer()
@@ -907,7 +917,7 @@ class Parser2Hooks(Parser2HooksBase):
                             )
                         ],
                     ).get_readonly(),
-                ),
+                ).get_rotated(primitive.rotation.on_parser2_eval_expression(context)),
             )
 
         def on_code_5_polygon(
@@ -955,7 +965,7 @@ class Parser2Hooks(Parser2HooksBase):
                             context.get_draw_units(),
                         ),
                     ),
-                ),
+                ).get_rotated(primitive.rotation.on_parser2_eval_expression(context)),
             )
 
         def on_code_6_moire(
@@ -1020,7 +1030,7 @@ class Parser2Hooks(Parser2HooksBase):
                             context.get_draw_units(),
                         ),
                     ),
-                ),
+                ).get_rotated(primitive.rotation.on_parser2_eval_expression(context)),
             )
 
         def on_code_21_center_line(
@@ -1065,7 +1075,7 @@ class Parser2Hooks(Parser2HooksBase):
                             context.get_draw_units(),
                         ),
                     ),
-                ),
+                ).get_rotated(primitive.rotation.on_parser2_eval_expression(context)),
             )
 
         def on_code_22_lower_left_line(
@@ -1103,6 +1113,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context on which to perform the actions.
+
             """
             context.set_axis_correspondence(token.correspondence)
             return super().on_parser_visit_token(token, context)
@@ -1125,6 +1136,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             self.DRAW_MODE_DISPATCH_TABLE[context.get_draw_mode()](self, token, context)
             return super().on_parser_visit_token(token, context)
@@ -1144,6 +1156,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             state = context.get_state()
 
@@ -1185,6 +1198,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             state = context.get_state()
 
@@ -1274,6 +1288,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             state = context.get_state()
 
@@ -1366,6 +1381,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             state = context.get_state()
 
@@ -1395,6 +1411,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             state = context.get_state()
 
@@ -1449,6 +1466,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_current_aperture_id(token.aperture_id)
             return super().on_parser_visit_token(token, context)
@@ -1471,6 +1489,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_coordinate_parser(
                 CoordinateParser.new(
@@ -1499,6 +1518,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_draw_mode(DrawMode.Linear)
             return super().on_parser_visit_token(token, context)
@@ -1523,6 +1543,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_draw_mode(DrawMode.ClockwiseCircular)
             return super().on_parser_visit_token(token, context)
@@ -1547,6 +1568,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_draw_mode(DrawMode.CounterclockwiseCircular)
             return super().on_parser_visit_token(token, context)
@@ -1572,6 +1594,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_is_region(is_region=True)
             context.set_region_command_buffer()
@@ -1596,6 +1619,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_is_region(is_region=False)
             command_buffer = context.get_region_command_buffer()
@@ -1632,6 +1656,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             self.hooks.select_aperture.on_parser_visit_token(token, context)
             return super().on_parser_visit_token(token, context)
@@ -1654,6 +1679,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_draw_units(Unit.Inches)
             return super().on_parser_visit_token(token, context)
@@ -1676,6 +1702,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_draw_units(Unit.Millimeters)
             return super().on_parser_visit_token(token, context)
@@ -1700,6 +1727,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_is_multi_quadrant(is_multi_quadrant=False)
             return super().on_parser_visit_token(token, context)
@@ -1724,6 +1752,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_is_multi_quadrant(is_multi_quadrant=True)
             return super().on_parser_visit_token(token, context)
@@ -1748,6 +1777,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             # NOOP - only absolute format supported.
             return super().on_parser_visit_token(token, context)
@@ -1772,6 +1802,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             raise IncrementalCoordinatesNotSupported2Error
 
@@ -1793,6 +1824,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_image_name(token.content)
             return super().on_parser_visit_token(token, context)
@@ -1818,6 +1850,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_is_output_image_negation_required(
                 value=(token.image_polarity == ImagePolarityEnum.NEGATIVE),
@@ -1842,6 +1875,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_mirroring(token.mirroring)
             return super().on_parser_visit_token(token, context)
@@ -1864,6 +1898,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_file_name(token.content)
             return super().on_parser_visit_token(token, context)
@@ -1886,6 +1921,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_polarity(token.polarity)
             return super().on_parser_visit_token(token, context)
@@ -1908,6 +1944,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_rotation(token.rotation)
             return super().on_parser_visit_token(token, context)
@@ -1930,6 +1967,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_scaling(token.scaling)
             return super().on_parser_visit_token(token, context)
@@ -1952,6 +1990,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_reached_program_stop()
             context.halt_parser()
@@ -1985,6 +2024,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_reached_end_of_file()
             context.halt_parser()
@@ -2007,6 +2047,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_draw_units(token.unit)
             return super().on_parser_visit_token(token, context)
@@ -2032,6 +2073,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_state_before_step_and_repeat()
 
@@ -2062,6 +2104,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             if context.get_is_step_and_repeat() is False:
                 raise StepAndRepeatNotInitializedError(token)
@@ -2112,6 +2155,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_aperture_attribute(token.name, token.value)
             return super().on_parser_visit_token(token, context)
@@ -2134,6 +2178,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             if token.name is not None:
                 context.delete_aperture_attribute(token.name)
@@ -2161,6 +2206,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_file_attribute(token.name, token.value)
             return super().on_parser_visit_token(token, context)
@@ -2183,6 +2229,7 @@ class Parser2Hooks(Parser2HooksBase):
                 The token that is being visited.
             context : Parser2Context
                 The context object containing information about the parser state.
+
             """
             context.set_object_attribute(token.name, token.value)
             return super().on_parser_visit_token(token, context)

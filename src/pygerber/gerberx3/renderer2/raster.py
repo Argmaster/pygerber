@@ -576,10 +576,27 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
                 .set_command_buffer_from_list([command])
                 .build(),
             )
+            max_xy = command.flash_point + Vector2D(
+                x=aperture.x_size / 2,
+                y=aperture.y_size / 2,
+            )
 
-            self.frame.rectangle(
+            min_xy = command.flash_point - Vector2D(
+                x=aperture.x_size / 2,
+                y=aperture.y_size / 2,
+            )
+
+            start_xy = min_xy.get_rotated(aperture.rotation)
+            end_xy = max_xy.get_rotated(aperture.rotation)
+
+            self.frame.polygon(
                 Polarity.Dark,
-                self.convert_bbox(command.get_bounding_box()),
+                (
+                    (self.convert_x(start_xy.x), self.convert_y(start_xy.y)),
+                    (self.convert_x(end_xy.x), self.convert_y(start_xy.y)),
+                    (self.convert_x(end_xy.x), self.convert_y(end_xy.y)),
+                    (self.convert_x(start_xy.x), self.convert_y(end_xy.y)),
+                ),
             )
             self._make_hole(command, aperture)
 
