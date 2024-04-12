@@ -1,4 +1,5 @@
 """Parser level abstraction of circle aperture info for Gerber AST parser, version 2."""
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -55,7 +56,3 @@ class NoCircle2(Circle2):
     def render_flash(self, renderer: Renderer2, command: Flash2) -> None:
         """Render draw operation."""
         renderer.hooks.render_flash_no_circle(command, self)
-
-    def get_bounding_box(self) -> BoundingBox:
-        """Get bounding box of draw operation."""
-        return BoundingBox.NULL
