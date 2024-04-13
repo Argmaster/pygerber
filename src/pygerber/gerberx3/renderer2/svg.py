@@ -64,7 +64,6 @@ if IS_SVG_BACKEND_AVAILABLE:
     class SvgRenderingFrame:
         """Rendering variable container."""
 
-        command_buffer: ReadonlyCommandBuffer2
         bounding_box: BoundingBox
         normalize_origin_to_0_0: bool
         mask: drawsvg.Mask = field(default_factory=drawsvg.Mask)
@@ -114,7 +113,6 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         self.command_buffer = command_buffer
         self.rendering_stack: list[SvgRenderingFrame] = [
             SvgRenderingFrame(
-                command_buffer=self.command_buffer,
                 bounding_box=self.command_buffer.get_bounding_box(),
                 normalize_origin_to_0_0=True,
                 flip_y=self.flip_y,
@@ -124,7 +122,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
     def push_render_frame(
         self,
-        cmd: ReadonlyCommandBuffer2,
+        bbox: BoundingBox,
         *,
         normalize_origin_to_0_0: bool,
         flip_y: bool,
@@ -132,8 +130,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         """Push new segment render frame."""
         self.rendering_stack.append(
             SvgRenderingFrame(
-                command_buffer=cmd,
-                bounding_box=cmd.get_bounding_box(),
+                bounding_box=bbox,
                 normalize_origin_to_0_0=normalize_origin_to_0_0,
                 flip_y=flip_y,
             ),
@@ -207,10 +204,10 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         mask = drawsvg.Mask()
         mask.append(
             drawsvg.Rectangle(
-                x=0,
-                y=0,
-                width=self.convert_size(bbox.width),
-                height=self.convert_size(bbox.height),
+                x=self.convert_size(-bbox.width / 2),
+                y=self.convert_size(-bbox.height / 2),
+                width=self.convert_size(bbox.width * 2),
+                height=self.convert_size(bbox.height * 2),
                 fill="white",
             ),
         )
@@ -553,6 +550,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     self.convert_size(aperture.x_size),
                     self.convert_size(aperture.y_size),
                     fill=color,
+                    transform=f"rotate({aperture.rotation})",
                 ),
             )
             self.set_aperture(aperture_id, aperture_group)
@@ -591,6 +589,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     fill=color,
                     rx=radius,
                     ry=radius,
+                    transform=f"rotate({aperture.rotation})",
                 ),
             )
             self.set_aperture(aperture_id, aperture_group)
@@ -662,7 +661,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
         if aperture_group is None:
             self.push_render_frame(
-                aperture.command_buffer,
+                command.get_bounding_box(),
                 normalize_origin_to_0_0=False,
                 flip_y=False,
             )
