@@ -22,6 +22,7 @@ class Rasterized2DResultHandle(ResultHandle):
         ----------
         result : Image.Image
             Image object containing finished Gerber image.
+
         """
         super().__init__()
         self.result = result
@@ -40,6 +41,7 @@ class Rasterized2DResultHandle(ResultHandle):
         **kwargs: Any
             Extra parameters which will be passed to `Image.save()`.
             For details see [Pillow documentation](https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save).
+
         """
         image = self.get_image()
         if (isinstance(dest, Path) and dest.suffix in (".jpg", "jpeg")) or (

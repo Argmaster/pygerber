@@ -36,6 +36,7 @@ class Parser2:
         ----------
         options : ParserOptions | None
             Additional options for modifying parser behavior.
+
         """
         self.options = Parser2Options() if options is None else options
         self.is_used = False

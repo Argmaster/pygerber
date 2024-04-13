@@ -84,6 +84,7 @@ class State2Constants(FrozenGeneralModel):
         ------
         UnitNotSet2Error
             If the draw units are not set.
+
         """
         if self.draw_units is None:
             raise UnitNotSet2Error
@@ -104,6 +105,7 @@ class State2Constants(FrozenGeneralModel):
         -------
         Self
             A new instance of the state with the updated draw units.
+
         """
         return self.model_copy(
             update={
@@ -392,6 +394,7 @@ class State2DrawFlags(FrozenGeneralModel):
         -------
         Optional[ApertureID]
             The ID of the current aperture block, or None if no aperture block is set.
+
         """
         return self.aperture_block_id
 
@@ -412,6 +415,7 @@ class State2DrawFlags(FrozenGeneralModel):
         -------
         State2DrawFlags
             A new instance of the State2DrawFlags with the updated flag.
+
         """
         return self.model_copy(
             update={
@@ -865,6 +869,7 @@ class State2(FrozenGeneralModel):
         -------
         Offset
             The parsed coordinate converted to an Offset object.
+
         """
         if coordinate.coordinate_type == CoordinateType.MISSING_X:
             return self.current_position.x

@@ -115,7 +115,7 @@ def test_set_aperture_block_id() -> None:
 
 def test_set_is_step_and_repeat() -> None:
     state = State2()
-    new_state = state.set_is_step_and_repeat(True)  # noqa: FBT003
+    new_state = state.set_is_step_and_repeat(True)
     assert new_state.get_is_step_and_repeat() is True
 
 

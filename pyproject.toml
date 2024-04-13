@@ -133,8 +133,8 @@ target-version = ['py38']
 extend-exclude = '\.pyi?$'
 
 [tool.ruff]
-select = ["ALL"]
-ignore = [
+lint.select = ["ALL"]
+lint.ignore = [
     "ANN401",
     "ANN101",
     "ANN102",
@@ -152,21 +152,21 @@ show-fixes = true
 target-version = "py38"
 src = ["src", "test"]
 
-[tool.ruff.pylint]
+[tool.ruff.lint.pylint]
 max-args = 8
 
-[tool.ruff.pyupgrade]
+[tool.ruff.lint.pyupgrade]
 # Preserve types, even if a file imports `from __future__ import annotations`.
 keep-runtime-typing = true
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.flake8-tidy-imports]
+[tool.ruff.lint.flake8-tidy-imports]
 # Disallow all relative imports.
 ban-relative-imports = "all"
 
-[tool.ruff.flake8-type-checking]
+[tool.ruff.lint.flake8-type-checking]
 runtime-evaluated-base-classes = [
     "pydantic.BaseModel",
     "FrozenGeneralModel",

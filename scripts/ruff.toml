@@ -1,4 +1,5 @@
 extend = "../pyproject.toml"
+[lint]
 ignore = [
     "D", # Only limited docstrings are required.
 ]

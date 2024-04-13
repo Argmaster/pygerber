@@ -227,6 +227,7 @@ class TokenHooksBase(Generic[TokenT]):
             The token that will be visited.
         context : Parser2Context
             The context object containing information about the parser state.
+
         """
 
     def on_parser_visit_token(
@@ -244,6 +245,7 @@ class TokenHooksBase(Generic[TokenT]):
             The token that is being visited.
         context : Parser2Context
             The context object containing information about the parser state.
+
         """
 
     def post_parser_visit_token(
@@ -259,6 +261,7 @@ class TokenHooksBase(Generic[TokenT]):
             The token that was visited.
         context : Parser2Context
             The context object containing information about the parser state.
+
         """
 
 

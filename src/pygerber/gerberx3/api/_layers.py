@@ -79,6 +79,7 @@ class LayerParams(BaseModel):
         MutuallyExclusiveViolationError
             When more than one of mutually exclusive `source_path`, `source_code` and
             `source_buffer` is provided to constructor.
+
         """
         if self.source_path:
             if self.source_code or self.source_buffer:
@@ -141,6 +142,7 @@ class Layer:
         ----------
         options: LayerOptions
             Configuration of layer.
+
         """
         self.options = options
 
@@ -259,6 +261,7 @@ class RenderingResult:
             Extra parameters which will be passed to saving implementation.
             When dest is BytesIO or alike, `format` option must be specified.
             For Rasterized2D rendering options see [Pillow documentation](https://pillow.readthedocs.io/en/stable/reference/Image.html#PIL.Image.Image.save).
+
         """
         self._result_handle.save(dest, **options)
 

@@ -49,6 +49,7 @@ class RGBA(FrozenGeneralModel):
         -------
         RGBA
             Color built from hexadecimal values.
+
         """
         if string[0] == "#":
             string = string[1:]
@@ -83,6 +84,7 @@ class RGBA(FrozenGeneralModel):
         -------
         Self
             Color built from r, g, b, a values.
+
         """
         return cls(r=r, g=g, b=b, a=a)
 
@@ -113,6 +115,7 @@ class RGBA(FrozenGeneralModel):
         -------
         Self
             Color built from h, s, v, a values.
+
         """
         h %= 360
         s /= 100

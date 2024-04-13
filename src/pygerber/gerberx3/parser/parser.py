@@ -36,6 +36,7 @@ class Parser:
         ----------
         options : ParserOptions | None
             Additional options for modifying parser behavior.
+
         """
         self.options = ParserOptions() if options is None else options
         self.state = (

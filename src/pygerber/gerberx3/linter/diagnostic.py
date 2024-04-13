@@ -26,7 +26,7 @@ class Location(FrozenGeneralModel):
 
     uri: str
 
-    range: Range  # noqa: A003
+    range: Range
 
     def __repr__(self) -> str:
         return f"{self.uri}:{self.range!r}"
@@ -78,7 +78,7 @@ class DiagnosticSeverity(int, enum.Enum):
 
     Error = 1
     """Reports an error."""
-    Warning = 2  # noqa: A003
+    Warning = 2
     """Reports a warning."""
     Information = 3
     """Reports an information."""
@@ -146,7 +146,7 @@ class Diagnostic(FrozenGeneralModel):
     are only valid in the scope of a resource.
     """
 
-    range: Range  # noqa: A003
+    range: Range
     """The range at which the message applies"""
 
     message: str
