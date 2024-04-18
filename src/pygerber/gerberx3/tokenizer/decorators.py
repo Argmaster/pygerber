@@ -1,4 +1,5 @@
 """Decorators for reducing boilerplate required to implement token features."""
+
 from __future__ import annotations
 
 from typing import Generic, TypeVar

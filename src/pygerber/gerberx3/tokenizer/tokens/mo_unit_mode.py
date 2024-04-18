@@ -1,4 +1,5 @@
 """Wrapper for set unit mode token."""
+
 from __future__ import annotations
 
 import logging

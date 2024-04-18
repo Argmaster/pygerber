@@ -1,4 +1,5 @@
 """Parser level abstraction of flash operation for Gerber AST parser, version 2."""
+
 from __future__ import annotations
 
 from decimal import Decimal

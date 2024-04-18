@@ -6,6 +6,7 @@ everything what can be composed into more complicated structures, but doesn't ap
 alone as a macro content. Expressions can be reduced to numerical value during macro
 evaluation.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

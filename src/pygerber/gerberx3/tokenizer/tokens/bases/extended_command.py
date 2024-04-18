@@ -1,6 +1,5 @@
 """Base class for all extended commands."""
 
-
 from __future__ import annotations
 
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token

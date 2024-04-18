@@ -1,4 +1,5 @@
 """Command line commands of PyGerber."""
+
 from __future__ import annotations
 
 from pathlib import Path

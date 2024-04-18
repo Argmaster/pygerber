@@ -1,6 +1,5 @@
 """Tokenizer tests based on ATMEGA328-Motor-Board board."""
 
-
 from __future__ import annotations
 
 from test.gerberx3.test_tokenizer.common import make_tokenizer_test

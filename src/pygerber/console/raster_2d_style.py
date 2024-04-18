@@ -1,4 +1,5 @@
 """Tool for converting style string to ColorScheme objects."""
+
 from __future__ import annotations
 
 from typing import Optional

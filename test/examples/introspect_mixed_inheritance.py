@@ -1,4 +1,5 @@
 """Example for introspection with selective inheritance from Parser2HooksBase and Parser2Hooks."""
+
 from __future__ import annotations
 
 from pygerber.gerberx3.parser2.attributes2 import ApertureAttributes
@@ -39,9 +40,9 @@ class CustomHooks(Parser2HooksBase):
             token: DefineAnyT,
             context: Parser2Context,
         ) -> None:
-            self.hooks.aperture_attributes[
-                token.aperture_id
-            ] = context.aperture_attributes
+            self.hooks.aperture_attributes[token.aperture_id] = (
+                context.aperture_attributes
+            )
             return super().on_parser_visit_token(token, context)
 
 

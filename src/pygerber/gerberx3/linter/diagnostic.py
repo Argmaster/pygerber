@@ -1,4 +1,5 @@
 """Container for diagnostic info."""
+
 from __future__ import annotations
 
 import enum

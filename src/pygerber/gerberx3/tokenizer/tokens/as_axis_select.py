@@ -15,7 +15,6 @@ Function of the `LN` command:
 SPEC: `2023.03` SECTION: `8.1.6`
 """
 
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterable, Tuple

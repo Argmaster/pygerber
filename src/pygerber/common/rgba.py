@@ -2,6 +2,7 @@
 
 This module contains RGBA class which can be used to provide such color.
 """
+
 from __future__ import annotations
 
 from decimal import Decimal

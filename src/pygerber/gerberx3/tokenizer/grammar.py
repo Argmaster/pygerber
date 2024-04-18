@@ -210,9 +210,9 @@ class GerberGrammarBuilderOptions(GrammarBuilderOptions):
     fs_coordinate_format_token_cls: Type[Token] = CoordinateFormat
     g01_set_linear_token_cls: Type[Token] = SetLinear
     g02_set_clockwise_circular_token_cls: Type[Token] = SetClockwiseCircular
-    g03_set_counterclockwise_circular_token_cls: Type[
-        Token
-    ] = SetCounterclockwiseCircular
+    g03_set_counterclockwise_circular_token_cls: Type[Token] = (
+        SetCounterclockwiseCircular
+    )
     g04_comment_token_cls: Type[Token] = Comment
     g36_begin_region_token_cls: Type[Token] = BeginRegion
     g37_end_region_token_cls: Type[Token] = EndRegion

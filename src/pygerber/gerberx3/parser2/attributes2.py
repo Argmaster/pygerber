@@ -1,4 +1,5 @@
 """Attribute dictionaries for Gerber X3 parser."""
+
 from __future__ import annotations
 
 import datetime

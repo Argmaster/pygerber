@@ -1,4 +1,5 @@
 """Container for two macro expressions tied together as point in 2D space."""
+
 from __future__ import annotations
 
 from pygerber.gerberx3.parser2.macro2.element2 import Element2

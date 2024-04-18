@@ -1,4 +1,5 @@
 """Module contains class `StatementBuffer2 for macro statements."""
+
 from __future__ import annotations
 
 from typing import Iterator, List

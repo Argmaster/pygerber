@@ -1,4 +1,5 @@
 """Module contains model class wrapping immutable mapping."""
+
 from __future__ import annotations
 
 from types import MappingProxyType

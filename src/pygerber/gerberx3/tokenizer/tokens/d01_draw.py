@@ -1,4 +1,5 @@
 """Plot (D01) logic."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Generator, Iterable, Tuple

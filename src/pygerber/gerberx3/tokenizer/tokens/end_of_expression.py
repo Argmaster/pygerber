@@ -1,4 +1,5 @@
 """Wrapper for G74 token."""
+
 from __future__ import annotations
 
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token

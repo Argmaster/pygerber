@@ -1,4 +1,5 @@
 """Implementation of Gerber AST parser, version 2."""
+
 from __future__ import annotations
 
 import logging

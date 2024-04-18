@@ -1,4 +1,5 @@
 """Rectangle component for creating apertures."""
+
 from __future__ import annotations
 
 import logging

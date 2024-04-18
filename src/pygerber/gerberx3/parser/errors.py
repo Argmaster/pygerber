@@ -1,6 +1,5 @@
 """Base error classes used in this module."""
 
-
 from __future__ import annotations
 
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token

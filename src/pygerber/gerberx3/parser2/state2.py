@@ -5,6 +5,7 @@ for cheap storage and updates of parser state, as whenever parser state is updat
 one value must be changed, while rest of the structures remain unchanged and only
 references to them are copied.
 """
+
 from __future__ import annotations
 
 from decimal import Decimal

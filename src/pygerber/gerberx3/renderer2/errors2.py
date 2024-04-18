@@ -1,4 +1,5 @@
 """Module contains exceptions raised by rendering backends."""
+
 from __future__ import annotations
 
 

@@ -1,4 +1,5 @@
 """All language server specific error classes."""
+
 from __future__ import annotations
 
 

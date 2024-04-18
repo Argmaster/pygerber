@@ -1,6 +1,5 @@
 """tests based on ATMEGA328-Motor-Board board."""
 
-
 from __future__ import annotations
 
 from test.gerberx3.test_parser2.common import make_parser2_test

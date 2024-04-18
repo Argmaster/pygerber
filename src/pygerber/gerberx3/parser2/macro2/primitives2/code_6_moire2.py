@@ -1,4 +1,5 @@
 """Macro primitive Moire."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

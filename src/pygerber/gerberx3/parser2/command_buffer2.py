@@ -1,4 +1,5 @@
 """Module contains definition of class for buffering draw commands."""
+
 from __future__ import annotations
 
 import textwrap

@@ -1,6 +1,7 @@
 """`enums` module contains Exposure2 enumeration containing possible macro primitive
 exposures.
 """
+
 from __future__ import annotations
 
 from enum import Enum

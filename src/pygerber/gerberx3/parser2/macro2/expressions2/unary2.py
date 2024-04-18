@@ -1,4 +1,5 @@
 """`unary2` module contain classes wrapping unary operations within macro."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

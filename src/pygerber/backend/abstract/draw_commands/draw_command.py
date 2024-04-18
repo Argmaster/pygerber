@@ -1,4 +1,5 @@
 """Base class for creating components for aperture creation."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

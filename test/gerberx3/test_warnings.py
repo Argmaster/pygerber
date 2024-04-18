@@ -1,4 +1,5 @@
 """Test warnings in code."""
+
 from __future__ import annotations
 
 import logging

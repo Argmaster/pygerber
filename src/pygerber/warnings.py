@@ -1,4 +1,5 @@
 """Tools for displaying warnings."""
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """Common exception related tools."""
+
 from __future__ import annotations
 
 from typing import NoReturn

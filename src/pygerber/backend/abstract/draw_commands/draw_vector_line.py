@@ -4,6 +4,7 @@ This module defines the base class for creating vector line components
 used in drawing creation. The main class, `DrawVectorLine`, represents
 a vector line defined by its start and end positions and width.
 """
+
 from __future__ import annotations
 
 from pygerber.backend.abstract.backend_cls import Backend

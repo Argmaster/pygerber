@@ -1,4 +1,5 @@
 """Global drawing state containing configuration which can be altered by tokens."""
+
 from __future__ import annotations
 
 from decimal import Decimal

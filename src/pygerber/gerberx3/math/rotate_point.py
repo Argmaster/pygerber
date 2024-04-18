@@ -1,4 +1,5 @@
 """Tool for rotating point around center."""
+
 from __future__ import annotations
 
 from math import cos, sin

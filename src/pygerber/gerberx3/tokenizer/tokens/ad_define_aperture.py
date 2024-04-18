@@ -15,6 +15,7 @@ convey the meta information. Certainly do not abuse a zero-size object to indica
 absence of an object, e.g. by flashing a zero-size aperture to indicate the absence of
 a pad. This is just confusing. If there is nothing, put nothing.
 """
+
 from __future__ import annotations
 
 from decimal import Decimal

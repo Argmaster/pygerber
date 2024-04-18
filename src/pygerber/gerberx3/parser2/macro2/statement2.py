@@ -4,6 +4,7 @@ A statement is everything what have to appear alone, for example a primitive or 
 variable assignment. Statements by themselves can't be reduced to numerical value during
 macro evaluation.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

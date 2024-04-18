@@ -1,4 +1,5 @@
 """Parser hooks interface class, for Gerber AST parser, version 2."""
+
 # ruff: noqa: D401
 from __future__ import annotations
 

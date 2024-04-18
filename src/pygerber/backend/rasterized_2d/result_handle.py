@@ -1,4 +1,5 @@
 """Module contains handle class to drawing instructions visualization."""
+
 from __future__ import annotations
 
 from pathlib import Path

@@ -1,4 +1,5 @@
 """Defines a class used to identify aperture objects created by parser."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any

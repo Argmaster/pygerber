@@ -40,9 +40,6 @@ jobs:
       - name: Install dependencies
         run: poetry install --with=docs --no-cache --sync
 
-      - name: Install Mike
-        run: poetry run pip install mike
-
       - name: Configure Git
         run: |
           git config user.name github-actions

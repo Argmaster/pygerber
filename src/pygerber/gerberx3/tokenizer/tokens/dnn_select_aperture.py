@@ -1,4 +1,5 @@
 """Wrapper for aperture select token."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterable, Tuple

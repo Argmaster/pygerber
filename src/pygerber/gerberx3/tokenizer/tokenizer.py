@@ -4,6 +4,7 @@ Parser is based on GerberX3 format described in Ucamco's `The Gerber Layer Forma
 Specification`.
 
 """
+
 from __future__ import annotations
 
 import logging

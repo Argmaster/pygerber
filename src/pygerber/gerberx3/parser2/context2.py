@@ -1,4 +1,5 @@
 """Gerber AST parser, version 2, parsing context."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

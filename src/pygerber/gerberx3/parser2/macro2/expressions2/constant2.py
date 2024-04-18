@@ -1,4 +1,5 @@
 """`constant2` module contain class wrapping constant value in macro definition."""
+
 from __future__ import annotations
 
 from decimal import Decimal  # noqa: TCH003

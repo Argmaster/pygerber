@@ -1,4 +1,5 @@
 """Backend for rasterized rendering of Gerber files."""
+
 from __future__ import annotations
 
 from decimal import Decimal

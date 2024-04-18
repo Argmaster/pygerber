@@ -1,6 +1,7 @@
 """`pygerber.gerberx3.api` module provides simple, high-level API for rendering
 Gerber X3/X2 files.
 """
+
 from __future__ import annotations
 
 from pygerber.backend.rasterized_2d.color_scheme import ColorScheme

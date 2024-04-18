@@ -1091,9 +1091,9 @@ class Parser2Hooks(Parser2HooksBase):
             assignment: Assignment2,
         ) -> None:
             """Evaluate macro variable assignment statement."""
-            context.macro_variable_buffer[
-                assignment.variable_name
-            ] = assignment.value.on_parser2_eval_expression(context)
+            context.macro_variable_buffer[assignment.variable_name] = (
+                assignment.value.on_parser2_eval_expression(context)
+            )
 
     class AxisSelectTokenHooksTokenHooks(
         Parser2HooksBase.AxisSelectTokenHooksTokenHooks,

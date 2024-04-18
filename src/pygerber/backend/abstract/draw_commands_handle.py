@@ -1,4 +1,5 @@
 """Contains class wrapping list of draw operations created by Gerber parser."""
+
 from __future__ import annotations
 
 from typing import List

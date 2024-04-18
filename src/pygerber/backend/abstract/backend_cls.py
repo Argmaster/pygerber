@@ -1,4 +1,5 @@
 """Class interface for visualizing gerber files."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

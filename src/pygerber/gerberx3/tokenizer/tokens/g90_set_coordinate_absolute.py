@@ -1,4 +1,5 @@
 """Wrapper for G90 token."""
+
 from __future__ import annotations
 
 import logging

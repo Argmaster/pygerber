@@ -1,4 +1,5 @@
 """Errors which may be called by API layer."""
+
 from __future__ import annotations
 
 

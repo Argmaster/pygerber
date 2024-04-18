@@ -1,4 +1,5 @@
 """Class based on pydantic BaseModel with common set of features."""
+
 from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict

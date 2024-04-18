@@ -1,4 +1,5 @@
 """Class for drawing 2D rasterized vector lines."""
+
 from __future__ import annotations
 
 import logging

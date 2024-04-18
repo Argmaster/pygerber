@@ -1,6 +1,7 @@
 """`assignment2` module contains a `Assignment2` class wrapping variable assignment
 within macro definition.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

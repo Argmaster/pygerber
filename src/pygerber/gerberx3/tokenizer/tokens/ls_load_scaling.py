@@ -1,4 +1,5 @@
 """Wrapper for load scaling token."""
+
 from __future__ import annotations
 
 from decimal import Decimal
