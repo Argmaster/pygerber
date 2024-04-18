@@ -53,4 +53,4 @@ class Rasterized2DResultHandle(ResultHandle):
 
     def get_image(self) -> Image.Image:
         """Get result image object."""
-        return self.result.transpose(Image.FLIP_TOP_BOTTOM)
+        return self.result.transpose(Image.Transpose.FLIP_TOP_BOTTOM)

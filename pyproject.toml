@@ -75,6 +75,7 @@ types-tzlocal = "^5.0.1.1"
 ipykernel = "^6.25.0"
 twine = "^4.0.2"
 docutils = "0.20.1"
+typing-extensions = "^4.11.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -106,21 +107,25 @@ pygerber_language_server = "pygerber.gerberx3.language_server.__main__:main"
 # -------------------------------------------------------------------------------------
 # git hooks
 install-hooks = [
-    { cmd = "poetry install --sync --with=docs --no-ansi" },
+    { cmd = "poetry install --sync --with=docs --extras=language-server --extras=svg  --no-ansi" },
     { cmd = "poetry run python -m scripts.install_hooks" },
     { cmd = "poetry run pre-commit install --install-hooks --overwrite" },
 ]
 # -------------
 # hook triggers
 run-code-quality-checks = [
-    { cmd = "poetry install --sync --with=docs --no-ansi" },
+    { cmd = "poetry install --sync --with=docs --extras=language-server --extras=svg  --no-ansi" },
     { cmd = "poetry run pre-commit run --all-files -v" },
 ]
 # -------------------------------------------------------------------------------------
 run-unit-tests = [
+    { cmd = "poetry install --sync --with=docs --extras=language-server --extras=svg  --no-ansi" },
     { cmd = "poetry run pytest --log-level=DEBUG -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered" },
 ]
-run-type-checks = [{ cmd = "poetry run mypy src/pygerber/ test/" }]
+run-type-checks = [
+    { cmd = "poetry install --sync --with=docs --extras=language-server --extras=svg --no-ansi" },
+    { cmd = "poetry run mypy --config-file=pyproject.toml src/pygerber/ test/" },
+]
 
 [tool.ruff]
 lint.select = ["ALL"]

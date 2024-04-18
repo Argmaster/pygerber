@@ -15,6 +15,7 @@
         "CMPN",
         "Cxxx",
         "DONUTVAR",
+        "dpmm",
         "drawsvg",
         "dtype",
         "ebnf",
@@ -40,6 +41,7 @@
         "mkdocstrings",
         "Moiré",
         "MOMM",
+        "mypy",
         "Netlist",
         "numpy",
         "obround",
@@ -59,6 +61,7 @@
         "SOSTMT",
         "superfences",
         "tasklist",
+        "tobytes",
         "Ucamco's",
         "ungroup",
         "Xino"
@@ -139,5 +142,16 @@
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#007fff99",
         "titleBar.inactiveForeground": "#e7e7e799"
-    }
+    },
+    "python.analysis.addImport.heuristics": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.extraCommitChars": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.userFileIndexingLimit": -1,
+    "mypy-type-checker.path": [
+        "mypy",
+        "--config-file=pyproject.toml",
+        "src/pygerber",
+        "test"
+    ]
 }

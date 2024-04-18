@@ -815,7 +815,7 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         gc.collect(0)
         gc.collect(1)
         gc.collect(2)
-        self.frame.image = self.frame.image.transpose(Image.FLIP_TOP_BOTTOM)
+        self.frame.image = self.frame.image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
         gc.collect(0)
         gc.collect(1)
         gc.collect(2)

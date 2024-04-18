@@ -58,7 +58,7 @@ class Rasterized2DApertureDrawPolygon(DrawPolygon):
         target.image_draw.regular_polygon(
             bounding_circle=bounding_circle,
             n_sides=self.number_of_vertices,
-            rotation=rotation,
+            rotation=int(rotation),
             fill=self.polarity.get_2d_rasterized_color(),
             outline=None,
             width=0,

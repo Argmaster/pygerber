@@ -35,7 +35,7 @@ def unwrap(item: T) -> T:
     """Unwrap item wrapped in sequences."""
     try:
         while isinstance(item, (list, tuple, ParseResults)):
-            item = item[0]
+            item = item[0]  # type: ignore[pylance]
     except (TypeError, IndexError):
         pass
 
