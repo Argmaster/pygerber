@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
+# Release 2.3.1
+
+- Added support for rotation of code 21 center line macro primitive in SVG and Raster
+  renderers. Support is not exhaustive, it will be extended whenever extension is
+  requested by users.
+- Fixed bug causing macro flashes to be partially cut off in images rendered with SVG
+  renderer.
+- Fixed incorrect version string in `pygerber.__version__` and reported by
+  `pygerber --version`.
+
 # Release 2.3.0
 
 - Added full support for transforms (LP, LM, LR, LS commands) in Parser2.
