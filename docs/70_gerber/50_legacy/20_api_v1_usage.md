@@ -6,7 +6,8 @@
 
 PyGerber offers simple high-level API for rendering Gerber files. All necessary tools
 can be imported from `pygerber.gerberx3.api` module. See
-[module reference](../reference/pygerber/gerberx3/api/__init__.md) for full object list.
+[module reference](../../reference/pygerber/gerberx3/api/__init__.md) for full object
+list.
 
 !!! important
 
@@ -96,8 +97,8 @@ options = Rasterized2DLayerParams(
     ```
 
     See reference for all possible ways of creating
-    [`RGBA` color objects](../reference/pygerber/gerberx3/api/__init__.md#pygerber.gerberx3.api.RGBA)
-    and [`ColorSchema` color schema objects](../reference/pygerber/gerberx3/api/__init__.md#pygerber.gerberx3.api.ColorScheme).
+    [`RGBA` color objects](../../reference/pygerber/gerberx3/api/__init__.md#pygerber.gerberx3.api.RGBA)
+    and [`ColorSchema` color schema objects](../../reference/pygerber/gerberx3/api/__init__.md#pygerber.gerberx3.api.ColorScheme).
 
 Afterwards we can create a `Rasterized2DLayer` object. Remember to provide previously
 constructed `Rasterized2DLayerParams` instance to constructor:
@@ -170,7 +171,7 @@ coordinate origins and bounding boxes of layer.
 ## Further reading
 
 To further extend your knowledge about how to use PyGerber you could read
-[`pygerber.gerberx3.api` module reference](../reference/pygerber/gerberx3/api/__init__.md)
+[`pygerber.gerberx3.api` module reference](../../reference/pygerber/gerberx3/api/__init__.md)
 or see [Gerber Advanced API]("gerber_advanced_api.md")
 
 ---

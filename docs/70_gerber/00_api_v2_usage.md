@@ -1,4 +1,4 @@
-# ⭐ API V2 Usage
+# API Usage
 
 ## Hight Level API
 
@@ -100,4 +100,4 @@ Here is the result:
 </p>
 
 More detailed descriptions of interfaces can be found in
-[API Reference](../01_api_v2_reference.html) page.
+[API Reference](./01_api_v2_reference.md) page.

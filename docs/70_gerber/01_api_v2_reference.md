@@ -1,3 +1,3 @@
-# ⭐ API V2 Reference
+# API Reference
 
 ::: pygerber.gerberx3.api.v2

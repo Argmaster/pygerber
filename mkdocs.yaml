@@ -118,3 +118,6 @@ extra:
   version:
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/
     provider: mike
+
+hooks:
+  - docs/hooks.py

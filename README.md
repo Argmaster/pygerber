@@ -66,20 +66,6 @@ Alternatively, it is also possible to install it directly from repository:
 pip install git+https://github.com/Argmaster/pygerber
 ```
 
-### Language Server
-
-Since release 2.1.0 PyGerber now provides Gerber X3/X2 Language Server with
-[LSP](https://microsoft.github.io/language-server-protocol/) support. It can be enabled
-by installing PyGerber extras set `language-server` with following command:
-
-```
-pip install pygerber[language-server]
-```
-
-Afterwards you can use `pygerber is-language-server-available` to check if language
-server was correctly enabled. Please report all issues in
-[PyGerber Issues](https://github.com/Argmaster/pygerber/issues) section.
-
 ## Command line usage
 
 After installing `pygerber`, depending on your environment, it should become available
@@ -219,6 +205,24 @@ level API which allows to directly access PyGerber internals and change behavior
 parser, tokenizer and renderers. This can be used for code introspection and potentially
 other purposed. Check out documentation for more information.
 
+### Language Server
+
+Since release 2.1.0 PyGerber provides Gerber X3/X2 Language Server with
+[LSP](https://microsoft.github.io/language-server-protocol/) support. It can be enabled
+by installing PyGerber extras set `language-server` with following command:
+
+```
+pip install pygerber[language-server]
+```
+
+Afterwards you can use `pygerber is-language-server-available` to check if language
+server was correctly enabled. Please report all issues in
+[PyGerber Issues](https://github.com/Argmaster/pygerber/issues) section.
+
+You can utilize power of this language server with use of Visual Studio Code extension
+[Gerber X3/X2 Format Support](https://marketplace.visualstudio.com/items?itemName=argmaster.gerber-x3-x2-format-support)
+(`argmaster.gerber-x3-x2-format-support`).
+
 ## Documentation
 
 Official documentations is hosted on Github Pages and can be found
@@ -226,85 +230,18 @@ Official documentations is hosted on Github Pages and can be found
 
 ## Gerber features support
 
-Please refer to documentation for
+For detailed list of features which are supported/not supported by each tool please
+refer to documentation:
 
-- [Tokenizer](https://argmaster.github.io/pygerber/latest/gerber/feature_support/tokenizer.html),
-- [Parser](https://argmaster.github.io/pygerber/latest/gerber/feature_support/parser.html),
-- [Rasterized2DBackend](https://argmaster.github.io/pygerber/latest/gerber/feature_support/rasterized_2d.html),
-- [Parser2](https://argmaster.github.io/pygerber/latest/gerber/feature_support/parser2.html),
-- [SvgRenderer2](https://argmaster.github.io/pygerber/latest/gerber/feature_support/svgrenderer2.html),
-- [RasterRenderer2](https://argmaster.github.io/pygerber/latest/gerber/feature_support/rasterrenderer2.html),
-
-for detailed list of features which are supported/not supported by each tool.
-
-## Syntax feature requests
-
-All deprecated features (Mainly those from X2 format) are considered optional and
-priority to implement them will be assigned based on number of requests form community.
-
-If You needs support for syntax features which are not mentioned in
-`The Gerber Layer Format Specification. Revision 2023.08` (Available on
-[Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-08_en.pdf)
-and in
-[this repository](https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-08_en.pdf))
-and this feature is not already listed in Support paragraph, please open a new Feature
-request issue.
-
-**Feature request Issue should contain:**
-
-- detailed description how requested feature works,
-- code samples for testing the feature,
-- reference images (only applies to features changing image look).
-
-**Requests which don't comply with those guidelines will be considered low priority.**
+- [Tokenizer](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/0_tokenizer.html),
+- [Parser2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/1_parser2.html),
+- [RasterRenderer2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/2_rasterrenderer2.html),
+- [SvgRenderer2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/3_svgrenderer2.html),
 
 ## Development
 
-To quickly set up development environment, first you have to install `poetry` globally:
-
-```
-pip install poetry
-```
-
-Afterwards you will be able to create development virtual environment:
-
-```
-poetry shell
-```
-
-Then You have to install dependencies into this environment:
-
-```
-poetry install
-```
-
-And pre-commit hooks:
-
-```
-poe install-hooks
-```
-
-Now you are good to go. Whenever you commit changes, pre-commit hooks will be invoked.
-If they fail or change files, you will have to re-add changes and commit again.
-
-## Build from source
-
-To build PyGerber from source You have to set up [Development](#development) environment
-first. Make sure you have `poetry` environment activated with:
-
-```
-poetry shell
-```
-
-With environment active it should be possible to build wheel and source distribution
-with:
-
-```
-poetry build
-```
-
-Check `dist` directory within current working directory, `pygerber-x.y.z.tar.gz` and
-`pygerber-x.y.z-py3-none-any.whl` should be there.
+For development guidelines please visit documentation `Development` section
+[here](https://argmaster.github.io/pygerber/latest).
 
 ## Gerber reference archive
 

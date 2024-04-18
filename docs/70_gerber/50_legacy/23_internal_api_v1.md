@@ -14,7 +14,7 @@ releases.
 !!! warning "Security"
 
     In case of **security vulnerability**, patch update **may** introduce API break to guarantee
-    safety of users. Such case will be mentioned in [Changelog](../Changelog.md). If it
+    safety of users. Such case will be mentioned in [Changelog](../../Changelog.md). If it
     was not mentioned in Changelog,
     [please report it](https://github.com/Argmaster/pygerber/issues/new).
 
@@ -27,7 +27,7 @@ while leaving minor releases for manual review.
 !!! bug "Incompatible patches"
 
     [Please report](https://github.com/Argmaster/pygerber/issues/new) API breaks
-    introduced in patches, unless they were mentioned in [Changelog](../Changelog.md)
+    introduced in patches, unless they were mentioned in [Changelog](../../Changelog.md)
     with justification.
 
 ## Internal execution model
