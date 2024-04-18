@@ -90,7 +90,7 @@ mkdocs-macros-plugin = "^1.0.2"
 mkdocs-gen-files = "^0.5.0"
 pygments = "^2.15.1"
 pymdown-extensions = "^10.3"
-mike = "^1.1.2"
+mike = ">=1.1.2,<3.0.0"
 
 [tool.poetry.extras]
 language_server = ["pygls", "lsprotocol"]
