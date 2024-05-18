@@ -557,7 +557,7 @@ class GerberGrammarBuilder(GrammarBuilder):
         # A human readable comment, does not affect the image.
         return wrapper(
             self.options.g04_comment_token_cls,
-            Regex("G0*4") + self._build_string() + eoex,
+            Regex("G0*4") + Opt(self._build_string(), default="") + eoex,
         )
 
     def _build_define_aperture(self) -> ParserElement:
