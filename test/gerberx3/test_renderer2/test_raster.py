@@ -21,6 +21,10 @@ test_basic = make_raster_renderer2_test(
     __file__,
     "test/assets/gerberx3/basic",
 )
+test_arc = make_raster_renderer2_test(
+    __file__,
+    "test/assets/gerberx3/arc",
+)
 test_expressions = make_raster_renderer2_test(
     __file__,
     "test/assets/gerberx3/expressions",
@@ -41,4 +45,8 @@ test_kicad_hello = make_raster_renderer2_test(
 test_pcb_tools_issues = make_raster_renderer2_test(
     __file__,
     "test/assets/gerberx3/pcb_tools_issues",
+)
+test_issues = make_raster_renderer2_test(
+    __file__,
+    "test/assets/gerberx3/issues",
 )

@@ -483,8 +483,8 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         self.frame.arc(
             command.transform.polarity,
             bbox,
-            start_angle,
             end_angle,
+            start_angle,
             width=self.convert_size(command.aperture.get_stroke_width()),
         )
 
@@ -500,12 +500,53 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
 
     def render_cc_arc(self, command: CCArc2) -> None:
         """Render arc to target image."""
-        return self.render_arc(
-            command.model_copy(
-                update={
-                    "start_point": command.start_point,
-                    "end_point": command.end_point,
-                },
+        command.aperture.render_flash(
+            self.renderer,
+            Flash2(
+                transform=command.transform,
+                attributes=command.attributes,
+                aperture=command.aperture,
+                flash_point=command.start_point,
+            ),
+        )
+
+        start_angle = (
+            command.get_relative_start_point().angle_between(
+                Vector2D.UNIT_X,
+            )
+            % 360
+        )
+        end_angle = (
+            command.get_relative_end_point().angle_between(
+                Vector2D.UNIT_X,
+            )
+            % 360
+        )
+        bbox = self.convert_bbox(
+            BoundingBox.from_diameter(
+                (command.get_radius() * 2) + (command.aperture.get_stroke_width()),
+            )
+            + command.center_point,
+        )
+
+        if end_angle <= start_angle:
+            end_angle += 360
+
+        self.frame.arc(
+            command.transform.polarity,
+            bbox,
+            start_angle,
+            end_angle,
+            width=self.convert_size(command.aperture.get_stroke_width()),
+        )
+
+        command.aperture.render_flash(
+            self.renderer,
+            Flash2(
+                transform=command.transform,
+                attributes=command.attributes,
+                aperture=command.aperture,
+                flash_point=command.end_point,
             ),
         )
 
