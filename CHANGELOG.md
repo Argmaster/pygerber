@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
-# Release 2.3.2
+## WIP
+
+- Added command line interface utilizing API V2 for rendering Gerber files to images.
+  This includes interface for rendering PNG, JPEG and SVG images and multi-file projects
+  to single PNG?JPEG image.
+- Added support for inferring file type from file extension or `.FileFunction` file
+  attribute. This mechanism is used by default by API V2 based command line interface.
+
+## Release 2.3.2
 
 - Fixed clockwise arc rendering in raster renderer. Reported by @tgbl-mk (#203). Fixed
   by @Argmaster in #205.
@@ -13,7 +21,7 @@ this project adheres to [Calendar Versioning](https://calver.org/).
 - Disabled MacOS test suite due to consistent failures during Python installation on
   `macos-latest` GitHub hosted machines.
 
-# Release 2.3.1
+## Release 2.3.1
 
 - Added support for rotation of code 21 center line macro primitive in SVG and Raster
   renderers. Support is not exhaustive, it will be extended whenever extension is
@@ -23,7 +31,7 @@ this project adheres to [Calendar Versioning](https://calver.org/).
 - Fixed incorrect version string in `pygerber.__version__` and reported by
   `pygerber --version`.
 
-# Release 2.3.0
+## Release 2.3.0
 
 - Added full support for transforms (LP, LM, LR, LS commands) in Parser2.
 - Fixed titles in Parser2 and Parser feature support documentation. They were swapped.
