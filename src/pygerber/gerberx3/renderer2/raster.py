@@ -878,14 +878,19 @@ class RasterImageRef(ImageRef):
         options: FormatOptions | None = None,
     ) -> None:
         if isinstance(options, RasterFormatOptions):
-            if self.image.mode != options.pixel_format.value:
+            if self.image.mode.casefold() != options.pixel_format.value.casefold():
                 image = self.image.convert(options.pixel_format.value)
             else:
                 image = self.image
 
             kwargs = {}
+
             if options.image_format != ImageFormat.AUTO:
                 kwargs["format"] = options.image_format.value
+
+            if options.quality is not None:
+                kwargs["quality"] = options.quality
+
             image.save(output, **kwargs)
             return
 
@@ -918,6 +923,8 @@ class RasterFormatOptions(FormatOptions):
         self,
         image_format: ImageFormat = ImageFormat.AUTO,
         pixel_format: PixelFormat = PixelFormat.RGBA,
+        quality: int = 85,
     ) -> None:
         self.image_format = image_format
         self.pixel_format = pixel_format
+        self.quality = quality

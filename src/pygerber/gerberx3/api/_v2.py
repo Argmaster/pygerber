@@ -199,6 +199,7 @@ class ParsedFile:
         dpmm: int = 20,
         image_format: ImageFormatEnum = ImageFormatEnum.AUTO,
         pixel_format: PixelFormatEnum = PixelFormatEnum.RGB,
+        quality: int = 85,
     ) -> None:
         """Render Gerber file to raster image.
 
@@ -216,6 +217,8 @@ class ParsedFile:
             Image format to save, by default ImageFormatEnum.AUTO
         pixel_format : PixelFormatEnum, optional
             Pixel format, by default PixelFormatEnum.RGB
+        quality: int, optional
+            Image quality for JPEG format, by default 85.
 
         """
         output = RasterRenderer2(
@@ -226,6 +229,7 @@ class ParsedFile:
             RasterFormatOptions(
                 image_format=ImageFormat(image_format.value),
                 pixel_format=PixelFormat(pixel_format.value),
+                quality=quality,
             ),
         )
 
@@ -345,6 +349,10 @@ class ParsedProject:
             Pixel format, by default PixelFormatEnum.RGB
 
         """
+        if len(self.files) == 0:
+            msg = "No files to render"
+            raise ValueError(msg)
+
         min_x_mm = (
             min(
                 self.files,
