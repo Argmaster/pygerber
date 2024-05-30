@@ -13,6 +13,12 @@ from pygerber.console.raster_2d_style import (
     get_color_scheme_from_style,
 )
 from pygerber.gerberx3.api import Rasterized2DLayer, Rasterized2DLayerParams
+from pygerber.gerberx3.api.v2 import (
+    FileTypeEnum,
+    GerberFile,
+    ImageFormatEnum,
+    PixelFormatEnum,
+)
 
 
 @click.group("pygerber")
@@ -115,3 +121,102 @@ def _is_language_server_available() -> None:
         click.echo("Language server is available.")
     else:
         click.echo("Language server is not available.")
+
+
+@main.group("render")
+def _render() -> None:
+    """Render Gerber file with API V2."""
+
+
+@_render.command("raster")
+@click.argument("source", type=click.File(encoding="utf-8"))
+@click.option(
+    "-t",
+    "--file-type",
+    "file_type",
+    type=click.Choice(list(FileTypeEnum.__members__.keys()), case_sensitive=False),
+    default=FileTypeEnum.UNDEFINED.name,
+    help="Type of the Gerber file. Affects what colors are used for rendering.",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(dir_okay=False),
+    default="output.png",
+    help="Path to output file.",
+)
+@click.option(
+    "-i",
+    "--image-format",
+    type=click.Choice(["JPEG", "PNG", "AUTO"], case_sensitive=False),
+    default="AUTO",
+)
+@click.option(
+    "-p",
+    "--pixel-format",
+    type=click.Choice(["RGBA", "RGB"], case_sensitive=False),
+    default="RGB",
+)
+@click.option("-d", "--dpmm", type=int, default=20, help="Dots per millimeter.")
+@click.option(
+    "-q",
+    "--quality",
+    type=int,
+    default=95,
+    help="Compression algorithm quality control parameter.",
+)
+def _raster(
+    source: TextIO,
+    file_type: str,
+    output: str,
+    pixel_format: str,
+    image_format: str,
+    dpmm: int,
+    quality: int,
+) -> None:
+    """Render Gerber file with API V2 as raster (PNG/JPEG) image."""
+    GerberFile.from_buffer(
+        source, file_type=FileTypeEnum(file_type)
+    ).parse().render_raster(
+        output,
+        dpmm=dpmm,
+        pixel_format=PixelFormatEnum(pixel_format.upper()),
+        image_format=ImageFormatEnum(image_format.lower()),
+        quality=quality,
+    )
+
+
+@_render.command("vector")
+@click.argument("source", type=click.File(encoding="utf-8"))
+@click.option(
+    "-t",
+    "--file-type",
+    "file_type",
+    type=click.Choice(list(FileTypeEnum.__members__.keys()), case_sensitive=False),
+    default=FileTypeEnum.UNDEFINED.name,
+    help="Type of the Gerber file. Affects what colors are used for rendering.",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(dir_okay=False),
+    default="output.svg",
+    help="Path to output file.",
+)
+@click.option(
+    "-s",
+    "--scale",
+    type=float,
+    default=1.0,
+    help="Scaling factor applied to the output image.",
+)
+def _vector(
+    source: TextIO,
+    file_type: str,
+    output: str,
+    scale: float,
+) -> None:
+    """Render Gerber file with API V2 as vector (SVG) image."""
+    GerberFile.from_buffer(
+        source, file_type=FileTypeEnum(file_type)
+    ).parse().render_svg(output, scale=scale)
