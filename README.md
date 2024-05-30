@@ -83,21 +83,24 @@ $ pygerber --version
 pygerber, version x.y.z
 ```
 
-Use `--help` to display help messages with lists of subcommands and subcommand options:
+Use `--help` to display help messages for individual commands:
 
 ```
-pygerber raster-2d --help
+pygerber render --help
 ```
 
 To render 2D PNG image of some gerber file you can simply use:
 
 ```
-pygerber raster-2d gerber-source.grb
+pygerber render raster source.gbr -o output.png
 ```
 
 Image will be saved to `output.png` in current working directory.
 
 ![example_pcb_image](https://github.com/Argmaster/pygerber/assets/56170852/9bca28bf-8aa6-4215-aac1-62c386490485)
+
+For guide on how to render SVG images and multi-layer projects with CLI please refer to
+PyGerber documentation.
 
 ## Programmatic usage
 
