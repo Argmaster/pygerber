@@ -349,6 +349,10 @@ class ParsedProject:
             Pixel format, by default PixelFormatEnum.RGB
 
         """
+        if len(self.files) == 0:
+            msg = "No files to render"
+            raise ValueError(msg)
+
         min_x_mm = (
             min(
                 self.files,

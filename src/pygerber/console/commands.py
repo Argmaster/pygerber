@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, TextIO
+from typing import Generator, Optional, TextIO
 
 import click
 
@@ -18,6 +18,7 @@ from pygerber.gerberx3.api.v2 import (
     GerberFile,
     ImageFormatEnum,
     PixelFormatEnum,
+    Project,
 )
 
 
@@ -220,3 +221,32 @@ def _vector(
     GerberFile.from_buffer(
         source, file_type=FileTypeEnum(file_type)
     ).parse().render_svg(output, scale=scale)
+
+
+@_render.command("project")
+@click.argument("files", nargs=-1)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(dir_okay=False),
+    default="output.png",
+    help="Path to output file.",
+)
+@click.option("-d", "--dpmm", type=int, default=20, help="Dots per millimeter.")
+def _project(files: str, output: str, dpmm: int) -> None:
+    """Render multiple Gerber files and merge them layer by layer.
+
+    Layers are merged from first to last, thus last layer will be on top.
+    """
+
+    def _() -> Generator[GerberFile, None, None]:
+        for file in files:
+            file_path, *other = file.split("@")
+
+            file_type = FileTypeEnum.UNDEFINED
+            if len(other) != 0:
+                file_type = FileTypeEnum(other[0].upper())
+
+            yield GerberFile.from_file(file_path, file_type)
+
+    Project(list(_())).parse().render_raster(output, dpmm=dpmm)
