@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pygerber"
-version = "2.3.1"
+version = "2.3.2"
 description = "Parsing, formatting and rendering toolkit for Gerber X3 file format"
 authors = ["Krzysztof Wisniewski <argmaster.world@gmail.com>"]
 license = "MIT"
