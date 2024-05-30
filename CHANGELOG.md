@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Calendar Versioning](https://calver.org/).
 
+# Release 2.3.2
+
+- Fixed clockwise arc rendering in raster renderer. Reported by @tgbl-mk (#203). Fixed
+  by @Argmaster in #205.
+- Fixed empty comment parsing. Reported by @lookme2 (#198). Fixed by @Argmaster in #201.
+- Disabled MacOS test suite due to consistent failures during Python installation on
+  `macos-latest` GitHub hosted machines.
+
 # Release 2.3.1
 
 - Added support for rotation of code 21 center line macro primitive in SVG and Raster
