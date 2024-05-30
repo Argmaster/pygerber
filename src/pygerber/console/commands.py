@@ -14,6 +14,8 @@ from pygerber.console.raster_2d_style import (
 )
 from pygerber.gerberx3.api import Rasterized2DLayer, Rasterized2DLayerParams
 from pygerber.gerberx3.api.v2 import (
+    DEFAULT_ALPHA_COLOR_MAP,
+    DEFAULT_COLOR_MAP,
     FileTypeEnum,
     GerberFile,
     ImageFormatEnum,
@@ -130,14 +132,18 @@ def _render() -> None:
 
 
 @_render.command("raster")
-@click.argument("source", type=click.File(encoding="utf-8"))
+@click.argument(
+    "source",
+    type=click.Path(file_okay=True, dir_okay=False, exists=True, readable=True),
+)
 @click.option(
     "-t",
     "--file-type",
     "file_type",
     type=click.Choice(list(FileTypeEnum.__members__.keys()), case_sensitive=False),
-    default=FileTypeEnum.UNDEFINED.name,
-    help="Type of the Gerber file. Affects what colors are used for rendering.",
+    default=FileTypeEnum.INFER.name,
+    help="Type of the Gerber file. Affects what colors are used for rendering. If not "
+    "specified, file type will be inferred from extension or .FileFunction attribute.",
 )
 @click.option(
     "-o",
@@ -167,7 +173,7 @@ def _render() -> None:
     help="Compression algorithm quality control parameter.",
 )
 def _raster(
-    source: TextIO,
+    source: str,
     file_type: str,
     output: str,
     pixel_format: str,
@@ -176,10 +182,20 @@ def _raster(
     quality: int,
 ) -> None:
     """Render Gerber file with API V2 as raster (PNG/JPEG) image."""
-    GerberFile.from_buffer(
+    parsed_file = GerberFile.from_file(
         source, file_type=FileTypeEnum(file_type)
-    ).parse().render_raster(
+    ).parse()
+
+    color_map = DEFAULT_COLOR_MAP
+
+    if pixel_format.upper() == "RGBA":
+        color_map = DEFAULT_ALPHA_COLOR_MAP
+
+    color_scheme = color_map[parsed_file.get_file_type()]
+
+    parsed_file.render_raster(
         output,
+        color_scheme=color_scheme,
         dpmm=dpmm,
         pixel_format=PixelFormatEnum(pixel_format.upper()),
         image_format=ImageFormatEnum(image_format.lower()),
@@ -188,14 +204,18 @@ def _raster(
 
 
 @_render.command("vector")
-@click.argument("source", type=click.File(encoding="utf-8"))
+@click.argument(
+    "source",
+    type=click.Path(file_okay=True, dir_okay=False, exists=True, readable=True),
+)
 @click.option(
     "-t",
     "--file-type",
     "file_type",
     type=click.Choice(list(FileTypeEnum.__members__.keys()), case_sensitive=False),
-    default=FileTypeEnum.UNDEFINED.name,
-    help="Type of the Gerber file. Affects what colors are used for rendering.",
+    default=FileTypeEnum.INFER.name,
+    help="Type of the Gerber file. Affects what colors are used for rendering. If not "
+    "specified, file type will be inferred from extension or .FileFunction attribute.",
 )
 @click.option(
     "-o",
@@ -212,15 +232,17 @@ def _raster(
     help="Scaling factor applied to the output image.",
 )
 def _vector(
-    source: TextIO,
+    source: str,
     file_type: str,
     output: str,
     scale: float,
 ) -> None:
     """Render Gerber file with API V2 as vector (SVG) image."""
-    GerberFile.from_buffer(
+    parsed_file = GerberFile.from_file(
         source, file_type=FileTypeEnum(file_type)
-    ).parse().render_svg(output, scale=scale)
+    ).parse()
+    color_scheme = DEFAULT_COLOR_MAP[parsed_file.get_file_type()]
+    parsed_file.render_svg(output, color_scheme=color_scheme, scale=scale)
 
 
 @_render.command("project")
@@ -243,7 +265,7 @@ def _project(files: str, output: str, dpmm: int) -> None:
         for file in files:
             file_path, *other = file.split("@")
 
-            file_type = FileTypeEnum.UNDEFINED
+            file_type = FileTypeEnum.INFER
             if len(other) != 0:
                 file_type = FileTypeEnum(other[0].upper())
 

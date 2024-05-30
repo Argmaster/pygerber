@@ -16,3 +16,9 @@ class DRAWSVGNotAvailableError(SvgRenderer2Error):
 
     You can install it with `pip install pygerber[svg]`.
     """
+
+    def __init__(self) -> None:
+        super().__init__(
+            "`drawsvg` library is not available. "
+            "Install it with `pip install pygerber[svg]`."
+        )
