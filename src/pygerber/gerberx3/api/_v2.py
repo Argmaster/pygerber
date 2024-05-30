@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum, unique
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, TextIO
+from typing import TYPE_CHECKING, Dict, List, Optional, TextIO
 
 from PIL import Image
 
@@ -65,8 +66,69 @@ class FileTypeEnum(Enum):
     PASTE = "PASTE"
     SILK = "SILK"
     EDGE = "EDGE"
+
+    PLATED = "PLATED"
+    NON_PLATED = "NON_PLATED"
+    PROFILE = "PROFILE"
+    SOLDERMASK = "SOLDERMASK"
+    LEGEND = "LEGEND"
+    COMPONENT = "COMPONENT"
+    GLUE = "GLUE"
+    CARBONMASK = "CARBONMASK"
+    GOLDMASK = "GOLDMASK"
+    HEATSINKMASK = "HEATSINKMASK"
+    PEELABLEMASK = "PEELABLEMASK"
+    SILVERMASK = "SILVERMASK"
+    TINMASK = "TINMASK"
+    DEPTHROUT = "DEPTHROUT"
+    VCUT = "VCUT"
+    VIAFILL = "VIAFILL"
+    PADS = "PADS"
+
     OTHER = "OTHER"
     UNDEFINED = "UNDEFINED"
+
+    INFER_FROM_EXTENSION = "INFER_FROM_EXTENSION"
+    INFER_FROM_ATTRIBUTES = "INFER_FROM_ATTRIBUTES"
+    INFER = "INFER"
+
+    @classmethod
+    def infer_from_attributes(cls, file_function: Optional[str] = None) -> FileTypeEnum:
+        """Infer file type from file extension."""
+        if file_function is None:
+            return cls.UNDEFINED
+
+        function, *_ = file_function.split(",")
+        function = function.upper()
+
+        try:
+            return FileTypeEnum(function)
+        except (ValueError, TypeError, KeyError):
+            return cls.UNDEFINED
+
+    @classmethod
+    def infer_from_extension(cls, extension: str) -> FileTypeEnum:
+        if re.match(r"\.g[0-9]+", extension):
+            return FileTypeEnum.COPPER
+
+        if re.match(r"\.gp[0-9]+", extension):
+            return FileTypeEnum.COPPER
+
+        if re.match(r"\.gm[0-9]+", extension):
+            return FileTypeEnum.COPPER
+
+        return {
+            ".gto": FileTypeEnum.SILK,
+            ".gbo": FileTypeEnum.SILK,
+            ".gpt": FileTypeEnum.PADS,
+            ".gpb": FileTypeEnum.PADS,
+            ".gts": FileTypeEnum.SOLDERMASK,
+            ".gbs": FileTypeEnum.SOLDERMASK,
+            ".gtl": FileTypeEnum.COPPER,
+            ".gbl": FileTypeEnum.COPPER,
+            ".gtp": FileTypeEnum.PASTE,
+            ".gbp": FileTypeEnum.PASTE,
+        }.get(extension.lower(), FileTypeEnum.UNDEFINED)
 
 
 @dataclass
@@ -87,6 +149,14 @@ class GerberFile:
     ) -> Self:
         """Initialize object with Gerber source code loaded from file on disk."""
         file_path = Path(file_path)
+        if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
+            file_type = FileTypeEnum.infer_from_extension(file_path.suffix)
+
+        if file_type == FileTypeEnum.INFER:
+            file_type = FileTypeEnum.infer_from_extension(file_path.suffix)
+            if file_type == FileTypeEnum.UNDEFINED:
+                file_type = FileTypeEnum.INFER_FROM_ATTRIBUTES
+
         return cls(file_path.read_text(encoding="utf-8"), file_type)
 
     @classmethod
@@ -96,6 +166,8 @@ class GerberFile:
         file_type: FileTypeEnum = FileTypeEnum.UNDEFINED,
     ) -> Self:
         """Initialize object with Gerber source code from string."""
+        if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
+            file_type = FileTypeEnum.UNDEFINED
         return cls(source_code, file_type)
 
     @classmethod
@@ -105,6 +177,8 @@ class GerberFile:
         file_type: FileTypeEnum = FileTypeEnum.UNDEFINED,
     ) -> Self:
         """Initialize object with Gerber source code from readable buffer."""
+        if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
+            file_type = FileTypeEnum.UNDEFINED
         return cls(buffer.read(), file_type)
 
     def parse(
@@ -122,10 +196,18 @@ class GerberFile:
             ),
         )
         command_buffer = parser.parse(tokens)
+
+        if self.file_type in (FileTypeEnum.INFER_FROM_ATTRIBUTES, FileTypeEnum.INFER):
+            file_type = FileTypeEnum.infer_from_attributes(
+                parser.context.file_attributes.get(".FileFunction", None)
+            )
+        else:
+            file_type = self.file_type
+
         return ParsedFile(
             GerberFileInfo.from_readonly_command_buffer(command_buffer),
             command_buffer,
-            self.file_type,
+            file_type,
         )
 
 
@@ -295,18 +377,52 @@ DEFAULT_COLOR_MAP: COLOR_MAP_T = {
     FileTypeEnum.MASK: ColorScheme.SOLDER_MASK,
     FileTypeEnum.PASTE: ColorScheme.PASTE_MASK,
     FileTypeEnum.SILK: ColorScheme.SILK,
-    FileTypeEnum.EDGE: ColorScheme.DEBUG_1_ALPHA,
+    FileTypeEnum.EDGE: ColorScheme.SILK,
     FileTypeEnum.OTHER: ColorScheme.DEBUG_1_ALPHA,
     FileTypeEnum.UNDEFINED: ColorScheme.DEBUG_1_ALPHA,
+    FileTypeEnum.PLATED: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.NON_PLATED: ColorScheme.PASTE_MASK,
+    FileTypeEnum.PROFILE: ColorScheme.SILK,
+    FileTypeEnum.SOLDERMASK: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.LEGEND: ColorScheme.SILK,
+    FileTypeEnum.COMPONENT: ColorScheme.PASTE_MASK,
+    FileTypeEnum.GLUE: ColorScheme.PASTE_MASK,
+    FileTypeEnum.CARBONMASK: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.GOLDMASK: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.HEATSINKMASK: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.PEELABLEMASK: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.SILVERMASK: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.TINMASK: ColorScheme.SOLDER_MASK,
+    FileTypeEnum.DEPTHROUT: ColorScheme.PASTE_MASK,
+    FileTypeEnum.VCUT: ColorScheme.PASTE_MASK,
+    FileTypeEnum.VIAFILL: ColorScheme.PASTE_MASK,
+    FileTypeEnum.PADS: ColorScheme.PASTE_MASK,
 }
 DEFAULT_ALPHA_COLOR_MAP: COLOR_MAP_T = {
     FileTypeEnum.COPPER: ColorScheme.COPPER_ALPHA,
     FileTypeEnum.MASK: ColorScheme.SOLDER_MASK_ALPHA,
     FileTypeEnum.PASTE: ColorScheme.PASTE_MASK_ALPHA,
     FileTypeEnum.SILK: ColorScheme.SILK_ALPHA,
-    FileTypeEnum.EDGE: ColorScheme.DEBUG_1_ALPHA,
+    FileTypeEnum.EDGE: ColorScheme.SILK_ALPHA,
     FileTypeEnum.OTHER: ColorScheme.DEBUG_1_ALPHA,
     FileTypeEnum.UNDEFINED: ColorScheme.DEBUG_1_ALPHA,
+    FileTypeEnum.PLATED: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.NON_PLATED: ColorScheme.PASTE_MASK_ALPHA,
+    FileTypeEnum.PROFILE: ColorScheme.SILK_ALPHA,
+    FileTypeEnum.SOLDERMASK: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.LEGEND: ColorScheme.SILK_ALPHA,
+    FileTypeEnum.COMPONENT: ColorScheme.PASTE_MASK_ALPHA,
+    FileTypeEnum.GLUE: ColorScheme.PASTE_MASK_ALPHA,
+    FileTypeEnum.CARBONMASK: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.GOLDMASK: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.HEATSINKMASK: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.PEELABLEMASK: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.SILVERMASK: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.TINMASK: ColorScheme.SOLDER_MASK_ALPHA,
+    FileTypeEnum.DEPTHROUT: ColorScheme.PASTE_MASK_ALPHA,
+    FileTypeEnum.VCUT: ColorScheme.PASTE_MASK_ALPHA,
+    FileTypeEnum.VIAFILL: ColorScheme.PASTE_MASK_ALPHA,
+    FileTypeEnum.PADS: ColorScheme.PASTE_MASK_ALPHA,
 }
 
 
