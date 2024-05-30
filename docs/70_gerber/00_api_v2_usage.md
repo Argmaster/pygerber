@@ -101,3 +101,35 @@ Here is the result:
 
 More detailed descriptions of interfaces can be found in
 [API Reference](./01_api_v2_reference.md) page.
+
+### Rendering with inferred color scheme
+
+PyGerber can infer file type from file extension or `.FileFunction` file attribute.
+Below is an simple example of how to render a file with inferred color scheme:
+
+```python
+from pygerber.gerberx3.api.v2 import GerberFile, DEFAULT_COLOR_MAP, FileTypeEnum
+
+parsed_file = GerberFile.from_file(
+    "test/assets/gerberx3/ATMEGA328-Motor-Board/ATMEGA328_Motor_Board-F.SilkS.gto",
+    file_type=FileTypeEnum.INFER_FROM_EXTENSION
+).parse()
+
+color_scheme = DEFAULT_COLOR_MAP[parsed_file.get_file_type()]
+parsed_file.render_raster("main.png", color_scheme=color_scheme)
+
+```
+
+Analogically, you can use `FileTypeEnum.INFER_FROM_ATTRIBUTES` to infer file type from
+`.FileFunction` attribute.
+
+!!! important
+
+    `FileTypeEnum.INFER_FROM_EXTENSION` works only with `GerberFile.from_file()`.
+    While using `GerberFile.from_str()` and `GerberFile.from_buffer()` no inference will
+    be done resulting in `FileTypeEnum.UNDEFINED` file type.
+
+If you want to automatically fall back from file extension inference to attribute based
+inference, you can use `FileTypeEnum.INFER` file type. In such case if file extension
+inference results in `FileTypeEnum.UNDEFINED`, PyGerber will try to infer file type from
+`.FileFunction` attribute.

@@ -39,12 +39,20 @@ This can be done by providing list of paths to gerber files to `pygerber render 
 command.
 
 Each path can be suffixed with `@` and layer type name. This will affect color palette
-used for rendering individual layers. For now supported layer types are: `COPPER`,
-`MASK`, `PASTE`, `SILK`, `EDGE`, `OTHER`, `UNDEFINED`. Layer names are case-insensitive.
+used for rendering individual layers. For full list of available layer types check out
+`FileTypeEnum` values. Layer names are case-insensitive.
 
 ```bash
 pygerber render project src/pygerber/examples/simple_2layer-F_Cu.gbr@copper src/pygerber/examples/simple_2layer-F_Mask.gbr@mask src/pygerber/examples/simple_2layer-F_Paste.gbr@paste src/pygerber/examples/simple_2layer-F_Silkscreen.gbr@silk
 ```
 
-When layer type is not provided, `UNDEFINED` is used as default, which results in use of
-debug color palette.
+When layer type is not provided, file type will be inferred from extension or file
+attributes. If neither of those methods succeeds, `FileTypeEnum.UNDEFINED` will be used
+resulting in use of debug color palette.
+
+Thanks to file type inference, command below should produce the same result as the one
+above:
+
+```bash
+pygerber render project src/pygerber/examples/simple_2layer-F_Cu.gbr src/pygerber/examples/simple_2layer-F_Mask.gbr src/pygerber/examples/simple_2layer-F_Paste.gbr src/pygerber/examples/simple_2layer-F_Silkscreen.gbr
+```
