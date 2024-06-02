@@ -1,0 +1,50 @@
+%FSLAX26Y26*%
+%MOMM*%
+%ADD100C,4*%
+%ADD200C,3*%
+%ADD300C,1.5*%
+%ADD400C,0.5*%
+
+D100*
+%LPD*%
+G04 Diagonal bottom-left -> top-right solid.*
+X10000000Y0D02*
+X0Y10000000D01*
+D200*
+%LPC*%
+G04 Diagonal bottom-left -> top-right clear.*
+X10000000Y0D02*
+X0Y10000000D01*
+D100*
+%LPD*%
+G04 Diagonal bottom-right -> top-left solid.*
+X0Y0D02*
+X10000000Y10000000D01*
+D200*
+%LPC*%
+G04 Diagonal bottom-right -> top-left clear.*
+X0Y0D02*
+X10000000Y10000000D01*
+
+D300*
+%LPD*%
+G04 Diagonal bottom-left -> top-right solid.*
+X8000000Y2000000D02*
+X2000000Y8000000D01*
+D400*
+%LPC*%
+G04 Diagonal bottom-left -> top-right clear.*
+X8000000Y2000000D02*
+X2000000Y8000000D01*
+D300*
+%LPD*%
+G04 Diagonal bottom-right -> top-left solid.*
+X2000000Y2000000D02*
+X8000000Y8000000D01*
+D400*
+%LPC*%
+G04 Diagonal bottom-right -> top-left clear.*
+X2000000Y2000000D02*
+X8000000Y8000000D01*
+
+M02*
