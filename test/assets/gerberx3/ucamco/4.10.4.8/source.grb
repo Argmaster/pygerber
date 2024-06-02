@@ -1,0 +1,21 @@
+G04 Example contour: two disjunct areas*
+%FSLAX26Y26*%
+%MOMM*%
+G36*
+X0Y5000000D02*
+G01*
+Y10000000D01*
+X10000000D01*
+Y0D01*
+X0D01*
+Y5000000D01*
+G04 first fully-coincident linear segment*
+X-1000000D01*
+X-5000000Y1000000D01*
+X-9000000Y5000000D01*
+X-5000000Y9000000D01*
+X-1000000Y5000000D01*
+G04 second fully-coincident linear segment*
+X0D01*
+G37*
+M02*
