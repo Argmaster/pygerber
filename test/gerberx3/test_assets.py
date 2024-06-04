@@ -1,12 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from test.gerberx3.common import GERBER_ASSETS_INDEX, Asset, CaseGenerator, ConfigBase
+from test.gerberx3.common import (
+    GERBER_ASSETS_INDEX,
+    REFERENCE_ASSETS_MANAGER,
+    Asset,
+    CaseGenerator,
+    ConfigBase,
+    highlight_differences,
+)
 
 import pytest
+from PIL import Image
 
 from pygerber.gerberx3.parser2.parser2 import Parser2
 from pygerber.gerberx3.renderer2.raster import RasterRenderer2, RasterRenderer2Hooks
+from pygerber.gerberx3.renderer2.svg import SvgRenderer2, SvgRenderer2Hooks
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 
 
@@ -16,6 +25,7 @@ class Config(ConfigBase):
 
     dpmm: int = 20
     as_expression: bool = False
+    compare_with_reference: bool = True
 
 
 @CaseGenerator[Config](
@@ -58,3 +68,66 @@ def test_raster_renderer2(asset: Asset, config: Config) -> None:
 
     output_file_path = asset.get_output_file(".raster_renderer2").with_suffix(".png")
     ref.save_to(output_file_path)
+
+    if config.compare_with_reference:
+        reference_path = REFERENCE_ASSETS_MANAGER.get_asset_path(
+            ".raster_renderer2", asset.relative_path
+        ).with_suffix(".png")
+        reference_image = Image.open(reference_path).convert("RGBA")
+
+        output_image = Image.open(output_file_path).convert("RGBA")
+
+        if reference_image != output_image:
+            diff_image_dest = asset.get_output_file(
+                ".diff_raster_renderer2"
+            ).with_suffix(".png")
+            diff_image_dest.mkdir(mode=0o777, parents=True, exist_ok=True)
+            diff_image = highlight_differences(output_image, reference_image)
+
+            diff_image.save(diff_image_dest)
+
+            msg = "Image mismatch."
+            raise ValueError(msg)
+
+
+@CaseGenerator[Config](
+    GERBER_ASSETS_INDEX,
+    {
+        "expressions.*": Config(as_expression=True),
+        "incomplete.*": Config(skip=True),
+    },
+    Config,
+).parametrize
+def test_svg_renderer2(asset: Asset, config: Config) -> None:
+    if config.skip:
+        pytest.skip()
+
+    if config.xfail:
+        pytest.xfail(config.xfail_message)
+
+    source = asset.absolute_path.read_text()
+    tokenizer = Tokenizer()
+
+    if config.as_expression:
+        stack = tokenizer.tokenize_expressions(source)
+    else:
+        stack = tokenizer.tokenize(source)
+
+    parser = Parser2()
+    cmd_buf = parser.parse(stack)
+
+    ref = SvgRenderer2(SvgRenderer2Hooks()).render(cmd_buf)
+
+    output_file_path = asset.get_output_file(".svg_renderer2").with_suffix(".svg")
+    ref.save_to(output_file_path)
+
+    reference_path = REFERENCE_ASSETS_MANAGER.get_asset_path(
+        ".svg_renderer2", asset.relative_path
+    ).with_suffix(".svg")
+
+    output_file_content = output_file_path.read_bytes()
+    reference_file_content = reference_path.read_bytes()
+
+    if config.compare_with_reference and output_file_content != reference_file_content:
+        msg = "File mismatch."
+        raise ValueError(msg)

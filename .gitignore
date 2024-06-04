@@ -298,3 +298,4 @@ pyrightconfig.json
 *.prof
 output.png
 \#*.*
+.reference-assets/

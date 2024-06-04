@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import fnmatch
+import platform
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
@@ -17,6 +19,7 @@ from typing import (
 )
 
 import pytest
+from PIL import Image, ImageDraw
 
 from pygerber.gerberx3.api.v2 import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
@@ -179,3 +182,109 @@ class CaseGenerator(Generic[ConfigT]):
             self,
             ids=[a.alias for a in GERBER_ASSETS_INDEX],
         )
+
+
+if platform.system() == "Windows":
+    GIT_PATH = Path(
+        subprocess.run(
+            ["where", "git"],  # noqa: S607, S603
+            capture_output=True,
+            text=True,
+            check=False,
+        ).stdout.strip()
+    )
+else:
+    GIT_PATH = Path(
+        subprocess.run(
+            ["which", "git"],  # noqa: S607, S603
+            capture_output=True,
+            text=True,
+            check=False,
+        ).stdout.strip()
+    )
+
+
+class ReferenceAssetsManager:
+    def __init__(self, sha: str) -> None:
+        self.sha = sha
+        self.repository_directory = Path().cwd() / ".reference-assets"
+
+        self._prepare_repository()
+
+    def _prepare_repository(self) -> None:
+        if not self.repository_directory.exists():
+            subprocess.run(
+                [  # noqa: S603
+                    GIT_PATH.as_posix(),
+                    "clone",
+                    "https://github.com/Argmaster/pygerber-reference-assets",
+                    self.repository_directory.as_posix(),
+                ],
+                check=True,
+                capture_output=True,
+            )
+        subprocess.run(
+            [  # noqa: S603
+                GIT_PATH.as_posix(),
+                "checkout",
+                self.sha,
+            ],
+            cwd=self.repository_directory.as_posix(),
+            check=True,
+            capture_output=True,
+        )
+
+    def get_asset_path(self, tag: str, relative_path: Path) -> Path:
+        return self.repository_directory / f".reference{tag}" / relative_path
+
+
+REFERENCE_ASSETS_MANAGER = ReferenceAssetsManager(
+    "293b85a7bff85af027c05a14261c58657aa8a5a7"
+)
+
+
+def highlight_differences(first: Image.Image, second: Image.Image) -> Image.Image:
+    """
+    Highlight the differences between two images.
+    """
+    max_width = max(first.width, second.width)
+    max_height = max(first.height, second.height)
+
+    # Pad and center images
+    img1_centered = pad_and_center(first, max_width, max_height, (0, 0, 0, 0))
+    img2_centered = pad_and_center(second, max_width, max_height, (0, 0, 0, 0))
+
+    diff_img = Image.new("RGBA", (max_width, max_height))
+
+    draw = ImageDraw.Draw(diff_img)
+    for x in range(max_width):
+        for y in range(max_height):
+            r1, g1, b1, a1 = img1_centered.getpixel((x, y))
+            r2, g2, b2, a2 = img2_centered.getpixel((x, y))
+            draw.point(
+                (x, y),
+                fill=(
+                    abs(r1 - r2),
+                    abs(g1 - g2),
+                    abs(b1 - b2),
+                    255 - abs(a1 - a2),
+                ),
+            )
+
+    return diff_img
+
+
+def pad_and_center(
+    img: Image.Image,
+    target_width: int,
+    target_height: int,
+    fill_color: tuple[int, ...] | int,
+) -> Image.Image:
+    """
+    Pad and center the image to the target dimensions.
+    """
+    result = Image.new("RGBA", (target_width, target_height), fill_color)
+    left = (target_width - img.width) // 2
+    top = (target_height - img.height) // 2
+    result.paste(img, (left, top))
+    return result
