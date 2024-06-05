@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from test.gerberx3.common import (
     GERBER_ASSETS_INDEX,
@@ -31,7 +32,7 @@ class Config(ConfigBase):
 @CaseGenerator[Config](
     GERBER_ASSETS_INDEX,
     {
-        "*.A64-OLinuXino-rev-G.*": Config(dpmm=40),
+        "A64-OLinuXino-rev-G.*": Config(dpmm=40),
         "flashes.*": Config(dpmm=40),
         "flashes.00_circle+h_4_tbh.grb": Config(
             xfail=True,
@@ -81,7 +82,6 @@ def test_raster_renderer2(asset: Asset, config: Config) -> None:
             diff_image_dest = asset.get_output_file(
                 ".diff_raster_renderer2"
             ).with_suffix(".png")
-            diff_image_dest.mkdir(mode=0o777, parents=True, exist_ok=True)
             diff_image = highlight_differences(output_image, reference_image)
 
             diff_image.save(diff_image_dest)
@@ -121,13 +121,59 @@ def test_svg_renderer2(asset: Asset, config: Config) -> None:
     output_file_path = asset.get_output_file(".svg_renderer2").with_suffix(".svg")
     ref.save_to(output_file_path)
 
-    reference_path = REFERENCE_ASSETS_MANAGER.get_asset_path(
-        ".svg_renderer2", asset.relative_path
-    ).with_suffix(".svg")
+    if config.compare_with_reference:
+        reference_path = REFERENCE_ASSETS_MANAGER.get_asset_path(
+            ".svg_renderer2", asset.relative_path
+        ).with_suffix(".svg")
 
-    output_file_content = output_file_path.read_bytes()
-    reference_file_content = reference_path.read_bytes()
+        output_file_content = output_file_path.read_bytes()
+        reference_file_content = reference_path.read_bytes()
 
-    if config.compare_with_reference and output_file_content != reference_file_content:
-        msg = "File mismatch."
-        raise ValueError(msg)
+        if output_file_content != reference_file_content:
+            msg = "File mismatch."
+            raise ValueError(msg)
+
+
+@CaseGenerator[Config](
+    GERBER_ASSETS_INDEX,
+    {
+        "A64-OLinuXino-rev-G.*": Config(skip=True),
+        "A64-OLinuXino-rev-G.A64-OlinuXino_Rev_G-B_Cu.gbr": Config(skip=False),
+        "ATMEGA328-Motor-Board.*": Config(skip=True),
+        "ATMEGA328-Motor-Board.ATMEGA328_Motor_Board-B.Cu.gbl": Config(skip=False),
+        "expressions.*": Config(as_expression=True),
+        "incomplete.*": Config(skip=True),
+    },
+    Config,
+).parametrize
+def test_parser2(asset: Asset, config: Config) -> None:
+    if config.skip:
+        pytest.skip(reason=config.skip_reason)
+
+    if config.xfail:
+        pytest.xfail(config.xfail_message)
+
+    source = asset.absolute_path.read_text()
+    tokenizer = Tokenizer()
+
+    if config.as_expression:
+        stack = tokenizer.tokenize_expressions(source)
+    else:
+        stack = tokenizer.tokenize(source)
+
+    parser = Parser2()
+    cmd_buf = parser.parse(stack)
+
+    output = cmd_buf.model_dump_json(indent=2, serialize_as_any=True)
+    output_file_path = asset.get_output_file(".parser2").with_suffix(".json")
+    output_file_path.write_text(output)
+
+    if config.compare_with_reference:
+        reference_path = REFERENCE_ASSETS_MANAGER.get_asset_path(
+            ".parser2", asset.relative_path
+        ).with_suffix(".json")
+
+        output_file_content = json.loads(output_file_path.read_text())
+        reference_file_content = json.loads(reference_path.read_text())
+
+        assert output_file_content == reference_file_content

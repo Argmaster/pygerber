@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, computed_field
 
 
 class FrozenGeneralModel(BaseModel):
@@ -13,3 +13,9 @@ class FrozenGeneralModel(BaseModel):
         frozen=True,
         arbitrary_types_allowed=True,
     )
+
+    @computed_field  # type: ignore[misc]
+    @property
+    def __class_qualname__(self) -> str:
+        """Name of class."""
+        return self.__class__.__qualname__

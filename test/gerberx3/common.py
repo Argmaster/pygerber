@@ -136,6 +136,7 @@ class ConfigBase:
     xfail: bool = False
     xfail_message: str = "Test is expected to fail"
     skip: bool = False
+    skip_reason: str = "Test is skipped"
 
 
 ConfigT = TypeVar("ConfigT", bound=ConfigBase)
@@ -226,6 +227,15 @@ class ReferenceAssetsManager:
         subprocess.run(
             [  # noqa: S603
                 GIT_PATH.as_posix(),
+                "fetch",
+            ],
+            cwd=self.repository_directory.as_posix(),
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            [  # noqa: S603
+                GIT_PATH.as_posix(),
                 "checkout",
                 self.sha,
             ],
@@ -239,7 +249,7 @@ class ReferenceAssetsManager:
 
 
 REFERENCE_ASSETS_MANAGER = ReferenceAssetsManager(
-    "293b85a7bff85af027c05a14261c58657aa8a5a7"
+    "1f390bfbd52baab4c8ebf06f5efb5310d8572526"
 )
 
 
