@@ -76,6 +76,7 @@ ipykernel = "^6.25.0"
 twine = "^4.0.2"
 docutils = "0.20.1"
 typing-extensions = "^4.11.0"
+filelock = "^3.14.0"
 
 [tool.poetry.group.docs]
 optional = true

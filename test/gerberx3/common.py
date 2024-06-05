@@ -19,6 +19,7 @@ from typing import (
 )
 
 import pytest
+from filelock import FileLock
 from PIL import Image, ImageDraw
 
 from pygerber.gerberx3.api.v2 import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
@@ -213,36 +214,38 @@ class ReferenceAssetsManager:
         self._prepare_repository()
 
     def _prepare_repository(self) -> None:
-        if not self.repository_directory.exists():
+        lock = FileLock(self.repository_directory.with_suffix(".lock"))
+        with lock:
+            if not self.repository_directory.exists():
+                subprocess.run(
+                    [  # noqa: S603
+                        GIT_PATH.as_posix(),
+                        "clone",
+                        "https://github.com/Argmaster/pygerber-reference-assets",
+                        self.repository_directory.as_posix(),
+                    ],
+                    check=True,
+                    capture_output=True,
+                )
             subprocess.run(
                 [  # noqa: S603
                     GIT_PATH.as_posix(),
-                    "clone",
-                    "https://github.com/Argmaster/pygerber-reference-assets",
-                    self.repository_directory.as_posix(),
+                    "fetch",
                 ],
+                cwd=self.repository_directory.as_posix(),
                 check=True,
                 capture_output=True,
             )
-        subprocess.run(
-            [  # noqa: S603
-                GIT_PATH.as_posix(),
-                "fetch",
-            ],
-            cwd=self.repository_directory.as_posix(),
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            [  # noqa: S603
-                GIT_PATH.as_posix(),
-                "checkout",
-                self.sha,
-            ],
-            cwd=self.repository_directory.as_posix(),
-            check=True,
-            capture_output=True,
-        )
+            subprocess.run(
+                [  # noqa: S603
+                    GIT_PATH.as_posix(),
+                    "checkout",
+                    self.sha,
+                ],
+                cwd=self.repository_directory.as_posix(),
+                check=True,
+                capture_output=True,
+            )
 
     def get_asset_path(self, tag: str, relative_path: Path) -> Path:
         return self.repository_directory / f".reference{tag}" / relative_path

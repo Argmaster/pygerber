@@ -299,3 +299,4 @@ pyrightconfig.json
 output.png
 \#*.*
 .reference-assets/
+.reference-assets.lock
