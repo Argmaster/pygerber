@@ -12,6 +12,7 @@ on:
       - release/**
       - dependabot/**
       - maintenance/**
+      - refactor/**
     paths:
       - src/**
       - test/**
