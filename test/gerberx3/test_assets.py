@@ -29,7 +29,7 @@ class Config(ConfigBase):
     compare_with_reference: bool = True
 
 
-@CaseGenerator[Config](
+@CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "A64-OLinuXino-rev-G.*": Config(dpmm=40),
@@ -90,7 +90,7 @@ def test_raster_renderer2(asset: Asset, config: Config) -> None:
             raise ValueError(msg)
 
 
-@CaseGenerator[Config](
+@CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "expressions.*": Config(as_expression=True),
@@ -134,7 +134,7 @@ def test_svg_renderer2(asset: Asset, config: Config) -> None:
             raise ValueError(msg)
 
 
-@CaseGenerator[Config](
+@CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "A64-OLinuXino-rev-G.*": Config(skip=True),
@@ -179,7 +179,7 @@ def test_parser2(asset: Asset, config: Config) -> None:
         assert output_file_content == reference_file_content
 
 
-@CaseGenerator[Config](
+@CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "A64-OLinuXino-rev-G.*": Config(skip=True),
