@@ -177,3 +177,33 @@ def test_parser2(asset: Asset, config: Config) -> None:
         reference_file_content = json.loads(reference_path.read_text())
 
         assert output_file_content == reference_file_content
+
+
+@CaseGenerator[Config](
+    GERBER_ASSETS_INDEX,
+    {
+        "A64-OLinuXino-rev-G.*": Config(skip=True),
+        "A64-OLinuXino-rev-G.A64-OlinuXino_Rev_G-B_Cu.gbr": Config(skip=False),
+        "ATMEGA328-Motor-Board.*": Config(skip=True),
+        "ATMEGA328-Motor-Board.ATMEGA328_Motor_Board-B.Cu.gbl": Config(skip=False),
+        "expressions.*": Config(as_expression=True),
+        "incomplete.*": Config(skip=True),
+    },
+    Config,
+).parametrize
+def test_tokenizer(asset: Asset, config: Config) -> None:
+    if config.skip:
+        pytest.skip(reason=config.skip_reason)
+
+    if config.xfail:
+        pytest.xfail(config.xfail_message)
+
+    source = asset.absolute_path.read_text()
+    tokenizer = Tokenizer()
+
+    if config.as_expression:
+        stack = tokenizer.tokenize_expressions(source)
+    else:
+        stack = tokenizer.tokenize(source)
+
+    assert len(stack) > 0
