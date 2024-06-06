@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import fnmatch
-import platform
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
@@ -19,6 +17,8 @@ from typing import (
 )
 
 import pytest
+from dulwich import porcelain
+from dulwich.repo import Repo
 from filelock import FileLock
 from PIL import Image, ImageDraw
 
@@ -186,26 +186,6 @@ class CaseGenerator(Generic[ConfigT]):
         )
 
 
-if platform.system() == "Windows":
-    GIT_PATH = Path(
-        subprocess.run(
-            ["where", "git"],  # noqa: S607, S603
-            capture_output=True,
-            text=True,
-            check=False,
-        ).stdout.strip()
-    )
-else:
-    GIT_PATH = Path(
-        subprocess.run(
-            ["which", "git"],  # noqa: S607, S603
-            capture_output=True,
-            text=True,
-            check=False,
-        ).stdout.strip()
-    )
-
-
 class ReferenceAssetsManager:
     def __init__(self, sha: str) -> None:
         self.sha = sha
@@ -217,35 +197,13 @@ class ReferenceAssetsManager:
         lock = FileLock(self.repository_directory.with_suffix(".lock"))
         with lock:
             if not self.repository_directory.exists():
-                subprocess.run(
-                    [  # noqa: S603
-                        GIT_PATH.as_posix(),
-                        "clone",
-                        "https://github.com/Argmaster/pygerber-reference-assets",
-                        self.repository_directory.as_posix(),
-                    ],
-                    check=True,
-                    capture_output=True,
+                porcelain.clone(
+                    "https://github.com/Argmaster/pygerber-reference-assets",
+                    self.repository_directory.as_posix(),
                 )
-            subprocess.run(
-                [  # noqa: S603
-                    GIT_PATH.as_posix(),
-                    "fetch",
-                ],
-                cwd=self.repository_directory.as_posix(),
-                check=True,
-                capture_output=True,
-            )
-            subprocess.run(
-                [  # noqa: S603
-                    GIT_PATH.as_posix(),
-                    "checkout",
-                    self.sha,
-                ],
-                cwd=self.repository_directory.as_posix(),
-                check=True,
-                capture_output=True,
-            )
+            repository = Repo(self.repository_directory.as_posix())
+            porcelain.fetch(repository, "origin")
+            porcelain.checkout_branch(repository, self.sha)
 
     def get_asset_path(self, tag: str, relative_path: Path) -> Path:
         return self.repository_directory / f".reference{tag}" / relative_path
