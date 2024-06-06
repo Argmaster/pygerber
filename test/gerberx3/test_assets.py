@@ -29,7 +29,7 @@ class Config(ConfigBase):
     compare_with_reference: bool = True
 
 
-@CaseGenerator(
+parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "A64-OLinuXino-rev-G.*": Config(dpmm=40),
@@ -47,6 +47,9 @@ class Config(ConfigBase):
     },
     Config,
 ).parametrize
+
+
+@parametrize
 def test_raster_renderer2(asset: Asset, config: Config) -> None:
     if config.skip:
         pytest.skip()
@@ -90,7 +93,7 @@ def test_raster_renderer2(asset: Asset, config: Config) -> None:
             raise ValueError(msg)
 
 
-@CaseGenerator(
+parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "expressions.*": Config(as_expression=True),
@@ -98,6 +101,9 @@ def test_raster_renderer2(asset: Asset, config: Config) -> None:
     },
     Config,
 ).parametrize
+
+
+@parametrize
 def test_svg_renderer2(asset: Asset, config: Config) -> None:
     if config.skip:
         pytest.skip()
@@ -134,7 +140,7 @@ def test_svg_renderer2(asset: Asset, config: Config) -> None:
             raise ValueError(msg)
 
 
-@CaseGenerator(
+parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "A64-OLinuXino-rev-G.*": Config(skip=True),
@@ -146,6 +152,9 @@ def test_svg_renderer2(asset: Asset, config: Config) -> None:
     },
     Config,
 ).parametrize
+
+
+@parametrize
 def test_parser2(asset: Asset, config: Config) -> None:
     if config.skip:
         pytest.skip(reason=config.skip_reason)
@@ -179,7 +188,7 @@ def test_parser2(asset: Asset, config: Config) -> None:
         assert output_file_content == reference_file_content
 
 
-@CaseGenerator(
+parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "A64-OLinuXino-rev-G.*": Config(skip=True),
@@ -191,6 +200,9 @@ def test_parser2(asset: Asset, config: Config) -> None:
     },
     Config,
 ).parametrize
+
+
+@parametrize
 def test_tokenizer(asset: Asset, config: Config) -> None:
     if config.skip:
         pytest.skip(reason=config.skip_reason)
