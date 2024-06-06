@@ -91,7 +91,7 @@ class Parser:
         except ExitParsingProcessInterrupt:
             return
 
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             if self.options.on_update_drawing_state_error == ParserOnErrorAction.Ignore:
                 pass
 

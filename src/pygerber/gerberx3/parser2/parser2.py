@@ -87,7 +87,7 @@ class Parser2:
         except ExitParsingProcess2Interrupt:
             raise
 
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             if (
                 self.options.on_update_drawing_state_error
                 == Parser2OnErrorAction.Ignore

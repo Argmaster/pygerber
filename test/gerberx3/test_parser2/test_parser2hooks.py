@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 from decimal import Decimal
 from pathlib import Path
-from test.gerberx3.test_parser2.common import debug_dump_context, parse_code
 
 import pytest
 
@@ -70,6 +69,7 @@ from pygerber.gerberx3.tokenizer.tokens.fs_coordinate_format import (
     AxisFormat,
     CoordinateParser,
 )
+from test.gerberx3.test_parser2.common import debug_dump_context, parse_code
 
 DEBUG_DUMP_DIR = Path(__file__).parent / ".output" / "test_parser2hooks"
 DEBUG_DUMP_DIR.mkdir(exist_ok=True, parents=True)

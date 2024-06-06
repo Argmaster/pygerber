@@ -4,6 +4,11 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Generator
+
+import pytest
+
+from pygerber.gerberx3.renderer2.svg import IS_SVG_BACKEND_AVAILABLE
 from test.examples import (
     introspect_minimal_example,
     introspect_mixed_inheritance,
@@ -16,11 +21,6 @@ from test.examples import (
     renderer_2_raster_render,
     renderer_2_svg_render,
 )
-from typing import Generator
-
-import pytest
-
-from pygerber.gerberx3.renderer2.svg import IS_SVG_BACKEND_AVAILABLE
 
 DIRECTORY = Path(__file__).parent
 

@@ -2,14 +2,6 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from test.gerberx3.common import (
-    GERBER_ASSETS_INDEX,
-    REFERENCE_ASSETS_MANAGER,
-    Asset,
-    CaseGenerator,
-    ConfigBase,
-    highlight_differences,
-)
 
 import pytest
 from PIL import Image
@@ -18,6 +10,14 @@ from pygerber.gerberx3.parser2.parser2 import Parser2
 from pygerber.gerberx3.renderer2.raster import RasterRenderer2, RasterRenderer2Hooks
 from pygerber.gerberx3.renderer2.svg import SvgRenderer2, SvgRenderer2Hooks
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
+from test.gerberx3.common import (
+    GERBER_ASSETS_INDEX,
+    REFERENCE_ASSETS_MANAGER,
+    Asset,
+    CaseGenerator,
+    ConfigBase,
+    highlight_differences,
+)
 
 
 @dataclass
