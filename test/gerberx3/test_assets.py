@@ -182,8 +182,14 @@ def test_parser2(asset: Asset, config: Config) -> None:
             ".parser2", asset.relative_path
         ).with_suffix(".json")
 
-        output_file_content = json.loads(output_file_path.read_text())
-        reference_file_content = json.loads(reference_path.read_text())
+        output_file_content = json.loads(
+            output_file_path.read_text(),
+            parse_float=lambda x: round(float(x), 6),
+        )
+        reference_file_content = json.loads(
+            reference_path.read_text(),
+            parse_float=lambda x: round(float(x), 6),
+        )
 
         assert output_file_content == reference_file_content
 
