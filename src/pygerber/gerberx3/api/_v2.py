@@ -117,18 +117,25 @@ class FileTypeEnum(Enum):
         if re.match(r"\.gm[0-9]+", extension):
             return FileTypeEnum.COPPER
 
-        return {
-            ".gto": FileTypeEnum.SILK,
-            ".gbo": FileTypeEnum.SILK,
-            ".gpt": FileTypeEnum.PADS,
-            ".gpb": FileTypeEnum.PADS,
-            ".gts": FileTypeEnum.SOLDERMASK,
-            ".gbs": FileTypeEnum.SOLDERMASK,
-            ".gtl": FileTypeEnum.COPPER,
-            ".gbl": FileTypeEnum.COPPER,
-            ".gtp": FileTypeEnum.PASTE,
-            ".gbp": FileTypeEnum.PASTE,
-        }.get(extension.lower(), FileTypeEnum.UNDEFINED)
+        return GERBER_EXTENSION_TO_FILE_TYPE_MAPPING.get(
+            extension.lower(), FileTypeEnum.UNDEFINED
+        )
+
+
+GERBER_EXTENSION_TO_FILE_TYPE_MAPPING: Dict[str, FileTypeEnum] = {
+    ".grb": FileTypeEnum.INFER_FROM_ATTRIBUTES,
+    ".gbr": FileTypeEnum.INFER_FROM_ATTRIBUTES,
+    ".gto": FileTypeEnum.SILK,
+    ".gbo": FileTypeEnum.SILK,
+    ".gpt": FileTypeEnum.PADS,
+    ".gpb": FileTypeEnum.PADS,
+    ".gts": FileTypeEnum.SOLDERMASK,
+    ".gbs": FileTypeEnum.SOLDERMASK,
+    ".gtl": FileTypeEnum.COPPER,
+    ".gbl": FileTypeEnum.COPPER,
+    ".gtp": FileTypeEnum.PASTE,
+    ".gbp": FileTypeEnum.PASTE,
+}
 
 
 @dataclass

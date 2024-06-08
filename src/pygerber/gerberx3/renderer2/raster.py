@@ -62,8 +62,8 @@ def custom_round(value: Decimal | float) -> int:
     int_val = int(value)
     diff = abs(int_val - Decimal(value))
 
-    if diff > HALF:
-        return int_val + 1
+    if diff >= HALF:
+        return int_val
 
     return int_val
 
@@ -81,6 +81,8 @@ class RasterRenderingFrameBuilder:
         self.dpmm = 1
         self.scale = Decimal("1")
         self.polarity: Optional[Polarity] = None
+        self.x_offset = 0
+        self.y_offset = 0
 
     def set_command_buffer(self, command_buffer: ReadonlyCommandBuffer2) -> Self:
         """Specify source buffer."""
@@ -127,6 +129,12 @@ class RasterRenderingFrameBuilder:
         self.polarity = polarity
         return self
 
+    def set_pixel_dimension_offsets(self, x: int = 0, y: int = 0) -> Self:
+        """Set pixel dimension offsets."""
+        self.x_offset = x
+        self.y_offset = y
+        return self
+
     def build(self, *, with_mask: bool = True) -> RasterRenderingFrame:
         """Build final rendering frame container."""
         command_buffer = (
@@ -140,8 +148,10 @@ class RasterRenderingFrameBuilder:
             else self.bounding_box
         )
         dimensions = (
-            max(custom_round(bbox.width.as_millimeters() * self.dpmm * self.scale), 1),
-            max(custom_round(bbox.height.as_millimeters() * self.dpmm * self.scale), 1),
+            max(custom_round(bbox.width.as_millimeters() * self.dpmm * self.scale), 1)
+            + self.x_offset,
+            max(custom_round(bbox.height.as_millimeters() * self.dpmm * self.scale), 1)
+            + self.y_offset,
         )
         image = (
             Image.new("RGBA", dimensions, (0, 0, 0, 0))
@@ -477,8 +487,12 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
             + command.center_point,
         )
 
-        if end_angle <= start_angle:
+        if end_angle < start_angle:
             end_angle += 360
+
+        if end_angle == start_angle:
+            start_angle = 360
+            end_angle = 0
 
         self.frame.arc(
             command.transform.polarity,
@@ -556,15 +570,37 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         raster_aperture = self.get_aperture(aperture_id)
 
         if raster_aperture is None:
-            self.push_render_frame(
-                self.frame_builder.set_polarity(command.transform.polarity)
-                .set_command_buffer_from_list([command])
-                .build(),
-            )
+            bbox = list(self.convert_bbox(command.get_bounding_box()))
+            # Circles which are drawn with small amount of pixels are offset by 1 pixel
+            # for some reason. This is a first part of workaround for that. 30 pixels is
+            # an empirically determined threshold after which the offset is not needed
+            # anymore. We need to increase size of the bounding box by 1 pixel to
+            # fit a circle which size will also be increased by 1 pixel.
+            if abs(bbox[0] - bbox[2]) <= 35:  # noqa: PLR2004
+                self.frame_builder.set_pixel_dimension_offsets(x=1, y=1)
+
+            # Unfortunately workaround implemented just above forces frame generation
+            # to be deferred to here.
+            frame_builder = self.frame_builder.set_polarity(
+                command.transform.polarity
+            ).set_command_buffer_from_list([command])
+            self.push_render_frame(frame_builder.build())
+            # Additionally we have to clean up frame_builder state we have altered.
+            self.frame_builder.set_pixel_dimension_offsets()
+
+            # We have to recalculate a bounding box after jumping into new frame as
+            # dimensions of the frame likely changed, therefore relative position of
+            # bounding box also changed.
+            bbox = list(self.convert_bbox(command.get_bounding_box()))
+            # This is a second part of workaround for circles which are drawn with small
+            # amount of pixels. We need to increase size of the circle itself. We
+            # couldn't do it earlier because we need to recalculate bbox for new frame.
+            if abs(bbox[0] - bbox[2]) <= 35:  # noqa: PLR2004
+                bbox[2] += 1
 
             self.frame.ellipse(
                 Polarity.Dark,
-                self.convert_bbox(command.get_bounding_box()),
+                bbox,
             )
             self._make_hole(command, aperture)
 

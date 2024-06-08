@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from test.gerberx3.test_parser2.common import debug_dump_context, parse_code
 from unittest.mock import MagicMock
 
 from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.state_enums import Mirroring
 from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
+from test.gerberx3.test_parser2.common import debug_dump_context, parse_code
 
 DEBUG_DUMP_DIR = Path(__file__).parent / ".output" / "test_parser2context"
 DEBUG_DUMP_DIR.mkdir(exist_ok=True, parents=True)

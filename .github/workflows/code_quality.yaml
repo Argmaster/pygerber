@@ -12,6 +12,7 @@ on:
       - release/**
       - dependabot/**
       - maintenance/**
+      - refactor/**
 
   pull_request:
     branches:

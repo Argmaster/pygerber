@@ -1,0 +1,27 @@
+%FSLAX26Y26*%
+%MOMM*%
+%ADD100C,3.0*%
+%ADD200C,2.0*%
+
+D100*
+%LPD*%
+G04 Diagonal bottom-left -> top-right solid.*
+X5000000Y0D02*
+X0Y5000000D01*
+D200*
+%LPC*%
+G04 Diagonal bottom-left -> top-right clear.*
+X5000000Y0D02*
+X0Y5000000D01*
+D100*
+%LPD*%
+G04 Diagonal bottom-right -> top-left solid.*
+X0Y0D02*
+X5000000Y5000000D01*
+D200*
+%LPC*%
+G04 Diagonal bottom-right -> top-left clear.*
+X0Y0D02*
+X5000000Y5000000D01*
+
+M02*
