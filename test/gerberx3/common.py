@@ -8,12 +8,15 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Generator,
     Generic,
     Iterable,
     Optional,
     Sequence,
     TypeVar,
+    Union,
+    cast,
 )
 
 import pytest
@@ -209,9 +212,8 @@ class ReferenceAssetsManager:
         return self.repository_directory / f".reference{tag}" / relative_path
 
 
-REFERENCE_ASSETS_MANAGER = ReferenceAssetsManager(
-    "1f390bfbd52baab4c8ebf06f5efb5310d8572526"
-)
+REFERENCE_ASSET_SHA = "1f390bfbd52baab4c8ebf06f5efb5310d8572526"
+REFERENCE_ASSETS_MANAGER = ReferenceAssetsManager(REFERENCE_ASSET_SHA)
 
 
 def highlight_differences(first: Image.Image, second: Image.Image) -> Image.Image:
@@ -259,3 +261,88 @@ def pad_and_center(
     top = (target_height - img.height) // 2
     result.paste(img, (left, top))
     return result
+
+
+T = TypeVar("T", bound=Optional[Any])
+
+
+class JsonWalker:
+    """Walks through a JSON-like data structure and applies callbacks to each element.
+
+    Walking is done left-to-right in a depth-first manner.
+    """
+
+    def __init__(
+        self,
+        on_dict: Optional[Callable[[dict[str, Any]], None]] = None,
+        on_list: Optional[Callable[[list[Any]], None]] = None,
+        on_string: Optional[Callable[[str], None]] = None,
+        on_number: Optional[Callable[[Union[float, int]], None]] = None,
+        on_bool: Optional[Callable[[bool], None]] = None,
+        on_none: Optional[Callable[[None], None]] = None,
+    ) -> None:
+        if on_dict is not None:
+            self.on_dict = on_dict  # type: ignore[assignment]
+
+        if on_list is not None:
+            self.on_list = on_list  # type: ignore[assignment]
+
+        if on_string is not None:
+            self.on_string = on_string  # type: ignore[assignment]
+
+        if on_number is not None:
+            self.on_number = on_number  # type: ignore[assignment]
+
+        if on_bool is not None:
+            self.on_bool = on_bool  # type: ignore[assignment]
+
+        if on_none is not None:
+            self.on_none = on_none  # type: ignore[assignment]
+
+    def walk(self, data: T) -> T:
+        return self._walk_any(data)
+
+    def _walk_any(self, data: T) -> T:
+        if isinstance(data, dict):
+            self.on_dict(data)
+            for key, value in data.items():
+                data[key] = self._walk_any(value)
+            return cast(T, data)
+
+        if isinstance(data, list):
+            self.on_list(data)
+            for i, value in enumerate(data):
+                data[i] = self._walk_any(value)
+            return cast(T, data)
+
+        if isinstance(data, str):
+            return cast(T, self.on_string(data))
+
+        if isinstance(data, (int, float)):
+            return cast(T, self.on_number(float(data)))
+
+        if isinstance(data, bool):
+            return cast(T, self.on_bool(data))
+
+        if data is None:
+            return self.on_none(data)  # type: ignore[unreachable]
+
+        raise TypeError(type(data))
+
+    def on_dict(self, data: dict[str, Any]) -> dict[str, Any]:
+        return data
+
+    def on_list(self, data: list[Any]) -> list[Any]:
+        return data
+
+    def on_string(self, data: str) -> str:
+        return data
+
+    def on_number(self, data: float) -> float:
+        return data
+
+    def on_bool(self, data: bool) -> bool:  # noqa: FBT001
+        return data
+
+    def on_none(self, data: None) -> None:
+        return data

@@ -16,6 +16,7 @@ from test.gerberx3.common import (
     Asset,
     CaseGenerator,
     ConfigBase,
+    JsonWalker,
     highlight_differences,
 )
 
@@ -182,16 +183,20 @@ def test_parser2(asset: Asset, config: Config) -> None:
             ".parser2", asset.relative_path
         ).with_suffix(".json")
 
-        output_file_content = json.loads(
-            output_file_path.read_text(),
-            parse_float=lambda x: round(float(x), 6),
-        )
-        reference_file_content = json.loads(
-            reference_path.read_text(),
-            parse_float=lambda x: round(float(x), 6),
-        )
+        walker = DecimalPrecisionFixerWalker()
+
+        output_file_content = walker.walk(json.loads(output_file_path.read_text()))
+        reference_file_content = walker.walk(json.loads(reference_path.read_text()))
 
         assert output_file_content == reference_file_content
+
+
+class DecimalPrecisionFixerWalker(JsonWalker):
+    def on_string(self, data: str) -> str:
+        try:
+            return str(round(float(data), 6))
+        except ValueError:
+            return super().on_string(data)
 
 
 parametrize = CaseGenerator(
