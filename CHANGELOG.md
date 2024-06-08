@@ -3,15 +3,18 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
-this project adheres to [Calendar Versioning](https://calver.org/).
+this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
-## WIP
+## Release 2.4.0
 
 - Added command line interface utilizing API V2 for rendering Gerber files to images.
   This includes interface for rendering PNG, JPEG and SVG images and multi-file projects
-  to single PNG?JPEG image.
+  to single PNG/JPEG image.
 - Added support for inferring file type from file extension or `.FileFunction` file
   attribute. This mechanism is used by default by API V2 based command line interface.
+- Refactored test suite and dropped testing of code related to `Parser` class originally
+  included in `PyGerber` 2.0.0. Currently only `Parser2` related code is actively
+  tested.
 
 ## Release 2.3.2
 
