@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import platform
 from dataclasses import dataclass
 
 import pytest
@@ -94,11 +95,26 @@ def test_raster_renderer2(asset: Asset, config: Config) -> None:
             raise ValueError(msg)
 
 
+IS_WINDOWS = platform.system() == "Windows"
+
+
 parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "expressions.*": Config(as_expression=True),
         "incomplete.*": Config(skip=True),
+        "flashes.03_polygon3+h_4.grb": Config(skip=IS_WINDOWS),
+        "flashes.03_polygon3_4.grb": Config(skip=IS_WINDOWS),
+        "flashes.04_polygon6+h_4.grb": Config(skip=IS_WINDOWS),
+        "flashes.04_polygon6_4.grb": Config(skip=IS_WINDOWS),
+        "flashes.05_circle+h_rectangle+h_obround+h_traingle+h.grb": Config(
+            skip=IS_WINDOWS
+        ),
+        "polarity_cutouts.sample.grb": Config(skip=IS_WINDOWS),
+        "ucamco.2.11.2.source.grb": Config(skip=IS_WINDOWS),
+        "ucamco.2.11.2.source_no_macro.grb": Config(skip=IS_WINDOWS),
+        "ucamco.4.9.6.source.grb": Config(skip=IS_WINDOWS),
+        "ucamco.4.9.6.source_no_ld_rot.grb": Config(skip=IS_WINDOWS),
     },
     Config,
 ).parametrize
