@@ -348,8 +348,7 @@ class GerberGrammarBuilder(GrammarBuilder):
         comment = self._build_comment_token()
 
         common = (
-            comment
-            | mo
+            mo
             | fs
             | self._build_macro_tokens()
             | self._build_define_aperture()
@@ -365,6 +364,7 @@ class GerberGrammarBuilder(GrammarBuilder):
             | self._build_attribute_tokens(statement=True)
             | m01
             | eoex
+            | comment
         )
 
         invalid_token = self.wrapper(
@@ -921,10 +921,52 @@ class GerberGrammarBuilder(GrammarBuilder):
                 file_attribute_name | aperture_attribute_name | object_attribute_name,
             ).set_results_name("attribute_name"),
         )
-        if statement:
-            return self._build_stmt(tf | ta | to | td)
 
-        return tf | ta | to | td
+        # Set a file attribute.
+        tf_comment = wrapper(
+            self.options.tf_file_attribute_token_cls,
+            Regex("G0*4")
+            + Literal("#@!")
+            + Literal("TF")
+            + file_attribute_name.set_results_name("attribute_name")
+            + maybe_comma_or_maybe_comma_with_field,
+        )
+        # Add an aperture attribute to the dictionary or modify it.
+        ta_comment = wrapper(
+            self.options.ta_aperture_attribute_token_cls,
+            Regex("G0*4")
+            + Literal("#@!")
+            + Literal("TA")
+            + aperture_attribute_name.set_results_name("attribute_name")
+            + maybe_comma_or_maybe_comma_with_field,
+        )
+        # Add an object attribute to the dictionary or modify it.
+        to_comment = wrapper(
+            self.options.to_object_attribute_token_cls,
+            Regex("G0*4")
+            + Literal("#@!")
+            + Literal("TO")
+            + object_attribute_name.set_results_name("attribute_name")
+            + maybe_comma_or_maybe_comma_with_field,
+        )
+        # Delete one or all attributes in the dictionary.
+        td_comment = wrapper(
+            self.options.td_delete_attribute_token_cls,
+            Regex("G0*4")
+            + Literal("#@!")
+            + Literal("TD")
+            + Opt(
+                file_attribute_name | aperture_attribute_name | object_attribute_name,
+            ).set_results_name("attribute_name"),
+        )
+
+        attrs = tf | ta | to | td
+        comment_attrs = tf_comment | ta_comment | to_comment | td_comment
+
+        if statement:
+            return self._build_stmt(attrs) | comment_attrs
+
+        return attrs | comment_attrs
 
     _build_eoex_cache: Optional[ParserElement] = None
 
