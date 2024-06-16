@@ -346,12 +346,15 @@ class GerberGrammarBuilder(GrammarBuilder):
         g_codes = self._build_g_codes()
         d_codes = self._build_d_codes()
         comment = self._build_comment_token()
+        attributes = self._build_attribute_tokens()
+        macro = self._build_macro_tokens()
+        define_aperture = self._build_define_aperture()
 
         common = (
             mo
             | fs
-            | self._build_macro_tokens()
-            | self._build_define_aperture()
+            | macro
+            | define_aperture
             | dnn
             | (d_codes + eoex)
             | (g_codes + d_codes + eoex)
@@ -361,7 +364,7 @@ class GerberGrammarBuilder(GrammarBuilder):
             | ab_open
             | ab_close
             | sr
-            | self._build_attribute_tokens(statement=True)
+            | attributes
             | m01
             | eoex
             | comment
@@ -881,7 +884,7 @@ class GerberGrammarBuilder(GrammarBuilder):
             Regex(r"\$[0-9]*[1-9][0-9]*")("macro_variable_name"),
         )
 
-    def _build_attribute_tokens(self, *, statement: bool = False) -> ParserElement:
+    def _build_attribute_tokens(self) -> ParserElement:
         wrapper = self.wrapper
 
         file_attribute_name = self._build_name().set_name("file attribute name")
@@ -963,10 +966,7 @@ class GerberGrammarBuilder(GrammarBuilder):
         attrs = tf | ta | to | td
         comment_attrs = tf_comment | ta_comment | to_comment | td_comment
 
-        if statement:
-            return self._build_stmt(attrs) | comment_attrs
-
-        return attrs | comment_attrs
+        return self._build_stmt(attrs) | comment_attrs
 
     _build_eoex_cache: Optional[ParserElement] = None
 
