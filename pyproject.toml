@@ -55,7 +55,6 @@ numpy = [
     { version = "^1.24.4", markers = "python_version >= '3.8' and python_version <= '3.11'" },
     { version = "^1.26.1", markers = "python_version >= '3.12' and python_version < '3.13'" },
 ]
-pyyaml = "^6.0.1"
 pygls = { version = "^1.0.2", optional = true }
 lsprotocol = { version = "^2023.0.0a3", optional = true }
 drawsvg = { version = "^2.3.0", optional = true }
@@ -73,7 +72,7 @@ pytest-xdist = { extras = ["psutil"], version = "^3.3.1" }
 pytest-cov = "^4.1.0"
 types-tzlocal = "^5.0.1.1"
 ipykernel = "^6.25.0"
-twine = ">=4.0.2,<6.0.0"
+twine = "^5.1.1"
 docutils = "0.20.1"
 typing-extensions = "^4.11.0"
 filelock = "^3.14.0"
@@ -97,6 +96,7 @@ black = "^24.4.0"
 [tool.poetry.extras]
 language_server = ["pygls", "lsprotocol"]
 svg = ["drawsvg"]
+all = ["pygls", "lsprotocol", "drawsvg"]
 
 [build-system]
 requires = ["poetry-core"]
