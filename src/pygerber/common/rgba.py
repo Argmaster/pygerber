@@ -152,6 +152,10 @@ class RGBA(FrozenGeneralModel):
         """Return RGBA color as tuple of integers in range 0 to 255 inclusive."""
         return self.r, self.g, self.b, self.a
 
+    def as_rgb_int(self) -> tuple[int, int, int]:
+        """Return RGB color as tuple of integers in range 0 to 255 inclusive."""
+        return self.r, self.g, self.b
+
     def as_rgba_float(self) -> tuple[float, float, float, float]:
         """Return RGBA color as tuple of floats in range 0.0 to 1.0 inclusive."""
         return (
@@ -162,7 +166,10 @@ class RGBA(FrozenGeneralModel):
         )
 
     def to_hex(self) -> str:
-        """Return color as hexadecimal string."""
+        """Return color as hexadecimal string.
+
+        Eg. `#FF0000FF` for red color.
+        """
         r = f"{self.r:0{2}x}"
         g = f"{self.g:0{2}x}"
         b = f"{self.b:0{2}x}"

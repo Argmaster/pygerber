@@ -5,8 +5,11 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import os
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from tempfile import TemporaryDirectory
+from typing import Any, Generator
 
 import pytest
 import tzlocal
@@ -15,6 +18,16 @@ THIS_FILE = Path(__file__)
 THIS_FILE_DIRECTORY = THIS_FILE.parent
 TEST_DIRECTORY = THIS_FILE_DIRECTORY
 ASSETS_DIRECTORY = TEST_DIRECTORY / "assets"
+
+
+@contextmanager
+def cd_to_tempdir() -> Generator[Path, None, None]:
+    original_cwd = Path.cwd().as_posix()
+
+    with TemporaryDirectory() as tempdir:
+        os.chdir(tempdir)
+        yield Path(tempdir)
+        os.chdir(original_cwd)
 
 
 class AssetLoader:
