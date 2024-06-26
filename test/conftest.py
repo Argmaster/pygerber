@@ -24,7 +24,7 @@ ASSETS_DIRECTORY = TEST_DIRECTORY / "assets"
 def cd_to_tempdir() -> Generator[Path, None, None]:
     original_cwd = Path.cwd().as_posix()
     with suppress(  # noqa: SIM117
-        FileNotFoundError, NotADirectoryError, FileExistsError
+        FileNotFoundError, NotADirectoryError, FileExistsError, PermissionError
     ):
         with TemporaryDirectory() as tempdir:
             os.chdir(tempdir)
