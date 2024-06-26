@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-import os
-from contextlib import contextmanager
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from typing import Generator
 
 import pytest
 
 from pygerber.gerberx3.renderer2.svg import IS_SVG_BACKEND_AVAILABLE
+from test.conftest import cd_to_tempdir
 from test.examples import (
     introspect_minimal_example,
     introspect_mixed_inheritance,
@@ -72,16 +69,6 @@ def test_renderer_2_raster_render() -> None:
 @pytest.mark.skipif(not IS_SVG_BACKEND_AVAILABLE, reason="SVG backend required")
 def test_renderer_2_svg_render() -> None:
     renderer_2_svg_render.render()
-
-
-@contextmanager
-def cd_to_tempdir() -> Generator[None, None, None]:
-    original_cwd = Path.cwd().as_posix()
-
-    with TemporaryDirectory() as tempdir:
-        os.chdir(tempdir)
-        yield
-        os.chdir(original_cwd)
 
 
 def test_pygerber_api_v2_svg() -> None:
