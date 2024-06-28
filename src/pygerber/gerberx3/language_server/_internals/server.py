@@ -20,7 +20,7 @@ MAX_CACHE_SIZE = 64
 
 def get_language_server() -> LanguageServer:  # noqa: C901
     """Get instance of Gerber language server."""
-    if not IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:
+    if not IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:  # pragma: no cover
         raise LanguageServerNotAvailableError
 
     import lsprotocol.types as lspt
@@ -33,7 +33,7 @@ def get_language_server() -> LanguageServer:  # noqa: C901
 
     server = LanguageServer(
         "pygerber.gerberx3.language_server",
-        f"v{pygerber.__version__}",
+        pygerber.__version__,
         max_workers=1,
     )
 

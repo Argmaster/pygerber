@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import logging.config
 import pathlib
+import sys
 
 from pygerber.gerberx3.language_server._internals.server import get_language_server
 
@@ -14,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     """Run main entry point for language server."""
+    quiet = "--quiet" in sys.argv or "-q" in sys.argv
+
     logging.config.dictConfig(
         {
             "version": 1,
@@ -27,7 +30,10 @@ def main() -> None:
                     "formatter": "simple",
                 },
             },
-            "root": {"level": "INFO", "handlers": ["stderr"]},
+            "root": {
+                "level": "INFO" if not quiet else "CRITICAL",
+                "handlers": ["stderr"],
+            },
             "loggers": {
                 # Don't repeat every message
                 "pygls.protocol": {

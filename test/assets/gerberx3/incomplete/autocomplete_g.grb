@@ -1,0 +1,11 @@
+%MOMM*%
+%FSLAX26Y26*%
+%TF.Part,Other,example*%
+%TF.Part,Other,example*%
+%LPD*%
+%ADD10C,0.010*%
+D10*
+X0Y0D02*
+G01*
+X5000000Y0D01*
+G
