@@ -62,7 +62,7 @@ wheel = ">=0.23.0,<1.0"
 name = "attrs"
 version = "23.2.0"
 description = "Classes Without Boilerplate"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "attrs-23.2.0-py3-none-any.whl", hash = "sha256:99b87a485a5820b23b879f04c2305b44b951b502fd64be915879d77a7e8fc6f1"},
@@ -213,7 +213,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 name = "cattrs"
 version = "23.2.3"
 description = "Composable complex class support for attrs and dataclasses."
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "cattrs-23.2.3-py3-none-any.whl", hash = "sha256:0341994d94971052e9ee70662542699a3162ea1e0c62f7ce1b4a57f563685108"},
@@ -1140,7 +1140,7 @@ testing = ["pytest (>=6,!=8.1.1)", "pytest-checkdocs (>=2.4)", "pytest-cov", "py
 name = "lsprotocol"
 version = "2023.0.1"
 description = "Python implementation of the Language Server Protocol."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "lsprotocol-2023.0.1-py3-none-any.whl", hash = "sha256:c75223c9e4af2f24272b14c6375787438279369236cd568f596d4951052a60f2"},
@@ -2173,7 +2173,7 @@ files = [
 name = "pygls"
 version = "1.3.1"
 description = "A pythonic generic language server (pronounced like 'pie glass')"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pygls-1.3.1-py3-none-any.whl", hash = "sha256:6e00f11efc56321bdeb6eac04f6d86131f654c7d49124344a9ebb968da3dd91e"},
@@ -2257,6 +2257,24 @@ tomli = {version = ">=1", markers = "python_version < \"3.11\""}
 dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "pytest-asyncio"
+version = "0.23.7"
+description = "Pytest support for asyncio"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pytest_asyncio-0.23.7-py3-none-any.whl", hash = "sha256:009b48127fbe44518a547bddd25611551b0e43ccdbf1e67d12479f569832c20b"},
+    {file = "pytest_asyncio-0.23.7.tar.gz", hash = "sha256:5f5c72948f4c49e7db4f29f2521d4031f1c27f86e57b046126654083d4770268"},
+]
+
+[package.dependencies]
+pytest = ">=7.0.0,<9"
+
+[package.extras]
+docs = ["sphinx (>=5.3)", "sphinx-rtd-theme (>=1.0)"]
+testing = ["coverage (>=6.2)", "hypothesis (>=5.7.1)"]
+
+[[package]]
 name = "pytest-cov"
 version = "4.1.0"
 description = "Pytest plugin for measuring coverage."
@@ -2273,6 +2291,24 @@ pytest = ">=4.6"
 
 [package.extras]
 testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtualenv"]
+
+[[package]]
+name = "pytest-lsp"
+version = "0.4.2"
+description = "A pytest plugin for end-to-end testing of language servers"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pytest_lsp-0.4.2-py3-none-any.whl", hash = "sha256:94d4f36cf8629da5ab7616b434beca07c542e0938ec3ad9dc171f2e7e0dfd1fc"},
+    {file = "pytest_lsp-0.4.2.tar.gz", hash = "sha256:716fee29ebaa30cfb7aea72f517383544fb6dd6403bef68dd10d805ac3255555"},
+]
+
+[package.dependencies]
+importlib-resources = {version = "*", markers = "python_version < \"3.9\""}
+packaging = "*"
+pygls = ">=1.1.0"
+pytest = "*"
+pytest-asyncio = ">=0.23"
 
 [[package]]
 name = "pytest-xdist"
@@ -3091,4 +3127,4 @@ svg = ["drawsvg"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<3.13"
-content-hash = "052f4c4eb6fd9a8334700e3258a093178c3bf31ca7ecfea8610985617afac9b8"
+content-hash = "d6e8d4a31452486bbd78c1b812d7ff6ea146ef44b46c3001b849a47a624d371b"
