@@ -84,7 +84,7 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.5.2"
 mkdocs-material = "^9.1.21"
-mkdocstrings = { extras = ["python"], version = ">=0.22,<0.25" }
+mkdocstrings = { extras = ["python"], version = ">=0.25.1,<0.26" }
 mkdocs-literate-nav = "^0.6.0"
 mkdocs-macros-plugin = "^1.0.2"
 mkdocs-gen-files = "^0.5.0"
