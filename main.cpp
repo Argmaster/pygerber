@@ -1,8 +1,7 @@
-#include <array>
 #include <cstdint>
 #include <exception>
+#include <format>
 #include <iostream>
-#include <optional>
 #include <vector>
 
 #define DEBUG 1
@@ -140,7 +139,13 @@ enum class TokenType {
     INVALID,
     INTEGER,
     SIGN,
-    G_CODE,
+    G01_CODE,
+    G02_CODE,
+    G03_CODE,
+    G04_CODE,
+    G36_CODE,
+    G37_CODE,
+    STRING,
     COORDINATE_CODE,
     D_CODE,
     END_COMMAND,
@@ -158,9 +163,23 @@ struct ExtendedCommand : Token {};
 
 struct GerberParser {
 
-    class EndOfMapping : std::exception {};
+    class EndOfFile : std::exception {};
 
-    class InvalidToken : std::exception {};
+    class InvalidToken : std::exception {
+
+        std::string message;
+        uint64_t    failure_char_index;
+
+      public:
+        InvalidToken(uint64_t failure_char_index) :
+            failure_char_index(failure_char_index) {
+            message = std::format("Invalid token at index: {}", failure_char_index);
+        }
+
+        const char* what() const noexcept override {
+            return message.c_str();
+        }
+    };
 
     enum class Result {
         CONSUMED,
@@ -169,145 +188,152 @@ struct GerberParser {
 
     char*    gerber_code;
     uint64_t gerber_code_size;
-    uint64_t char_pointer = 0;
 
-    enum TokenType     token_type = TokenType::UNKNOWN;
     std::vector<Token> parsed_tokens_vector;
-    std::vector<char>   buffer;
+    std::vector<char>  token_buffer;
 
     GerberParser(char* file_mapping, uint64_t file_size) :
         gerber_code(file_mapping),
         gerber_code_size(file_size),
-        buffer(16384) {}
-
-    bool has_next_char() {
-        return char_pointer < gerber_code_size;
-    }
-
-    char get_next_char_throw() {
-        std::optional<char> current = get_next_char();
-        if (!current.has_value()) {
-            throw EndOfMapping();
-        }
-        return current.value();
-    }
-
-    std::optional<char> get_next_char() {
-        if (!has_next_char()) {
-            return std::nullopt;
-        }
-        char next = gerber_code[char_pointer];
-        char_pointer++;
-        LOG_DEBUG("get_next_char(): %c \n", next);
-        return next;
-    }
-
-    std::optional<char> get_prev_char() {
-        if (char_pointer <= 0) {
-            return std::nullopt;
-        }
-        char_pointer--;
-        char next = gerber_code[char_pointer];
-        return next;
-    }
+        token_buffer(16384) {}
 
     bool parse() {
-        while (char_pointer < gerber_code_size) {
-            LOG_DEBUG("char_pointer: %llu  file_size: %llu \n", char_pointer, gerber_code_size);
-            try {
-                parse_next();
-            } catch (GerberParser::EndOfMapping) {
-                return true;
-            } catch (GerberParser::InvalidToken) {
-                return false;
+        uint64_t current_char_index = 0;
+        try {
+            while (current_char_index < gerber_code_size) {
+                current_char_index = parse_next(current_char_index);
             }
+        } catch (GerberParser::EndOfFile) {
+            return true;
         }
         return true;
     }
 
-    void parse_next() {
-        char current = get_next_char_throw();
-        switch (current) {
+    std::string make_substring(uint64_t begin_token_index, uint64_t current_char_index) {
+        return std::string(gerber_code + begin_token_index, gerber_code + current_char_index);
+    }
+
+    void make_token(uint64_t begin_token_index, uint64_t current_char_index, enum TokenType type) {
+        parsed_tokens_vector.push_back({make_substring(begin_token_index, current_char_index), type}
+        );
+    }
+
+    uint64_t parse_next(uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            throw EndOfFile();
+        }
+        char current_char = gerber_code[current_char_index];
+
+        switch (current_char) {
             case '*':
-                LOG_DEBUG("Found * character. \n");
-                parsed_tokens_vector.push_back(
-                    {std::string(1, current), TokenType::END_COMMAND}
-                );
-                break;
+                return parse_asterisk(current_char_index, current_char_index);
             case 'G':
-                LOG_DEBUG("Found G character. \n");
-                parsed_tokens_vector.push_back({std::string(1, current), TokenType::G_CODE}
-                );
-                break;
-            case 'X':
-            case 'Y':
-            case 'I':
-            case 'J':
-                LOG_DEBUG("Found X|Y character. \n");
-                parsed_tokens_vector.push_back(
-                    {std::string(1, current), TokenType::COORDINATE_CODE}
-                );
-                break;
-            case '%':
-                LOG_DEBUG("Found %% character. \n");
-                parsed_tokens_vector.push_back(
-                    {std::string(1, current), TokenType::STATEMENT_BOUNDARY}
-                );
-                break;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                parse_integer(current);
-                break;
-            case '-':
-            case '+':
-                parsed_tokens_vector.push_back({std::string(1, current), TokenType::SIGN});
-                break;
+                return parse_g_code(current_char_index, current_char_index + 1);
             case ' ':
             case '\t':
             case '\n':
             case '\r':
-                break;
+                return current_char_index + 1;
+            default:
+                throw InvalidToken(current_char_index);
         }
+        return current_char_index + 1;
     }
 
-    void parse_integer(char current) {
-        LOG_DEBUG("Found %c character. \n", current);
-        buffer.push_back(current);
-        parse_integer_tail();
-
-        LOG_DEBUG("parsed_tokens_vector %llu \n", parsed_tokens_vector.size());
-        parsed_tokens_vector.push_back(
-            {std::string{buffer.begin(), buffer.end()}, TokenType::INTEGER}
-        );
-        buffer.clear();
-    }
-
-    void parse_integer_tail() {
-        while (has_next_char()) {
-            std::optional<char> current = get_next_char();
-            if (!current.has_value()) {
-                return;
-            }
-            if (parse_number(current.value()) == Result::CONSUMED) {
-                buffer.push_back(current.value());
-                continue;
-            }
-            // Don't consume not matching character.
-            get_prev_char();
-            break;
+    uint64_t parse_asterisk(uint64_t begin_token_index, uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            return begin_token_index;
         }
+        char current_char = gerber_code[current_char_index];
+        switch (current_char) {
+            case '*':
+                make_token(begin_token_index, current_char_index + 1, TokenType::END_COMMAND);
+                return current_char_index + 1;
+        }
+        throw InvalidToken(current_char_index);
     }
 
-    Result parse_number(char current) {
-        switch (current) {
+    uint64_t parse_string(uint64_t begin_token_index, uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            make_token(begin_token_index, current_char_index, TokenType::STRING);
+            return current_char_index - 1;
+        }
+        char current_char = gerber_code[current_char_index];
+        switch (current_char) {
+            case '*':
+            case '%':
+                make_token(begin_token_index, current_char_index, TokenType::STRING);
+                return current_char_index - 1;
+            default:
+                return parse_string(begin_token_index, current_char_index + 1);
+        }
+        throw InvalidToken(current_char_index);
+    }
+
+    uint64_t parse_g_code(uint64_t begin_token_index, uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            return begin_token_index;
+        }
+        char current_char = gerber_code[current_char_index];
+        switch (current_char) {
+            case '0':
+                return parse_g_code(begin_token_index, current_char_index + 1);
+            case '1':
+                if (is_a_number(current_char_index + 1))
+                    return begin_token_index;
+                make_token(begin_token_index, current_char_index + 1, TokenType::G01_CODE);
+                return parse_asterisk(current_char_index + 1, current_char_index + 1);
+            case '2':
+                if (is_a_number(current_char_index + 1))
+                    return begin_token_index;
+                make_token(begin_token_index, current_char_index + 1, TokenType::G02_CODE);
+                return parse_asterisk(current_char_index + 1, current_char_index + 1);
+            case '3':
+                if (is_a_number(current_char_index + 1)) {
+                    return parse_g3_code(begin_token_index, current_char_index + 1);
+                } else {
+                    make_token(begin_token_index, current_char_index + 1, TokenType::G03_CODE);
+                    return parse_asterisk(current_char_index + 1, current_char_index + 1);
+                }
+            case '4':
+                if (is_a_number(current_char_index + 1))
+                    return begin_token_index;
+                make_token(begin_token_index, current_char_index + 1, TokenType::G04_CODE);
+                if (!is_asterisk(current_char_index + 1)) {
+                    current_char_index =
+                        parse_string(current_char_index + 1, current_char_index + 1);
+                }
+                return parse_asterisk(current_char_index + 1, current_char_index + 1);
+        }
+        throw InvalidToken(current_char_index);
+    }
+
+    uint64_t parse_g3_code(uint64_t begin_token_index, uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            return begin_token_index;
+        }
+        char current_char = gerber_code[current_char_index];
+        switch (current_char) {
+            case '6':
+                if (is_a_number(current_char_index + 1))
+                    return begin_token_index;
+                make_token(begin_token_index, current_char_index + 1, TokenType::G36_CODE);
+                return parse_asterisk(current_char_index + 1, current_char_index + 1);
+            case '7':
+                if (is_a_number(current_char_index + 1))
+                    return begin_token_index;
+                make_token(begin_token_index, current_char_index + 1, TokenType::G37_CODE);
+                return parse_asterisk(current_char_index + 1, current_char_index + 1);
+        }
+        throw InvalidToken(current_char_index);
+    }
+
+    bool is_a_number(uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            return false;
+        }
+        char current_char = gerber_code[current_char_index];
+        switch (current_char) {
             case '0':
             case '1':
             case '2':
@@ -318,26 +344,50 @@ struct GerberParser {
             case '7':
             case '8':
             case '9':
-                LOG_DEBUG("Found %c character. \n", current);
-                return Result::CONSUMED;
-                break;
+                return true;
         }
-        return Result::ABORTED;
+        return false;
+    }
+
+    bool is_asterisk(uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            return false;
+        }
+        char current_char = gerber_code[current_char_index];
+        switch (current_char) {
+            case '*':
+                return true;
+        }
+        return false;
     }
 };
 
 int main() {
-    auto mapping_handler =
-        FileMapping("C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_"
-                    "codes\\G01.grb");
-    char* mapping = (char*)(mapping_handler.GetMapping());
 
-    auto         size = mapping_handler.GetSize();
-    GerberParser parser(mapping, size);
-    parser.parse();
+    std::vector<std::string> paths = {
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G01.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G02.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G03.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G04.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G04_text.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G36.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G37.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G70.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G71.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G73.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G74.grb",
+    };
+    for (auto path : paths) {
+        auto  mapping_handler = FileMapping(path.c_str());
+        char* mapping         = (char*)(mapping_handler.GetMapping());
 
-    for (auto token : parser.parsed_tokens_vector) {
-        std::cout << token.content << " " << int(token.type) << std::endl;
+        auto         size = mapping_handler.GetSize();
+        GerberParser parser(mapping, size);
+        parser.parse();
+        std::cout << path << std::endl;
+        for (auto token : parser.parsed_tokens_vector) {
+            std::cout << token.content << " " << int(token.type) << std::endl;
+        }
     }
 
     return 0;
