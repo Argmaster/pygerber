@@ -136,32 +136,36 @@ class FileMapping {
 #endif
 
 enum class TokenType {
-    UNKNOWN         = 0,
-    INVALID         = 1,
-    INTEGER         = 2,
-    SIGN            = 3,
-    G01_CODE        = 4,
-    G02_CODE        = 5,
-    G03_CODE        = 6,
-    G04_CODE        = 7,
-    G36_CODE        = 8,
-    G37_CODE        = 9,
-    G54_CODE        = 10,
-    G55_CODE        = 11,
-    G70_CODE        = 12,
-    G71_CODE        = 13,
-    G74_CODE        = 14,
-    G75_CODE        = 15,
-    G90_CODE        = 16,
-    G91_CODE        = 17,
-    D01_CODE        = 18,
-    D02_CODE        = 19,
-    D03_CODE        = 20,
-    DNN_SELECT      = 21,
-    STRING          = 22,
-    COORDINATE_CODE = 23,
+    UNKNOWN               = 0,
+    INVALID               = 1,
+    INTEGER               = 2,
+    STRING                = 3,
+    G01_COMMAND           = 4,
+    G02_COMMAND           = 5,
+    G03_COMMAND           = 6,
+    G04_COMMAND           = 7,
+    G36_COMMAND           = 8,
+    G37_COMMAND           = 9,
+    G54_COMMAND           = 10,
+    G55_COMMAND           = 11,
+    G70_COMMAND           = 12,
+    G71_COMMAND           = 13,
+    G74_COMMAND           = 14,
+    G75_COMMAND           = 15,
+    G90_COMMAND           = 16,
+    G91_COMMAND           = 17,
+    D01_COMMAND           = 18,
+    D02_COMMAND           = 19,
+    D03_COMMAND           = 20,
+    DNN_SELECT            = 21,
+    COORDINATE_COMMAND    = 23,
+    FS_EXTENDED_COMMAND   = 24,
+    FS_ZERO_OMISSION      = 26,
+    FS_COORDINATE_TYPE    = 25,
+    FS_AXIS_FORMAT        = 27,
+    MODE_EXTENDED_COMMAND = 28,
     END_COMMAND,
-    STATEMENT_BOUNDARY,
+    EXTENDED_COMMAND_BOUNDARY,
 };
 
 struct Token {
@@ -262,8 +266,15 @@ struct GerberTokenizer {
             case 'Y':
             case 'I':
             case 'J':
-                make_token(current_char_index, current_char_index + 1, TokenType::COORDINATE_CODE);
+                make_token(
+                    current_char_index, current_char_index + 1, TokenType::COORDINATE_COMMAND
+                );
                 return tokenize_signed_integer(current_char_index + 1, current_char_index + 1);
+            case '%':
+                make_token(
+                    current_char_index, current_char_index + 1, TokenType::EXTENDED_COMMAND_BOUNDARY
+                );
+                return tokenize_extended_command(current_char_index + 1, current_char_index + 1);
             case ' ':
             case '\t':
             case '\n':
@@ -277,12 +288,28 @@ struct GerberTokenizer {
 
     uint64_t tokenize_asterisk(uint64_t begin_token_index, uint64_t current_char_index) {
         if (current_char_index >= gerber_code_size) {
-            return begin_token_index;
+            throw_invalid_token(begin_token_index, current_char_index + 1);
         }
         char current_char = gerber_code[current_char_index];
         switch (current_char) {
             case '*':
                 make_token(begin_token_index, current_char_index + 1, TokenType::END_COMMAND);
+                return current_char_index + 1;
+        }
+        throw_invalid_token(begin_token_index, current_char_index + 1);
+    }
+
+    uint64_t
+    tokenize_extended_command_boundary(uint64_t begin_token_index, uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+        char current_char = gerber_code[current_char_index];
+        switch (current_char) {
+            case '%':
+                make_token(
+                    begin_token_index, current_char_index + 1, TokenType::EXTENDED_COMMAND_BOUNDARY
+                );
                 return current_char_index + 1;
         }
         throw_invalid_token(begin_token_index, current_char_index + 1);
@@ -307,7 +334,7 @@ struct GerberTokenizer {
 
     uint64_t tokenize_g_code(uint64_t begin_token_index, uint64_t current_char_index) {
         if (current_char_index >= gerber_code_size) {
-            return begin_token_index;
+            throw_invalid_token(begin_token_index, current_char_index + 1);
         }
         char current_char = gerber_code[current_char_index];
         switch (current_char) {
@@ -316,24 +343,24 @@ struct GerberTokenizer {
             case '1':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G01_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G01_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '2':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G02_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G02_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '3':
                 if (is_a_number(current_char_index + 1)) {
                     return tokenize_g3_code(begin_token_index, current_char_index + 1);
                 } else {
-                    make_token(begin_token_index, current_char_index + 1, TokenType::G03_CODE);
+                    make_token(begin_token_index, current_char_index + 1, TokenType::G03_COMMAND);
                     return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
                 }
             case '4':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G04_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G04_COMMAND);
                 if (!is_asterisk(current_char_index + 1)) {
                     current_char_index =
                         tokenize_string(current_char_index + 1, current_char_index + 1);
@@ -360,19 +387,19 @@ struct GerberTokenizer {
 
     uint64_t tokenize_g3_code(uint64_t begin_token_index, uint64_t current_char_index) {
         if (current_char_index >= gerber_code_size) {
-            return begin_token_index;
+            throw_invalid_token(begin_token_index, current_char_index + 1);
         }
         char current_char = gerber_code[current_char_index];
         switch (current_char) {
             case '6':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G36_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G36_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '7':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G37_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G37_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
         }
         throw_invalid_token(begin_token_index, current_char_index + 1);
@@ -380,51 +407,49 @@ struct GerberTokenizer {
 
     uint64_t tokenize_g5_code(uint64_t begin_token_index, uint64_t current_char_index) {
         if (current_char_index >= gerber_code_size) {
-            return begin_token_index;
+            throw_invalid_token(begin_token_index, current_char_index + 1);
         }
         char current_char = gerber_code[current_char_index];
         switch (current_char) {
             case '4':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G54_CODE);
-                // tokenize D code.
-                return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G54_COMMAND);
+                return current_char_index + 1;
             case '5':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G55_CODE);
-                // tokenize D03 code.
-                return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G55_COMMAND);
+                return current_char_index + 1;
         }
         throw_invalid_token(begin_token_index, current_char_index + 1);
     }
 
     uint64_t tokenize_g7_code(uint64_t begin_token_index, uint64_t current_char_index) {
         if (current_char_index >= gerber_code_size) {
-            return begin_token_index;
+            throw_invalid_token(begin_token_index, current_char_index + 1);
         }
         char current_char = gerber_code[current_char_index];
         switch (current_char) {
             case '0':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G70_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G70_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '1':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G71_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G71_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '4':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G74_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G74_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '5':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G75_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G75_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
         }
         throw_invalid_token(begin_token_index, current_char_index + 1);
@@ -432,20 +457,20 @@ struct GerberTokenizer {
 
     uint64_t tokenize_g9_code(uint64_t begin_token_index, uint64_t current_char_index) {
         if (current_char_index >= gerber_code_size) {
-            return begin_token_index;
+            throw_invalid_token(begin_token_index, current_char_index + 1);
         }
         char current_char = gerber_code[current_char_index];
         switch (current_char) {
             case '0':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G90_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G90_COMMAND);
                 // tokenize D code.
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '1':
                 if (is_a_number(current_char_index + 1))
                     throw_invalid_token(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::G91_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::G91_COMMAND);
                 // tokenize D03 code.
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
         }
@@ -463,18 +488,18 @@ struct GerberTokenizer {
             case '1':
                 if (is_a_number(current_char_index + 1))
                     return tokenize_d_select(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::D01_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::D01_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '2':
                 if (is_a_number(current_char_index + 1))
                     return tokenize_d_select(begin_token_index, current_char_index + 1);
-                make_token(begin_token_index, current_char_index + 1, TokenType::D02_CODE);
+                make_token(begin_token_index, current_char_index + 1, TokenType::D02_COMMAND);
                 return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
             case '3':
                 if (is_a_number(current_char_index + 1)) {
                     return tokenize_d_select(begin_token_index, current_char_index + 1);
                 } else {
-                    make_token(begin_token_index, current_char_index + 1, TokenType::D03_CODE);
+                    make_token(begin_token_index, current_char_index + 1, TokenType::D03_COMMAND);
                     return tokenize_asterisk(current_char_index + 1, current_char_index + 1);
                 }
             case '4':
@@ -560,6 +585,105 @@ struct GerberTokenizer {
         throw_invalid_token(begin_token_index, current_char_index + 1);
     }
 
+    uint64_t tokenize_extended_command(uint64_t begin_token_index, uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+        char current_char = gerber_code[current_char_index];
+        switch (current_char) {
+            case 'F':
+                return tokenize_fs_extended_command(begin_token_index, current_char_index + 1);
+                // case 'M': {
+                //     uint64_t next_char_index = current_char_index + 1;
+                //     if (current_char_index >= gerber_code_size) {
+                //         throw_invalid_token(begin_token_index, current_char_index + 1);
+                //     }
+                //     char next_char = gerber_code[next_char_index];
+                //     switch (next_char) {
+                //         case 'O':
+                //             make_token(
+                //                 begin_token_index, next_char_index,
+                //                 TokenType::MODE_EXTENDED_COMMAND
+                //             );
+                //             return tokenize_fs_extended_command(next_char_index, next_char_index
+                //             + 1);
+                //     }
+                //     throw_invalid_token(begin_token_index, current_char_index + 1);
+                // }
+        }
+        throw_invalid_token(begin_token_index, current_char_index + 1);
+    }
+
+    uint64_t tokenize_fs_extended_command(uint64_t begin_token_index, uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+        char current_char = gerber_code[current_char_index];
+        if (current_char == 'S') {
+            make_token(begin_token_index, current_char_index + 1, TokenType::FS_EXTENDED_COMMAND);
+            current_char_index++;
+            begin_token_index = current_char_index;
+        } else {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+
+        current_char_index = tokenize_one_of(
+            "LT", 2, TokenType::FS_ZERO_OMISSION, begin_token_index, current_char_index
+        );
+        begin_token_index = current_char_index;
+
+        current_char_index = tokenize_one_of(
+            "AI", 2, TokenType::FS_COORDINATE_TYPE, begin_token_index, current_char_index
+        );
+        begin_token_index = current_char_index;
+
+        for (int i = 0; i < 2; i++) {
+            if (current_char_index >= gerber_code_size) {
+                throw_invalid_token(begin_token_index, current_char_index + 1);
+            }
+            current_char = gerber_code[current_char_index];
+            switch (current_char) {
+                case 'X':
+                case 'Y':
+                    make_token(
+                        begin_token_index, current_char_index + 1, TokenType::FS_AXIS_FORMAT
+                    );
+                    current_char_index =
+                        tokenize_unsigned_integer(current_char_index + 1, current_char_index + 1);
+                    begin_token_index = current_char_index;
+                    break;
+                default:
+                    throw_invalid_token(begin_token_index, current_char_index + 1);
+            }
+        }
+
+        current_char_index = tokenize_asterisk(begin_token_index, current_char_index);
+        current_char_index =
+            tokenize_extended_command_boundary(current_char_index, current_char_index);
+
+        return current_char_index + 1;
+    }
+
+    uint64_t tokenize_one_of(
+        const char*    chars,
+        uint32_t       length,
+        enum TokenType token_type,
+        uint64_t       begin_token_index,
+        uint64_t       current_char_index
+    ) {
+        if (current_char_index >= gerber_code_size) {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+        char current_char = gerber_code[current_char_index];
+        for (int i = 0; i < length; i++) {
+            if (current_char == chars[i]) {
+                make_token(begin_token_index, current_char_index + 1, token_type);
+                return current_char_index + 1;
+            }
+        }
+        throw_invalid_token(begin_token_index, current_char_index + 1);
+    }
+
     bool is_a_number(uint64_t current_char_index) {
         if (current_char_index >= gerber_code_size) {
             return false;
@@ -601,11 +725,12 @@ int main() {
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G02.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G03.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G04.grb",
-        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G04_text.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G04_text."
+        "grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G36.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G37.grb",
-        //"C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G54.grb",
-        //"C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G55.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G54.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G55.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G70.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G71.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\g_codes\\G74.grb",
@@ -619,6 +744,10 @@ int main() {
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\d_codes\\D01.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\d_codes\\D02.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\d_codes\\D03.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\fs\\FSLAX26Y26.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\fs\\FSLAX66Y66.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\fs\\FSLIX26Y26.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\fs\\FSTIX26Y27.grb",
     };
     for (auto path : paths) {
         auto  mapping_handler = FileMapping(path.c_str());
