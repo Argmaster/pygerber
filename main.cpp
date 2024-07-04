@@ -136,34 +136,35 @@ class FileMapping {
 #endif
 
 enum class TokenType {
-    UNKNOWN               = 0,
-    INVALID               = 1,
-    INTEGER               = 2,
-    STRING                = 3,
-    G01_COMMAND           = 4,
-    G02_COMMAND           = 5,
-    G03_COMMAND           = 6,
-    G04_COMMAND           = 7,
-    G36_COMMAND           = 8,
-    G37_COMMAND           = 9,
-    G54_COMMAND           = 10,
-    G55_COMMAND           = 11,
-    G70_COMMAND           = 12,
-    G71_COMMAND           = 13,
-    G74_COMMAND           = 14,
-    G75_COMMAND           = 15,
-    G90_COMMAND           = 16,
-    G91_COMMAND           = 17,
-    D01_COMMAND           = 18,
-    D02_COMMAND           = 19,
-    D03_COMMAND           = 20,
-    DNN_SELECT            = 21,
-    COORDINATE_COMMAND    = 23,
-    FS_EXTENDED_COMMAND   = 24,
-    FS_ZERO_OMISSION      = 26,
-    FS_COORDINATE_TYPE    = 25,
-    FS_AXIS_FORMAT        = 27,
-    MODE_EXTENDED_COMMAND = 28,
+    UNKNOWN                     = 0,
+    INVALID                     = 1,
+    INTEGER                     = 2,
+    STRING                      = 3,
+    G01_COMMAND                 = 4,
+    G02_COMMAND                 = 5,
+    G03_COMMAND                 = 6,
+    G04_COMMAND                 = 7,
+    G36_COMMAND                 = 8,
+    G37_COMMAND                 = 9,
+    G54_COMMAND                 = 10,
+    G55_COMMAND                 = 11,
+    G70_COMMAND                 = 12,
+    G71_COMMAND                 = 13,
+    G74_COMMAND                 = 14,
+    G75_COMMAND                 = 15,
+    G90_COMMAND                 = 16,
+    G91_COMMAND                 = 17,
+    D01_COMMAND                 = 18,
+    D02_COMMAND                 = 19,
+    D03_COMMAND                 = 20,
+    DNN_SELECT                  = 21,
+    COORDINATE_COMMAND          = 23,
+    FS_EXTENDED_COMMAND         = 24,
+    FS_ZERO_OMISSION            = 26,
+    FS_COORDINATE_TYPE          = 25,
+    FS_AXIS_FORMAT              = 27,
+    MODE_EXTENDED_COMMAND       = 28,
+    MODE_EXTENDED_COMMAND_VALUE = 29,
     END_COMMAND,
     EXTENDED_COMMAND_BOUNDARY,
 };
@@ -593,23 +594,8 @@ struct GerberTokenizer {
         switch (current_char) {
             case 'F':
                 return tokenize_fs_extended_command(begin_token_index, current_char_index + 1);
-                // case 'M': {
-                //     uint64_t next_char_index = current_char_index + 1;
-                //     if (current_char_index >= gerber_code_size) {
-                //         throw_invalid_token(begin_token_index, current_char_index + 1);
-                //     }
-                //     char next_char = gerber_code[next_char_index];
-                //     switch (next_char) {
-                //         case 'O':
-                //             make_token(
-                //                 begin_token_index, next_char_index,
-                //                 TokenType::MODE_EXTENDED_COMMAND
-                //             );
-                //             return tokenize_fs_extended_command(next_char_index, next_char_index
-                //             + 1);
-                //     }
-                //     throw_invalid_token(begin_token_index, current_char_index + 1);
-                // }
+            case 'M':
+                return tokenize_mode_extended_command(begin_token_index, current_char_index + 1);
         }
         throw_invalid_token(begin_token_index, current_char_index + 1);
     }
@@ -684,6 +670,66 @@ struct GerberTokenizer {
         throw_invalid_token(begin_token_index, current_char_index + 1);
     }
 
+    uint64_t
+    tokenize_mode_extended_command(uint64_t begin_token_index, uint64_t current_char_index) {
+        if (current_char_index >= gerber_code_size) {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+        char current_char = gerber_code[current_char_index];
+        if (current_char != 'O') {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+        make_token(begin_token_index, current_char_index + 1, TokenType::MODE_EXTENDED_COMMAND);
+
+        current_char_index++;
+        begin_token_index = current_char_index;
+
+        if (current_char_index >= gerber_code_size) {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+        current_char = gerber_code[current_char_index];
+        switch (current_char) {
+            case 'M':
+                current_char = next_or_throw(begin_token_index, current_char_index);
+                if (current_char != 'M') {
+                    throw_invalid_token(begin_token_index, current_char_index + 1);
+                }
+                make_token(
+                    begin_token_index,
+                    current_char_index + 1,
+                    TokenType::MODE_EXTENDED_COMMAND_VALUE
+                );
+                break;
+            case 'I':
+                current_char = next_or_throw(begin_token_index, current_char_index);
+                if (current_char != 'N') {
+                    throw_invalid_token(begin_token_index, current_char_index + 1);
+                }
+                make_token(
+                    begin_token_index,
+                    current_char_index + 1,
+                    TokenType::MODE_EXTENDED_COMMAND_VALUE
+                );
+                break;
+            default:
+                throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+
+        current_char_index = tokenize_asterisk(current_char_index + 1, current_char_index + 1);
+        current_char_index =
+            tokenize_extended_command_boundary(current_char_index, current_char_index);
+
+        return current_char_index + 1;
+    }
+
+    char next_or_throw(uint64_t begin_token_index, uint64_t& current_char_index) {
+        current_char_index++;
+        if (current_char_index >= gerber_code_size) {
+            throw_invalid_token(begin_token_index, current_char_index + 1);
+        }
+        return gerber_code[current_char_index];
+    }
+
     bool is_a_number(uint64_t current_char_index) {
         if (current_char_index >= gerber_code_size) {
             return false;
@@ -748,6 +794,7 @@ int main() {
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\fs\\FSLAX66Y66.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\fs\\FSLIX26Y26.grb",
         "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\fs\\FSTIX26Y27.grb",
+        "C:\\Users\\argma\\dev\\pygerber\\test\\assets\\gerberx3\\tokens\\set_codes\\mo.grb",
     };
     for (auto path : paths) {
         auto  mapping_handler = FileMapping(path.c_str());
