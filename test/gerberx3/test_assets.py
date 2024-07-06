@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import platform
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 
 import pytest
 from PIL import Image
@@ -31,6 +32,12 @@ class Config(ConfigBase):
     compare_with_reference: bool = True
 
 
+common_case_generator_config = {
+    "macro.*": Config(dpmm=100),
+    "incomplete.*": Config(skip=True),
+}
+
+
 parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
@@ -45,7 +52,7 @@ parametrize = CaseGenerator(
         "ucamco.4.10.4.9.*": Config(dpmm=50),
         "ucamco.4.11.4.*": Config(dpmm=1),
         "expressions.*": Config(as_expression=True),
-        "incomplete.*": Config(skip=True),
+        **common_case_generator_config,
     },
     Config,
 ).parametrize
@@ -102,7 +109,6 @@ parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
         "expressions.*": Config(as_expression=True),
-        "incomplete.*": Config(skip=True),
         "flashes.03_polygon3+h_4.grb": Config(skip=IS_WINDOWS),
         "flashes.03_polygon3_4.grb": Config(skip=IS_WINDOWS),
         "flashes.04_polygon6+h_4.grb": Config(skip=IS_WINDOWS),
@@ -115,6 +121,7 @@ parametrize = CaseGenerator(
         "ucamco.2.11.2.source_no_macro.grb": Config(skip=IS_WINDOWS),
         "ucamco.4.9.6.source.grb": Config(skip=IS_WINDOWS),
         "ucamco.4.9.6.source_no_ld_rot.grb": Config(skip=IS_WINDOWS),
+        **common_case_generator_config,
     },
     Config,
 ).parametrize
@@ -153,7 +160,10 @@ def test_svg_renderer2(asset: Asset, config: Config) -> None:
         reference_file_content = reference_path.read_bytes()
 
         if output_file_content != reference_file_content:
-            msg = "File mismatch."
+            similarity_ratio = SequenceMatcher(
+                None, output_file_content, reference_file_content
+            ).quick_ratio()
+            msg = f"File mismatch. (Similarity ratio: {similarity_ratio})"
             raise ValueError(msg)
 
 
@@ -165,7 +175,7 @@ parametrize = CaseGenerator(
         "ATMEGA328-Motor-Board.*": Config(skip=True),
         "ATMEGA328-Motor-Board.ATMEGA328_Motor_Board-B.Cu.gbl": Config(skip=False),
         "expressions.*": Config(as_expression=True),
-        "incomplete.*": Config(skip=True),
+        **common_case_generator_config,
     },
     Config,
 ).parametrize
@@ -223,7 +233,7 @@ parametrize = CaseGenerator(
         "ATMEGA328-Motor-Board.*": Config(skip=True),
         "ATMEGA328-Motor-Board.ATMEGA328_Motor_Board-B.Cu.gbl": Config(skip=False),
         "expressions.*": Config(as_expression=True),
-        "incomplete.*": Config(skip=True),
+        **common_case_generator_config,
     },
     Config,
 ).parametrize
