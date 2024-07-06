@@ -76,7 +76,7 @@ typing-extensions = "^4.11.0"
 filelock = "^3.14.0"
 dulwich = "^0.22.1"
 pytest-xdist = { extras = ["psutil"], version = "^3.3.1" }
-pytest-cov = "^4.1.0"
+pytest-cov = ">=4.1,<6.0"
 pytest-lsp = "^0.4.2"
 pytest-asyncio = "^0.23.7"
 
