@@ -42,7 +42,7 @@ async def client(  # type: ignore[no-untyped-def]  # noqa: ANN201
     response = await lsp_client.initialize_session(
         InitializeParams(
             capabilities=client_capabilities("visual-studio-code"),
-            root_uri=f"file://{GERBER_ASSETS_DIRECTORY.as_posix()}/incomplete",
+            root_uri=(GERBER_ASSETS_DIRECTORY / "incomplete").as_uri(),
         )
     )
     assert response.server_info is not None
@@ -60,7 +60,9 @@ async def test_completion(client: LanguageClient) -> None:
         params=CompletionParams(
             position=Position(line=10, character=1),
             text_document=TextDocumentIdentifier(
-                uri=f"file://{GERBER_ASSETS_DIRECTORY.as_posix()}/incomplete/autocomplete_g.grb"
+                uri=(
+                    GERBER_ASSETS_DIRECTORY / "incomplete" / "autocomplete_g.grb"
+                ).as_uri()
             ),
         )
     )
@@ -76,7 +78,9 @@ async def test_hover_d01(client: LanguageClient) -> None:
         params=HoverParams(
             position=Position(line=9, character=7),
             text_document=TextDocumentIdentifier(
-                uri=f"file://{GERBER_ASSETS_DIRECTORY.as_posix()}/incomplete/autocomplete_g.grb"
+                uri=(
+                    GERBER_ASSETS_DIRECTORY / "incomplete" / "autocomplete_g.grb"
+                ).as_uri()
             ),
         )
     )
@@ -93,7 +97,9 @@ async def test_hover_invalid_expression(client: LanguageClient) -> None:
         params=HoverParams(
             position=Position(line=10, character=1),
             text_document=TextDocumentIdentifier(
-                uri=f"file://{GERBER_ASSETS_DIRECTORY.as_posix()}/incomplete/autocomplete_g.grb"
+                uri=(
+                    GERBER_ASSETS_DIRECTORY / "incomplete" / "autocomplete_g.grb"
+                ).as_uri()
             ),
         )
     )
