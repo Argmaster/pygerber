@@ -71,8 +71,11 @@ class Vector2D(FrozenGeneralModel):
         Mirroring.XY: _get_mirrored_xy,
     }
 
-    def get_rotated(self, angle: Decimal) -> Self:
-        """Get copy of this vector rotated around (0, 0)."""
+    def get_rotated(self, angle: float | Decimal) -> Self:
+        """Get copy of this vector rotated around (0, 0).
+
+        Angle is in degrees.
+        """
         if angle == Decimal("0.0"):
             return self
         return self.rotate_around_origin(angle)
@@ -236,7 +239,7 @@ class Vector2D(FrozenGeneralModel):
         """Return x, y Offset as tuple."""
         return (float(self.x.value), float(self.y.value))
 
-    def rotate_around_origin(self, angle_degrees: Decimal) -> Self:
+    def rotate_around_origin(self, angle_degrees: float | Decimal) -> Self:
         """Return vector rotated x degrees around origin."""
         angle_radians = math.radians(angle_degrees)
         return self.__class__(

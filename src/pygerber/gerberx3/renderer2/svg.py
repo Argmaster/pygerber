@@ -330,14 +330,14 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         p3 = command.end_point - point_offset
 
         rectangle = drawsvg.Lines(
-            self.convert_x(p0.x),
-            self.convert_y(p0.y),
-            self.convert_x(p1.x),
-            self.convert_y(p1.y),
-            self.convert_x(p2.x),
-            self.convert_y(p2.y),
-            self.convert_x(p3.x),
-            self.convert_y(p3.y),
+            f"{self.convert_x(p0.x):.8f}",
+            f"{self.convert_y(p0.y):.8f}",
+            f"{self.convert_x(p1.x):.8f}",
+            f"{self.convert_y(p1.y):.8f}",
+            f"{self.convert_x(p2.x):.8f}",
+            f"{self.convert_y(p2.y):.8f}",
+            f"{self.convert_x(p3.x):.8f}",
+            f"{self.convert_y(p3.y):.8f}",
             fill=color,
             close=True,
         )
@@ -420,8 +420,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         end_inner = command.end_point + end_point_offset
         # Move path ptr to inner arc start point.
         arc_path.M(
-            self.convert_x(start_inner.x),
-            self.convert_y(start_inner.y),
+            f"{self.convert_x(start_inner.x):.8f}",
+            f"{self.convert_y(start_inner.y):.8f}",
         )
         self.render_arc_to_path(
             command.model_copy(
@@ -438,8 +438,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         end_outer = command.start_point - start_point_offset
         # Draw line between end of inner arc and start of outer arc.
         arc_path.L(
-            self.convert_x(start_outer.x),
-            self.convert_y(start_outer.y),
+            f"{self.convert_x(start_outer.x):.8f}",
+            f"{self.convert_y(start_outer.y):.8f}",
         )
         self.render_cc_arc_to_path(
             CCArc2(
@@ -550,7 +550,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     self.convert_size(aperture.x_size),
                     self.convert_size(aperture.y_size),
                     fill=color,
-                    transform=f"rotate({aperture.rotation})",
+                    transform=f"rotate(-{aperture.rotation})",
                 ),
             )
             self.set_aperture(aperture_id, aperture_group)
@@ -589,7 +589,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     fill=color,
                     rx=radius,
                     ry=radius,
-                    transform=f"rotate({aperture.rotation})",
+                    transform=f"rotate(-{aperture.rotation})",
                 ),
             )
             self.set_aperture(aperture_id, aperture_group)
@@ -625,8 +625,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
 
             p = drawsvg.Path(fill=color)
             p.M(
-                self.convert_size(rotated_radius_vector.x),
-                self.convert_size(rotated_radius_vector.y),
+                f"{self.convert_size(rotated_radius_vector.x):.8f}",
+                f"{self.convert_size(rotated_radius_vector.y):.8f}",
             )
 
             for i in range(1, number_of_vertices):
@@ -635,8 +635,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                     rotation_angle,
                 )
                 p.L(
-                    self.convert_size(rotated_radius_vector.x),
-                    self.convert_size(rotated_radius_vector.y),
+                    f"{self.convert_size(rotated_radius_vector.x):.8f}",
+                    f"{self.convert_size(rotated_radius_vector.y):.8f}",
                 )
 
             p.Z()
@@ -694,8 +694,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         for cmd in command.command_buffer:
             if isinstance(cmd, (Line2, Arc2, CCArc2)):
                 region.M(
-                    self.convert_x(cmd.start_point.x),
-                    self.convert_y(cmd.start_point.y),
+                    f"{self.convert_x(cmd.start_point.x):.8f}",
+                    f"{self.convert_y(cmd.start_point.y):.8f}",
                 )
                 break
 
@@ -717,8 +717,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
     def render_line_to_path(self, command: Line2, path: drawsvg.Path) -> None:
         """Render line region boundary."""
         path.L(
-            self.convert_x(command.end_point.x),
-            self.convert_y(command.end_point.y),
+            f"{self.convert_x(command.end_point.x):.8f}",
+            f"{self.convert_y(command.end_point.y):.8f}",
         )
 
     def render_arc_to_path(self, command: Arc2, path: drawsvg.Path) -> None:
@@ -736,10 +736,10 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         sweep = 1
 
         path.A(
-            rx=self.convert_size(command.get_radius()),
-            ry=self.convert_size(command.get_radius()),
-            ex=self.convert_x(command.end_point.x),
-            ey=self.convert_y(command.end_point.y),
+            rx=f"{self.convert_size(command.get_radius()):.8f}",
+            ry=f"{self.convert_size(command.get_radius()):.8f}",
+            ex=f"{self.convert_x(command.end_point.x):.8f}",
+            ey=f"{self.convert_y(command.end_point.y):.8f}",
             rot=0,
             large_arc=large_arc,
             sweep=sweep,
@@ -760,10 +760,10 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         sweep = 0
 
         path.A(
-            rx=self.convert_size(command.get_radius()),
-            ry=self.convert_size(command.get_radius()),
-            ex=self.convert_x(command.end_point.x),
-            ey=self.convert_y(command.end_point.y),
+            rx=f"{self.convert_size(command.get_radius()):.8f}",
+            ry=f"{self.convert_size(command.get_radius()):.8f}",
+            ex=f"{self.convert_x(command.end_point.x):.8f}",
+            ey=f"{self.convert_y(command.end_point.y):.8f}",
             rot=0,
             large_arc=large_arc,
             sweep=sweep,
