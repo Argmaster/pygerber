@@ -212,7 +212,7 @@ class ReferenceAssetsManager:
         return self.repository_directory / f".reference{tag}" / relative_path
 
 
-REFERENCE_ASSET_SHA = "400bda369147e53425ee502d88dbcedd6072e2b4"
+REFERENCE_ASSET_SHA = "fd3d59618be220fc5554e03de2b18e66009c30c9"
 REFERENCE_ASSETS_MANAGER = ReferenceAssetsManager(REFERENCE_ASSET_SHA)
 
 
