@@ -375,6 +375,13 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         """Get current rendering stack frame."""
         return self.rendering_stack[-1]
 
+    def convert_xy(self, v: Vector2D) -> tuple[int, int]:
+        """Convert vector coordinates to coordinates in image space."""
+        return (
+            self.convert_x(v.x),
+            self.convert_y(v.y),
+        )
+
     def convert_x(self, x: Offset) -> int:
         """Convert y offset to y coordinate in image space."""
         origin_offset_x = self.frame.bounding_box.min_x.as_millimeters()
@@ -653,26 +660,29 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
                 .set_command_buffer_from_list([command])
                 .build(),
             )
-            max_xy = command.flash_point + Vector2D(
+            edge_offset_vector = Vector2D(
                 x=aperture.x_size / 2,
-                y=aperture.y_size / 2,
-            )
+                y=Offset.new(0),
+            ).get_rotated(aperture.rotation)
 
-            min_xy = command.flash_point - Vector2D(
-                x=aperture.x_size / 2,
-                y=aperture.y_size / 2,
-            )
+            max_xy = command.flash_point + edge_offset_vector
+            min_xy = command.flash_point - edge_offset_vector
 
-            start_xy = min_xy.get_rotated(aperture.rotation)
-            end_xy = max_xy.get_rotated(aperture.rotation)
+            start_xy = min_xy
+            end_xy = max_xy
+
+            tangent_vector = Vector2D(
+                x=Offset.new(0),
+                y=aperture.y_size / 2,
+            ).get_rotated(aperture.rotation)
 
             self.frame.polygon(
                 Polarity.Dark,
                 (
-                    (self.convert_x(start_xy.x), self.convert_y(start_xy.y)),
-                    (self.convert_x(end_xy.x), self.convert_y(start_xy.y)),
-                    (self.convert_x(end_xy.x), self.convert_y(end_xy.y)),
-                    (self.convert_x(start_xy.x), self.convert_y(end_xy.y)),
+                    (self.convert_xy(start_xy + tangent_vector)),
+                    (self.convert_xy(start_xy - tangent_vector)),
+                    (self.convert_xy(end_xy - tangent_vector)),
+                    (self.convert_xy(end_xy + tangent_vector)),
                 ),
             )
             self._make_hole(command, aperture)

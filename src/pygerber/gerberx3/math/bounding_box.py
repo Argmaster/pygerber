@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import math
 import operator
 from decimal import Decimal
 from typing import Callable, ClassVar, Tuple
@@ -164,24 +163,23 @@ class BoundingBox(FrozenGeneralModel):
 
     def get_rotated(self, angle: Decimal) -> BoundingBox:
         """Return bounding box rotated around (0, 0)."""
-        angle_radians = math.radians(angle)
-        max_x = self.max_x * math.cos(angle_radians) - self.max_y * math.sin(
-            angle_radians,
-        )
-        max_y = self.max_x * math.sin(angle_radians) - self.max_y * math.cos(
-            angle_radians,
-        )
-        min_x = self.min_x * math.cos(angle_radians) - self.min_y * math.sin(
-            angle_radians,
-        )
-        min_y = self.min_x * math.sin(angle_radians) - self.min_y * math.cos(
-            angle_radians,
-        )
+        v_x_max = Vector2D(x=self.max_x, y=Offset.new(0)).get_rotated(-angle)
+        v_y_max = Vector2D(x=Offset.new(0), y=self.max_y).get_rotated(-angle)
+
+        v_new_max_0 = v_x_max + v_y_max
+        v_new_max_1 = v_x_max - v_y_max
+
+        v_x_min = Vector2D(x=self.min_x, y=Offset.new(0)).get_rotated(-angle)
+        v_y_min = Vector2D(x=Offset.new(0), y=self.min_y).get_rotated(-angle)
+
+        v_new_min_0 = v_x_min + v_y_min
+        v_new_min_1 = v_x_min - v_y_min
+
         return BoundingBox(
-            max_x=max(max_x, min_x),
-            max_y=max(max_y, min_y),
-            min_x=min(max_x, min_x),
-            min_y=min(max_y, min_y),
+            max_x=max(v_new_max_0.x, v_new_max_1.x, v_new_min_0.x, v_new_min_1.x),
+            max_y=max(v_new_max_0.y, v_new_max_1.y, v_new_min_0.y, v_new_min_1.y),
+            min_x=min(v_new_max_0.x, v_new_max_1.x, v_new_min_0.x, v_new_min_1.x),
+            min_y=min(v_new_max_0.y, v_new_max_1.y, v_new_min_0.y, v_new_min_1.y),
         )
 
 
