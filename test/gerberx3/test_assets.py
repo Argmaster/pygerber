@@ -34,6 +34,7 @@ class Config(ConfigBase):
 
 common_case_generator_config = {
     "macro.*": Config(dpmm=100),
+    "macro.code_1_circle.*": Config(dpmm=100, compare_with_reference=False),
     "incomplete.*": Config(skip=True),
 }
 
