@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pygerber.vm.command_visitor import CommandVisitor
 from pygerber.vm.commands.command import Command
 from pygerber.vm.types.box import Box
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.vector import Vector
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class StartLayer(Command):
@@ -20,7 +25,7 @@ class StartLayer(Command):
         visitor.on_start_layer(self)
 
     @classmethod
-    def new(cls, id_: str, box: Box) -> StartLayer:
+    def new(cls, id_: str, box: Box) -> Self:
         """Create a new start layer command from values."""
         return cls(
             id=LayerID(id=id_),
@@ -47,3 +52,12 @@ class PasteLayer(Command):
     def visit(self, visitor: CommandVisitor) -> None:
         """Visit paste layer command."""
         visitor.on_paste_layer(self)
+
+    @classmethod
+    def new(cls, id_: str, center: tuple[float, float], target_id: str) -> Self:
+        """Create a new start layer command from values."""
+        return cls(
+            id=LayerID(id=id_),
+            center=Vector.from_tuple(center),
+            target_id=LayerID(id=target_id),
+        )

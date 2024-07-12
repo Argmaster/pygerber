@@ -14,7 +14,10 @@ from pygerber.vm.base import Result, VirtualMachine
 from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
 from pygerber.vm.commands.polygon import Arc, Line, Polygon
-from pygerber.vm.pillow.errors import BoxNotSetError, NoLayerSetError
+from pygerber.vm.pillow.errors import (
+    LayerNotFoundError,
+    NoLayerSetError,
+)
 from pygerber.vm.types.box import Box
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.style import Style
@@ -49,10 +52,21 @@ class PillowResult(Result):
 class _PillowLayer:
     """Layer in PillowVirtualMachine."""
 
-    def __init__(self, size: tuple[int, int]) -> None:
-        self.size = size
-        self.image = Image.new("1", size, 0)
+    def __init__(self, dpmm: int, box: Box) -> None:
+        self.dpmm = dpmm
+        self.box = box
+        self.pixel_size = (
+            self.to_pixel(self.box.width),
+            self.to_pixel(self.box.height),
+        )
+        self.image = Image.new("1", self.pixel_size, 0)
         self.draw = ImageDraw.Draw(self.image)
+
+    def to_pixel(self, value: float | Unit) -> int:
+        """Convert value in mm to pixels."""
+        if isinstance(value, Unit):
+            return int(value.value * self.dpmm)
+        return int(value * self.dpmm)
 
 
 class PillowVirtualMachine(VirtualMachine):
@@ -66,7 +80,6 @@ class PillowVirtualMachine(VirtualMachine):
 
     def reset(self) -> None:
         """Reset state of the virtual machine."""
-        self._main_box: Optional[Box] = None
         self.layers: dict[LayerID, _PillowLayer] = {}
         self.layer_stack: list[_PillowLayer] = []
 
@@ -77,13 +90,6 @@ class PillowVirtualMachine(VirtualMachine):
             return self.layer_stack[-1]
 
         raise NoLayerSetError
-
-    @property
-    def main_box(self) -> Box:
-        """Get main box."""
-        if self._main_box is None:
-            raise BoxNotSetError
-        return self._main_box
 
     def on_polygon(self, command: Polygon) -> None:
         """Visit polygon command."""
@@ -99,7 +105,6 @@ class PillowVirtualMachine(VirtualMachine):
                     (segment.end.x, segment.end.y),
                 )
             elif isinstance(segment, Arc):
-                # Needs implementation of arc calculation logic.
                 start = (segment.start.x, segment.start.y)
                 if len(points) == 0 or points[-1] != start:
                     points.append(
@@ -206,17 +211,9 @@ class PillowVirtualMachine(VirtualMachine):
 
     def on_start_layer(self, command: StartLayer) -> None:
         """Visit start layer command."""
-        layer = _PillowLayer(
-            (
-                self.to_pixel(command.box.width),
-                self.to_pixel(command.box.height),
-            ),
-        )
+        layer = _PillowLayer(self.dpmm, command.box)
         self.layers[command.id] = layer
         self.layer_stack.append(layer)
-
-        if command.id == LayerID(id="main"):
-            self._main_box = command.box
 
     def on_end_layer(self, command: EndLayer) -> None:
         """Visit start end command."""
@@ -226,6 +223,29 @@ class PillowVirtualMachine(VirtualMachine):
 
     def on_paste_layer(self, command: PasteLayer) -> None:
         """Visit paste layer command."""
+        source_layer = self.layers.get(command.id, None)
+        if source_layer is None:
+            raise LayerNotFoundError(command.id)
+
+        target_layer = self.layers.get(command.target_id, None)
+        if target_layer is None:
+            raise LayerNotFoundError(command.target_id)
+
+        source_width_half = source_layer.box.width / 2
+        source_height_half = source_layer.box.height / 2
+
+        target_layer.image.paste(
+            source_layer.image,
+            (
+                self.to_pixel(
+                    self.correct_center_x(command.center.x - source_width_half)
+                ),
+                self.to_pixel(
+                    self.correct_center_y(command.center.y - source_height_half)
+                ),
+            ),
+            mask=source_layer.image,
+        )
 
     def to_pixel(self, value: float | Unit) -> int:
         """Convert value in mm to pixels."""
@@ -235,14 +255,14 @@ class PillowVirtualMachine(VirtualMachine):
 
     def correct_center_x(self, x: float | Unit) -> float:
         """Correct x coordinate for center."""
-        offset = self.main_box.center.x.value - self.main_box.width / 2
+        offset = self.layer.box.center.x.value - self.layer.box.width / 2
         if isinstance(x, Unit):
             return x.value - offset
         return x - offset
 
     def correct_center_y(self, y: float | Unit) -> float:
         """Correct x coordinate for center."""
-        offset = self.main_box.center.y.value - self.main_box.height / 2
+        offset = self.layer.box.center.y.value - self.layer.box.height / 2
         if isinstance(y, Unit):
             return y.value - offset
         return y - offset

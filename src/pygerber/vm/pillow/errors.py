@@ -15,3 +15,7 @@ class NoLayerSetError(PillowVirtualMachineError):
 
 class BoxNotSetError(PillowVirtualMachineError):
     """Raised when main box was set prior to drawing polygon."""
+
+
+class LayerNotFoundError(PillowVirtualMachineError):
+    """Raised when layer with given ID was not found during paste operation."""
