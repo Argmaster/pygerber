@@ -4,10 +4,10 @@ layers in `VirtualMachine` classes.
 
 from __future__ import annotations
 
-from pygerber.vm.types.model import VMModelType
+from pygerber.vm.types.model import ModelType
 
 
-class LayerID(VMModelType):
+class LayerID(ModelType):
     """Represents the ID of a layer."""
 
     id: str

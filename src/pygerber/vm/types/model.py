@@ -4,8 +4,20 @@ model types.
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, computed_field
 
 
-class VMModelType(BaseModel):
+class ModelType(BaseModel):
     """Common base class for all VM model types."""
+
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+        arbitrary_types_allowed=True,
+    )
+
+    @computed_field  # type: ignore[misc]
+    @property
+    def __class_qualname__(self) -> str:
+        """Name of class."""
+        return self.__class__.__qualname__

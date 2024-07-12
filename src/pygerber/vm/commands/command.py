@@ -5,13 +5,13 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from pygerber.vm.types.model import VMModelType
+from pygerber.vm.types.model import ModelType
 
 if TYPE_CHECKING:
     from pygerber.vm.base import CommandVisitor
 
 
-class Command(VMModelType):
+class Command(ModelType):
     """Base class for drawing commands."""
 
     @abstractmethod

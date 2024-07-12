@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pydantic import BaseModel
 
 from pygerber.vm.base import CommandVisitor
 from pygerber.vm.commands.command import Command
 from pygerber.vm.types.point import Point
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class PolygonPart(BaseModel):
@@ -30,6 +35,11 @@ class Line(PolygonPart):
     start: Point
     end: Point
 
+    @classmethod
+    def from_tuples(cls, start: tuple[float, float], end: tuple[float, float]) -> Self:
+        """Create a new line from two tuples."""
+        return cls(start=Point.from_tuple(start), end=Point.from_tuple(end))
+
 
 class Arc(PolygonPart):
     """Draw a arc from the current position to the given position.
@@ -39,3 +49,8 @@ class Arc(PolygonPart):
 
     start: Point
     end: Point
+
+    @classmethod
+    def from_tuples(cls, start: tuple[float, float], end: tuple[float, float]) -> Self:
+        """Create a new arc from two tuples."""
+        return cls(start=Point.from_tuple(start), end=Point.from_tuple(end))
