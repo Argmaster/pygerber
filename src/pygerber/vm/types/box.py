@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pygerber.vm.types.model import ModelType
-from pygerber.vm.types.point import Point
+from pygerber.vm.types.vector import Vector
 
 
 class Box(ModelType):
@@ -12,11 +12,11 @@ class Box(ModelType):
     Used to specify size and coordinate space of a layer.
     """
 
-    center: Point
+    center: Vector
     width: float
     height: float
 
     @classmethod
     def new(cls, center: tuple[float, float], width: float, height: float) -> Box:
         """Create a new box from a tuple."""
-        return cls(center=Point.from_tuple(center), width=width, height=height)
+        return cls(center=Vector.from_tuple(center), width=width, height=height)

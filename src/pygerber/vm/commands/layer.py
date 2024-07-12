@@ -6,7 +6,7 @@ from pygerber.vm.command_visitor import CommandVisitor
 from pygerber.vm.commands.command import Command
 from pygerber.vm.types.box import Box
 from pygerber.vm.types.layer_id import LayerID
-from pygerber.vm.types.point import Point
+from pygerber.vm.types.vector import Vector
 
 
 class StartLayer(Command):
@@ -41,7 +41,7 @@ class PasteLayer(Command):
 
     id: LayerID
 
-    center: Point
+    center: Vector
     target_id: LayerID
 
     def visit(self, visitor: CommandVisitor) -> None:

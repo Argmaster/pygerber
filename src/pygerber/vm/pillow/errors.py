@@ -11,3 +11,7 @@ class PillowVirtualMachineError(VirtualMachineError):
 
 class NoLayerSetError(PillowVirtualMachineError):
     """Raised when no layer was set prior to drawing polygon."""
+
+
+class BoxNotSetError(PillowVirtualMachineError):
+    """Raised when main box was set prior to drawing polygon."""

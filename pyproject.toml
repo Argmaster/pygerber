@@ -149,6 +149,7 @@ lint.ignore = [
     "D107",   # Adding docstring to __init__ doesn't make sense when class already has its docstring.
     "ISC001", # Checks for the absence of trailing commas. Conflicts with ruff format.
     "COM812", # Checks for implicitly concatenated strings on a single line. Conflicts with ruff format.
+    "S101",   # Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
 ]
 show-fixes = true
 target-version = "py38"
