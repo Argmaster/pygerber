@@ -4,17 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.ast.nodes.math.assignment import Assignment
-from pygerber.gerberx3.ast.nodes.math.constant import Constant
-from pygerber.gerberx3.ast.nodes.math.expression import Expression
-from pygerber.gerberx3.ast.nodes.math.operators.binary.add import Add
-from pygerber.gerberx3.ast.nodes.math.operators.binary.div import Div
-from pygerber.gerberx3.ast.nodes.math.operators.binary.mul import Mul
-from pygerber.gerberx3.ast.nodes.math.operators.binary.sub import Sub
-from pygerber.gerberx3.ast.nodes.math.operators.unary.neg import Neg
-from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
-from pygerber.gerberx3.ast.nodes.math.variable import Variable
-
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
     from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
@@ -53,6 +42,16 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.m_codes.M00 import M00
     from pygerber.gerberx3.ast.nodes.m_codes.M01 import M01
     from pygerber.gerberx3.ast.nodes.m_codes.M02 import M02
+    from pygerber.gerberx3.ast.nodes.math.assignment import Assignment
+    from pygerber.gerberx3.ast.nodes.math.constant import Constant
+    from pygerber.gerberx3.ast.nodes.math.expression import Expression
+    from pygerber.gerberx3.ast.nodes.math.operators.binary.add import Add
+    from pygerber.gerberx3.ast.nodes.math.operators.binary.div import Div
+    from pygerber.gerberx3.ast.nodes.math.operators.binary.mul import Mul
+    from pygerber.gerberx3.ast.nodes.math.operators.binary.sub import Sub
+    from pygerber.gerberx3.ast.nodes.math.operators.unary.neg import Neg
+    from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
+    from pygerber.gerberx3.ast.nodes.math.variable import Variable
     from pygerber.gerberx3.ast.nodes.other.command_end import CommandEnd
     from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
     from pygerber.gerberx3.ast.nodes.other.extended_command_close import (
