@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw
 from pygerber.vm.base import Result, VirtualMachine
 from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
-from pygerber.vm.commands.polygon import Arc, Line, Polygon
+from pygerber.vm.commands.shape import Arc, Line, Shape
 from pygerber.vm.pillow.errors import (
     LayerNotFoundError,
     NoLayerSetError,
@@ -91,8 +91,8 @@ class PillowVirtualMachine(VirtualMachine):
 
         raise NoLayerSetError
 
-    def on_polygon(self, command: Polygon) -> None:
-        """Visit polygon command."""
+    def on_shape(self, command: Shape) -> None:
+        """Visit shape command."""
         points: list[tuple[Unit, Unit]] = []
         for segment in command.commands:
             if isinstance(segment, Line):
@@ -117,7 +117,7 @@ class PillowVirtualMachine(VirtualMachine):
             else:
                 raise NotImplementedError
 
-        self.polygon(points, negative=command.negative)
+        self._polygon(points, negative=command.negative)
 
     def _calculate_arc_points(
         self, command: Arc
@@ -195,7 +195,7 @@ class PillowVirtualMachine(VirtualMachine):
             current_angle = apply_delta(current_angle, delta)
         yield end
 
-    def polygon(self, points: Sequence[tuple[Unit, Unit]], *, negative: bool) -> None:
+    def _polygon(self, points: Sequence[tuple[Unit, Unit]], *, negative: bool) -> None:
         """Draw a polygon."""
         self.layer.draw.polygon(
             [

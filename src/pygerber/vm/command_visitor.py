@@ -10,14 +10,14 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
-    from pygerber.vm.commands.polygon import Polygon
+    from pygerber.vm.commands.shape import Shape
 
 
 class CommandVisitor:
     """Interface of a command visitor."""
 
-    def on_polygon(self, command: Polygon) -> None:
-        """Visit polygon command."""
+    def on_shape(self, command: Shape) -> None:
+        """Visit shape command."""
 
     def on_start_layer(self, command: StartLayer) -> None:
         """Visit start layer command."""

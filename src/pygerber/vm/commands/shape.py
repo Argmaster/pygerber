@@ -1,8 +1,10 @@
-"""`polygon` module contains classes for drawing polygons."""
+"""`shape` module contains classes for drawing shapes consisting of connected lines
+and arcs filled with solid color.
+"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from pydantic import BaseModel
 
@@ -15,19 +17,19 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class PolygonPart(BaseModel):
-    """Base class for region parts."""
+class ShapeSegment(BaseModel):
+    """Base class for shape segment types."""
 
 
-class Polygon(Command):
+class Shape(Command):
     """Draw a line from the current position to the given position."""
 
-    commands: list[PolygonPart]
+    commands: List[ShapeSegment]
     negative: bool = False
 
     def visit(self, visitor: CommandVisitor) -> None:
         """Visit polygon command."""
-        visitor.on_polygon(self)
+        visitor.on_shape(self)
 
     @classmethod
     def new_rectangle(
@@ -83,7 +85,7 @@ class Polygon(Command):
         )
 
 
-class Line(PolygonPart):
+class Line(ShapeSegment):
     """Draw a line from the current position to the given position."""
 
     start: Vector
@@ -95,7 +97,7 @@ class Line(PolygonPart):
         return cls(start=Vector.from_tuple(start), end=Vector.from_tuple(end))
 
 
-class Arc(PolygonPart):
+class Arc(ShapeSegment):
     """Draw a arc from the current position to the given position.
 
     Arcs are always clockwise.
