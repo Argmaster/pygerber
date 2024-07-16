@@ -10,10 +10,7 @@ from pygerber.gerberx3.language_server._internals import (
 from pygerber.gerberx3.language_server._internals.errors import EmptyASTError
 from pygerber.gerberx3.linter import diagnostic
 from pygerber.gerberx3.linter.diagnostic import Diagnostic
-from pygerber.gerberx3.parser.errors import ExitParsingProcessInterrupt, ParserError
-from pygerber.gerberx3.parser.parser import Parser, ParserOptions, StatePreservingParser
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
-from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 
 if TYPE_CHECKING:
     from pygls.server import LanguageServer
@@ -38,10 +35,6 @@ class Document:
         )
 
         self.parser_error_diagnostics: list[diagnostic.Diagnostic] = []
-        self.options = ParserOptions(
-            on_update_drawing_state_error=self.on_update_drawing_state_error,
-        )
-        self.parser = StatePreservingParser(self.options)
         self.ls.show_message_log(
             f"Created parser for {uri}",
             lspt.MessageType.Info,
@@ -61,41 +54,10 @@ class Document:
             f"Started parsing {uri}",
             lspt.MessageType.Info,
         )
-        self.parser.parse(self.ast)
         self.ls.show_message_log(
             f"Finished parsing {self.uri}",
             lspt.MessageType.Info,
         )
-
-    def on_update_drawing_state_error(
-        self,
-        exc: Exception,
-        _parser: Parser,
-        token: Token,
-    ) -> None:
-        if isinstance(exc, ParserError):
-            message = exc.get_message()
-        else:
-            message = f"{exc.__class__.__qualname__}: {exc}"
-
-        self.parser_error_diagnostics.append(
-            diagnostic.Diagnostic(
-                range=(
-                    diagnostic.Range(
-                        start=token.get_token_position(),
-                        end=token.get_token_end_position(),
-                    )
-                ),
-                message=message,
-                severity=diagnostic.DiagnosticSeverity.Error,
-            ),
-        )
-        self.ls.show_message_log(
-            message,
-            lspt.MessageType.Info,
-        )
-
-        raise ExitParsingProcessInterrupt
 
     def text_document_hover(self, params: lspt.HoverParams) -> Optional[lspt.Hover]:
         try:
@@ -116,7 +78,7 @@ class Document:
                 return lspt.Hover(
                     contents=lspt.MarkupContent(
                         kind=lspt.MarkupKind.Markdown,
-                        value=token.get_hover_message(self.parser.get_state_at(token)),
+                        value="Not implemented",
                     ),
                 )
 

@@ -5,7 +5,6 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.tokenizer.tokens.macro.expressions.macro_expression import (
     MacroExpressionToken,
 )
@@ -14,10 +13,8 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
     from pygerber.gerberx3.parser2.macro2.expressions2.expression2 import Expression2
-    from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 
 
 class NumericConstant(MacroExpressionToken):
@@ -51,10 +48,6 @@ class NumericConstant(MacroExpressionToken):
         return context.macro_expressions.constant(
             value=self.value,
         )
-
-    def evaluate_numeric(self, _macro_context: MacroContext, state: State) -> Offset:
-        """Evaluate numeric value of this macro expression."""
-        return Offset.new(value=self.value, unit=state.get_units())
 
     def get_gerber_code(
         self,
