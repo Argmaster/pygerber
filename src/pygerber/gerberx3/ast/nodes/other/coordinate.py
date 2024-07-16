@@ -4,7 +4,7 @@ class.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from pygerber.gerberx3.ast.nodes.base import Node
 
@@ -14,6 +14,9 @@ if TYPE_CHECKING:
 
 class Coordinate(Node):
     """Represents Coordinate node."""
+
+    type: Literal["X", "Y", "I", "J"]
+    value: str
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

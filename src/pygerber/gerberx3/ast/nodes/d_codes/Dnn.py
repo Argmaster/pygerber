@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 class Dnn(Node):
     """Represents DNN Gerber command."""
 
+    value: str
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_dnn(self)
