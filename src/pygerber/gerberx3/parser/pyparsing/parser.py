@@ -4,9 +4,10 @@ implementation based on pyparsing library.
 
 from __future__ import annotations
 
-from typing import Optional, Type, cast
+from typing import Optional, Type
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.file import File
 from pygerber.gerberx3.parser.pyparsing.grammar import Grammar
 
 
@@ -21,7 +22,8 @@ class Parser:
         else:
             self.grammar = Grammar.DEFAULT
 
-    def parse(self, code: str) -> list[Node]:
+    def parse(self, code: str) -> File:
         """Parse the input."""
-        parse_result = self.grammar.parseString(code)
-        return cast(list[Node], parse_result.as_list())
+        parse_result = self.grammar.parseString(code).get("root_node")
+        assert isinstance(parse_result, File)
+        return parse_result

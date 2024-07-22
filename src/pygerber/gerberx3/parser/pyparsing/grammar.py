@@ -14,6 +14,7 @@ from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
 from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
 from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
 from pygerber.gerberx3.ast.nodes.d_codes.Dnn import Dnn
+from pygerber.gerberx3.ast.nodes.file import File
 from pygerber.gerberx3.ast.nodes.g_codes.G01 import G01
 from pygerber.gerberx3.ast.nodes.g_codes.G02 import G02
 from pygerber.gerberx3.ast.nodes.g_codes.G03 import G03
@@ -37,13 +38,13 @@ from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
 def g(value: int, cls: Type[Node]) -> pp.ParserElement:
     """Create a parser element capable of parsing particular G-code."""
     element = pp.Regex(r"G0*" + str(value)).set_name(f"G{value}")
-    return element.setParseAction(lambda: cls())
+    return element.setParseAction(lambda s, loc, _tokens: cls(source=s, location=loc))
 
 
 def m(value: int, cls: Type[Node]) -> pp.ParserElement:
     """Create a parser element capable of parsing particular D-code."""
     element = pp.Regex(r"M0*" + str(value)).set_name(f"M{value}")
-    return element.setParseAction(lambda: cls())
+    return element.setParseAction(lambda s, loc, _tokens: cls(source=s, location=loc))
 
 
 T = TypeVar("T", bound=Node)
@@ -59,7 +60,15 @@ class Grammar:
 
     def build(self) -> pp.ParserElement:
         """Build the grammar."""
-        return pp.OneOrMore(self.g_codes() | self.m_codes() | self.d_codes())
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> File:
+            return self.get_cls(File)(source=s, location=loc, commands=tokens.as_list())
+
+        return (
+            pp.OneOrMore(self.g_codes() | self.m_codes() | self.d_codes())
+            .set_results_name("root_node")
+            .set_parse_action(_)
+        )
 
     def d_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing D-codes."""
@@ -69,6 +78,8 @@ class Grammar:
             token_list = cast(list[Coordinate], parse_result_token_list)
             try:
                 return self.get_cls(D01)(
+                    source=s,
+                    location=loc,
                     x=token_list[0],
                     y=token_list[1],
                     i=token_list[2] if len(token_list) >= 4 else None,  # noqa: PLR2004
@@ -94,6 +105,8 @@ class Grammar:
             token_list = cast(list[Coordinate], parse_result_token_list)
             try:
                 return self.get_cls(D02)(
+                    source=s,
+                    location=loc,
                     x=token_list[0],
                     y=token_list[1],
                 )
@@ -111,6 +124,8 @@ class Grammar:
             token_list = cast(list[Coordinate], parse_result_token_list)
             try:
                 return self.get_cls(D03)(
+                    source=s,
+                    location=loc,
                     x=token_list[0],
                     y=token_list[1],
                 )
@@ -132,7 +147,7 @@ class Grammar:
             assert len(value) > 1
 
             try:
-                return self.get_cls(Dnn)(value=value)
+                return self.get_cls(Dnn)(source=s, location=loc, value=value)
             except ValidationError as e:
                 raise pp.ParseFatalException(s, loc, "Invalid Dnn") from e
 
@@ -148,13 +163,15 @@ class Grammar:
     def coordinate(self) -> pp.ParserElement:
         """Create a parser element capable of parsing coordinates."""
 
-        def _(tokens: pp.ParseResults) -> Coordinate:
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Coordinate:
             type_, value = tokens.as_list()
             assert isinstance(type_, str), type(type_)
             assert type_ in ("X", "Y", "I", "J")
             assert isinstance(value, str)
 
-            return self.get_cls(Coordinate)(type=type_, value=value)
+            return self.get_cls(Coordinate)(
+                source=s, location=loc, type=type_, value=value
+            )
 
         return (
             (

@@ -14,6 +14,9 @@ if TYPE_CHECKING:
 class Node(ModelType):
     """Base class for all nodes."""
 
+    source: str
+    location: int
+
     @abstractmethod
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

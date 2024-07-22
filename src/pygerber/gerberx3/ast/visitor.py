@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
     from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
     from pygerber.gerberx3.ast.nodes.d_codes.Dnn import Dnn
+    from pygerber.gerberx3.ast.nodes.file import File
     from pygerber.gerberx3.ast.nodes.g_codes.G01 import G01
     from pygerber.gerberx3.ast.nodes.g_codes.G02 import G02
     from pygerber.gerberx3.ast.nodes.g_codes.G03 import G03
@@ -70,11 +71,15 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.primitives.code_20 import Code20
     from pygerber.gerberx3.ast.nodes.primitives.code_21 import Code21
     from pygerber.gerberx3.ast.nodes.primitives.code_22 import Code22
+    from pygerber.gerberx3.ast.nodes.properties.AS import AS
     from pygerber.gerberx3.ast.nodes.properties.FS import FS
     from pygerber.gerberx3.ast.nodes.properties.IN import IN
     from pygerber.gerberx3.ast.nodes.properties.IP import IP
+    from pygerber.gerberx3.ast.nodes.properties.IR import IR
+    from pygerber.gerberx3.ast.nodes.properties.MI import MI
     from pygerber.gerberx3.ast.nodes.properties.MO import MO
     from pygerber.gerberx3.ast.nodes.properties.OF import OF
+    from pygerber.gerberx3.ast.nodes.properties.SF import SF
 
 
 class AstVisitor:
@@ -292,6 +297,9 @@ class AstVisitor:
 
     # Properties
 
+    def on_as(self, node: AS) -> None:
+        """Handle `AS` node."""
+
     def on_fs(self, node: FS) -> None:
         """Handle `FS` node."""
 
@@ -301,8 +309,24 @@ class AstVisitor:
     def on_ip(self, node: IP) -> None:
         """Handle `IP` node."""
 
+    def on_ir(self, node: IR) -> None:
+        """Handle `IR` node."""
+
+    def on_mi(self, node: MI) -> None:
+        """Handle `MI` node."""
+
     def on_mo(self, node: MO) -> None:
         """Handle `MO` node."""
 
     def on_of(self, node: OF) -> None:
         """Handle `OF` node."""
+
+    def on_sf(self, node: SF) -> None:
+        """Handle `SF` node."""
+
+    # Root node
+
+    def on_file(self, node: File) -> None:
+        """Handle `File` node."""
+        for command in node.commands:
+            command.visit(self)
