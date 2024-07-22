@@ -1,0 +1,7 @@
+%TA.AperFunction,AntiPad*%
+%TA.AperFunction,ViaPad*%
+%TA.DrillTolerance,0.02,0.01*%
+%TA.AperFunction,ComponentDrill*%
+%TA.AperFunction,Other,Special*%
+%TA.AperFunction,MechanicalDrill*%
+%TA.DrillTolerance,0.15,0.15*%
