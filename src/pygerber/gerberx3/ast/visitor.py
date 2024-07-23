@@ -52,6 +52,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.math.operators.binary.sub import Sub
     from pygerber.gerberx3.ast.nodes.math.operators.unary.neg import Neg
     from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
+    from pygerber.gerberx3.ast.nodes.math.point import Point
     from pygerber.gerberx3.ast.nodes.math.variable import Variable
     from pygerber.gerberx3.ast.nodes.other.command_end import CommandEnd
     from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
@@ -245,6 +246,9 @@ class AstVisitor:
 
     def on_expression(self, node: Expression) -> None:
         """Handle `Expression` node."""
+
+    def on_point(self, node: Point) -> None:
+        """Handle `Point` node."""
 
     def on_variable(self, node: Variable) -> None:
         """Handle `Variable` node."""

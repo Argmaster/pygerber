@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 class AMopen(Node):
     """Represents AM Gerber extended command."""
 
+    name: str
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_am_open(self)

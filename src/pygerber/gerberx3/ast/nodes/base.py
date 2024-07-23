@@ -5,7 +5,9 @@ from __future__ import annotations
 from abc import abstractmethod
 from typing import TYPE_CHECKING
 
-from pygerber.vm.types.model import ModelType
+from pydantic import Field
+
+from pygerber.gerberx3.ast.nodes.model import ModelType
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
@@ -14,8 +16,8 @@ if TYPE_CHECKING:
 class Node(ModelType):
     """Base class for all nodes."""
 
-    source: str
-    location: int
+    source: str = Field(repr=False)
+    location: int = Field(repr=False)
 
     @abstractmethod
     def visit(self, visitor: AstVisitor) -> None:

@@ -1,4 +1,4 @@
-"""`pygerber.nodes.math.Expression` module contains definition of `Expression`
+"""`pygerber.nodes.math.expression` module contains definition of `Expression`
 class.
 """
 

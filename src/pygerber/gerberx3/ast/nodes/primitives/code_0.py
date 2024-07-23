@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 class Code0(Node):
     """Represents code 0 macro primitive."""
 
+    string: str
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_code_0(self)
