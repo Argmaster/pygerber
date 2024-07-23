@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.math.expression import Expression
+from pygerber.gerberx3.ast.nodes.math.point import Point
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
@@ -12,6 +14,13 @@ if TYPE_CHECKING:
 
 class Code4(Node):
     """Represents code 4 macro primitive."""
+
+    exposure: Expression
+    number_of_points: Expression
+    start_x: Expression
+    start_y: Expression
+    points: List[Point]
+    rotation: Expression
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

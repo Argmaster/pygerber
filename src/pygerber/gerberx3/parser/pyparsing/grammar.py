@@ -385,7 +385,7 @@ class Grammar:
                             cs
                             + self.expression.set_results_name("exposure")
                             + cs
-                            + self.expression.set_results_name("number_of_vertices")
+                            + self.expression.set_results_name("number_of_points")
                             + cs
                             + self.expression.set_results_name("start_x")
                             + cs
@@ -397,7 +397,7 @@ class Grammar:
                                     + cs
                                     + self.expression.set_results_name("y")
                                 )
-                                .set_results_name("point")
+                                .set_results_name("points", list_all_matches=True)
                                 .set_parse_action(_point),
                             )
                             + cs
