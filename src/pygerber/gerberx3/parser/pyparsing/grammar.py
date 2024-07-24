@@ -75,9 +75,11 @@ class Grammar:
         ast_node_class_overrides: dict[str, Type[Node]],
         *,
         enable_packrat: bool = True,
+        enable_debug: bool = False,
     ) -> None:
         self.ast_node_class_overrides = ast_node_class_overrides
         self.enable_packrat = enable_packrat
+        self.enable_debug = enable_debug
 
     def build(self) -> pp.ParserElement:
         """Build the grammar."""
@@ -99,10 +101,90 @@ class Grammar:
             )
             .set_results_name("root_node")
             .set_parse_action(_)
-            .set_debug()
         )
-        root.enable_packrat()
+
+        if self.enable_packrat:
+            root.enable_packrat()
+
+        if self.enable_debug:
+            root.set_debug()
+
         return root
+
+    def get_cls(self, node_cls: Type[T]) -> Type[T]:
+        """Get the class of the node."""
+        return self.ast_node_class_overrides.get(node_cls.__qualname__, node_cls)  # type: ignore[return-value]
+
+    @pp.cached_property
+    def string(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing strings."""
+        return pp.CharsNotIn("%*").set_results_name("string")
+
+    @pp.cached_property
+    def comma(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing commas."""
+        return pp.Suppress(pp.Literal(",").set_name("comma"))
+
+    @pp.cached_property
+    def name(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing names."""
+        return pp.Regex(r"[._$a-zA-Z][._$a-zA-Z0-9]{0,126}").set_results_name("name")
+
+    @pp.cached_property
+    def double(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing doubles."""
+        return pp.Regex(r"[+-]?(([0-9]+(\.[0-9]+)?)|(\.[0-9]+))").set_results_name(
+            "double"
+        )
+
+    #  █████  ██████  ███████ ██████  ████████ ██    ██ ██████  ███████
+    # ██   ██ ██   ██ ██      ██   ██    ██    ██    ██ ██   ██ ██
+    # ███████ ██████  █████   ██████     ██    ██    ██ ██████  █████
+    # ██   ██ ██      ██      ██   ██    ██    ██    ██ ██   ██ ██
+    # ██   ██ ██      ███████ ██   ██    ██     ██████  ██   ██ ███████
+
+    def macro(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing macros."""
+        return (
+            self.extended_command_open
+            + self.am_open
+            + self.command_end
+            + self.primitives
+            + self.am_close
+            + self.extended_command_close
+        )
+
+    @pp.cached_property
+    def am_open(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing AM-open."""
+
+        def _am_open(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(AMopen)(source=s, location=loc, **tokens.as_dict())
+
+        return (
+            (pp.Literal("AM") + self.name).set_name("AMopen").set_parse_action(_am_open)
+        )
+
+    @pp.cached_property
+    def am_close(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing AM-close."""
+
+        def _am_close(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(AMclose)(source=s, location=loc, **tokens.as_dict())
+
+        return pp.Literal("").set_name("AM_close").set_parse_action(_am_close)
+
+    #  █████  ████████ ████████ ██████  ██ ██████  ██    ██ ████████ ███████
+    # ██   ██    ██       ██    ██   ██ ██ ██   ██ ██    ██    ██    ██
+    # ███████    ██       ██    ██████  ██ ██████  ██    ██    ██    █████
+    # ██   ██    ██       ██    ██   ██ ██ ██   ██ ██    ██    ██    ██
+    # ██   ██    ██       ██    ██   ██ ██ ██████   ██████     ██    ███████
+
+    # ██████      █████ ███████ ██████  ███████ ███████
+    # ██   ██    ██     ██   ██ ██   ██ ██      ██
+    # ██   ██    ██     ██   ██ ██   ██ █████   ███████
+    # ██   ██    ██     ██   ██ ██   ██ ██           ██
+    # ██████      █████ ███████ ██████  ███████ ███████
 
     def d_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing D-codes."""
@@ -189,44 +271,11 @@ class Grammar:
 
         return pp.MatchFirst([d01, d02, d03, dnn])
 
-    def get_cls(self, node_cls: Type[T]) -> Type[T]:
-        """Get the class of the node."""
-        return self.ast_node_class_overrides.get(node_cls.__qualname__, node_cls)  # type: ignore[return-value]
-
-    @pp.cached_property
-    def coordinate(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing coordinates."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Coordinate:
-            type_, value = tokens.as_list()
-            assert isinstance(type_, str), type(type_)
-            assert type_ in ("X", "Y", "I", "J")
-            assert isinstance(value, str)
-
-            return self.get_cls(Coordinate)(
-                source=s,
-                location=loc,
-                type=type_,  # type: ignore[arg-type]
-                value=value,
-            )
-
-        return (
-            (
-                pp.oneOf(("X", "Y", "I", "J")).set_name("coordinate_type")
-                + pp.Regex(r"[+-]?[0-9]+").set_name("coordinate_value")
-            )
-            .set_parse_action(_)
-            .set_name("coordinate")
-        )
-
-    @pp.cached_property
-    def command_end(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing the command end."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> CommandEnd:
-            return self.get_cls(CommandEnd)(source=s, location=loc)
-
-        return pp.Literal("*").set_name("*").set_parse_action(_)
+    #  ██████      █████ ███████ ██████  ███████ ███████
+    # ██          ██     ██   ██ ██   ██ ██      ██
+    # ██   ███    ██     ██   ██ ██   ██ █████   ███████
+    # ██    ██    ██     ██   ██ ██   ██ ██           ██
+    #  ██████      █████ ███████ ██████  ███████ ███████
 
     def g_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing G-codes."""
@@ -270,17 +319,24 @@ class Grammar:
             ]
         )
 
-    @pp.cached_property
-    def string(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing strings."""
-        return pp.CharsNotIn("%*").set_results_name("string")
-
     def g(self, value: int, cls: Type[Node]) -> pp.ParserElement:
         """Create a parser element capable of parsing particular G-code."""
         element = pp.Regex(r"G0*" + str(value)).set_name(f"G{value}")
         return element.setParseAction(
             lambda s, loc, _tokens: self.get_cls(cls)(source=s, location=loc)
         )
+
+    # ██      ██████   █████  ██████      █████ ███████ ███    ███ ███    ███  █████  ███    ██ ██████  ███████ # noqa: E501
+    # ██     ██    ██ ██   ██ ██   ██    ██     ██   ██ ████  ████ ████  ████ ██   ██ ████   ██ ██   ██ ██      # noqa: E501
+    # ██     ██    ██ ███████ ██   ██    ██     ██   ██ ██ ████ ██ ██ ████ ██ ███████ ██ ██  ██ ██   ██ ███████ # noqa: E501
+    # ██     ██    ██ ██   ██ ██   ██    ██     ██   ██ ██  ██  ██ ██  ██  ██ ██   ██ ██  ██ ██ ██   ██      ██ # noqa: E501
+    # ██████ ███████  ██   ██ ██████      █████ ███████ ██      ██ ██      ██ ██   ██ ██   ████ ██████  ███████ # noqa: E501
+
+    # ███    ███     █████ ███████ ██████  ███████ ███████
+    # ████  ████    ██     ██   ██ ██   ██ ██      ██
+    # ██ ████ ██    ██     ██   ██ ██   ██ █████   ███████
+    # ██  ██  ██    ██     ██   ██ ██   ██ ██           ██
+    # ██      ██     █████ ███████ ██████  ███████ ███████
 
     def m_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing M-codes."""
@@ -305,231 +361,11 @@ class Grammar:
             lambda s, loc, _tokens: cls(source=s, location=loc)
         )
 
-    @pp.cached_property
-    def extended_command_open(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing the extended command open."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ExtendedCommandOpen)(source=s, location=loc)
-
-        return pp.Regex(r"%").set_name("%").set_parse_action(_)
-
-    @pp.cached_property
-    def extended_command_close(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing the extended command close."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ExtendedCommandClose)(source=s, location=loc)
-
-        return pp.Regex(r"%").set_name("%").set_parse_action(_)
-
-    def macro(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing macros."""
-
-        def _am_open(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(AMopen)(source=s, location=loc, **tokens.as_dict())
-
-        def _am_close(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(AMclose)(source=s, location=loc, **tokens.as_dict())
-
-        cs = pp.Suppress(pp.Literal(",").set_name("comma"))
-
-        def _point(s: str, loc: int, tokens: pp.ParseResults) -> Point:
-            return self.get_cls(Point)(source=s, location=loc, **tokens.as_dict())
-
-        return (
-            self.extended_command_open
-            + (pp.Literal("AM") + self.name)
-            .set_name("AMopen")
-            .set_parse_action(_am_open)
-            + self.command_end
-            + pp.ZeroOrMore(
-                pp.MatchFirst(
-                    [
-                        self.assignment,
-                        self.primitive(Code0, 0, self.string),
-                        self.primitive(
-                            Code1,
-                            1,
-                            cs
-                            + self.expression.set_results_name("exposure")
-                            + cs
-                            + self.expression.set_results_name("diameter")
-                            + cs
-                            + self.expression.set_results_name("center_x")
-                            + cs
-                            + self.expression.set_results_name("center_y")
-                            + pp.Opt(cs + self.expression.set_results_name("rotation")),
-                        ),
-                        self.primitive(
-                            Code2,
-                            2,
-                            cs
-                            + self.expression.set_results_name("exposure")
-                            + cs
-                            + self.expression.set_results_name("width")
-                            + cs
-                            + self.expression.set_results_name("start_x")
-                            + cs
-                            + self.expression.set_results_name("start_y")
-                            + cs
-                            + self.expression.set_results_name("end_x")
-                            + cs
-                            + self.expression.set_results_name("end_y")
-                            + cs
-                            + self.expression.set_results_name("rotation"),
-                        ),
-                        self.primitive(
-                            Code4,
-                            4,
-                            cs
-                            + self.expression.set_results_name("exposure")
-                            + cs
-                            + self.expression.set_results_name("number_of_points")
-                            + cs
-                            + self.expression.set_results_name("start_x")
-                            + cs
-                            + self.expression.set_results_name("start_y")
-                            + pp.OneOrMore(
-                                (
-                                    cs
-                                    + self.expression.set_results_name("x")
-                                    + cs
-                                    + self.expression.set_results_name("y")
-                                )
-                                .set_results_name("points", list_all_matches=True)
-                                .set_parse_action(_point),
-                            )
-                            + cs
-                            + self.expression.set_results_name("rotation"),
-                        ),
-                        self.primitive(
-                            Code5,
-                            5,
-                            cs
-                            + self.expression.set_results_name("exposure")
-                            + cs
-                            + self.expression.set_results_name("number_of_vertices")
-                            + cs
-                            + self.expression.set_results_name("center_x")
-                            + cs
-                            + self.expression.set_results_name("center_y")
-                            + cs
-                            + self.expression.set_results_name("diameter")
-                            + cs
-                            + self.expression.set_results_name("rotation"),
-                        ),
-                        self.primitive(
-                            Code6,
-                            6,
-                            cs
-                            + self.expression.set_results_name("center_x")
-                            + cs
-                            + self.expression.set_results_name("center_y")
-                            + cs
-                            + self.expression.set_results_name("outer_diameter")
-                            + cs
-                            + self.expression.set_results_name("ring_thickness")
-                            + cs
-                            + self.expression.set_results_name("gap_between_rings")
-                            + cs
-                            + self.expression.set_results_name("max_ring_count")
-                            + cs
-                            + self.expression.set_results_name("crosshair_thickness")
-                            + cs
-                            + self.expression.set_results_name("crosshair_length")
-                            + cs
-                            + self.expression.set_results_name("rotation"),
-                        ),
-                        self.primitive(
-                            Code7,
-                            7,
-                            cs
-                            + self.expression.set_results_name("center_x")
-                            + cs
-                            + self.expression.set_results_name("center_y")
-                            + cs
-                            + self.expression.set_results_name("outer_diameter")
-                            + cs
-                            + self.expression.set_results_name("inner_diameter")
-                            + cs
-                            + self.expression.set_results_name("gap_thickness")
-                            + cs
-                            + self.expression.set_results_name("rotation"),
-                        ),
-                        self.primitive(
-                            Code20,
-                            20,
-                            cs
-                            + self.expression.set_results_name("exposure")
-                            + cs
-                            + self.expression.set_results_name("width")
-                            + cs
-                            + self.expression.set_results_name("start_x")
-                            + cs
-                            + self.expression.set_results_name("start_y")
-                            + cs
-                            + self.expression.set_results_name("end_x")
-                            + cs
-                            + self.expression.set_results_name("end_y")
-                            + cs
-                            + self.expression.set_results_name("rotation"),
-                        ),
-                        self.primitive(
-                            Code21,
-                            21,
-                            cs
-                            + self.expression.set_results_name("exposure")
-                            + cs
-                            + self.expression.set_results_name("width")
-                            + cs
-                            + self.expression.set_results_name("height")
-                            + cs
-                            + self.expression.set_results_name("center_x")
-                            + cs
-                            + self.expression.set_results_name("center_y")
-                            + cs
-                            + self.expression.set_results_name("rotation"),
-                        ),
-                        self.primitive(
-                            Code22,
-                            22,
-                            cs
-                            + self.expression.set_results_name("exposure")
-                            + cs
-                            + self.expression.set_results_name("width")
-                            + cs
-                            + self.expression.set_results_name("height")
-                            + cs
-                            + self.expression.set_results_name("x_lower_left")
-                            + cs
-                            + self.expression.set_results_name("y_lower_left")
-                            + cs
-                            + self.expression.set_results_name("rotation"),
-                        ),
-                    ]
-                )
-            )
-            + (pp.Literal("").set_name("AM_close").set_parse_action(_am_close))
-            + self.extended_command_close
-        )
-
-    @pp.cached_property
-    def name(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing names."""
-        return pp.Regex(r"[._$a-zA-Z][._$a-zA-Z0-9]{0,126}").set_results_name("name")
-
-    def primitive(
-        self, cls: Type[Node], code: int, fields: pp.ParserElement
-    ) -> pp.ParserElement:
-        """Create a parser element capable of parsing a primitive."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(cls)(source=s, location=loc, **_tokens.as_dict())
-
-        return (pp.Literal(str(code)) + fields).set_name(
-            f"primitive-{code}"
-        ).set_parse_action(_) + self.command_end
+    # ███    ███  █████  ████████ ██   ██
+    # ████  ████ ██   ██    ██    ██   ██
+    # ██ ████ ██ ███████    ██    ███████
+    # ██  ██  ██ ██   ██    ██    ██   ██
+    # ██      ██ ██   ██    ██    ██   ██
 
     @pp.cached_property
     def expression(self) -> pp.ParserElement:
@@ -626,13 +462,6 @@ class Grammar:
         return self.double.set_results_name("constant").set_parse_action(_)
 
     @pp.cached_property
-    def double(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing doubles."""
-        return pp.Regex(r"[+-]?(([0-9]+(\.[0-9]+)?)|(\.[0-9]+))").set_results_name(
-            "double"
-        )
-
-    @pp.cached_property
     def variable(self) -> pp.ParserElement:
         """Create a parser element capable of parsing variables."""
 
@@ -653,6 +482,266 @@ class Grammar:
             + pp.Suppress("=")
             + self.expression.set_results_name("expression")
         ).set_results_name("assignment").set_parse_action(_) + self.command_end
+
+    #  ██████ ████████ ██   ██ ███████ ██████
+    # ██    ██   ██    ██   ██ ██      ██   ██
+    # ██    ██   ██    ███████ █████   ██████
+    # ██    ██   ██    ██   ██ ██      ██   ██
+    #  ██████    ██    ██   ██ ███████ ██   ██
+
+    @pp.cached_property
+    def command_end(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing the command end."""
+
+        def _(s: str, loc: int, _tokens: pp.ParseResults) -> CommandEnd:
+            return self.get_cls(CommandEnd)(source=s, location=loc)
+
+        return pp.Literal("*").set_name("*").set_parse_action(_)
+
+    @pp.cached_property
+    def coordinate(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing coordinates."""
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Coordinate:
+            type_, value = tokens.as_list()
+            assert isinstance(type_, str), type(type_)
+            assert type_ in ("X", "Y", "I", "J")
+            assert isinstance(value, str)
+
+            return self.get_cls(Coordinate)(
+                source=s,
+                location=loc,
+                type=type_,  # type: ignore[arg-type]
+                value=value,
+            )
+
+        return (
+            (
+                pp.oneOf(("X", "Y", "I", "J")).set_name("coordinate_type")
+                + pp.Regex(r"[+-]?[0-9]+").set_name("coordinate_value")
+            )
+            .set_parse_action(_)
+            .set_name("coordinate")
+        )
+
+    @pp.cached_property
+    def extended_command_open(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing the extended command open."""
+
+        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
+            return self.get_cls(ExtendedCommandOpen)(source=s, location=loc)
+
+        return pp.Regex(r"%").set_name("%").set_parse_action(_)
+
+    @pp.cached_property
+    def extended_command_close(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing the extended command close."""
+
+        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
+            return self.get_cls(ExtendedCommandClose)(source=s, location=loc)
+
+        return pp.Regex(r"%").set_name("%").set_parse_action(_)
+
+    # ██████  ██████  ██ ███    ███ ██ ████████ ██ ██    ██ ███████ ███████
+    # ██   ██ ██   ██ ██ ████  ████ ██    ██    ██ ██    ██ ██      ██
+    # ██████  ██████  ██ ██ ████ ██ ██    ██    ██ ██    ██ █████   ███████
+    # ██      ██   ██ ██ ██  ██  ██ ██    ██    ██  ██  ██  ██           ██
+    # ██      ██   ██ ██ ██      ██ ██    ██    ██   ████   ███████ ███████
+
+    @pp.cached_property
+    def primitives(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing macro primitives."""
+
+        def _point(s: str, loc: int, tokens: pp.ParseResults) -> Point:
+            return self.get_cls(Point)(source=s, location=loc, **tokens.as_dict())
+
+        cs = self.comma
+
+        return pp.ZeroOrMore(
+            pp.MatchFirst(
+                [
+                    self.assignment,
+                    self.primitive(Code0, 0, self.string),
+                    self.primitive(
+                        Code1,
+                        1,
+                        cs
+                        + self.expression.set_results_name("exposure")
+                        + cs
+                        + self.expression.set_results_name("diameter")
+                        + cs
+                        + self.expression.set_results_name("center_x")
+                        + cs
+                        + self.expression.set_results_name("center_y")
+                        + pp.Opt(cs + self.expression.set_results_name("rotation")),
+                    ),
+                    self.primitive(
+                        Code2,
+                        2,
+                        cs
+                        + self.expression.set_results_name("exposure")
+                        + cs
+                        + self.expression.set_results_name("width")
+                        + cs
+                        + self.expression.set_results_name("start_x")
+                        + cs
+                        + self.expression.set_results_name("start_y")
+                        + cs
+                        + self.expression.set_results_name("end_x")
+                        + cs
+                        + self.expression.set_results_name("end_y")
+                        + cs
+                        + self.expression.set_results_name("rotation"),
+                    ),
+                    self.primitive(
+                        Code4,
+                        4,
+                        cs
+                        + self.expression.set_results_name("exposure")
+                        + cs
+                        + self.expression.set_results_name("number_of_points")
+                        + cs
+                        + self.expression.set_results_name("start_x")
+                        + cs
+                        + self.expression.set_results_name("start_y")
+                        + pp.OneOrMore(
+                            (
+                                cs
+                                + self.expression.set_results_name("x")
+                                + cs
+                                + self.expression.set_results_name("y")
+                            )
+                            .set_results_name("points", list_all_matches=True)
+                            .set_parse_action(_point),
+                        )
+                        + cs
+                        + self.expression.set_results_name("rotation"),
+                    ),
+                    self.primitive(
+                        Code5,
+                        5,
+                        cs
+                        + self.expression.set_results_name("exposure")
+                        + cs
+                        + self.expression.set_results_name("number_of_vertices")
+                        + cs
+                        + self.expression.set_results_name("center_x")
+                        + cs
+                        + self.expression.set_results_name("center_y")
+                        + cs
+                        + self.expression.set_results_name("diameter")
+                        + cs
+                        + self.expression.set_results_name("rotation"),
+                    ),
+                    self.primitive(
+                        Code6,
+                        6,
+                        cs
+                        + self.expression.set_results_name("center_x")
+                        + cs
+                        + self.expression.set_results_name("center_y")
+                        + cs
+                        + self.expression.set_results_name("outer_diameter")
+                        + cs
+                        + self.expression.set_results_name("ring_thickness")
+                        + cs
+                        + self.expression.set_results_name("gap_between_rings")
+                        + cs
+                        + self.expression.set_results_name("max_ring_count")
+                        + cs
+                        + self.expression.set_results_name("crosshair_thickness")
+                        + cs
+                        + self.expression.set_results_name("crosshair_length")
+                        + cs
+                        + self.expression.set_results_name("rotation"),
+                    ),
+                    self.primitive(
+                        Code7,
+                        7,
+                        cs
+                        + self.expression.set_results_name("center_x")
+                        + cs
+                        + self.expression.set_results_name("center_y")
+                        + cs
+                        + self.expression.set_results_name("outer_diameter")
+                        + cs
+                        + self.expression.set_results_name("inner_diameter")
+                        + cs
+                        + self.expression.set_results_name("gap_thickness")
+                        + cs
+                        + self.expression.set_results_name("rotation"),
+                    ),
+                    self.primitive(
+                        Code20,
+                        20,
+                        cs
+                        + self.expression.set_results_name("exposure")
+                        + cs
+                        + self.expression.set_results_name("width")
+                        + cs
+                        + self.expression.set_results_name("start_x")
+                        + cs
+                        + self.expression.set_results_name("start_y")
+                        + cs
+                        + self.expression.set_results_name("end_x")
+                        + cs
+                        + self.expression.set_results_name("end_y")
+                        + cs
+                        + self.expression.set_results_name("rotation"),
+                    ),
+                    self.primitive(
+                        Code21,
+                        21,
+                        cs
+                        + self.expression.set_results_name("exposure")
+                        + cs
+                        + self.expression.set_results_name("width")
+                        + cs
+                        + self.expression.set_results_name("height")
+                        + cs
+                        + self.expression.set_results_name("center_x")
+                        + cs
+                        + self.expression.set_results_name("center_y")
+                        + cs
+                        + self.expression.set_results_name("rotation"),
+                    ),
+                    self.primitive(
+                        Code22,
+                        22,
+                        cs
+                        + self.expression.set_results_name("exposure")
+                        + cs
+                        + self.expression.set_results_name("width")
+                        + cs
+                        + self.expression.set_results_name("height")
+                        + cs
+                        + self.expression.set_results_name("x_lower_left")
+                        + cs
+                        + self.expression.set_results_name("y_lower_left")
+                        + cs
+                        + self.expression.set_results_name("rotation"),
+                    ),
+                ]
+            )
+        )
+
+    def primitive(
+        self, cls: Type[Node], code: int, fields: pp.ParserElement
+    ) -> pp.ParserElement:
+        """Create a parser element capable of parsing a primitive."""
+
+        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
+            return self.get_cls(cls)(source=s, location=loc, **_tokens.as_dict())
+
+        return (pp.Literal(str(code)) + fields).set_name(
+            f"primitive-{code}"
+        ).set_parse_action(_) + self.command_end
+
+    # ██████  ██████   ██████  ██████  ███████ ███████ ███████ ██ ███████ ███████
+    # ██   ██ ██   ██ ██    ██ ██   ██ ██      ██   ██   ██    ██ ██      ██
+    # ██████  ██████  ██    ██ ██████  █████   ██████    ██    ██ █████   ███████
+    # ██      ██   ██ ██    ██ ██      ██      ██   ██   ██    ██ ██           ██
+    # ██      ██   ██  ██████  ██      ███████ ██   ██   ██    ██ ███████ ███████
 
 
 Grammar.DEFAULT = Grammar({}).build()

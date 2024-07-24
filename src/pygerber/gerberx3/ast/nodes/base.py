@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Node(ModelType):
     """Base class for all nodes."""
 
-    source: str = Field(repr=False)
+    source: str = Field(repr=False, exclude=True)
     location: int = Field(repr=False)
 
     @abstractmethod
