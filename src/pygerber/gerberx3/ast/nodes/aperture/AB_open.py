@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 class ABopen(Node):
     """Represents AB Gerber extended command."""
 
+    aperture_identifier: str
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_ab_open(self)

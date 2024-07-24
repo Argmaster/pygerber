@@ -9,8 +9,11 @@ from typing import ClassVar, List, Type, TypeVar, cast
 import pyparsing as pp
 from pydantic import ValidationError
 
+from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
+from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
 from pygerber.gerberx3.ast.nodes.aperture.AM_close import AMclose
 from pygerber.gerberx3.ast.nodes.aperture.AM_open import AMopen
+from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
 from pygerber.gerberx3.ast.nodes.base import Node
 from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
 from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
@@ -94,7 +97,7 @@ class Grammar:
                         self.g_codes(),
                         self.m_codes(),
                         self.d_codes(),
-                        self.macro(),
+                        self.aperture(),
                         self.command_end,
                     ]
                 )
@@ -137,11 +140,70 @@ class Grammar:
             "double"
         )
 
+    @pp.cached_property
+    def integer(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing integers."""
+        return pp.Regex(r"[+-]?[0-9]+").set_results_name("integer")
+
+    @pp.cached_property
+    def aperture_identifier(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing aperture identifiers."""
+        return pp.Regex(r"D[0]*[1-9][0-9]+").set_results_name("aperture_identifier")
+
     #  █████  ██████  ███████ ██████  ████████ ██    ██ ██████  ███████
     # ██   ██ ██   ██ ██      ██   ██    ██    ██    ██ ██   ██ ██
     # ███████ ██████  █████   ██████     ██    ██    ██ ██████  █████
     # ██   ██ ██      ██      ██   ██    ██    ██    ██ ██   ██ ██
     # ██   ██ ██      ███████ ██   ██    ██     ██████  ██   ██ ███████
+
+    def aperture(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing apertures."""
+        return pp.MatchFirst(
+            [
+                self.aperture_block(),
+                self.macro(),
+                self.step_repeat(),
+            ]
+        )
+
+    def aperture_block(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing aperture blocks."""
+        return pp.MatchFirst(
+            [
+                self.ab_open,
+                self.ab_close,
+            ]
+        )
+
+    @pp.cached_property
+    def ab_open(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing AB-open."""
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(ABopen)(source=s, location=loc, **tokens.as_dict())
+
+        return (
+            self.extended_command_open
+            + (pp.Literal("AB") + self.aperture_identifier)
+            .set_name("ABopen")
+            .set_parse_action(_)
+            + self.command_end
+            + self.extended_command_close
+        )
+
+    @pp.cached_property
+    def ab_close(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing AB-close."""
+
+        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
+            return self.get_cls(ABclose)(source=s, location=loc)
+
+        return (
+            self.extended_command_open
+            + pp.Literal("AB").set_name("ABclose").set_parse_action(_)
+            + self.command_end
+            + self.extended_command_close
+        )
 
     def macro(self) -> pp.ParserElement:
         """Create a parser element capable of parsing macros."""
@@ -174,6 +236,53 @@ class Grammar:
 
         return pp.Literal("").set_name("AM_close").set_parse_action(_am_close)
 
+    def step_repeat(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing step repeats."""
+        return pp.MatchFirst(
+            [
+                self.sr_open,
+                self.sr_close,
+            ]
+        )
+
+    @pp.cached_property
+    def sr_open(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing SR-open."""
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(SRopen)(source=s, location=loc, **tokens.as_dict())
+
+        return (
+            self.extended_command_open
+            + (
+                (
+                    pp.Literal("SR")
+                    + pp.Opt(pp.Literal("X") + self.double.set_results_name("x"))
+                    + pp.Opt(pp.Literal("Y") + self.double.set_results_name("y"))
+                    + pp.Opt(pp.Literal("I") + self.double.set_results_name("i"))
+                    + pp.Opt(pp.Literal("J") + self.double.set_results_name("j"))
+                )
+                .set_name("SRopen")
+                .set_parse_action(_)
+            )
+            + self.command_end
+            + self.extended_command_close
+        )
+
+    @pp.cached_property
+    def sr_close(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing SR-close."""
+
+        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
+            return self.get_cls(ABclose)(source=s, location=loc)
+
+        return (
+            self.extended_command_open
+            + pp.Literal("SR").set_name("SRclose").set_parse_action(_)
+            + self.command_end
+            + self.extended_command_close
+        )
+
     #  █████  ████████ ████████ ██████  ██ ██████  ██    ██ ████████ ███████
     # ██   ██    ██       ██    ██   ██ ██ ██   ██ ██    ██    ██    ██
     # ███████    ██       ██    ██████  ██ ██████  ██    ██    ██    █████
@@ -190,26 +299,21 @@ class Grammar:
         """Create a parser element capable of parsing D-codes."""
 
         def _(s: str, loc: int, tokens: pp.ParseResults) -> D01:
-            parse_result_token_list = tokens.as_list()
-            token_list = cast(list[Coordinate], parse_result_token_list)
             try:
                 return self.get_cls(D01)(
                     source=s,
                     location=loc,
-                    x=token_list[0],
-                    y=token_list[1],
-                    i=token_list[2] if len(token_list) >= 4 else None,  # noqa: PLR2004
-                    j=token_list[3] if len(token_list) >= 5 else None,  # noqa: PLR2004
+                    **tokens.as_dict(),
                 )
             except ValidationError as e:
                 raise pp.ParseFatalException(s, loc, "Invalid D01") from e
 
         d01 = (
             (
-                self.coordinate
-                + self.coordinate
-                + pp.Opt(self.coordinate)
-                + pp.Opt(self.coordinate)
+                self.coordinate.set_results_name("x")
+                + self.coordinate.set_results_name("y")
+                + pp.Opt(self.coordinate.set_results_name("i"))
+                + pp.Opt(self.coordinate.set_results_name("j"))
                 + pp.Regex(r"D0*1")
             )
             .set_parse_action(_)
@@ -217,39 +321,41 @@ class Grammar:
         )
 
         def _(s: str, loc: int, tokens: pp.ParseResults) -> D02:
-            parse_result_token_list = tokens.as_list()
-            token_list = cast(list[Coordinate], parse_result_token_list)
             try:
                 return self.get_cls(D02)(
                     source=s,
                     location=loc,
-                    x=token_list[0],
-                    y=token_list[1],
+                    **tokens.as_dict(),
                 )
             except ValidationError as e:
                 raise pp.ParseFatalException(s, loc, "Invalid D02") from e
 
         d02 = (
-            (self.coordinate + self.coordinate + pp.Regex(r"D0*2"))
+            (
+                self.coordinate.set_results_name("x")
+                + self.coordinate.set_results_name("y")
+                + pp.Regex(r"D0*2")
+            )
             .set_parse_action(_)
             .set_name("D02")
         )
 
         def _(s: str, loc: int, tokens: pp.ParseResults) -> D03:
-            parse_result_token_list = tokens.as_list()
-            token_list = cast(list[Coordinate], parse_result_token_list)
             try:
                 return self.get_cls(D03)(
                     source=s,
                     location=loc,
-                    x=token_list[0],
-                    y=token_list[1],
+                    **tokens.as_dict(),
                 )
             except ValidationError as e:
                 raise pp.ParseFatalException(s, loc, "Invalid D03") from e
 
         d03 = (
-            (self.coordinate + self.coordinate + pp.Regex(r"D0*3"))
+            (
+                pp.Opt(self.coordinate.set_results_name("x"))
+                + pp.Opt(self.coordinate.set_results_name("y"))
+                + pp.Regex(r"D0*3")
+            )
             .set_parse_action(_)
             .set_name("D03")
         )
@@ -518,7 +624,7 @@ class Grammar:
         return (
             (
                 pp.oneOf(("X", "Y", "I", "J")).set_name("coordinate_type")
-                + pp.Regex(r"[+-]?[0-9]+").set_name("coordinate_value")
+                + self.integer.set_name("coordinate_value")
             )
             .set_parse_action(_)
             .set_name("coordinate")

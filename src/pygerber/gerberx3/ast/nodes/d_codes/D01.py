@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
+from pydantic import Field
+
 from pygerber.gerberx3.ast.nodes.base import Node
 from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
 
@@ -16,8 +18,8 @@ class D01(Node):
 
     x: Coordinate
     y: Coordinate
-    i: Optional[Coordinate]
-    j: Optional[Coordinate]
+    i: Optional[Coordinate] = Field(default=None)
+    j: Optional[Coordinate] = Field(default=None)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
