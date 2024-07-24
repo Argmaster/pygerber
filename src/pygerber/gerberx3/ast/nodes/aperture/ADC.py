@@ -1,8 +1,10 @@
-"""`pygerber.nodes.aperture.AD` module contains definition of `AD` class."""
+"""`pygerber.nodes.aperture.ADC` module contains definition of `AD` class."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
+
+from pydantic import Field
 
 from pygerber.gerberx3.ast.nodes.base import Node
 
@@ -10,9 +12,13 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
-class AD(Node):
+class ADC(Node):
     """Represents AD Gerber extended command."""
+
+    aperture_identifier: str
+    diameter: str
+    hole_diameter: Optional[str] = Field(default=None)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
-        visitor.on_ad(self)
+        visitor.on_adc(self)

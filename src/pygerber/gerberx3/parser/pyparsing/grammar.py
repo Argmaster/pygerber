@@ -4,13 +4,18 @@ implemented using the pyparsing library.
 
 from __future__ import annotations
 
-from typing import ClassVar, List, Type, TypeVar, cast
+from typing import ClassVar, List, Literal, Type, TypeVar, cast
 
 import pyparsing as pp
 from pydantic import ValidationError
 
 from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
 from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
+from pygerber.gerberx3.ast.nodes.aperture.ADC import ADC
+from pygerber.gerberx3.ast.nodes.aperture.ADmacro import ADmacro
+from pygerber.gerberx3.ast.nodes.aperture.ADO import ADO
+from pygerber.gerberx3.ast.nodes.aperture.ADP import ADP
+from pygerber.gerberx3.ast.nodes.aperture.ADR import ADR
 from pygerber.gerberx3.ast.nodes.aperture.AM_close import AMclose
 from pygerber.gerberx3.ast.nodes.aperture.AM_open import AMopen
 from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
@@ -163,6 +168,7 @@ class Grammar:
                 self.aperture_block(),
                 self.macro(),
                 self.step_repeat(),
+                self.add_aperture(),
             ]
         )
 
@@ -282,6 +288,111 @@ class Grammar:
             + self.command_end
             + self.extended_command_close
         )
+
+    def add_aperture(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing add-aperture commands."""
+        return (
+            self.extended_command_open
+            + pp.Suppress(pp.Literal("AD"))
+            + pp.MatchFirst(
+                [
+                    self.add_aperture_circle(),
+                    self.add_aperture_rectangle("R", ADR),
+                    self.add_aperture_rectangle("O", ADO),
+                    self.add_aperture_polygon(),
+                    self.add_aperture_macro(),
+                ]
+            )
+            + self.command_end
+            + self.extended_command_close
+        )
+
+    def add_aperture_circle(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing add-aperture-circle commands."""
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(ADC)(source=s, location=loc, **tokens.as_dict())
+
+        return (
+            (
+                self.aperture_identifier
+                + pp.Literal("C,")
+                + self.double.set_results_name("diameter")
+                + pp.Opt(self.x + self.double.set_results_name("hole_diameter"))
+            )
+            .set_name("ADC")
+            .set_parse_action(_)
+        )
+
+    def add_aperture_rectangle(
+        self, symbol: Literal["R", "O"], cls: Type[Node]
+    ) -> pp.ParserElement:
+        """Create a parser element capable of parsing add-aperture-rectangle
+        commands.
+        """
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(cls)(source=s, location=loc, **tokens.as_dict())
+
+        return (
+            (
+                self.aperture_identifier
+                + pp.Literal(f"{symbol},")
+                + self.double.set_results_name("width")
+                + self.x
+                + self.double.set_results_name("height")
+                + pp.Opt(self.x + self.double.set_results_name("hole_diameter"))
+            )
+            .set_name("ADC")
+            .set_parse_action(_)
+        )
+
+    def add_aperture_polygon(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing add-aperture-polygon
+        commands.
+        """
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(ADP)(source=s, location=loc, **tokens.as_dict())
+
+        return (
+            (
+                self.aperture_identifier
+                + pp.Literal("P,")
+                + self.double.set_results_name("outer_diameter")
+                + self.x
+                + self.double.set_results_name("vertices")
+                + pp.Opt(self.x + self.double.set_results_name("rotation"))
+                + pp.Opt(self.x + self.double.set_results_name("hole_diameter"))
+            )
+            .set_name("ADC")
+            .set_parse_action(_)
+        )
+
+    def add_aperture_macro(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing add-aperture-polygon
+        commands.
+        """
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(ADmacro)(source=s, location=loc, **tokens.as_dict())
+
+        param = self.double.set_results_name("params", list_all_matches=True)
+
+        return (
+            (
+                self.aperture_identifier
+                + self.name.set_results_name("name")
+                + pp.Opt(self.comma + param + pp.ZeroOrMore(self.x + param))
+            )
+            .set_name("ADC")
+            .set_parse_action(_)
+        )
+
+    @pp.cached_property
+    def x(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing literal X."""
+        return pp.Suppress(pp.Literal("X")).set_name("X")
 
     #  █████  ████████ ████████ ██████  ██ ██████  ██    ██ ████████ ███████
     # ██   ██    ██       ██    ██   ██ ██ ██   ██ ██    ██    ██    ██

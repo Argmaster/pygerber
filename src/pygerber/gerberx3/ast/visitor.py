@@ -7,7 +7,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
     from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
-    from pygerber.gerberx3.ast.nodes.aperture.AD import AD
+    from pygerber.gerberx3.ast.nodes.aperture.ADC import ADC
+    from pygerber.gerberx3.ast.nodes.aperture.ADmacro import ADmacro
+    from pygerber.gerberx3.ast.nodes.aperture.ADO import ADO
+    from pygerber.gerberx3.ast.nodes.aperture.ADP import ADP
+    from pygerber.gerberx3.ast.nodes.aperture.ADR import ADR
     from pygerber.gerberx3.ast.nodes.aperture.AM_close import AMclose
     from pygerber.gerberx3.ast.nodes.aperture.AM_open import AMopen
     from pygerber.gerberx3.ast.nodes.aperture.SR_close import SRclose
@@ -99,8 +103,20 @@ class AstVisitor:
     def on_ab_open(self, node: ABopen) -> None:
         """Handle `ABopen` node."""
 
-    def on_ad(self, node: AD) -> None:
-        """Handle `AD` node."""
+    def on_adc(self, node: ADC) -> None:
+        """Handle `AD` circle node."""
+
+    def on_adr(self, node: ADR) -> None:
+        """Handle `AD` rectangle node."""
+
+    def on_ado(self, node: ADO) -> None:
+        """Handle `AD` obround node."""
+
+    def on_adp(self, node: ADP) -> None:
+        """Handle `AD` polygon node."""
+
+    def on_ad_macro(self, node: ADmacro) -> None:
+        """Handle `AD` macro node."""
 
     def on_am_close(self, node: AMclose) -> None:
         """Handle `AMclose` node."""
