@@ -69,6 +69,7 @@ from pygerber.gerberx3.ast.nodes.primitives.code_7 import Code7
 from pygerber.gerberx3.ast.nodes.primitives.code_20 import Code20
 from pygerber.gerberx3.ast.nodes.primitives.code_21 import Code21
 from pygerber.gerberx3.ast.nodes.primitives.code_22 import Code22
+from pygerber.gerberx3.ast.nodes.properties.FS import FS
 
 T = TypeVar("T", bound=Node)
 
@@ -103,6 +104,7 @@ class Grammar:
                         self.m_codes(),
                         self.d_codes(),
                         self.aperture(),
+                        self.properties(),
                         self.command_end,
                     ]
                 )
@@ -959,6 +961,34 @@ class Grammar:
     # ██████  ██████  ██    ██ ██████  █████   ██████    ██    ██ █████   ███████
     # ██      ██   ██ ██    ██ ██      ██      ██   ██   ██    ██ ██           ██
     # ██      ██   ██  ██████  ██      ███████ ██   ██   ██    ██ ███████ ███████
+
+    def properties(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing Properties-commands."""
+        return self.fs()
+
+    def fs(self) -> pp.ParserElement:
+        """Create a parser for the FS command."""
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> FS:
+            try:
+                return self.get_cls(FS)(source=s, location=loc, **tokens.as_dict())
+            except ValidationError as e:
+                raise pp.ParseFatalException(s, loc, "Invalid FS") from e
+
+        return (
+            self.extended_command_open
+            + (
+                pp.Literal("FS")
+                + pp.oneOf(("L", "T")).set_results_name("zeros")
+                + pp.oneOf(("I", "A")).set_results_name("coordinate_mode")
+                + self.coordinate.set_results_name("x")
+                + self.coordinate.set_results_name("y")
+            )
+            .set_parse_action(_)
+            .set_name("FS")
+            + self.command_end
+            + self.extended_command_close
+        )
 
 
 Grammar.DEFAULT = Grammar({}).build()
