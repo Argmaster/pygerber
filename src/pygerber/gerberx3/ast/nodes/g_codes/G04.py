@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import Field
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class G04(Node):
     """Represents G04 Gerber command."""
 
-    content: str = Field(default="")
+    string: Optional[str] = Field(default=None)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

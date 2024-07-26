@@ -4,7 +4,8 @@ implemented using the pyparsing library.
 
 from __future__ import annotations
 
-from typing import ClassVar, List, Literal, Type, TypeVar, cast
+from enum import IntFlag
+from typing import Callable, ClassVar, List, Literal, Type, TypeVar, cast
 
 import pyparsing as pp
 from pydantic import ValidationError
@@ -70,8 +71,17 @@ from pygerber.gerberx3.ast.nodes.primitives.code_20 import Code20
 from pygerber.gerberx3.ast.nodes.primitives.code_21 import Code21
 from pygerber.gerberx3.ast.nodes.primitives.code_22 import Code22
 from pygerber.gerberx3.ast.nodes.properties.FS import FS
+from pygerber.gerberx3.ast.nodes.properties.MO import MO
 
 T = TypeVar("T", bound=Node)
+
+
+class Optimization(IntFlag):
+    """Namespace class holding optimization level constants."""
+
+    DISCARD_COMMAND_BOUNDARIES = 0b0001
+    DISCARD_COMMENTS = 0b0010
+    DISCARD_ATTRIBUTES = 0b0100
 
 
 class Grammar:
@@ -85,10 +95,12 @@ class Grammar:
         *,
         enable_packrat: bool = True,
         enable_debug: bool = False,
+        optimization: int = 1,
     ) -> None:
         self.ast_node_class_overrides = ast_node_class_overrides
         self.enable_packrat = enable_packrat
         self.enable_debug = enable_debug
+        self.optimization = optimization
 
     def build(self) -> pp.ParserElement:
         """Build the grammar."""
@@ -156,6 +168,16 @@ class Grammar:
     def aperture_identifier(self) -> pp.ParserElement:
         """Create a parser element capable of parsing aperture identifiers."""
         return pp.Regex(r"D[0]*[1-9][0-9]+").set_results_name("aperture_identifier")
+
+    def make_unpack_callback(
+        self, node_type: Type[Node]
+    ) -> Callable[[str, int, pp.ParseResults], Node]:
+        """Create a callback for unpacking the results of the parser."""
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
+            return self.get_cls(node_type)(source=s, location=loc, **tokens.as_dict())
+
+        return _
 
     #  █████  ██████  ███████ ██████  ████████ ██    ██ ██████  ███████
     # ██   ██ ██   ██ ██      ██   ██    ██    ██    ██ ██   ██ ██
@@ -498,15 +520,12 @@ class Grammar:
 
     def g_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing G-codes."""
+        g04_comment = (pp.Regex(r"G0*4") + pp.Opt(self.string)).set_name("G04")
 
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> G04:
-            content = tokens.as_dict().get("string")
-            assert isinstance(content, str)
-            return self.get_cls(G04)(source=s, location=loc, content=content)
-
-        g04_comment = (
-            (pp.Regex(r"G0*4") + self.string).set_name("G04").set_parse_action(_)
-        )
+        if self.optimization & Optimization.DISCARD_COMMENTS:
+            g04_comment = pp.Suppress(g04_comment)
+        else:
+            g04_comment = g04_comment.set_parse_action(self.make_unpack_callback(G04))
 
         return pp.MatchFirst(
             [
@@ -514,14 +533,13 @@ class Grammar:
                 *(
                     self.g(
                         value,
-                        self.get_cls(cls),  # type: ignore[arg-type]
+                        self.get_cls(cls),  # type: ignore[arg-type, type-abstract]
                     )
                     for (value, cls) in reversed(
                         (
                             (1, G01),
                             (2, G02),
                             (3, G03),
-                            (4, G04),
                             (36, G36),
                             (37, G37),
                             (54, G54),
@@ -651,7 +669,7 @@ class Grammar:
                     _div,
                 ),
                 (
-                    pp.Suppress(pp.oneOf("x X")),
+                    pp.Suppress(pp.one_of("x X")),
                     2,
                     pp.OpAssoc.LEFT,
                     _mul,
@@ -711,11 +729,12 @@ class Grammar:
     @pp.cached_property
     def command_end(self) -> pp.ParserElement:
         """Create a parser element capable of parsing the command end."""
+        parser = pp.Literal(r"*").set_name("*")
 
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> CommandEnd:
-            return self.get_cls(CommandEnd)(source=s, location=loc)
+        if self.optimization & Optimization.DISCARD_COMMAND_BOUNDARIES:
+            return pp.Suppress(parser)
 
-        return pp.Literal("*").set_name("*").set_parse_action(_)
+        return parser.set_parse_action(self.make_unpack_callback(CommandEnd))
 
     @pp.cached_property
     def coordinate(self) -> pp.ParserElement:
@@ -736,7 +755,7 @@ class Grammar:
 
         return (
             (
-                pp.oneOf(("X", "Y", "I", "J")).set_name("coordinate_type")
+                pp.one_of(("X", "Y", "I", "J")).set_name("coordinate_type")
                 + self.integer.set_name("coordinate_value")
             )
             .set_parse_action(_)
@@ -746,20 +765,22 @@ class Grammar:
     @pp.cached_property
     def extended_command_open(self) -> pp.ParserElement:
         """Create a parser element capable of parsing the extended command open."""
+        parser = pp.Literal(r"%").set_name("%")
 
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ExtendedCommandOpen)(source=s, location=loc)
+        if self.optimization & Optimization.DISCARD_COMMAND_BOUNDARIES:
+            return pp.Suppress(parser)
 
-        return pp.Regex(r"%").set_name("%").set_parse_action(_)
+        return parser.set_parse_action(self.make_unpack_callback(ExtendedCommandOpen))
 
     @pp.cached_property
     def extended_command_close(self) -> pp.ParserElement:
         """Create a parser element capable of parsing the extended command close."""
+        parser = pp.Literal(r"%").set_name("%")
 
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ExtendedCommandClose)(source=s, location=loc)
+        if self.optimization & Optimization.DISCARD_COMMAND_BOUNDARIES:
+            return pp.Suppress(parser)
 
-        return pp.Regex(r"%").set_name("%").set_parse_action(_)
+        return parser.set_parse_action(self.make_unpack_callback(ExtendedCommandClose))
 
     # ██████  ██████  ██ ███    ███ ██ ████████ ██ ██    ██ ███████ ███████
     # ██   ██ ██   ██ ██ ████  ████ ██    ██    ██ ██    ██ ██      ██
@@ -964,7 +985,7 @@ class Grammar:
 
     def properties(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Properties-commands."""
-        return self.fs()
+        return pp.MatchFirst([self.fs(), self.mo()])
 
     def fs(self) -> pp.ParserElement:
         """Create a parser for the FS command."""
@@ -979,13 +1000,26 @@ class Grammar:
             self.extended_command_open
             + (
                 pp.Literal("FS")
-                + pp.oneOf(("L", "T")).set_results_name("zeros")
-                + pp.oneOf(("I", "A")).set_results_name("coordinate_mode")
+                + pp.one_of(("L", "T")).set_results_name("zeros")
+                + pp.one_of(("I", "A")).set_results_name("coordinate_mode")
                 + self.coordinate.set_results_name("x")
                 + self.coordinate.set_results_name("y")
             )
             .set_parse_action(_)
             .set_name("FS")
+            + self.command_end
+            + self.extended_command_close
+        )
+
+    def mo(self) -> pp.ParserElement:
+        """Create a parser for the MO command."""
+        return (
+            self.extended_command_open
+            + (
+                (pp.Literal("MO") + pp.one_of(["IN", "MM"]).set_results_name("mode"))
+                .set_parse_action(self.make_unpack_callback(MO))
+                .set_name("MO")
+            )
             + self.command_end
             + self.extended_command_close
         )
