@@ -20,6 +20,13 @@ from pygerber.gerberx3.ast.nodes.aperture.ADR import ADR
 from pygerber.gerberx3.ast.nodes.aperture.AM_close import AMclose
 from pygerber.gerberx3.ast.nodes.aperture.AM_open import AMopen
 from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
+from pygerber.gerberx3.ast.nodes.attribute.TA import (
+    AperFunction,
+    TA_AperFunction,
+    TA_DrillTolerance,
+    TA_FlashText,
+    TA_UserName,
+)
 from pygerber.gerberx3.ast.nodes.base import Node
 from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
 from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
@@ -112,10 +119,11 @@ class Grammar:
             pp.OneOrMore(
                 pp.MatchFirst(
                     [
+                        self.aperture(),
+                        self.attribute(),
                         self.g_codes(),
                         self.m_codes(),
                         self.d_codes(),
-                        self.aperture(),
                         self.properties(),
                         self.command_end,
                     ]
@@ -145,12 +153,22 @@ class Grammar:
     @pp.cached_property
     def comma(self) -> pp.ParserElement:
         """Create a parser element capable of parsing commas."""
-        return pp.Suppress(pp.Literal(",").set_name("comma"))
+        return pp.Suppress(pp.Literal(",").set_name(","))
 
     @pp.cached_property
     def name(self) -> pp.ParserElement:
         """Create a parser element capable of parsing names."""
-        return pp.Regex(r"[._$a-zA-Z][._$a-zA-Z0-9]{0,126}").set_results_name("name")
+        return pp.Regex(r"[._a-zA-Z$][._a-zA-Z0-9]*/").set_results_name("name")
+
+    @pp.cached_property
+    def user_name(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing user attribute names."""
+        return pp.Regex(r"[_a-zA-Z$][._a-zA-Z0-9]*").set_results_name("user_name")
+
+    @pp.cached_property
+    def field(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing user attribute names."""
+        return pp.Regex(r"[^%*,]*").set_results_name("field")
 
     @pp.cached_property
     def double(self) -> pp.ParserElement:
@@ -423,6 +441,109 @@ class Grammar:
     # ███████    ██       ██    ██████  ██ ██████  ██    ██    ██    █████
     # ██   ██    ██       ██    ██   ██ ██ ██   ██ ██    ██    ██    ██
     # ██   ██    ██       ██    ██   ██ ██ ██████   ██████     ██    ███████
+
+    def attribute(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing attributes."""
+        return pp.MatchFirst(
+            [
+                self.ta(),
+            ]
+        )
+
+    def ta(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing TA attributes."""
+        return (
+            self.extended_command_open
+            + pp.MatchFirst(
+                [
+                    self._ta_user_name,
+                    self._ta_aper_function,
+                    self._ta_drill_tolerance,
+                    self._ta_flash_text,
+                ]
+            )
+            + self.command_end
+            + self.extended_command_close
+        )
+
+    @pp.cached_property
+    def _ta_user_name(self) -> pp.ParserElement:
+        return (
+            (
+                pp.Literal("TA")
+                + self.user_name
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name("fields", list_all_matches=True)
+                )
+            )
+            .set_name("TA-with-user-name")
+            .set_parse_action(self.make_unpack_callback(TA_UserName))
+        )
+
+    @pp.cached_property
+    def _ta_aper_function(self) -> pp.ParserElement:
+        return (
+            (
+                pp.Literal("TA")
+                + pp.Literal(".AperFunction")
+                + pp.Optional(
+                    self.comma
+                    + pp.one_of([v.value for v in AperFunction]).set_results_name(
+                        "function"
+                    )
+                )
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name("fields", list_all_matches=True)
+                )
+            )
+            .set_name("TA.AperFunction")
+            .set_parse_action(self.make_unpack_callback(TA_AperFunction))
+        )
+
+    @pp.cached_property
+    def _ta_drill_tolerance(self) -> pp.ParserElement:
+        return (
+            (
+                pp.Literal("TA")
+                + pp.Literal(".DrillTolerance")
+                + pp.Optional(
+                    self.comma
+                    + self.double.set_results_name("plus_tolerance")
+                    + pp.Optional(
+                        self.comma + self.double.set_results_name("minus_tolerance")
+                    )
+                )
+            )
+            .set_name("TA.DrillTolerance")
+            .set_parse_action(self.make_unpack_callback(TA_DrillTolerance))
+        )
+
+    @pp.cached_property
+    def _ta_flash_text(self) -> pp.ParserElement:
+        return (
+            (
+                pp.Literal("TA")
+                + pp.Literal(".FlashText")
+                + self.comma
+                + self.field.set_results_name("string")
+                + self.comma
+                + pp.one_of(list("BC")).set_results_name("mode")
+                + self.comma
+                + pp.one_of(list("RM")).set_results_name("mirroring")
+                + self.comma
+                + self.field.set_results_name("font")
+                + self.comma
+                + self.field.set_results_name("size")
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name("comments", list_all_matches=True)
+                )
+            )
+            .set_name("TA.FlashText")
+            .set_parse_action(self.make_unpack_callback(TA_FlashText))
+        )
 
     # ██████      █████ ███████ ██████  ███████ ███████
     # ██   ██    ██     ██   ██ ██   ██ ██      ██

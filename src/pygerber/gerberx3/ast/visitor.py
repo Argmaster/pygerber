@@ -4,6 +4,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from pygerber.gerberx3.ast.nodes.attribute.TA import (
+    TA_AperFunction,
+    TA_DrillTolerance,
+    TA_FlashText,
+    TA_UserName,
+)
+
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
     from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
@@ -134,6 +141,22 @@ class AstVisitor:
 
     def on_ta(self, node: TA) -> None:
         """Handle `TA` node."""
+
+    def on_ta_user_name(self, node: TA_UserName) -> None:
+        """Handle `TA` node."""
+        self.on_ta(node)
+
+    def on_ta_aper_function(self, node: TA_AperFunction) -> None:
+        """Handle `TA` node."""
+        self.on_ta(node)
+
+    def on_ta_drill_tolerance(self, node: TA_DrillTolerance) -> None:
+        """Handle `TA` node."""
+        self.on_ta(node)
+
+    def on_ta_flash_text(self, node: TA_FlashText) -> None:
+        """Handle `TA` node."""
+        self.on_ta(node)
 
     def on_td(self, node: TD) -> None:
         """Handle `TD` node."""
