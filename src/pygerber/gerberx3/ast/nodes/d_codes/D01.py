@@ -16,8 +16,8 @@ if TYPE_CHECKING:
 class D01(Node):
     """Represents D01 Gerber command."""
 
-    x: Coordinate
-    y: Coordinate
+    x: Optional[Coordinate] = Field(default=None)
+    y: Optional[Coordinate] = Field(default=None)
     i: Optional[Coordinate] = Field(default=None)
     j: Optional[Coordinate] = Field(default=None)
 

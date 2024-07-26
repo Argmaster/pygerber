@@ -10,6 +10,16 @@ from pygerber.gerberx3.ast.nodes.attribute.TA import (
     TA_FlashText,
     TA_UserName,
 )
+from pygerber.gerberx3.ast.nodes.attribute.TF import (
+    TF_MD5,
+    TF_CreationDate,
+    TF_FileFunction,
+    TF_FilePolarity,
+    TF_GenerationSoftware,
+    TF_Part,
+    TF_ProjectId,
+    TF_SameCoordinates,
+)
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
@@ -163,6 +173,38 @@ class AstVisitor:
 
     def on_tf(self, node: TF) -> None:
         """Handle `TF` node."""
+
+    def on_tf_part(self, node: TF_Part) -> None:
+        """Handle `TF` node."""
+        self.on_tf(node)
+
+    def on_tf_file_function(self, node: TF_FileFunction) -> None:
+        """Handle `TF` node."""
+        self.on_tf(node)
+
+    def on_tf_file_polarity(self, node: TF_FilePolarity) -> None:
+        """Handle `TF` node."""
+        self.on_tf(node)
+
+    def on_tf_same_coordinates(self, node: TF_SameCoordinates) -> None:
+        """Handle `TF` node."""
+        self.on_tf(node)
+
+    def on_tf_creation_date(self, node: TF_CreationDate) -> None:
+        """Handle `TF` node."""
+        self.on_tf(node)
+
+    def on_tf_generation_software(self, node: TF_GenerationSoftware) -> None:
+        """Handle `TF` node."""
+        self.on_tf(node)
+
+    def on_tf_project_id(self, node: TF_ProjectId) -> None:
+        """Handle `TF` node."""
+        self.on_tf(node)
+
+    def on_tf_md5(self, node: TF_MD5) -> None:
+        """Handle `TF` node."""
+        self.on_tf(node)
 
     def on_to(self, node: TO) -> None:
         """Handle `TO` node."""

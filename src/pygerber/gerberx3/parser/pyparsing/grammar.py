@@ -28,6 +28,16 @@ from pygerber.gerberx3.ast.nodes.attribute.TA import (
     TA_UserName,
 )
 from pygerber.gerberx3.ast.nodes.attribute.TD import TD
+from pygerber.gerberx3.ast.nodes.attribute.TF import (
+    TF_MD5,
+    TF_CreationDate,
+    TF_FileFunction,
+    TF_FilePolarity,
+    TF_GenerationSoftware,
+    TF_Part,
+    TF_ProjectId,
+    TF_SameCoordinates,
+)
 from pygerber.gerberx3.ast.nodes.base import Node
 from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
 from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
@@ -361,7 +371,7 @@ class Grammar:
                 self.aperture_identifier
                 + pp.Literal("C,")
                 + self.double.set_results_name("diameter")
-                + pp.Opt(self.x + self.double.set_results_name("hole_diameter"))
+                + pp.Opt(self._x + self.double.set_results_name("hole_diameter"))
             )
             .set_name("ADC")
             .set_parse_action(_)
@@ -382,9 +392,9 @@ class Grammar:
                 self.aperture_identifier
                 + pp.Literal(f"{symbol},")
                 + self.double.set_results_name("width")
-                + self.x
+                + self._x
                 + self.double.set_results_name("height")
-                + pp.Opt(self.x + self.double.set_results_name("hole_diameter"))
+                + pp.Opt(self._x + self.double.set_results_name("hole_diameter"))
             )
             .set_name("ADC")
             .set_parse_action(_)
@@ -403,10 +413,10 @@ class Grammar:
                 self.aperture_identifier
                 + pp.Literal("P,")
                 + self.double.set_results_name("outer_diameter")
-                + self.x
+                + self._x
                 + self.double.set_results_name("vertices")
-                + pp.Opt(self.x + self.double.set_results_name("rotation"))
-                + pp.Opt(self.x + self.double.set_results_name("hole_diameter"))
+                + pp.Opt(self._x + self.double.set_results_name("rotation"))
+                + pp.Opt(self._x + self.double.set_results_name("hole_diameter"))
             )
             .set_name("ADC")
             .set_parse_action(_)
@@ -426,15 +436,14 @@ class Grammar:
             (
                 self.aperture_identifier
                 + self.name.set_results_name("name")
-                + pp.Opt(self.comma + param + pp.ZeroOrMore(self.x + param))
+                + pp.Opt(self.comma + param + pp.ZeroOrMore(self._x + param))
             )
             .set_name("ADC")
             .set_parse_action(_)
         )
 
     @pp.cached_property
-    def x(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing literal X."""
+    def _x(self) -> pp.ParserElement:
         return pp.Suppress(pp.Literal("X")).set_name("X")
 
     #  █████  ████████ ████████ ██████  ██ ██████  ██    ██ ████████ ███████
@@ -449,6 +458,7 @@ class Grammar:
             [
                 self.ta(),
                 self.td(),
+                self.tf(),
             ]
         )
 
@@ -472,14 +482,14 @@ class Grammar:
     def _ta_user_name(self) -> pp.ParserElement:
         return (
             (
-                pp.Literal("TA")
+                self._ta
                 + self.user_name
                 + pp.ZeroOrMore(
                     self.comma
                     + self.field.set_results_name("fields", list_all_matches=True)
                 )
             )
-            .set_name("TA-with-user-name")
+            .set_name("TA<UserName>")
             .set_parse_action(self.make_unpack_callback(TA_UserName))
         )
 
@@ -487,7 +497,7 @@ class Grammar:
     def _ta_aper_function(self) -> pp.ParserElement:
         return (
             (
-                pp.Literal("TA")
+                self._ta
                 + pp.Literal(".AperFunction")
                 + pp.Optional(
                     self.comma
@@ -508,7 +518,7 @@ class Grammar:
     def _ta_drill_tolerance(self) -> pp.ParserElement:
         return (
             (
-                pp.Literal("TA")
+                self._ta
                 + pp.Literal(".DrillTolerance")
                 + pp.Optional(
                     self.comma
@@ -526,18 +536,18 @@ class Grammar:
     def _ta_flash_text(self) -> pp.ParserElement:
         return (
             (
-                pp.Literal("TA")
+                self._ta
                 + pp.Literal(".FlashText")
                 + self.comma
                 + self.field.set_results_name("string")
                 + self.comma
                 + pp.one_of(list("BC")).set_results_name("mode")
                 + self.comma
-                + pp.one_of(list("RM")).set_results_name("mirroring")
+                + pp.Opt(pp.one_of(list("RM")).set_results_name("mirroring"))
                 + self.comma
-                + self.field.set_results_name("font")
+                + pp.Opt(self.field.set_results_name("font"))
                 + self.comma
-                + self.field.set_results_name("size")
+                + pp.Opt(self.field.set_results_name("size"))
                 + pp.ZeroOrMore(
                     self.comma
                     + self.field.set_results_name("comments", list_all_matches=True)
@@ -546,6 +556,10 @@ class Grammar:
             .set_name("TA.FlashText")
             .set_parse_action(self.make_unpack_callback(TA_FlashText))
         )
+
+    @pp.cached_property
+    def _ta(self) -> pp.ParserElement:
+        return pp.Literal("TA")
 
     def td(self) -> pp.ParserElement:
         """Create a parser element capable of parsing TD attributes."""
@@ -560,6 +574,171 @@ class Grammar:
             + self.extended_command_close
         )
 
+    def tf(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing TF attributes."""
+        return (
+            self.extended_command_open
+            + pp.MatchFirst(
+                [
+                    self._tf_user_name,
+                    self._tf_part,
+                    self._tf_file_function,
+                    self._tf_file_polarity,
+                    self._tf_same_coordinates,
+                    self._tf_creation_date,
+                    self._tf_generation_software,
+                    self._tf_project_id,
+                    self._tf_md5,
+                ]
+            )
+            + self.command_end
+            + self.extended_command_close
+        )
+
+    @pp.cached_property
+    def _tf_user_name(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + self.user_name
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name("fields", list_all_matches=True)
+                )
+            )
+            .set_name("TF<UserName>")
+            .set_parse_action(self.make_unpack_callback(TA_UserName))
+        )
+
+    @pp.cached_property
+    def _tf_part(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + pp.CaselessLiteral(".Part")
+                + self.comma
+                + self.field.set_results_name("part")
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name("fields", list_all_matches=True)
+                )
+            )
+            .set_name("TF.Part")
+            .set_parse_action(self.make_unpack_callback(TF_Part))
+        )
+
+    @pp.cached_property
+    def _tf_file_function(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + pp.CaselessLiteral(".FileFunction")
+                + self.comma
+                + self.field.set_results_name("file_function")
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name("fields", list_all_matches=True)
+                )
+            )
+            .set_name("TF.FileFunction")
+            .set_parse_action(self.make_unpack_callback(TF_FileFunction))
+        )
+
+    @pp.cached_property
+    def _tf_file_polarity(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + pp.CaselessLiteral(".FilePolarity")
+                + self.comma
+                + self.field.set_results_name("polarity")
+            )
+            .set_name("TF.FilePolarity")
+            .set_parse_action(self.make_unpack_callback(TF_FilePolarity))
+        )
+
+    @pp.cached_property
+    def _tf_same_coordinates(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + pp.CaselessLiteral(".SameCoordinates")
+                + pp.Opt(self.comma + self.field.set_results_name("identifier"))
+            )
+            .set_name("TF.SameCoordinates")
+            .set_parse_action(self.make_unpack_callback(TF_SameCoordinates))
+        )
+
+    @pp.cached_property
+    def _tf_creation_date(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + pp.CaselessLiteral(".CreationDate")
+                + self.comma
+                + self.field.set_results_name("creation_date")
+            )
+            .set_name("TF.CreationDate")
+            .set_parse_action(self.make_unpack_callback(TF_CreationDate))
+        )
+
+    @pp.cached_property
+    def _tf_generation_software(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + pp.CaselessLiteral(".GenerationSoftware")
+                + pp.Opt(
+                    self.comma
+                    + self.field.set_results_name("vendor")
+                    + pp.Opt(
+                        self.comma
+                        + self.field.set_results_name("application")
+                        + pp.Opt(self.comma + self.field.set_results_name("version"))
+                    )
+                )
+            )
+            .set_name("TF.GenerationSoftware")
+            .set_parse_action(self.make_unpack_callback(TF_GenerationSoftware))
+        )
+
+    @pp.cached_property
+    def _tf_project_id(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + pp.CaselessLiteral(".ProjectId")
+                + pp.Opt(
+                    self.comma
+                    + self.field.set_results_name("name")
+                    + pp.Opt(
+                        self.comma
+                        + self.field.set_results_name("guid")
+                        + pp.Opt(self.comma + self.field.set_results_name("revision"))
+                    )
+                )
+            )
+            .set_name("TF.ProjectId")
+            .set_parse_action(self.make_unpack_callback(TF_ProjectId))
+        )
+
+    @pp.cached_property
+    def _tf_md5(self) -> pp.ParserElement:
+        return (
+            (
+                self._tf
+                + pp.CaselessLiteral(".MD5")
+                + self.comma
+                + self.field.set_results_name("md5")
+            )
+            .set_name("TF.MD5")
+            .set_parse_action(self.make_unpack_callback(TF_MD5))
+        )
+
+    @pp.cached_property
+    def _tf(self) -> pp.ParserElement:
+        return pp.Literal("TF")
+
     # ██████      █████ ███████ ██████  ███████ ███████
     # ██   ██    ██     ██   ██ ██   ██ ██      ██
     # ██   ██    ██     ██   ██ ██   ██ █████   ███████
@@ -568,38 +747,17 @@ class Grammar:
 
     def d_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing D-codes."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> D01:
-            try:
-                return self.get_cls(D01)(
-                    source=s,
-                    location=loc,
-                    **tokens.as_dict(),
-                )
-            except ValidationError as e:
-                raise pp.ParseFatalException(s, loc, "Invalid D01") from e
-
         d01 = (
             (
-                self.coordinate.set_results_name("x")
-                + self.coordinate.set_results_name("y")
+                pp.Opt(self.coordinate.set_results_name("x"))
+                + pp.Opt(self.coordinate.set_results_name("y"))
                 + pp.Opt(self.coordinate.set_results_name("i"))
                 + pp.Opt(self.coordinate.set_results_name("j"))
                 + pp.Regex(r"D0*1")
             )
-            .set_parse_action(_)
+            .set_parse_action(self.make_unpack_callback(D01))
             .set_name("D01")
         )
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> D02:
-            try:
-                return self.get_cls(D02)(
-                    source=s,
-                    location=loc,
-                    **tokens.as_dict(),
-                )
-            except ValidationError as e:
-                raise pp.ParseFatalException(s, loc, "Invalid D02") from e
 
         d02 = (
             (
@@ -607,19 +765,9 @@ class Grammar:
                 + self.coordinate.set_results_name("y")
                 + pp.Regex(r"D0*2")
             )
-            .set_parse_action(_)
+            .set_parse_action(self.make_unpack_callback(D02))
             .set_name("D02")
         )
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> D03:
-            try:
-                return self.get_cls(D03)(
-                    source=s,
-                    location=loc,
-                    **tokens.as_dict(),
-                )
-            except ValidationError as e:
-                raise pp.ParseFatalException(s, loc, "Invalid D03") from e
 
         d03 = (
             (
@@ -627,26 +775,24 @@ class Grammar:
                 + pp.Opt(self.coordinate.set_results_name("y"))
                 + pp.Regex(r"D0*3")
             )
-            .set_parse_action(_)
+            .set_parse_action(self.make_unpack_callback(D03))
             .set_name("D03")
         )
 
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Dnn:
-            parse_result_token_list = tokens.as_list()
-            token_list = cast(list[Coordinate], parse_result_token_list)
-            value = token_list[0]
-            assert isinstance(value, str)  # type: ignore[unreachable]
-            assert value.startswith("D")  # type: ignore[unreachable]
-            assert len(value) > 1
+        dnn = (
+            self.aperture_identifier.set_results_name("value")
+            .set_parse_action(self.make_unpack_callback(Dnn))
+            .set_name("Dnn")
+        )
 
-            try:
-                return self.get_cls(Dnn)(source=s, location=loc, value=value)
-            except ValidationError as e:
-                raise pp.ParseFatalException(s, loc, "Invalid Dnn") from e
-
-        dnn = pp.Regex(r"D0*[0-9]*").set_parse_action(_).set_name("Dnn")
-
-        return pp.MatchFirst([d01, d02, d03, dnn])
+        return pp.MatchFirst(
+            [
+                dnn,
+                d01,
+                d02,
+                d03,
+            ]
+        )
 
     #  ██████      █████ ███████ ██████  ███████ ███████
     # ██          ██     ██   ██ ██   ██ ██      ██
@@ -720,9 +866,9 @@ class Grammar:
                     self.get_cls(cls),  # type: ignore[arg-type, type-abstract]
                 )
                 for (value, cls) in (
-                    (0, M00),
-                    (1, M01),
                     (2, M02),
+                    (1, M01),
+                    (0, M00),
                 )
             ]
         )

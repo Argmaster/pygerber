@@ -1,2 +1,3 @@
 %TA.FlashText,L1,C,R,Courier,10,Layer number (L1 is top)*%
 %TA.FlashText,XZ12ADF,B,,Code128,,Project identifier *%
+%TA.FlashText,XZ12ADF,B,,,*%

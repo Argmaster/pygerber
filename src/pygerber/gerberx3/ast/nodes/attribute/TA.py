@@ -69,6 +69,11 @@ class AperFunction(Enum):
     NonMaterial = "NonMaterial"
     Other = "Other"
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}.{self.name}"
+
+    __str__ = __repr__
+
 
 class TA_AperFunction(TA):  # noqa: N801
     """Represents TA .AperFunction Gerber attribute."""
@@ -99,7 +104,7 @@ class TA_FlashText(TA):  # noqa: N801
     mode: Literal["B", "C"]
     mirroring: Literal["R", "M"] = Field(default="R")
     font: Optional[str] = Field(default=None)
-    size: Optional[float] = Field(default=None)
+    size: Optional[str] = Field(default=None)
     comments: List[str] = Field(default_factory=list)
 
     def visit(self, visitor: AstVisitor) -> None:

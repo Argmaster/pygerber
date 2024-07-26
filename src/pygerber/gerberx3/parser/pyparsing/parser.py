@@ -22,8 +22,8 @@ class Parser:
         else:
             self.grammar = Grammar.DEFAULT
 
-    def parse(self, code: str) -> File:
+    def parse(self, code: str, *, strict: bool = True) -> File:
         """Parse the input."""
-        parse_result = self.grammar.parseString(code).get("root_node")
+        parse_result = self.grammar.parseString(code, parse_all=strict).get("root_node")
         assert isinstance(parse_result, File)
         return parse_result
