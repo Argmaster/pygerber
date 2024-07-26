@@ -27,6 +27,7 @@ from pygerber.gerberx3.ast.nodes.attribute.TA import (
     TA_FlashText,
     TA_UserName,
 )
+from pygerber.gerberx3.ast.nodes.attribute.TD import TD
 from pygerber.gerberx3.ast.nodes.base import Node
 from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
 from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
@@ -447,6 +448,7 @@ class Grammar:
         return pp.MatchFirst(
             [
                 self.ta(),
+                self.td(),
             ]
         )
 
@@ -543,6 +545,19 @@ class Grammar:
             )
             .set_name("TA.FlashText")
             .set_parse_action(self.make_unpack_callback(TA_FlashText))
+        )
+
+    def td(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing TD attributes."""
+        return (
+            self.extended_command_open
+            + (
+                (pp.Literal("TD") + pp.Opt(self.string.set_results_name("name")))
+                .set_name("TD")
+                .set_parse_action(self.make_unpack_callback(TD))
+            )
+            + self.command_end
+            + self.extended_command_close
         )
 
     # ██████      █████ ███████ ██████  ███████ ███████
