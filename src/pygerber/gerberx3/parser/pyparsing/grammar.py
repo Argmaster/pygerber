@@ -37,6 +37,25 @@ from pygerber.gerberx3.ast.nodes.attribute.TF import (
     TF_Part,
     TF_ProjectId,
     TF_SameCoordinates,
+    TF_UserName,
+)
+from pygerber.gerberx3.ast.nodes.attribute.TO import (
+    TO_C,
+    TO_CMNP,
+    TO_N,
+    TO_P,
+    TO_CFtp,
+    TO_CHgt,
+    TO_CLbD,
+    TO_CLbN,
+    TO_CMfr,
+    TO_CMnt,
+    TO_CPgD,
+    TO_CPgN,
+    TO_CRot,
+    TO_CSup,
+    TO_CVal,
+    TO_UserName,
 )
 from pygerber.gerberx3.ast.nodes.base import Node
 from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
@@ -459,6 +478,7 @@ class Grammar:
                 self.ta(),
                 self.td(),
                 self.tf(),
+                self.to(),
             ]
         )
 
@@ -607,7 +627,7 @@ class Grammar:
                 )
             )
             .set_name("TF<UserName>")
-            .set_parse_action(self.make_unpack_callback(TA_UserName))
+            .set_parse_action(self.make_unpack_callback(TF_UserName))
         )
 
     @pp.cached_property
@@ -738,6 +758,261 @@ class Grammar:
     @pp.cached_property
     def _tf(self) -> pp.ParserElement:
         return pp.Literal("TF")
+
+    def to(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing TO attributes."""
+        return (
+            self.extended_command_open
+            + pp.MatchFirst(
+                [
+                    self._to_user_name,
+                    self._to_n,
+                    self._to_p,
+                    self._to_c,
+                    self._to_crot,
+                    self._to_cmfr,
+                    self._to_cmpn,
+                    self._to_cval,
+                    self._to_cmnt,
+                    self._to_cftp,
+                    self._to_cpgn,
+                    self._to_cpgd,
+                    self._to_chgt,
+                    self._to_clbn,
+                    self._to_clbd,
+                    self._to_csup,
+                ]
+            )
+            + self.command_end
+            + self.extended_command_close
+        )
+
+    @pp.cached_property
+    def _to_user_name(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + self.user_name
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name("fields", list_all_matches=True)
+                )
+            )
+            .set_name("TO<UserName>")
+            .set_parse_action(self.make_unpack_callback(TO_UserName))
+        )
+
+    @pp.cached_property
+    def _to_n(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".N")
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name("net_names", list_all_matches=True)
+                )
+            )
+            .set_name("TO.N")
+            .set_parse_action(self.make_unpack_callback(TO_N))
+        )
+
+    @pp.cached_property
+    def _to_p(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".P")
+                + self.comma
+                + self.field.set_results_name("refdes")
+                + self.comma
+                + self.field.set_results_name("number")
+                + pp.Opt(self.comma + self.field.set_results_name("function"))
+            )
+            .set_name("TO.P")
+            .set_parse_action(self.make_unpack_callback(TO_P))
+        )
+
+    @pp.cached_property
+    def _to_c(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".C")
+                + self.comma
+                + self.field.set_results_name("refdes")
+            )
+            .set_name("TO.C")
+            .set_parse_action(self.make_unpack_callback(TO_C))
+        )
+
+    @pp.cached_property
+    def _to_crot(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CRot")
+                + self.comma
+                + self.field.set_results_name("angle")
+            )
+            .set_name("TO.CRot")
+            .set_parse_action(self.make_unpack_callback(TO_CRot))
+        )
+
+    @pp.cached_property
+    def _to_cmfr(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CMfr")
+                + self.comma
+                + self.field.set_results_name("manufacturer")
+            )
+            .set_name("TO.CMfr")
+            .set_parse_action(self.make_unpack_callback(TO_CMfr))
+        )
+
+    @pp.cached_property
+    def _to_cmpn(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CMPN")
+                + self.comma
+                + self.field.set_results_name("part_number")
+            )
+            .set_name("TO.CMPN")
+            .set_parse_action(self.make_unpack_callback(TO_CMNP))
+        )
+
+    @pp.cached_property
+    def _to_cval(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CVal")
+                + self.comma
+                + self.field.set_results_name("value")
+            )
+            .set_name("TO.CVal")
+            .set_parse_action(self.make_unpack_callback(TO_CVal))
+        )
+
+    @pp.cached_property
+    def _to_cmnt(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CMnt")
+                + self.comma
+                + self.field.set_results_name("mount")
+            )
+            .set_name("TO.CMnt")
+            .set_parse_action(self.make_unpack_callback(TO_CMnt))
+        )
+
+    @pp.cached_property
+    def _to_cftp(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CFtp")
+                + self.comma
+                + self.field.set_results_name("footprint")
+            )
+            .set_name("TO.CFtp")
+            .set_parse_action(self.make_unpack_callback(TO_CFtp))
+        )
+
+    @pp.cached_property
+    def _to_cpgn(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CPgN")
+                + self.comma
+                + self.field.set_results_name("name")
+            )
+            .set_name("TO.CPgN")
+            .set_parse_action(self.make_unpack_callback(TO_CPgN))
+        )
+
+    @pp.cached_property
+    def _to_cpgd(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CPgD")
+                + self.comma
+                + self.field.set_results_name("description")
+            )
+            .set_name("TO.CPgD")
+            .set_parse_action(self.make_unpack_callback(TO_CPgD))
+        )
+
+    @pp.cached_property
+    def _to_chgt(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CHgt")
+                + self.comma
+                + self.field.set_results_name("height")
+            )
+            .set_name("TO.CHgt")
+            .set_parse_action(self.make_unpack_callback(TO_CHgt))
+        )
+
+    @pp.cached_property
+    def _to_clbn(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CLbn")
+                + self.comma
+                + self.field.set_results_name("name")
+            )
+            .set_name("TO.CLbn")
+            .set_parse_action(self.make_unpack_callback(TO_CLbN))
+        )
+
+    @pp.cached_property
+    def _to_clbd(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CLbD")
+                + self.comma
+                + self.field.set_results_name("description")
+            )
+            .set_name("TO.CLbD")
+            .set_parse_action(self.make_unpack_callback(TO_CLbD))
+        )
+
+    @pp.cached_property
+    def _to_csup(self) -> pp.ParserElement:
+        return (
+            (
+                self._to
+                + pp.CaselessLiteral(".CSup")
+                + self.comma
+                + self.field.set_results_name("supplier")
+                + self.comma
+                + self.field.set_results_name("supplier_part")
+                + pp.ZeroOrMore(
+                    self.comma
+                    + self.field.set_results_name(
+                        "other_suppliers", list_all_matches=True
+                    )
+                )
+            )
+            .set_name("TO.CSup")
+            .set_parse_action(self.make_unpack_callback(TO_CSup))
+        )
+
+    @pp.cached_property
+    def _to(self) -> pp.ParserElement:
+        return pp.Literal("TO")
 
     # ██████      █████ ███████ ██████  ███████ ███████
     # ██   ██    ██     ██   ██ ██   ██ ██      ██

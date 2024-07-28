@@ -1,9 +1,0 @@
-%TO.C,R6*%
-%TO.P,IC12,2,TRIG*%
-%TO.P,IC12,1,GND*%
-%TO.P,R5,1*%
-%TO.P,R5,2*%
-%TO.C,R2*%
-%TO.P,U1,4*%
-%TO.N,Clk3*%
-%TO.C,R301*%

@@ -24,6 +24,17 @@ class TF(Node):
         """Handle visitor call."""
 
 
+class TF_UserName(TF):  # noqa: N801
+    """Represents TF Gerber extended command with user name."""
+
+    user_name: str
+    fields: List[str] = Field(default_factory=list)
+
+    def visit(self, visitor: AstVisitor) -> None:
+        """Handle visitor call."""
+        visitor.on_tf_user_name(self)
+
+
 class Part(Enum):
     """Enumerate supported part types."""
 

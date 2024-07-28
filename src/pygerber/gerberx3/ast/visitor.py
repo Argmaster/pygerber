@@ -19,6 +19,25 @@ from pygerber.gerberx3.ast.nodes.attribute.TF import (
     TF_Part,
     TF_ProjectId,
     TF_SameCoordinates,
+    TF_UserName,
+)
+from pygerber.gerberx3.ast.nodes.attribute.TO import (
+    TO_C,
+    TO_CMNP,
+    TO_N,
+    TO_P,
+    TO_CFtp,
+    TO_CHgt,
+    TO_CLbD,
+    TO_CLbN,
+    TO_CMfr,
+    TO_CMnt,
+    TO_CPgD,
+    TO_CPgN,
+    TO_CRot,
+    TO_CSup,
+    TO_CVal,
+    TO_UserName,
 )
 
 if TYPE_CHECKING:
@@ -153,19 +172,19 @@ class AstVisitor:
         """Handle `TA` node."""
 
     def on_ta_user_name(self, node: TA_UserName) -> None:
-        """Handle `TA` node."""
+        """Handle `TA_UserName` node."""
         self.on_ta(node)
 
     def on_ta_aper_function(self, node: TA_AperFunction) -> None:
-        """Handle `TA` node."""
+        """Handle `TA_AperFunction` node."""
         self.on_ta(node)
 
     def on_ta_drill_tolerance(self, node: TA_DrillTolerance) -> None:
-        """Handle `TA` node."""
+        """Handle `TA_DrillTolerance` node."""
         self.on_ta(node)
 
     def on_ta_flash_text(self, node: TA_FlashText) -> None:
-        """Handle `TA` node."""
+        """Handle `TA_FlashText` node."""
         self.on_ta(node)
 
     def on_td(self, node: TD) -> None:
@@ -174,40 +193,108 @@ class AstVisitor:
     def on_tf(self, node: TF) -> None:
         """Handle `TF` node."""
 
+    def on_tf_user_name(self, node: TF_UserName) -> None:
+        """Handle `TF_UserName` node."""
+        self.on_tf(node)
+
     def on_tf_part(self, node: TF_Part) -> None:
-        """Handle `TF` node."""
+        """Handle `TF_Part` node."""
         self.on_tf(node)
 
     def on_tf_file_function(self, node: TF_FileFunction) -> None:
-        """Handle `TF` node."""
+        """Handle `TF_FileFunction` node."""
         self.on_tf(node)
 
     def on_tf_file_polarity(self, node: TF_FilePolarity) -> None:
-        """Handle `TF` node."""
+        """Handle `TF_FilePolarity` node."""
         self.on_tf(node)
 
     def on_tf_same_coordinates(self, node: TF_SameCoordinates) -> None:
-        """Handle `TF` node."""
+        """Handle `TF_SameCoordinates` node."""
         self.on_tf(node)
 
     def on_tf_creation_date(self, node: TF_CreationDate) -> None:
-        """Handle `TF` node."""
+        """Handle `TF_CreationDate` node."""
         self.on_tf(node)
 
     def on_tf_generation_software(self, node: TF_GenerationSoftware) -> None:
-        """Handle `TF` node."""
+        """Handle `TF_GenerationSoftware` node."""
         self.on_tf(node)
 
     def on_tf_project_id(self, node: TF_ProjectId) -> None:
-        """Handle `TF` node."""
+        """Handle `TF_ProjectId` node."""
         self.on_tf(node)
 
     def on_tf_md5(self, node: TF_MD5) -> None:
-        """Handle `TF` node."""
+        """Handle `TF_MD5` node."""
         self.on_tf(node)
 
     def on_to(self, node: TO) -> None:
         """Handle `TO` node."""
+
+    def on_to_user_name(self, node: TO_UserName) -> None:
+        """Handle `TO_UserName` node."""
+        self.on_to(node)
+
+    def on_to_n(self, node: TO_N) -> None:
+        """Handle `TO_N` node."""
+        self.on_to(node)
+
+    def on_to_p(self, node: TO_P) -> None:
+        """Handle `TO_P` node`."""
+        self.on_to(node)
+
+    def on_to_c(self, node: TO_C) -> None:
+        """Handle `TO_C` node."""
+        self.on_to(node)
+
+    def on_to_crot(self, node: TO_CRot) -> None:
+        """Handle `TO_CRot` node."""
+        self.on_to(node)
+
+    def on_to_cmfr(self, node: TO_CMfr) -> None:
+        """Handle `TO_CMfr` node."""
+        self.on_to(node)
+
+    def on_to_cmnp(self, node: TO_CMNP) -> None:
+        """Handle `TO_CMNP` node."""
+        self.on_to(node)
+
+    def on_to_cval(self, node: TO_CVal) -> None:
+        """Handle `TO_CVal` node."""
+        self.on_to(node)
+
+    def on_to_cmnt(self, node: TO_CMnt) -> None:
+        """Handle `TO_CVal` node."""
+        self.on_to(node)
+
+    def on_to_cftp(self, node: TO_CFtp) -> None:
+        """Handle `TO_Cftp` node."""
+        self.on_to(node)
+
+    def on_to_cpgn(self, node: TO_CPgN) -> None:
+        """Handle `TO_CPgN` node."""
+        self.on_to(node)
+
+    def on_to_cpgd(self, node: TO_CPgD) -> None:
+        """Handle `TO_CPgD` node."""
+        self.on_to(node)
+
+    def on_to_chgt(self, node: TO_CHgt) -> None:
+        """Handle `TO_CHgt` node."""
+        self.on_to(node)
+
+    def on_to_clbn(self, node: TO_CLbN) -> None:
+        """Handle `TO_CLbN` node."""
+        self.on_to(node)
+
+    def on_to_clbd(self, node: TO_CLbD) -> None:
+        """Handle `TO_CLbD` node."""
+        self.on_to(node)
+
+    def on_to_csup(self, node: TO_CSup) -> None:
+        """Handle `TO_CSup` node."""
+        self.on_to(node)
 
     # D codes
 
