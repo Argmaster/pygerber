@@ -7,7 +7,10 @@ from typing import TYPE_CHECKING, Optional
 from pydantic import Field
 
 from pygerber.gerberx3.ast.nodes.base import Node
-from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
+from pygerber.gerberx3.ast.nodes.other.coordinate import (
+    CoordinateX,
+    CoordinateY,
+)
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
@@ -16,8 +19,8 @@ if TYPE_CHECKING:
 class D03(Node):
     """Represents D03 Gerber command."""
 
-    x: Optional[Coordinate] = Field(default=None)
-    y: Optional[Coordinate] = Field(default=None)
+    x: Optional[CoordinateX] = Field(default=None)
+    y: Optional[CoordinateY] = Field(default=None)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

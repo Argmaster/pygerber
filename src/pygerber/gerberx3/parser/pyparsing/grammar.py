@@ -92,7 +92,12 @@ from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
 from pygerber.gerberx3.ast.nodes.math.point import Point
 from pygerber.gerberx3.ast.nodes.math.variable import Variable
 from pygerber.gerberx3.ast.nodes.other.command_end import CommandEnd
-from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
+from pygerber.gerberx3.ast.nodes.other.coordinate import (
+    CoordinateI,
+    CoordinateJ,
+    CoordinateX,
+    CoordinateY,
+)
 from pygerber.gerberx3.ast.nodes.other.extended_command_close import (
     ExtendedCommandClose,
 )
@@ -1022,51 +1027,62 @@ class Grammar:
 
     def d_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing D-codes."""
-        d01 = (
-            (
-                pp.Opt(self.coordinate.set_results_name("x"))
-                + pp.Opt(self.coordinate.set_results_name("y"))
-                + pp.Opt(self.coordinate.set_results_name("i"))
-                + pp.Opt(self.coordinate.set_results_name("j"))
-                + pp.Regex(r"D0*1")
-            )
-            .set_parse_action(self.make_unpack_callback(D01))
-            .set_name("D01")
+        return pp.MatchFirst(
+            [
+                self._dnn,
+                self._d01,
+                self._d02,
+                self._d03,
+            ]
         )
 
-        d02 = (
-            (
-                self.coordinate.set_results_name("x")
-                + self.coordinate.set_results_name("y")
-                + pp.Regex(r"D0*2")
-            )
-            .set_parse_action(self.make_unpack_callback(D02))
-            .set_name("D02")
-        )
-
-        d03 = (
-            (
-                pp.Opt(self.coordinate.set_results_name("x"))
-                + pp.Opt(self.coordinate.set_results_name("y"))
-                + pp.Regex(r"D0*3")
-            )
-            .set_parse_action(self.make_unpack_callback(D03))
-            .set_name("D03")
-        )
-
-        dnn = (
+    @pp.cached_property
+    def _dnn(self) -> pp.ParserElement:
+        return (
             self.aperture_identifier.set_results_name("value")
             .set_parse_action(self.make_unpack_callback(Dnn))
             .set_name("Dnn")
         )
 
-        return pp.MatchFirst(
-            [
-                dnn,
-                d01,
-                d02,
-                d03,
-            ]
+    @pp.cached_property
+    def _d01(self) -> pp.ParserElement:
+        return (
+            (
+                pp.Opt(self._coordinate_x.set_results_name("x"))
+                + pp.Opt(self._coordinate_y.set_results_name("y"))
+                + pp.Opt(self._coordinate_i.set_results_name("i"))
+                + pp.Opt(self._coordinate_j.set_results_name("j"))
+                + pp.Regex(r"D0*1")
+                + pp.Literal("*")
+            )
+            .set_parse_action(self.make_unpack_callback(D01))
+            .set_name("D01")
+        )
+
+    @pp.cached_property
+    def _d02(self) -> pp.ParserElement:
+        return (
+            (
+                self._coordinate_x.set_results_name("x")
+                + self._coordinate_y.set_results_name("y")
+                + pp.Regex(r"D0*2")
+                + pp.Literal("*")
+            )
+            .set_parse_action(self.make_unpack_callback(D02))
+            .set_name("D02")
+        )
+
+    @pp.cached_property
+    def _d03(self) -> pp.ParserElement:
+        return (
+            (
+                pp.Opt(self._coordinate_x.set_results_name("x"))
+                + pp.Opt(self._coordinate_y.set_results_name("y"))
+                + pp.Regex(r"D0*3")
+                + pp.Literal("*")
+            )
+            .set_parse_action(self.make_unpack_callback(D03))
+            .set_name("D03")
         )
 
     #  ██████      █████ ███████ ██████  ███████ ███████
@@ -1294,29 +1310,35 @@ class Grammar:
         return parser.set_parse_action(self.make_unpack_callback(CommandEnd))
 
     @pp.cached_property
-    def coordinate(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing coordinates."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Coordinate:
-            type_, value = tokens.as_list()
-            assert isinstance(type_, str), type(type_)
-            assert type_ in ("X", "Y", "I", "J")
-            assert isinstance(value, str)
-
-            return self.get_cls(Coordinate)(
-                source=s,
-                location=loc,
-                type=type_,  # type: ignore[arg-type]
-                value=value,
-            )
-
+    def _coordinate_x(self) -> pp.ParserElement:
         return (
-            (
-                pp.one_of(("X", "Y", "I", "J")).set_name("coordinate_type")
-                + self.integer.set_name("coordinate_value")
-            )
-            .set_parse_action(_)
-            .set_name("coordinate")
+            (pp.CaselessLiteral("X") + self.integer.set_results_name("value"))
+            .set_parse_action(self.make_unpack_callback(CoordinateX))
+            .set_name("coordinate.x")
+        )
+
+    @pp.cached_property
+    def _coordinate_y(self) -> pp.ParserElement:
+        return (
+            (pp.CaselessLiteral("Y") + self.integer.set_results_name("value"))
+            .set_parse_action(self.make_unpack_callback(CoordinateY))
+            .set_name("coordinate.y")
+        )
+
+    @pp.cached_property
+    def _coordinate_i(self) -> pp.ParserElement:
+        return (
+            (pp.CaselessLiteral("I") + self.integer.set_results_name("value"))
+            .set_parse_action(self.make_unpack_callback(CoordinateI))
+            .set_name("coordinate.i")
+        )
+
+    @pp.cached_property
+    def _coordinate_j(self) -> pp.ParserElement:
+        return (
+            (pp.CaselessLiteral("J") + self.integer.set_results_name("value"))
+            .set_parse_action(self.make_unpack_callback(CoordinateJ))
+            .set_name("coordinate.j")
         )
 
     @pp.cached_property
@@ -1559,8 +1581,12 @@ class Grammar:
                 pp.Literal("FS")
                 + pp.one_of(("L", "T")).set_results_name("zeros")
                 + pp.one_of(("I", "A")).set_results_name("coordinate_mode")
-                + self.coordinate.set_results_name("x")
-                + self.coordinate.set_results_name("y")
+                + pp.CaselessLiteral("X")
+                + pp.Regex(r"[0-9]").set_results_name("x_integral")
+                + pp.Regex(r"[0-9]").set_results_name("x_decimal")
+                + pp.CaselessLiteral("Y")
+                + pp.Regex(r"[0-9]").set_results_name("y_integral")
+                + pp.Regex(r"[0-9]").set_results_name("y_decimal")
             )
             .set_parse_action(_)
             .set_name("FS")

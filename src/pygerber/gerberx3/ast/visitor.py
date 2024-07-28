@@ -39,6 +39,12 @@ from pygerber.gerberx3.ast.nodes.attribute.TO import (
     TO_CVal,
     TO_UserName,
 )
+from pygerber.gerberx3.ast.nodes.other.coordinate import (
+    CoordinateI,
+    CoordinateJ,
+    CoordinateX,
+    CoordinateY,
+)
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
@@ -300,12 +306,33 @@ class AstVisitor:
 
     def on_d01(self, node: D01) -> None:
         """Handle `D01` node."""
+        if node.x:
+            node.x.visit(self)
+
+        if node.y:
+            node.y.visit(self)
+
+        if node.i:
+            node.i.visit(self)
+
+        if node.j:
+            node.j.visit(self)
 
     def on_d02(self, node: D02) -> None:
         """Handle `D02` node."""
+        if node.x:
+            node.x.visit(self)
+
+        if node.y:
+            node.y.visit(self)
 
     def on_d03(self, node: D03) -> None:
         """Handle `D03` node."""
+        if node.x:
+            node.x.visit(self)
+
+        if node.y:
+            node.y.visit(self)
 
     def on_dnn(self, node: Dnn) -> None:
         """Handle `Dnn` node."""
@@ -428,6 +455,22 @@ class AstVisitor:
 
     def on_coordinate(self, node: Coordinate) -> None:
         """Handle `Coordinate` node."""
+
+    def on_coordinate_x(self, node: CoordinateX) -> None:
+        """Handle `Coordinate` node."""
+        self.on_coordinate(node)
+
+    def on_coordinate_y(self, node: CoordinateY) -> None:
+        """Handle `Coordinate` node."""
+        self.on_coordinate(node)
+
+    def on_coordinate_i(self, node: CoordinateI) -> None:
+        """Handle `Coordinate` node."""
+        self.on_coordinate(node)
+
+    def on_coordinate_j(self, node: CoordinateJ) -> None:
+        """Handle `Coordinate` node."""
+        self.on_coordinate(node)
 
     def on_extended_command_close(self, node: ExtendedCommandClose) -> None:
         """Handle `ExtendedCommandClose` node."""
