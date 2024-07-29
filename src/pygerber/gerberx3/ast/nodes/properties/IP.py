@@ -13,6 +13,8 @@ if TYPE_CHECKING:
 class IP(Node):
     """Represents IP Gerber extended command."""
 
+    polarity: str
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_ip(self)
