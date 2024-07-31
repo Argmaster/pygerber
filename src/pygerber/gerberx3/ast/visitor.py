@@ -543,5 +543,5 @@ class AstVisitor:
 
     def on_file(self, node: File) -> None:
         """Handle `File` node."""
-        for command in node.commands:
+        for command in node.nodes:
             command.visit(self)

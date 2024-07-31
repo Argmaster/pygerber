@@ -149,7 +149,7 @@ class Grammar:
         """Build the grammar."""
 
         def _(s: str, loc: int, tokens: pp.ParseResults) -> File:
-            return self.get_cls(File)(source=s, location=loc, commands=tokens.as_list())
+            return self.get_cls(File)(source=s, location=loc, nodes=tokens.as_list())
 
         root = (
             pp.OneOrMore(

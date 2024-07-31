@@ -4,24 +4,21 @@ from __future__ import annotations
 
 import datetime  # noqa: TCH003
 import hashlib
-from abc import abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, List, Literal, Optional
+from typing import TYPE_CHECKING, Callable, List, Literal, Optional
 
 from pydantic import Field
 
 from pygerber.gerberx3.ast.nodes.base import Node
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
 class TF(Node):
     """Represents TF Gerber extended command."""
-
-    @abstractmethod
-    def visit(self, visitor: AstVisitor) -> None:
-        """Handle visitor call."""
 
 
 class TF_UserName(TF):  # noqa: N801
@@ -33,6 +30,12 @@ class TF_UserName(TF):  # noqa: N801
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_user_name(self)
+
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_user_name
 
 
 class Part(Enum):
@@ -54,6 +57,12 @@ class TF_Part(TF):  # noqa: N801
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_part(self)
+
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_part
 
 
 class FileFunction(Enum):
@@ -102,6 +111,12 @@ class TF_FileFunction(TF):  # noqa: N801
         """Handle visitor call."""
         visitor.on_tf_file_function(self)
 
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_file_function
+
 
 class TF_FilePolarity(TF):  # noqa: N801
     """Represents TF Gerber extended command with file polarity attribute."""
@@ -111,6 +126,12 @@ class TF_FilePolarity(TF):  # noqa: N801
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_file_polarity(self)
+
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_file_polarity
 
 
 class TF_SameCoordinates(TF):  # noqa: N801
@@ -122,6 +143,12 @@ class TF_SameCoordinates(TF):  # noqa: N801
         """Handle visitor call."""
         visitor.on_tf_same_coordinates(self)
 
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_same_coordinates
+
 
 class TF_CreationDate(TF):  # noqa: N801
     """Represents TF Gerber extended command with creation date attribute."""
@@ -131,6 +158,12 @@ class TF_CreationDate(TF):  # noqa: N801
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_creation_date(self)
+
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_creation_date
 
 
 class TF_GenerationSoftware(TF):  # noqa: N801
@@ -144,6 +177,12 @@ class TF_GenerationSoftware(TF):  # noqa: N801
         """Handle visitor call."""
         visitor.on_tf_generation_software(self)
 
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_generation_software
+
 
 class TF_ProjectId(TF):  # noqa: N801
     """Represents TF Gerber extended command with project id attribute."""
@@ -155,6 +194,12 @@ class TF_ProjectId(TF):  # noqa: N801
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_project_id(self)
+
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_project_id
 
 
 MD5_LENGTH_HEX = 32
@@ -179,3 +224,9 @@ class TF_MD5(TF):  # noqa: N801
         )
         source_hash = hashlib.md5(source).hexdigest()  # noqa: S324
         return source_hash == self.md5
+
+    def get_visitor_callback_function(
+        self, visitor: AstVisitor
+    ) -> Callable[[Self], None]:
+        """Get callback function for the node."""
+        return visitor.on_tf_md5
