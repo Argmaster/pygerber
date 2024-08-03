@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 class IR(Node):
     """Represents IR Gerber extended command."""
 
+    rotation_degree: int
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_ir(self)

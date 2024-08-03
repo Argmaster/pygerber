@@ -114,6 +114,7 @@ from pygerber.gerberx3.ast.nodes.primitives.code_21 import Code21
 from pygerber.gerberx3.ast.nodes.primitives.code_22 import Code22
 from pygerber.gerberx3.ast.nodes.properties.FS import FS
 from pygerber.gerberx3.ast.nodes.properties.IP import IP
+from pygerber.gerberx3.ast.nodes.properties.IR import IR
 from pygerber.gerberx3.ast.nodes.properties.MO import MO
 
 T = TypeVar("T", bound=Node)
@@ -1565,7 +1566,7 @@ class Grammar:
 
     def properties(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Properties-commands."""
-        return pp.MatchFirst([self.fs(), self.mo(), self.ip()])
+        return pp.MatchFirst([self.fs(), self.mo(), self.ip(), self.ir()])
 
     def fs(self) -> pp.ParserElement:
         """Create a parser for the FS command."""
@@ -1612,6 +1613,29 @@ class Grammar:
             )
             .set_parse_action(_)
             .set_name("IP")
+            + self.command_end
+            + self.extended_command_close
+        )
+
+    def ir(self) -> pp.ParserElement:
+        """Create a parser for the IR command."""
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> IR:
+            try:
+                return self.get_cls(IR)(source=s, location=loc, **tokens.as_dict())
+            except ValidationError as e:
+                raise pp.ParseFatalException(s, loc, "Invalid IR") from e
+
+        return (
+            self.extended_command_open
+            + (
+                pp.Literal("IR")
+                + pp.one_of(("0", "90", "180", "270")).set_results_name(
+                    "rotation_degree"
+                )
+            )
+            .set_parse_action(_)
+            .set_name("IR")
             + self.command_end
             + self.extended_command_close
         )
