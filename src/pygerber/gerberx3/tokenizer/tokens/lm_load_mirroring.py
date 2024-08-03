@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Tuple
+from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.state_enums import Mirroring
 from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
@@ -13,9 +13,6 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -44,21 +41,6 @@ class LoadMirroring(ExtendedCommandToken):
         """
         mirroring = Mirroring(tokens["mirroring"])
         return cls(string=string, location=location, mirroring=mirroring)
-
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set drawing polarity."""
-        return (
-            state.model_copy(
-                update={
-                    "mirroring": self.mirroring,
-                },
-            ),
-            (),
-        )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""

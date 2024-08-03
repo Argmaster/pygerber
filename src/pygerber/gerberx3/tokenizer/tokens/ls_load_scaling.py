@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable, Tuple
+from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
     ExtendedCommandToken,
@@ -13,9 +13,6 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -60,21 +57,6 @@ class LoadScaling(ExtendedCommandToken):
         """
         scaling = Decimal(str(tokens["scaling"]))
         return cls(string=string, location=location, scaling=scaling)
-
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set drawing polarity."""
-        return (
-            state.model_copy(
-                update={
-                    "scaling": self.scaling,
-                },
-            ),
-            (),
-        )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""

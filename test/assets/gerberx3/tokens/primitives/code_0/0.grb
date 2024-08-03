@@ -1,0 +1,9 @@
+%AMBox*
+0 Rectangle with rounded corners, with rotation*
+0 The origin of the aperture is its center*
+0 $1 X-size*
+0 $2 Y-size*
+0 $3 Rounding radius*
+0 $4 Rotation angle, in degrees counterclockwise*
+0 Add two overlapping rectangle primitives as box body*
+%

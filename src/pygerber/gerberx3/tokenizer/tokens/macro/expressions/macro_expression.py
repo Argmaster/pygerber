@@ -4,14 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 
 if TYPE_CHECKING:
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
     from pygerber.gerberx3.parser2.macro2.expressions2.expression2 import Expression2
-    from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 
 
 class MacroExpressionToken(Token):
@@ -45,12 +42,3 @@ class MacroExpressionToken(Token):
     def to_parser2_expression(self, context: Parser2Context) -> Expression2:
         """Convert to `Expression2` descendant class."""
         raise NotImplementedError
-
-    def evaluate_numeric(
-        self,
-        _macro_context: MacroContext,
-        state: State,
-        /,
-    ) -> Offset:
-        """Evaluate numeric value of this macro expression."""
-        return Offset.new(value="0.0", unit=state.get_units())

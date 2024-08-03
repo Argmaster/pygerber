@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Tuple
+from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.math.vector_2d import Vector2D
 from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 from pygerber.gerberx3.tokenizer.tokens.coordinate import Coordinate, CoordinateType
 
@@ -12,9 +11,6 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -62,43 +58,6 @@ class D03Flash(CommandToken):
             y=y,
         )
 
-    def update_drawing_state(
-        self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set coordinate parser."""
-        x = state.parse_coordinate(self.x)
-        y = state.parse_coordinate(self.y)
-
-        position = Vector2D(x=x, y=y)
-        draw_commands: list[DrawCommand] = []
-        current_aperture = backend.get_private_aperture_handle(
-            state.get_current_aperture(),
-        )
-        if state.is_region:
-            polarity = state.polarity.to_region_variant()
-        else:
-            polarity = state.polarity
-
-        draw_commands.append(
-            backend.get_draw_paste_cls()(
-                backend=backend,
-                polarity=polarity,
-                center_position=position,
-                other=current_aperture.drawing_target,
-            ),
-        )
-
-        return (
-            state.model_copy(
-                update={
-                    "current_position": position,
-                },
-            ),
-            draw_commands,
-        )
-
     def get_gerber_code(
         self,
         indent: str = "",
@@ -117,19 +76,3 @@ class D03Flash(CommandToken):
         context.get_hooks().command_flash.pre_parser_visit_token(self, context)
         context.get_hooks().command_flash.on_parser_visit_token(self, context)
         context.get_hooks().command_flash.post_parser_visit_token(self, context)
-
-    def get_state_based_hover_message(
-        self,
-        state: State,
-    ) -> str:
-        """Return operation specific extra information about token."""
-        units = state.get_units()
-
-        x1 = state.parse_coordinate(self.x).as_unit(units)
-        y1 = state.parse_coordinate(self.y).as_unit(units)
-
-        aperture = state.get_current_aperture().aperture_id
-
-        u = units.value.lower()
-
-        return f"Flash `{aperture}` on (`{x1}`{u}, `{y1}`{u})"

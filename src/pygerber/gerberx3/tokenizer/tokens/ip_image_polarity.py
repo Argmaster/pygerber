@@ -2,21 +2,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Tuple
+from typing import TYPE_CHECKING
 
 from pygerber.gerberx3.state_enums import ImagePolarityEnum
 from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
     ExtendedCommandToken,
 )
-from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -51,24 +47,6 @@ class ImagePolarity(ExtendedCommandToken):
             string=string,
             location=location,
             image_polarity=image_polarity,
-        )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set drawing polarity."""
-        warn_deprecated_code("IP", "8.1.4")
-        return (
-            state.model_copy(
-                update={
-                    "is_output_image_negation_required": (
-                        self.image_polarity == ImagePolarityEnum.NEGATIVE
-                    ),
-                },
-            ),
-            (),
         )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:

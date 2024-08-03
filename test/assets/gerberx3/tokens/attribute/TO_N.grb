@@ -1,0 +1,8 @@
+%TO.N,Clk3*%
+%TO.N,unconnected-(J2-TX2--PadB3)*%
+%TO.N,unconnected-(J2-SBU2-PadB8)*%
+%TO.N,/Shield*%
+%TO.N,/D2-*%
+%TO.N,GND*%
+%TO.N,/USB&HDMI\002CWiFi&BT\002CEthernet\002CLCD/MDI[3]+*%
+%TO.N,/NAND Flash \002C eMMC\002C T-Card and Audio/NAND0-ALE\005CSDC2-DS*%

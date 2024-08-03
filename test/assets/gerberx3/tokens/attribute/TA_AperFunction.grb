@@ -1,0 +1,15 @@
+%TA.AperFunction,AntiPad*%
+%TA.AperFunction,ViaPad*%
+%TA.AperFunction,ComponentDrill*%
+%TA.AperFunction,Other,Special*%
+%TA.AperFunction,MechanicalDrill*%
+%TA.AperFunction,Conductor*%
+%TA.AperFunction,SMDPad,CuDef*%
+%TA.AperFunction,ViaPad*%
+%TA.AperFunction,ComponentPad*%
+%TA.AperFunction,EtchedComponent*%
+%TA.AperFunction,BGAPad,CuDef*%
+%TA.AperFunction,TestPad*%
+%TA.AperFunction,Profile*%
+%TA.AperFunction,NonConductor*%
+%TA.AperFunction*%

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Tuple
+from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.parser.errors import ApertureNotDefinedError
 from pygerber.gerberx3.tokenizer.aperture_id import ApertureID
 from pygerber.gerberx3.tokenizer.tokens.bases.command import CommandToken
 
@@ -12,9 +11,6 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -61,23 +57,6 @@ class DNNSelectAperture(CommandToken):
             string=string,
             location=location,
             aperture_id=ApertureID(tokens["aperture_identifier"]),
-        )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set current aperture."""
-        if self.aperture_id not in state.apertures:
-            raise ApertureNotDefinedError(self.aperture_id)
-        return (
-            state.model_copy(
-                update={
-                    "current_aperture": state.apertures[self.aperture_id],
-                },
-            ),
-            (),
         )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:

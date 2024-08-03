@@ -17,16 +17,12 @@ SPEC: `2023.03` SECTION: `8.1.6`
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Tuple
+from typing import TYPE_CHECKING
 
-from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.state_enums import AxisCorrespondence
 from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
     ExtendedCommandToken,
 )
-from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -108,15 +104,6 @@ class AxisSelect(ExtendedCommandToken):
             location=location,
             correspondence=AxisCorrespondence(correspondence),
         )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Update drawing state."""
-        warn_deprecated_code("AS", "8.1")
-        return super().update_drawing_state(state, _backend)
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""

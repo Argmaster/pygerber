@@ -8,10 +8,6 @@ import pytest
 
 from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.math.vector_2d import Vector2D
-from pygerber.gerberx3.parser.errors import (
-    IncrementalCoordinatesNotSupportedError,
-    ZeroOmissionNotSupportedError,
-)
 from pygerber.gerberx3.parser2.apertures2.circle2 import Circle2
 from pygerber.gerberx3.parser2.apertures2.macro2 import Macro2
 from pygerber.gerberx3.parser2.apertures2.obround2 import Obround2
@@ -29,6 +25,7 @@ from pygerber.gerberx3.parser2.commands2.region2 import Region2
 from pygerber.gerberx3.parser2.context2 import Parser2Context
 from pygerber.gerberx3.parser2.errors2 import (
     ApertureNotDefined2Error,
+    IncrementalCoordinatesNotSupported2Error,
     NoValidArcCenterFoundError,
     OnUpdateDrawingState2Error,
     ReferencedNotInitializedBlockBufferError,
@@ -36,6 +33,7 @@ from pygerber.gerberx3.parser2.errors2 import (
     StepAndRepeatNotInitializedError,
     UnitNotSet2Error,
     UnnamedBlockApertureNotAllowedError,
+    ZeroOmissionNotSupported2Error,
 )
 from pygerber.gerberx3.parser2.macro2.assignment2 import Assignment2
 from pygerber.gerberx3.parser2.macro2.expressions2.binary2 import (
@@ -1146,7 +1144,7 @@ def test_coordinate_format_token_hooks_incremental_leading() -> None:
     except OnUpdateDrawingState2Error as e:
         assert isinstance(  # noqa: PT017
             e.__cause__,
-            IncrementalCoordinatesNotSupportedError,
+            IncrementalCoordinatesNotSupported2Error,
         )
     else:
         pytest.fail("Not raised OnUpdateDrawingState2Error")
@@ -1169,7 +1167,7 @@ def test_coordinate_format_token_hooks_incremental_trailing() -> None:
     except OnUpdateDrawingState2Error as e:
         assert isinstance(  # noqa: PT017
             e.__cause__,
-            ZeroOmissionNotSupportedError,
+            ZeroOmissionNotSupported2Error,
         )
     else:
         pytest.fail("Not raised OnUpdateDrawingState2Error")

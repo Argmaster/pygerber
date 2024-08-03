@@ -35,6 +35,7 @@ class Config(ConfigBase):
 common_case_generator_config = {
     "macro.*": Config(dpmm=100),
     "incomplete.*": Config(skip=True),
+    "tokens.*": Config(skip=True),
 }
 
 
