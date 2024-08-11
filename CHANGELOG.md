@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## Release 2.4.1
+
+- Added support for comment based attributes (#217)
+- Fixed incorrect rotation of rectangle flashes (#243)
+- Removed PyYAML dependency (#221)
+- Added tests for language server (#227)
+- Added tests for console interface (#223)
+
 ## Release 2.4.0
 
 - Added command line interface utilizing API V2 for rendering Gerber files to images.
