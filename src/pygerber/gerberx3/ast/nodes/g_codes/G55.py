@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -14,6 +15,8 @@ if TYPE_CHECKING:
 
 class G55(Node):
     """Represents G55 Gerber command."""
+
+    flash: D03
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

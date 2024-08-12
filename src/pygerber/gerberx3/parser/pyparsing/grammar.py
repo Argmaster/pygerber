@@ -8,7 +8,6 @@ from enum import IntFlag
 from typing import Callable, ClassVar, List, Literal, Type, TypeVar, cast
 
 import pyparsing as pp
-from pydantic import ValidationError
 
 from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
 from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
@@ -91,7 +90,6 @@ from pygerber.gerberx3.ast.nodes.math.operators.unary.neg import Neg
 from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
 from pygerber.gerberx3.ast.nodes.math.point import Point
 from pygerber.gerberx3.ast.nodes.math.variable import Variable
-from pygerber.gerberx3.ast.nodes.other.command_end import CommandEnd
 from pygerber.gerberx3.ast.nodes.other.coordinate import (
     CoordinateI,
     CoordinateJ,
@@ -123,9 +121,9 @@ T = TypeVar("T", bound=Node)
 class Optimization(IntFlag):
     """Namespace class holding optimization level constants."""
 
-    DISCARD_COMMAND_BOUNDARIES = 0b0001
-    DISCARD_COMMENTS = 0b0010
-    DISCARD_ATTRIBUTES = 0b0100
+    DISCARD_COMMAND_BOUNDARIES = 0b0000_0001
+    DISCARD_COMMENTS = 0b0000_0010
+    DISCARD_ATTRIBUTES = 0b0000_0100
 
 
 class Grammar:
@@ -162,7 +160,6 @@ class Grammar:
                         self.m_codes(),
                         self.d_codes(),
                         self.properties(),
-                        self.command_end,
                     ]
                 )
             )
@@ -177,6 +174,10 @@ class Grammar:
             root.set_debug()
 
         return root
+
+    @pp.cached_property
+    def _asterisk(self) -> pp.ParserElement:
+        return pp.Literal(r"*").set_name("*")
 
     def get_cls(self, node_cls: Type[T]) -> Type[T]:
         """Get the class of the node."""
@@ -195,7 +196,7 @@ class Grammar:
     @pp.cached_property
     def name(self) -> pp.ParserElement:
         """Create a parser element capable of parsing names."""
-        return pp.Regex(r"[._a-zA-Z$][._a-zA-Z0-9]*/").set_results_name("name")
+        return pp.Regex(r"[._a-zA-Z$][._a-zA-Z0-9]*").set_results_name("name")
 
     @pp.cached_property
     def user_name(self) -> pp.ParserElement:
@@ -263,30 +264,22 @@ class Grammar:
     @pp.cached_property
     def ab_open(self) -> pp.ParserElement:
         """Create a parser element capable of parsing AB-open."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ABopen)(source=s, location=loc, **tokens.as_dict())
-
         return (
             self.extended_command_open
-            + (pp.Literal("AB") + self.aperture_identifier)
+            + (pp.Literal("AB") + self.aperture_identifier + self._asterisk)
             .set_name("ABopen")
-            .set_parse_action(_)
-            + self.command_end
+            .set_parse_action(self.make_unpack_callback(ABopen))
             + self.extended_command_close
         )
 
     @pp.cached_property
     def ab_close(self) -> pp.ParserElement:
         """Create a parser element capable of parsing AB-close."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ABclose)(source=s, location=loc)
-
         return (
             self.extended_command_open
-            + pp.Literal("AB").set_name("ABclose").set_parse_action(_)
-            + self.command_end
+            + (pp.Literal("AB") + self._asterisk)
+            .set_name("ABclose")
+            .set_parse_action(self.make_unpack_callback(ABclose))
             + self.extended_command_close
         )
 
@@ -295,7 +288,6 @@ class Grammar:
         return (
             self.extended_command_open
             + self.am_open
-            + self.command_end
             + self.primitives
             + self.am_close
             + self.extended_command_close
@@ -304,22 +296,20 @@ class Grammar:
     @pp.cached_property
     def am_open(self) -> pp.ParserElement:
         """Create a parser element capable of parsing AM-open."""
-
-        def _am_open(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(AMopen)(source=s, location=loc, **tokens.as_dict())
-
         return (
-            (pp.Literal("AM") + self.name).set_name("AMopen").set_parse_action(_am_open)
+            (pp.Literal("AM") + self.name + self._asterisk)
+            .set_name("AMopen")
+            .set_parse_action(self.make_unpack_callback(AMopen))
         )
 
     @pp.cached_property
     def am_close(self) -> pp.ParserElement:
         """Create a parser element capable of parsing AM-close."""
-
-        def _am_close(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(AMclose)(source=s, location=loc, **tokens.as_dict())
-
-        return pp.Literal("").set_name("AM_close").set_parse_action(_am_close)
+        return (
+            pp.Literal("")
+            .set_name("AM_close")
+            .set_parse_action(self.make_unpack_callback(AMclose))
+        )
 
     def step_repeat(self) -> pp.ParserElement:
         """Create a parser element capable of parsing step repeats."""
@@ -333,10 +323,6 @@ class Grammar:
     @pp.cached_property
     def sr_open(self) -> pp.ParserElement:
         """Create a parser element capable of parsing SR-open."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(SRopen)(source=s, location=loc, **tokens.as_dict())
-
         return (
             self.extended_command_open
             + (
@@ -346,25 +332,22 @@ class Grammar:
                     + pp.Opt(pp.Literal("Y") + self.double.set_results_name("y"))
                     + pp.Opt(pp.Literal("I") + self.double.set_results_name("i"))
                     + pp.Opt(pp.Literal("J") + self.double.set_results_name("j"))
+                    + self._asterisk
                 )
                 .set_name("SRopen")
-                .set_parse_action(_)
+                .set_parse_action(self.make_unpack_callback(SRopen))
             )
-            + self.command_end
             + self.extended_command_close
         )
 
     @pp.cached_property
     def sr_close(self) -> pp.ParserElement:
         """Create a parser element capable of parsing SR-close."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ABclose)(source=s, location=loc)
-
         return (
             self.extended_command_open
-            + pp.Literal("SR").set_name("SRclose").set_parse_action(_)
-            + self.command_end
+            + (pp.Literal("SR") + self._asterisk)
+            .set_name("SRclose")
+            .set_parse_action(self.make_unpack_callback(AMclose))
             + self.extended_command_close
         )
 
@@ -372,7 +355,6 @@ class Grammar:
         """Create a parser element capable of parsing add-aperture commands."""
         return (
             self.extended_command_open
-            + pp.Suppress(pp.Literal("AD"))
             + pp.MatchFirst(
                 [
                     self.add_aperture_circle(),
@@ -382,25 +364,22 @@ class Grammar:
                     self.add_aperture_macro(),
                 ]
             )
-            + self.command_end
             + self.extended_command_close
         )
 
     def add_aperture_circle(self) -> pp.ParserElement:
         """Create a parser element capable of parsing add-aperture-circle commands."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ADC)(source=s, location=loc, **tokens.as_dict())
-
         return (
             (
-                self.aperture_identifier
+                pp.Literal("AD")
+                + self.aperture_identifier
                 + pp.Literal("C,")
                 + self.double.set_results_name("diameter")
                 + pp.Opt(self._x + self.double.set_results_name("hole_diameter"))
+                + self._asterisk
             )
             .set_name("ADC")
-            .set_parse_action(_)
+            .set_parse_action(self.make_unpack_callback(ADC))
         )
 
     def add_aperture_rectangle(
@@ -409,63 +388,57 @@ class Grammar:
         """Create a parser element capable of parsing add-aperture-rectangle
         commands.
         """
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(cls)(source=s, location=loc, **tokens.as_dict())
-
         return (
             (
-                self.aperture_identifier
+                pp.Literal("AD")
+                + self.aperture_identifier
                 + pp.Literal(f"{symbol},")
                 + self.double.set_results_name("width")
                 + self._x
                 + self.double.set_results_name("height")
                 + pp.Opt(self._x + self.double.set_results_name("hole_diameter"))
+                + self._asterisk
             )
-            .set_name("ADC")
-            .set_parse_action(_)
+            .set_name(f"AD{symbol}")
+            .set_parse_action(self.make_unpack_callback(cls))
         )
 
     def add_aperture_polygon(self) -> pp.ParserElement:
         """Create a parser element capable of parsing add-aperture-polygon
         commands.
         """
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ADP)(source=s, location=loc, **tokens.as_dict())
-
         return (
             (
-                self.aperture_identifier
+                pp.Literal("AD")
+                + self.aperture_identifier
                 + pp.Literal("P,")
                 + self.double.set_results_name("outer_diameter")
                 + self._x
                 + self.double.set_results_name("vertices")
                 + pp.Opt(self._x + self.double.set_results_name("rotation"))
                 + pp.Opt(self._x + self.double.set_results_name("hole_diameter"))
+                + self._asterisk
             )
-            .set_name("ADC")
-            .set_parse_action(_)
+            .set_name("ADP")
+            .set_parse_action(self.make_unpack_callback(ADP))
         )
 
     def add_aperture_macro(self) -> pp.ParserElement:
         """Create a parser element capable of parsing add-aperture-polygon
         commands.
         """
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(ADmacro)(source=s, location=loc, **tokens.as_dict())
-
         param = self.double.set_results_name("params", list_all_matches=True)
 
         return (
             (
-                self.aperture_identifier
+                pp.Literal("AD")
+                + self.aperture_identifier
                 + self.name.set_results_name("name")
                 + pp.Opt(self.comma + param + pp.ZeroOrMore(self._x + param))
+                + self._asterisk
             )
-            .set_name("ADC")
-            .set_parse_action(_)
+            .set_name("ADmacro")
+            .set_parse_action(self.make_unpack_callback(ADmacro))
         )
 
     @pp.cached_property
@@ -501,7 +474,6 @@ class Grammar:
                     self._ta_flash_text,
                 ]
             )
-            + self.command_end
             + self.extended_command_close
         )
 
@@ -515,6 +487,7 @@ class Grammar:
                     self.comma
                     + self.field.set_results_name("fields", list_all_matches=True)
                 )
+                + self._asterisk
             )
             .set_name("TA<UserName>")
             .set_parse_action(self.make_unpack_callback(TA_UserName))
@@ -536,6 +509,7 @@ class Grammar:
                     self.comma
                     + self.field.set_results_name("fields", list_all_matches=True)
                 )
+                + self._asterisk
             )
             .set_name("TA.AperFunction")
             .set_parse_action(self.make_unpack_callback(TA_AperFunction))
@@ -554,6 +528,7 @@ class Grammar:
                         self.comma + self.double.set_results_name("minus_tolerance")
                     )
                 )
+                + self._asterisk
             )
             .set_name("TA.DrillTolerance")
             .set_parse_action(self.make_unpack_callback(TA_DrillTolerance))
@@ -579,6 +554,7 @@ class Grammar:
                     self.comma
                     + self.field.set_results_name("comments", list_all_matches=True)
                 )
+                + self._asterisk
             )
             .set_name("TA.FlashText")
             .set_parse_action(self.make_unpack_callback(TA_FlashText))
@@ -593,11 +569,14 @@ class Grammar:
         return (
             self.extended_command_open
             + (
-                (pp.Literal("TD") + pp.Opt(self.string.set_results_name("name")))
+                (
+                    pp.Literal("TD")
+                    + pp.Opt(self.string.set_results_name("name"))
+                    + self._asterisk
+                )
                 .set_name("TD")
                 .set_parse_action(self.make_unpack_callback(TD))
             )
-            + self.command_end
             + self.extended_command_close
         )
 
@@ -618,7 +597,6 @@ class Grammar:
                     self._tf_md5,
                 ]
             )
-            + self.command_end
             + self.extended_command_close
         )
 
@@ -632,6 +610,7 @@ class Grammar:
                     self.comma
                     + self.field.set_results_name("fields", list_all_matches=True)
                 )
+                + self._asterisk
             )
             .set_name("TF<UserName>")
             .set_parse_action(self.make_unpack_callback(TF_UserName))
@@ -649,6 +628,7 @@ class Grammar:
                     self.comma
                     + self.field.set_results_name("fields", list_all_matches=True)
                 )
+                + self._asterisk
             )
             .set_name("TF.Part")
             .set_parse_action(self.make_unpack_callback(TF_Part))
@@ -666,6 +646,7 @@ class Grammar:
                     self.comma
                     + self.field.set_results_name("fields", list_all_matches=True)
                 )
+                + self._asterisk
             )
             .set_name("TF.FileFunction")
             .set_parse_action(self.make_unpack_callback(TF_FileFunction))
@@ -679,6 +660,7 @@ class Grammar:
                 + pp.CaselessLiteral(".FilePolarity")
                 + self.comma
                 + self.field.set_results_name("polarity")
+                + self._asterisk
             )
             .set_name("TF.FilePolarity")
             .set_parse_action(self.make_unpack_callback(TF_FilePolarity))
@@ -691,6 +673,7 @@ class Grammar:
                 self._tf
                 + pp.CaselessLiteral(".SameCoordinates")
                 + pp.Opt(self.comma + self.field.set_results_name("identifier"))
+                + self._asterisk
             )
             .set_name("TF.SameCoordinates")
             .set_parse_action(self.make_unpack_callback(TF_SameCoordinates))
@@ -704,6 +687,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CreationDate")
                 + self.comma
                 + self.field.set_results_name("creation_date")
+                + self._asterisk
             )
             .set_name("TF.CreationDate")
             .set_parse_action(self.make_unpack_callback(TF_CreationDate))
@@ -724,6 +708,7 @@ class Grammar:
                         + pp.Opt(self.comma + self.field.set_results_name("version"))
                     )
                 )
+                + self._asterisk
             )
             .set_name("TF.GenerationSoftware")
             .set_parse_action(self.make_unpack_callback(TF_GenerationSoftware))
@@ -744,6 +729,7 @@ class Grammar:
                         + pp.Opt(self.comma + self.field.set_results_name("revision"))
                     )
                 )
+                + self._asterisk
             )
             .set_name("TF.ProjectId")
             .set_parse_action(self.make_unpack_callback(TF_ProjectId))
@@ -757,6 +743,7 @@ class Grammar:
                 + pp.CaselessLiteral(".MD5")
                 + self.comma
                 + self.field.set_results_name("md5")
+                + self._asterisk
             )
             .set_name("TF.MD5")
             .set_parse_action(self.make_unpack_callback(TF_MD5))
@@ -790,7 +777,6 @@ class Grammar:
                     self._to_csup,
                 ]
             )
-            + self.command_end
             + self.extended_command_close
         )
 
@@ -804,6 +790,7 @@ class Grammar:
                     self.comma
                     + self.field.set_results_name("fields", list_all_matches=True)
                 )
+                + self._asterisk
             )
             .set_name("TO<UserName>")
             .set_parse_action(self.make_unpack_callback(TO_UserName))
@@ -819,6 +806,7 @@ class Grammar:
                     self.comma
                     + self.field.set_results_name("net_names", list_all_matches=True)
                 )
+                + self._asterisk
             )
             .set_name("TO.N")
             .set_parse_action(self.make_unpack_callback(TO_N))
@@ -835,6 +823,7 @@ class Grammar:
                 + self.comma
                 + self.field.set_results_name("number")
                 + pp.Opt(self.comma + self.field.set_results_name("function"))
+                + self._asterisk
             )
             .set_name("TO.P")
             .set_parse_action(self.make_unpack_callback(TO_P))
@@ -848,6 +837,7 @@ class Grammar:
                 + pp.CaselessLiteral(".C")
                 + self.comma
                 + self.field.set_results_name("refdes")
+                + self._asterisk
             )
             .set_name("TO.C")
             .set_parse_action(self.make_unpack_callback(TO_C))
@@ -861,6 +851,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CRot")
                 + self.comma
                 + self.field.set_results_name("angle")
+                + self._asterisk
             )
             .set_name("TO.CRot")
             .set_parse_action(self.make_unpack_callback(TO_CRot))
@@ -874,6 +865,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CMfr")
                 + self.comma
                 + self.field.set_results_name("manufacturer")
+                + self._asterisk
             )
             .set_name("TO.CMfr")
             .set_parse_action(self.make_unpack_callback(TO_CMfr))
@@ -887,6 +879,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CMPN")
                 + self.comma
                 + self.field.set_results_name("part_number")
+                + self._asterisk
             )
             .set_name("TO.CMPN")
             .set_parse_action(self.make_unpack_callback(TO_CMNP))
@@ -900,6 +893,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CVal")
                 + self.comma
                 + self.field.set_results_name("value")
+                + self._asterisk
             )
             .set_name("TO.CVal")
             .set_parse_action(self.make_unpack_callback(TO_CVal))
@@ -913,6 +907,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CMnt")
                 + self.comma
                 + self.field.set_results_name("mount")
+                + self._asterisk
             )
             .set_name("TO.CMnt")
             .set_parse_action(self.make_unpack_callback(TO_CMnt))
@@ -926,6 +921,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CFtp")
                 + self.comma
                 + self.field.set_results_name("footprint")
+                + self._asterisk
             )
             .set_name("TO.CFtp")
             .set_parse_action(self.make_unpack_callback(TO_CFtp))
@@ -939,6 +935,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CPgN")
                 + self.comma
                 + self.field.set_results_name("name")
+                + self._asterisk
             )
             .set_name("TO.CPgN")
             .set_parse_action(self.make_unpack_callback(TO_CPgN))
@@ -952,6 +949,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CPgD")
                 + self.comma
                 + self.field.set_results_name("description")
+                + self._asterisk
             )
             .set_name("TO.CPgD")
             .set_parse_action(self.make_unpack_callback(TO_CPgD))
@@ -965,6 +963,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CHgt")
                 + self.comma
                 + self.field.set_results_name("height")
+                + self._asterisk
             )
             .set_name("TO.CHgt")
             .set_parse_action(self.make_unpack_callback(TO_CHgt))
@@ -978,6 +977,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CLbn")
                 + self.comma
                 + self.field.set_results_name("name")
+                + self._asterisk
             )
             .set_name("TO.CLbn")
             .set_parse_action(self.make_unpack_callback(TO_CLbN))
@@ -991,6 +991,7 @@ class Grammar:
                 + pp.CaselessLiteral(".CLbD")
                 + self.comma
                 + self.field.set_results_name("description")
+                + self._asterisk
             )
             .set_name("TO.CLbD")
             .set_parse_action(self.make_unpack_callback(TO_CLbD))
@@ -1012,6 +1013,7 @@ class Grammar:
                         "other_suppliers", list_all_matches=True
                     )
                 )
+                + self._asterisk
             )
             .set_name("TO.CSup")
             .set_parse_action(self.make_unpack_callback(TO_CSup))
@@ -1041,7 +1043,7 @@ class Grammar:
     @pp.cached_property
     def _dnn(self) -> pp.ParserElement:
         return (
-            self.aperture_identifier.set_results_name("value")
+            (self.aperture_identifier.set_results_name("value") + self._asterisk)
             .set_parse_action(self.make_unpack_callback(Dnn))
             .set_name("Dnn")
         )
@@ -1055,7 +1057,7 @@ class Grammar:
                 + pp.Opt(self._coordinate_i.set_results_name("i"))
                 + pp.Opt(self._coordinate_j.set_results_name("j"))
                 + pp.Regex(r"D0*1")
-                + pp.Literal("*")
+                + self._asterisk
             )
             .set_parse_action(self.make_unpack_callback(D01))
             .set_name("D01")
@@ -1068,7 +1070,7 @@ class Grammar:
                 self._coordinate_x.set_results_name("x")
                 + self._coordinate_y.set_results_name("y")
                 + pp.Regex(r"D0*2")
-                + pp.Literal("*")
+                + self._asterisk
             )
             .set_parse_action(self.make_unpack_callback(D02))
             .set_name("D02")
@@ -1081,7 +1083,7 @@ class Grammar:
                 pp.Opt(self._coordinate_x.set_results_name("x"))
                 + pp.Opt(self._coordinate_y.set_results_name("y"))
                 + pp.Regex(r"D0*3")
-                + pp.Literal("*")
+                + self._asterisk
             )
             .set_parse_action(self.make_unpack_callback(D03))
             .set_name("D03")
@@ -1095,16 +1097,42 @@ class Grammar:
 
     def g_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing G-codes."""
-        g04_comment = (pp.Regex(r"G0*4") + pp.Opt(self.string)).set_name("G04")
+        g04_comment = (
+            pp.Regex(r"G0*4") + pp.Opt(self.string) + self._asterisk
+        ).set_name("G04")
 
         if self.optimization & Optimization.DISCARD_COMMENTS:
             g04_comment = pp.Suppress(g04_comment)
         else:
             g04_comment = g04_comment.set_parse_action(self.make_unpack_callback(G04))
 
+        g54 = (
+            (pp.Regex(r"G0*54") + self._dnn.set_results_name("dnn"))
+            .set_name("G54")
+            .set_parse_action(self.make_unpack_callback(G54))
+        )
+        g55 = (
+            (
+                pp.Regex(r"G0*55")
+                + (
+                    (
+                        pp.Opt(self._coordinate_x.set_results_name("x"))
+                        + pp.Opt(self._coordinate_y.set_results_name("y"))
+                        + pp.Regex(r"D0*3")
+                        + self._asterisk
+                    )
+                    .set_parse_action(self.make_unpack_callback(D03))
+                    .set_name("D03")
+                ).set_results_name("flash")
+            )
+            .set_name("G55")
+            .set_parse_action(self.make_unpack_callback(G55))
+        )
         return pp.MatchFirst(
             [
                 g04_comment,
+                g54,
+                g55,
                 *(
                     self.g(
                         value,
@@ -1118,7 +1146,6 @@ class Grammar:
                             (36, G36),
                             (37, G37),
                             (54, G54),
-                            (55, G55),
                             (70, G70),
                             (71, G71),
                             (74, G74),
@@ -1133,9 +1160,10 @@ class Grammar:
 
     def g(self, value: int, cls: Type[Node]) -> pp.ParserElement:
         """Create a parser element capable of parsing particular G-code."""
-        element = pp.Regex(r"G0*" + str(value)).set_name(f"G{value}")
-        return element.setParseAction(
-            lambda s, loc, _tokens: self.get_cls(cls)(source=s, location=loc)
+        return (
+            (pp.Regex(r"G0*" + str(value)) + self._asterisk)
+            .set_name(f"G{value}")
+            .set_parse_action(self.make_unpack_callback(cls))
         )
 
     # ██      ██████   █████  ██████      █████ ███████ ███    ███ ███    ███  █████  ███    ██ ██████  ███████ # noqa: E501
@@ -1168,9 +1196,10 @@ class Grammar:
 
     def m(self, value: int, cls: Type[Node]) -> pp.ParserElement:
         """Create a parser element capable of parsing particular D-code."""
-        element = pp.Regex(r"M0*" + str(value)).set_name(f"M{value}")
-        return element.setParseAction(
-            lambda s, loc, _tokens: cls(source=s, location=loc)
+        return (
+            (pp.Regex(r"M0*" + str(value)) + self._asterisk)
+            .set_name(f"M{value}")
+            .set_parse_action(self.make_unpack_callback(cls))
         )
 
     # ███    ███  █████  ████████ ██   ██
@@ -1267,49 +1296,38 @@ class Grammar:
     @pp.cached_property
     def constant(self) -> pp.ParserElement:
         """Create a parser element capable of parsing constants."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(Constant)(source=s, location=loc, **_tokens.as_dict())
-
-        return self.double.set_results_name("constant").set_parse_action(_)
+        return self.double.set_results_name("constant").set_parse_action(
+            self.make_unpack_callback(Constant)
+        )
 
     @pp.cached_property
     def variable(self) -> pp.ParserElement:
         """Create a parser element capable of parsing variables."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(Variable)(source=s, location=loc, **_tokens.as_dict())
-
-        return pp.Regex(r"\$[0-9]+").set_results_name("variable").set_parse_action(_)
+        return (
+            pp.Regex(r"\$[0-9]+")
+            .set_results_name("variable")
+            .set_parse_action(self.make_unpack_callback(Variable))
+        )
 
     @pp.cached_property
     def assignment(self) -> pp.ParserElement:
         """Create a parser element capable of parsing assignments."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(Assignment)(source=s, location=loc, **tokens.as_dict())
-
         return (
-            self.variable
-            + pp.Suppress("=")
-            + self.expression.set_results_name("expression")
-        ).set_results_name("assignment").set_parse_action(_) + self.command_end
+            (
+                self.variable
+                + pp.Suppress("=")
+                + self.expression.set_results_name("expression")
+                + self._asterisk
+            )
+            .set_results_name("assignment")
+            .set_parse_action(self.make_unpack_callback(Assignment))
+        )
 
     #  ██████ ████████ ██   ██ ███████ ██████
     # ██    ██   ██    ██   ██ ██      ██   ██
     # ██    ██   ██    ███████ █████   ██████
     # ██    ██   ██    ██   ██ ██      ██   ██
     #  ██████    ██    ██   ██ ███████ ██   ██
-
-    @pp.cached_property
-    def command_end(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing the command end."""
-        parser = pp.Literal(r"*").set_name("*")
-
-        if self.optimization & Optimization.DISCARD_COMMAND_BOUNDARIES:
-            return pp.Suppress(parser)
-
-        return parser.set_parse_action(self.make_unpack_callback(CommandEnd))
 
     @pp.cached_property
     def _coordinate_x(self) -> pp.ParserElement:
@@ -1372,10 +1390,6 @@ class Grammar:
     @pp.cached_property
     def primitives(self) -> pp.ParserElement:
         """Create a parser element capable of parsing macro primitives."""
-
-        def _point(s: str, loc: int, tokens: pp.ParseResults) -> Point:
-            return self.get_cls(Point)(source=s, location=loc, **tokens.as_dict())
-
         cs = self.comma
 
         return pp.ZeroOrMore(
@@ -1433,7 +1447,7 @@ class Grammar:
                                 + self.expression.set_results_name("y")
                             )
                             .set_results_name("points", list_all_matches=True)
-                            .set_parse_action(_point),
+                            .set_parse_action(self.make_unpack_callback(Point)),
                         )
                         + cs
                         + self.expression.set_results_name("rotation"),
@@ -1550,13 +1564,11 @@ class Grammar:
         self, cls: Type[Node], code: int, fields: pp.ParserElement
     ) -> pp.ParserElement:
         """Create a parser element capable of parsing a primitive."""
-
-        def _(s: str, loc: int, _tokens: pp.ParseResults) -> Node:
-            return self.get_cls(cls)(source=s, location=loc, **_tokens.as_dict())
-
-        return (pp.Literal(str(code)) + fields).set_name(
-            f"primitive-{code}"
-        ).set_parse_action(_) + self.command_end
+        return (
+            (pp.Literal(str(code)) + fields + self._asterisk)
+            .set_name(f"primitive-{code}")
+            .set_parse_action(self.make_unpack_callback(cls))
+        )
 
     # ██████  ██████   ██████  ██████  ███████ ███████ ███████ ██ ███████ ███████
     # ██   ██ ██   ██ ██    ██ ██   ██ ██      ██   ██   ██    ██ ██      ██
@@ -1570,13 +1582,6 @@ class Grammar:
 
     def fs(self) -> pp.ParserElement:
         """Create a parser for the FS command."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> FS:
-            try:
-                return self.get_cls(FS)(source=s, location=loc, **tokens.as_dict())
-            except ValidationError as e:
-                raise pp.ParseFatalException(s, loc, "Invalid FS") from e
-
         return (
             self.extended_command_open
             + (
@@ -1589,54 +1594,38 @@ class Grammar:
                 + pp.CaselessLiteral("Y")
                 + pp.Regex(r"[0-9]").set_results_name("y_integral")
                 + pp.Regex(r"[0-9]").set_results_name("y_decimal")
+                + self._asterisk
             )
-            .set_parse_action(_)
+            .set_parse_action(self.make_unpack_callback(FS))
             .set_name("FS")
-            + self.command_end
             + self.extended_command_close
         )
 
     def ip(self) -> pp.ParserElement:
         """Create a parser for the IP command."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> IP:
-            try:
-                return self.get_cls(IP)(source=s, location=loc, **tokens.as_dict())
-            except ValidationError as e:
-                raise pp.ParseFatalException(s, loc, "Invalid IP") from e
-
         return (
             self.extended_command_open
             + (
                 pp.Literal("IP")
                 + pp.one_of(("POS", "NEG")).set_results_name("polarity")
+                + self._asterisk
             )
-            .set_parse_action(_)
+            .set_parse_action(self.make_unpack_callback(IP))
             .set_name("IP")
-            + self.command_end
             + self.extended_command_close
         )
 
     def ir(self) -> pp.ParserElement:
         """Create a parser for the IR command."""
-
-        def _(s: str, loc: int, tokens: pp.ParseResults) -> IR:
-            try:
-                return self.get_cls(IR)(source=s, location=loc, **tokens.as_dict())
-            except ValidationError as e:
-                raise pp.ParseFatalException(s, loc, "Invalid IR") from e
-
         return (
             self.extended_command_open
             + (
                 pp.Literal("IR")
-                + pp.one_of(("0", "90", "180", "270")).set_results_name(
-                    "rotation_degree"
-                )
+                + self.double.set_results_name("rotation_degrees")
+                + self._asterisk
             )
-            .set_parse_action(_)
+            .set_parse_action(self.make_unpack_callback(IR))
             .set_name("IR")
-            + self.command_end
             + self.extended_command_close
         )
 
@@ -1645,11 +1634,14 @@ class Grammar:
         return (
             self.extended_command_open
             + (
-                (pp.Literal("MO") + pp.one_of(["IN", "MM"]).set_results_name("mode"))
+                (
+                    pp.Literal("MO")
+                    + pp.one_of(["IN", "MM"]).set_results_name("mode")
+                    + self._asterisk
+                )
                 .set_parse_action(self.make_unpack_callback(MO))
                 .set_name("MO")
             )
-            + self.command_end
             + self.extended_command_close
         )
 

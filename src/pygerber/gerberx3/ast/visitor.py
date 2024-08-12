@@ -100,7 +100,6 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
     from pygerber.gerberx3.ast.nodes.math.point import Point
     from pygerber.gerberx3.ast.nodes.math.variable import Variable
-    from pygerber.gerberx3.ast.nodes.other.command_end import CommandEnd
     from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
     from pygerber.gerberx3.ast.nodes.other.extended_command_close import (
         ExtendedCommandClose,
@@ -359,9 +358,11 @@ class AstVisitor:
 
     def on_g54(self, node: G54) -> None:
         """Handle `G54` node."""
+        node.dnn.visit(self)
 
     def on_g55(self, node: G55) -> None:
         """Handle `G55` node."""
+        node.flash.visit(self)
 
     def on_g70(self, node: G70) -> None:
         """Handle `G70` node."""
@@ -449,9 +450,6 @@ class AstVisitor:
         """Handle `Variable` node."""
 
     # Other
-
-    def on_command_end(self, node: CommandEnd) -> None:
-        """Handle `CommandEnd` node."""
 
     def on_coordinate(self, node: Coordinate) -> None:
         """Handle `Coordinate` node."""
