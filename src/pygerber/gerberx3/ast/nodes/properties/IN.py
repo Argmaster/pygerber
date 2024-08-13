@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable
 
+from pydantic import Field
+
 from pygerber.gerberx3.ast.nodes.base import Node
 
 if TYPE_CHECKING:
@@ -14,6 +16,8 @@ if TYPE_CHECKING:
 
 class IN(Node):
     """Represents IN Gerber extended command."""
+
+    name: str = Field(default="")
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

@@ -108,6 +108,7 @@ from pygerber.gerberx3.ast.nodes.primitives.code_20 import Code20
 from pygerber.gerberx3.ast.nodes.primitives.code_21 import Code21
 from pygerber.gerberx3.ast.nodes.primitives.code_22 import Code22
 from pygerber.gerberx3.ast.nodes.properties.FS import FS
+from pygerber.gerberx3.ast.nodes.properties.IN import IN
 from pygerber.gerberx3.ast.nodes.properties.IP import IP
 from pygerber.gerberx3.ast.nodes.properties.IR import IR
 from pygerber.gerberx3.ast.nodes.properties.MI import MI
@@ -1503,6 +1504,7 @@ class Grammar:
                 self.of(),
                 self.as_(),
                 self.mi(),
+                self.in_(),
             ]
         )
 
@@ -1588,4 +1590,14 @@ class Grammar:
             )
             .set_parse_action(self.make_unpack_callback(MI))
             .set_name("MI")
+        )
+
+    def in_(self) -> pp.ParserElement:
+        """Create a parser for the IN command."""
+        return (
+            self._extended_command(
+                pp.Literal("IN") + self.string.set_results_name("name")
+            )
+            .set_parse_action(self.make_unpack_callback(IN))
+            .set_name("IN")
         )
