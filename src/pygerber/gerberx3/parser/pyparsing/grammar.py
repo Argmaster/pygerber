@@ -114,6 +114,7 @@ from pygerber.gerberx3.ast.nodes.properties.IR import IR
 from pygerber.gerberx3.ast.nodes.properties.MI import MI
 from pygerber.gerberx3.ast.nodes.properties.MO import MO
 from pygerber.gerberx3.ast.nodes.properties.OF import OF
+from pygerber.gerberx3.ast.nodes.properties.SF import SF
 
 T = TypeVar("T", bound=Node)
 
@@ -1505,6 +1506,7 @@ class Grammar:
                 self.as_(),
                 self.mi(),
                 self.in_(),
+                self.sf(),
             ]
         )
 
@@ -1600,4 +1602,16 @@ class Grammar:
             )
             .set_parse_action(self.make_unpack_callback(IN))
             .set_name("IN")
+        )
+
+    def sf(self) -> pp.ParserElement:
+        """Create a parser for the SF command."""
+        return (
+            self._extended_command(
+                pp.Literal("SF")
+                + pp.Opt(pp.Literal("A") + self.double.set_results_name("a_scale"))
+                + pp.Opt(pp.Literal("B") + self.double.set_results_name("b_scale"))
+            )
+            .set_parse_action(self.make_unpack_callback(SF))
+            .set_name("SF")
         )

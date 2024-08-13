@@ -442,13 +442,13 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
         y_integral=4,
         y_decimal=5,
     ),
-    IN: IN(source="", location=0),
+    IN: IN(source="", location=0, name="name"),
     IP: IP(source="", location=0, polarity="D"),
     IR: IR(source="", location=0, rotation_degrees=90),
-    MI: MI(source="", location=0),
+    MI: MI(source="", location=0, a_mirroring=0, b_mirroring=1),
     MO: MO(source="", location=0, mode=UnitMode.METRIC),
     OF: OF(source="", location=0, a_offset=1, b_offset=2),
-    SF: SF(source="", location=0),
+    SF: SF(source="", location=0, a_scale=1.0, b_scale=1.0),
     File: File(source="", location=0, nodes=[]),
 }
 
