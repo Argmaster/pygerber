@@ -117,7 +117,6 @@ T = TypeVar("T", bound=Node)
 class Optimization(IntFlag):
     """Namespace class holding optimization level constants."""
 
-    DISCARD_COMMAND_BOUNDARIES = 0b0000_0001
     DISCARD_COMMENTS = 0b0000_0010
     DISCARD_ATTRIBUTES = 0b0000_0100
 
@@ -975,7 +974,7 @@ class Grammar:
     @pp.cached_property
     def _dnn(self) -> pp.ParserElement:
         return (
-            (self.aperture_identifier.set_results_name("value") + self._asterisk)
+            self._command(self.aperture_identifier.set_results_name("value"))
             .set_parse_action(self.make_unpack_callback(Dnn))
             .set_name("Dnn")
         )
@@ -983,13 +982,12 @@ class Grammar:
     @pp.cached_property
     def _d01(self) -> pp.ParserElement:
         return (
-            (
+            self._command(
                 pp.Opt(self._coordinate_x.set_results_name("x"))
                 + pp.Opt(self._coordinate_y.set_results_name("y"))
                 + pp.Opt(self._coordinate_i.set_results_name("i"))
                 + pp.Opt(self._coordinate_j.set_results_name("j"))
                 + pp.Regex(r"D0*1")
-                + self._asterisk
             )
             .set_parse_action(self.make_unpack_callback(D01))
             .set_name("D01")
@@ -998,11 +996,10 @@ class Grammar:
     @pp.cached_property
     def _d02(self) -> pp.ParserElement:
         return (
-            (
+            self._command(
                 self._coordinate_x.set_results_name("x")
                 + self._coordinate_y.set_results_name("y")
                 + pp.Regex(r"D0*2")
-                + self._asterisk
             )
             .set_parse_action(self.make_unpack_callback(D02))
             .set_name("D02")
@@ -1011,11 +1008,10 @@ class Grammar:
     @pp.cached_property
     def _d03(self) -> pp.ParserElement:
         return (
-            (
+            self._command(
                 pp.Opt(self._coordinate_x.set_results_name("x"))
                 + pp.Opt(self._coordinate_y.set_results_name("y"))
                 + pp.Regex(r"D0*3")
-                + self._asterisk
             )
             .set_parse_action(self.make_unpack_callback(D03))
             .set_name("D03")
@@ -1029,8 +1025,8 @@ class Grammar:
 
     def g_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing G-codes."""
-        g04_comment = (
-            pp.Regex(r"G0*4") + pp.Opt(self.string) + self._asterisk
+        g04_comment = self._command(
+            pp.Regex(r"G0*4") + pp.Opt(self.string),
         ).set_name("G04")
 
         if self.optimization & Optimization.DISCARD_COMMENTS:
@@ -1081,7 +1077,7 @@ class Grammar:
     def g(self, value: int, cls: Type[Node]) -> pp.ParserElement:
         """Create a parser element capable of parsing particular G-code."""
         return (
-            (pp.Regex(r"G0*" + str(value)) + self._asterisk)
+            self._command(pp.Regex(r"G0*" + str(value)))
             .set_name(f"G{value}")
             .set_parse_action(self.make_unpack_callback(cls))
         )
@@ -1117,7 +1113,7 @@ class Grammar:
     def m(self, value: int, cls: Type[Node]) -> pp.ParserElement:
         """Create a parser element capable of parsing particular D-code."""
         return (
-            (pp.Regex(r"M0*" + str(value)) + self._asterisk)
+            self._command(pp.Regex(r"M0*" + str(value)))
             .set_name(f"M{value}")
             .set_parse_action(self.make_unpack_callback(cls))
         )
@@ -1233,11 +1229,10 @@ class Grammar:
     def assignment(self) -> pp.ParserElement:
         """Create a parser element capable of parsing assignments."""
         return (
-            (
+            self._command(
                 self.variable
                 + pp.Suppress("=")
                 + self.expression.set_results_name("expression")
-                + self._asterisk
             )
             .set_results_name("assignment")
             .set_parse_action(self.make_unpack_callback(Assignment))
@@ -1465,7 +1460,7 @@ class Grammar:
     ) -> pp.ParserElement:
         """Create a parser element capable of parsing a primitive."""
         return (
-            (pp.Literal(str(code)) + fields + self._asterisk)
+            self._command(pp.Literal(str(code)) + fields)
             .set_name(f"primitive-{code}")
             .set_parse_action(self.make_unpack_callback(cls))
         )
