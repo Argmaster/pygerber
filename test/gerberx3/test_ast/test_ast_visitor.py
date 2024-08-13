@@ -112,7 +112,7 @@ from pygerber.gerberx3.ast.nodes.primitives.code_7 import Code7
 from pygerber.gerberx3.ast.nodes.primitives.code_20 import Code20
 from pygerber.gerberx3.ast.nodes.primitives.code_21 import Code21
 from pygerber.gerberx3.ast.nodes.primitives.code_22 import Code22
-from pygerber.gerberx3.ast.nodes.properties.AS import AS
+from pygerber.gerberx3.ast.nodes.properties.AS import AS, AxisCorrespondence
 from pygerber.gerberx3.ast.nodes.properties.FS import FS
 from pygerber.gerberx3.ast.nodes.properties.IN import IN
 from pygerber.gerberx3.ast.nodes.properties.IP import IP
@@ -431,7 +431,7 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
         y_lower_left=Constant(source="", location=0, constant="5"),
         rotation=Constant(source="", location=0, constant="6"),
     ),
-    AS: AS(source="", location=0),
+    AS: AS(source="", location=0, correspondence=AxisCorrespondence.AX_BY),
     FS: FS(
         source="",
         location=0,

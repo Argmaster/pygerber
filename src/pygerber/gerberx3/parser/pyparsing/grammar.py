@@ -1488,7 +1488,9 @@ class Grammar:
 
     def properties(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Properties-commands."""
-        return pp.MatchFirst([self.fs(), self.mo(), self.ip(), self.ir(), self.of()])
+        return pp.MatchFirst(
+            [self.fs(), self.mo(), self.ip(), self.ir(), self.of(), self.as_()]
+        )
 
     def fs(self) -> pp.ParserElement:
         """Create a parser for the FS command."""
@@ -1546,6 +1548,17 @@ class Grammar:
                 pp.Literal("OF")
                 + pp.Opt(pp.Literal("A") + self.double.set_results_name("a_offset"))
                 + pp.Opt(pp.Literal("B") + self.double.set_results_name("b_offset"))
+            )
+            .set_parse_action(self.make_unpack_callback(OF))
+            .set_name("OF")
+        )
+
+    def as_(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing AS-commands."""
+        return (
+            self._extended_command(
+                pp.Literal("AS")
+                + pp.one_of(["AXBY", "AYBX"]).set_results_name("correspondence")
             )
             .set_parse_action(self.make_unpack_callback(OF))
             .set_name("OF")
