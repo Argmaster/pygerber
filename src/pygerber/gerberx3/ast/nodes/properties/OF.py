@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, Optional
 
 from pygerber.gerberx3.ast.nodes.base import Node
 
@@ -14,6 +14,9 @@ if TYPE_CHECKING:
 
 class OF(Node):
     """Represents OF Gerber extended command."""
+
+    a_offset: Optional[float]
+    b_offset: Optional[float]
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

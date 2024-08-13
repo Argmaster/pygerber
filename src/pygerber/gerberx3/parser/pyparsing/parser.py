@@ -17,10 +17,7 @@ class Parser:
     def __init__(
         self, ast_node_class_overrides: Optional[dict[str, Type[Node]]] = None
     ) -> None:
-        if ast_node_class_overrides is not None:
-            self.grammar = Grammar(ast_node_class_overrides).build()
-        else:
-            self.grammar = Grammar.DEFAULT
+        self.grammar = Grammar(ast_node_class_overrides or {}).build()
 
     def parse(self, code: str, *, strict: bool = True) -> File:
         """Parse the input."""

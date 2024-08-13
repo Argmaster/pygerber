@@ -263,7 +263,7 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     G90: G90(source="", location=0),
     G91: G91(source="", location=0),
     LM: LM(source="", location=0),
-    LN: LN(source="", location=0),
+    LN: LN(source="", location=0, name="name"),
     LP: LP(source="", location=0),
     LR: LR(source="", location=0),
     LS: LS(source="", location=0),
@@ -447,7 +447,7 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     IR: IR(source="", location=0, rotation_degrees=90),
     MI: MI(source="", location=0),
     MO: MO(source="", location=0, mode=UnitMode.METRIC),
-    OF: OF(source="", location=0),
+    OF: OF(source="", location=0, a_offset=1, b_offset=2),
     SF: SF(source="", location=0),
     File: File(source="", location=0, nodes=[]),
 }

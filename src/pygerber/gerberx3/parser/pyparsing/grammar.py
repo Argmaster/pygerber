@@ -5,7 +5,7 @@ implemented using the pyparsing library.
 from __future__ import annotations
 
 from enum import IntFlag
-from typing import Callable, ClassVar, List, Literal, Type, TypeVar, cast
+from typing import Callable, List, Literal, Type, TypeVar, cast
 
 import pyparsing as pp
 
@@ -111,6 +111,7 @@ from pygerber.gerberx3.ast.nodes.properties.FS import FS
 from pygerber.gerberx3.ast.nodes.properties.IP import IP
 from pygerber.gerberx3.ast.nodes.properties.IR import IR
 from pygerber.gerberx3.ast.nodes.properties.MO import MO
+from pygerber.gerberx3.ast.nodes.properties.OF import OF
 
 T = TypeVar("T", bound=Node)
 
@@ -125,15 +126,13 @@ class Optimization(IntFlag):
 class Grammar:
     """Internal representation of the Gerber X3 grammar."""
 
-    DEFAULT: ClassVar[pp.ParserElement]
-
     def __init__(
         self,
         ast_node_class_overrides: dict[str, Type[Node]],
         *,
         enable_packrat: bool = True,
         enable_debug: bool = False,
-        optimization: int = 1,
+        optimization: int = 0,
     ) -> None:
         self.ast_node_class_overrides = ast_node_class_overrides
         self.enable_packrat = enable_packrat
@@ -1489,7 +1488,7 @@ class Grammar:
 
     def properties(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Properties-commands."""
-        return pp.MatchFirst([self.fs(), self.mo(), self.ip(), self.ir()])
+        return pp.MatchFirst([self.fs(), self.mo(), self.ip(), self.ir(), self.of()])
 
     def fs(self) -> pp.ParserElement:
         """Create a parser for the FS command."""
@@ -1540,5 +1539,14 @@ class Grammar:
             .set_name("MO")
         )
 
-
-Grammar.DEFAULT = Grammar({}).build()
+    def of(self) -> pp.ParserElement:
+        """Create a parser for the MO command."""
+        return (
+            self._extended_command(
+                pp.Literal("OF")
+                + pp.Opt(pp.Literal("A") + self.double.set_results_name("a_offset"))
+                + pp.Opt(pp.Literal("B") + self.double.set_results_name("b_offset"))
+            )
+            .set_parse_action(self.make_unpack_callback(OF))
+            .set_name("OF")
+        )
