@@ -110,6 +110,7 @@ from pygerber.gerberx3.ast.nodes.primitives.code_22 import Code22
 from pygerber.gerberx3.ast.nodes.properties.FS import FS
 from pygerber.gerberx3.ast.nodes.properties.IP import IP
 from pygerber.gerberx3.ast.nodes.properties.IR import IR
+from pygerber.gerberx3.ast.nodes.properties.MI import MI
 from pygerber.gerberx3.ast.nodes.properties.MO import MO
 from pygerber.gerberx3.ast.nodes.properties.OF import OF
 
@@ -225,6 +226,11 @@ class Grammar:
     def integer(self) -> pp.ParserElement:
         """Create a parser element capable of parsing integers."""
         return pp.Regex(r"[+-]?[0-9]+").set_results_name("integer")
+
+    @pp.cached_property
+    def boolean(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing integers."""
+        return pp.one_of(("0", "1")).set_results_name("boolean")
 
     @pp.cached_property
     def aperture_identifier(self) -> pp.ParserElement:
@@ -1489,7 +1495,15 @@ class Grammar:
     def properties(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Properties-commands."""
         return pp.MatchFirst(
-            [self.fs(), self.mo(), self.ip(), self.ir(), self.of(), self.as_()]
+            [
+                self.fs(),
+                self.mo(),
+                self.ip(),
+                self.ir(),
+                self.of(),
+                self.as_(),
+                self.mi(),
+            ]
         )
 
     def fs(self) -> pp.ParserElement:
@@ -1562,4 +1576,16 @@ class Grammar:
             )
             .set_parse_action(self.make_unpack_callback(OF))
             .set_name("OF")
+        )
+
+    def mi(self) -> pp.ParserElement:
+        """Create a parser for the MI command."""
+        return (
+            self._extended_command(
+                pp.Literal("MI")
+                + pp.Opt(pp.Literal("A") + self.boolean.set_results_name("a_mirroring"))
+                + pp.Opt(pp.Literal("B") + self.boolean.set_results_name("b_mirroring"))
+            )
+            .set_parse_action(self.make_unpack_callback(MI))
+            .set_name("MI")
         )
