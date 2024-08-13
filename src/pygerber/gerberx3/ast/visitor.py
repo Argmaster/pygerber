@@ -101,12 +101,6 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.math.point import Point
     from pygerber.gerberx3.ast.nodes.math.variable import Variable
     from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
-    from pygerber.gerberx3.ast.nodes.other.extended_command_close import (
-        ExtendedCommandClose,
-    )
-    from pygerber.gerberx3.ast.nodes.other.extended_command_open import (
-        ExtendedCommandOpen,
-    )
     from pygerber.gerberx3.ast.nodes.primitives.code_0 import Code0
     from pygerber.gerberx3.ast.nodes.primitives.code_1 import Code1
     from pygerber.gerberx3.ast.nodes.primitives.code_2 import Code2
@@ -469,12 +463,6 @@ class AstVisitor:
     def on_coordinate_j(self, node: CoordinateJ) -> None:
         """Handle `Coordinate` node."""
         self.on_coordinate(node)
-
-    def on_extended_command_close(self, node: ExtendedCommandClose) -> None:
-        """Handle `ExtendedCommandClose` node."""
-
-    def on_extended_command_open(self, node: ExtendedCommandOpen) -> None:
-        """Handle `ExtendedCommandOpen` node."""
 
     # Primitives
 
