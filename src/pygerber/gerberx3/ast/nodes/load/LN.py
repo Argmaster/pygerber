@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 class LN(Node):
     """Represents LN Gerber extended command."""
 
+    name: str
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_ln(self)

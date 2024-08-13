@@ -76,6 +76,7 @@ from pygerber.gerberx3.ast.nodes.g_codes.G74 import G74
 from pygerber.gerberx3.ast.nodes.g_codes.G75 import G75
 from pygerber.gerberx3.ast.nodes.g_codes.G90 import G90
 from pygerber.gerberx3.ast.nodes.g_codes.G91 import G91
+from pygerber.gerberx3.ast.nodes.load.LN import LN
 from pygerber.gerberx3.ast.nodes.m_codes.M00 import M00
 from pygerber.gerberx3.ast.nodes.m_codes.M01 import M01
 from pygerber.gerberx3.ast.nodes.m_codes.M02 import M02
@@ -152,6 +153,7 @@ class Grammar:
                         self.aperture(),
                         self.attribute(),
                         self.g_codes(),
+                        self.load_commands(),
                         self.m_codes(),
                         self.d_codes(),
                         self.properties(),
@@ -1087,6 +1089,20 @@ class Grammar:
     # ██     ██    ██ ███████ ██   ██    ██     ██   ██ ██ ████ ██ ██ ████ ██ ███████ ██ ██  ██ ██   ██ ███████ # noqa: E501
     # ██     ██    ██ ██   ██ ██   ██    ██     ██   ██ ██  ██  ██ ██  ██  ██ ██   ██ ██  ██ ██ ██   ██      ██ # noqa: E501
     # ██████ ███████  ██   ██ ██████      █████ ███████ ██      ██ ██      ██ ██   ██ ██   ████ ██████  ███████ # noqa: E501
+
+    def load_commands(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing Load-commands."""
+        return pp.MatchFirst([self.ln()])
+
+    def ln(self) -> pp.ParserElement:
+        """Create a parser for the LN command."""
+        return (
+            self._extended_command(
+                pp.Literal("LN") + self.string.set_results_name("name")
+            )
+            .set_parse_action(self.make_unpack_callback(LN))
+            .set_name("LN")
+        )
 
     # ███    ███     █████ ███████ ██████  ███████ ███████
     # ████  ████    ██     ██   ██ ██   ██ ██      ██
