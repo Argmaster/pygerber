@@ -834,39 +834,58 @@ class Formatter(AstVisitor):
 
     def on_as(self, node: AS) -> None:
         """Handle `AS` node."""
-        super().on_as(node)
+        with self._extended_command("AS"):
+            self._write(node.correspondence.value)
 
     def on_fs(self, node: FS) -> None:
         """Handle `FS` node."""
-        super().on_fs(node)
+        with self._extended_command("FS"):
+            self._write(node.zeros)
+            self._write(node.coordinate_mode)
+            self._write(f"X{node.x_integral}{node.x_decimal}")
+            self._write(f"Y{node.y_integral}{node.y_decimal}")
 
     def on_in(self, node: IN) -> None:
         """Handle `IN` node."""
-        super().on_in(node)
+        with self._extended_command("IN"):
+            self._write(node.name)
 
     def on_ip(self, node: IP) -> None:
         """Handle `IP` node."""
-        super().on_ip(node)
+        with self._extended_command("IP"):
+            self._write(node.polarity)
 
     def on_ir(self, node: IR) -> None:
         """Handle `IR` node."""
-        super().on_ir(node)
+        with self._extended_command("IR"):
+            self._write(self._fmt_double(node.rotation_degrees))
 
     def on_mi(self, node: MI) -> None:
         """Handle `MI` node."""
-        super().on_mi(node)
+        with self._extended_command("MI"):
+            self._write(f"A{node.a_mirroring}")
+            self._write(f"B{node.b_mirroring}")
 
     def on_mo(self, node: MO) -> None:
         """Handle `MO` node."""
-        super().on_mo(node)
+        with self._extended_command("MO"):
+            self._write(node.mode.value)
 
     def on_of(self, node: OF) -> None:
         """Handle `OF` node."""
-        super().on_of(node)
+        with self._extended_command("OF"):
+            if node.a_offset is not None:
+                self._write(f"A{node.a_offset}")
+            if node.b_offset is not None:
+                self._write(f"B{node.b_offset}")
 
     def on_sf(self, node: SF) -> None:
         """Handle `SF` node."""
-        super().on_sf(node)
+        with self._extended_command("SF"):
+            self._write("A")
+            self._write(self._fmt_double(node.a_scale))
+            self._write("B")
+            self._write(self._fmt_double(node.b_scale))
 
     # Root node
 

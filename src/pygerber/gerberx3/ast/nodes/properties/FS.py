@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, Literal
 
 from pygerber.gerberx3.ast.nodes.base import Node
 
@@ -15,8 +15,8 @@ if TYPE_CHECKING:
 class FS(Node):
     """Represents FS Gerber extended command."""
 
-    zeros: str
-    coordinate_mode: str
+    zeros: Literal["L", "T"]
+    coordinate_mode: Literal["A", "I"]
 
     x_integral: int
     x_decimal: int
