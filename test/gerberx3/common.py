@@ -205,8 +205,10 @@ class ReferenceAssetsManager:
                     self.repository_directory.as_posix(),
                 )
             repository = Repo(self.repository_directory.as_posix())
-            porcelain.fetch(repository, "origin")
-            porcelain.checkout_branch(repository, self.sha)
+            sha = repository.head().decode(encoding="utf-8")
+            if sha != self.sha:
+                porcelain.fetch(repository, "origin")
+                porcelain.checkout_branch(repository, self.sha)
 
     def get_asset_path(self, tag: str, relative_path: Path) -> Path:
         return self.repository_directory / f".reference{tag}" / relative_path

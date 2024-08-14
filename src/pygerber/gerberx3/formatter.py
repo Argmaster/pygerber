@@ -266,21 +266,18 @@ class Formatter(AstVisitor):
     def _write(self, value: str) -> None:
         self.output.write(value)
 
-    def on_ab_close(self, node: ABclose) -> None:
+    def on_ab_close(self, node: ABclose) -> None:  # noqa: ARG002
         """Handle `ABclose` node."""
-        super().on_ab_close(node)
         with self._extended_command("AB"):
             pass
 
     def on_ab_open(self, node: ABopen) -> None:
         """Handle `ABopen` node."""
-        super().on_ab_open(node)
         with self._extended_command("AB"):
             self._write(node.aperture_identifier)
 
     def on_adc(self, node: ADC) -> None:
         """Handle `AD` circle node."""
-        super().on_adc(node)
         with self._extended_command(f"AD{node.aperture_identifier}C,"):
             self._write(self._fmt_double(node.diameter))
 
@@ -289,18 +286,42 @@ class Formatter(AstVisitor):
 
     def on_adr(self, node: ADR) -> None:
         """Handle `AD` rectangle node."""
-        super().on_adr(node)
+        with self._extended_command(f"AD{node.aperture_identifier}R,"):
+            self._write(self._fmt_double(node.width))
+            self._write(f"X{self._fmt_double(node.height)}")
+
+            if node.hole_diameter is not None:
+                self._write(f"X{self._fmt_double(node.hole_diameter)}")
 
     def on_ado(self, node: ADO) -> None:
         """Handle `AD` obround node."""
-        super().on_ado(node)
+        with self._extended_command(f"AD{node.aperture_identifier}O,"):
+            self._write(self._fmt_double(node.width))
+            self._write(f"X{self._fmt_double(node.height)}")
+
+            if node.hole_diameter is not None:
+                self._write(f"X{self._fmt_double(node.hole_diameter)}")
 
     def on_adp(self, node: ADP) -> None:
         """Handle `AD` polygon node."""
+        with self._extended_command(f"AD{node.aperture_identifier}P,"):
+            self._write(self._fmt_double(node.outer_diameter))
+            self._write(f"X{node.vertices}")
+
+            if node.rotation is not None:
+                self._write(f"X{self._fmt_double(node.rotation)}")
+
+            if node.hole_diameter is not None:
+                self._write(f"X{self._fmt_double(node.hole_diameter)}")
 
     def on_ad_macro(self, node: ADmacro) -> None:
         """Handle `AD` macro node."""
-        super().on_ad_macro(node)
+        with self._extended_command(f"AD{node.aperture_identifier}{node.name}"):
+            if node.params is not None:
+                first, *rest = node.params
+                self._write(f",{first}")
+                for param in rest:
+                    self._write(f"X{param}")
 
     def on_am_close(self, node: AMclose) -> None:
         """Handle `AMclose` node."""
@@ -314,13 +335,25 @@ class Formatter(AstVisitor):
         super().on_am_open(node)
         self._write(f"%AM{node.name}*")
 
-    def on_sr_close(self, node: SRclose) -> None:
+    def on_sr_close(self, node: SRclose) -> None:  # noqa: ARG002
         """Handle `SRclose` node."""
-        super().on_sr_close(node)
+        with self._extended_command("SR"):
+            pass
 
     def on_sr_open(self, node: SRopen) -> None:
         """Handle `SRopen` node."""
-        super().on_sr_open(node)
+        with self._extended_command("SR"):
+            if node.x is not None:
+                self._write(f"X{node.x}")
+
+            if node.x is not None:
+                self._write(f"Y{node.y}")
+
+            if node.x is not None:
+                self._write(f"I{node.i}")
+
+            if node.x is not None:
+                self._write(f"J{node.j}")
 
     # Attribute
 

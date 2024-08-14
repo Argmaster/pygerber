@@ -83,4 +83,6 @@ def test_formatter(asset: Asset, config: Config) -> None:
     formatted_source = output_buffer.read()
     formatted_ast = parser.parse(formatted_source)
 
-    assert formatted_ast.model_dump_json() == ast.model_dump_json()
+    assert formatted_ast.model_dump_json(serialize_as_any=True) == ast.model_dump_json(
+        serialize_as_any=True
+    )
