@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Callable, Optional
 from pydantic import Field
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.types import Double, Integer
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -18,10 +19,10 @@ class ADP(Node):
     """Represents AD polygon Gerber extended command."""
 
     aperture_identifier: str
-    outer_diameter: str
-    vertices: str
-    rotation: Optional[str] = Field(default=None)
-    hole_diameter: Optional[str] = Field(default=None)
+    outer_diameter: Double
+    vertices: Integer
+    rotation: Optional[Double] = Field(default=None)
+    hole_diameter: Optional[Double] = Field(default=None)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

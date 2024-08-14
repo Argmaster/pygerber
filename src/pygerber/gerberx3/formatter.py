@@ -1,10 +1,19 @@
-"""`pygerber.gerberx3.node_visitor` contains definition of `NodeVisitor` class."""
+"""`pygerber.gerberx3.formatter` module contains implementation `Formatter` class
+which implements configurable Gerber code formatting.
+"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from contextlib import contextmanager
+from typing import TYPE_CHECKING, Generator, Literal, Optional
+
+from pyparsing import cached_property
+
+from pygerber.gerberx3.ast.visitor import AstVisitor
 
 if TYPE_CHECKING:
+    from io import StringIO
+
     from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
     from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
     from pygerber.gerberx3.ast.nodes.aperture.ADC import ADC
@@ -17,7 +26,6 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.aperture.SR_close import SRclose
     from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
     from pygerber.gerberx3.ast.nodes.attribute.TA import (
-        TA,
         TA_AperFunction,
         TA_DrillTolerance,
         TA_FlashText,
@@ -25,7 +33,6 @@ if TYPE_CHECKING:
     )
     from pygerber.gerberx3.ast.nodes.attribute.TD import TD
     from pygerber.gerberx3.ast.nodes.attribute.TF import (
-        TF,
         TF_MD5,
         TF_CreationDate,
         TF_FileFunction,
@@ -37,7 +44,6 @@ if TYPE_CHECKING:
         TF_UserName,
     )
     from pygerber.gerberx3.ast.nodes.attribute.TO import (
-        TO,
         TO_C,
         TO_CMNP,
         TO_N,
@@ -55,7 +61,6 @@ if TYPE_CHECKING:
         TO_CVal,
         TO_UserName,
     )
-    from pygerber.gerberx3.ast.nodes.base import Node
     from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
     from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
     from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
@@ -85,7 +90,6 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.m_codes.M02 import M02
     from pygerber.gerberx3.ast.nodes.math.assignment import Assignment
     from pygerber.gerberx3.ast.nodes.math.constant import Constant
-    from pygerber.gerberx3.ast.nodes.math.expression import Expression
     from pygerber.gerberx3.ast.nodes.math.operators.binary.add import Add
     from pygerber.gerberx3.ast.nodes.math.operators.binary.div import Div
     from pygerber.gerberx3.ast.nodes.math.operators.binary.mul import Mul
@@ -95,7 +99,6 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.math.point import Point
     from pygerber.gerberx3.ast.nodes.math.variable import Variable
     from pygerber.gerberx3.ast.nodes.other.coordinate import (
-        Coordinate,
         CoordinateI,
         CoordinateJ,
         CoordinateX,
@@ -122,291 +125,448 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.properties.SF import SF
 
 
-class AstVisitor:
-    """Interface of a node visitor.
+class FormatterError(Exception):
+    """Formatter error."""
 
-    This class defines interface compliant with visitor pattern.
-    For more information on this pattern visit:
-    https://refactoring.guru/design-patterns/visitor
-    """
 
-    def __init__(self) -> None:
-        self._current_node_index = -1
-        self._nodes: List[Node] = []
+class Formatter(AstVisitor):
+    """Gerber X3 compatible formatter."""
 
-    # Aperture
+    def __init__(  # noqa: PLR0913
+        self,
+        *,
+        indent_character: Literal[" ", "\t"] = " ",
+        macro_body_indentation: str = "",
+        macro_split_mode: Literal["none", "primitives", "parameters"] = "primitives",
+        indent_block_aperture_body: str = "",
+        indent_step_and_repeat: str = "",
+        float_decimal_places: int = 6,
+        float_trim_trailing_zeros: bool = True,
+        indent_non_aperture_select_commands: bool = False,
+        split_format_select: bool = False,
+        split_aperture_definition: bool = False,
+        split_extended_command_boundaries: bool = False,
+        strip_whitespace_mode: bool = False,
+        macro_end_in_new_line: bool = False,
+    ) -> None:
+        r"""Initialize Formatter instance.
+
+        Parameters
+        ----------
+        indent_character: Literal[" ", "\t"], optional
+            Character used for indentation, by default " "
+        macro_body_indentation : str, optional
+            Indentation of macro body, by default ""
+        macro_split_mode : Literal["none", "primitives", "parameters"], optional
+            Changes how macro definitions are formatted, by default "none"
+            When "none" is selected, macro will be formatted as a single line.
+            ```gerber
+            %AMDonut*1,1,$1,$2,$3*$4=$1x0.75*1,0,$4,$2,$3*%
+            ```
+            When "primitives" is selected, macro will be formatted with each primitive
+            on a new line.
+            ```gerber
+            %AMDonut*
+            1,1,$1,$2,$3*
+            $4=$1x0.75*
+            1,0,$4,$2,$3*%
+            ```
+        indent_block_aperture_body : str, optional
+            _description_, by default ""
+        indent_step_and_repeat : str, optional
+            _description_, by default ""
+        float_decimal_places : int, optional
+            _description_, by default 6
+        float_trim_trailing_zeros : bool, optional
+            _description_, by default True
+        indent_non_aperture_select_commands : bool, optional
+            _description_, by default False
+        split_format_select : bool, optional
+            _description_, by default False
+        split_aperture_definition : bool, optional
+            _description_, by default False
+        split_extended_command_boundaries : bool, optional
+            _description_, by default False
+        strip_whitespace_mode : bool, optional
+            _description_, by default False
+        macro_end_in_new_line: bool, optional
+            _description_, by default False
+
+        """
+        super().__init__()
+        self.indent_character = indent_character
+        self.macro_body_indentation = macro_body_indentation
+        self.macro_split_mode = macro_split_mode
+        self.indent_block_aperture_body = indent_block_aperture_body
+        self.indent_step_and_repeat = indent_step_and_repeat
+        self.float_decimal_places = float_decimal_places
+
+        self.float_trim_trailing_zeros = float_trim_trailing_zeros
+        self.indent_non_aperture_select_commands = indent_non_aperture_select_commands
+        self.split_format_select = split_format_select
+        self.split_aperture_definition = split_aperture_definition
+        self.split_extended_command_boundaries = split_extended_command_boundaries
+        self.strip_whitespace_mode = strip_whitespace_mode
+        self.macro_end_in_new_line = macro_end_in_new_line
+
+        self._output: Optional[StringIO] = None
+
+    def format(self, source: File, output: StringIO) -> None:
+        """Format Gerber AST according to rules specified in Formatter constructor."""
+        self._output = output
+        try:
+            self.on_file(source)
+        finally:
+            self._output = None
+
+    @property
+    def output(self) -> StringIO:
+        """Get output buffer."""
+        if self._output is None:
+            msg = "Output buffer is not set."
+            raise FormatterError(msg)
+
+        return self._output
+
+    def _fmt_double(self, value: float) -> str:
+        double = f"{value:.{self.float_decimal_places}f}"
+        if self.float_trim_trailing_zeros:
+            return double.rstrip("0").rstrip(".")
+        return double
+
+    @cached_property
+    def lf(self) -> str:
+        """Get end of line character."""
+        return "" if self.strip_whitespace_mode else "\n"
+
+    @contextmanager
+    def _command(self, cmd: str) -> Generator[None, None, None]:
+        self._write(cmd)
+        yield
+        self._write(f"*{self.lf}")
+
+    @contextmanager
+    def _extended_command(self, cmd: str) -> Generator[None, None, None]:
+        self._write(f"%{cmd}")
+        yield
+        self._write(f"*%{self.lf}")
+
+    def _write(self, value: str) -> None:
+        self.output.write(value)
 
     def on_ab_close(self, node: ABclose) -> None:
         """Handle `ABclose` node."""
+        super().on_ab_close(node)
+        with self._extended_command("AB"):
+            pass
 
     def on_ab_open(self, node: ABopen) -> None:
         """Handle `ABopen` node."""
+        super().on_ab_open(node)
+        with self._extended_command("AB"):
+            self._write(node.aperture_identifier)
 
     def on_adc(self, node: ADC) -> None:
         """Handle `AD` circle node."""
+        super().on_adc(node)
+        with self._extended_command(f"AD{node.aperture_identifier}C,"):
+            self._write(self._fmt_double(node.diameter))
+
+            if node.hole_diameter is not None:
+                self._write(f"X{self._fmt_double(node.hole_diameter)}")
 
     def on_adr(self, node: ADR) -> None:
         """Handle `AD` rectangle node."""
+        super().on_adr(node)
 
     def on_ado(self, node: ADO) -> None:
         """Handle `AD` obround node."""
+        super().on_ado(node)
 
     def on_adp(self, node: ADP) -> None:
         """Handle `AD` polygon node."""
 
     def on_ad_macro(self, node: ADmacro) -> None:
         """Handle `AD` macro node."""
+        super().on_ad_macro(node)
 
     def on_am_close(self, node: AMclose) -> None:
         """Handle `AMclose` node."""
+        super().on_am_close(node)
 
     def on_am_open(self, node: AMopen) -> None:
         """Handle `AMopen` node."""
+        super().on_am_open(node)
 
     def on_sr_close(self, node: SRclose) -> None:
         """Handle `SRclose` node."""
+        super().on_sr_close(node)
 
     def on_sr_open(self, node: SRopen) -> None:
         """Handle `SRopen` node."""
+        super().on_sr_open(node)
 
     # Attribute
 
-    def on_ta(self, node: TA) -> None:
-        """Handle `TA` node."""
-
     def on_ta_user_name(self, node: TA_UserName) -> None:
         """Handle `TA_UserName` node."""
-        self.on_ta(node)
+        super().on_ta_user_name(node)
 
     def on_ta_aper_function(self, node: TA_AperFunction) -> None:
         """Handle `TA_AperFunction` node."""
-        self.on_ta(node)
+        super().on_ta_aper_function(node)
 
     def on_ta_drill_tolerance(self, node: TA_DrillTolerance) -> None:
         """Handle `TA_DrillTolerance` node."""
-        self.on_ta(node)
+        super().on_ta_drill_tolerance(node)
 
     def on_ta_flash_text(self, node: TA_FlashText) -> None:
         """Handle `TA_FlashText` node."""
-        self.on_ta(node)
+        super().on_ta_flash_text(node)
 
     def on_td(self, node: TD) -> None:
         """Handle `TD` node."""
-
-    def on_tf(self, node: TF) -> None:
-        """Handle `TF` node."""
+        super().on_td(node)
 
     def on_tf_user_name(self, node: TF_UserName) -> None:
         """Handle `TF_UserName` node."""
-        self.on_tf(node)
+        super().on_tf_user_name(node)
 
     def on_tf_part(self, node: TF_Part) -> None:
         """Handle `TF_Part` node."""
-        self.on_tf(node)
+        super().on_tf_part(node)
 
     def on_tf_file_function(self, node: TF_FileFunction) -> None:
         """Handle `TF_FileFunction` node."""
-        self.on_tf(node)
+        super().on_tf_file_function(node)
 
     def on_tf_file_polarity(self, node: TF_FilePolarity) -> None:
         """Handle `TF_FilePolarity` node."""
-        self.on_tf(node)
+        super().on_tf_file_polarity(node)
 
     def on_tf_same_coordinates(self, node: TF_SameCoordinates) -> None:
         """Handle `TF_SameCoordinates` node."""
-        self.on_tf(node)
+        super().on_tf_same_coordinates(node)
 
     def on_tf_creation_date(self, node: TF_CreationDate) -> None:
         """Handle `TF_CreationDate` node."""
-        self.on_tf(node)
+        super().on_tf_creation_date(node)
 
     def on_tf_generation_software(self, node: TF_GenerationSoftware) -> None:
         """Handle `TF_GenerationSoftware` node."""
-        self.on_tf(node)
+        super().on_tf_generation_software(node)
 
     def on_tf_project_id(self, node: TF_ProjectId) -> None:
         """Handle `TF_ProjectId` node."""
-        self.on_tf(node)
+        super().on_tf_project_id(node)
 
     def on_tf_md5(self, node: TF_MD5) -> None:
         """Handle `TF_MD5` node."""
-        self.on_tf(node)
-
-    def on_to(self, node: TO) -> None:
-        """Handle `TO` node."""
+        super().on_tf_md5(node)
 
     def on_to_user_name(self, node: TO_UserName) -> None:
         """Handle `TO_UserName` node."""
-        self.on_to(node)
+        super().on_to_user_name(node)
 
     def on_to_n(self, node: TO_N) -> None:
         """Handle `TO_N` node."""
-        self.on_to(node)
+        super().on_to_n(node)
 
     def on_to_p(self, node: TO_P) -> None:
         """Handle `TO_P` node`."""
-        self.on_to(node)
+        super().on_to_p(node)
 
     def on_to_c(self, node: TO_C) -> None:
         """Handle `TO_C` node."""
-        self.on_to(node)
+        super().on_to_c(node)
 
     def on_to_crot(self, node: TO_CRot) -> None:
         """Handle `TO_CRot` node."""
-        self.on_to(node)
+        super().on_to_crot(node)
 
     def on_to_cmfr(self, node: TO_CMfr) -> None:
         """Handle `TO_CMfr` node."""
-        self.on_to(node)
+        super().on_to_cmfr(node)
 
     def on_to_cmnp(self, node: TO_CMNP) -> None:
         """Handle `TO_CMNP` node."""
-        self.on_to(node)
+        super().on_to_cmnp(node)
 
     def on_to_cval(self, node: TO_CVal) -> None:
         """Handle `TO_CVal` node."""
-        self.on_to(node)
+        super().on_to_cval(node)
 
     def on_to_cmnt(self, node: TO_CMnt) -> None:
         """Handle `TO_CVal` node."""
-        self.on_to(node)
+        super().on_to_cmnt(node)
 
     def on_to_cftp(self, node: TO_CFtp) -> None:
         """Handle `TO_Cftp` node."""
-        self.on_to(node)
+        super().on_to_cftp(node)
 
     def on_to_cpgn(self, node: TO_CPgN) -> None:
         """Handle `TO_CPgN` node."""
-        self.on_to(node)
+        super().on_to_cpgn(node)
 
     def on_to_cpgd(self, node: TO_CPgD) -> None:
         """Handle `TO_CPgD` node."""
-        self.on_to(node)
+        super().on_to_cpgd(node)
 
     def on_to_chgt(self, node: TO_CHgt) -> None:
         """Handle `TO_CHgt` node."""
-        self.on_to(node)
+        super().on_to_chgt(node)
 
     def on_to_clbn(self, node: TO_CLbN) -> None:
         """Handle `TO_CLbN` node."""
-        self.on_to(node)
+        super().on_to_clbn(node)
 
     def on_to_clbd(self, node: TO_CLbD) -> None:
         """Handle `TO_CLbD` node."""
-        self.on_to(node)
+        super().on_to_clbd(node)
 
     def on_to_csup(self, node: TO_CSup) -> None:
         """Handle `TO_CSup` node."""
-        self.on_to(node)
+        super().on_to_csup(node)
 
     # D codes
 
     def on_d01(self, node: D01) -> None:
         """Handle `D01` node."""
-        if node.x is not None:
-            node.x.visit(self)
-
-        if node.y is not None:
-            node.y.visit(self)
-
-        if node.i is not None:
-            node.i.visit(self)
-
-        if node.j is not None:
-            node.j.visit(self)
+        super().on_d01(node)
+        with self._command("D01"):
+            pass
 
     def on_d02(self, node: D02) -> None:
         """Handle `D02` node."""
-        if node.x is not None:
-            node.x.visit(self)
-
-        if node.y is not None:
-            node.y.visit(self)
+        super().on_d02(node)
+        with self._command("D02"):
+            pass
 
     def on_d03(self, node: D03) -> None:
         """Handle `D03` node."""
-        if node.x is not None:
-            node.x.visit(self)
-
-        if node.y is not None:
-            node.y.visit(self)
+        super().on_d03(node)
+        with self._command("D03"):
+            pass
 
     def on_dnn(self, node: Dnn) -> None:
         """Handle `Dnn` node."""
+        super().on_dnn(node)
+        with self._command(node.value):
+            pass
 
     # G codes
 
     def on_g01(self, node: G01) -> None:
         """Handle `G01` node."""
+        super().on_g01(node)
+        self._write("G01*\n")
 
     def on_g02(self, node: G02) -> None:
         """Handle `G02` node."""
+        super().on_g02(node)
+        self._write("G02*\n")
 
     def on_g03(self, node: G03) -> None:
         """Handle `G03` node."""
+        super().on_g03(node)
+        self._write("G03*\n")
 
     def on_g04(self, node: G04) -> None:
         """Handle `G04` node."""
+        super().on_g04(node)
+        self._write(f"G04{node.string}*\n")
 
     def on_g36(self, node: G36) -> None:
         """Handle `G36` node."""
+        super().on_g36(node)
+        self._write("G36*\n")
 
     def on_g37(self, node: G37) -> None:
         """Handle `G37` node."""
+        super().on_g37(node)
+        self._write("G37*\n")
 
     def on_g54(self, node: G54) -> None:
         """Handle `G54` node."""
-        node.dnn.visit(self)
+        self._write("G54")
+        super().on_g54(node)
 
     def on_g55(self, node: G55) -> None:
         """Handle `G55` node."""
-        node.flash.visit(self)
+        self._write("G55")
+        super().on_g55(node)
 
     def on_g70(self, node: G70) -> None:
         """Handle `G70` node."""
+        super().on_g70(node)
+        self._write("G70*\n")
 
     def on_g71(self, node: G71) -> None:
         """Handle `G71` node."""
+        super().on_g71(node)
+        self._write("G71*\n")
 
     def on_g74(self, node: G74) -> None:
         """Handle `G74` node."""
+        super().on_g74(node)
+        self._write("G74*\n")
 
     def on_g75(self, node: G75) -> None:
         """Handle `G75` node."""
+        super().on_g75(node)
+        self._write("G75*\n")
 
     def on_g90(self, node: G90) -> None:
         """Handle `G90` node."""
+        super().on_g90(node)
+        self._write("G90*\n")
 
     def on_g91(self, node: G91) -> None:
         """Handle `G91` node."""
+        super().on_g91(node)
+        self._write("G91*\n")
 
     # Load
 
     def on_lm(self, node: LM) -> None:
         """Handle `LM` node."""
+        super().on_lm(node)
 
     def on_ln(self, node: LN) -> None:
         """Handle `LN` node."""
+        super().on_ln(node)
 
     def on_lp(self, node: LP) -> None:
         """Handle `LP` node."""
+        super().on_lp(node)
 
     def on_lr(self, node: LR) -> None:
         """Handle `LR` node."""
+        super().on_lr(node)
 
     def on_ls(self, node: LS) -> None:
         """Handle `LS` node."""
+        super().on_ls(node)
 
     # M Codes
 
     def on_m00(self, node: M00) -> None:
         """Handle `M00` node."""
+        super().on_m00(node)
+        with self._command("M00"):
+            pass
 
     def on_m01(self, node: M01) -> None:
         """Handle `M01` node."""
+        super().on_m01(node)
+        with self._command("M01"):
+            pass
 
     def on_m02(self, node: M02) -> None:
         """Handle `M02` node."""
+        super().on_m02(node)
+        with self._command("M02"):
+            pass
 
     # Math
 
@@ -414,220 +574,150 @@ class AstVisitor:
 
     def on_add(self, node: Add) -> None:
         """Handle `Add` node."""
-        self.on_expression(node)
-        for operand in node.operands:
-            operand.visit(self)
+        super().on_add(node)
 
     def on_div(self, node: Div) -> None:
         """Handle `Div` node."""
-        self.on_expression(node)
-        for operand in node.operands:
-            operand.visit(self)
+        super().on_div(node)
 
     def on_mul(self, node: Mul) -> None:
         """Handle `Mul` node."""
-        self.on_expression(node)
-        for operand in node.operands:
-            operand.visit(self)
+        super().on_mul(node)
 
     def on_sub(self, node: Sub) -> None:
         """Handle `Sub` node."""
-        self.on_expression(node)
-        for operand in node.operands:
-            operand.visit(self)
+        super().on_sub(node)
 
     # Math :: Operators :: Unary
 
     def on_neg(self, node: Neg) -> None:
         """Handle `Neg` node."""
-        self.on_expression(node)
-        node.operand.visit(self)
+        super().on_neg(node)
 
     def on_pos(self, node: Pos) -> None:
         """Handle `Pos` node."""
-        self.on_expression(node)
-        node.operand.visit(self)
+        super().on_pos(node)
 
     def on_assignment(self, node: Assignment) -> None:
         """Handle `Assignment` node."""
-        node.variable.visit(self)
-        node.expression.visit(self)
+        super().on_assignment(node)
 
     def on_constant(self, node: Constant) -> None:
         """Handle `Constant` node."""
-        self.on_expression(node)
-
-    def on_expression(self, node: Expression) -> None:
-        """Handle `Expression` node."""
+        super().on_constant(node)
 
     def on_point(self, node: Point) -> None:
         """Handle `Point` node."""
-        node.x.visit(self)
-        node.y.visit(self)
+        super().on_point(node)
 
     def on_variable(self, node: Variable) -> None:
         """Handle `Variable` node."""
-        self.on_expression(node)
+        super().on_variable(node)
 
     # Other
 
-    def on_coordinate(self, node: Coordinate) -> None:
-        """Handle `Coordinate` node."""
-
     def on_coordinate_x(self, node: CoordinateX) -> None:
         """Handle `Coordinate` node."""
-        self.on_coordinate(node)
+        super().on_coordinate_x(node)
+        self._write(f"X{node.value}")
 
     def on_coordinate_y(self, node: CoordinateY) -> None:
         """Handle `Coordinate` node."""
-        self.on_coordinate(node)
+        super().on_coordinate_y(node)
+        self._write(f"Y{node.value}")
 
     def on_coordinate_i(self, node: CoordinateI) -> None:
         """Handle `Coordinate` node."""
-        self.on_coordinate(node)
+        super().on_coordinate_i(node)
+        self._write(f"I{node.value}")
 
     def on_coordinate_j(self, node: CoordinateJ) -> None:
         """Handle `Coordinate` node."""
-        self.on_coordinate(node)
+        super().on_coordinate_j(node)
+        self._write(f"J{node.value}")
 
     # Primitives
 
     def on_code_0(self, node: Code0) -> None:
         """Handle `Code0` node."""
+        super().on_code_0(node)
 
     def on_code_1(self, node: Code1) -> None:
         """Handle `Code1` node."""
-        node.exposure.visit(self)
-        node.diameter.visit(self)
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        if node.rotation is not None:
-            node.rotation.visit(self)
+        super().on_code_1(node)
 
     def on_code_2(self, node: Code2) -> None:
         """Handle `Code2` node."""
-        node.exposure.visit(self)
-        node.width.visit(self)
-        node.start_x.visit(self)
-        node.start_y.visit(self)
-        node.end_x.visit(self)
-        node.end_y.visit(self)
-        node.rotation.visit(self)
+        super().on_code_2(node)
 
     def on_code_4(self, node: Code4) -> None:
         """Handle `Code4` node."""
-        node.exposure.visit(self)
-        node.number_of_points.visit(self)
-        node.start_x.visit(self)
-        node.start_y.visit(self)
-        for point in node.points:
-            point.visit(self)
-        node.rotation.visit(self)
+        super().on_code_4(node)
 
     def on_code_5(self, node: Code5) -> None:
         """Handle `Code5` node."""
-        node.exposure.visit(self)
-        node.number_of_vertices.visit(self)
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        node.diameter.visit(self)
-        node.rotation.visit(self)
+        super().on_code_5(node)
 
     def on_code_6(self, node: Code6) -> None:
         """Handle `Code6` node."""
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        node.outer_diameter.visit(self)
-        node.ring_thickness.visit(self)
-        node.gap_between_rings.visit(self)
-        node.max_ring_count.visit(self)
-        node.crosshair_thickness.visit(self)
-        node.crosshair_length.visit(self)
-        node.rotation.visit(self)
+        super().on_code_6(node)
 
     def on_code_7(self, node: Code7) -> None:
         """Handle `Code7` node."""
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        node.outer_diameter.visit(self)
-        node.inner_diameter.visit(self)
-        node.gap_thickness.visit(self)
-        node.rotation.visit(self)
+        super().on_code_7(node)
 
     def on_code_20(self, node: Code20) -> None:
         """Handle `Code20` node."""
-        node.exposure.visit(self)
-        node.width.visit(self)
-        node.start_x.visit(self)
-        node.start_y.visit(self)
-        node.end_x.visit(self)
-        node.end_y.visit(self)
-        node.rotation.visit(self)
+        super().on_code_20(node)
 
     def on_code_21(self, node: Code21) -> None:
         """Handle `Code21` node."""
-        node.exposure.visit(self)
-        node.width.visit(self)
-        node.height.visit(self)
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        node.rotation.visit(self)
+        super().on_code_21(node)
 
     def on_code_22(self, node: Code22) -> None:
         """Handle `Code22` node."""
-        node.exposure.visit(self)
-        node.width.visit(self)
-        node.height.visit(self)
-        node.x_lower_left.visit(self)
-        node.y_lower_left.visit(self)
-        node.rotation.visit(self)
+        super().on_code_22(node)
 
     # Properties
 
     def on_as(self, node: AS) -> None:
         """Handle `AS` node."""
+        super().on_as(node)
 
     def on_fs(self, node: FS) -> None:
         """Handle `FS` node."""
+        super().on_fs(node)
 
     def on_in(self, node: IN) -> None:
         """Handle `IN` node."""
+        super().on_in(node)
 
     def on_ip(self, node: IP) -> None:
         """Handle `IP` node."""
+        super().on_ip(node)
 
     def on_ir(self, node: IR) -> None:
         """Handle `IR` node."""
+        super().on_ir(node)
 
     def on_mi(self, node: MI) -> None:
         """Handle `MI` node."""
+        super().on_mi(node)
 
     def on_mo(self, node: MO) -> None:
         """Handle `MO` node."""
+        super().on_mo(node)
 
     def on_of(self, node: OF) -> None:
         """Handle `OF` node."""
+        super().on_of(node)
 
     def on_sf(self, node: SF) -> None:
         """Handle `SF` node."""
+        super().on_sf(node)
 
     # Root node
 
     def on_file(self, node: File) -> None:
         """Handle `File` node."""
-        self._current_node_index = 0
-        self._nodes = node.nodes
-        try:
-            for command in node.nodes:
-                command.visit(self)
-        finally:
-            self._current_node_index = -1
-            self._nodes = []
-
-    def get_next_node(self) -> Optional[Node]:
-        """Get next node from the iterator."""
-        if -1 < self._current_node_index < len(self._nodes):
-            node = self._nodes[self._current_node_index]
-            self._current_node_index += 1
-            return node
-        return None
+        super().on_file(node)

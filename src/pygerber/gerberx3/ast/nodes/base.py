@@ -19,7 +19,7 @@ class Node(ModelType):
     """Base class for all nodes."""
 
     source: str = Field(repr=False, exclude=True)
-    location: int = Field(repr=False)
+    location: int = Field(repr=False, exclude=True)
 
     @abstractmethod
     def visit(self, visitor: AstVisitor) -> None:

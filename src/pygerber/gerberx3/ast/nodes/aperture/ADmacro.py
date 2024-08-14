@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Callable, List, Optional
 from pydantic import Field
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.types import Double
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -19,7 +20,7 @@ class ADmacro(Node):
 
     aperture_identifier: str
     name: str
-    params: Optional[List[str]] = Field(default=None)
+    params: Optional[List[Double]] = Field(default=None)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
