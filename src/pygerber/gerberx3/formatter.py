@@ -136,8 +136,10 @@ class Formatter(AstVisitor):
         self,
         *,
         indent_character: Literal[" ", "\t"] = " ",
-        macro_body_indentation: str = "",
+        macro_body_indentation: str | int = 4,
+        macro_param_indentation: str | int = 4,
         macro_split_mode: Literal["none", "primitives", "parameters"] = "primitives",
+        macro_end_in_new_line: bool = False,
         indent_block_aperture_body: str = "",
         indent_step_and_repeat: str = "",
         float_decimal_places: int = 6,
@@ -147,7 +149,6 @@ class Formatter(AstVisitor):
         split_aperture_definition: bool = False,
         split_extended_command_boundaries: bool = False,
         strip_whitespace_mode: bool = False,
-        macro_end_in_new_line: bool = False,
     ) -> None:
         r"""Initialize Formatter instance.
 
@@ -155,8 +156,11 @@ class Formatter(AstVisitor):
         ----------
         indent_character: Literal[" ", "\t"], optional
             Character used for indentation, by default " "
-        macro_body_indentation : str, optional
-            Indentation of macro body, by default ""
+        macro_body_indentation : str | int, optional
+            Indentation of macro body, by default 4
+        macro_param_indentation: str | int, optional
+            Indentation of macro parameters, by default 4
+            This indentation is added on top of macro body indentation.
         macro_split_mode : Literal["none", "primitives", "parameters"], optional
             Changes how macro definitions are formatted, by default "none"
             When "none" is selected, macro will be formatted as a single line.
@@ -195,8 +199,17 @@ class Formatter(AstVisitor):
         """
         super().__init__()
         self.indent_character = indent_character
+
+        if isinstance(macro_body_indentation, int):
+            macro_body_indentation = indent_character * macro_body_indentation
         self.macro_body_indentation = macro_body_indentation
+
+        if isinstance(macro_param_indentation, int):
+            macro_param_indentation = indent_character * macro_param_indentation
+        self.macro_param_indentation = macro_param_indentation
+
         self.macro_split_mode = macro_split_mode
+        self.macro_end_in_new_line = macro_end_in_new_line
         self.indent_block_aperture_body = indent_block_aperture_body
         self.indent_step_and_repeat = indent_step_and_repeat
         self.float_decimal_places = float_decimal_places
@@ -207,7 +220,6 @@ class Formatter(AstVisitor):
         self.split_aperture_definition = split_aperture_definition
         self.split_extended_command_boundaries = split_extended_command_boundaries
         self.strip_whitespace_mode = strip_whitespace_mode
-        self.macro_end_in_new_line = macro_end_in_new_line
 
         self._output: Optional[StringIO] = None
 
@@ -293,10 +305,14 @@ class Formatter(AstVisitor):
     def on_am_close(self, node: AMclose) -> None:
         """Handle `AMclose` node."""
         super().on_am_close(node)
+        if self.macro_end_in_new_line:
+            self._write(f"{self.lf}")
+        self._write(f"%{self.lf}")
 
     def on_am_open(self, node: AMopen) -> None:
         """Handle `AMopen` node."""
         super().on_am_open(node)
+        self._write(f"%AM{node.name}*")
 
     def on_sr_close(self, node: SRclose) -> None:
         """Handle `SRclose` node."""
@@ -450,40 +466,33 @@ class Formatter(AstVisitor):
 
     def on_dnn(self, node: Dnn) -> None:
         """Handle `Dnn` node."""
-        super().on_dnn(node)
         with self._command(node.value):
             pass
 
     # G codes
 
-    def on_g01(self, node: G01) -> None:
+    def on_g01(self, node: G01) -> None:  # noqa: ARG002
         """Handle `G01` node."""
-        super().on_g01(node)
         self._write("G01*\n")
 
-    def on_g02(self, node: G02) -> None:
+    def on_g02(self, node: G02) -> None:  # noqa: ARG002
         """Handle `G02` node."""
-        super().on_g02(node)
         self._write("G02*\n")
 
-    def on_g03(self, node: G03) -> None:
+    def on_g03(self, node: G03) -> None:  # noqa: ARG002
         """Handle `G03` node."""
-        super().on_g03(node)
         self._write("G03*\n")
 
     def on_g04(self, node: G04) -> None:
         """Handle `G04` node."""
-        super().on_g04(node)
         self._write(f"G04{node.string}*\n")
 
-    def on_g36(self, node: G36) -> None:
+    def on_g36(self, node: G36) -> None:  # noqa: ARG002
         """Handle `G36` node."""
-        super().on_g36(node)
         self._write("G36*\n")
 
-    def on_g37(self, node: G37) -> None:
+    def on_g37(self, node: G37) -> None:  # noqa: ARG002
         """Handle `G37` node."""
-        super().on_g37(node)
         self._write("G37*\n")
 
     def on_g54(self, node: G54) -> None:
@@ -496,34 +505,28 @@ class Formatter(AstVisitor):
         self._write("G55")
         super().on_g55(node)
 
-    def on_g70(self, node: G70) -> None:
+    def on_g70(self, node: G70) -> None:  # noqa: ARG002
         """Handle `G70` node."""
-        super().on_g70(node)
         self._write("G70*\n")
 
-    def on_g71(self, node: G71) -> None:
+    def on_g71(self, node: G71) -> None:  # noqa: ARG002
         """Handle `G71` node."""
-        super().on_g71(node)
         self._write("G71*\n")
 
-    def on_g74(self, node: G74) -> None:
+    def on_g74(self, node: G74) -> None:  # noqa: ARG002
         """Handle `G74` node."""
-        super().on_g74(node)
         self._write("G74*\n")
 
-    def on_g75(self, node: G75) -> None:
+    def on_g75(self, node: G75) -> None:  # noqa: ARG002
         """Handle `G75` node."""
-        super().on_g75(node)
         self._write("G75*\n")
 
-    def on_g90(self, node: G90) -> None:
+    def on_g90(self, node: G90) -> None:  # noqa: ARG002
         """Handle `G90` node."""
-        super().on_g90(node)
         self._write("G90*\n")
 
-    def on_g91(self, node: G91) -> None:
+    def on_g91(self, node: G91) -> None:  # noqa: ARG002
         """Handle `G91` node."""
-        super().on_g91(node)
         self._write("G91*\n")
 
     # Load
@@ -550,133 +553,282 @@ class Formatter(AstVisitor):
 
     # M Codes
 
-    def on_m00(self, node: M00) -> None:
+    def on_m00(self, node: M00) -> None:  # noqa: ARG002
         """Handle `M00` node."""
-        super().on_m00(node)
         with self._command("M00"):
             pass
 
-    def on_m01(self, node: M01) -> None:
+    def on_m01(self, node: M01) -> None:  # noqa: ARG002
         """Handle `M01` node."""
-        super().on_m01(node)
         with self._command("M01"):
             pass
 
-    def on_m02(self, node: M02) -> None:
+    def on_m02(self, node: M02) -> None:  # noqa: ARG002
         """Handle `M02` node."""
-        super().on_m02(node)
         with self._command("M02"):
             pass
 
     # Math
 
     # Math :: Operators :: Binary
-
     def on_add(self, node: Add) -> None:
         """Handle `Add` node."""
-        super().on_add(node)
+        self._write("(")
+        for i, operand in enumerate(node.operands):
+            operand.visit(self)
+            if i < len(node.operands) - 1:
+                self._write("+")
+        self._write(")")
 
     def on_div(self, node: Div) -> None:
         """Handle `Div` node."""
-        super().on_div(node)
+        self._write("(")
+        for i, operand in enumerate(node.operands):
+            operand.visit(self)
+            if i < len(node.operands) - 1:
+                self._write("/")
+        self._write(")")
 
     def on_mul(self, node: Mul) -> None:
         """Handle `Mul` node."""
-        super().on_mul(node)
+        self._write("(")
+        for i, operand in enumerate(node.operands):
+            operand.visit(self)
+            if i < len(node.operands) - 1:
+                self._write("x")
+        self._write(")")
 
     def on_sub(self, node: Sub) -> None:
         """Handle `Sub` node."""
-        super().on_sub(node)
+        self._write("(")
+        for i, operand in enumerate(node.operands):
+            operand.visit(self)
+            if i < len(node.operands) - 1:
+                self._write("-")
+        self._write(")")
 
     # Math :: Operators :: Unary
 
     def on_neg(self, node: Neg) -> None:
         """Handle `Neg` node."""
-        super().on_neg(node)
+        self._write("-")
+        node.operand.visit(self)
 
     def on_pos(self, node: Pos) -> None:
         """Handle `Pos` node."""
-        super().on_pos(node)
+        self._write("+")
+        node.operand.visit(self)
 
     def on_assignment(self, node: Assignment) -> None:
         """Handle `Assignment` node."""
-        super().on_assignment(node)
+        self._write(self._macro_primitive_lf)
+        node.variable.visit(self)
+        self._write("=")
+        node.expression.visit(self)
+        self._write("*")
 
     def on_constant(self, node: Constant) -> None:
         """Handle `Constant` node."""
-        super().on_constant(node)
+        self._write(self._fmt_double(node.constant))
 
     def on_point(self, node: Point) -> None:
         """Handle `Point` node."""
-        super().on_point(node)
+        node.x.visit(self)
+        self._write(",")
+        node.y.visit(self)
 
     def on_variable(self, node: Variable) -> None:
         """Handle `Variable` node."""
-        super().on_variable(node)
+        self._write(node.variable)
 
     # Other
 
     def on_coordinate_x(self, node: CoordinateX) -> None:
         """Handle `Coordinate` node."""
-        super().on_coordinate_x(node)
         self._write(f"X{node.value}")
 
     def on_coordinate_y(self, node: CoordinateY) -> None:
         """Handle `Coordinate` node."""
-        super().on_coordinate_y(node)
         self._write(f"Y{node.value}")
 
     def on_coordinate_i(self, node: CoordinateI) -> None:
         """Handle `Coordinate` node."""
-        super().on_coordinate_i(node)
         self._write(f"I{node.value}")
 
     def on_coordinate_j(self, node: CoordinateJ) -> None:
         """Handle `Coordinate` node."""
-        super().on_coordinate_j(node)
         self._write(f"J{node.value}")
 
     # Primitives
 
     def on_code_0(self, node: Code0) -> None:
         """Handle `Code0` node."""
-        super().on_code_0(node)
+        primitive_lf = (
+            self.lf if self.macro_split_mode in ("primitives", "parameters") else ""
+        )
+        self._write(f"{primitive_lf}0{node.string}*")
 
     def on_code_1(self, node: Code1) -> None:
         """Handle `Code1` node."""
-        super().on_code_1(node)
+        self._write(f"{self._macro_primitive_lf}1,{self._macro_param_lf}")
+        node.exposure.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.diameter.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.center_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.center_y.visit(self)
+        if node.rotation is not None:
+            self._write(f",{self._macro_param_lf}")
+            node.rotation.visit(self)
+        self._write("*")
+
+    @property
+    def _macro_primitive_lf(self) -> str:
+        return self.lf if self.macro_split_mode in ("primitives", "parameters") else ""
+
+    @property
+    def _macro_param_lf(self) -> str:
+        return self.lf if self.macro_split_mode == "parameters" else ""
 
     def on_code_2(self, node: Code2) -> None:
         """Handle `Code2` node."""
-        super().on_code_2(node)
+        self._write(f"{self._macro_primitive_lf}2,{self._macro_param_lf}")
+        node.exposure.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.width.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.start_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.start_y.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.end_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.end_y.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.rotation.visit(self)
+        self._write("*")
 
     def on_code_4(self, node: Code4) -> None:
         """Handle `Code4` node."""
-        super().on_code_4(node)
+        self._write(f"{self._macro_primitive_lf}4,{self._macro_param_lf}")
+        node.exposure.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.number_of_points.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.start_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.start_y.visit(self)
+        for point in node.points:
+            self._write(f",{self._macro_param_lf}")
+            point.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.rotation.visit(self)
+        self._write("*")
 
     def on_code_5(self, node: Code5) -> None:
         """Handle `Code5` node."""
-        super().on_code_5(node)
+        self._write(f"{self._macro_primitive_lf}5,{self._macro_param_lf}")
+        node.exposure.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.number_of_vertices.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.center_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.center_y.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.diameter.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.rotation.visit(self)
+        self._write("*")
 
     def on_code_6(self, node: Code6) -> None:
         """Handle `Code6` node."""
-        super().on_code_6(node)
+        self._write(f"{self._macro_primitive_lf}6,{self._macro_param_lf}")
+        node.center_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.center_y.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.outer_diameter.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.ring_thickness.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.gap_between_rings.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.max_ring_count.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.crosshair_thickness.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.crosshair_length.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.rotation.visit(self)
+        self._write("*")
 
     def on_code_7(self, node: Code7) -> None:
         """Handle `Code7` node."""
-        super().on_code_7(node)
+        self._write(f"{self._macro_primitive_lf}7,{self._macro_param_lf}")
+        node.center_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.center_y.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.outer_diameter.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.inner_diameter.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.gap_thickness.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.rotation.visit(self)
+        self._write("*")
 
     def on_code_20(self, node: Code20) -> None:
         """Handle `Code20` node."""
-        super().on_code_20(node)
+        self._write(f"{self._macro_primitive_lf}20,{self._macro_param_lf}")
+        node.exposure.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.width.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.start_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.start_y.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.end_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.end_y.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.rotation.visit(self)
+        self._write("*")
 
     def on_code_21(self, node: Code21) -> None:
         """Handle `Code21` node."""
-        super().on_code_21(node)
+        self._write(f"{self._macro_primitive_lf}21,{self._macro_param_lf}")
+        node.exposure.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.width.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.height.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.center_x.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.center_y.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.rotation.visit(self)
+        self._write("*")
 
     def on_code_22(self, node: Code22) -> None:
         """Handle `Code22` node."""
-        super().on_code_22(node)
+        self._write(f"{self._macro_primitive_lf}22,{self._macro_param_lf}")
+        node.exposure.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.width.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.height.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.x_lower_left.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.y_lower_left.visit(self)
+        self._write(f",{self._macro_param_lf}")
+        node.rotation.visit(self)
+        self._write("*")
 
     # Properties
 
