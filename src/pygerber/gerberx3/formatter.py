@@ -659,7 +659,7 @@ class Formatter(AstVisitor):
 
     def on_g04(self, node: G04) -> None:
         """Handle `G04` node."""
-        self._write(f"G04{node.string}*\n")
+        self._write(f"G04{node.string or ''}*\n")
 
     def on_g36(self, node: G36) -> None:  # noqa: ARG002
         """Handle `G36` node."""
