@@ -359,23 +359,75 @@ class Formatter(AstVisitor):
 
     def on_ta_user_name(self, node: TA_UserName) -> None:
         """Handle `TA_UserName` node."""
-        super().on_ta_user_name(node)
+        with self._extended_command(f"TA{node.user_name}"):
+            for field in node.fields:
+                self._write(",")
+                self._write(field)
 
     def on_ta_aper_function(self, node: TA_AperFunction) -> None:
         """Handle `TA_AperFunction` node."""
-        super().on_ta_aper_function(node)
+        with self._extended_command("TA.AperFunction"):
+            if node.function is not None:
+                self._write(",")
+                self._write(node.function.value)
+
+            for field in node.fields:
+                self._write(",")
+                self._write(field)
 
     def on_ta_drill_tolerance(self, node: TA_DrillTolerance) -> None:
         """Handle `TA_DrillTolerance` node."""
-        super().on_ta_drill_tolerance(node)
+        with self._extended_command("TA.DrillTolerance"):
+            if node.plus_tolerance is not None:
+                self._write(",")
+                self._write(self._fmt_double(node.plus_tolerance))
+
+            if node.minus_tolerance is not None:
+                self._write(",")
+                self._write(self._fmt_double(node.minus_tolerance))
 
     def on_ta_flash_text(self, node: TA_FlashText) -> None:
         """Handle `TA_FlashText` node."""
-        super().on_ta_flash_text(node)
+        with self._extended_command("TA.FlashText"):
+            self._write(",")
+            self._write(node.string)
+
+            self._write(",")
+            self._write(node.mode)
+
+            self._write(",")
+            self._write(node.mirroring)
+
+            if len(node.comments) == 0:
+                if node.font is not None:
+                    self._write(",")
+                    self._write(node.font)
+
+                if node.size is not None:
+                    self._write(",")
+                    self._write(node.size)
+
+                for comment in node.comments:
+                    self._write(",")
+                    self._write(comment)
+            else:
+                self._write(",")
+                if node.font is not None:
+                    self._write(node.font)
+
+                self._write(",")
+                if node.size is not None:
+                    self._write(node.size)
+
+                for comment in node.comments:
+                    self._write(",")
+                    self._write(comment)
 
     def on_td(self, node: TD) -> None:
         """Handle `TD` node."""
-        super().on_td(node)
+        with self._extended_command("TD"):
+            if node.name is not None:
+                self._write(node.name)
 
     def on_tf_user_name(self, node: TF_UserName) -> None:
         """Handle `TF_UserName` node."""
