@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Generator, Literal, Optional
 
 from pyparsing import cached_property
 
+from pygerber.gerberx3.ast.nodes.types import Double
 from pygerber.gerberx3.ast.visitor import AstVisitor
 
 if TYPE_CHECKING:
@@ -240,7 +241,7 @@ class Formatter(AstVisitor):
 
         return self._output
 
-    def _fmt_double(self, value: float) -> str:
+    def _fmt_double(self, value: Double) -> str:
         double = f"{value:.{self.float_decimal_places}f}"
         if self.float_trim_trailing_zeros:
             return double.rstrip("0").rstrip(".")
@@ -511,67 +512,111 @@ class Formatter(AstVisitor):
 
     def on_to_user_name(self, node: TO_UserName) -> None:
         """Handle `TO_UserName` node."""
-        super().on_to_user_name(node)
+        with self._extended_command(f"TO{node.user_name}"):
+            for field in node.fields:
+                self._write(",")
+                self._write(field)
 
     def on_to_n(self, node: TO_N) -> None:
         """Handle `TO_N` node."""
-        super().on_to_n(node)
+        with self._extended_command("TO.N"):
+            for field in node.net_names:
+                self._write(",")
+                self._write(field)
 
     def on_to_p(self, node: TO_P) -> None:
         """Handle `TO_P` node`."""
-        super().on_to_p(node)
+        with self._extended_command("TO.P"):
+            self._write(",")
+            self._write(node.refdes)
+            self._write(",")
+            self._write(node.number)
+            if node.function is not None:
+                self._write(",")
+                self._write(node.function)
 
     def on_to_c(self, node: TO_C) -> None:
         """Handle `TO_C` node."""
-        super().on_to_c(node)
+        with self._extended_command("TO.C"):
+            self._write(",")
+            self._write(node.refdes)
 
     def on_to_crot(self, node: TO_CRot) -> None:
         """Handle `TO_CRot` node."""
-        super().on_to_crot(node)
+        with self._extended_command("TO.CRot"):
+            self._write(",")
+            self._write(self._fmt_double(node.angle))
 
     def on_to_cmfr(self, node: TO_CMfr) -> None:
         """Handle `TO_CMfr` node."""
-        super().on_to_cmfr(node)
+        with self._extended_command("TO.CMfr"):
+            self._write(",")
+            self._write(node.manufacturer)
 
     def on_to_cmnp(self, node: TO_CMNP) -> None:
         """Handle `TO_CMNP` node."""
-        super().on_to_cmnp(node)
+        with self._extended_command("TO.CMPN"):
+            self._write(",")
+            self._write(node.part_number)
 
     def on_to_cval(self, node: TO_CVal) -> None:
         """Handle `TO_CVal` node."""
-        super().on_to_cval(node)
+        with self._extended_command("TO.CVal"):
+            self._write(",")
+            self._write(node.value)
 
     def on_to_cmnt(self, node: TO_CMnt) -> None:
         """Handle `TO_CVal` node."""
-        super().on_to_cmnt(node)
+        with self._extended_command("TO.CMnt"):
+            self._write(",")
+            self._write(node.mount.value)
 
     def on_to_cftp(self, node: TO_CFtp) -> None:
         """Handle `TO_Cftp` node."""
-        super().on_to_cftp(node)
+        with self._extended_command("TO.CFtp"):
+            self._write(",")
+            self._write(node.footprint)
 
     def on_to_cpgn(self, node: TO_CPgN) -> None:
         """Handle `TO_CPgN` node."""
-        super().on_to_cpgn(node)
+        with self._extended_command("TO.CPgN"):
+            self._write(",")
+            self._write(node.name)
 
     def on_to_cpgd(self, node: TO_CPgD) -> None:
         """Handle `TO_CPgD` node."""
-        super().on_to_cpgd(node)
+        with self._extended_command("TO.CPgD"):
+            self._write(",")
+            self._write(node.description)
 
     def on_to_chgt(self, node: TO_CHgt) -> None:
         """Handle `TO_CHgt` node."""
-        super().on_to_chgt(node)
+        with self._extended_command("TO.CHgt"):
+            self._write(",")
+            self._write(self._fmt_double(node.height))
 
     def on_to_clbn(self, node: TO_CLbN) -> None:
         """Handle `TO_CLbN` node."""
-        super().on_to_clbn(node)
+        with self._extended_command("TO.CLbn"):
+            self._write(",")
+            self._write(node.name)
 
     def on_to_clbd(self, node: TO_CLbD) -> None:
         """Handle `TO_CLbD` node."""
-        super().on_to_clbd(node)
+        with self._extended_command("TO.CLbD"):
+            self._write(",")
+            self._write(node.description)
 
     def on_to_csup(self, node: TO_CSup) -> None:
         """Handle `TO_CSup` node."""
-        super().on_to_csup(node)
+        with self._extended_command("TO.CSup"):
+            self._write(",")
+            self._write(node.supplier)
+            self._write(",")
+            self._write(node.supplier_part)
+            for field in node.other_suppliers:
+                self._write(",")
+                self._write(field)
 
     # D codes
 

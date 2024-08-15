@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Callable, List, Optional
 from pydantic import Field
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.types import Double
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -89,7 +90,7 @@ class TO_C(TO):  # noqa: N801
 class TO_CRot(TO):  # noqa: N801
     """Represents TO Gerber extended command with .CRot attribute."""
 
-    angle: float
+    angle: Double
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -226,7 +227,7 @@ class TO_CPgD(TO):  # noqa: N801
 class TO_CHgt(TO):  # noqa: N801
     """Represents TO Gerber extended command with .CHgt attribute."""
 
-    height: float
+    height: Double
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
