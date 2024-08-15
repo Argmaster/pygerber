@@ -431,39 +431,83 @@ class Formatter(AstVisitor):
 
     def on_tf_user_name(self, node: TF_UserName) -> None:
         """Handle `TF_UserName` node."""
-        super().on_tf_user_name(node)
+        with self._extended_command(f"TF{node.user_name}"):
+            for field in node.fields:
+                self._write(",")
+                self._write(field)
 
     def on_tf_part(self, node: TF_Part) -> None:
         """Handle `TF_Part` node."""
-        super().on_tf_part(node)
+        with self._extended_command("TF.Part,"):
+            self._write(node.part.value)
+            if len(node.fields) != 0:
+                for field in node.fields:
+                    self._write(",")
+                    self._write(field)
 
     def on_tf_file_function(self, node: TF_FileFunction) -> None:
         """Handle `TF_FileFunction` node."""
-        super().on_tf_file_function(node)
+        with self._extended_command("TF.FileFunction,"):
+            self._write(node.file_function.value)
+            if len(node.fields) != 0:
+                for field in node.fields:
+                    self._write(",")
+                    self._write(field)
 
     def on_tf_file_polarity(self, node: TF_FilePolarity) -> None:
         """Handle `TF_FilePolarity` node."""
-        super().on_tf_file_polarity(node)
+        with self._extended_command("TF.FilePolarity,"):
+            self._write(node.polarity)
 
     def on_tf_same_coordinates(self, node: TF_SameCoordinates) -> None:
         """Handle `TF_SameCoordinates` node."""
-        super().on_tf_same_coordinates(node)
+        with self._extended_command("TF.SameCoordinates"):
+            if node.identifier is not None:
+                self._write(",")
+                self._write(node.identifier)
 
     def on_tf_creation_date(self, node: TF_CreationDate) -> None:
         """Handle `TF_CreationDate` node."""
-        super().on_tf_creation_date(node)
+        with self._extended_command("TF.CreationDate"):
+            if node.creation_date is not None:
+                self._write(",")
+                self._write(node.creation_date.isoformat())
 
     def on_tf_generation_software(self, node: TF_GenerationSoftware) -> None:
         """Handle `TF_GenerationSoftware` node."""
-        super().on_tf_generation_software(node)
+        with self._extended_command("TF.GenerationSoftware"):
+            self._write(",")
+            if node.vendor is not None:
+                self._write(node.vendor)
+
+            self._write(",")
+            if node.application is not None:
+                self._write(node.application)
+
+            self._write(",")
+            if node.version is not None:
+                self._write(node.version)
 
     def on_tf_project_id(self, node: TF_ProjectId) -> None:
         """Handle `TF_ProjectId` node."""
-        super().on_tf_project_id(node)
+        with self._extended_command("TF.ProjectId"):
+            self._write(",")
+            if node.name is not None:
+                self._write(node.name)
+
+            self._write(",")
+            if node.guid is not None:
+                self._write(node.guid)
+
+            self._write(",")
+            if node.revision is not None:
+                self._write(node.revision)
 
     def on_tf_md5(self, node: TF_MD5) -> None:
         """Handle `TF_MD5` node."""
-        super().on_tf_md5(node)
+        with self._extended_command("TF.MD5"):
+            self._write(",")
+            self._write(node.md5)
 
     def on_to_user_name(self, node: TO_UserName) -> None:
         """Handle `TO_UserName` node."""
