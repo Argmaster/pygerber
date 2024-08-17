@@ -2,49 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from pygerber.gerberx3.ast.nodes.attribute.TA import (
-    TA_AperFunction,
-    TA_DrillTolerance,
-    TA_FlashText,
-    TA_UserName,
-)
-from pygerber.gerberx3.ast.nodes.attribute.TF import (
-    TF_MD5,
-    TF_CreationDate,
-    TF_FileFunction,
-    TF_FilePolarity,
-    TF_GenerationSoftware,
-    TF_Part,
-    TF_ProjectId,
-    TF_SameCoordinates,
-    TF_UserName,
-)
-from pygerber.gerberx3.ast.nodes.attribute.TO import (
-    TO_C,
-    TO_CMNP,
-    TO_N,
-    TO_P,
-    TO_CFtp,
-    TO_CHgt,
-    TO_CLbD,
-    TO_CLbN,
-    TO_CMfr,
-    TO_CMnt,
-    TO_CPgD,
-    TO_CPgN,
-    TO_CRot,
-    TO_CSup,
-    TO_CVal,
-    TO_UserName,
-)
-from pygerber.gerberx3.ast.nodes.other.coordinate import (
-    CoordinateI,
-    CoordinateJ,
-    CoordinateX,
-    CoordinateY,
-)
+from typing import TYPE_CHECKING, List, Optional
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
@@ -58,10 +16,46 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.aperture.AM_open import AMopen
     from pygerber.gerberx3.ast.nodes.aperture.SR_close import SRclose
     from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
-    from pygerber.gerberx3.ast.nodes.attribute.TA import TA
+    from pygerber.gerberx3.ast.nodes.attribute.TA import (
+        TA,
+        TA_AperFunction,
+        TA_DrillTolerance,
+        TA_FlashText,
+        TA_UserName,
+    )
     from pygerber.gerberx3.ast.nodes.attribute.TD import TD
-    from pygerber.gerberx3.ast.nodes.attribute.TF import TF
-    from pygerber.gerberx3.ast.nodes.attribute.TO import TO
+    from pygerber.gerberx3.ast.nodes.attribute.TF import (
+        TF,
+        TF_MD5,
+        TF_CreationDate,
+        TF_FileFunction,
+        TF_FilePolarity,
+        TF_GenerationSoftware,
+        TF_Part,
+        TF_ProjectId,
+        TF_SameCoordinates,
+        TF_UserName,
+    )
+    from pygerber.gerberx3.ast.nodes.attribute.TO import (
+        TO,
+        TO_C,
+        TO_CMNP,
+        TO_N,
+        TO_P,
+        TO_CFtp,
+        TO_CHgt,
+        TO_CLbD,
+        TO_CLbN,
+        TO_CMfr,
+        TO_CMnt,
+        TO_CPgD,
+        TO_CPgN,
+        TO_CRot,
+        TO_CSup,
+        TO_CVal,
+        TO_UserName,
+    )
+    from pygerber.gerberx3.ast.nodes.base import Node
     from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
     from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
     from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
@@ -100,7 +94,13 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
     from pygerber.gerberx3.ast.nodes.math.point import Point
     from pygerber.gerberx3.ast.nodes.math.variable import Variable
-    from pygerber.gerberx3.ast.nodes.other.coordinate import Coordinate
+    from pygerber.gerberx3.ast.nodes.other.coordinate import (
+        Coordinate,
+        CoordinateI,
+        CoordinateJ,
+        CoordinateX,
+        CoordinateY,
+    )
     from pygerber.gerberx3.ast.nodes.primitives.code_0 import Code0
     from pygerber.gerberx3.ast.nodes.primitives.code_1 import Code1
     from pygerber.gerberx3.ast.nodes.primitives.code_2 import Code2
@@ -129,6 +129,10 @@ class AstVisitor:
     For more information on this pattern visit:
     https://refactoring.guru/design-patterns/visitor
     """
+
+    def __init__(self) -> None:
+        self._current_node_index = -1
+        self._nodes: List[Node] = []
 
     # Aperture
 
@@ -408,38 +412,60 @@ class AstVisitor:
 
     def on_add(self, node: Add) -> None:
         """Handle `Add` node."""
+        self.on_expression(node)
+        for operand in node.operands:
+            operand.visit(self)
 
     def on_div(self, node: Div) -> None:
         """Handle `Div` node."""
+        self.on_expression(node)
+        for operand in node.operands:
+            operand.visit(self)
 
     def on_mul(self, node: Mul) -> None:
         """Handle `Mul` node."""
+        self.on_expression(node)
+        for operand in node.operands:
+            operand.visit(self)
 
     def on_sub(self, node: Sub) -> None:
         """Handle `Sub` node."""
+        self.on_expression(node)
+        for operand in node.operands:
+            operand.visit(self)
 
     # Math :: Operators :: Unary
 
     def on_neg(self, node: Neg) -> None:
         """Handle `Neg` node."""
+        self.on_expression(node)
+        node.operand.visit(self)
 
     def on_pos(self, node: Pos) -> None:
         """Handle `Pos` node."""
+        self.on_expression(node)
+        node.operand.visit(self)
 
     def on_assignment(self, node: Assignment) -> None:
         """Handle `Assignment` node."""
+        node.variable.visit(self)
+        node.expression.visit(self)
 
     def on_constant(self, node: Constant) -> None:
         """Handle `Constant` node."""
+        self.on_expression(node)
 
     def on_expression(self, node: Expression) -> None:
         """Handle `Expression` node."""
 
     def on_point(self, node: Point) -> None:
         """Handle `Point` node."""
+        node.x.visit(self)
+        node.y.visit(self)
 
     def on_variable(self, node: Variable) -> None:
         """Handle `Variable` node."""
+        self.on_expression(node)
 
     # Other
 
@@ -469,30 +495,90 @@ class AstVisitor:
 
     def on_code_1(self, node: Code1) -> None:
         """Handle `Code1` node."""
+        node.exposure.visit(self)
+        node.diameter.visit(self)
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        if node.rotation is not None:
+            node.rotation.visit(self)
 
     def on_code_2(self, node: Code2) -> None:
         """Handle `Code2` node."""
+        node.exposure.visit(self)
+        node.width.visit(self)
+        node.start_x.visit(self)
+        node.start_y.visit(self)
+        node.end_x.visit(self)
+        node.end_y.visit(self)
+        node.rotation.visit(self)
 
     def on_code_4(self, node: Code4) -> None:
         """Handle `Code4` node."""
+        node.exposure.visit(self)
+        node.number_of_points.visit(self)
+        node.start_x.visit(self)
+        node.start_y.visit(self)
+        for point in node.points:
+            point.visit(self)
+        node.rotation.visit(self)
 
     def on_code_5(self, node: Code5) -> None:
         """Handle `Code5` node."""
+        node.exposure.visit(self)
+        node.number_of_vertices.visit(self)
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        node.diameter.visit(self)
+        node.rotation.visit(self)
 
     def on_code_6(self, node: Code6) -> None:
         """Handle `Code6` node."""
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        node.outer_diameter.visit(self)
+        node.ring_thickness.visit(self)
+        node.gap_between_rings.visit(self)
+        node.max_ring_count.visit(self)
+        node.crosshair_thickness.visit(self)
+        node.crosshair_length.visit(self)
+        node.rotation.visit(self)
 
     def on_code_7(self, node: Code7) -> None:
         """Handle `Code7` node."""
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        node.outer_diameter.visit(self)
+        node.inner_diameter.visit(self)
+        node.gap_thickness.visit(self)
+        node.rotation.visit(self)
 
     def on_code_20(self, node: Code20) -> None:
         """Handle `Code20` node."""
+        node.exposure.visit(self)
+        node.width.visit(self)
+        node.start_x.visit(self)
+        node.start_y.visit(self)
+        node.end_x.visit(self)
+        node.end_y.visit(self)
+        node.rotation.visit(self)
 
     def on_code_21(self, node: Code21) -> None:
         """Handle `Code21` node."""
+        node.exposure.visit(self)
+        node.width.visit(self)
+        node.height.visit(self)
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        node.rotation.visit(self)
 
     def on_code_22(self, node: Code22) -> None:
         """Handle `Code22` node."""
+        node.exposure.visit(self)
+        node.width.visit(self)
+        node.height.visit(self)
+        node.x_lower_left.visit(self)
+        node.y_lower_left.visit(self)
+        node.rotation.visit(self)
 
     # Properties
 
@@ -527,5 +613,19 @@ class AstVisitor:
 
     def on_file(self, node: File) -> None:
         """Handle `File` node."""
-        for command in node.nodes:
-            command.visit(self)
+        self._current_node_index = 0
+        self._nodes = node.nodes
+        try:
+            for command in node.nodes:
+                command.visit(self)
+        finally:
+            self._current_node_index = -1
+            self._nodes = []
+
+    def get_next_node(self) -> Optional[Node]:
+        """Get next node from the iterator."""
+        if -1 < self._current_node_index < len(self._nodes):
+            node = self._nodes[self._current_node_index]
+            self._current_node_index += 1
+            return node
+        return None

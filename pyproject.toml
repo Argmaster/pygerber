@@ -58,6 +58,7 @@ numpy = [
 pygls = { version = "^1.0.2", optional = true }
 lsprotocol = { version = "^2023.0.0a3", optional = true }
 drawsvg = { version = "^2.3.0", optional = true }
+typing-extensions = "^4.12.2"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"
@@ -150,6 +151,7 @@ lint.ignore = [
     "ISC001", # Checks for the absence of trailing commas. Conflicts with ruff format.
     "COM812", # Checks for implicitly concatenated strings on a single line. Conflicts with ruff format.
     "S101",   # Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+    "EXE002", # Breaks on file systems which do not support executable permissions.
 ]
 show-fixes = true
 target-version = "py38"

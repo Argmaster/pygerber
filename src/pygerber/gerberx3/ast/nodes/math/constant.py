@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.math.expression import Expression
+from pygerber.gerberx3.ast.nodes.types import Double
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 class Constant(Expression):
     """Represents math expression constant."""
 
-    constant: str
+    constant: Double
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

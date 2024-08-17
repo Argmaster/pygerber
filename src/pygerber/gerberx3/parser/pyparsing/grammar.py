@@ -535,12 +535,14 @@ class Grammar:
                 + self.comma
                 + pp.Opt(pp.one_of(list("RM")).set_results_name("mirroring"))
                 + self.comma
-                + pp.Opt(self.field.set_results_name("font"))
+                + pp.Opt(self.field).set_results_name("font")
                 + self.comma
-                + pp.Opt(self.field.set_results_name("size"))
+                + pp.Opt(self.field).set_results_name("size")
                 + pp.ZeroOrMore(
                     self.comma
-                    + self.field.set_results_name("comments", list_all_matches=True)
+                    + pp.Opt(self.field).set_results_name(
+                        "comments", list_all_matches=True
+                    )
                 )
             )
             .set_name("TA.FlashText")
