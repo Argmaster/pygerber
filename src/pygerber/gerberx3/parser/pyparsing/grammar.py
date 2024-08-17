@@ -1062,25 +1062,54 @@ class Grammar:
         else:
             g04_comment = g04_comment.set_parse_action(self.make_unpack_callback(G04))
 
-        def _(cls: Type[Node]) -> pp.ParserElement:
+        non_standalone_d_codes = self.d_codes(is_standalone=False)
+
+        def _standalone(cls: Type[Node]) -> pp.ParserElement:
             code = int(cls.__qualname__.lstrip("G"))
             return (
                 self._command(pp.Regex(f"G0*{code}"))
                 .set_name(cls.__qualname__)
                 .set_parse_action(self.make_unpack_callback(cls, is_standalone=True))
-            ) | (  # We have to account for legacy cases like `G70D02*`, see
-                # `G.is_standalone` docstring for more information.
-                (pp.Regex(f"G0*{code}"))
+            )
+
+        def _non_standalone(cls: Type[Node]) -> pp.ParserElement:
+            # We have to account for legacy cases like `G70D02*`, see
+            # `G.is_standalone` docstring for more information.
+            code = int(cls.__qualname__.lstrip("G"))
+            return (
+                (
+                    pp.Regex(f"G0*{code}")
+                    + pp.FollowedBy(pp.one_of(["D", "X", "Y", "I", "J"]))
+                )
                 .set_name(cls.__qualname__)
                 .set_parse_action(self.make_unpack_callback(cls, is_standalone=False))
-                + self.d_codes(is_standalone=False)
-            )
+            ) + non_standalone_d_codes
 
         return pp.MatchFirst(
             [
                 g04_comment,
                 *(
-                    _(cls)
+                    _standalone(cast(Type[Node], cls))
+                    for cls in reversed(
+                        (
+                            G01,
+                            G02,
+                            G03,
+                            G36,
+                            G37,
+                            G54,
+                            G55,
+                            G70,
+                            G71,
+                            G74,
+                            G75,
+                            G90,
+                            G91,
+                        )
+                    )
+                ),
+                *(
+                    _non_standalone(cast(Type[Node], cls))
                     for cls in reversed(
                         (
                             G01,

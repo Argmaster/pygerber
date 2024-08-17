@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from io import StringIO
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -85,9 +84,11 @@ def test_formatter(asset: Asset, config: Config) -> None:
     formatted_source = output_buffer.read()
     formatted_ast = parser.parse(formatted_source)
 
-    assert formatted_ast.model_dump_json(serialize_as_any=True) == ast.model_dump_json(
+    if formatted_ast.model_dump_json(serialize_as_any=True) == ast.model_dump_json(
         serialize_as_any=True
-    )
+    ):
+        msg = "Formatted AST is the same as the original AST."
+        raise AssertionError(msg)
 
 
 DONUT_MACRO_SOURCE = """%AMDonut*
@@ -144,7 +145,6 @@ def test_indent_character_tab() -> None:
 
 
 class TestMacroSplitMode:
-
     def test_none(self) -> None:
         formatted_source = _format(
             DONUT_MACRO_SOURCE,

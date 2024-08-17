@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.types import Double
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 class LR(Node):
     """Represents LR Gerber extended command."""
 
-    rotation: float
+    rotation: Double
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
