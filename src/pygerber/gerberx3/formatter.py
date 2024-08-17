@@ -5,6 +5,7 @@ which implements configurable Gerber code formatting.
 from __future__ import annotations
 
 from contextlib import contextmanager
+from enum import Enum
 from typing import TYPE_CHECKING, Generator, Literal, Optional
 
 from pyparsing import cached_property
@@ -133,13 +134,20 @@ class FormatterError(Exception):
 class Formatter(AstVisitor):
     """Gerber X3 compatible formatter."""
 
+    class MacroSplitMode(Enum):
+        """Macro split mode."""
+
+        NONE = "none"
+        PRIMITIVES = "primitives"
+        PARAMETERS = "parameters"
+
     def __init__(  # noqa: PLR0913
         self,
         *,
         indent_character: Literal[" ", "\t"] = " ",
-        macro_body_indentation: str | int = 4,
-        macro_param_indentation: str | int = 4,
-        macro_split_mode: Literal["none", "primitives", "parameters"] = "primitives",
+        macro_body_indent: str | int = 4,
+        macro_param_indent: str | int = 4,
+        macro_split_mode: MacroSplitMode = MacroSplitMode.PRIMITIVES,
         macro_end_in_new_line: bool = False,
         indent_block_aperture_body: str = "",
         indent_step_and_repeat: str = "",
@@ -149,7 +157,7 @@ class Formatter(AstVisitor):
         split_format_select: bool = False,
         split_aperture_definition: bool = False,
         split_extended_command_boundaries: bool = False,
-        strip_whitespace_mode: bool = False,
+        strip_whitespace: bool = False,
     ) -> None:
         r"""Initialize Formatter instance.
 
@@ -157,9 +165,9 @@ class Formatter(AstVisitor):
         ----------
         indent_character: Literal[" ", "\t"], optional
             Character used for indentation, by default " "
-        macro_body_indentation : str | int, optional
+        macro_body_indent : str | int, optional
             Indentation of macro body, by default 4
-        macro_param_indentation: str | int, optional
+        macro_param_indent: str | int, optional
             Indentation of macro parameters, by default 4
             This indentation is added on top of macro body indentation.
         macro_split_mode : Literal["none", "primitives", "parameters"], optional
@@ -176,6 +184,8 @@ class Formatter(AstVisitor):
             $4=$1x0.75*
             1,0,$4,$2,$3*%
             ```
+        macro_end_in_new_line: bool, optional
+            _description_, by default False
         indent_block_aperture_body : str, optional
             _description_, by default ""
         indent_step_and_repeat : str, optional
@@ -192,25 +202,24 @@ class Formatter(AstVisitor):
             _description_, by default False
         split_extended_command_boundaries : bool, optional
             _description_, by default False
-        strip_whitespace_mode : bool, optional
-            _description_, by default False
-        macro_end_in_new_line: bool, optional
+        strip_whitespace : bool, optional
             _description_, by default False
 
         """
         super().__init__()
         self.indent_character = indent_character
 
-        if isinstance(macro_body_indentation, int):
-            macro_body_indentation = indent_character * macro_body_indentation
-        self.macro_body_indentation = macro_body_indentation
+        if isinstance(macro_body_indent, int):
+            macro_body_indent = indent_character * macro_body_indent
+        self.macro_body_indent = macro_body_indent
 
-        if isinstance(macro_param_indentation, int):
-            macro_param_indentation = indent_character * macro_param_indentation
-        self.macro_param_indentation = macro_param_indentation
+        if isinstance(macro_param_indent, int):
+            macro_param_indent = indent_character * macro_param_indent
+        self.macro_param_indent = macro_param_indent
 
         self.macro_split_mode = macro_split_mode
         self.macro_end_in_new_line = macro_end_in_new_line
+
         self.indent_block_aperture_body = indent_block_aperture_body
         self.indent_step_and_repeat = indent_step_and_repeat
         self.float_decimal_places = float_decimal_places
@@ -220,7 +229,7 @@ class Formatter(AstVisitor):
         self.split_format_select = split_format_select
         self.split_aperture_definition = split_aperture_definition
         self.split_extended_command_boundaries = split_extended_command_boundaries
-        self.strip_whitespace_mode = strip_whitespace_mode
+        self.strip_whitespace = strip_whitespace
 
         self._output: Optional[StringIO] = None
 
@@ -250,7 +259,7 @@ class Formatter(AstVisitor):
     @cached_property
     def lf(self) -> str:
         """Get end of line character."""
-        return "" if self.strip_whitespace_mode else "\n"
+        return "" if self.strip_whitespace else "\n"
 
     @contextmanager
     def _command(self, cmd: str) -> Generator[None, None, None]:
@@ -837,10 +846,7 @@ class Formatter(AstVisitor):
 
     def on_code_0(self, node: Code0) -> None:
         """Handle `Code0` node."""
-        primitive_lf = (
-            self.lf if self.macro_split_mode in ("primitives", "parameters") else ""
-        )
-        self._write(f"{primitive_lf}0{node.string}*")
+        self._write(f"{self._macro_primitive_lf}0{node.string}*")
 
     def on_code_1(self, node: Code1) -> None:
         """Handle `Code1` node."""
@@ -857,13 +863,34 @@ class Formatter(AstVisitor):
             node.rotation.visit(self)
         self._write("*")
 
-    @property
+    @cached_property
     def _macro_primitive_lf(self) -> str:
-        return self.lf if self.macro_split_mode in ("primitives", "parameters") else ""
+        if self.macro_split_mode == self.MacroSplitMode.NONE or self.strip_whitespace:
+            return ""
 
-    @property
+        if self.macro_split_mode in (
+            self.MacroSplitMode.PRIMITIVES,
+            self.MacroSplitMode.PARAMETERS,
+        ):
+            return self.lf + self.macro_body_indent
+
+        msg = f"Unsupported macro split mode: {self.macro_split_mode}"
+        raise NotImplementedError(msg)
+
+    @cached_property
     def _macro_param_lf(self) -> str:
-        return self.lf if self.macro_split_mode == "parameters" else ""
+        if (
+            self.macro_split_mode
+            in (self.MacroSplitMode.NONE, self.MacroSplitMode.PRIMITIVES)
+            or self.strip_whitespace
+        ):
+            return ""
+
+        if self.macro_split_mode == self.MacroSplitMode.PARAMETERS:
+            return self.lf + self.macro_param_indent + self.macro_body_indent
+
+        msg = f"Unsupported macro split mode: {self.macro_split_mode}"
+        raise NotImplementedError(msg)
 
     def on_code_2(self, node: Code2) -> None:
         """Handle `Code2` node."""

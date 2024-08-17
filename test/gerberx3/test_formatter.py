@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from io import StringIO
+from typing import Any
 
 import pytest
 
@@ -86,3 +87,161 @@ def test_formatter(asset: Asset, config: Config) -> None:
     assert formatted_ast.model_dump_json(serialize_as_any=True) == ast.model_dump_json(
         serialize_as_any=True
     )
+
+
+DONUT_MACRO_SOURCE = """%AMDonut*
+1,1,$1,$2,$3*
+$4=$1x0.75*
+1,0,$4,$2,$3*
+%
+"""
+
+
+def test_indent_character_space() -> None:
+    formatted_source = _format(
+        DONUT_MACRO_SOURCE,
+        indent_character=" ",
+        macro_body_indent=4,
+        macro_split_mode=Formatter.MacroSplitMode.PRIMITIVES,
+        macro_end_in_new_line=False,
+    )
+    assert (
+        formatted_source
+        == """%AMDonut*
+    1,1,$1,$2,$3*
+    $4=($1x0.75)*
+    1,0,$4,$2,$3*%
+"""
+    )
+
+
+def _format(source: str, **kwargs: Any) -> str:
+    ast = Parser().parse(source)
+    output_buffer = StringIO()
+    Formatter(**kwargs).format(ast, output_buffer)
+
+    output_buffer.seek(0)
+    return output_buffer.read()
+
+
+def test_indent_character_tab() -> None:
+    formatted_source = _format(
+        DONUT_MACRO_SOURCE,
+        indent_character="\t",
+        macro_body_indent=1,
+        macro_split_mode=Formatter.MacroSplitMode.PRIMITIVES,
+        macro_end_in_new_line=False,
+    )
+    assert (
+        formatted_source
+        == """%AMDonut*
+\t1,1,$1,$2,$3*
+\t$4=($1x0.75)*
+\t1,0,$4,$2,$3*%
+"""
+    )
+
+
+class TestMacroSplitMode:
+
+    def test_none(self) -> None:
+        formatted_source = _format(
+            DONUT_MACRO_SOURCE,
+            indent_character=" ",
+            macro_body_indent=4,
+            macro_split_mode=Formatter.MacroSplitMode.NONE,
+            macro_end_in_new_line=False,
+        )
+        assert (
+            formatted_source
+            == """%AMDonut*1,1,$1,$2,$3*$4=($1x0.75)*1,0,$4,$2,$3*%
+"""
+        )
+
+    def test_parameters(self) -> None:
+        formatted_source = _format(
+            DONUT_MACRO_SOURCE,
+            indent_character=" ",
+            macro_body_indent=4,
+            macro_param_indent=4,
+            macro_split_mode=Formatter.MacroSplitMode.PARAMETERS,
+            macro_end_in_new_line=False,
+        )
+        assert (
+            formatted_source
+            == """%AMDonut*
+    1,
+        1,
+        $1,
+        $2,
+        $3*
+    $4=($1x0.75)*
+    1,
+        0,
+        $4,
+        $2,
+        $3*%
+"""
+        )
+
+    def test_none__macro_end_in_new_line(self) -> None:
+        formatted_source = _format(
+            DONUT_MACRO_SOURCE,
+            indent_character=" ",
+            macro_body_indent=4,
+            macro_param_indent=4,
+            macro_split_mode=Formatter.MacroSplitMode.NONE,
+            macro_end_in_new_line=True,
+        )
+        assert (
+            formatted_source
+            == """%AMDonut*1,1,$1,$2,$3*$4=($1x0.75)*1,0,$4,$2,$3*
+%
+"""
+        )
+
+    def test_primitives__macro_end_in_new_line(self) -> None:
+        formatted_source = _format(
+            DONUT_MACRO_SOURCE,
+            indent_character=" ",
+            macro_body_indent=4,
+            macro_param_indent=4,
+            macro_split_mode=Formatter.MacroSplitMode.PRIMITIVES,
+            macro_end_in_new_line=True,
+        )
+        assert (
+            formatted_source
+            == """%AMDonut*
+    1,1,$1,$2,$3*
+    $4=($1x0.75)*
+    1,0,$4,$2,$3*
+%
+"""
+        )
+
+    def test_parameters_macro_end_in_new_line(self) -> None:
+        formatted_source = _format(
+            DONUT_MACRO_SOURCE,
+            indent_character=" ",
+            macro_body_indent=4,
+            macro_param_indent=4,
+            macro_split_mode=Formatter.MacroSplitMode.PARAMETERS,
+            macro_end_in_new_line=True,
+        )
+        assert (
+            formatted_source
+            == """%AMDonut*
+    1,
+        1,
+        $1,
+        $2,
+        $3*
+    $4=($1x0.75)*
+    1,
+        0,
+        $4,
+        $2,
+        $3*
+%
+"""
+        )

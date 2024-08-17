@@ -81,9 +81,10 @@ logger.setLevel(logging.DEBUG)
 
 start_time = datetime.datetime.now(tz=tzlocal.get_localzone())
 log_file_path = (
-    Path.cwd() / "log" / "test" / f"{start_time.isoformat(timespec='hours')}.log"
+    Path.cwd() / "log" / "test" / f"{start_time.strftime("%Y_%m_%d_%H_%M_%S")}.log"
 )
 log_file_path.parent.mkdir(0o777, parents=True, exist_ok=True)
+log_file_path.touch(exist_ok=True)
 file_handler = logging.FileHandler(log_file_path.as_posix(), encoding="utf-8")
 file_handler.setLevel(logging.DEBUG)
 logger.addHandler(file_handler)

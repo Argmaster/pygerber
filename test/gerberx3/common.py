@@ -202,7 +202,7 @@ class ReferenceAssetsManager:
             if not self.repository_directory.exists():
                 porcelain.clone(
                     "https://github.com/Argmaster/pygerber-reference-assets",
-                    self.repository_directory.as_posix(),
+                    self.repository_directory,
                 )
             repository = Repo(self.repository_directory.as_posix())
             sha = repository.head().decode(encoding="utf-8")
