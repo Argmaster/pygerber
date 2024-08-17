@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Callable, Optional
 
 from pydantic import Field
 
-from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.d_codes.D import D
 from pygerber.gerberx3.ast.nodes.other.coordinate import (
     CoordinateI,
     CoordinateJ,
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
-class D01(Node):
+class D01(D):
     """Represents D01 Gerber command."""
 
     x: Optional[CoordinateX] = Field(default=None)

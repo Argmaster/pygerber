@@ -299,32 +299,32 @@ class AstVisitor:
 
     def on_d01(self, node: D01) -> None:
         """Handle `D01` node."""
-        if node.x:
+        if node.x is not None:
             node.x.visit(self)
 
-        if node.y:
+        if node.y is not None:
             node.y.visit(self)
 
-        if node.i:
+        if node.i is not None:
             node.i.visit(self)
 
-        if node.j:
+        if node.j is not None:
             node.j.visit(self)
 
     def on_d02(self, node: D02) -> None:
         """Handle `D02` node."""
-        if node.x:
+        if node.x is not None:
             node.x.visit(self)
 
-        if node.y:
+        if node.y is not None:
             node.y.visit(self)
 
     def on_d03(self, node: D03) -> None:
         """Handle `D03` node."""
-        if node.x:
+        if node.x is not None:
             node.x.visit(self)
 
-        if node.y:
+        if node.y is not None:
             node.y.visit(self)
 
     def on_dnn(self, node: Dnn) -> None:
@@ -352,11 +352,9 @@ class AstVisitor:
 
     def on_g54(self, node: G54) -> None:
         """Handle `G54` node."""
-        node.dnn.visit(self)
 
     def on_g55(self, node: G55) -> None:
         """Handle `G55` node."""
-        node.flash.visit(self)
 
     def on_g70(self, node: G70) -> None:
         """Handle `G70` node."""

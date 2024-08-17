@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, Optional
 
-from pygerber.gerberx3.ast.nodes.base import Node
+from pydantic import Field
+
+from pygerber.gerberx3.ast.nodes.d_codes.D import D
 from pygerber.gerberx3.ast.nodes.other.coordinate import (
     CoordinateX,
     CoordinateY,
@@ -16,11 +18,11 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
-class D02(Node):
+class D02(D):
     """Represents D02 Gerber command."""
 
-    x: CoordinateX
-    y: CoordinateY
+    x: Optional[CoordinateX] = Field(default=None)
+    y: Optional[CoordinateY] = Field(default=None)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
