@@ -84,7 +84,7 @@ def test_formatter(asset: Asset, config: Config) -> None:
     formatted_source = output_buffer.read()
     formatted_ast = parser.parse(formatted_source)
 
-    if formatted_ast.model_dump_json(serialize_as_any=True) == ast.model_dump_json(
+    if formatted_ast.model_dump_json(serialize_as_any=True) != ast.model_dump_json(
         serialize_as_any=True
     ):
         msg = "Formatted AST is the same as the original AST."
