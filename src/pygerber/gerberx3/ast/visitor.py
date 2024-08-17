@@ -356,11 +356,9 @@ class AstVisitor:
 
     def on_g54(self, node: G54) -> None:
         """Handle `G54` node."""
-        node.dnn.visit(self)
 
     def on_g55(self, node: G55) -> None:
         """Handle `G55` node."""
-        node.flash.visit(self)
 
     def on_g70(self, node: G70) -> None:
         """Handle `G70` node."""

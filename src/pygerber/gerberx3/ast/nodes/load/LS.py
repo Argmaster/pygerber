@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 class LS(Node):
     """Represents LS Gerber extended command."""
 
+    scale: float
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_ls(self)

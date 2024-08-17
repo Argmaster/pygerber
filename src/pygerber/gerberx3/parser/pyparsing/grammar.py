@@ -5,7 +5,7 @@ implemented using the pyparsing library.
 from __future__ import annotations
 
 from enum import IntFlag
-from typing import Callable, List, Literal, Type, TypeVar, cast
+from typing import Any, Callable, List, Literal, Type, TypeVar, cast
 
 import pyparsing as pp
 
@@ -76,7 +76,11 @@ from pygerber.gerberx3.ast.nodes.g_codes.G74 import G74
 from pygerber.gerberx3.ast.nodes.g_codes.G75 import G75
 from pygerber.gerberx3.ast.nodes.g_codes.G90 import G90
 from pygerber.gerberx3.ast.nodes.g_codes.G91 import G91
+from pygerber.gerberx3.ast.nodes.load.LM import LM
 from pygerber.gerberx3.ast.nodes.load.LN import LN
+from pygerber.gerberx3.ast.nodes.load.LP import LP
+from pygerber.gerberx3.ast.nodes.load.LR import LR
+from pygerber.gerberx3.ast.nodes.load.LS import LS
 from pygerber.gerberx3.ast.nodes.m_codes.M00 import M00
 from pygerber.gerberx3.ast.nodes.m_codes.M01 import M01
 from pygerber.gerberx3.ast.nodes.m_codes.M02 import M02
@@ -157,7 +161,7 @@ class Grammar:
                         self.g_codes(),
                         self.load_commands(),
                         self.m_codes(),
-                        self.d_codes(),
+                        self.d_codes(is_standalone=True),
                         self.properties(),
                     ]
                 )
@@ -240,12 +244,16 @@ class Grammar:
         return pp.Regex(r"D[0]*[1-9][0-9]+").set_results_name("aperture_identifier")
 
     def make_unpack_callback(
-        self, node_type: Type[Node]
+        self,
+        node_type: Type[Node],
+        **kwargs: Any,
     ) -> Callable[[str, int, pp.ParseResults], Node]:
         """Create a callback for unpacking the results of the parser."""
 
         def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
-            return self.get_cls(node_type)(source=s, location=loc, **tokens.as_dict())
+            return self.get_cls(node_type)(
+                source=s, location=loc, **tokens.as_dict(), **kwargs
+            )
 
         return _
 
@@ -971,27 +979,32 @@ class Grammar:
     # ██   ██    ██     ██   ██ ██   ██ ██           ██
     # ██████      █████ ███████ ██████  ███████ ███████
 
-    def d_codes(self) -> pp.ParserElement:
-        """Create a parser element capable of parsing D-codes."""
+    def d_codes(self, *, is_standalone: bool) -> pp.ParserElement:
+        """Create a parser element capable of parsing D-codes.
+
+        `is_standalone` parameter is used to determine if the D-code is standalone, ie.
+        not prefixed by a G-code with no asterisk at the end. See `D.is_standalone` or
+        `G.is_standalone` for more information.
+        """
         return pp.MatchFirst(
             [
-                self._dnn,
-                self._d01,
-                self._d02,
-                self._d03,
+                self._dnn(is_standalone=is_standalone),
+                self._d01(is_standalone=is_standalone),
+                self._d02(is_standalone=is_standalone),
+                self._d03(is_standalone=is_standalone),
             ]
         )
 
-    @pp.cached_property
-    def _dnn(self) -> pp.ParserElement:
+    def _dnn(self, *, is_standalone: bool) -> pp.ParserElement:
         return (
             self._command(self.aperture_identifier.set_results_name("value"))
-            .set_parse_action(self.make_unpack_callback(Dnn))
+            .set_parse_action(
+                self.make_unpack_callback(Dnn, is_standalone=is_standalone)
+            )
             .set_name("Dnn")
         )
 
-    @pp.cached_property
-    def _d01(self) -> pp.ParserElement:
+    def _d01(self, *, is_standalone: bool) -> pp.ParserElement:
         return (
             self._command(
                 pp.Opt(self._coordinate_x.set_results_name("x"))
@@ -1000,31 +1013,35 @@ class Grammar:
                 + pp.Opt(self._coordinate_j.set_results_name("j"))
                 + pp.Regex(r"D0*1")
             )
-            .set_parse_action(self.make_unpack_callback(D01))
+            .set_parse_action(
+                self.make_unpack_callback(D01, is_standalone=is_standalone)
+            )
             .set_name("D01")
         )
 
-    @pp.cached_property
-    def _d02(self) -> pp.ParserElement:
+    def _d02(self, *, is_standalone: bool) -> pp.ParserElement:
         return (
             self._command(
-                self._coordinate_x.set_results_name("x")
-                + self._coordinate_y.set_results_name("y")
+                pp.Opt(self._coordinate_x.set_results_name("x"))
+                + pp.Opt(self._coordinate_y.set_results_name("y"))
                 + pp.Regex(r"D0*2")
             )
-            .set_parse_action(self.make_unpack_callback(D02))
+            .set_parse_action(
+                self.make_unpack_callback(D02, is_standalone=is_standalone)
+            )
             .set_name("D02")
         )
 
-    @pp.cached_property
-    def _d03(self) -> pp.ParserElement:
+    def _d03(self, *, is_standalone: bool) -> pp.ParserElement:
         return (
             self._command(
                 pp.Opt(self._coordinate_x.set_results_name("x"))
                 + pp.Opt(self._coordinate_y.set_results_name("y"))
                 + pp.Regex(r"D0*3")
             )
-            .set_parse_action(self.make_unpack_callback(D03))
+            .set_parse_action(
+                self.make_unpack_callback(D03, is_standalone=is_standalone)
+            )
             .set_name("D03")
         )
 
@@ -1045,52 +1062,44 @@ class Grammar:
         else:
             g04_comment = g04_comment.set_parse_action(self.make_unpack_callback(G04))
 
-        g54 = (
-            (pp.Regex(r"G0*54") + self._dnn.set_results_name("dnn"))
-            .set_name("G54")
-            .set_parse_action(self.make_unpack_callback(G54))
-        )
-        g55 = (
-            (pp.Regex(r"G0*55") + self._d03.set_results_name("flash"))
-            .set_name("G55")
-            .set_parse_action(self.make_unpack_callback(G55))
-        )
+        def _(cls: Type[Node]) -> pp.ParserElement:
+            code = int(cls.__qualname__.lstrip("G"))
+            return (
+                self._command(pp.Regex(f"G0*{code}"))
+                .set_name(cls.__qualname__)
+                .set_parse_action(self.make_unpack_callback(cls, is_standalone=True))
+            ) | (  # We have to account for legacy cases like `G70D02*`, see
+                # `G.is_standalone` docstring for more information.
+                (pp.Regex(f"G0*{code}"))
+                .set_name(cls.__qualname__)
+                .set_parse_action(self.make_unpack_callback(cls, is_standalone=False))
+                + self.d_codes(is_standalone=False)
+            )
+
         return pp.MatchFirst(
             [
                 g04_comment,
-                g54,
-                g55,
                 *(
-                    self.g(
-                        value,
-                        self.get_cls(cls),  # type: ignore[arg-type, type-abstract]
-                    )
-                    for (value, cls) in reversed(
+                    _(cls)
+                    for cls in reversed(
                         (
-                            (1, G01),
-                            (2, G02),
-                            (3, G03),
-                            (36, G36),
-                            (37, G37),
-                            (54, G54),
-                            (70, G70),
-                            (71, G71),
-                            (74, G74),
-                            (75, G75),
-                            (90, G90),
-                            (91, G91),
+                            G01,
+                            G02,
+                            G03,
+                            G36,
+                            G37,
+                            G54,
+                            G55,
+                            G70,
+                            G71,
+                            G74,
+                            G75,
+                            G90,
+                            G91,
                         )
                     )
                 ),
             ]
-        )
-
-    def g(self, value: int, cls: Type[Node]) -> pp.ParserElement:
-        """Create a parser element capable of parsing particular G-code."""
-        return (
-            self._command(pp.Regex(r"G0*" + str(value)))
-            .set_name(f"G{value}")
-            .set_parse_action(self.make_unpack_callback(cls))
         )
 
     # ██      ██████   █████  ██████      █████ ███████ ███    ███ ███    ███  █████  ███    ██ ██████  ███████ # noqa: E501
@@ -1101,7 +1110,7 @@ class Grammar:
 
     def load_commands(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Load-commands."""
-        return pp.MatchFirst([self.ln()])
+        return pp.MatchFirst([self.ln(), self.lp(), self.lr(), self.ls(), self.lm()])
 
     def ln(self) -> pp.ParserElement:
         """Create a parser for the LN command."""
@@ -1111,6 +1120,47 @@ class Grammar:
             )
             .set_parse_action(self.make_unpack_callback(LN))
             .set_name("LN")
+        )
+
+    def lp(self) -> pp.ParserElement:
+        """Create a parser for the LP command."""
+        return (
+            self._extended_command(
+                pp.Literal("LP") + pp.one_of(["C", "D"]).set_results_name("polarity")
+            )
+            .set_parse_action(self.make_unpack_callback(LP))
+            .set_name("LP")
+        )
+
+    def lr(self) -> pp.ParserElement:
+        """Create a parser for the LR command."""
+        return (
+            self._extended_command(
+                pp.Literal("LR") + self.double.set_results_name("rotation")
+            )
+            .set_parse_action(self.make_unpack_callback(LR))
+            .set_name("LR")
+        )
+
+    def ls(self) -> pp.ParserElement:
+        """Create a parser for the LS command."""
+        return (
+            self._extended_command(
+                pp.Literal("LS") + self.double.set_results_name("scale")
+            )
+            .set_parse_action(self.make_unpack_callback(LS))
+            .set_name("LS")
+        )
+
+    def lm(self) -> pp.ParserElement:
+        """Create a parser for the LM command."""
+        return (
+            self._extended_command(
+                pp.Literal("LM")
+                + pp.one_of(["N", "XY", "X", "Y"]).set_results_name("mirroring")
+            )
+            .set_parse_action(self.make_unpack_callback(LM))
+            .set_name("LM")
         )
 
     # ███    ███     █████ ███████ ██████  ███████ ███████

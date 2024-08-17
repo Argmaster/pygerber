@@ -15,6 +15,8 @@ if TYPE_CHECKING:
 class LR(Node):
     """Represents LR Gerber extended command."""
 
+    rotation: float
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_lr(self)

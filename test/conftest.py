@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import json
 import logging
+import logging.handlers
 import os
 from contextlib import contextmanager, suppress
 from pathlib import Path
@@ -80,12 +81,14 @@ logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 start_time = datetime.datetime.now(tz=tzlocal.get_localzone())
-log_file_path = (
-    Path.cwd() / "log" / "test" / f"{start_time.strftime("%Y_%m_%d_%H_%M_%S")}.log"
-)
+log_file_path = Path.cwd() / "log" / "test" / "pygerber_pytest.log"
 log_file_path.parent.mkdir(0o777, parents=True, exist_ok=True)
-log_file_path.touch(exist_ok=True)
-file_handler = logging.FileHandler(log_file_path.as_posix(), encoding="utf-8")
+file_handler = logging.handlers.RotatingFileHandler(
+    log_file_path.as_posix(),
+    encoding="utf-8",
+    backupCount=16,
+    maxBytes=16 * 1024**2,  # Max 16 MB
+)
 file_handler.setLevel(logging.DEBUG)
 logger.addHandler(file_handler)
 

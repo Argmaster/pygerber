@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable
 
-from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.d_codes.D import D
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
-class Dnn(Node):
+class Dnn(D):
     """Represents DNN Gerber command."""
 
     value: str
