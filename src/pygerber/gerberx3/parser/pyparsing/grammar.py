@@ -76,7 +76,11 @@ from pygerber.gerberx3.ast.nodes.g_codes.G74 import G74
 from pygerber.gerberx3.ast.nodes.g_codes.G75 import G75
 from pygerber.gerberx3.ast.nodes.g_codes.G90 import G90
 from pygerber.gerberx3.ast.nodes.g_codes.G91 import G91
+from pygerber.gerberx3.ast.nodes.load.LM import LM
 from pygerber.gerberx3.ast.nodes.load.LN import LN
+from pygerber.gerberx3.ast.nodes.load.LP import LP
+from pygerber.gerberx3.ast.nodes.load.LR import LR
+from pygerber.gerberx3.ast.nodes.load.LS import LS
 from pygerber.gerberx3.ast.nodes.m_codes.M00 import M00
 from pygerber.gerberx3.ast.nodes.m_codes.M01 import M01
 from pygerber.gerberx3.ast.nodes.m_codes.M02 import M02
@@ -1099,7 +1103,7 @@ class Grammar:
 
     def load_commands(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Load-commands."""
-        return pp.MatchFirst([self.ln()])
+        return pp.MatchFirst([self.ln(), self.lp(), self.lr(), self.ls(), self.lm()])
 
     def ln(self) -> pp.ParserElement:
         """Create a parser for the LN command."""
@@ -1109,6 +1113,47 @@ class Grammar:
             )
             .set_parse_action(self.make_unpack_callback(LN))
             .set_name("LN")
+        )
+
+    def lp(self) -> pp.ParserElement:
+        """Create a parser for the LP command."""
+        return (
+            self._extended_command(
+                pp.Literal("LP") + pp.one_of(["C", "D"]).set_results_name("polarity")
+            )
+            .set_parse_action(self.make_unpack_callback(LP))
+            .set_name("LP")
+        )
+
+    def lr(self) -> pp.ParserElement:
+        """Create a parser for the LR command."""
+        return (
+            self._extended_command(
+                pp.Literal("LR") + self.double.set_results_name("rotation")
+            )
+            .set_parse_action(self.make_unpack_callback(LR))
+            .set_name("LR")
+        )
+
+    def ls(self) -> pp.ParserElement:
+        """Create a parser for the LS command."""
+        return (
+            self._extended_command(
+                pp.Literal("LS") + self.double.set_results_name("scale")
+            )
+            .set_parse_action(self.make_unpack_callback(LS))
+            .set_name("LS")
+        )
+
+    def lm(self) -> pp.ParserElement:
+        """Create a parser for the LM command."""
+        return (
+            self._extended_command(
+                pp.Literal("LM")
+                + pp.one_of(["N", "XY", "X", "Y"]).set_results_name("mirroring")
+            )
+            .set_parse_action(self.make_unpack_callback(LM))
+            .set_name("LM")
         )
 
     # ███    ███     █████ ███████ ██████  ███████ ███████

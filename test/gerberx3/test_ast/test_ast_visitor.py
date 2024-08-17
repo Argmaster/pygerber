@@ -78,9 +78,9 @@ from pygerber.gerberx3.ast.nodes.g_codes.G74 import G74
 from pygerber.gerberx3.ast.nodes.g_codes.G75 import G75
 from pygerber.gerberx3.ast.nodes.g_codes.G90 import G90
 from pygerber.gerberx3.ast.nodes.g_codes.G91 import G91
-from pygerber.gerberx3.ast.nodes.load.LM import LM
+from pygerber.gerberx3.ast.nodes.load.LM import LM, Mirroring
 from pygerber.gerberx3.ast.nodes.load.LN import LN
-from pygerber.gerberx3.ast.nodes.load.LP import LP
+from pygerber.gerberx3.ast.nodes.load.LP import LP, Polarity
 from pygerber.gerberx3.ast.nodes.load.LR import LR
 from pygerber.gerberx3.ast.nodes.load.LS import LS
 from pygerber.gerberx3.ast.nodes.m_codes.M00 import M00
@@ -262,11 +262,11 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     G75: G75(source="", location=0),
     G90: G90(source="", location=0),
     G91: G91(source="", location=0),
-    LM: LM(source="", location=0),
+    LM: LM(source="", location=0, mirroring=Mirroring.XY),
     LN: LN(source="", location=0, name="name"),
-    LP: LP(source="", location=0),
-    LR: LR(source="", location=0),
-    LS: LS(source="", location=0),
+    LP: LP(source="", location=0, polarity=Polarity.Clear),
+    LR: LR(source="", location=0, rotation=0.1),
+    LS: LS(source="", location=0, scale=0.1),
     M00: M00(source="", location=0),
     M01: M01(source="", location=0),
     M02: M02(source="", location=0),
