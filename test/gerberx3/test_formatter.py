@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from io import StringIO
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -158,6 +159,23 @@ class TestMacroSplitMode:
 """
         )
 
+    def test_primitives(self) -> None:
+        formatted_source = _format(
+            DONUT_MACRO_SOURCE,
+            indent_character=" ",
+            macro_body_indent=4,
+            macro_split_mode=Formatter.MacroSplitMode.PRIMITIVES,
+            macro_end_in_new_line=False,
+        )
+        assert (
+            formatted_source
+            == """%AMDonut*
+    1,1,$1,$2,$3*
+    $4=($1x0.75)*
+    1,0,$4,$2,$3*%
+"""
+        )
+
     def test_parameters(self) -> None:
         formatted_source = _format(
             DONUT_MACRO_SOURCE,
@@ -245,3 +263,100 @@ class TestMacroSplitMode:
 %
 """
         )
+
+
+APERTURE_BLOCK_SOURCE = """%ABD12*%
+%ADD11C,0.5*%
+D10*
+G01*
+X-2500000Y-1000000D03*
+Y1000000D03*
+D11*
+X-2500000Y-1000000D03*
+X-500000Y-1000000D02*
+X2500000D01*
+G75*
+G03*
+X500000Y1000000I-2000000J0D01*
+G01*
+%AB*%
+"""
+
+APERTURE_BLOCK_NESTED_SOURCE = """%ABD102*%
+G04 Define nested block aperture 101, consisting of 2x2 flashes of aperture 100*
+%ABD101*%
+D100*
+X0Y0D03*
+X0Y70000000D03*
+X100000000Y0D03*
+X100000000Y70000000D03*
+%AB*%
+D101*
+X0Y0D03*
+X0Y160000000D03*
+X0Y320000000D03*
+X230000000Y0D03*
+X230000000Y160000000D03*
+X230000000Y320000000D03*
+D12*
+X19500000Y-10000000D03*
+%AB*%
+"""
+
+
+def test_block_aperture_indent() -> None:
+    formatted_source = _format(
+        APERTURE_BLOCK_SOURCE,
+        indent_character=" ",
+        block_aperture_body_indent=4,
+    )
+    assert (
+        formatted_source
+        == """%ABD12*%
+    %ADD11C,0.5*%
+    D10*
+    G01*
+    X-2500000Y-1000000D03*
+    Y1000000D03*
+    D11*
+    X-2500000Y-1000000D03*
+    X-500000Y-1000000D02*
+    X2500000D01*
+    G75*
+    G03*
+    X500000Y1000000I-2000000J0D01*
+    G01*
+%AB*%
+"""
+    )
+
+
+def test_nested_block_aperture_indent() -> None:
+    formatted_source = _format(
+        APERTURE_BLOCK_NESTED_SOURCE,
+        indent_character=" ",
+        block_aperture_body_indent=4,
+    )
+    assert (
+        formatted_source
+        == """%ABD102*%
+    G04 Define nested block aperture 101, consisting of 2x2 flashes of aperture 100*
+    %ABD101*%
+        D100*
+        X0Y0D03*
+        X0Y70000000D03*
+        X100000000Y0D03*
+        X100000000Y70000000D03*
+    %AB*%
+    D101*
+    X0Y0D03*
+    X0Y160000000D03*
+    X0Y320000000D03*
+    X230000000Y0D03*
+    X230000000Y160000000D03*
+    X230000000Y320000000D03*
+    D12*
+    X19500000Y-10000000D03*
+%AB*%
+"""
+    )

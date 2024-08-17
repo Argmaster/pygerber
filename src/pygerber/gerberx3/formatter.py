@@ -6,9 +6,18 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from enum import Enum
-from typing import TYPE_CHECKING, Generator, Literal, Optional
+from functools import wraps
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Generator,
+    Literal,
+    Optional,
+    TypeVar,
+)
 
 from pyparsing import cached_property
+from typing_extensions import ParamSpec
 
 from pygerber.gerberx3.ast.nodes.types import Double
 from pygerber.gerberx3.ast.visitor import AstVisitor
@@ -131,6 +140,10 @@ class FormatterError(Exception):
     """Formatter error."""
 
 
+ParamT = ParamSpec("ParamT")
+ReturnT = TypeVar("ReturnT")
+
+
 class Formatter(AstVisitor):
     """Gerber X3 compatible formatter."""
 
@@ -145,18 +158,18 @@ class Formatter(AstVisitor):
         self,
         *,
         indent_character: Literal[" ", "\t"] = " ",
-        macro_body_indent: str | int = 4,
-        macro_param_indent: str | int = 4,
+        macro_body_indent: str | int = 0,
+        macro_param_indent: str | int = 0,
         macro_split_mode: MacroSplitMode = MacroSplitMode.PRIMITIVES,
         macro_end_in_new_line: bool = False,
-        indent_block_aperture_body: str = "",
-        indent_step_and_repeat: str = "",
-        float_decimal_places: int = 6,
+        block_aperture_body_indent: str | int = 0,
+        step_and_repeat_body_indent: str | int = 0,
+        float_decimal_places: int = 8,
         float_trim_trailing_zeros: bool = True,
-        indent_non_aperture_select_commands: bool = False,
-        split_format_select: bool = False,
-        split_aperture_definition: bool = False,
-        split_extended_command_boundaries: bool = False,
+        d01_indent: int | str = 0,
+        d02_indent: int | str = 0,
+        d03_indent: int | str = 0,
+        line_end: Literal["\n", "\r\n"] = "\n",
         strip_whitespace: bool = False,
     ) -> None:
         r"""Initialize Formatter instance.
@@ -166,17 +179,18 @@ class Formatter(AstVisitor):
         indent_character: Literal[" ", "\t"], optional
             Character used for indentation, by default " "
         macro_body_indent : str | int, optional
-            Indentation of macro body, by default 4
+            Indentation of macro body, by default 0
         macro_param_indent: str | int, optional
-            Indentation of macro parameters, by default 4
+            Indentation of macro parameters, by default 0
             This indentation is added on top of macro body indentation.
-        macro_split_mode : Literal["none", "primitives", "parameters"], optional
-            Changes how macro definitions are formatted, by default "none"
-            When "none" is selected, macro will be formatted as a single line.
+            This has effect only when `macro_split_mode` is `PARAMETERS`.
+        macro_split_mode : `Formatter.MacroSplitMode`, optional
+            Changes how macro definitions are formatted, by default `NONE`
+            When `NONE` is selected, macro will be formatted as a single line.
             ```gerber
             %AMDonut*1,1,$1,$2,$3*$4=$1x0.75*1,0,$4,$2,$3*%
             ```
-            When "primitives" is selected, macro will be formatted with each primitive
+            When `PRIMITIVES` is selected, macro will be formatted with each primitive
             on a new line.
             ```gerber
             %AMDonut*
@@ -184,26 +198,49 @@ class Formatter(AstVisitor):
             $4=$1x0.75*
             1,0,$4,$2,$3*%
             ```
+            When `PARAMETERS` is selected, macro will be formatted with each primitive
+            on a new line and each parameter of a primitive on a new line.
+            ```gerber
+            %AMDonut*
+            1,
+            1,
+            $1,
+            $2,
+            $3*
+            $4=$1x0.75*
+            1,
+            0,
+            $4,
+            $2,
+            $3*%
+            ```
+            Use `macro_body_indent` and `macro_param_indent` to control indentation.
         macro_end_in_new_line: bool, optional
-            _description_, by default False
-        indent_block_aperture_body : str, optional
-            _description_, by default ""
-        indent_step_and_repeat : str, optional
-            _description_, by default ""
+            Place % sign which marks the end of macro in new line, by default False
+        block_aperture_body_indent : str | int, optional
+            Indentation of block aperture definition body, by default 0
+            This indentations stacks for nested block apertures.
+        step_and_repeat_body_indent : str | int, optional
+            Indentation of step and repeat definition body, by default 0
+            This indentations stacks for nested step and repeat blocks.
         float_decimal_places : int, optional
-            _description_, by default 6
+            Limit number of decimal places shown for float values, by default 8
         float_trim_trailing_zeros : bool, optional
-            _description_, by default True
-        indent_non_aperture_select_commands : bool, optional
-            _description_, by default False
-        split_format_select : bool, optional
-            _description_, by default False
-        split_aperture_definition : bool, optional
-            _description_, by default False
-        split_extended_command_boundaries : bool, optional
-            _description_, by default False
+            Remove trailing zeros from floats, by default True
+            When this is enabled, after floating point number is formatted with respect
+            to `float_decimal_places`, trailing zeros are removed. If all zeros after
+            decimal point are removed, decimal point is also removed.
+        d01_indent : str | int, optional
+            Custom indentation of D01 command, by default 0
+        d02_indent : str | int, optional
+            Custom indentation of D02 command, by default 0
+        d03_indent : str | int, optional
+            Custom indentation of D03 command, by default 0
         strip_whitespace : bool, optional
-            _description_, by default False
+            Remove all semantically insignificant whitespace, by default False
+        line_end : Literal["\n", "\r\n"], optional
+            Line ending character, Unix or Windows style, by default "\n" (Unix style)
+            If `strip_whitespace` is enabled, no line end will be used.
 
         """
         super().__init__()
@@ -220,18 +257,47 @@ class Formatter(AstVisitor):
         self.macro_split_mode = macro_split_mode
         self.macro_end_in_new_line = macro_end_in_new_line
 
-        self.indent_block_aperture_body = indent_block_aperture_body
-        self.indent_step_and_repeat = indent_step_and_repeat
+        if isinstance(block_aperture_body_indent, int):
+            block_aperture_body_indent = indent_character * block_aperture_body_indent
+        self.block_aperture_body_indent = block_aperture_body_indent
+
+        if isinstance(step_and_repeat_body_indent, int):
+            step_and_repeat_body_indent = indent_character * step_and_repeat_body_indent
+        self.step_and_repeat_body_indent = step_and_repeat_body_indent
+
         self.float_decimal_places = float_decimal_places
 
         self.float_trim_trailing_zeros = float_trim_trailing_zeros
-        self.indent_non_aperture_select_commands = indent_non_aperture_select_commands
-        self.split_format_select = split_format_select
-        self.split_aperture_definition = split_aperture_definition
-        self.split_extended_command_boundaries = split_extended_command_boundaries
+
+        if isinstance(d01_indent, int):
+            d01_indent = indent_character * d01_indent
+        self.d01_indent = d01_indent
+
+        if isinstance(d02_indent, int):
+            d02_indent = indent_character * d02_indent
+        self.d02_indent = d02_indent
+
+        if isinstance(d03_indent, int):
+            d03_indent = indent_character * d03_indent
+        self.d03_indent = d03_indent
+
         self.strip_whitespace = strip_whitespace
 
+        self.lf = line_end
+
+        if self.strip_whitespace:
+            self.lf = ""
+            self.indent_character = ""
+            self.macro_body_indent = ""
+            self.macro_param_indent = ""
+            self.block_aperture_body_indent = ""
+            self.step_and_repeat_body_indent = ""
+            self.d01_indent = ""
+            self.d02_indent = ""
+            self.d03_indent = ""
+
         self._output: Optional[StringIO] = None
+        self._base_indent: str = ""
 
     def format(self, source: File, output: StringIO) -> None:
         """Format Gerber AST according to rules specified in Formatter constructor."""
@@ -240,6 +306,7 @@ class Formatter(AstVisitor):
             self.on_file(source)
         finally:
             self._output = None
+            self._base_indent = ""
 
     @property
     def output(self) -> StringIO:
@@ -256,16 +323,98 @@ class Formatter(AstVisitor):
             return double.rstrip("0").rstrip(".")
         return double
 
-    @cached_property
-    def lf(self) -> str:
-        """Get end of line character."""
-        return "" if self.strip_whitespace else "\n"
+    @staticmethod
+    def _insert_base_indent(
+        function: Callable[ParamT, ReturnT]
+    ) -> Callable[ParamT, ReturnT]:
+
+        @wraps(function)
+        def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+            self = args[0]
+            assert isinstance(self, Formatter)
+            self._write(self._base_indent)
+            return function(*args, **kwargs)
+
+        return _
+
+    @staticmethod
+    def _insert_extra_indent(
+        variable_name: str,
+    ) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
+
+        def _decorator(
+            function: Callable[ParamT, ReturnT]
+        ) -> Callable[ParamT, ReturnT]:
+
+            @wraps(function)
+            def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+                self = args[0]
+                assert isinstance(self, Formatter)
+
+                self._write(getattr(self, variable_name))
+
+                return function(*args, **kwargs)
+
+            return _
+
+        return _decorator
+
+    @staticmethod
+    def _increase_base_indent(
+        variable_name: str,
+    ) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
+
+        def _decorator(
+            function: Callable[ParamT, ReturnT]
+        ) -> Callable[ParamT, ReturnT]:
+
+            @wraps(function)
+            def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+                self = args[0]
+                assert isinstance(self, Formatter)
+
+                self._base_indent += getattr(self, variable_name)
+
+                return function(*args, **kwargs)
+
+            return _
+
+        return _decorator
+
+    @staticmethod
+    def _decrease_base_indent(
+        variable_name: str,
+    ) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
+
+        def _decorator(
+            function: Callable[ParamT, ReturnT]
+        ) -> Callable[ParamT, ReturnT]:
+
+            @wraps(function)
+            def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+                self = args[0]
+                assert isinstance(self, Formatter)
+
+                indent_delta = getattr(self, variable_name)
+                if self._base_indent.endswith(indent_delta):
+                    self._base_indent = self._base_indent[: -len(indent_delta)]
+
+                return function(*args, **kwargs)
+
+            return _
+
+        return _decorator
 
     @contextmanager
-    def _command(self, cmd: str) -> Generator[None, None, None]:
+    def _command(
+        self, cmd: str, *, asterisk: bool = True, lf: bool = True
+    ) -> Generator[None, None, None]:
         self._write(cmd)
         yield
-        self._write(f"*{self.lf}")
+        if asterisk:
+            self._write("*")
+        if lf:
+            self._write(self.lf)
 
     @contextmanager
     def _extended_command(self, cmd: str) -> Generator[None, None, None]:
@@ -276,16 +425,21 @@ class Formatter(AstVisitor):
     def _write(self, value: str) -> None:
         self.output.write(value)
 
+    @_decrease_base_indent("block_aperture_body_indent")
+    @_insert_base_indent
     def on_ab_close(self, node: ABclose) -> None:  # noqa: ARG002
         """Handle `ABclose` node."""
         with self._extended_command("AB"):
             pass
 
+    @_insert_base_indent
+    @_increase_base_indent("block_aperture_body_indent")
     def on_ab_open(self, node: ABopen) -> None:
         """Handle `ABopen` node."""
         with self._extended_command("AB"):
             self._write(node.aperture_identifier)
 
+    @_insert_base_indent
     def on_adc(self, node: ADC) -> None:
         """Handle `AD` circle node."""
         with self._extended_command(f"AD{node.aperture_identifier}C,"):
@@ -294,6 +448,7 @@ class Formatter(AstVisitor):
             if node.hole_diameter is not None:
                 self._write(f"X{self._fmt_double(node.hole_diameter)}")
 
+    @_insert_base_indent
     def on_adr(self, node: ADR) -> None:
         """Handle `AD` rectangle node."""
         with self._extended_command(f"AD{node.aperture_identifier}R,"):
@@ -303,6 +458,7 @@ class Formatter(AstVisitor):
             if node.hole_diameter is not None:
                 self._write(f"X{self._fmt_double(node.hole_diameter)}")
 
+    @_insert_base_indent
     def on_ado(self, node: ADO) -> None:
         """Handle `AD` obround node."""
         with self._extended_command(f"AD{node.aperture_identifier}O,"):
@@ -312,6 +468,7 @@ class Formatter(AstVisitor):
             if node.hole_diameter is not None:
                 self._write(f"X{self._fmt_double(node.hole_diameter)}")
 
+    @_insert_base_indent
     def on_adp(self, node: ADP) -> None:
         """Handle `AD` polygon node."""
         with self._extended_command(f"AD{node.aperture_identifier}P,"):
@@ -324,6 +481,7 @@ class Formatter(AstVisitor):
             if node.hole_diameter is not None:
                 self._write(f"X{self._fmt_double(node.hole_diameter)}")
 
+    @_insert_base_indent
     def on_ad_macro(self, node: ADmacro) -> None:
         """Handle `AD` macro node."""
         with self._extended_command(f"AD{node.aperture_identifier}{node.name}"):
@@ -333,6 +491,7 @@ class Formatter(AstVisitor):
                 for param in rest:
                     self._write(f"X{param}")
 
+    @_insert_base_indent
     def on_am_close(self, node: AMclose) -> None:
         """Handle `AMclose` node."""
         super().on_am_close(node)
@@ -340,16 +499,21 @@ class Formatter(AstVisitor):
             self._write(f"{self.lf}")
         self._write(f"%{self.lf}")
 
+    @_insert_base_indent
     def on_am_open(self, node: AMopen) -> None:
         """Handle `AMopen` node."""
         super().on_am_open(node)
         self._write(f"%AM{node.name}*")
 
+    @_decrease_base_indent("step_and_repeat_body_indent")
+    @_insert_base_indent
     def on_sr_close(self, node: SRclose) -> None:  # noqa: ARG002
         """Handle `SRclose` node."""
         with self._extended_command("SR"):
             pass
 
+    @_insert_base_indent
+    @_increase_base_indent("step_and_repeat_body_indent")
     def on_sr_open(self, node: SRopen) -> None:
         """Handle `SRopen` node."""
         with self._extended_command("SR"):
@@ -367,6 +531,7 @@ class Formatter(AstVisitor):
 
     # Attribute
 
+    @_insert_base_indent
     def on_ta_user_name(self, node: TA_UserName) -> None:
         """Handle `TA_UserName` node."""
         with self._extended_command(f"TA{node.user_name}"):
@@ -374,6 +539,7 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(field)
 
+    @_insert_base_indent
     def on_ta_aper_function(self, node: TA_AperFunction) -> None:
         """Handle `TA_AperFunction` node."""
         with self._extended_command("TA.AperFunction"):
@@ -385,6 +551,7 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(field)
 
+    @_insert_base_indent
     def on_ta_drill_tolerance(self, node: TA_DrillTolerance) -> None:
         """Handle `TA_DrillTolerance` node."""
         with self._extended_command("TA.DrillTolerance"):
@@ -396,6 +563,7 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(self._fmt_double(node.minus_tolerance))
 
+    @_insert_base_indent
     def on_ta_flash_text(self, node: TA_FlashText) -> None:
         """Handle `TA_FlashText` node."""
         with self._extended_command("TA.FlashText"):
@@ -433,12 +601,14 @@ class Formatter(AstVisitor):
                     self._write(",")
                     self._write(comment)
 
+    @_insert_base_indent
     def on_td(self, node: TD) -> None:
         """Handle `TD` node."""
         with self._extended_command("TD"):
             if node.name is not None:
                 self._write(node.name)
 
+    @_insert_base_indent
     def on_tf_user_name(self, node: TF_UserName) -> None:
         """Handle `TF_UserName` node."""
         with self._extended_command(f"TF{node.user_name}"):
@@ -446,6 +616,7 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(field)
 
+    @_insert_base_indent
     def on_tf_part(self, node: TF_Part) -> None:
         """Handle `TF_Part` node."""
         with self._extended_command("TF.Part,"):
@@ -455,6 +626,7 @@ class Formatter(AstVisitor):
                     self._write(",")
                     self._write(field)
 
+    @_insert_base_indent
     def on_tf_file_function(self, node: TF_FileFunction) -> None:
         """Handle `TF_FileFunction` node."""
         with self._extended_command("TF.FileFunction,"):
@@ -464,11 +636,13 @@ class Formatter(AstVisitor):
                     self._write(",")
                     self._write(field)
 
+    @_insert_base_indent
     def on_tf_file_polarity(self, node: TF_FilePolarity) -> None:
         """Handle `TF_FilePolarity` node."""
         with self._extended_command("TF.FilePolarity,"):
             self._write(node.polarity)
 
+    @_insert_base_indent
     def on_tf_same_coordinates(self, node: TF_SameCoordinates) -> None:
         """Handle `TF_SameCoordinates` node."""
         with self._extended_command("TF.SameCoordinates"):
@@ -476,6 +650,7 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(node.identifier)
 
+    @_insert_base_indent
     def on_tf_creation_date(self, node: TF_CreationDate) -> None:
         """Handle `TF_CreationDate` node."""
         with self._extended_command("TF.CreationDate"):
@@ -483,6 +658,7 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(node.creation_date.isoformat())
 
+    @_insert_base_indent
     def on_tf_generation_software(self, node: TF_GenerationSoftware) -> None:
         """Handle `TF_GenerationSoftware` node."""
         with self._extended_command("TF.GenerationSoftware"):
@@ -498,6 +674,7 @@ class Formatter(AstVisitor):
             if node.version is not None:
                 self._write(node.version)
 
+    @_insert_base_indent
     def on_tf_project_id(self, node: TF_ProjectId) -> None:
         """Handle `TF_ProjectId` node."""
         with self._extended_command("TF.ProjectId"):
@@ -513,12 +690,14 @@ class Formatter(AstVisitor):
             if node.revision is not None:
                 self._write(node.revision)
 
+    @_insert_base_indent
     def on_tf_md5(self, node: TF_MD5) -> None:
         """Handle `TF_MD5` node."""
         with self._extended_command("TF.MD5"):
             self._write(",")
             self._write(node.md5)
 
+    @_insert_base_indent
     def on_to_user_name(self, node: TO_UserName) -> None:
         """Handle `TO_UserName` node."""
         with self._extended_command(f"TO{node.user_name}"):
@@ -526,6 +705,7 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(field)
 
+    @_insert_base_indent
     def on_to_n(self, node: TO_N) -> None:
         """Handle `TO_N` node."""
         with self._extended_command("TO.N"):
@@ -533,6 +713,7 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(field)
 
+    @_insert_base_indent
     def on_to_p(self, node: TO_P) -> None:
         """Handle `TO_P` node`."""
         with self._extended_command("TO.P"):
@@ -544,78 +725,91 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(node.function)
 
+    @_insert_base_indent
     def on_to_c(self, node: TO_C) -> None:
         """Handle `TO_C` node."""
         with self._extended_command("TO.C"):
             self._write(",")
             self._write(node.refdes)
 
+    @_insert_base_indent
     def on_to_crot(self, node: TO_CRot) -> None:
         """Handle `TO_CRot` node."""
         with self._extended_command("TO.CRot"):
             self._write(",")
             self._write(self._fmt_double(node.angle))
 
+    @_insert_base_indent
     def on_to_cmfr(self, node: TO_CMfr) -> None:
         """Handle `TO_CMfr` node."""
         with self._extended_command("TO.CMfr"):
             self._write(",")
             self._write(node.manufacturer)
 
+    @_insert_base_indent
     def on_to_cmnp(self, node: TO_CMNP) -> None:
         """Handle `TO_CMNP` node."""
         with self._extended_command("TO.CMPN"):
             self._write(",")
             self._write(node.part_number)
 
+    @_insert_base_indent
     def on_to_cval(self, node: TO_CVal) -> None:
         """Handle `TO_CVal` node."""
         with self._extended_command("TO.CVal"):
             self._write(",")
             self._write(node.value)
 
+    @_insert_base_indent
     def on_to_cmnt(self, node: TO_CMnt) -> None:
         """Handle `TO_CVal` node."""
         with self._extended_command("TO.CMnt"):
             self._write(",")
             self._write(node.mount.value)
 
+    @_insert_base_indent
     def on_to_cftp(self, node: TO_CFtp) -> None:
         """Handle `TO_Cftp` node."""
         with self._extended_command("TO.CFtp"):
             self._write(",")
             self._write(node.footprint)
 
+    @_insert_base_indent
     def on_to_cpgn(self, node: TO_CPgN) -> None:
         """Handle `TO_CPgN` node."""
         with self._extended_command("TO.CPgN"):
             self._write(",")
             self._write(node.name)
 
+    @_insert_base_indent
     def on_to_cpgd(self, node: TO_CPgD) -> None:
         """Handle `TO_CPgD` node."""
         with self._extended_command("TO.CPgD"):
             self._write(",")
             self._write(node.description)
 
+    @_insert_base_indent
     def on_to_chgt(self, node: TO_CHgt) -> None:
         """Handle `TO_CHgt` node."""
         with self._extended_command("TO.CHgt"):
             self._write(",")
             self._write(self._fmt_double(node.height))
 
+    @_insert_base_indent
     def on_to_clbn(self, node: TO_CLbN) -> None:
         """Handle `TO_CLbN` node."""
         with self._extended_command("TO.CLbn"):
             self._write(",")
             self._write(node.name)
 
+    @_insert_base_indent
     def on_to_clbd(self, node: TO_CLbD) -> None:
         """Handle `TO_CLbD` node."""
         with self._extended_command("TO.CLbD"):
             self._write(",")
             self._write(node.description)
 
+    @_insert_base_indent
     def on_to_csup(self, node: TO_CSup) -> None:
         """Handle `TO_CSup` node."""
         with self._extended_command("TO.CSup"):
@@ -629,24 +823,31 @@ class Formatter(AstVisitor):
 
     # D codes
 
+    @_insert_base_indent
+    @_insert_extra_indent("d01_indent")
     def on_d01(self, node: D01) -> None:
         """Handle `D01` node."""
         super().on_d01(node)
         with self._command("D01"):
             pass
 
+    @_insert_base_indent
+    @_insert_extra_indent("d02_indent")
     def on_d02(self, node: D02) -> None:
         """Handle `D02` node."""
         super().on_d02(node)
         with self._command("D02"):
             pass
 
+    @_insert_base_indent
+    @_insert_extra_indent("d03_indent")
     def on_d03(self, node: D03) -> None:
         """Handle `D03` node."""
         super().on_d03(node)
         with self._command("D03"):
             pass
 
+    @_insert_base_indent
     def on_dnn(self, node: Dnn) -> None:
         """Handle `Dnn` node."""
         with self._command(node.value):
@@ -654,98 +855,134 @@ class Formatter(AstVisitor):
 
     # G codes
 
+    @_insert_base_indent
     def on_g01(self, node: G01) -> None:  # noqa: ARG002
         """Handle `G01` node."""
-        self._write("G01*\n")
+        with self._command("G01"):
+            pass
 
+    @_insert_base_indent
     def on_g02(self, node: G02) -> None:  # noqa: ARG002
         """Handle `G02` node."""
-        self._write("G02*\n")
+        with self._command("G02"):
+            pass
 
+    @_insert_base_indent
     def on_g03(self, node: G03) -> None:  # noqa: ARG002
         """Handle `G03` node."""
-        self._write("G03*\n")
+        with self._command("G03"):
+            pass
 
+    @_insert_base_indent
     def on_g04(self, node: G04) -> None:
         """Handle `G04` node."""
-        self._write(f"G04{node.string or ''}*\n")
+        with self._command(f"G04{node.string or ''}"):
+            pass
 
+    @_insert_base_indent
     def on_g36(self, node: G36) -> None:  # noqa: ARG002
         """Handle `G36` node."""
-        self._write("G36*\n")
+        with self._command("G36"):
+            pass
 
+    @_insert_base_indent
     def on_g37(self, node: G37) -> None:  # noqa: ARG002
         """Handle `G37` node."""
-        self._write("G37*\n")
+        with self._command("G37"):
+            pass
 
+    @_insert_base_indent
     def on_g54(self, node: G54) -> None:
         """Handle `G54` node."""
-        self._write("G54")
+        with self._command("G54", asterisk=False, lf=False):
+            pass
         super().on_g54(node)
 
+    @_insert_base_indent
     def on_g55(self, node: G55) -> None:
         """Handle `G55` node."""
-        self._write("G55")
+        with self._command("G55", asterisk=False, lf=False):
+            pass
         super().on_g55(node)
 
+    @_insert_base_indent
     def on_g70(self, node: G70) -> None:  # noqa: ARG002
         """Handle `G70` node."""
-        self._write("G70*\n")
+        with self._command("G70"):
+            pass
 
+    @_insert_base_indent
     def on_g71(self, node: G71) -> None:  # noqa: ARG002
         """Handle `G71` node."""
-        self._write("G71*\n")
+        with self._command("G71"):
+            pass
 
+    @_insert_base_indent
     def on_g74(self, node: G74) -> None:  # noqa: ARG002
         """Handle `G74` node."""
-        self._write("G74*\n")
+        with self._command("G74"):
+            pass
 
+    @_insert_base_indent
     def on_g75(self, node: G75) -> None:  # noqa: ARG002
         """Handle `G75` node."""
-        self._write("G75*\n")
+        with self._command("G75"):
+            pass
 
+    @_insert_base_indent
     def on_g90(self, node: G90) -> None:  # noqa: ARG002
         """Handle `G90` node."""
-        self._write("G90*\n")
+        with self._command("G90"):
+            pass
 
+    @_insert_base_indent
     def on_g91(self, node: G91) -> None:  # noqa: ARG002
         """Handle `G91` node."""
-        self._write("G91*\n")
+        with self._command("G91"):
+            pass
 
     # Load
 
+    @_insert_base_indent
     def on_lm(self, node: LM) -> None:
         """Handle `LM` node."""
         super().on_lm(node)
 
+    @_insert_base_indent
     def on_ln(self, node: LN) -> None:
         """Handle `LN` node."""
         super().on_ln(node)
 
+    @_insert_base_indent
     def on_lp(self, node: LP) -> None:
         """Handle `LP` node."""
         super().on_lp(node)
 
+    @_insert_base_indent
     def on_lr(self, node: LR) -> None:
         """Handle `LR` node."""
         super().on_lr(node)
 
+    @_insert_base_indent
     def on_ls(self, node: LS) -> None:
         """Handle `LS` node."""
         super().on_ls(node)
 
     # M Codes
 
+    @_insert_base_indent
     def on_m00(self, node: M00) -> None:  # noqa: ARG002
         """Handle `M00` node."""
         with self._command("M00"):
             pass
 
+    @_insert_base_indent
     def on_m01(self, node: M01) -> None:  # noqa: ARG002
         """Handle `M01` node."""
         with self._command("M01"):
             pass
 
+    @_insert_base_indent
     def on_m02(self, node: M02) -> None:  # noqa: ARG002
         """Handle `M02` node."""
         with self._command("M02"):
@@ -802,6 +1039,7 @@ class Formatter(AstVisitor):
         self._write("+")
         node.operand.visit(self)
 
+    @_insert_base_indent
     def on_assignment(self, node: Assignment) -> None:
         """Handle `Assignment` node."""
         self._write(self._macro_primitive_lf)
@@ -844,10 +1082,12 @@ class Formatter(AstVisitor):
 
     # Primitives
 
+    @_insert_base_indent
     def on_code_0(self, node: Code0) -> None:
         """Handle `Code0` node."""
         self._write(f"{self._macro_primitive_lf}0{node.string}*")
 
+    @_insert_base_indent
     def on_code_1(self, node: Code1) -> None:
         """Handle `Code1` node."""
         self._write(f"{self._macro_primitive_lf}1,{self._macro_param_lf}")
@@ -865,7 +1105,7 @@ class Formatter(AstVisitor):
 
     @cached_property
     def _macro_primitive_lf(self) -> str:
-        if self.macro_split_mode == self.MacroSplitMode.NONE or self.strip_whitespace:
+        if self.macro_split_mode == self.MacroSplitMode.NONE:
             return ""
 
         if self.macro_split_mode in (
@@ -879,10 +1119,9 @@ class Formatter(AstVisitor):
 
     @cached_property
     def _macro_param_lf(self) -> str:
-        if (
-            self.macro_split_mode
-            in (self.MacroSplitMode.NONE, self.MacroSplitMode.PRIMITIVES)
-            or self.strip_whitespace
+        if self.macro_split_mode in (
+            self.MacroSplitMode.NONE,
+            self.MacroSplitMode.PRIMITIVES,
         ):
             return ""
 
@@ -892,6 +1131,7 @@ class Formatter(AstVisitor):
         msg = f"Unsupported macro split mode: {self.macro_split_mode}"
         raise NotImplementedError(msg)
 
+    @_insert_base_indent
     def on_code_2(self, node: Code2) -> None:
         """Handle `Code2` node."""
         self._write(f"{self._macro_primitive_lf}2,{self._macro_param_lf}")
@@ -910,6 +1150,7 @@ class Formatter(AstVisitor):
         node.rotation.visit(self)
         self._write("*")
 
+    @_insert_base_indent
     def on_code_4(self, node: Code4) -> None:
         """Handle `Code4` node."""
         self._write(f"{self._macro_primitive_lf}4,{self._macro_param_lf}")
@@ -927,6 +1168,7 @@ class Formatter(AstVisitor):
         node.rotation.visit(self)
         self._write("*")
 
+    @_insert_base_indent
     def on_code_5(self, node: Code5) -> None:
         """Handle `Code5` node."""
         self._write(f"{self._macro_primitive_lf}5,{self._macro_param_lf}")
@@ -943,6 +1185,7 @@ class Formatter(AstVisitor):
         node.rotation.visit(self)
         self._write("*")
 
+    @_insert_base_indent
     def on_code_6(self, node: Code6) -> None:
         """Handle `Code6` node."""
         self._write(f"{self._macro_primitive_lf}6,{self._macro_param_lf}")
@@ -965,6 +1208,7 @@ class Formatter(AstVisitor):
         node.rotation.visit(self)
         self._write("*")
 
+    @_insert_base_indent
     def on_code_7(self, node: Code7) -> None:
         """Handle `Code7` node."""
         self._write(f"{self._macro_primitive_lf}7,{self._macro_param_lf}")
@@ -981,6 +1225,7 @@ class Formatter(AstVisitor):
         node.rotation.visit(self)
         self._write("*")
 
+    @_insert_base_indent
     def on_code_20(self, node: Code20) -> None:
         """Handle `Code20` node."""
         self._write(f"{self._macro_primitive_lf}20,{self._macro_param_lf}")
@@ -999,6 +1244,7 @@ class Formatter(AstVisitor):
         node.rotation.visit(self)
         self._write("*")
 
+    @_insert_base_indent
     def on_code_21(self, node: Code21) -> None:
         """Handle `Code21` node."""
         self._write(f"{self._macro_primitive_lf}21,{self._macro_param_lf}")
@@ -1015,6 +1261,7 @@ class Formatter(AstVisitor):
         node.rotation.visit(self)
         self._write("*")
 
+    @_insert_base_indent
     def on_code_22(self, node: Code22) -> None:
         """Handle `Code22` node."""
         self._write(f"{self._macro_primitive_lf}22,{self._macro_param_lf}")
@@ -1033,11 +1280,13 @@ class Formatter(AstVisitor):
 
     # Properties
 
+    @_insert_base_indent
     def on_as(self, node: AS) -> None:
         """Handle `AS` node."""
         with self._extended_command("AS"):
             self._write(node.correspondence.value)
 
+    @_insert_base_indent
     def on_fs(self, node: FS) -> None:
         """Handle `FS` node."""
         with self._extended_command("FS"):
@@ -1046,32 +1295,38 @@ class Formatter(AstVisitor):
             self._write(f"X{node.x_integral}{node.x_decimal}")
             self._write(f"Y{node.y_integral}{node.y_decimal}")
 
+    @_insert_base_indent
     def on_in(self, node: IN) -> None:
         """Handle `IN` node."""
         with self._extended_command("IN"):
             self._write(node.name)
 
+    @_insert_base_indent
     def on_ip(self, node: IP) -> None:
         """Handle `IP` node."""
         with self._extended_command("IP"):
             self._write(node.polarity)
 
+    @_insert_base_indent
     def on_ir(self, node: IR) -> None:
         """Handle `IR` node."""
         with self._extended_command("IR"):
             self._write(self._fmt_double(node.rotation_degrees))
 
+    @_insert_base_indent
     def on_mi(self, node: MI) -> None:
         """Handle `MI` node."""
         with self._extended_command("MI"):
             self._write(f"A{node.a_mirroring}")
             self._write(f"B{node.b_mirroring}")
 
+    @_insert_base_indent
     def on_mo(self, node: MO) -> None:
         """Handle `MO` node."""
         with self._extended_command("MO"):
             self._write(node.mode.value)
 
+    @_insert_base_indent
     def on_of(self, node: OF) -> None:
         """Handle `OF` node."""
         with self._extended_command("OF"):
@@ -1080,6 +1335,7 @@ class Formatter(AstVisitor):
             if node.b_offset is not None:
                 self._write(f"B{node.b_offset}")
 
+    @_insert_base_indent
     def on_sf(self, node: SF) -> None:
         """Handle `SF` node."""
         with self._extended_command("SF"):
