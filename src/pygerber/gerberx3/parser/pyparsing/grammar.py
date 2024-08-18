@@ -18,6 +18,7 @@ from pygerber.gerberx3.ast.nodes.aperture.ADP import ADP
 from pygerber.gerberx3.ast.nodes.aperture.ADR import ADR
 from pygerber.gerberx3.ast.nodes.aperture.AM_close import AMclose
 from pygerber.gerberx3.ast.nodes.aperture.AM_open import AMopen
+from pygerber.gerberx3.ast.nodes.aperture.SR_close import SRclose
 from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
 from pygerber.gerberx3.ast.nodes.attribute.TA import (
     AperFunction,
@@ -278,8 +279,8 @@ class Grammar:
         """Create a parser element capable of parsing aperture blocks."""
         return pp.MatchFirst(
             [
-                self.ab_open,
                 self.ab_close,
+                self.ab_open,
             ]
         )
 
@@ -325,8 +326,8 @@ class Grammar:
         """Create a parser element capable of parsing step repeats."""
         return pp.MatchFirst(
             [
-                self.sr_open,
                 self.sr_close,
+                self.sr_open,
             ]
         )
 
@@ -351,7 +352,7 @@ class Grammar:
         return (
             self._extended_command(pp.Literal("SR"))
             .set_name("SRclose")
-            .set_parse_action(self.make_unpack_callback(AMclose))
+            .set_parse_action(self.make_unpack_callback(SRclose))
         )
 
     def add_aperture(self) -> pp.ParserElement:

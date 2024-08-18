@@ -159,7 +159,7 @@ class Formatter(AstVisitor):
         macro_end_in_new_line: bool = False,
         block_aperture_body_indent: str | int = 0,
         step_and_repeat_body_indent: str | int = 0,
-        float_decimal_places: int = 8,
+        float_decimal_places: int = -1,
         float_trim_trailing_zeros: bool = True,
         d01_indent: int | str = 0,
         d02_indent: int | str = 0,
@@ -223,7 +223,8 @@ class Formatter(AstVisitor):
             Indentation of step and repeat definition body, by default 0
             This indentations stacks for nested step and repeat blocks.
         float_decimal_places : int, optional
-            Limit number of decimal places shown for float values, by default 8
+            Limit number of decimal places shown for float values, by default -1
+            Negative values are interpreted as no limit.
         float_trim_trailing_zeros : bool, optional
             Remove trailing zeros from floats, by default True
             When this is enabled, after floating point number is formatted with respect
@@ -340,6 +341,8 @@ class Formatter(AstVisitor):
         return self._output
 
     def _fmt_double(self, value: Double) -> str:
+        if self.float_decimal_places < 0:
+            return str(value)
         double = f"{value:.{self.float_decimal_places}f}"
         if self.float_trim_trailing_zeros:
             return double.rstrip("0").rstrip(".")
