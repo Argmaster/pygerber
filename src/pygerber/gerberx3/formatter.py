@@ -952,27 +952,32 @@ class Formatter(AstVisitor):
     @_decorator_insert_base_indent
     def on_lm(self, node: LM) -> None:
         """Handle `LM` node."""
-        super().on_lm(node)
+        with self._extended_command(f"LM{node.mirroring.value}"):
+            pass
 
     @_decorator_insert_base_indent
     def on_ln(self, node: LN) -> None:
         """Handle `LN` node."""
-        super().on_ln(node)
+        with self._extended_command(f"LN{node.name}"):
+            pass
 
     @_decorator_insert_base_indent
     def on_lp(self, node: LP) -> None:
         """Handle `LP` node."""
-        super().on_lp(node)
+        with self._extended_command(f"LP{node.polarity.value}"):
+            pass
 
     @_decorator_insert_base_indent
     def on_lr(self, node: LR) -> None:
         """Handle `LR` node."""
-        super().on_lr(node)
+        with self._extended_command(f"LR{self._fmt_double(node.rotation)}"):
+            pass
 
     @_decorator_insert_base_indent
     def on_ls(self, node: LS) -> None:
         """Handle `LS` node."""
-        super().on_ls(node)
+        with self._extended_command(f"LS{self._fmt_double(node.scale)}"):
+            pass
 
     # M Codes
 
