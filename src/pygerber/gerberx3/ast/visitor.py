@@ -1,4 +1,4 @@
-"""`pygerber.gerberx3.node_visitor` contains definition of `NodeVisitor` class."""
+"""`pygerber.gerberx3.visitor` contains definition of `AstVisitor` class."""
 
 from __future__ import annotations
 

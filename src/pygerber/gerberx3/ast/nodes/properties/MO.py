@@ -2,24 +2,15 @@
 
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.enums import UnitMode
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.gerberx3.ast.visitor import AstVisitor
-
-
-class UnitMode(Enum):
-    """Unit mode enumeration."""
-
-    IMPERIAL = "IN"
-    """Imperial unit mode. In this mode inches are used to express lengths."""
-    METRIC = "MM"
-    """Metric unit mode. In this mode millimeters are used to express lengths."""
 
 
 class MO(Node):

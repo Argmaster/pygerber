@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import datetime  # noqa: TCH003
 import hashlib
-from enum import Enum
 from typing import TYPE_CHECKING, Callable, List, Literal, Optional
 
 from pydantic import Field
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.enums import FileFunction, Part
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -38,16 +38,6 @@ class TF_UserName(TF):  # noqa: N801
         return visitor.on_tf_user_name
 
 
-class Part(Enum):
-    """Enumerate supported part types."""
-
-    Single = "Single"
-    Array = "Array"
-    FabricationPanel = "FabricationPanel"
-    Coupon = "Coupon"
-    Other = "Other"
-
-
 class TF_Part(TF):  # noqa: N801
     """Represents TF Gerber extended command with part attribute."""
 
@@ -63,42 +53,6 @@ class TF_Part(TF):  # noqa: N801
     ) -> Callable[[Self], None]:
         """Get callback function for the node."""
         return visitor.on_tf_part
-
-
-class FileFunction(Enum):
-    """Enumerate supported file function types."""
-
-    Copper = "Copper"
-    Plated = "Plated"
-    NonPlated = "NonPlated"
-    Profile = "Profile"
-    Soldermask = "Soldermask"
-    Legend = "Legend"
-    Component = "Component"
-    Paste = "Paste"
-    Glue = "Glue"
-    Carbonmask = "Carbonmask"
-    Goldmask = "Goldmask"
-    Heatsinkmask = "Heatsinkmask"
-    Peelablemask = "Peelablemask"
-    Silvermask = "Silvermask"
-    Tinmask = "Tinmask"
-    Depthrout = "Depthrout"
-    Vcut = "Vcut"
-    Viafill = "Viafill"
-    Pads = "Pads"
-    Other = "Other"
-    Drillmap = "Drillmap"
-    FabricationDrawing = "FabricationDrawing"
-    Vcutmap = "Vcutmap"
-    AssemblyDrawing = "AssemblyDrawing"
-    ArrayDrawing = "ArrayDrawing"
-    OtherDrawing = "OtherDrawing"
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}.{self.name}"
-
-    __str__ = __repr__
 
 
 class TF_FileFunction(TF):  # noqa: N801

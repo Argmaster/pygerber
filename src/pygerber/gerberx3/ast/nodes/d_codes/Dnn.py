@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.d_codes.D import D
+from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 class Dnn(D):
     """Represents DNN Gerber command."""
 
-    value: str
+    aperture_id: ApertureIdStr
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

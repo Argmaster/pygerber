@@ -998,7 +998,7 @@ class Grammar:
 
     def _dnn(self, *, is_standalone: bool) -> pp.ParserElement:
         return (
-            self._command(self.aperture_identifier.set_results_name("value"))
+            self._command(self.aperture_identifier.set_results_name("aperture_id"))
             .set_parse_action(
                 self.make_unpack_callback(Dnn, is_standalone=is_standalone)
             )

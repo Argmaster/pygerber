@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 from pydantic import Field
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.enums import Mount
 from pygerber.gerberx3.ast.nodes.types import Double
 
 if TYPE_CHECKING:
@@ -149,15 +149,6 @@ class TO_CVal(TO):  # noqa: N801
     ) -> Callable[[Self], None]:
         """Get callback function for the node."""
         return visitor.on_to_cval
-
-
-class Mount(Enum):
-    """Mount type enumeration."""
-
-    SMD = "SMD"
-    TH = "TH"
-    Pressfit = "Pressfit"
-    Other = "Other"
 
 
 class TO_CMnt(TO):  # noqa: N801

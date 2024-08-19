@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.types import PackedCoordinateStr
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -21,7 +22,7 @@ class Coordinate(Node):
 class CoordinateX(Coordinate):
     """Represents X Coordinate node."""
 
-    value: str
+    value: PackedCoordinateStr
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -37,7 +38,7 @@ class CoordinateX(Coordinate):
 class CoordinateY(Coordinate):
     """Represents Y Coordinate node."""
 
-    value: str
+    value: PackedCoordinateStr
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -53,7 +54,7 @@ class CoordinateY(Coordinate):
 class CoordinateI(Coordinate):
     """Represents I Coordinate node."""
 
-    value: str
+    value: PackedCoordinateStr
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -69,7 +70,7 @@ class CoordinateI(Coordinate):
 class CoordinateJ(Coordinate):
     """Represents J Coordinate node."""
 
-    value: str
+    value: PackedCoordinateStr
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

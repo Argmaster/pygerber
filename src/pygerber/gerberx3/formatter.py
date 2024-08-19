@@ -884,7 +884,7 @@ class Formatter(AstVisitor):
         if node.is_standalone or not self.keep_non_standalone_codes:
             self._insert_base_indent()
 
-        with self._command(node.value):
+        with self._command(node.aperture_id):
             pass
 
     # G codes
@@ -1327,8 +1327,8 @@ class Formatter(AstVisitor):
     def on_fs(self, node: FS) -> None:
         """Handle `FS` node."""
         with self._extended_command("FS"):
-            self._write(node.zeros)
-            self._write(node.coordinate_mode)
+            self._write(node.zeros.value)
+            self._write(node.coordinate_mode.value)
             self._write(f"X{node.x_integral}{node.x_decimal}")
             self._write(f"Y{node.y_integral}{node.y_decimal}")
 
@@ -1342,7 +1342,7 @@ class Formatter(AstVisitor):
     def on_ip(self, node: IP) -> None:
         """Handle `IP` node."""
         with self._extended_command("IP"):
-            self._write(node.polarity)
+            self._write(node.polarity.value)
 
     @_decorator_insert_base_indent
     def on_ir(self, node: IR) -> None:

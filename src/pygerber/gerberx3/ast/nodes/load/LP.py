@@ -2,22 +2,15 @@
 
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.state_enums import Polarity
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.gerberx3.ast.visitor import AstVisitor
-
-
-class Polarity(Enum):
-    """Polarity enum."""
-
-    Clear = "C"
-    Dark = "D"
 
 
 class LP(Node):

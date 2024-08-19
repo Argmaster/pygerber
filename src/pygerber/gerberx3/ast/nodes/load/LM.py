@@ -2,24 +2,15 @@
 
 from __future__ import annotations
 
-from enum import Enum
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.state_enums import Mirroring
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     from pygerber.gerberx3.ast.visitor import AstVisitor
-
-
-class Mirroring(Enum):
-    """Mirroring enum."""
-
-    None_ = "N"
-    X = "X"
-    Y = "Y"
-    XY = "XY"
 
 
 class LM(Node):

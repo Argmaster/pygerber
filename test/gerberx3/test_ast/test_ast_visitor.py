@@ -63,6 +63,7 @@ from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
 from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
 from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
 from pygerber.gerberx3.ast.nodes.d_codes.Dnn import Dnn
+from pygerber.gerberx3.ast.nodes.enums import CoordinateMode, ImagePolarity, Zeros
 from pygerber.gerberx3.ast.nodes.file import File
 from pygerber.gerberx3.ast.nodes.g_codes.G01 import G01
 from pygerber.gerberx3.ast.nodes.g_codes.G02 import G02
@@ -121,6 +122,7 @@ from pygerber.gerberx3.ast.nodes.properties.MI import MI
 from pygerber.gerberx3.ast.nodes.properties.MO import MO, UnitMode
 from pygerber.gerberx3.ast.nodes.properties.OF import OF
 from pygerber.gerberx3.ast.nodes.properties.SF import SF
+from pygerber.gerberx3.ast.nodes.types import ApertureIdStr, PackedCoordinateStr
 from pygerber.gerberx3.ast.visitor import AstVisitor
 
 NODE_SAMPLES: Dict[Type[Node], Node] = {
@@ -238,16 +240,16 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     D02: D02(
         source="",
         location=0,
-        x=CoordinateX(source="", location=0, value="1"),
-        y=CoordinateY(source="", location=0, value="2"),
+        x=CoordinateX(source="", location=0, value=PackedCoordinateStr("1")),
+        y=CoordinateY(source="", location=0, value=PackedCoordinateStr("2")),
     ),
     D03: D03(
         source="",
         location=0,
-        x=CoordinateX(source="", location=0, value="1"),
-        y=CoordinateY(source="", location=0, value="2"),
+        x=CoordinateX(source="", location=0, value=PackedCoordinateStr("1")),
+        y=CoordinateY(source="", location=0, value=PackedCoordinateStr("2")),
     ),
-    Dnn: Dnn(source="", location=0, value="D11"),
+    Dnn: Dnn(source="", location=0, aperture_id=ApertureIdStr("D11")),
     G01: G01(source="", location=0),
     G02: G02(source="", location=0),
     G03: G03(source="", location=0),
@@ -326,10 +328,10 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
         y=Constant(source="", location=0, constant=2),
     ),
     Variable: Variable(source="", location=0, variable="$1"),
-    CoordinateX: CoordinateX(source="", location=0, value="1"),
-    CoordinateY: CoordinateY(source="", location=0, value="1"),
-    CoordinateI: CoordinateI(source="", location=0, value="1"),
-    CoordinateJ: CoordinateJ(source="", location=0, value="1"),
+    CoordinateX: CoordinateX(source="", location=0, value=PackedCoordinateStr("1")),
+    CoordinateY: CoordinateY(source="", location=0, value=PackedCoordinateStr("1")),
+    CoordinateI: CoordinateI(source="", location=0, value=PackedCoordinateStr("1")),
+    CoordinateJ: CoordinateJ(source="", location=0, value=PackedCoordinateStr("1")),
     Code0: Code0(source="", location=0, string="string"),
     Code1: Code1(
         source="",
@@ -435,15 +437,15 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     FS: FS(
         source="",
         location=0,
-        zeros="L",
-        coordinate_mode="A",
+        zeros=Zeros.SKIP_LEADING,
+        coordinate_mode=CoordinateMode.ABSOLUTE,
         x_integral=2,
         x_decimal=3,
         y_integral=4,
         y_decimal=5,
     ),
     IN: IN(source="", location=0, name="name"),
-    IP: IP(source="", location=0, polarity="D"),
+    IP: IP(source="", location=0, polarity=ImagePolarity.POSITIVE),
     IR: IR(source="", location=0, rotation_degrees=90),
     MI: MI(source="", location=0, a_mirroring=0, b_mirroring=1),
     MO: MO(source="", location=0, mode=UnitMode.METRIC),
