@@ -89,6 +89,7 @@ from pygerber.gerberx3.ast.nodes import (
     CoordinateY,
     Div,
     Dnn,
+    Double,
     File,
     G,
     Mul,
@@ -124,7 +125,6 @@ from pygerber.gerberx3.ast.nodes import (
     TO_UserName,
     Variable,
 )
-from pygerber.gerberx3.ast.nodes.types import Double
 from pygerber.gerberx3.ast.visitor import AstVisitor
 
 if TYPE_CHECKING:

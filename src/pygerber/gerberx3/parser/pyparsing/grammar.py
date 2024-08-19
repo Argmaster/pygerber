@@ -9,27 +9,90 @@ from typing import Any, Callable, List, Literal, Type, TypeVar, cast
 
 import pyparsing as pp
 
-from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
-from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
-from pygerber.gerberx3.ast.nodes.aperture.ADC import ADC
-from pygerber.gerberx3.ast.nodes.aperture.ADmacro import ADmacro
-from pygerber.gerberx3.ast.nodes.aperture.ADO import ADO
-from pygerber.gerberx3.ast.nodes.aperture.ADP import ADP
-from pygerber.gerberx3.ast.nodes.aperture.ADR import ADR
-from pygerber.gerberx3.ast.nodes.aperture.AM_close import AMclose
-from pygerber.gerberx3.ast.nodes.aperture.AM_open import AMopen
-from pygerber.gerberx3.ast.nodes.aperture.SR_close import SRclose
-from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
-from pygerber.gerberx3.ast.nodes.attribute.TA import (
-    AperFunction,
+from pygerber.gerberx3.ast.nodes import (
+    AB,
+    ADC,
+    ADO,
+    ADP,
+    ADR,
+    AS,
+    D01,
+    D02,
+    D03,
+    FS,
+    G01,
+    G02,
+    G03,
+    G04,
+    G36,
+    G37,
+    G54,
+    G55,
+    G70,
+    G71,
+    G74,
+    G75,
+    G90,
+    G91,
+    IN,
+    IP,
+    IR,
+    LM,
+    LN,
+    LP,
+    LR,
+    LS,
+    M00,
+    M01,
+    M02,
+    MI,
+    MO,
+    OF,
+    SF,
+    TD,
+    TF_MD5,
+    TO_C,
+    TO_CMNP,
+    TO_N,
+    TO_P,
+    ABclose,
+    ABopen,
+    Add,
+    ADmacro,
+    AMclose,
+    AMopen,
+    Assignment,
+    Code0,
+    Code1,
+    Code2,
+    Code4,
+    Code5,
+    Code6,
+    Code7,
+    Code20,
+    Code21,
+    Code22,
+    Constant,
+    CoordinateI,
+    CoordinateJ,
+    CoordinateX,
+    CoordinateY,
+    Div,
+    Dnn,
+    Expression,
+    File,
+    Mul,
+    Neg,
+    Node,
+    Point,
+    Pos,
+    SRclose,
+    SRopen,
+    Sub,
     TA_AperFunction,
     TA_DrillTolerance,
     TA_FlashText,
     TA_UserName,
-)
-from pygerber.gerberx3.ast.nodes.attribute.TD import TD
-from pygerber.gerberx3.ast.nodes.attribute.TF import (
-    TF_MD5,
     TF_CreationDate,
     TF_FileFunction,
     TF_FilePolarity,
@@ -38,12 +101,6 @@ from pygerber.gerberx3.ast.nodes.attribute.TF import (
     TF_ProjectId,
     TF_SameCoordinates,
     TF_UserName,
-)
-from pygerber.gerberx3.ast.nodes.attribute.TO import (
-    TO_C,
-    TO_CMNP,
-    TO_N,
-    TO_P,
     TO_CFtp,
     TO_CHgt,
     TO_CLbD,
@@ -56,70 +113,9 @@ from pygerber.gerberx3.ast.nodes.attribute.TO import (
     TO_CSup,
     TO_CVal,
     TO_UserName,
+    Variable,
 )
-from pygerber.gerberx3.ast.nodes.base import Node
-from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
-from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
-from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
-from pygerber.gerberx3.ast.nodes.d_codes.Dnn import Dnn
-from pygerber.gerberx3.ast.nodes.file import File
-from pygerber.gerberx3.ast.nodes.g_codes.G01 import G01
-from pygerber.gerberx3.ast.nodes.g_codes.G02 import G02
-from pygerber.gerberx3.ast.nodes.g_codes.G03 import G03
-from pygerber.gerberx3.ast.nodes.g_codes.G04 import G04
-from pygerber.gerberx3.ast.nodes.g_codes.G36 import G36
-from pygerber.gerberx3.ast.nodes.g_codes.G37 import G37
-from pygerber.gerberx3.ast.nodes.g_codes.G54 import G54
-from pygerber.gerberx3.ast.nodes.g_codes.G55 import G55
-from pygerber.gerberx3.ast.nodes.g_codes.G70 import G70
-from pygerber.gerberx3.ast.nodes.g_codes.G71 import G71
-from pygerber.gerberx3.ast.nodes.g_codes.G74 import G74
-from pygerber.gerberx3.ast.nodes.g_codes.G75 import G75
-from pygerber.gerberx3.ast.nodes.g_codes.G90 import G90
-from pygerber.gerberx3.ast.nodes.g_codes.G91 import G91
-from pygerber.gerberx3.ast.nodes.load.LM import LM
-from pygerber.gerberx3.ast.nodes.load.LN import LN
-from pygerber.gerberx3.ast.nodes.load.LP import LP
-from pygerber.gerberx3.ast.nodes.load.LR import LR
-from pygerber.gerberx3.ast.nodes.load.LS import LS
-from pygerber.gerberx3.ast.nodes.m_codes.M00 import M00
-from pygerber.gerberx3.ast.nodes.m_codes.M01 import M01
-from pygerber.gerberx3.ast.nodes.m_codes.M02 import M02
-from pygerber.gerberx3.ast.nodes.math.assignment import Assignment
-from pygerber.gerberx3.ast.nodes.math.constant import Constant
-from pygerber.gerberx3.ast.nodes.math.expression import Expression
-from pygerber.gerberx3.ast.nodes.math.operators.binary.add import Add
-from pygerber.gerberx3.ast.nodes.math.operators.binary.div import Div
-from pygerber.gerberx3.ast.nodes.math.operators.binary.mul import Mul
-from pygerber.gerberx3.ast.nodes.math.operators.binary.sub import Sub
-from pygerber.gerberx3.ast.nodes.math.operators.unary.neg import Neg
-from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
-from pygerber.gerberx3.ast.nodes.math.point import Point
-from pygerber.gerberx3.ast.nodes.math.variable import Variable
-from pygerber.gerberx3.ast.nodes.other.coordinate import (
-    CoordinateI,
-    CoordinateJ,
-    CoordinateX,
-    CoordinateY,
-)
-from pygerber.gerberx3.ast.nodes.primitives.code_0 import Code0
-from pygerber.gerberx3.ast.nodes.primitives.code_1 import Code1
-from pygerber.gerberx3.ast.nodes.primitives.code_2 import Code2
-from pygerber.gerberx3.ast.nodes.primitives.code_4 import Code4
-from pygerber.gerberx3.ast.nodes.primitives.code_5 import Code5
-from pygerber.gerberx3.ast.nodes.primitives.code_6 import Code6
-from pygerber.gerberx3.ast.nodes.primitives.code_7 import Code7
-from pygerber.gerberx3.ast.nodes.primitives.code_20 import Code20
-from pygerber.gerberx3.ast.nodes.primitives.code_21 import Code21
-from pygerber.gerberx3.ast.nodes.primitives.code_22 import Code22
-from pygerber.gerberx3.ast.nodes.properties.FS import FS
-from pygerber.gerberx3.ast.nodes.properties.IN import IN
-from pygerber.gerberx3.ast.nodes.properties.IP import IP
-from pygerber.gerberx3.ast.nodes.properties.IR import IR
-from pygerber.gerberx3.ast.nodes.properties.MI import MI
-from pygerber.gerberx3.ast.nodes.properties.MO import MO
-from pygerber.gerberx3.ast.nodes.properties.OF import OF
-from pygerber.gerberx3.ast.nodes.properties.SF import SF
+from pygerber.gerberx3.ast.nodes.enums import AperFunction
 
 T = TypeVar("T", bound=Node)
 
@@ -158,12 +154,12 @@ class Grammar:
                 pp.MatchFirst(
                     [
                         self.aperture(),
-                        self.attribute(),
-                        self.g_codes(),
-                        self.load_commands(),
-                        self.m_codes(),
-                        self.d_codes(is_standalone=True),
-                        self.properties(),
+                        self.attribute,
+                        self.g_codes,
+                        self.load_commands,
+                        self.m_codes,
+                        self.properties,
+                        self.d_codes_standalone,
                     ]
                 )
             )
@@ -269,20 +265,44 @@ class Grammar:
         return pp.MatchFirst(
             [
                 self.aperture_block(),
-                self.macro(),
-                self.step_repeat(),
-                self.add_aperture(),
+                self.macro,
+                self.step_repeat,
+                self.add_aperture,
             ]
         )
 
     def aperture_block(self) -> pp.ParserElement:
         """Create a parser element capable of parsing aperture blocks."""
-        return pp.MatchFirst(
-            [
-                self.ab_close,
-                self.ab_open,
-            ]
+        block = pp.Forward()
+
+        aperture_block = (
+            (
+                self.ab_open.set_results_name("open")
+                + block
+                + self.ab_close.set_results_name("close")
+            )
+            .set_name("ApertureBlock")
+            .set_parse_action(self.make_unpack_callback(AB))
         )
+
+        block <<= pp.ZeroOrMore(
+            pp.MatchFirst(
+                [
+                    self.attribute,
+                    self.g_codes,
+                    self.load_commands,
+                    self.m_codes,  # Technically not valid according to standard.
+                    self.properties,
+                    self.d_codes_standalone,
+                    # Other aperture altering commands.
+                    self.macro,
+                    self.step_repeat,
+                    self.add_aperture,
+                ]
+            )
+        ).set_results_name("nodes")
+
+        return aperture_block
 
     @pp.cached_property
     def ab_open(self) -> pp.ParserElement:
@@ -302,6 +322,7 @@ class Grammar:
             .set_parse_action(self.make_unpack_callback(ABclose))
         )
 
+    @pp.cached_property
     def macro(self) -> pp.ParserElement:
         """Create a parser element capable of parsing macros."""
         return self.am_open + self.primitives + self.am_close
@@ -322,6 +343,7 @@ class Grammar:
             self.make_unpack_callback(AMclose)
         )
 
+    @pp.cached_property
     def step_repeat(self) -> pp.ParserElement:
         """Create a parser element capable of parsing step repeats."""
         return pp.MatchFirst(
@@ -355,6 +377,7 @@ class Grammar:
             .set_parse_action(self.make_unpack_callback(SRclose))
         )
 
+    @pp.cached_property
     def add_aperture(self) -> pp.ParserElement:
         """Create a parser element capable of parsing add-aperture commands."""
         return pp.MatchFirst(
@@ -447,6 +470,7 @@ class Grammar:
     # ██   ██    ██       ██    ██   ██ ██ ██   ██ ██    ██    ██    ██
     # ██   ██    ██       ██    ██   ██ ██ ██████   ██████     ██    ███████
 
+    @pp.cached_property
     def attribute(self) -> pp.ParserElement:
         """Create a parser element capable of parsing attributes."""
         return pp.MatchFirst(
@@ -980,7 +1004,17 @@ class Grammar:
     # ██   ██    ██     ██   ██ ██   ██ ██           ██
     # ██████      █████ ███████ ██████  ███████ ███████
 
-    def d_codes(self, *, is_standalone: bool) -> pp.ParserElement:
+    @pp.cached_property
+    def d_codes_standalone(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing standalone D-codes."""
+        return self._d_codes(is_standalone=True)
+
+    @pp.cached_property
+    def d_codes_non_standalone(self) -> pp.ParserElement:
+        """Create a parser element capable of parsing standalone D-codes."""
+        return self._d_codes(is_standalone=False)
+
+    def _d_codes(self, *, is_standalone: bool) -> pp.ParserElement:
         """Create a parser element capable of parsing D-codes.
 
         `is_standalone` parameter is used to determine if the D-code is standalone, ie.
@@ -1052,6 +1086,7 @@ class Grammar:
     # ██    ██    ██     ██   ██ ██   ██ ██           ██
     #  ██████      █████ ███████ ██████  ███████ ███████
 
+    @pp.cached_property
     def g_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing G-codes."""
         g04_comment = self._command(
@@ -1062,8 +1097,6 @@ class Grammar:
             g04_comment = pp.Suppress(g04_comment)
         else:
             g04_comment = g04_comment.set_parse_action(self.make_unpack_callback(G04))
-
-        non_standalone_d_codes = self.d_codes(is_standalone=False)
 
         def _standalone(cls: Type[Node]) -> pp.ParserElement:
             code = int(cls.__qualname__.lstrip("G"))
@@ -1084,7 +1117,7 @@ class Grammar:
                 )
                 .set_name(cls.__qualname__)
                 .set_parse_action(self.make_unpack_callback(cls, is_standalone=False))
-            ) + non_standalone_d_codes
+            ) + self.d_codes_non_standalone
 
         return pp.MatchFirst(
             [
@@ -1138,6 +1171,7 @@ class Grammar:
     # ██     ██    ██ ██   ██ ██   ██    ██     ██   ██ ██  ██  ██ ██  ██  ██ ██   ██ ██  ██ ██ ██   ██      ██ # noqa: E501
     # ██████ ███████  ██   ██ ██████      █████ ███████ ██      ██ ██      ██ ██   ██ ██   ████ ██████  ███████ # noqa: E501
 
+    @pp.cached_property
     def load_commands(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Load-commands."""
         return pp.MatchFirst([self.ln(), self.lp(), self.lr(), self.ls(), self.lm()])
@@ -1199,6 +1233,7 @@ class Grammar:
     # ██  ██  ██    ██     ██   ██ ██   ██ ██           ██
     # ██      ██     █████ ███████ ██████  ███████ ███████
 
+    @pp.cached_property
     def m_codes(self) -> pp.ParserElement:
         """Create a parser element capable of parsing M-codes."""
         return pp.MatchFirst(
@@ -1576,6 +1611,7 @@ class Grammar:
     # ██      ██   ██ ██    ██ ██      ██      ██   ██   ██    ██ ██           ██
     # ██      ██   ██  ██████  ██      ███████ ██   ██   ██    ██ ███████ ███████
 
+    @pp.cached_property
     def properties(self) -> pp.ParserElement:
         """Create a parser element capable of parsing Properties-commands."""
         return pp.MatchFirst(
@@ -1660,7 +1696,7 @@ class Grammar:
                 pp.Literal("AS")
                 + pp.one_of(["AXBY", "AYBX"]).set_results_name("correspondence")
             )
-            .set_parse_action(self.make_unpack_callback(OF))
+            .set_parse_action(self.make_unpack_callback(AS))
             .set_name("OF")
         )
 
