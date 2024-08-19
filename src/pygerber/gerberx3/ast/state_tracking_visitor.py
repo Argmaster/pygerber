@@ -9,7 +9,7 @@ from typing import Any, Callable, Optional
 
 from pydantic import BaseModel, Field
 
-from pygerber.gerberx3.ast.nodes import AB, AD, AM
+from pygerber.gerberx3.ast.nodes import AB, AD, AM, TA, TD, TF, TO
 from pygerber.gerberx3.ast.nodes.enums import (
     AxisCorrespondence,
     CoordinateMode,
@@ -89,11 +89,14 @@ class CoordinateFormat(_StateModel):
 class Attributes(_StateModel):
     """Attributes of the Gerber file."""
 
-    aperture_attributes: dict[str, Any] = Field(default_factory=dict)
+    aperture_attributes: dict[str, TA] = Field(default_factory=dict)
+    """Object attributes created with TA extended command."""
 
-    file_attributes: dict[str, Any] = Field(default_factory=dict)
+    file_attributes: dict[str, TF] = Field(default_factory=dict)
+    """Object attributes created with TF extended command."""
 
-    object_attributes: dict[str, Any] = Field(default_factory=dict)
+    object_attributes: dict[str, TO] = Field(default_factory=dict)
+    """Object attributes created with TO extended command."""
 
     image_polarity: ImagePolarity = Field(default=None)
     """The name of the image. (Spec reference: 8.1.3)"""
@@ -182,14 +185,17 @@ class State(_StateModel):
     coordinate_j: Double = Field(default=0.0)
     """Last J coordinate value set by CoordinateJ node."""
 
-    transform: Transform = Field(default_factory=lambda: Transform)
+    transform: Transform = Field(default_factory=Transform)
     """Current aperture transformation parameters."""
 
-    apertures: ApertureStorage = Field(default_factory=lambda: ApertureStorage)
+    apertures: ApertureStorage = Field(default_factory=ApertureStorage)
     """Container for different types of apertures."""
 
-    macro_context: MacroContext = Field(default_factory=lambda: MacroContext)
+    macro_context: MacroContext = Field(default_factory=MacroContext)
     """Context used for macro evaluation."""
+
+    attributes: Attributes = Field(default_factory=Attributes)
+    """Container for holding currently active attributes."""
 
 
 class StateTrackingVisitor(AstVisitor):
@@ -218,3 +224,27 @@ class StateTrackingVisitor(AstVisitor):
     def on_am(self, node: AM) -> None:
         """Handle `AM` root node."""
         self.state.apertures.macros[node.open.name] = node
+
+    # Attribute
+
+    def on_ta(self, node: TA) -> None:
+        """Handle `TA_UserName` node."""
+        self.state.attributes.aperture_attributes[node.attribute_name] = node
+
+    def on_tf(self, node: TF) -> None:
+        """Handle `TF` node."""
+        self.state.attributes.file_attributes[node.attribute_name] = node
+
+    def on_to(self, node: TO) -> None:
+        """Handle `TO` node."""
+        self.state.attributes.object_attributes[node.attribute_name] = node
+
+    def on_td(self, node: TD) -> None:
+        """Handle `TD` node."""
+        if node.name is None:
+            self.state.attributes.aperture_attributes.clear()
+            self.state.attributes.object_attributes.clear()
+            return
+
+        self.state.attributes.aperture_attributes.pop(node.name, None)
+        self.state.attributes.object_attributes.pop(node.name, None)

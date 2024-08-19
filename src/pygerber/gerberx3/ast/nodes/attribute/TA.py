@@ -18,12 +18,22 @@ if TYPE_CHECKING:
 class TA(Node):
     """Represents TA Gerber extended command."""
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        raise NotImplementedError
+
 
 class TA_UserName(TA):  # noqa: N801
     """Represents TA Gerber extended command with user name."""
 
     user_name: str
     fields: List[str] = Field(default_factory=list)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return self.user_name
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -42,6 +52,11 @@ class TA_AperFunction(TA):  # noqa: N801
     function: Optional[AperFunction] = Field(default=None)
     fields: List[str] = Field(default_factory=list)
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".AperFunction"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_ta_aper_function(self)
@@ -58,6 +73,11 @@ class TA_DrillTolerance(TA):  # noqa: N801
 
     plus_tolerance: Optional[float] = Field(default=None)
     minus_tolerance: Optional[float] = Field(default=None)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".DrillTolerance"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -79,6 +99,11 @@ class TA_FlashText(TA):  # noqa: N801
     font: Optional[str] = Field(default=None)
     size: Optional[str] = Field(default=None)
     comments: List[str] = Field(default_factory=list)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".FlashText"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

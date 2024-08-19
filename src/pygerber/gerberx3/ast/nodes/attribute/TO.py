@@ -19,12 +19,22 @@ if TYPE_CHECKING:
 class TO(Node):
     """Represents TO Gerber extended command."""
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        raise NotImplementedError
+
 
 class TO_UserName(TO):  # noqa: N801
     """Represents TO Gerber extended command with user name."""
 
     user_name: str
     fields: List[str] = Field(default_factory=list)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return self.user_name
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -41,6 +51,11 @@ class TO_N(TO):  # noqa: N801
     """Represents TO Gerber extended command with .N attribute."""
 
     net_names: List[str] = Field(default_factory=list)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".N"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -60,6 +75,11 @@ class TO_P(TO):  # noqa: N801
     number: str
     function: Optional[str] = Field(default=None)
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".P"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_to_p(self)
@@ -75,6 +95,11 @@ class TO_C(TO):  # noqa: N801
     """Represents TO Gerber extended command with .C attribute."""
 
     refdes: str
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".C"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -92,6 +117,11 @@ class TO_CRot(TO):  # noqa: N801
 
     angle: Double
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CRot"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_to_crot(self)
@@ -107,6 +137,11 @@ class TO_CMfr(TO):  # noqa: N801
     """Represents TO Gerber extended command with .CMfr attribute."""
 
     manufacturer: str
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CMfr"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -124,6 +159,11 @@ class TO_CMNP(TO):  # noqa: N801
 
     part_number: str
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CMNP"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_to_cmnp(self)
@@ -139,6 +179,11 @@ class TO_CVal(TO):  # noqa: N801
     """Represents TO Gerber extended command with .CVal attribute."""
 
     value: str
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CVal"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -156,6 +201,11 @@ class TO_CMnt(TO):  # noqa: N801
 
     mount: Mount
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CMnt"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_to_cmnt(self)
@@ -171,6 +221,11 @@ class TO_CFtp(TO):  # noqa: N801
     """Represents TO Gerber extended command with .CFtp attribute."""
 
     footprint: str
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CFtp"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -188,6 +243,11 @@ class TO_CPgN(TO):  # noqa: N801
 
     name: str
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CPgN"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_to_cpgn(self)
@@ -203,6 +263,11 @@ class TO_CPgD(TO):  # noqa: N801
     """Represents TO Gerber extended command with .CPgD attribute."""
 
     description: str
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CPgD"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -220,6 +285,11 @@ class TO_CHgt(TO):  # noqa: N801
 
     height: Double
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CHgt"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_to_chgt(self)
@@ -236,6 +306,11 @@ class TO_CLbN(TO):  # noqa: N801
 
     name: str
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CLbN"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_to_clbn(self)
@@ -251,6 +326,11 @@ class TO_CLbD(TO):  # noqa: N801
     """Represents TO Gerber extended command with .CLbD attribute."""
 
     description: str
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CLbD"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -270,6 +350,11 @@ class TO_CSup(TO):  # noqa: N801
     supplier_part: str
 
     other_suppliers: List[str] = Field(default_factory=list)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CSup"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

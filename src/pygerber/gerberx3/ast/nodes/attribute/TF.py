@@ -20,12 +20,22 @@ if TYPE_CHECKING:
 class TF(Node):
     """Represents TF Gerber extended command."""
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        raise NotImplementedError
+
 
 class TF_UserName(TF):  # noqa: N801
     """Represents TF Gerber extended command with user name."""
 
     user_name: str
     fields: List[str] = Field(default_factory=list)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return self.user_name
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -44,6 +54,11 @@ class TF_Part(TF):  # noqa: N801
     part: Part
     fields: List[str] = Field(default_factory=list)
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".Part"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_part(self)
@@ -61,6 +76,11 @@ class TF_FileFunction(TF):  # noqa: N801
     file_function: FileFunction
     fields: List[str] = Field(default_factory=list)
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".FileFunction"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_file_function(self)
@@ -76,6 +96,11 @@ class TF_FilePolarity(TF):  # noqa: N801
     """Represents TF Gerber extended command with file polarity attribute."""
 
     polarity: Literal["Positive", "Negative"]
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".FilePolarity"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -93,6 +118,11 @@ class TF_SameCoordinates(TF):  # noqa: N801
 
     identifier: Optional[str] = Field(default=None)
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".SameCoordinates"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_same_coordinates(self)
@@ -108,6 +138,11 @@ class TF_CreationDate(TF):  # noqa: N801
     """Represents TF Gerber extended command with creation date attribute."""
 
     creation_date: datetime.datetime
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".CreationDate"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -127,6 +162,11 @@ class TF_GenerationSoftware(TF):  # noqa: N801
     application: Optional[str] = Field(default=None)
     version: Optional[str] = Field(default=None)
 
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".GenerationSoftware"
+
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
         visitor.on_tf_generation_software(self)
@@ -144,6 +184,11 @@ class TF_ProjectId(TF):  # noqa: N801
     name: Optional[str] = Field(default=None)
     guid: Optional[str] = Field(default=None)
     revision: Optional[str] = Field(default=None)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".ProjectId"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
@@ -163,6 +208,11 @@ class TF_MD5(TF):  # noqa: N801
     """Represents TF Gerber extended command with MD5 attribute."""
 
     md5: str = Field(min_length=MD5_LENGTH_HEX, max_length=MD5_LENGTH_HEX)
+
+    @property
+    def attribute_name(self) -> str:
+        """Get attribute name."""
+        return ".MD5"
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
