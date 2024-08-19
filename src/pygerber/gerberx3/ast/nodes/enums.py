@@ -138,7 +138,7 @@ class Mount(Enum):
 class Mirroring(Enum):
     """Mirroring enum."""
 
-    None_ = "N"
+    NONE = "N"
     X = "X"
     Y = "Y"
     XY = "XY"

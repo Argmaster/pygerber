@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Callable, List, Optional
 
 from pydantic import Field
 
-from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.aperture.AD import AD
 from pygerber.gerberx3.ast.nodes.types import Double
 
 if TYPE_CHECKING:
@@ -15,10 +15,9 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
-class ADmacro(Node):
+class ADmacro(AD):
     """Represents AD macro Gerber extended command."""
 
-    aperture_identifier: str
     name: str
     params: Optional[List[Double]] = Field(default=None)
 
