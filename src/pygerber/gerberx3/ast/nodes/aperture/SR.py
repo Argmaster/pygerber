@@ -1,11 +1,12 @@
-"""`pygerber.nodes.aperture.ABopen` module contains definition of `ABopen` class."""
+"""`pygerber.nodes.aperture.SR` module contains definition of `SR` class."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable
 
+from pygerber.gerberx3.ast.nodes.aperture.SR_close import SRclose
+from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
 from pygerber.gerberx3.ast.nodes.base import Node
-from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -13,17 +14,19 @@ if TYPE_CHECKING:
     from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
-class ABopen(Node):
-    """Represents AB Gerber extended command."""
+class SR(Node):
+    """Represents SR Gerber extended command."""
 
-    aperture_identifier: ApertureIdStr
+    open: SRopen
+    nodes: list[Node]
+    close: SRclose
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""
-        visitor.on_ab_open(self)
+        visitor.on_sr(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
     ) -> Callable[[Self], None]:
         """Get callback function for the node."""
-        return visitor.on_ab_open
+        return visitor.on_sr

@@ -50,6 +50,7 @@ from pygerber.gerberx3.ast.nodes import (
     MO,
     OF,
     SF,
+    SR,
     TD,
     TF_MD5,
     TO_C,
@@ -144,6 +145,9 @@ class Grammar:
         self.enable_debug = enable_debug
         self.optimization = optimization
 
+        self.step_repeat_forward = pp.Forward()
+        self.aperture_block_forward = pp.Forward()
+
     def build(self) -> pp.ParserElement:
         """Build the grammar."""
 
@@ -154,13 +158,13 @@ class Grammar:
             pp.OneOrMore(
                 pp.MatchFirst(
                     [
-                        self.aperture(),
-                        self.attribute,
+                        self.d_codes_standalone,
                         self.g_codes,
                         self.load_commands,
-                        self.m_codes,
+                        self.aperture(),
+                        self.attribute,
                         self.properties,
-                        self.d_codes_standalone,
+                        self.m_codes,
                     ]
                 )
             )
@@ -265,35 +269,35 @@ class Grammar:
         """Create a parser element capable of parsing apertures."""
         return pp.MatchFirst(
             [
-                self.aperture_block(),
+                self.aperture_block,
                 self.macro,
                 self.step_repeat,
                 self.add_aperture,
             ]
         )
 
+    @pp.cached_property
     def aperture_block(self) -> pp.ParserElement:
         """Create a parser element capable of parsing aperture blocks."""
-        aperture_block = pp.Forward()
+        self.aperture_block_forward = pp.Forward()
 
-        aperture_block <<= (
+        self.aperture_block_forward <<= (
             (
                 self.ab_open.set_results_name("open")
                 + pp.ZeroOrMore(
                     pp.MatchFirst(
                         [
-                            self.attribute,
+                            self.d_codes_standalone,
                             self.g_codes,
                             self.load_commands,
+                            self.properties,
+                            self.attribute,
+                            self.add_aperture,
+                            self.step_repeat_forward,
+                            self.aperture_block_forward,
+                            self.macro,
                             # Technically not valid according to standard.
                             self.m_codes,
-                            self.properties,
-                            self.d_codes_standalone,
-                            # Other aperture altering commands.
-                            self.macro,
-                            self.step_repeat,
-                            self.add_aperture,
-                            aperture_block,
                         ]
                     )
                 ).set_results_name("nodes")
@@ -303,7 +307,7 @@ class Grammar:
             .set_parse_action(self.make_unpack_callback(AB))
         )
 
-        return aperture_block
+        return self.aperture_block_forward
 
     @pp.cached_property
     def ab_open(self) -> pp.ParserElement:
@@ -355,12 +359,35 @@ class Grammar:
     @pp.cached_property
     def step_repeat(self) -> pp.ParserElement:
         """Create a parser element capable of parsing step repeats."""
-        return pp.MatchFirst(
-            [
-                self.sr_close,
-                self.sr_open,
-            ]
+        self.step_and_repeat_block_forward = pp.Forward()
+
+        self.step_and_repeat_block_forward <<= (
+            (
+                self.sr_open.set_results_name("open")
+                + pp.ZeroOrMore(
+                    pp.MatchFirst(
+                        [
+                            self.d_codes_standalone,
+                            self.g_codes,
+                            self.load_commands,
+                            self.properties,
+                            self.attribute,
+                            self.add_aperture,
+                            self.step_repeat_forward,
+                            self.aperture_block_forward,
+                            self.macro,
+                            # Technically not valid according to standard.
+                            self.m_codes,
+                        ]
+                    )
+                ).set_results_name("nodes")
+                + self.sr_close.set_results_name("close")
+            )
+            .set_name("StepAndRepeatBlock")
+            .set_parse_action(self.make_unpack_callback(SR))
         )
+
+        return self.step_and_repeat_block_forward
 
     @pp.cached_property
     def sr_open(self) -> pp.ParserElement:

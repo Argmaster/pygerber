@@ -16,6 +16,7 @@ from pygerber.gerberx3.ast.nodes.aperture.ADR import ADR
 from pygerber.gerberx3.ast.nodes.aperture.AM import AM
 from pygerber.gerberx3.ast.nodes.aperture.AM_close import AMclose
 from pygerber.gerberx3.ast.nodes.aperture.AM_open import AMopen
+from pygerber.gerberx3.ast.nodes.aperture.SR import SR
 from pygerber.gerberx3.ast.nodes.aperture.SR_close import SRclose
 from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
 from pygerber.gerberx3.ast.nodes.attribute.TA import (
@@ -141,6 +142,7 @@ __all__ = [
     "ADR",
     "AMclose",
     "AMopen",
+    "SR",
     "SRclose",
     "SRopen",
     "TA_AperFunction",

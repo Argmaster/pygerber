@@ -47,6 +47,7 @@ if TYPE_CHECKING:
         MO,
         OF,
         SF,
+        SR,
         TA,
         TD,
         TF,
@@ -181,6 +182,13 @@ class AstVisitor:
 
     def on_am_open(self, node: AMopen) -> None:
         """Handle `AMopen` node."""
+
+    def on_sr(self, node: SR) -> None:
+        """Handle `SR` root node."""
+        node.open.visit(self)
+        for inner_node in node.nodes:
+            inner_node.visit(self)
+        node.close.visit(self)
 
     def on_sr_close(self, node: SRclose) -> None:
         """Handle `SRclose` node."""
