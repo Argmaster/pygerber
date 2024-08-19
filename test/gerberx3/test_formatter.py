@@ -82,6 +82,7 @@ def test_formatter(asset: Asset, config: Config) -> None:
 
     output_buffer.seek(0)
     formatted_source = output_buffer.read()
+
     formatted_ast = parser.parse(formatted_source)
 
     if formatted_ast.model_dump_json(serialize_as_any=True) != ast.model_dump_json(
@@ -304,7 +305,7 @@ X19500000Y-10000000D03*
 """
 
 
-def test_block_aperture_indent() -> None:
+def test_block_aperture_body_indent() -> None:
     formatted_source = _format(
         APERTURE_BLOCK_SOURCE,
         indent_character=" ",
@@ -331,7 +332,7 @@ def test_block_aperture_indent() -> None:
     )
 
 
-def test_nested_block_aperture_indent() -> None:
+def test_nested_block_aperture_body_indent() -> None:
     formatted_source = _format(
         APERTURE_BLOCK_NESTED_SOURCE,
         indent_character=" ",
@@ -358,5 +359,35 @@ def test_nested_block_aperture_indent() -> None:
     D12*
     X19500000Y-10000000D03*
 %AB*%
+"""
+    )
+
+
+STEP_AND_REPEAT_SOURCE = """%SRX3Y2I5.0J4.0*%
+D13*
+X123456Y789012D03*
+D14*
+X456789Y012345D03*
+%SR*%
+"""
+
+
+def test_step_and_repeat_body_indent() -> None:
+    formatted_source = _format(
+        STEP_AND_REPEAT_SOURCE,
+        indent_character=" ",
+        step_and_repeat_body_indent=4,
+    )
+    from pathlib import Path
+
+    Path("formatted.gbr").write_text(formatted_source)
+    assert (
+        formatted_source
+        == """%SRX3Y2I5.0J4.0*%
+    D13*
+    X123456Y789012D03*
+    D14*
+    X456789Y012345D03*
+%SR*%
 """
     )
