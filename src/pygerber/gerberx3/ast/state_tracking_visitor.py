@@ -137,7 +137,7 @@ class ApertureStorage(_StateModel):
     apertures: dict[ApertureIdStr, AD] = Field(default_factory=dict)
     """Aperture storage."""
 
-    blocks: dict[str, AB] = Field(default_factory=dict)
+    blocks: dict[ApertureIdStr, AB] = Field(default_factory=dict)
     """Block aperture storage."""
 
     macros: dict[str, AM] = Field(default_factory=dict)
@@ -185,9 +185,11 @@ class State(_StateModel):
     transform: Transform = Field(default_factory=lambda: Transform)
     """Current aperture transformation parameters."""
 
-    apertures: ApertureStorage
+    apertures: ApertureStorage = Field(default_factory=lambda: ApertureStorage)
+    """Container for different types of apertures."""
 
     macro_context: MacroContext = Field(default_factory=lambda: MacroContext)
+    """Context used for macro evaluation."""
 
 
 class StateTrackingVisitor(AstVisitor):
@@ -201,3 +203,18 @@ class StateTrackingVisitor(AstVisitor):
 
     def __init__(self) -> None:
         super().__init__()
+        self.state = State()
+
+    # Aperture
+
+    def on_ab(self, node: AB) -> None:
+        """Handle `ABclose` node."""
+        self.state.apertures.blocks[node.open.aperture_identifier] = node
+
+    def on_ad(self, node: AD) -> None:
+        """Handle `AD` node."""
+        self.state.apertures.apertures[node.aperture_identifier] = node
+
+    def on_am(self, node: AM) -> None:
+        """Handle `AM` root node."""
+        self.state.apertures.macros[node.open.name] = node
