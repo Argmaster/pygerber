@@ -368,6 +368,28 @@ class Formatter(AstVisitor):
         self._write(value)
 
     @staticmethod
+    def _insert_var(
+        variable_name_or_getter: str | Callable[[Formatter], str],
+    ) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
+        def _decorator(
+            function: Callable[ParamT, ReturnT],
+        ) -> Callable[ParamT, ReturnT]:
+            @wraps(function)
+            def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+                self = args[0]
+                assert isinstance(self, Formatter)
+                if isinstance(variable_name_or_getter, str):
+                    self._write(getattr(self, variable_name_or_getter))
+                else:
+                    self._write(variable_name_or_getter(self))
+
+                return function(*args, **kwargs)
+
+            return _
+
+        return _decorator
+
+    @staticmethod
     def _increase_base_indent(
         variable_name: str,
     ) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
@@ -964,6 +986,7 @@ class Formatter(AstVisitor):
         with self._extended_command(f"LN{node.name}"):
             pass
 
+    @_insert_var("empty_line_before_polarity_switch")
     @_decorator_insert_base_indent
     def on_lp(self, node: LP) -> None:
         """Handle `LP` node."""
