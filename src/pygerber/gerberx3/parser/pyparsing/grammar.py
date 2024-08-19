@@ -274,34 +274,34 @@ class Grammar:
 
     def aperture_block(self) -> pp.ParserElement:
         """Create a parser element capable of parsing aperture blocks."""
-        block = pp.Forward()
+        aperture_block = pp.Forward()
 
-        aperture_block = (
+        aperture_block <<= (
             (
                 self.ab_open.set_results_name("open")
-                + block
+                + pp.ZeroOrMore(
+                    pp.MatchFirst(
+                        [
+                            self.attribute,
+                            self.g_codes,
+                            self.load_commands,
+                            # Technically not valid according to standard.
+                            self.m_codes,
+                            self.properties,
+                            self.d_codes_standalone,
+                            # Other aperture altering commands.
+                            self.macro,
+                            self.step_repeat,
+                            self.add_aperture,
+                            aperture_block,
+                        ]
+                    )
+                ).set_results_name("nodes")
                 + self.ab_close.set_results_name("close")
             )
             .set_name("ApertureBlock")
             .set_parse_action(self.make_unpack_callback(AB))
         )
-
-        block <<= pp.ZeroOrMore(
-            pp.MatchFirst(
-                [
-                    self.attribute,
-                    self.g_codes,
-                    self.load_commands,
-                    self.m_codes,  # Technically not valid according to standard.
-                    self.properties,
-                    self.d_codes_standalone,
-                    # Other aperture altering commands.
-                    self.macro,
-                    self.step_repeat,
-                    self.add_aperture,
-                ]
-            )
-        ).set_results_name("nodes")
 
         return aperture_block
 

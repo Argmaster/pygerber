@@ -18,11 +18,9 @@ G04 Define block aperture 100, consisting of two draws and a round dot*
     D11*
     X-3556000Y17605375D03*
 %AB*%
-G04 Define block aperture 102, consisting of 2x3 flashes of aperture 101
-and 1 flash of D12*
+G04 Define block aperture 102, consisting of 2x3 flashes of aperture 101 and 1 flash of D12*
 %ABD102*%
-    G04 Define nested block aperture 101, consisting of 2x2 flashes of
-    aperture 100*
+    G04 Define nested block aperture 101, consisting of 2x2 flashes of aperture 100*
     %ABD101*%
         D100*
         X0Y0D03*
