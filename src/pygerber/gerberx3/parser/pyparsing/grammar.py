@@ -15,6 +15,7 @@ from pygerber.gerberx3.ast.nodes import (
     ADO,
     ADP,
     ADR,
+    AM,
     AS,
     D01,
     D02,
@@ -325,7 +326,15 @@ class Grammar:
     @pp.cached_property
     def macro(self) -> pp.ParserElement:
         """Create a parser element capable of parsing macros."""
-        return self.am_open + self.primitives + self.am_close
+        return (
+            (
+                self.am_open.set_results_name("open")
+                + self.primitives.set_results_name("primitives")
+                + self.am_close.set_results_name("close")
+            )
+            .set_name("MacroDefinition")
+            .set_parse_action(self.make_unpack_callback(AM))
+        )
 
     @pp.cached_property
     def am_open(self) -> pp.ParserElement:

@@ -171,6 +171,10 @@ class AstVisitor:
 
     def on_am(self, node: AM) -> None:
         """Handle `AM` root node."""
+        node.open.visit(self)
+        for primitive in node.primitives:
+            primitive.visit(self)
+        node.close.visit(self)
 
     def on_am_close(self, node: AMclose) -> None:
         """Handle `AMclose` node."""
