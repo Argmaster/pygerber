@@ -9,16 +9,44 @@ from typing import Any, Callable, Optional
 
 from pydantic import BaseModel, Field
 
-from pygerber.gerberx3.ast.nodes import AB, AD, AM, TA, TD, TF, TO
+from pygerber.common.error import throw
+from pygerber.gerberx3.ast.errors import (
+    ApertureNotFoundError,
+    ApertureNotSelectedError,
+    DirectADHandlerDispatchNotSupportedError,
+)
+from pygerber.gerberx3.ast.nodes import (
+    AB,
+    AD,
+    ADC,
+    ADO,
+    ADP,
+    ADR,
+    AM,
+    D01,
+    D02,
+    D03,
+    G01,
+    G02,
+    G03,
+    TA,
+    TD,
+    TF,
+    TO,
+    ADmacro,
+    ApertureIdStr,
+    Dnn,
+    Double,
+    PackedCoordinateStr,
+)
 from pygerber.gerberx3.ast.nodes.enums import (
     AxisCorrespondence,
     CoordinateMode,
     ImagePolarity,
     Mirroring,
+    UnitMode,
     Zeros,
 )
-from pygerber.gerberx3.ast.nodes.properties.MO import UnitMode
-from pygerber.gerberx3.ast.nodes.types import ApertureIdStr, Double, PackedCoordinateStr
 from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
@@ -173,16 +201,16 @@ class State(_StateModel):
     current_y: Double = Field(default=0.0)
     """Current Y coordinate value."""
 
-    coordinate_x: Double = Field(default=0.0)
+    coordinate_x: Optional[Double] = Field(default=None)
     """Last X coordinate value set by CoordinateX node."""
 
-    coordinate_y: Double = Field(default=0.0)
+    coordinate_y: Optional[Double] = Field(default=None)
     """Last Y coordinate value set by CoordinateY node."""
 
-    coordinate_i: Double = Field(default=0.0)
+    coordinate_i: Optional[Double] = Field(default=None)
     """Last I coordinate value set by CoordinateI node."""
 
-    coordinate_j: Double = Field(default=0.0)
+    coordinate_j: Optional[Double] = Field(default=None)
     """Last J coordinate value set by CoordinateJ node."""
 
     transform: Transform = Field(default_factory=Transform)
@@ -197,6 +225,20 @@ class State(_StateModel):
     attributes: Attributes = Field(default_factory=Attributes)
     """Container for holding currently active attributes."""
 
+    @property
+    def current_aperture(self) -> AD | AB:
+        """Get currently selected aperture."""
+        if self.current_aperture_id is None:
+            raise ApertureNotSelectedError
+
+        if self.current_aperture_id in self.apertures.apertures:
+            return self.apertures.apertures[self.current_aperture_id]
+
+        if self.current_aperture_id in self.apertures.blocks:
+            return self.apertures.blocks[self.current_aperture_id]
+
+        raise ApertureNotFoundError(self.current_aperture_id)
+
 
 class StateTrackingVisitor(AstVisitor):
     """`StateTrackingVisitor` is a visitor class that tracks the internal state
@@ -210,6 +252,19 @@ class StateTrackingVisitor(AstVisitor):
     def __init__(self) -> None:
         super().__init__()
         self.state = State()
+        self._on_d01_handler = self.on_draw_line
+        self._on_d03_handler_dispatch_table = {
+            AD: lambda *_: throw(DirectADHandlerDispatchNotSupportedError()),
+            ADC: self.on_flash_circle,
+            ADR: self.on_flash_rectangle,
+            ADO: self.on_flash_obround,
+            ADP: self.on_flash_polygon,
+            ADmacro: self.on_flash_macro,
+            AB: self.on_flash_block,
+        }
+        self._on_d03_handler: Callable[[D03, AD | AB], None] = lambda *_: throw(  # type: ignore[unreachable]
+            ApertureNotSelectedError()
+        )
 
     # Aperture
 
@@ -248,3 +303,78 @@ class StateTrackingVisitor(AstVisitor):
 
         self.state.attributes.aperture_attributes.pop(node.name, None)
         self.state.attributes.object_attributes.pop(node.name, None)
+
+    def on_d01(self, node: D01) -> None:
+        """Handle `D01` node."""
+        super().on_d01(node)
+        self._on_d01_handler(node)
+        self._update_coordinates()
+
+    def on_draw_line(self, node: D01) -> None:
+        """Handle `D01` node in linear interpolation mode."""
+
+    def on_draw_cw_arc(self, node: D01) -> None:
+        """Handle `D01` node in clockwise circular interpolation mode."""
+
+    def on_draw_ccw_arc(self, node: D01) -> None:
+        """Handle `D01` node in counter-clockwise circular interpolation."""
+
+    def _update_coordinates(self) -> None:
+        if self.state.coordinate_x is not None:
+            self.state.current_x = self.state.coordinate_x
+        if self.state.coordinate_y is not None:
+            self.state.current_y = self.state.coordinate_y
+
+    def on_d02(self, node: D02) -> None:
+        """Handle `D02` node."""
+        super().on_d02(node)
+        self._update_coordinates()
+
+    def on_d03(self, node: D03) -> None:
+        """Handle `D03` node."""
+        super().on_d03(node)
+        self._on_d03_handler(node, self._current_aperture)
+        self._update_coordinates()
+
+    def on_flash_circle(self, node: D03, aperture: ADC) -> None:
+        """Handle `D03` node with `ADC` aperture."""
+
+    def on_flash_rectangle(self, node: D03, aperture: ADR) -> None:
+        """Handle `D03` node with `ADR` aperture."""
+
+    def on_flash_obround(self, node: D03, aperture: ADO) -> None:
+        """Handle `D03` node with `ADO` aperture."""
+
+    def on_flash_polygon(self, node: D03, aperture: ADP) -> None:
+        """Handle `D03` node with `ADP` aperture."""
+
+    def on_flash_macro(self, node: D03, aperture: ADmacro) -> None:
+        """Handle `D03` node with `ADM` aperture."""
+
+    def on_flash_block(self, node: D03, aperture: AB) -> None:
+        """Handle `D03` node with `AB` aperture."""
+
+    def on_dnn(self, node: Dnn) -> None:
+        """Handle `Dnn` node."""
+        self.state.current_aperture_id = node.aperture_id
+        self._current_aperture = self.state.current_aperture
+        self._on_d03_handler = self._on_d03_handler_dispatch_table[  # type: ignore[assignment]
+            type(self._current_aperture)
+        ]
+
+    # G codes
+
+    def on_g01(self, node: G01) -> None:
+        """Handle `G01` node."""
+        super().on_g01(node)
+        self._on_d01_handler = self.on_draw_line
+
+    def on_g02(self, node: G02) -> None:
+        """Handle `G02` node."""
+        super().on_g02(node)
+        self._on_d01_handler = self.on_draw_cw_arc
+
+    def on_g03(self, node: G03) -> None:
+        """Handle `G03` node."""
+        super().on_g03(node)
+        self._on_d01_handler = self.on_draw_ccw_arc
