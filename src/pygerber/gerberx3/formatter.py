@@ -463,12 +463,12 @@ class Formatter(AstVisitor):
     def on_ab_open(self, node: ABopen) -> None:
         """Handle `ABopen` node."""
         with self._extended_command("AB"):
-            self._write(node.aperture_identifier)
+            self._write(node.aperture_id)
 
     @_decorator_insert_base_indent
     def on_adc(self, node: ADC) -> None:
         """Handle `AD` circle node."""
-        with self._extended_command(f"AD{node.aperture_identifier}C,"):
+        with self._extended_command(f"AD{node.aperture_id}C,"):
             self._write(self._fmt_double(node.diameter))
 
             if node.hole_diameter is not None:
@@ -477,7 +477,7 @@ class Formatter(AstVisitor):
     @_decorator_insert_base_indent
     def on_adr(self, node: ADR) -> None:
         """Handle `AD` rectangle node."""
-        with self._extended_command(f"AD{node.aperture_identifier}R,"):
+        with self._extended_command(f"AD{node.aperture_id}R,"):
             self._write(self._fmt_double(node.width))
             self._write(f"X{self._fmt_double(node.height)}")
 
@@ -487,7 +487,7 @@ class Formatter(AstVisitor):
     @_decorator_insert_base_indent
     def on_ado(self, node: ADO) -> None:
         """Handle `AD` obround node."""
-        with self._extended_command(f"AD{node.aperture_identifier}O,"):
+        with self._extended_command(f"AD{node.aperture_id}O,"):
             self._write(self._fmt_double(node.width))
             self._write(f"X{self._fmt_double(node.height)}")
 
@@ -497,7 +497,7 @@ class Formatter(AstVisitor):
     @_decorator_insert_base_indent
     def on_adp(self, node: ADP) -> None:
         """Handle `AD` polygon node."""
-        with self._extended_command(f"AD{node.aperture_identifier}P,"):
+        with self._extended_command(f"AD{node.aperture_id}P,"):
             self._write(self._fmt_double(node.outer_diameter))
             self._write(f"X{node.vertices}")
 
@@ -510,7 +510,7 @@ class Formatter(AstVisitor):
     @_decorator_insert_base_indent
     def on_ad_macro(self, node: ADmacro) -> None:
         """Handle `AD` macro node."""
-        with self._extended_command(f"AD{node.aperture_identifier}{node.name}"):
+        with self._extended_command(f"AD{node.aperture_id}{node.name}"):
             if node.params is not None:
                 first, *rest = node.params
                 self._write(f",{first}")

@@ -127,25 +127,25 @@ from pygerber.gerberx3.ast.visitor import AstVisitor
 
 NODE_SAMPLES: Dict[Type[Node], Node] = {
     ABclose: ABclose(source="", location=0),
-    ABopen: ABopen(source="", location=0, aperture_identifier=ApertureIdStr("D11")),
+    ABopen: ABopen(source="", location=0, aperture_id=ApertureIdStr("D11")),
     ADC: ADC(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D11"),
+        aperture_id=ApertureIdStr("D11"),
         diameter=0.1,
         hole_diameter=0.05,
     ),
     ADmacro: ADmacro(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D11"),
+        aperture_id=ApertureIdStr("D11"),
         name="macro",
         params=[1, 2],
     ),
     ADO: ADO(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D11"),
+        aperture_id=ApertureIdStr("D11"),
         width=0.1,
         height=0.05,
         hole_diameter=0.05,
@@ -153,7 +153,7 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     ADR: ADR(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D11"),
+        aperture_id=ApertureIdStr("D11"),
         width=0.1,
         height=0.05,
         hole_diameter=0.05,
@@ -161,7 +161,7 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     ADP: ADP(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D11"),
+        aperture_id=ApertureIdStr("D11"),
         outer_diameter=0.1,
         vertices=4,
         rotation=0.1,

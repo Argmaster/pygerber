@@ -9,4 +9,4 @@ from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
 class AD(Node):
     """Common base class for all commands adding new apertures."""
 
-    aperture_identifier: ApertureIdStr
+    aperture_id: ApertureIdStr

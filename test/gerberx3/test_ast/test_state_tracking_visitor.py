@@ -214,7 +214,7 @@ def test_d03_flash_circle(default_d03: D03, mocker: MockerFixture) -> None:
     ad = ADC(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D10"),
+        aperture_id=ApertureIdStr("D10"),
         diameter=0.1,
     )
     dnn = Dnn(
@@ -250,7 +250,7 @@ def test_d03_flash_rectangle(default_d03: D03, mocker: MockerFixture) -> None:
     ad = ADR(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D10"),
+        aperture_id=ApertureIdStr("D10"),
         width=0.1,
         height=0.1,
     )
@@ -277,7 +277,7 @@ def test_d03_flash_obround(default_d03: D03, mocker: MockerFixture) -> None:
     ad = ADO(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D10"),
+        aperture_id=ApertureIdStr("D10"),
         width=0.1,
         height=0.1,
     )
@@ -304,7 +304,7 @@ def test_d03_flash_polygon(default_d03: D03, mocker: MockerFixture) -> None:
     ad = ADP(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D10"),
+        aperture_id=ApertureIdStr("D10"),
         vertices=6,
         outer_diameter=0.1,
         rotation=0,
@@ -338,7 +338,7 @@ def test_d03_flash_macro(default_d03: D03, mocker: MockerFixture) -> None:
     ad = ADmacro(
         source="",
         location=0,
-        aperture_identifier=ApertureIdStr("D10"),
+        aperture_id=ApertureIdStr("D10"),
         name="MACRO0",
     )
     dnn = Dnn(
@@ -363,7 +363,7 @@ def test_d03_flash_block(default_d03: D03, mocker: MockerFixture) -> None:
     ab = AB(
         source="",
         location=0,
-        open=ABopen(source="", location=0, aperture_identifier=ApertureIdStr("D10")),
+        open=ABopen(source="", location=0, aperture_id=ApertureIdStr("D10")),
         nodes=[],
         close=ABclose(source="", location=0),
     )

@@ -241,9 +241,9 @@ class Grammar:
         return pp.one_of(("0", "1")).set_results_name("boolean")
 
     @pp.cached_property
-    def aperture_identifier(self) -> pp.ParserElement:
+    def aperture_id(self) -> pp.ParserElement:
         """Create a parser element capable of parsing aperture identifiers."""
-        return pp.Regex(r"D[0]*[1-9][0-9]+").set_results_name("aperture_identifier")
+        return pp.Regex(r"D[0]*[1-9][0-9]+").set_results_name("aperture_id")
 
     def make_unpack_callback(
         self,
@@ -313,7 +313,7 @@ class Grammar:
     def ab_open(self) -> pp.ParserElement:
         """Create a parser element capable of parsing AB-open."""
         return (
-            self._extended_command(pp.Literal("AB") + self.aperture_identifier)
+            self._extended_command(pp.Literal("AB") + self.aperture_id)
             .set_name("ABopen")
             .set_parse_action(self.make_unpack_callback(ABopen))
         )
@@ -431,7 +431,7 @@ class Grammar:
         return (
             self._extended_command(
                 pp.Literal("AD")
-                + self.aperture_identifier
+                + self.aperture_id
                 + pp.Literal("C,")
                 + self.double.set_results_name("diameter")
                 + pp.Opt(self._x + self.double.set_results_name("hole_diameter"))
@@ -449,7 +449,7 @@ class Grammar:
         return (
             self._extended_command(
                 pp.Literal("AD")
-                + self.aperture_identifier
+                + self.aperture_id
                 + pp.Literal(f"{symbol},")
                 + self.double.set_results_name("width")
                 + self._x
@@ -467,7 +467,7 @@ class Grammar:
         return (
             self._extended_command(
                 pp.Literal("AD")
-                + self.aperture_identifier
+                + self.aperture_id
                 + pp.Literal("P,")
                 + self.double.set_results_name("outer_diameter")
                 + self._x
@@ -488,7 +488,7 @@ class Grammar:
         return (
             self._extended_command(
                 pp.Literal("AD")
-                + self.aperture_identifier
+                + self.aperture_id
                 + self.name.set_results_name("name")
                 + pp.Opt(self.comma + param + pp.ZeroOrMore(self._x + param))
             )
@@ -1068,7 +1068,7 @@ class Grammar:
 
     def _dnn(self, *, is_standalone: bool) -> pp.ParserElement:
         return (
-            self._command(self.aperture_identifier.set_results_name("aperture_id"))
+            self._command(self.aperture_id.set_results_name("aperture_id"))
             .set_parse_action(
                 self.make_unpack_callback(Dnn, is_standalone=is_standalone)
             )

@@ -270,11 +270,11 @@ class StateTrackingVisitor(AstVisitor):
 
     def on_ab(self, node: AB) -> None:
         """Handle `ABclose` node."""
-        self.state.apertures.blocks[node.open.aperture_identifier] = node
+        self.state.apertures.blocks[node.open.aperture_id] = node
 
     def on_ad(self, node: AD) -> None:
         """Handle `AD` node."""
-        self.state.apertures.apertures[node.aperture_identifier] = node
+        self.state.apertures.apertures[node.aperture_id] = node
 
     def on_am(self, node: AM) -> None:
         """Handle `AM` root node."""
