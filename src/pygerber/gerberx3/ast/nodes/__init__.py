@@ -58,7 +58,7 @@ from pygerber.gerberx3.ast.nodes.attribute.TO import (
     TO_CVal,
     TO_UserName,
 )
-from pygerber.gerberx3.ast.nodes.base import Node
+from pygerber.gerberx3.ast.nodes.base import Node, SourceInfo
 from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
 from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
 from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
@@ -248,4 +248,5 @@ __all__ = [
     "Expression",
     "AB",
     "AM",
+    "SourceInfo",
 ]

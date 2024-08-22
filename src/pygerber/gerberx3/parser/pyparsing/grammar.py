@@ -5,7 +5,7 @@ implemented using the pyparsing library.
 from __future__ import annotations
 
 from enum import IntFlag
-from typing import Any, Callable, List, Literal, Type, TypeVar, cast
+from typing import Any, Callable, Literal, Type, TypeVar, cast
 
 import pyparsing as pp
 
@@ -88,6 +88,7 @@ from pygerber.gerberx3.ast.nodes import (
     Node,
     Point,
     Pos,
+    SourceInfo,
     SRclose,
     SRopen,
     Sub,
@@ -206,7 +207,7 @@ class Grammar:
     @pp.cached_property
     def comma(self) -> pp.ParserElement:
         """Create a parser element capable of parsing commas."""
-        return pp.Suppress(pp.Literal(",").set_name(","))
+        return pp.Literal(",").set_name(",")
 
     @pp.cached_property
     def name(self) -> pp.ParserElement:
@@ -254,7 +255,11 @@ class Grammar:
 
         def _(s: str, loc: int, tokens: pp.ParseResults) -> Node:
             return self.get_cls(node_type)(
-                source=s, location=loc, **tokens.as_dict(), **kwargs
+                source_info=SourceInfo(
+                    source=s, location=loc, length=sum(len(t) for t in tokens.as_list())
+                ),
+                **tokens.as_dict(),
+                **kwargs,
             )
 
         return _
@@ -352,8 +357,10 @@ class Grammar:
     @pp.cached_property
     def am_close(self) -> pp.ParserElement:
         """Create a parser element capable of parsing AM-close."""
-        return self._extended.set_name("AM_close").set_parse_action(
-            self.make_unpack_callback(AMclose)
+        return (
+            self._extended.copy()
+            .set_name("AM_close")
+            .set_parse_action(self.make_unpack_callback(AMclose))
         )
 
     @pp.cached_property
@@ -498,7 +505,7 @@ class Grammar:
 
     @pp.cached_property
     def _x(self) -> pp.ParserElement:
-        return pp.Suppress(pp.Literal("X")).set_name("X")
+        return pp.Literal("X").set_name("X")
 
     #  █████  ████████ ████████ ██████  ██ ██████  ██    ██ ████████ ███████
     # ██   ██    ██       ██    ██   ██ ██ ██   ██ ██    ██    ██    ██
@@ -1306,81 +1313,71 @@ class Grammar:
         factor = self.constant | self.variable
 
         def _neg(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-            token_list = cast(List[List[Expression]], tokens.as_list())[0]
+            nested_token_list = tokens.as_list()
+            assert len(nested_token_list) == 1
+            token_list = [t for t in nested_token_list[0] if isinstance(t, Expression)]
             assert len(token_list) == 1
             return self.get_cls(Neg)(source=s, location=loc, operand=token_list[0])
 
         def _pos(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-            token_list = cast(List[List[Expression]], tokens.as_list())[0]
+            nested_token_list = tokens.as_list()
+            assert len(nested_token_list) == 1
+            token_list = [t for t in nested_token_list[0] if isinstance(t, Expression)]
             assert len(token_list) == 1
             return self.get_cls(Pos)(source=s, location=loc, operand=token_list[0])
 
-        def _sub(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-            nested_token_list = cast(List[List[Expression]], tokens.as_list())
-            assert len(nested_token_list) == 1
-            token_list = nested_token_list[0]
-            assert len(token_list) > 1
-            return self.get_cls(Sub)(source=s, location=loc, operands=token_list)
+        def _binary(
+            cls: Type[Expression],
+        ) -> Callable[[str, int, pp.ParseResults], Expression]:
+            def _(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
+                nested_token_list = tokens.as_list()
+                assert len(nested_token_list) == 1
+                token_list = [
+                    t for t in nested_token_list[0] if isinstance(t, Expression)
+                ]
+                assert len(token_list) > 1
+                return self.get_cls(cls)(source=s, location=loc, operands=token_list)  # type: ignore[call-arg, return-value, type-var]
 
-        def _add(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-            nested_token_list = cast(List[List[Expression]], tokens.as_list())
-            assert len(nested_token_list) == 1
-            token_list = nested_token_list[0]
-            assert len(token_list) > 1
-            return self.get_cls(Add)(source=s, location=loc, operands=token_list)
-
-        def _div(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-            nested_token_list = cast(List[List[Expression]], tokens.as_list())
-            assert len(nested_token_list) == 1
-            token_list = nested_token_list[0]
-            assert len(token_list) > 1
-            return self.get_cls(Div)(source=s, location=loc, operands=token_list)
-
-        def _mul(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-            nested_token_list = cast(List[List[Expression]], tokens.as_list())
-            assert len(nested_token_list) == 1
-            token_list = nested_token_list[0]
-            assert len(token_list) > 1
-            return self.get_cls(Mul)(source=s, location=loc, operands=token_list)
+            return _
 
         return pp.infix_notation(
             factor,
             [
                 (
-                    pp.Suppress("-"),
+                    "-",
                     1,
                     pp.OpAssoc.RIGHT,
                     _neg,
                 ),
                 (
-                    pp.Suppress("+"),
+                    "+",
                     1,
                     pp.OpAssoc.RIGHT,
                     _pos,
                 ),
                 (
-                    pp.Suppress("/"),
+                    "/",
                     2,
                     pp.OpAssoc.LEFT,
-                    _div,
+                    _binary(Div),
                 ),
                 (
-                    pp.Suppress(pp.one_of("x X")),
+                    pp.one_of("x X"),
                     2,
                     pp.OpAssoc.LEFT,
-                    _mul,
+                    _binary(Mul),
                 ),
                 (
-                    pp.Suppress("-"),
+                    "-",
                     2,
                     pp.OpAssoc.LEFT,
-                    _sub,
+                    _binary(Sub),
                 ),
                 (
-                    pp.Suppress("+"),
+                    "+",
                     2,
                     pp.OpAssoc.LEFT,
-                    _add,
+                    _binary(Add),
                 ),
             ],
         ).set_name("expression")
@@ -1406,9 +1403,7 @@ class Grammar:
         """Create a parser element capable of parsing assignments."""
         return (
             self._command(
-                self.variable
-                + pp.Suppress("=")
-                + self.expression.set_results_name("expression")
+                self.variable + "=" + self.expression.set_results_name("expression")
             )
             .set_results_name("assignment")
             .set_parse_action(self.make_unpack_callback(Assignment))
