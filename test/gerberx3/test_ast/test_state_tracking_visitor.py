@@ -131,10 +131,10 @@ def test_d01_draw_linear(default_d01: D01, mocker: MockerFixture) -> None:
 @pytest.fixture()
 def default_d01() -> D01:
     return D01(
-        x=CoordinateX(source="", location=0, value=PackedCoordinateStr("1")),
-        y=CoordinateY(source="", location=0, value=PackedCoordinateStr("1")),
-        i=CoordinateI(source="", location=0, value=PackedCoordinateStr("1")),
-        j=CoordinateJ(source="", location=0, value=PackedCoordinateStr("1")),
+        x=CoordinateX(value=PackedCoordinateStr("1")),
+        y=CoordinateY(value=PackedCoordinateStr("1")),
+        i=CoordinateI(value=PackedCoordinateStr("1")),
+        j=CoordinateJ(value=PackedCoordinateStr("1")),
     )
 
 
@@ -205,8 +205,8 @@ def test_d03_flash_circle(default_d03: D03, mocker: MockerFixture) -> None:
 @pytest.fixture()
 def default_d03() -> D03:
     return D03(
-        x=CoordinateX(source="", location=0, value=PackedCoordinateStr("1")),
-        y=CoordinateY(source="", location=0, value=PackedCoordinateStr("1")),
+        x=CoordinateX(location=0, value=PackedCoordinateStr("1")),
+        y=CoordinateY(location=0, value=PackedCoordinateStr("1")),
     )
 
 
@@ -287,9 +287,9 @@ def test_d03_flash_macro(default_d03: D03, mocker: MockerFixture) -> None:
     visitor = StateTrackingVisitor()
 
     am = AM(
-        open=AMopen(source="", location=0, name="MACRO0"),
+        open=AMopen(name="MACRO0"),
         primitives=[],
-        close=AMclose(source="", location=0),
+        close=AMclose(),
     )
     ad = ADmacro(
         aperture_id=ApertureIdStr("D10"),
@@ -313,9 +313,9 @@ def test_d03_flash_block(default_d03: D03, mocker: MockerFixture) -> None:
     visitor = StateTrackingVisitor()
 
     ab = AB(
-        open=ABopen(source="", location=0, aperture_id=ApertureIdStr("D10")),
+        open=ABopen(aperture_id=ApertureIdStr("D10")),
         nodes=[],
-        close=ABclose(source="", location=0),
+        close=ABclose(),
     )
     dnn = Dnn(
         aperture_id=ApertureIdStr("D10"),
