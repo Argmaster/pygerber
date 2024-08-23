@@ -16,6 +16,7 @@ from pygerber.gerberx3.ast.nodes import (
     G01,
     G02,
     G03,
+    G36,
     ABclose,
     ABopen,
     ADmacro,
@@ -43,8 +44,6 @@ def test_set_file_attribute() -> None:
     """Test if file attribute assigned is performed correctly."""
     visitor = StateTrackingVisitor()
     node = TF_FileFunction(
-        source="",
-        location=0,
         file_function=FileFunction.Copper,
         fields=["FileFunction", "External"],
     )
@@ -57,8 +56,6 @@ def test_set_aperture_attribute() -> None:
 
     # Test plain assignment of TA_AperFunction
     node = TA_AperFunction(
-        source="",
-        location=0,
         function=AperFunction.ViaPad,
         fields=[],
     )
@@ -72,15 +69,11 @@ def test_set_two_aperture_attribute() -> None:
 
     # Test plain assignment of TA_AperFunction
     node0 = TA_AperFunction(
-        source="",
-        location=0,
         function=AperFunction.ViaPad,
         fields=[],
     )
     visitor.on_ta_aper_function(node0)
     node1 = TA_DrillTolerance(
-        source="",
-        location=0,
         plus_tolerance=0.1,
         minus_tolerance=0.1,
     )
@@ -95,8 +88,6 @@ def test_override_aperture_attribute() -> None:
 
     # Set initial aperture attribute
     initial_node = TA_AperFunction(
-        source="",
-        location=0,
         function=AperFunction.ViaDrill,
         fields=[],
     )
@@ -104,8 +95,6 @@ def test_override_aperture_attribute() -> None:
 
     # Override the aperture attribute
     override_node = TA_AperFunction(
-        source="",
-        location=0,
         function=AperFunction.ViaPad,
         fields=[],
     )
@@ -117,7 +106,7 @@ def test_override_aperture_attribute() -> None:
     )
 
 
-def test_d02_draw_linear(default_d01: D01, mocker: MockerFixture) -> None:
+def test_d01_draw_linear(default_d01: D01, mocker: MockerFixture) -> None:
     """Test if D02 command is handled correctly."""
     on_draw_line = mocker.spy(
         StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
@@ -130,10 +119,7 @@ def test_d02_draw_linear(default_d01: D01, mocker: MockerFixture) -> None:
     )
     visitor = StateTrackingVisitor()
 
-    g_code = G01(
-        source="",
-        location=0,
-    )
+    g_code = G01()
     visitor.on_g01(g_code)
     visitor.on_d01(default_d01)
 
@@ -145,8 +131,6 @@ def test_d02_draw_linear(default_d01: D01, mocker: MockerFixture) -> None:
 @pytest.fixture()
 def default_d01() -> D01:
     return D01(
-        source="",
-        location=0,
         x=CoordinateX(source="", location=0, value=PackedCoordinateStr("1")),
         y=CoordinateY(source="", location=0, value=PackedCoordinateStr("1")),
         i=CoordinateI(source="", location=0, value=PackedCoordinateStr("1")),
@@ -154,7 +138,7 @@ def default_d01() -> D01:
     )
 
 
-def test_d02_draw_cw_arc(default_d01: D01, mocker: MockerFixture) -> None:
+def test_d01_draw_cw_arc(default_d01: D01, mocker: MockerFixture) -> None:
     """Test if D02 command is handled correctly."""
     on_draw_line = mocker.spy(
         StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
@@ -167,19 +151,15 @@ def test_d02_draw_cw_arc(default_d01: D01, mocker: MockerFixture) -> None:
     )
     visitor = StateTrackingVisitor()
 
-    g_code = G02(
-        source="",
-        location=0,
-    )
-    visitor.on_g02(g_code)
-    visitor.on_d01(default_d01)
+    G02().visit(visitor)
+    default_d01.visit(visitor)
 
     on_draw_line.assert_not_called()
     on_draw_cw_arc.assert_called()
     on_draw_ccw_arc.assert_not_called()
 
 
-def test_d02_draw_ccw_arc(default_d01: D01, mocker: MockerFixture) -> None:
+def test_d01_draw_ccw_arc(default_d01: D01, mocker: MockerFixture) -> None:
     """Test if D02 command is handled correctly."""
     on_draw_line = mocker.spy(
         StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
@@ -192,12 +172,8 @@ def test_d02_draw_ccw_arc(default_d01: D01, mocker: MockerFixture) -> None:
     )
     visitor = StateTrackingVisitor()
 
-    g_code = G03(
-        source="",
-        location=0,
-    )
-    visitor.on_g03(g_code)
-    visitor.on_d01(default_d01)
+    G03().visit(visitor)
+    default_d01.visit(visitor)
 
     on_draw_line.assert_not_called()
     on_draw_cw_arc.assert_not_called()
@@ -212,14 +188,10 @@ def test_d03_flash_circle(default_d03: D03, mocker: MockerFixture) -> None:
     visitor = StateTrackingVisitor()
 
     ad = ADC(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
         diameter=0.1,
     )
     dnn = Dnn(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
     )
 
@@ -233,8 +205,6 @@ def test_d03_flash_circle(default_d03: D03, mocker: MockerFixture) -> None:
 @pytest.fixture()
 def default_d03() -> D03:
     return D03(
-        source="",
-        location=0,
         x=CoordinateX(source="", location=0, value=PackedCoordinateStr("1")),
         y=CoordinateY(source="", location=0, value=PackedCoordinateStr("1")),
     )
@@ -248,15 +218,11 @@ def test_d03_flash_rectangle(default_d03: D03, mocker: MockerFixture) -> None:
     visitor = StateTrackingVisitor()
 
     ad = ADR(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
         width=0.1,
         height=0.1,
     )
     dnn = Dnn(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
     )
 
@@ -275,15 +241,11 @@ def test_d03_flash_obround(default_d03: D03, mocker: MockerFixture) -> None:
     visitor = StateTrackingVisitor()
 
     ad = ADO(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
         width=0.1,
         height=0.1,
     )
     dnn = Dnn(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
     )
 
@@ -302,8 +264,6 @@ def test_d03_flash_polygon(default_d03: D03, mocker: MockerFixture) -> None:
     visitor = StateTrackingVisitor()
 
     ad = ADP(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
         vertices=6,
         outer_diameter=0.1,
@@ -311,8 +271,6 @@ def test_d03_flash_polygon(default_d03: D03, mocker: MockerFixture) -> None:
         hole_diameter=0.05,
     )
     dnn = Dnn(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
     )
 
@@ -329,21 +287,15 @@ def test_d03_flash_macro(default_d03: D03, mocker: MockerFixture) -> None:
     visitor = StateTrackingVisitor()
 
     am = AM(
-        source="",
-        location=0,
         open=AMopen(source="", location=0, name="MACRO0"),
         primitives=[],
         close=AMclose(source="", location=0),
     )
     ad = ADmacro(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
         name="MACRO0",
     )
     dnn = Dnn(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
     )
 
@@ -361,15 +313,11 @@ def test_d03_flash_block(default_d03: D03, mocker: MockerFixture) -> None:
     visitor = StateTrackingVisitor()
 
     ab = AB(
-        source="",
-        location=0,
         open=ABopen(source="", location=0, aperture_id=ApertureIdStr("D10")),
         nodes=[],
         close=ABclose(source="", location=0),
     )
     dnn = Dnn(
-        source="",
-        location=0,
         aperture_id=ApertureIdStr("D10"),
     )
 
@@ -378,3 +326,63 @@ def test_d03_flash_block(default_d03: D03, mocker: MockerFixture) -> None:
     visitor.on_d03(default_d03)
 
     spy.assert_called_once()
+
+
+def test_switch_to_region_mode_linear_plot(
+    default_d01: D01, mocker: MockerFixture
+) -> None:
+    """Check if the visitor switches to region mode handlers properly."""
+    handler = mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
+    )
+    region_mode_handler = mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_line.__name__
+    )
+    visitor = StateTrackingVisitor()
+
+    G01().visit(visitor)
+    G36().visit(visitor)
+    default_d01.visit(visitor)
+
+    handler.assert_not_called()
+    region_mode_handler.assert_called()
+
+
+def test_switch_to_region_mode_arc_plot(
+    default_d01: D01, mocker: MockerFixture
+) -> None:
+    """Check if the visitor switches to region mode handlers properly."""
+    handler = mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc.__name__
+    )
+    region_mode_handler = mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_cw_arc.__name__
+    )
+    visitor = StateTrackingVisitor()
+
+    G02().visit(visitor)
+    G36().visit(visitor)
+    default_d01.visit(visitor)
+
+    handler.assert_not_called()
+    region_mode_handler.assert_called()
+
+
+def test_switch_to_region_mode_ccw_arc_plot(
+    default_d01: D01, mocker: MockerFixture
+) -> None:
+    """Check if the visitor switches to region mode handlers properly."""
+    handler = mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc.__name__
+    )
+    region_mode_handler = mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_ccw_arc.__name__
+    )
+    visitor = StateTrackingVisitor()
+
+    G03().visit(visitor)
+    G36().visit(visitor)
+    default_d01.visit(visitor)
+
+    handler.assert_not_called()
+    region_mode_handler.assert_called()

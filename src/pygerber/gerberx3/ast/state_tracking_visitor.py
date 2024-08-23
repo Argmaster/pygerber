@@ -29,6 +29,8 @@ from pygerber.gerberx3.ast.nodes import (
     G01,
     G02,
     G03,
+    G36,
+    G37,
     TA,
     TD,
     TF,
@@ -225,6 +227,9 @@ class State(_StateModel):
     attributes: Attributes = Field(default_factory=Attributes)
     """Container for holding currently active attributes."""
 
+    is_region: bool = Field(default=False)
+    """Flag indicating if visitor is in region mode."""
+
     @property
     def current_aperture(self) -> AD | AB:
         """Get currently selected aperture."""
@@ -253,6 +258,16 @@ class StateTrackingVisitor(AstVisitor):
         super().__init__()
         self.state = State()
         self._on_d01_handler = self.on_draw_line
+        self._plot_mode_to_d01_handler = {
+            PlotMode.LINEAR: self.on_draw_line,
+            PlotMode.ARC: self.on_draw_cw_arc,
+            PlotMode.CCW_ARC: self.on_draw_ccw_arc,
+        }
+        self._plot_mode_to_in_region_d01_handler = {
+            PlotMode.LINEAR: self.on_in_region_draw_line,
+            PlotMode.ARC: self.on_in_region_draw_cw_arc,
+            PlotMode.CCW_ARC: self.on_in_region_draw_ccw_arc,
+        }
         self._on_d03_handler_dispatch_table = {
             AD: lambda *_: throw(DirectADHandlerDispatchNotSupportedError()),
             ADC: self.on_flash_circle,
@@ -368,13 +383,38 @@ class StateTrackingVisitor(AstVisitor):
         """Handle `G01` node."""
         super().on_g01(node)
         self._on_d01_handler = self.on_draw_line
+        self.state.plot_mode = PlotMode.LINEAR
 
     def on_g02(self, node: G02) -> None:
         """Handle `G02` node."""
         super().on_g02(node)
         self._on_d01_handler = self.on_draw_cw_arc
+        self.state.plot_mode = PlotMode.ARC
 
     def on_g03(self, node: G03) -> None:
         """Handle `G03` node."""
         super().on_g03(node)
         self._on_d01_handler = self.on_draw_ccw_arc
+        self.state.plot_mode = PlotMode.CCW_ARC
+
+    def on_g36(self, node: G36) -> None:
+        """Handle `G36` node."""
+        super().on_g36(node)
+        self.state.is_region = True
+        self._on_d01_handler = self._plot_mode_to_in_region_d01_handler[
+            self.state.plot_mode
+        ]
+
+    def on_in_region_draw_line(self, node: D01) -> None:
+        """Handle `D01` node in linear interpolation mode in region."""
+
+    def on_in_region_draw_cw_arc(self, node: D01) -> None:
+        """Handle `D01` node in clockwise circular interpolation mode in region."""
+
+    def on_in_region_draw_ccw_arc(self, node: D01) -> None:
+        """Handle `D01` node in counter-clockwise circular interpolation in region."""
+
+    def on_g37(self, node: G37) -> None:
+        """Handle `G37` node."""
+        super().on_g37(node)
+        self._on_d01_handler = self._plot_mode_to_d01_handler[self.state.plot_mode]
