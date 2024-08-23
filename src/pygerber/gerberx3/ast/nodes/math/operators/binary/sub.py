@@ -19,7 +19,8 @@ if TYPE_CHECKING:
 class Sub(Expression):
     """Represents math expression subtraction operator."""
 
-    operands: List[Expression] = Field(min_length=2)
+    head: Expression
+    tail: List[Expression] = Field(min_length=1)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

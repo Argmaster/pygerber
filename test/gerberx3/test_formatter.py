@@ -83,6 +83,10 @@ def test_formatter(asset: Asset, config: Config) -> None:
     output_buffer.seek(0)
     formatted_source = output_buffer.read()
 
+    from pathlib import Path
+
+    Path("formatted.gbr").write_text(formatted_source)
+
     formatted_ast = parser.parse(formatted_source)
 
     if formatted_ast.model_dump_json(serialize_as_any=True) != ast.model_dump_json(

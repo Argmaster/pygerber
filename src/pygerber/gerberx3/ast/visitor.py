@@ -87,6 +87,7 @@ if TYPE_CHECKING:
         Mul,
         Neg,
         Node,
+        Parenthesis,
         Point,
         Pos,
         SRclose,
@@ -440,25 +441,29 @@ class AstVisitor:
     def on_add(self, node: Add) -> None:
         """Handle `Add` node."""
         self.on_expression(node)
-        for operand in node.operands:
+        node.head.visit(self)
+        for operand in node.tail:
             operand.visit(self)
 
     def on_div(self, node: Div) -> None:
         """Handle `Div` node."""
         self.on_expression(node)
-        for operand in node.operands:
+        node.head.visit(self)
+        for operand in node.tail:
             operand.visit(self)
 
     def on_mul(self, node: Mul) -> None:
         """Handle `Mul` node."""
         self.on_expression(node)
-        for operand in node.operands:
+        node.head.visit(self)
+        for operand in node.tail:
             operand.visit(self)
 
     def on_sub(self, node: Sub) -> None:
         """Handle `Sub` node."""
         self.on_expression(node)
-        for operand in node.operands:
+        node.head.visit(self)
+        for operand in node.tail:
             operand.visit(self)
 
     # Math :: Operators :: Unary
@@ -484,6 +489,10 @@ class AstVisitor:
 
     def on_expression(self, node: Expression) -> None:
         """Handle `Expression` node."""
+
+    def on_parenthesis(self, node: Parenthesis) -> None:
+        """Handle `Parenthesis` node."""
+        node.inner.visit(self)
 
     def on_point(self, node: Point) -> None:
         """Handle `Point` node."""

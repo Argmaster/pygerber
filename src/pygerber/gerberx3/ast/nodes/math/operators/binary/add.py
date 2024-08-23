@@ -19,7 +19,8 @@ if TYPE_CHECKING:
 class Add(Expression):
     """Represents math expression addition operator."""
 
-    operands: List[Expression] = Field(min_length=2)
+    head: Expression
+    tail: List[Expression] = Field(min_length=1)
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

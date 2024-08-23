@@ -81,11 +81,11 @@ from pygerber.gerberx3.ast.nodes import (
     CoordinateY,
     Div,
     Dnn,
-    Expression,
     File,
     Mul,
     Neg,
     Node,
+    Parenthesis,
     Point,
     Pos,
     SourceInfo,
@@ -137,12 +137,14 @@ class Grammar:
         self,
         ast_node_class_overrides: dict[str, Type[Node]],
         *,
-        enable_packrat: bool = True,
+        enable_packrat: bool = False,
+        packrat_cache_size: int = 128,
         enable_debug: bool = False,
         optimization: int = 0,
     ) -> None:
         self.ast_node_class_overrides = ast_node_class_overrides
         self.enable_packrat = enable_packrat
+        self.packrat_cache_size = packrat_cache_size
         self.enable_debug = enable_debug
         self.optimization = optimization
 
@@ -174,7 +176,7 @@ class Grammar:
         )
 
         if self.enable_packrat:
-            root.enable_packrat()
+            root.enable_packrat(cache_size_limit=self.packrat_cache_size)
 
         if self.enable_debug:
             root.set_debug()
@@ -1307,80 +1309,95 @@ class Grammar:
     # ██  ██  ██ ██   ██    ██    ██   ██
     # ██      ██ ██   ██    ██    ██   ██
 
+    def _cb(self, element: pp.ParserElement, cls: Type[Node]) -> pp.ParserElement:
+        return element.set_parse_action(self.make_unpack_callback(cls))
+
     @pp.cached_property
     def expression(self) -> pp.ParserElement:
         """Create a parser element capable of parsing expressions."""
-        factor = self.constant | self.variable
+        expr = pp.Forward()
+        factor = (
+            self.variable
+            | self.constant
+            | self._cb(pp.Literal("(") + expr("inner") + pp.Literal(")"), Parenthesis)
+        )("factor")
 
-        def _neg(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-            nested_token_list = tokens.as_list()
-            assert len(nested_token_list) == 1
-            token_list = [t for t in nested_token_list[0] if isinstance(t, Expression)]
-            assert len(token_list) == 1
-            return self.get_cls(Neg)(source=s, location=loc, operand=token_list[0])
+        last_expr = factor
+        # Unary - operator
+        op_expr = pp.Literal("-")
 
-        def _pos(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-            nested_token_list = tokens.as_list()
-            assert len(nested_token_list) == 1
-            token_list = [t for t in nested_token_list[0] if isinstance(t, Expression)]
-            assert len(token_list) == 1
-            return self.get_cls(Pos)(source=s, location=loc, operand=token_list[0])
+        this_expr = pp.Forward()
+        match_expr = pp.FollowedBy(op_expr + this_expr) + (
+            op_expr + this_expr("operand")
+        ).set_parse_action(self.make_unpack_callback(Neg))
+        this_expr <<= match_expr | last_expr
+        last_expr = this_expr
 
-        def _binary(
-            cls: Type[Expression],
-        ) -> Callable[[str, int, pp.ParseResults], Expression]:
-            def _(s: str, loc: int, tokens: pp.ParseResults) -> Expression:
-                nested_token_list = tokens.as_list()
-                assert len(nested_token_list) == 1
-                token_list = [
-                    t for t in nested_token_list[0] if isinstance(t, Expression)
-                ]
-                assert len(token_list) > 1
-                return self.get_cls(cls)(source=s, location=loc, operands=token_list)  # type: ignore[call-arg, return-value, type-var]
+        # Unary + operator
+        op_expr = pp.Literal("+")
 
-            return _
+        this_expr = pp.Forward()
+        match_expr = pp.FollowedBy(op_expr + this_expr) + (
+            op_expr + this_expr("operand")
+        ).set_parse_action(self.make_unpack_callback(Pos))
+        this_expr <<= match_expr | last_expr
+        last_expr = this_expr
 
-        return pp.infix_notation(
-            factor,
-            [
-                (
-                    "-",
-                    1,
-                    pp.OpAssoc.RIGHT,
-                    _neg,
-                ),
-                (
-                    "+",
-                    1,
-                    pp.OpAssoc.RIGHT,
-                    _pos,
-                ),
-                (
-                    "/",
-                    2,
-                    pp.OpAssoc.LEFT,
-                    _binary(Div),
-                ),
-                (
-                    pp.one_of("x X"),
-                    2,
-                    pp.OpAssoc.LEFT,
-                    _binary(Mul),
-                ),
-                (
-                    "-",
-                    2,
-                    pp.OpAssoc.LEFT,
-                    _binary(Sub),
-                ),
-                (
-                    "+",
-                    2,
-                    pp.OpAssoc.LEFT,
-                    _binary(Add),
-                ),
-            ],
-        ).set_name("expression")
+        # Binary / operator
+        op_expr = pp.Literal("/")
+
+        this_expr = pp.Forward()
+        match_expr = pp.FollowedBy(last_expr + op_expr + last_expr) + (
+            last_expr("head")
+            + (op_expr + last_expr.set_results_name("tail", list_all_matches=True))[
+                1, ...
+            ]
+        ).set_parse_action(self.make_unpack_callback(Div))
+        this_expr <<= match_expr | last_expr
+        last_expr = this_expr
+
+        # Binary x|X operator
+        op_expr = pp.one_of(["x", "X"])
+
+        this_expr = pp.Forward()
+        match_expr = pp.FollowedBy(last_expr + op_expr + last_expr) + (
+            last_expr("head")
+            + (op_expr + last_expr.set_results_name("tail", list_all_matches=True))[
+                1, ...
+            ]
+        ).set_parse_action(self.make_unpack_callback(Mul))
+        this_expr <<= match_expr | last_expr
+        last_expr = this_expr
+
+        # Binary - operator
+        op_expr = pp.Literal("-")
+
+        this_expr = pp.Forward()
+        match_expr = pp.FollowedBy(last_expr + op_expr + last_expr) + (
+            last_expr("head")
+            + (op_expr + last_expr.set_results_name("tail", list_all_matches=True))[
+                1, ...
+            ]
+        ).set_parse_action(self.make_unpack_callback(Sub))
+        this_expr <<= match_expr | last_expr
+        last_expr = this_expr
+
+        # Binary - operator
+        op_expr = pp.Literal("+")
+
+        this_expr = pp.Forward()
+        match_expr = pp.FollowedBy(last_expr + op_expr + last_expr) + (
+            last_expr("head")
+            + (op_expr + last_expr.set_results_name("tail", list_all_matches=True))[
+                1, ...
+            ]
+        ).set_parse_action(self.make_unpack_callback(Add))
+        this_expr <<= match_expr | last_expr
+        last_expr = this_expr
+
+        expr <<= last_expr
+
+        return expr("expr")
 
     @pp.cached_property
     def constant(self) -> pp.ParserElement:

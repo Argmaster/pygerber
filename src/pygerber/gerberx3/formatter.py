@@ -94,6 +94,7 @@ from pygerber.gerberx3.ast.nodes import (
     G,
     Mul,
     Neg,
+    Parenthesis,
     Point,
     Pos,
     SRclose,
@@ -169,6 +170,7 @@ class Formatter(AstVisitor):
         keep_non_standalone_codes: bool = True,
         remove_g54: bool = False,
         remove_g55: bool = False,
+        explicit_parenthesis: bool = False,
         strip_whitespace: bool = False,
     ) -> None:
         r"""Initialize Formatter instance.
@@ -256,6 +258,10 @@ class Formatter(AstVisitor):
             Remove G55 code from output, by default False
             G55 code has no effect on the output, it was used in legacy files to
             prefix flash command.
+        explicit_parenthesis: bool, optional
+            Add explicit parenthesis around all mathematical
+            expressions within macro, by default False
+            When false, original parenthesis are kept.
         strip_whitespace : bool, optional
             Remove all semantically insignificant whitespace, by default False
 
@@ -305,6 +311,7 @@ class Formatter(AstVisitor):
         self.keep_non_standalone_codes = keep_non_standalone_codes
         self.remove_g54 = remove_g54
         self.remove_g55 = remove_g55
+        self.explicit_parenthesis = explicit_parenthesis
         self.strip_whitespace = strip_whitespace
 
         if self.strip_whitespace:
@@ -1030,39 +1037,59 @@ class Formatter(AstVisitor):
     # Math :: Operators :: Binary
     def on_add(self, node: Add) -> None:
         """Handle `Add` node."""
-        self._write("(")
-        for i, operand in enumerate(node.operands):
+        if self.explicit_parenthesis:
+            self._write("(")
+
+        node.head.visit(self)
+
+        for operand in node.tail:
+            self._write("+")
             operand.visit(self)
-            if i < len(node.operands) - 1:
-                self._write("+")
-        self._write(")")
+
+        if self.explicit_parenthesis:
+            self._write(")")
 
     def on_div(self, node: Div) -> None:
         """Handle `Div` node."""
-        self._write("(")
-        for i, operand in enumerate(node.operands):
+        if self.explicit_parenthesis:
+            self._write("(")
+
+        node.head.visit(self)
+
+        for operand in node.tail:
+            self._write("/")
             operand.visit(self)
-            if i < len(node.operands) - 1:
-                self._write("/")
-        self._write(")")
+
+        if self.explicit_parenthesis:
+            self._write(")")
 
     def on_mul(self, node: Mul) -> None:
         """Handle `Mul` node."""
-        self._write("(")
-        for i, operand in enumerate(node.operands):
+        if self.explicit_parenthesis:
+            self._write("(")
+
+        node.head.visit(self)
+
+        for operand in node.tail:
+            self._write("x")
             operand.visit(self)
-            if i < len(node.operands) - 1:
-                self._write("x")
-        self._write(")")
+
+        if self.explicit_parenthesis:
+            self._write(")")
 
     def on_sub(self, node: Sub) -> None:
         """Handle `Sub` node."""
-        self._write("(")
-        for i, operand in enumerate(node.operands):
+        if self.explicit_parenthesis:
+            self._write("(")
+
+        node.head.visit(self)
+
+        for operand in node.tail:
+            self._write("-")
             operand.visit(self)
-            if i < len(node.operands) - 1:
-                self._write("-")
-        self._write(")")
+
+        if self.explicit_parenthesis:
+            self._write(")")
 
     # Math :: Operators :: Unary
 
@@ -1088,6 +1115,16 @@ class Formatter(AstVisitor):
     def on_constant(self, node: Constant) -> None:
         """Handle `Constant` node."""
         self._write(self._fmt_double(node.constant))
+
+    def on_parenthesis(self, node: Parenthesis) -> None:
+        """Handle `Parenthesis` node."""
+        if not self.explicit_parenthesis:
+            self._write("(")
+
+        node.inner.visit(self)
+
+        if not self.explicit_parenthesis:
+            self._write(")")
 
     def on_point(self, node: Point) -> None:
         """Handle `Point` node."""

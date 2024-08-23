@@ -275,32 +275,32 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     Add: Add(
         source="",
         location=0,
-        operands=[
-            Constant(source="", location=0, constant=1),
+        head=Constant(source="", location=0, constant=1),
+        tail=[
             Constant(source="", location=0, constant=2),
         ],
     ),
     Div: Div(
         source="",
         location=0,
-        operands=[
-            Constant(source="", location=0, constant=1),
+        head=Constant(source="", location=0, constant=1),
+        tail=[
             Constant(source="", location=0, constant=2),
         ],
     ),
     Mul: Mul(
         source="",
         location=0,
-        operands=[
-            Constant(source="", location=0, constant=1),
+        head=Constant(source="", location=0, constant=1),
+        tail=[
             Constant(source="", location=0, constant=2),
         ],
     ),
     Sub: Sub(
         source="",
         location=0,
-        operands=[
-            Constant(source="", location=0, constant=1),
+        head=Constant(source="", location=0, constant=1),
+        tail=[
             Constant(source="", location=0, constant=2),
         ],
     ),

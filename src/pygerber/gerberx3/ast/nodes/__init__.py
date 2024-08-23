@@ -96,6 +96,7 @@ from pygerber.gerberx3.ast.nodes.math.operators.binary.mul import Mul
 from pygerber.gerberx3.ast.nodes.math.operators.binary.sub import Sub
 from pygerber.gerberx3.ast.nodes.math.operators.unary.neg import Neg
 from pygerber.gerberx3.ast.nodes.math.operators.unary.pos import Pos
+from pygerber.gerberx3.ast.nodes.math.parenthesis import Parenthesis
 from pygerber.gerberx3.ast.nodes.math.point import Point
 from pygerber.gerberx3.ast.nodes.math.variable import Variable
 from pygerber.gerberx3.ast.nodes.other.coordinate import (
@@ -246,6 +247,7 @@ __all__ = [
     "TF",
     "Coordinate",
     "Expression",
+    "Parenthesis",
     "AB",
     "AM",
     "SourceInfo",
