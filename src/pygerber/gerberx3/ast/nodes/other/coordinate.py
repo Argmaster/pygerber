@@ -12,7 +12,7 @@ from pygerber.gerberx3.ast.nodes.types import PackedCoordinateStr
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from pygerber.gerberx3.ast.visitor import AstVisitor
+    from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 
 
 class Coordinate(Node):

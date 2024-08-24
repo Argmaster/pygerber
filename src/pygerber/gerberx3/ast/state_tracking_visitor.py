@@ -11,6 +11,7 @@ from typing import Any, Callable, Optional
 from pydantic import BaseModel, Field
 
 from pygerber.common.error import throw
+from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 from pygerber.gerberx3.ast.errors import (
     ApertureNotFoundError,
     ApertureNotSelectedError,
@@ -66,7 +67,6 @@ from pygerber.gerberx3.ast.nodes.enums import (
     UnitMode,
     Zeros,
 )
-from pygerber.gerberx3.ast.visitor import AstVisitor
 
 
 class _StateModel(BaseModel):

@@ -15,7 +15,7 @@ from pygerber.gerberx3.ast.nodes.other.coordinate import (
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from pygerber.gerberx3.ast.visitor import AstVisitor
+    from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 
 
 class D02(D):

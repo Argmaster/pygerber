@@ -7,6 +7,7 @@ from unittest import mock
 import pytest
 import tzlocal
 
+from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
 from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
 from pygerber.gerberx3.ast.nodes.aperture.ADC import ADC
@@ -123,7 +124,6 @@ from pygerber.gerberx3.ast.nodes.properties.MO import MO, UnitMode
 from pygerber.gerberx3.ast.nodes.properties.OF import OF
 from pygerber.gerberx3.ast.nodes.properties.SF import SF
 from pygerber.gerberx3.ast.nodes.types import ApertureIdStr, PackedCoordinateStr
-from pygerber.gerberx3.ast.visitor import AstVisitor
 
 NODE_SAMPLES: Dict[Type[Node], Node] = {
     ABclose: ABclose(location=0),

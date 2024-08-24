@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 from pygerber.gerberx3.ast.nodes.attribute.TF import TF_MD5
-from pygerber.gerberx3.ast.visitor import AstVisitor
 from pygerber.gerberx3.parser.pyparsing.parser import Parser
 
 

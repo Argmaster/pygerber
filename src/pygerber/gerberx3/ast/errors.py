@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
-
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes import TF_MD5
+    from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
 
 
 class AstError(Exception):

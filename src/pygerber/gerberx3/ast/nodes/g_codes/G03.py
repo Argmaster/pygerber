@@ -9,7 +9,7 @@ from pygerber.gerberx3.ast.nodes.g_codes.G import G
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from pygerber.gerberx3.ast.visitor import AstVisitor
+    from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 
 
 class G03(G):

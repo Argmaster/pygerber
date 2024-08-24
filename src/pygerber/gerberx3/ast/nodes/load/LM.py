@@ -10,7 +10,7 @@ from pygerber.gerberx3.ast.nodes.enums import Mirroring
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from pygerber.gerberx3.ast.visitor import AstVisitor
+    from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 
 
 class LM(Node):

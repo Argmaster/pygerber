@@ -11,7 +11,7 @@ from pygerber.gerberx3.ast.nodes.math.variable import Variable
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from pygerber.gerberx3.ast.visitor import AstVisitor
+    from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 
 
 class Assignment(Node):

@@ -9,7 +9,7 @@ from pygerber.gerberx3.ast.nodes.math.expression import Expression
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from pygerber.gerberx3.ast.visitor import AstVisitor
+    from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 
 
 class Variable(Expression):
