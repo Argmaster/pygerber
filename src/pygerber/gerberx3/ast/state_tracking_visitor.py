@@ -399,7 +399,7 @@ class StateTrackingVisitor(AstVisitor):
     def on_d03(self, node: D03) -> None:
         """Handle `D03` node."""
         super().on_d03(node)
-        self._on_d03_handler(node, self._current_aperture)
+        self._on_d03_handler(node, self.state.current_aperture)
         self._update_coordinates()
 
     def on_flash_circle(self, node: D03, aperture: ADC) -> None:
@@ -423,9 +423,8 @@ class StateTrackingVisitor(AstVisitor):
     def on_dnn(self, node: Dnn) -> None:
         """Handle `Dnn` node."""
         self.state.current_aperture_id = node.aperture_id
-        self._current_aperture = self.state.current_aperture
         self._on_d03_handler = self._on_d03_handler_dispatch_table[  # type: ignore[assignment]
-            type(self._current_aperture)
+            type(self.state.current_aperture)
         ]
 
     # G codes

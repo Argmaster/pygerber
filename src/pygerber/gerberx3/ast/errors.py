@@ -18,7 +18,8 @@ class DirectADHandlerDispatchNotSupportedError(StateTrackingVisitorError):
 
     def __init__(self) -> None:
         super().__init__(
-            "AD class can not be used to select handler. Use subclass instead."
+            "Aperture was not selected before flash command was issued."
+            " PyGerber does not support direct use of AD class as handler."
         )
 
 

@@ -4,6 +4,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from pygerber.gerberx3.ast.errors import (
+    ApertureNotSelectedError,
+)
 from pygerber.gerberx3.ast.nodes import (
     AB,
     ADC,
@@ -192,6 +195,14 @@ def test_d01_draw_ccw_arc_default_quadrant(
     on_draw_line.assert_not_called()
     on_draw_cw_arc.assert_not_called()
     on_draw_ccw_arc.assert_called()
+
+
+def test_d03_flash_no_aperture(default_d03: D03) -> None:
+    """Test if D03 command callbacks are correctly called."""
+    visitor = StateTrackingVisitor()
+
+    with pytest.raises(ApertureNotSelectedError):
+        visitor.on_d03(default_d03)
 
 
 def test_d03_flash_circle(default_d03: D03, mocker: MockerFixture) -> None:
