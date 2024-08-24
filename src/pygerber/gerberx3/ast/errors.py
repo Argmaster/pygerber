@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
+
+if TYPE_CHECKING:
+    from pygerber.gerberx3.ast.nodes import TF_MD5
+
+
+class AstError(Exception):
+    """Base class for all errors raised by AST."""
 
 
 class VisitorError(Exception):
@@ -40,3 +49,11 @@ class ApertureNotFoundError(VisitorError):
         super().__init__(
             f"Aperture {aperture_number} not found in the aperture dictionary."
         )
+
+
+class SourceNotAvailableError(AstError):
+    """Raised when source is not available for MD5 check."""
+
+    def __init__(self, node: TF_MD5) -> None:
+        super().__init__("Source is not available for MD5 check.")
+        self.node = node

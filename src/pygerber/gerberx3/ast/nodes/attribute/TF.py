@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Callable, List, Literal, Optional
 
 from pydantic import Field
 
+from pygerber.gerberx3.ast.errors import SourceNotAvailableError
 from pygerber.gerberx3.ast.nodes.base import Node
 from pygerber.gerberx3.ast.nodes.enums import FileFunction, Part
 
@@ -220,8 +221,11 @@ class TF_MD5(TF):  # noqa: N801
 
     def check_source_hash(self) -> bool:
         """Validate MD5 attribute."""
+        if self.source_info is None:
+            raise SourceNotAvailableError(self)
+
         source = (
-            self.source[: self.location - 1]
+            self.source_info.source[: self.source_info.location - 1]
             .replace("\n", "")
             .replace("\r", "")
             .encode("utf-8")
