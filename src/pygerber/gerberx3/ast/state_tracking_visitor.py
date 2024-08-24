@@ -31,6 +31,8 @@ from pygerber.gerberx3.ast.nodes import (
     G03,
     G36,
     G37,
+    G74,
+    G75,
     TA,
     TD,
     TF,
@@ -164,6 +166,16 @@ class PlotMode(Enum):
     """Counter-clockwise circular interpolation mode."""
 
 
+class ArcInterpolation(Enum):
+    """Arc interpolation mode."""
+
+    SINGLE_QUADRANT = "SINGLE_QUADRANT"
+    """Single quadrant mode."""
+
+    MULTI_QUADRANT = "MULTI_QUADRANT"
+    """Multi quadrant mode."""
+
+
 class ApertureStorage(_StateModel):
     """Storage for apertures."""
 
@@ -193,6 +205,11 @@ class State(_StateModel):
 
     plot_mode: PlotMode = Field(default=PlotMode.LINEAR)
     """The plot mode. (Spec reference 4.7)"""
+
+    arc_interpolation: ArcInterpolation = Field(
+        default=ArcInterpolation.SINGLE_QUADRANT
+    )
+    """The arc interpolation mode. (Spec reference: 4.7.2)"""
 
     current_aperture_id: Optional[ApertureIdStr] = Field(default=None)
     """The ID of currently selected aperture. (Spec reference: 8.6)"""
@@ -259,14 +276,32 @@ class StateTrackingVisitor(AstVisitor):
         self.state = State()
         self._on_d01_handler = self.on_draw_line
         self._plot_mode_to_d01_handler = {
-            PlotMode.LINEAR: self.on_draw_line,
-            PlotMode.ARC: self.on_draw_cw_arc,
-            PlotMode.CCW_ARC: self.on_draw_ccw_arc,
+            PlotMode.LINEAR: {
+                ArcInterpolation.SINGLE_QUADRANT: self.on_draw_line,
+                ArcInterpolation.MULTI_QUADRANT: self.on_draw_line,
+            },
+            PlotMode.ARC: {
+                ArcInterpolation.SINGLE_QUADRANT: self.on_draw_cw_arc_sq,
+                ArcInterpolation.MULTI_QUADRANT: self.on_draw_cw_arc_mq,
+            },
+            PlotMode.CCW_ARC: {
+                ArcInterpolation.SINGLE_QUADRANT: self.on_draw_ccw_arc_sq,
+                ArcInterpolation.MULTI_QUADRANT: self.on_draw_ccw_arc_mq,
+            },
         }
         self._plot_mode_to_in_region_d01_handler = {
-            PlotMode.LINEAR: self.on_in_region_draw_line,
-            PlotMode.ARC: self.on_in_region_draw_cw_arc,
-            PlotMode.CCW_ARC: self.on_in_region_draw_ccw_arc,
+            PlotMode.LINEAR: {
+                ArcInterpolation.SINGLE_QUADRANT: self.on_in_region_draw_line,
+                ArcInterpolation.MULTI_QUADRANT: self.on_in_region_draw_line,
+            },
+            PlotMode.ARC: {
+                ArcInterpolation.SINGLE_QUADRANT: self.on_in_region_draw_cw_arc_sq,
+                ArcInterpolation.MULTI_QUADRANT: self.on_in_region_draw_cw_arc_mq,
+            },
+            PlotMode.CCW_ARC: {
+                ArcInterpolation.SINGLE_QUADRANT: self.on_in_region_draw_ccw_arc_sq,
+                ArcInterpolation.MULTI_QUADRANT: self.on_in_region_draw_ccw_arc_mq,
+            },
         }
         self._on_d03_handler_dispatch_table = {
             AD: lambda *_: throw(DirectADHandlerDispatchNotSupportedError()),
@@ -280,6 +315,10 @@ class StateTrackingVisitor(AstVisitor):
         self._on_d03_handler: Callable[[D03, AD | AB], None] = lambda *_: throw(  # type: ignore[unreachable]
             ApertureNotSelectedError()
         )
+        self._dispatch_d01_handler: Callable[[], None] = (
+            self._dispatch_d01_handler_non_region
+        )
+        self._dispatch_d01_handler()
 
     # Aperture
 
@@ -328,11 +367,23 @@ class StateTrackingVisitor(AstVisitor):
     def on_draw_line(self, node: D01) -> None:
         """Handle `D01` node in linear interpolation mode."""
 
-    def on_draw_cw_arc(self, node: D01) -> None:
-        """Handle `D01` node in clockwise circular interpolation mode."""
+    def on_draw_cw_arc_sq(self, node: D01) -> None:
+        """Handle `D01` node in clockwise circular interpolation single quadrant
+        mode.
+        """
 
-    def on_draw_ccw_arc(self, node: D01) -> None:
-        """Handle `D01` node in counter-clockwise circular interpolation."""
+    def on_draw_cw_arc_mq(self, node: D01) -> None:
+        """Handle `D01` node in clockwise circular interpolation multi quadrant mode."""
+
+    def on_draw_ccw_arc_sq(self, node: D01) -> None:
+        """Handle `D01` node in counter-clockwise circular interpolation single quadrant
+        mode.
+        """
+
+    def on_draw_ccw_arc_mq(self, node: D01) -> None:
+        """Handle `D01` node in counter-clockwise circular interpolation multi quadrant
+        mode.
+        """
 
     def _update_coordinates(self) -> None:
         if self.state.coordinate_x is not None:
@@ -382,39 +433,76 @@ class StateTrackingVisitor(AstVisitor):
     def on_g01(self, node: G01) -> None:
         """Handle `G01` node."""
         super().on_g01(node)
-        self._on_d01_handler = self.on_draw_line
         self.state.plot_mode = PlotMode.LINEAR
+        self._dispatch_d01_handler()
+
+    def _dispatch_d01_handler_in_region(self) -> None:
+        self._on_d01_handler = self._plot_mode_to_in_region_d01_handler[
+            self.state.plot_mode
+        ][self.state.arc_interpolation]
+
+    def _dispatch_d01_handler_non_region(self) -> None:
+        self._on_d01_handler = self._plot_mode_to_d01_handler[self.state.plot_mode][
+            self.state.arc_interpolation
+        ]
 
     def on_g02(self, node: G02) -> None:
         """Handle `G02` node."""
         super().on_g02(node)
-        self._on_d01_handler = self.on_draw_cw_arc
         self.state.plot_mode = PlotMode.ARC
+        self._dispatch_d01_handler()
 
     def on_g03(self, node: G03) -> None:
         """Handle `G03` node."""
         super().on_g03(node)
-        self._on_d01_handler = self.on_draw_ccw_arc
         self.state.plot_mode = PlotMode.CCW_ARC
+        self._dispatch_d01_handler()
 
     def on_g36(self, node: G36) -> None:
         """Handle `G36` node."""
         super().on_g36(node)
         self.state.is_region = True
-        self._on_d01_handler = self._plot_mode_to_in_region_d01_handler[
-            self.state.plot_mode
-        ]
+        self._dispatch_d01_handler = self._dispatch_d01_handler_in_region
+        self._dispatch_d01_handler()
 
     def on_in_region_draw_line(self, node: D01) -> None:
         """Handle `D01` node in linear interpolation mode in region."""
 
-    def on_in_region_draw_cw_arc(self, node: D01) -> None:
-        """Handle `D01` node in clockwise circular interpolation mode in region."""
+    def on_in_region_draw_cw_arc_sq(self, node: D01) -> None:
+        """Handle `D01` node in clockwise circular interpolation single quadrant mode
+        within region statement.
+        """
 
-    def on_in_region_draw_ccw_arc(self, node: D01) -> None:
-        """Handle `D01` node in counter-clockwise circular interpolation in region."""
+    def on_in_region_draw_cw_arc_mq(self, node: D01) -> None:
+        """Handle `D01` node in clockwise circular interpolation multi quadrant mode
+        within region statement.
+        """
+
+    def on_in_region_draw_ccw_arc_sq(self, node: D01) -> None:
+        """Handle `D01` node in counter-clockwise circular interpolation single quadrant
+        mode within region statement.
+        """
+
+    def on_in_region_draw_ccw_arc_mq(self, node: D01) -> None:
+        """Handle `D01` node in counter-clockwise circular interpolation multi quadrant
+        mode within region statement.
+        """
 
     def on_g37(self, node: G37) -> None:
         """Handle `G37` node."""
         super().on_g37(node)
-        self._on_d01_handler = self._plot_mode_to_d01_handler[self.state.plot_mode]
+        self.state.is_region = False
+        self._dispatch_d01_handler = self._dispatch_d01_handler_non_region
+        self._dispatch_d01_handler()
+
+    def on_g74(self, node: G74) -> None:
+        """Handle `G74` node."""
+        super().on_g74(node)
+        self.state.arc_interpolation = ArcInterpolation.SINGLE_QUADRANT
+        self._dispatch_d01_handler()
+
+    def on_g75(self, node: G75) -> None:
+        """Handle `G75` node."""
+        super().on_g75(node)
+        self.state.arc_interpolation = ArcInterpolation.MULTI_QUADRANT
+        self._dispatch_d01_handler()

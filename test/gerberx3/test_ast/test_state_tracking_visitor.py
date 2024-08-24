@@ -17,6 +17,9 @@ from pygerber.gerberx3.ast.nodes import (
     G02,
     G03,
     G36,
+    G37,
+    G74,
+    G75,
     ABclose,
     ABopen,
     ADmacro,
@@ -27,6 +30,7 @@ from pygerber.gerberx3.ast.nodes import (
     CoordinateX,
     CoordinateY,
     Dnn,
+    Node,
     PackedCoordinateStr,
     TA_AperFunction,
     TA_DrillTolerance,
@@ -106,16 +110,18 @@ def test_override_aperture_attribute() -> None:
     )
 
 
-def test_d01_draw_linear(default_d01: D01, mocker: MockerFixture) -> None:
+def test_d01_draw_linear_default_quadrant(
+    default_d01: D01, mocker: MockerFixture
+) -> None:
     """Test if D02 command is handled correctly."""
     on_draw_line = mocker.spy(
         StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
     )
     on_draw_cw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__
     )
     on_draw_ccw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__
     )
     visitor = StateTrackingVisitor()
 
@@ -130,6 +136,10 @@ def test_d01_draw_linear(default_d01: D01, mocker: MockerFixture) -> None:
 
 @pytest.fixture()
 def default_d01() -> D01:
+    return _default_d01()
+
+
+def _default_d01() -> D01:
     return D01(
         x=CoordinateX(value=PackedCoordinateStr("1")),
         y=CoordinateY(value=PackedCoordinateStr("1")),
@@ -138,16 +148,18 @@ def default_d01() -> D01:
     )
 
 
-def test_d01_draw_cw_arc(default_d01: D01, mocker: MockerFixture) -> None:
+def test_d01_draw_cw_arc_default_quadrant(
+    default_d01: D01, mocker: MockerFixture
+) -> None:
     """Test if D02 command is handled correctly."""
     on_draw_line = mocker.spy(
         StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
     )
     on_draw_cw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__
     )
     on_draw_ccw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__
     )
     visitor = StateTrackingVisitor()
 
@@ -159,16 +171,18 @@ def test_d01_draw_cw_arc(default_d01: D01, mocker: MockerFixture) -> None:
     on_draw_ccw_arc.assert_not_called()
 
 
-def test_d01_draw_ccw_arc(default_d01: D01, mocker: MockerFixture) -> None:
+def test_d01_draw_ccw_arc_default_quadrant(
+    default_d01: D01, mocker: MockerFixture
+) -> None:
     """Test if D02 command is handled correctly."""
     on_draw_line = mocker.spy(
         StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
     )
     on_draw_cw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__
     )
     on_draw_ccw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__
     )
     visitor = StateTrackingVisitor()
 
@@ -328,7 +342,7 @@ def test_d03_flash_block(default_d03: D03, mocker: MockerFixture) -> None:
     spy.assert_called_once()
 
 
-def test_switch_to_region_mode_linear_plot(
+def test_switch_to_region_mode_linear_default_quadrant_plot(
     default_d01: D01, mocker: MockerFixture
 ) -> None:
     """Check if the visitor switches to region mode handlers properly."""
@@ -348,15 +362,15 @@ def test_switch_to_region_mode_linear_plot(
     region_mode_handler.assert_called()
 
 
-def test_switch_to_region_mode_arc_plot(
+def test_switch_to_region_mode_arc_default_quadrant_plot(
     default_d01: D01, mocker: MockerFixture
 ) -> None:
     """Check if the visitor switches to region mode handlers properly."""
     handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__
     )
     region_mode_handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_cw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_cw_arc_sq.__name__
     )
     visitor = StateTrackingVisitor()
 
@@ -368,15 +382,15 @@ def test_switch_to_region_mode_arc_plot(
     region_mode_handler.assert_called()
 
 
-def test_switch_to_region_mode_ccw_arc_plot(
+def test_switch_to_region_mode_ccw_arc_default_quadrant_plot(
     default_d01: D01, mocker: MockerFixture
 ) -> None:
     """Check if the visitor switches to region mode handlers properly."""
     handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__
     )
     region_mode_handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_ccw_arc.__name__
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_ccw_arc_sq.__name__
     )
     visitor = StateTrackingVisitor()
 
@@ -386,3 +400,56 @@ def test_switch_to_region_mode_ccw_arc_plot(
 
     handler.assert_not_called()
     region_mode_handler.assert_called()
+
+
+STATE_TRACKING_VISITOR_D01_CALLBACKS = {
+    StateTrackingVisitor.on_draw_line.__name__,
+    StateTrackingVisitor.on_draw_cw_arc_sq.__name__,
+    StateTrackingVisitor.on_draw_cw_arc_mq.__name__,
+    StateTrackingVisitor.on_draw_ccw_arc_sq.__name__,
+    StateTrackingVisitor.on_draw_ccw_arc_mq.__name__,
+}
+
+STATE_TRACKING_VISITOR_D01_IN_REGION_CALLBACKS = {
+    StateTrackingVisitor.on_in_region_draw_line.__name__,
+    StateTrackingVisitor.on_in_region_draw_cw_arc_sq.__name__,
+    StateTrackingVisitor.on_in_region_draw_cw_arc_mq.__name__,
+    StateTrackingVisitor.on_in_region_draw_ccw_arc_sq.__name__,
+    StateTrackingVisitor.on_in_region_draw_ccw_arc_mq.__name__,
+}
+STATE_TRACKING_VISITOR_D01_ALL_CALLBACKS = {
+    *STATE_TRACKING_VISITOR_D01_CALLBACKS,
+    *STATE_TRACKING_VISITOR_D01_IN_REGION_CALLBACKS,
+}
+
+_PARAMS = [
+    ([G01(), G37(), G74()], StateTrackingVisitor.on_draw_line.__name__),
+    ([G02(), G37(), G74()], StateTrackingVisitor.on_draw_cw_arc_sq.__name__),
+    ([G03(), G37(), G74()], StateTrackingVisitor.on_draw_ccw_arc_sq.__name__),
+    ([G01(), G36(), G74()], StateTrackingVisitor.on_in_region_draw_line.__name__),
+    ([G02(), G36(), G74()], StateTrackingVisitor.on_in_region_draw_cw_arc_sq.__name__),
+    ([G03(), G36(), G74()], StateTrackingVisitor.on_in_region_draw_ccw_arc_sq.__name__),
+    ([G01(), G37(), G75()], StateTrackingVisitor.on_draw_line.__name__),
+    ([G02(), G37(), G75()], StateTrackingVisitor.on_draw_cw_arc_mq.__name__),
+    ([G03(), G37(), G75()], StateTrackingVisitor.on_draw_ccw_arc_mq.__name__),
+    ([G01(), G36(), G75()], StateTrackingVisitor.on_in_region_draw_line.__name__),
+    ([G02(), G36(), G75()], StateTrackingVisitor.on_in_region_draw_cw_arc_mq.__name__),
+    ([G03(), G36(), G75()], StateTrackingVisitor.on_in_region_draw_ccw_arc_mq.__name__),
+]
+
+
+@pytest.mark.parametrize(
+    ("tokens", "expect"),
+    _PARAMS,
+)
+def test_d01_dispatch(
+    tokens: list[Node],
+    expect: str,
+) -> None:
+    """Test if D01 command is dispatched correctly."""
+    visitor = StateTrackingVisitor()
+
+    for token in tokens:
+        token.visit(visitor)
+
+    assert visitor._on_d01_handler.__name__ == expect
