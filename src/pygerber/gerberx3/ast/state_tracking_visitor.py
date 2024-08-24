@@ -31,8 +31,12 @@ from pygerber.gerberx3.ast.nodes import (
     G03,
     G36,
     G37,
+    G70,
+    G71,
     G74,
     G75,
+    G90,
+    G91,
     TA,
     TD,
     TF,
@@ -45,7 +49,7 @@ from pygerber.gerberx3.ast.nodes import (
 )
 from pygerber.gerberx3.ast.nodes.enums import (
     AxisCorrespondence,
-    CoordinateMode,
+    CoordinateNotation,
     ImagePolarity,
     Mirroring,
     UnitMode,
@@ -61,14 +65,14 @@ class _StateModel(BaseModel):
 class CoordinateFormat(_StateModel):
     """Coordinate format information."""
 
-    zeros: Zeros
-    coordinate_mode: CoordinateMode
+    zeros: Zeros = Field(default=Zeros.SKIP_LEADING)
+    coordinate_mode: CoordinateNotation = Field(default=CoordinateNotation.ABSOLUTE)
 
-    x_integral: int
-    x_decimal: int
+    x_integral: int = Field(default=2)
+    x_decimal: int = Field(default=6)
 
-    y_integral: int
-    y_decimal: int
+    y_integral: int = Field(default=2)
+    y_decimal: int = Field(default=6)
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -494,6 +498,16 @@ class StateTrackingVisitor(AstVisitor):
         self._dispatch_d01_handler = self._dispatch_d01_handler_non_region
         self._dispatch_d01_handler()
 
+    def on_g70(self, node: G70) -> None:
+        """Handle `G70` node."""
+        super().on_g70(node)
+        self.state.unit_mode = UnitMode.IMPERIAL
+
+    def on_g71(self, node: G71) -> None:
+        """Handle `G71` node."""
+        super().on_g71(node)
+        self.state.unit_mode = UnitMode.METRIC
+
     def on_g74(self, node: G74) -> None:
         """Handle `G74` node."""
         super().on_g74(node)
@@ -505,3 +519,17 @@ class StateTrackingVisitor(AstVisitor):
         super().on_g75(node)
         self.state.arc_interpolation = ArcInterpolation.MULTI_QUADRANT
         self._dispatch_d01_handler()
+
+    def on_g90(self, node: G90) -> None:
+        """Handle `G90` node."""
+        super().on_g90(node)
+        if self.state.coordinate_format is None:
+            self.state.coordinate_format = CoordinateFormat()
+        self.state.coordinate_format.coordinate_mode = CoordinateNotation.ABSOLUTE
+
+    def on_g91(self, node: G91) -> None:
+        """Handle `G91` node."""
+        super().on_g91(node)
+        if self.state.coordinate_format is None:
+            self.state.coordinate_format = CoordinateFormat()
+        self.state.coordinate_format.coordinate_mode = CoordinateNotation.INCREMENTAL

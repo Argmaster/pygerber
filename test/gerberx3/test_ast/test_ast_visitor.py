@@ -63,7 +63,7 @@ from pygerber.gerberx3.ast.nodes.d_codes.D01 import D01
 from pygerber.gerberx3.ast.nodes.d_codes.D02 import D02
 from pygerber.gerberx3.ast.nodes.d_codes.D03 import D03
 from pygerber.gerberx3.ast.nodes.d_codes.Dnn import Dnn
-from pygerber.gerberx3.ast.nodes.enums import CoordinateMode, ImagePolarity, Zeros
+from pygerber.gerberx3.ast.nodes.enums import CoordinateNotation, ImagePolarity, Zeros
 from pygerber.gerberx3.ast.nodes.file import File
 from pygerber.gerberx3.ast.nodes.g_codes.G01 import G01
 from pygerber.gerberx3.ast.nodes.g_codes.G02 import G02
@@ -370,7 +370,7 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
     AS: AS(correspondence=AxisCorrespondence.AX_BY),
     FS: FS(
         zeros=Zeros.SKIP_LEADING,
-        coordinate_mode=CoordinateMode.ABSOLUTE,
+        coordinate_mode=CoordinateNotation.ABSOLUTE,
         x_integral=2,
         x_decimal=3,
         y_integral=4,

@@ -22,7 +22,7 @@ class Zeros(Enum):
     __str__ = __repr__
 
 
-class CoordinateMode(Enum):
+class CoordinateNotation(Enum):
     """Coordinate mode enumeration."""
 
     ABSOLUTE = "A"

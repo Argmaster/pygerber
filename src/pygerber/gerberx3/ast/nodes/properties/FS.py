@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from pygerber.gerberx3.ast.nodes.base import Node
-from pygerber.gerberx3.ast.nodes.enums import CoordinateMode, Zeros
+from pygerber.gerberx3.ast.nodes.enums import CoordinateNotation, Zeros
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -17,7 +17,7 @@ class FS(Node):
     """Represents FS Gerber extended command."""
 
     zeros: Zeros
-    coordinate_mode: CoordinateMode
+    coordinate_mode: CoordinateNotation
 
     x_integral: int
     x_decimal: int
