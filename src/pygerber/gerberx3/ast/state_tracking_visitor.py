@@ -25,9 +25,11 @@ from pygerber.gerberx3.ast.nodes import (
     ADP,
     ADR,
     AM,
+    AS,
     D01,
     D02,
     D03,
+    FS,
     G01,
     G02,
     G03,
@@ -39,6 +41,9 @@ from pygerber.gerberx3.ast.nodes import (
     G75,
     G90,
     G91,
+    IN,
+    IP,
+    IR,
     LM,
     LN,
     LP,
@@ -46,6 +51,10 @@ from pygerber.gerberx3.ast.nodes import (
     LS,
     M00,
     M02,
+    MI,
+    MO,
+    OF,
+    SF,
     TA,
     TD,
     TF,
@@ -134,7 +143,7 @@ class CoordinateFormat(_StateModel):
 
 
 class Attributes(_StateModel):
-    """Attributes of the Gerber file."""
+    """Attributes Gerber X3 of apertures, objects and file."""
 
     aperture_attributes: dict[str, TA] = Field(default_factory=dict)
     """Object attributes created with TA extended command."""
@@ -145,7 +154,35 @@ class Attributes(_StateModel):
     object_attributes: dict[str, TO] = Field(default_factory=dict)
     """Object attributes created with TO extended command."""
 
-    image_polarity: ImagePolarity = Field(default=None)
+
+class ImageAttributes(_StateModel):
+    """Legacy attributes of the image."""
+
+    polarity: ImagePolarity = Field(default=None)
+    """The name of the image. (Spec reference: 8.1.4)"""
+
+    rotation: Double = Field(default=0.0)
+    """The rotation of the image. (Spec reference: 8.1.5)"""
+
+    a_axis_mirroring: int = Field(default=0)
+    """The mirroring of A axis of the image. (Spec reference: 8.1.7)"""
+
+    b_axis_mirroring: int = Field(default=0)
+    """The mirroring of B axis of the image. (Spec reference: 8.1.7)"""
+
+    a_axis_offset: Optional[Double] = Field(default=0)
+    """The offset of A axis of the image. (Spec reference: 8.1.8)"""
+
+    b_axis_offset: Optional[Double] = Field(default=0)
+    """The offset of B axis of the image. (Spec reference: 8.1.8)"""
+
+    a_axis_scale: Optional[Double] = Field(default=0)
+    """The scale of A axis of the image. (Spec reference: 8.1.9)"""
+
+    b_axis_scale: Optional[Double] = Field(default=0)
+    """The scale of B axis of the image. (Spec reference: 8.1.9)"""
+
+    image_name: Optional[str] = Field(default=None)
     """The name of the image. (Spec reference: 8.1.3)"""
 
     file_name: Optional[str] = Field(default=None)
@@ -261,6 +298,9 @@ class State(_StateModel):
 
     attributes: Attributes = Field(default_factory=Attributes)
     """Container for holding currently active attributes."""
+
+    image_attributes: ImageAttributes = Field(default_factory=ImageAttributes)
+    """Container for holding legacy image attributes."""
 
     is_region: bool = Field(default=False)
     """Flag indicating if visitor is in region mode."""
@@ -566,7 +606,7 @@ class StateTrackingVisitor(AstVisitor):
     def on_ln(self, node: LN) -> None:
         """Handle `LN` node."""
         super().on_ln(node)
-        self.state.attributes.file_name = node.name
+        self.state.image_attributes.file_name = node.name
 
     def on_lp(self, node: LP) -> None:
         """Handle `LP` node."""
@@ -590,6 +630,61 @@ class StateTrackingVisitor(AstVisitor):
     def on_m02(self, node: M02) -> None:
         """Handle `M02` node."""
         raise ProgramStop(node)
+
+    def on_as(self, node: AS) -> None:
+        """Handle `AS` node."""
+        super().on_as(node)
+        self.state.image_attributes.axis_correspondence = node.correspondence
+
+    def on_fs(self, node: FS) -> None:
+        """Handle `FS` node."""
+        super().on_fs(node)
+        self.state.coordinate_format = CoordinateFormat(
+            zeros=node.zeros,
+            coordinate_mode=node.coordinate_mode,
+            x_integral=node.x_integral,
+            x_decimal=node.x_decimal,
+            y_integral=node.y_integral,
+            y_decimal=node.y_decimal,
+        )
+
+    def on_in(self, node: IN) -> None:
+        """Handle `IN` node."""
+        super().on_in(node)
+        self.state.image_attributes.image_name = node.name
+
+    def on_ip(self, node: IP) -> None:
+        """Handle `IP` node."""
+        super().on_ip(node)
+        self.state.image_attributes.polarity = node.polarity
+
+    def on_ir(self, node: IR) -> None:
+        """Handle `IR` node."""
+        super().on_ir(node)
+        self.state.image_attributes.rotation = node.rotation_degrees
+
+    def on_mi(self, node: MI) -> None:
+        """Handle `MI` node."""
+        super().on_mi(node)
+        self.state.image_attributes.a_axis_mirroring = node.a_mirroring
+        self.state.image_attributes.b_axis_mirroring = node.b_mirroring
+
+    def on_mo(self, node: MO) -> None:
+        """Handle `MO` node."""
+        super().on_mo(node)
+        self.state.unit_mode = node.mode
+
+    def on_of(self, node: OF) -> None:
+        """Handle `OF` node."""
+        super().on_of(node)
+        self.state.image_attributes.a_axis_offset = node.a_offset
+        self.state.image_attributes.b_axis_offset = node.b_offset
+
+    def on_sf(self, node: SF) -> None:
+        """Handle `SF` node."""
+        super().on_sf(node)
+        self.state.image_attributes.a_axis_scale = node.a_scale
+        self.state.image_attributes.b_axis_scale = node.b_scale
 
     def on_file(self, node: File) -> None:
         """Handle `File` node."""
