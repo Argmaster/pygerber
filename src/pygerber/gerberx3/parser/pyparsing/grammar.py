@@ -1397,7 +1397,7 @@ class Grammar:
 
         expr <<= last_expr
 
-        return expr("expr")
+        return take_only(expr("expression"), "expression")
 
     @pp.cached_property
     def constant(self) -> pp.ParserElement:
@@ -1419,9 +1419,7 @@ class Grammar:
     def assignment(self) -> pp.ParserElement:
         """Create a parser element capable of parsing assignments."""
         return (
-            self._command(
-                self.variable + "=" + self.expression.set_results_name("expression")
-            )
+            self._command(self.variable + "=" + self.expression)
             .set_results_name("assignment")
             .set_parse_action(self.make_unpack_callback(Assignment))
         )
@@ -1781,3 +1779,8 @@ class Grammar:
             .set_parse_action(self.make_unpack_callback(SF))
             .set_name("SF")
         )
+
+
+def take_only(expr: pp.ParserElement, name: str) -> pp.ParserElement:
+    """Add parse action to extract single named parse result from a parse result."""
+    return pp.TokenConverter(expr).add_parse_action(lambda t: t.as_dict()[name])(name)

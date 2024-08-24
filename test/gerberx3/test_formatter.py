@@ -83,10 +83,6 @@ def test_formatter(asset: Asset, config: Config) -> None:
     output_buffer.seek(0)
     formatted_source = output_buffer.read()
 
-    from pathlib import Path
-
-    Path("formatted.gbr").write_text(formatted_source)
-
     formatted_ast = parser.parse(formatted_source)
 
     if formatted_ast.model_dump_json(serialize_as_any=True) != ast.model_dump_json(
@@ -116,7 +112,7 @@ def test_indent_character_space() -> None:
         formatted_source
         == """%AMDonut*
     1,1,$1,$2,$3*
-    $4=($1x0.75)*
+    $4=$1x0.75*
     1,0,$4,$2,$3*%
 """
     )
@@ -125,7 +121,29 @@ def test_indent_character_space() -> None:
 def _format(source: str, **kwargs: Any) -> str:
     ast = Parser().parse(source)
     output_buffer = StringIO()
-    Formatter(**kwargs).format(ast, output_buffer)
+    formatter_params = {
+        "indent_character": " ",
+        "macro_body_indent": 0,
+        "macro_param_indent": 0,
+        "macro_split_mode": Formatter.MacroSplitMode.PRIMITIVES,
+        "macro_end_in_new_line": False,
+        "block_aperture_body_indent": 0,
+        "step_and_repeat_body_indent": 0,
+        "float_decimal_places": 6,
+        "float_trim_trailing_zeros": True,
+        "d01_indent": 0,
+        "d02_indent": 0,
+        "d03_indent": 0,
+        "line_end": "\n",
+        "empty_line_before_polarity_switch": False,
+        "keep_non_standalone_codes": True,
+        "remove_g54": False,
+        "remove_g55": False,
+        "explicit_parenthesis": False,
+        "strip_whitespace": False,
+    }
+    formatter_params.update(kwargs)
+    Formatter(**formatter_params).format(ast, output_buffer)  # type: ignore[arg-type]
 
     output_buffer.seek(0)
     return output_buffer.read()
@@ -143,7 +161,7 @@ def test_indent_character_tab() -> None:
         formatted_source
         == """%AMDonut*
 \t1,1,$1,$2,$3*
-\t$4=($1x0.75)*
+\t$4=$1x0.75*
 \t1,0,$4,$2,$3*%
 """
     )
@@ -160,7 +178,7 @@ class TestMacroSplitMode:
         )
         assert (
             formatted_source
-            == """%AMDonut*1,1,$1,$2,$3*$4=($1x0.75)*1,0,$4,$2,$3*%
+            == """%AMDonut*1,1,$1,$2,$3*$4=$1x0.75*1,0,$4,$2,$3*%
 """
         )
 
@@ -176,7 +194,7 @@ class TestMacroSplitMode:
             formatted_source
             == """%AMDonut*
     1,1,$1,$2,$3*
-    $4=($1x0.75)*
+    $4=$1x0.75*
     1,0,$4,$2,$3*%
 """
         )
@@ -198,7 +216,7 @@ class TestMacroSplitMode:
         $1,
         $2,
         $3*
-    $4=($1x0.75)*
+    $4=$1x0.75*
     1,
         0,
         $4,
@@ -218,7 +236,7 @@ class TestMacroSplitMode:
         )
         assert (
             formatted_source
-            == """%AMDonut*1,1,$1,$2,$3*$4=($1x0.75)*1,0,$4,$2,$3*
+            == """%AMDonut*1,1,$1,$2,$3*$4=$1x0.75*1,0,$4,$2,$3*
 %
 """
         )
@@ -236,7 +254,7 @@ class TestMacroSplitMode:
             formatted_source
             == """%AMDonut*
     1,1,$1,$2,$3*
-    $4=($1x0.75)*
+    $4=$1x0.75*
     1,0,$4,$2,$3*
 %
 """
@@ -259,7 +277,7 @@ class TestMacroSplitMode:
         $1,
         $2,
         $3*
-    $4=($1x0.75)*
+    $4=$1x0.75*
     1,
         0,
         $4,
@@ -393,5 +411,75 @@ def test_step_and_repeat_body_indent() -> None:
     D14*
     X456789Y012345D03*
 %SR*%
+"""
+    )
+
+
+AM_TEST1 = """%AMTEST1*
+$2=100-$1/1.75+$2*
+%
+"""
+
+
+def test_explicit_parenthesis() -> None:
+    formatted_source = _format(
+        AM_TEST1,
+        explicit_parenthesis=True,
+    )
+    assert (
+        formatted_source
+        == """%AMTEST1*
+$2=((100-($1/1.75))+$2)*%
+"""
+    )
+
+
+def test_no_explicit_parenthesis() -> None:
+    formatted_source = _format(
+        AM_TEST1,
+        explicit_parenthesis=False,
+    )
+    assert (
+        formatted_source
+        == """%AMTEST1*
+$2=100-$1/1.75+$2*%
+"""
+    )
+
+
+def test_no_explicit_parenthesis_keep_original_same_order() -> None:
+    """Check if parenthesis are kept the way they were in the original source
+    while explicit_parenthesis is False and presence of parenthesis does not
+    affect expression execution order.
+    """
+    formatted_source = _format(
+        """%AMTEST1*
+$2=100-($1/1.75)+$2*%
+""",
+        explicit_parenthesis=False,
+    )
+    assert (
+        formatted_source
+        == """%AMTEST1*
+$2=100-($1/1.75)+$2*%
+"""
+    )
+
+
+def test_no_explicit_parenthesis_keep_original_different_order() -> None:
+    """Check if parenthesis are kept the way they were in the original source
+    while explicit_parenthesis is False and presence of parenthesis does
+    affect expression execution order.
+    """
+    formatted_source = _format(
+        """%AMTEST1*
+$2=(100-$1)/1.75+$2*%
+""",
+        explicit_parenthesis=False,
+    )
+    assert (
+        formatted_source
+        == """%AMTEST1*
+$2=(100-$1)/1.75+$2*%
 """
     )
