@@ -37,6 +37,11 @@ from pygerber.gerberx3.ast.nodes import (
     G75,
     G90,
     G91,
+    LM,
+    LN,
+    LP,
+    LR,
+    LS,
     TA,
     TD,
     TF,
@@ -52,6 +57,7 @@ from pygerber.gerberx3.ast.nodes.enums import (
     CoordinateNotation,
     ImagePolarity,
     Mirroring,
+    Polarity,
     UnitMode,
     Zeros,
 )
@@ -146,6 +152,9 @@ class Attributes(_StateModel):
 
 class Transform(_StateModel):
     """Aperture transformations."""
+
+    polarity: Polarity = Field(default=Polarity.Dark)
+    """Aperture polarity set with LP command. (Spec reference: 4.9.2)"""
 
     mirroring: Mirroring = Field(default=Mirroring.NONE)
     """Aperture mirroring set with LM command. (Spec reference: 4.9.3)"""
@@ -533,3 +542,28 @@ class StateTrackingVisitor(AstVisitor):
         if self.state.coordinate_format is None:
             self.state.coordinate_format = CoordinateFormat()
         self.state.coordinate_format.coordinate_mode = CoordinateNotation.INCREMENTAL
+
+    def on_lm(self, node: LM) -> None:
+        """Handle `LM` node."""
+        super().on_lm(node)
+        self.state.transform.mirroring = node.mirroring
+
+    def on_ln(self, node: LN) -> None:
+        """Handle `LN` node."""
+        super().on_ln(node)
+        self.state.attributes.file_name = node.name
+
+    def on_lp(self, node: LP) -> None:
+        """Handle `LP` node."""
+        super().on_lp(node)
+        self.state.transform.polarity = node.polarity
+
+    def on_lr(self, node: LR) -> None:
+        """Handle `LR` node."""
+        super().on_lr(node)
+        self.state.transform.rotation = node.rotation
+
+    def on_ls(self, node: LS) -> None:
+        """Handle `LS` node."""
+        super().on_ls(node)
+        self.state.transform.scaling = node.scale
