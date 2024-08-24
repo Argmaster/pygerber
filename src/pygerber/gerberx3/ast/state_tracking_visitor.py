@@ -4,6 +4,7 @@ class.
 
 from __future__ import annotations
 
+from contextlib import suppress
 from enum import Enum
 from typing import Any, Callable, Optional
 
@@ -42,6 +43,8 @@ from pygerber.gerberx3.ast.nodes import (
     LP,
     LR,
     LS,
+    M00,
+    M02,
     TA,
     TD,
     TF,
@@ -50,8 +53,10 @@ from pygerber.gerberx3.ast.nodes import (
     ApertureIdStr,
     Dnn,
     Double,
+    File,
     PackedCoordinateStr,
 )
+from pygerber.gerberx3.ast.nodes.base import Node
 from pygerber.gerberx3.ast.nodes.enums import (
     AxisCorrespondence,
     CoordinateNotation,
@@ -275,6 +280,14 @@ class State(_StateModel):
         raise ApertureNotFoundError(self.current_aperture_id)
 
 
+class ProgramStop(Exception):  # noqa: N818
+    """Exception raised when M00 or M02 command is encountered."""
+
+    def __init__(self, node: M00 | M02) -> None:
+        self.node = node
+        super().__init__()
+
+
 class StateTrackingVisitor(AstVisitor):
     """`StateTrackingVisitor` is a visitor class that tracks the internal state
     defined in the GerberX3 specification and modifies it according to Gerber
@@ -284,8 +297,10 @@ class StateTrackingVisitor(AstVisitor):
     interface of `AstVisitor` class.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *, ignore_program_stop: bool = False) -> None:
         super().__init__()
+        self._ignore_program_stop = ignore_program_stop
+
         self.state = State()
         self._on_d01_handler = self.on_draw_line
         self._plot_mode_to_d01_handler = {
@@ -567,3 +582,23 @@ class StateTrackingVisitor(AstVisitor):
         """Handle `LS` node."""
         super().on_ls(node)
         self.state.transform.scaling = node.scale
+
+    def on_m00(self, node: M00) -> None:
+        """Handle `M00` node."""
+        raise ProgramStop(node)
+
+    def on_m02(self, node: M02) -> None:
+        """Handle `M02` node."""
+        raise ProgramStop(node)
+
+    def on_file(self, node: File) -> None:
+        """Handle `File` node."""
+        with suppress(ProgramStop):
+            super().on_file(node)
+
+    def on_exception(self, node: Node, exception: Exception) -> bool:  # noqa: ARG002
+        """Handle exception."""
+        if isinstance(exception, ProgramStop):
+            return bool(self._ignore_program_stop)
+
+        return False

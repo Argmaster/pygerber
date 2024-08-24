@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes import (
@@ -128,10 +128,6 @@ class AstVisitor:
     For more information on this pattern visit:
     https://refactoring.guru/design-patterns/visitor
     """
-
-    def __init__(self) -> None:
-        self._current_node_index = -1
-        self._nodes: List[Node] = []
 
     # Aperture
 
@@ -649,19 +645,22 @@ class AstVisitor:
 
     def on_file(self, node: File) -> None:
         """Handle `File` node."""
-        self._current_node_index = 0
-        self._nodes = node.nodes
         try:
             for command in node.nodes:
-                command.visit(self)
+                try:
+                    command.visit(self)
+                except Exception as e:  # noqa: PERF203
+                    if self.on_exception(command, e):
+                        raise
         finally:
-            self._current_node_index = -1
-            self._nodes = []
+            self.on_end_of_file(node)
 
-    def get_next_node(self) -> Optional[Node]:
-        """Get next node from the iterator."""
-        if -1 < self._current_node_index < len(self._nodes):
-            node = self._nodes[self._current_node_index]
-            self._current_node_index += 1
-            return node
-        return None
+    def on_end_of_file(self, node: File) -> None:
+        """Handle end of file."""
+
+    def on_exception(self, node: Node, exception: Exception) -> bool:  # noqa: ARG002
+        """Handle exception.
+
+        If return value is True, exception will be re-raised.
+        """
+        return True
