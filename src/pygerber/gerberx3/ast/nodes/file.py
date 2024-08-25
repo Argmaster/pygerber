@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, List
 
 from pygerber.gerberx3.ast.nodes.base import Node
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class File(Node):
     """AST node representing Gerber file."""
 
-    nodes: list[Node]
+    nodes: List[Node]
 
     def visit(self, visitor: AstVisitor) -> None:
         """Handle visitor call."""

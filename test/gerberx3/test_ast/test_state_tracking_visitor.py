@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import pytest
 
@@ -454,7 +454,7 @@ _PARAMS = [
     _PARAMS,
 )
 def test_d01_dispatch(
-    tokens: list[Node],
+    tokens: List[Node],
     expect: str,
 ) -> None:
     """Test if D01 command is dispatched correctly."""

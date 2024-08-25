@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, List
 
 from pygerber.gerberx3.ast.nodes.aperture.SR_close import SRclose
 from pygerber.gerberx3.ast.nodes.aperture.SR_open import SRopen
@@ -18,7 +18,7 @@ class SR(Node):
     """Represents SR Gerber extended command."""
 
     open: SRopen
-    nodes: list[Node]
+    nodes: List[Node]
     close: SRclose
 
     def visit(self, visitor: AstVisitor) -> None:

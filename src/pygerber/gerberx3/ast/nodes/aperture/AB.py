@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Callable, List
 
 from pygerber.gerberx3.ast.nodes.aperture.AB_close import ABclose
 from pygerber.gerberx3.ast.nodes.aperture.AB_open import ABopen
@@ -18,7 +18,7 @@ class AB(Node):
     """Represents AB Gerber extended command."""
 
     open: ABopen
-    nodes: list[Node]
+    nodes: List[Node]
     close: ABclose
 
     def visit(self, visitor: AstVisitor) -> None:
