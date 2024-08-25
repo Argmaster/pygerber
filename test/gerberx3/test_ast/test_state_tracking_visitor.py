@@ -16,6 +16,7 @@ from pygerber.gerberx3.ast.nodes import (
     AM,
     D01,
     D03,
+    FS,
     G01,
     G02,
     G03,
@@ -39,9 +40,17 @@ from pygerber.gerberx3.ast.nodes import (
     TA_DrillTolerance,
     TF_FileFunction,
 )
-from pygerber.gerberx3.ast.nodes.enums import AperFunction, FileFunction
+from pygerber.gerberx3.ast.nodes.enums import (
+    AperFunction,
+    CoordinateNotation,
+    FileFunction,
+    Zeros,
+)
 from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
-from pygerber.gerberx3.ast.state_tracking_visitor import StateTrackingVisitor
+from pygerber.gerberx3.ast.state_tracking_visitor import (
+    CoordinateFormat,
+    StateTrackingVisitor,
+)
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -464,3 +473,77 @@ def test_d01_dispatch(
         token.visit(visitor)
 
     assert visitor._on_d01_handler.__name__ == expect
+
+
+@pytest.mark.parametrize(
+    (
+        "zeros",
+        "coordinate_mode",
+        "x_integral",
+        "x_decimal",
+        "y_integral",
+        "y_decimal",
+    ),
+    [
+        (
+            Zeros.SKIP_LEADING,
+            CoordinateNotation.ABSOLUTE,
+            2,
+            6,
+            3,
+            7,
+        ),
+        (
+            Zeros.SKIP_TRAILING,
+            CoordinateNotation.ABSOLUTE,
+            2,
+            6,
+            3,
+            7,
+        ),
+        (
+            Zeros.SKIP_LEADING,
+            CoordinateNotation.INCREMENTAL,
+            2,
+            6,
+            3,
+            7,
+        ),
+        (
+            Zeros.SKIP_TRAILING,
+            CoordinateNotation.INCREMENTAL,
+            2,
+            6,
+            3,
+            7,
+        ),
+    ],
+)
+def test_coordinate_format(
+    zeros: Zeros,
+    coordinate_mode: CoordinateNotation,
+    x_integral: int,
+    x_decimal: int,
+    y_integral: int,
+    y_decimal: int,
+) -> None:
+    node = FS(
+        zeros=zeros,
+        coordinate_mode=coordinate_mode,
+        x_integral=x_integral,
+        x_decimal=x_decimal,
+        y_integral=y_integral,
+        y_decimal=y_decimal,
+    )
+
+    visitor = StateTrackingVisitor()
+    node.visit(visitor)
+
+    assert visitor.state.coordinate_format == CoordinateFormat(
+        zeros=zeros,
+        coordinate_mode=coordinate_mode,
+        x_integral=x_integral,
+        x_decimal=x_decimal,
+        y_integral=y_integral,
+        y_decimal=y_decimal,
+    )

@@ -8,7 +8,7 @@ from contextlib import suppress
 from enum import Enum
 from typing import Any, Callable, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from pygerber.common.error import throw
 from pygerber.gerberx3.ast.ast_visitor import AstVisitor
@@ -81,6 +81,12 @@ from pygerber.gerberx3.ast.nodes.enums import (
 class _StateModel(BaseModel):
     """Base class for all models representing parts of Gerber state."""
 
+    model_config = ConfigDict(
+        extra="allow",
+        frozen=False,
+        arbitrary_types_allowed=True,
+    )
+
 
 class CoordinateFormat(_StateModel):
     """Coordinate format information."""
@@ -110,12 +116,12 @@ class CoordinateFormat(_StateModel):
     def unpack_x(self, coordinate: PackedCoordinateStr, /) -> Double:  # noqa: ARG002
         """Unpack X coordinate using the current coordinate format."""
         msg = "Coordinate format was not properly set."
-        raise NotImplementedError(msg)
+        raise NotImplementedError(msg)  # pragma: no cover
 
     def unpack_y(self, coordinate: PackedCoordinateStr, /) -> Double:  # noqa: ARG002
         """Unpack X coordinate using the current coordinate format."""
         msg = "Coordinate format was not properly set."
-        raise NotImplementedError(msg)
+        raise NotImplementedError(msg)  # pragma: no cover
 
     def _unpack_skip_trailing(
         self, integer: int, decimal: int
