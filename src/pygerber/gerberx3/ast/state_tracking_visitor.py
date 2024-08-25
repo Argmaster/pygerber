@@ -1,5 +1,5 @@
-"""`pygerber.gerberx3.node_visitor` contains definition of `StateTrackingVisitor`
-class.
+"""`pygerber.gerberx3.state_tracking_visitor` contains definition of
+`StateTrackingVisitor` class.
 """
 
 from __future__ import annotations
