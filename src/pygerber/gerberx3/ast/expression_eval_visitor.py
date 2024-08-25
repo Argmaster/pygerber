@@ -87,11 +87,13 @@ class ExpressionEvalVisitor(AstVisitor):
 
     def on_neg(self, node: Neg) -> None:
         """Handle `Neg` node."""
-        super().on_neg(node)
+        node.operand.visit(self)
+        self.return_value = -self.return_value
 
     def on_pos(self, node: Pos) -> None:
         """Handle `Pos` node."""
-        super().on_pos(node)
+        node.operand.visit(self)
+        self.return_value = +self.return_value
 
     def on_variable(self, node: Variable) -> None:
         """Handle `Variable` node."""
