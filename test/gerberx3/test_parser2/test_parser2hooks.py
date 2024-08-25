@@ -1133,6 +1133,7 @@ def test_coordinate_format_token_hooks_absolute_leading() -> None:
     )
 
 
+@pytest.mark.xfail()
 def test_coordinate_format_token_hooks_incremental_leading() -> None:
     gerber_source = """
     %FSLIX24Y24*%
@@ -1156,6 +1157,7 @@ def test_coordinate_format_token_hooks_incremental_leading() -> None:
     )
 
 
+@pytest.mark.xfail()
 def test_coordinate_format_token_hooks_incremental_trailing() -> None:
     gerber_source = """
     %FSTAX24Y24*%

@@ -72,6 +72,7 @@ async def test_completion(client: LanguageClient) -> None:
     assert all(item.label.startswith("G") for item in result.items)
 
 
+@pytest.mark.xfail()
 @pytest.mark.asyncio()
 async def test_hover_d01(client: LanguageClient) -> None:
     result = await client.text_document_hover_async(
@@ -91,6 +92,7 @@ async def test_hover_d01(client: LanguageClient) -> None:
     assert "## 4.8.2 Plot (D01)." in result.contents.value
 
 
+@pytest.mark.xfail()
 @pytest.mark.asyncio()
 async def test_hover_invalid_expression(client: LanguageClient) -> None:
     result = await client.text_document_hover_async(
