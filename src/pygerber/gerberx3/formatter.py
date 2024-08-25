@@ -140,6 +140,83 @@ ParamT = ParamSpec("ParamT")
 ReturnT = TypeVar("ReturnT")
 
 
+def _increase_base_indent(
+    variable_name: str,
+) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
+    def _decorator(
+        function: Callable[ParamT, ReturnT],
+    ) -> Callable[ParamT, ReturnT]:
+        @wraps(function)
+        def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+            self = args[0]
+            assert isinstance(self, Formatter)
+
+            self._base_indent += getattr(self, variable_name)
+
+            return function(*args, **kwargs)
+
+        return _
+
+    return _decorator
+
+
+def _decrease_base_indent(
+    variable_name: str,
+) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
+    def _decorator(
+        function: Callable[ParamT, ReturnT],
+    ) -> Callable[ParamT, ReturnT]:
+        @wraps(function)
+        def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+            self = args[0]
+            assert isinstance(self, Formatter)
+
+            indent_delta = getattr(self, variable_name)
+            if self._base_indent.endswith(indent_delta):
+                self._base_indent = self._base_indent[: -len(indent_delta)]
+
+            return function(*args, **kwargs)
+
+        return _
+
+    return _decorator
+
+
+def _decorator_insert_base_indent(
+    function: Callable[ParamT, ReturnT],
+) -> Callable[ParamT, ReturnT]:
+    @wraps(function)
+    def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+        self = args[0]
+        assert isinstance(self, Formatter)
+        self._insert_base_indent()
+        return function(*args, **kwargs)
+
+    return _
+
+
+def _insert_var(
+    variable_name_or_getter: str | Callable[[Formatter], str],
+) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
+    def _decorator(
+        function: Callable[ParamT, ReturnT],
+    ) -> Callable[ParamT, ReturnT]:
+        @wraps(function)
+        def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
+            self = args[0]
+            assert isinstance(self, Formatter)
+            if isinstance(variable_name_or_getter, str):
+                self._write(getattr(self, variable_name_or_getter))
+            else:
+                self._write(variable_name_or_getter(self))
+
+            return function(*args, **kwargs)
+
+        return _
+
+    return _decorator
+
+
 class Formatter(AstVisitor):
     """Gerber X3 compatible formatter."""
 
@@ -355,88 +432,11 @@ class Formatter(AstVisitor):
             return double.rstrip("0").rstrip(".")
         return double
 
-    @staticmethod
-    def _decorator_insert_base_indent(
-        function: Callable[ParamT, ReturnT],
-    ) -> Callable[ParamT, ReturnT]:
-        @wraps(function)
-        def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
-            self = args[0]
-            assert isinstance(self, Formatter)
-            self._insert_base_indent()
-            return function(*args, **kwargs)
-
-        return _
-
     def _insert_base_indent(self) -> None:
         self._write(self._base_indent)
 
     def _insert_extra_indent(self, value: str) -> None:
         self._write(value)
-
-    @staticmethod
-    def _insert_var(
-        variable_name_or_getter: str | Callable[[Formatter], str],
-    ) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
-        def _decorator(
-            function: Callable[ParamT, ReturnT],
-        ) -> Callable[ParamT, ReturnT]:
-            @wraps(function)
-            def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
-                self = args[0]
-                assert isinstance(self, Formatter)
-                if isinstance(variable_name_or_getter, str):
-                    self._write(getattr(self, variable_name_or_getter))
-                else:
-                    self._write(variable_name_or_getter(self))
-
-                return function(*args, **kwargs)
-
-            return _
-
-        return _decorator
-
-    @staticmethod
-    def _increase_base_indent(
-        variable_name: str,
-    ) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
-        def _decorator(
-            function: Callable[ParamT, ReturnT],
-        ) -> Callable[ParamT, ReturnT]:
-            @wraps(function)
-            def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
-                self = args[0]
-                assert isinstance(self, Formatter)
-
-                self._base_indent += getattr(self, variable_name)
-
-                return function(*args, **kwargs)
-
-            return _
-
-        return _decorator
-
-    @staticmethod
-    def _decrease_base_indent(
-        variable_name: str,
-    ) -> Callable[[Callable[ParamT, ReturnT]], Callable[ParamT, ReturnT]]:
-        def _decorator(
-            function: Callable[ParamT, ReturnT],
-        ) -> Callable[ParamT, ReturnT]:
-            @wraps(function)
-            def _(*args: ParamT.args, **kwargs: ParamT.kwargs) -> ReturnT:
-                self = args[0]
-                assert isinstance(self, Formatter)
-
-                indent_delta = getattr(self, variable_name)
-                if self._base_indent.endswith(indent_delta):
-                    self._base_indent = self._base_indent[: -len(indent_delta)]
-
-                return function(*args, **kwargs)
-
-            return _
-
-        return _decorator
 
     @contextmanager
     def _command(
