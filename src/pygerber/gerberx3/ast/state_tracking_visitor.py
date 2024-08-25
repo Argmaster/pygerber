@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -151,13 +151,13 @@ class CoordinateFormat(_StateModel):
 class Attributes(_StateModel):
     """Attributes Gerber X3 of apertures, objects and file."""
 
-    aperture_attributes: dict[str, TA] = Field(default_factory=dict)
+    aperture_attributes: Dict[str, TA] = Field(default_factory=dict)
     """Object attributes created with TA extended command."""
 
-    file_attributes: dict[str, TF] = Field(default_factory=dict)
+    file_attributes: Dict[str, TF] = Field(default_factory=dict)
     """Object attributes created with TF extended command."""
 
-    object_attributes: dict[str, TO] = Field(default_factory=dict)
+    object_attributes: Dict[str, TO] = Field(default_factory=dict)
     """Object attributes created with TO extended command."""
 
 
@@ -240,13 +240,13 @@ class ArcInterpolation(Enum):
 class ApertureStorage(_StateModel):
     """Storage for apertures."""
 
-    apertures: dict[ApertureIdStr, AD] = Field(default_factory=dict)
+    apertures: Dict[ApertureIdStr, AD] = Field(default_factory=dict)
     """Aperture storage."""
 
-    blocks: dict[ApertureIdStr, AB] = Field(default_factory=dict)
+    blocks: Dict[ApertureIdStr, AB] = Field(default_factory=dict)
     """Block aperture storage."""
 
-    macros: dict[str, AM] = Field(default_factory=dict)
+    macros: Dict[str, AM] = Field(default_factory=dict)
     """Macro definition storage."""
 
 
