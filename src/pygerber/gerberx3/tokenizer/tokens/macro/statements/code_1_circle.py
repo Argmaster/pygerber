@@ -5,15 +5,12 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import TYPE_CHECKING, ClassVar, Optional
 
-from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
-from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.tokenizer.tokens.macro.expressions.macro_expression import (
     MacroExpressionToken,
 )
 from pygerber.gerberx3.tokenizer.tokens.macro.expressions.numeric_constant import (
     NumericConstant,
 )
-from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 from pygerber.gerberx3.tokenizer.tokens.macro.statements.primitive import (
     MacroPrimitiveToken,
 )
@@ -91,21 +88,6 @@ class Code1CircleToken(MacroPrimitiveToken):
             center_y=center_y,
             rotation=rotation,
         )
-
-    def evaluate(
-        self,
-        macro_context: MacroContext,
-        state: State,
-        handle: PrivateApertureHandle,
-    ) -> None:
-        """Evaluate macro expression."""
-        self.exposure.evaluate_numeric(macro_context, state)
-        self.diameter.evaluate_numeric(macro_context, state)
-        self.center_x.evaluate_numeric(macro_context, state)
-        self.center_y.evaluate_numeric(macro_context, state)
-        self.rotation.evaluate_numeric(macro_context, state)
-
-        return super().evaluate(macro_context, state, handle)
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""

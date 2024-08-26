@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable, Tuple
+from typing import TYPE_CHECKING
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
-from pygerber.gerberx3.parser.errors import (
-    IncrementalCoordinatesNotSupportedError,
-    InvalidCoordinateLengthError,
-    UnsupportedCoordinateTypeError,
-    ZeroOmissionNotSupportedError,
+from pygerber.gerberx3.parser2.errors2 import (
+    IncrementalCoordinatesNotSupported2Error,
+    InvalidCoordinateLength2Error,
+    UnsupportedCoordinateType2Error,
+    ZeroOmissionNotSupported2Error,
 )
 from pygerber.gerberx3.tokenizer.helpers.gerber_code_enum import GerberCodeEnum
 from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
@@ -28,9 +28,6 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -83,29 +80,6 @@ class CoordinateFormat(ExtendedCommandToken):
             coordinate_mode=coordinate_mode,
             x_format=x_format,
             y_format=y_format,
-        )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Set coordinate parser."""
-        if state.coordinate_parser is not None:
-            logging.warning(
-                "Overriding coordinate format is illegal."
-                "(See 4.2.2 in Gerber Layer Format Specification)",
-            )
-        return (
-            state.model_copy(
-                update={
-                    "coordinate_parser": CoordinateParser.new(
-                        x_format=self.x_format,
-                        y_format=self.y_format,
-                    ),
-                },
-            ),
-            (),
         )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
@@ -188,10 +162,10 @@ class CoordinateParser(FrozenGeneralModel):
     ) -> Self:
         """Update coordinate parser format configuration."""
         if coordinate_mode != CoordinateMode.Absolute:
-            raise IncrementalCoordinatesNotSupportedError
+            raise IncrementalCoordinatesNotSupported2Error
 
         if zeros_mode != TrailingZerosMode.OmitLeading:
-            raise ZeroOmissionNotSupportedError
+            raise ZeroOmissionNotSupported2Error
 
         for axis, axis_format in (("X", x_format), ("Y", y_format)):
             if axis_format.decimal < RECOMMENDED_MINIMAL_DECIMAL_PLACES:
@@ -213,7 +187,7 @@ class CoordinateParser(FrozenGeneralModel):
         if coordinate.coordinate_type in (CoordinateType.Y, CoordinateType.J):
             return self._parse(self.y_format, coordinate.offset, coordinate.sign)
 
-        raise UnsupportedCoordinateTypeError(coordinate.coordinate_type)
+        raise UnsupportedCoordinateType2Error(coordinate.coordinate_type)
 
     def _parse(
         self,
@@ -225,7 +199,7 @@ class CoordinateParser(FrozenGeneralModel):
 
         if len(offset) > total_length:
             msg = f"Got {offset!r} with length {len(offset)} expected {total_length}."
-            raise InvalidCoordinateLengthError(msg)
+            raise InvalidCoordinateLength2Error(msg)
 
         offset = offset.rjust(axis_format.total_length, "0")
         integer, decimal = offset[: axis_format.integer], offset[axis_format.integer :]

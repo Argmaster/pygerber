@@ -2,25 +2,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Iterator, List, Tuple
+from typing import TYPE_CHECKING, Iterator, List
 
-from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
-from pygerber.gerberx3.math.offset import Offset
 from pygerber.gerberx3.tokenizer.tokens.bases.group import TokenGroup
 from pygerber.gerberx3.tokenizer.tokens.bases.token import Token
 from pygerber.gerberx3.tokenizer.tokens.macro.macro_begin import MacroBegin
-from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
-from pygerber.gerberx3.tokenizer.tokens.macro.statements.statement import (
-    MacroStatementToken,
-)
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -170,24 +161,6 @@ class MacroDefinition(TokenGroup):
             tokens=macro_body_tokens,
         )
 
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Exit drawing process."""
-        new_macros_dict = {**state.macros}
-        new_macros_dict[self.macro_name] = self
-
-        return (
-            state.model_copy(
-                update={
-                    "macros": new_macros_dict,
-                },
-            ),
-            (),
-        )
-
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""
         context.get_hooks().macro_definition.pre_parser_visit_token(self, context)
@@ -199,17 +172,3 @@ class MacroDefinition(TokenGroup):
         for token in self.tokens:
             yield from token
         yield self
-
-    def evaluate(
-        self,
-        state: State,
-        handle: PrivateApertureHandle,
-        parameters: dict[str, Offset],
-    ) -> None:
-        """Evaluate macro into series of DrawCommands."""
-        context = MacroContext()
-        context.variables.update(parameters)
-
-        for expression in self.tokens:
-            if isinstance(expression, MacroStatementToken):
-                expression.evaluate(context, state, handle)

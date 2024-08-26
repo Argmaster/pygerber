@@ -22,7 +22,13 @@ class ShapeSegment(BaseModel):
 
 
 class Shape(Command):
-    """Draw a line from the current position to the given position."""
+    """`Shape` command instructs VM to render a shape described by series of
+    lines and arcs into currently active layer.
+
+    Last point of first segment (line or arc) is always connected to the first point
+    first segment, so shapes are implicitly closed. If those points are not overlapping,
+    they are connected by a straight line.
+    """
 
     commands: List[ShapeSegment]
     negative: bool = False

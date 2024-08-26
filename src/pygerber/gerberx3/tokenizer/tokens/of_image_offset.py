@@ -18,15 +18,11 @@ SPEC: `2023.03` SECTION: `8.1.6`
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
-from pygerber.backend.abstract.backend_cls import Backend
-from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
     ExtendedCommandToken,
 )
-from pygerber.warnings import warn_deprecated_code
 
 if TYPE_CHECKING:
     from pyparsing import ParseResults
@@ -71,15 +67,6 @@ class ImageOffset(ExtendedCommandToken):
         a = Decimal(str(tmp)) if (tmp := tokens.get("a")) is not None else None
         b = Decimal(str(tmp)) if (tmp := tokens.get("b")) is not None else None
         return cls(string=string, location=location, a=a, b=b)
-
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Update drawing state."""
-        warn_deprecated_code("IN", "8.1")
-        return super().update_drawing_state(state, _backend)
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""
