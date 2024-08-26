@@ -15,13 +15,13 @@ from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
 from pygerber.vm.commands.shape import Arc, Line, Shape
 from pygerber.vm.pillow.errors import (
+    LayerAlreadyExistsError,
     LayerNotFoundError,
     NoLayerSetError,
 )
-from pygerber.vm.types.box import Box
+from pygerber.vm.types.box import FixedBox
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.style import Style
-from pygerber.vm.types.unit import Unit
 from pygerber.vm.types.vector import Vector
 
 FULL_ANGLE_DEGREES = 360
@@ -52,7 +52,7 @@ class PillowResult(Result):
 class _PillowLayer:
     """Layer in PillowVirtualMachine."""
 
-    def __init__(self, dpmm: int, box: Box) -> None:
+    def __init__(self, dpmm: int, box: FixedBox) -> None:
         self.dpmm = dpmm
         self.box = box
         self.pixel_size = (
@@ -62,10 +62,8 @@ class _PillowLayer:
         self.image = Image.new("1", self.pixel_size, 0)
         self.draw = ImageDraw.Draw(self.image)
 
-    def to_pixel(self, value: float | Unit) -> int:
+    def to_pixel(self, value: float) -> int:
         """Convert value in mm to pixels."""
-        if isinstance(value, Unit):
-            return int(value.value * self.dpmm)
         return int(value * self.dpmm)
 
 
@@ -93,7 +91,7 @@ class PillowVirtualMachine(VirtualMachine):
 
     def on_shape(self, command: Shape) -> None:
         """Visit shape command."""
-        points: list[tuple[Unit, Unit]] = []
+        points: list[tuple[float, float]] = []
         for segment in command.commands:
             if isinstance(segment, Line):
                 start = (segment.start.x, segment.start.y)
@@ -121,7 +119,7 @@ class PillowVirtualMachine(VirtualMachine):
 
     def _calculate_arc_points(
         self, command: Arc
-    ) -> Generator[tuple[Unit, Unit], None, None]:
+    ) -> Generator[tuple[float, float], None, None]:
         """Calculate points on arc."""
         start_angle = (
             command.get_relative_start_point().angle_between(
@@ -142,7 +140,7 @@ class PillowVirtualMachine(VirtualMachine):
         assert end_angle < FULL_ANGLE_DEGREES
 
         angle_delta = abs(start_angle - end_angle)
-        angle_length = (angle_delta / 360) * (command.get_radius().value * 2 * math.pi)
+        angle_length = (angle_delta / 360) * (command.get_radius() * 2 * math.pi)
         angle_length_pixels = self.to_pixel(angle_length)
         segment_count = angle_length_pixels * self.angle_length_to_segment_count_ratio
         angle_delta = angle_delta / segment_count
@@ -195,7 +193,9 @@ class PillowVirtualMachine(VirtualMachine):
             current_angle = apply_delta(current_angle, delta)
         yield end
 
-    def _polygon(self, points: Sequence[tuple[Unit, Unit]], *, negative: bool) -> None:
+    def _polygon(
+        self, points: Sequence[tuple[float, float]], *, negative: bool
+    ) -> None:
         """Draw a polygon."""
         self.layer.draw.polygon(
             [
@@ -212,6 +212,9 @@ class PillowVirtualMachine(VirtualMachine):
     def on_start_layer(self, command: StartLayer) -> None:
         """Visit start layer command."""
         layer = _PillowLayer(self.dpmm, command.box)
+        if command.id in self.layers:
+            raise LayerAlreadyExistsError(command.id)
+
         self.layers[command.id] = layer
         self.layer_stack.append(layer)
 
@@ -247,24 +250,18 @@ class PillowVirtualMachine(VirtualMachine):
             mask=source_layer.image,
         )
 
-    def to_pixel(self, value: float | Unit) -> int:
+    def to_pixel(self, value: float) -> int:
         """Convert value in mm to pixels."""
-        if isinstance(value, Unit):
-            return int(value.value * self.dpmm)
         return int(value * self.dpmm)
 
-    def correct_center_x(self, x: float | Unit) -> float:
+    def correct_center_x(self, x: float) -> float:
         """Correct x coordinate for center."""
-        offset = self.layer.box.center.x.value - self.layer.box.width / 2
-        if isinstance(x, Unit):
-            return x.value - offset
+        offset = self.layer.box.center.x - self.layer.box.width / 2
         return x - offset
 
-    def correct_center_y(self, y: float | Unit) -> float:
+    def correct_center_y(self, y: float) -> float:
         """Correct x coordinate for center."""
-        offset = self.layer.box.center.y.value - self.layer.box.height / 2
-        if isinstance(y, Unit):
-            return y.value - offset
+        offset = self.layer.box.center.y - self.layer.box.height / 2
         return y - offset
 
     def get_color(self, *, negative: bool) -> int:

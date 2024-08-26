@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, ClassVar
 
 from pygerber.common.namespace import Namespace
 from pygerber.vm.types.model import ModelType
-from pygerber.vm.types.unit import Unit
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -16,8 +15,8 @@ if TYPE_CHECKING:
 class Vector(ModelType):
     """Represents a point in cartesian coordinate space."""
 
-    x: Unit
-    y: Unit
+    x: float
+    y: float
 
     class unit(Namespace):  # noqa: N801
         """Namespace containing unit vectors."""
@@ -29,15 +28,10 @@ class Vector(ModelType):
     @classmethod
     def from_tuple(cls, data: tuple[float, float]) -> Self:
         """Create a new point from a tuple."""
-        return cls(x=Unit.from_float(data[0]), y=Unit.from_float(data[1]))
-
-    @classmethod
-    def from_values(cls, x: float, y: float) -> Self:
-        """Create a new point from a tuple."""
-        return cls(x=Unit.from_float(x), y=Unit.from_float(y))
+        return cls(x=data[0], y=data[1])
 
     @property
-    def xy(self) -> tuple[Unit, Unit]:
+    def xy(self) -> tuple[float, float]:
         """Return point as tuple of Units."""
         return (self.x, self.y)
 
@@ -45,7 +39,7 @@ class Vector(ModelType):
         """Add two points."""
         if isinstance(other, Vector):
             return Vector(x=self.x + other.x, y=self.y + other.y)
-        if isinstance(other, Unit):
+        if isinstance(other, float):
             return Vector(x=self.x + other, y=self.y + other)
         if isinstance(other, (int, float)):
             return Vector(x=self.x + other, y=self.y + other)
@@ -55,7 +49,7 @@ class Vector(ModelType):
         """Subtract two points."""
         if isinstance(other, Vector):
             return Vector(x=self.x - other.x, y=self.y - other.y)
-        if isinstance(other, Unit):
+        if isinstance(other, float):
             return Vector(x=self.x - other, y=self.y - other)
         if isinstance(other, (int, float)):
             return Vector(x=self.x - other, y=self.y - other)
@@ -65,7 +59,7 @@ class Vector(ModelType):
         """Multiply two points."""
         if isinstance(other, Vector):
             return Vector(x=self.x * other.x, y=self.y * other.y)
-        if isinstance(other, Unit):
+        if isinstance(other, float):
             return Vector(x=self.x * other, y=self.y * other)
         if isinstance(other, (int, float)):
             return Vector(x=self.x * other, y=self.y * other)
@@ -75,7 +69,7 @@ class Vector(ModelType):
         """Divide two points."""
         if isinstance(other, Vector):
             return Vector(x=self.x / other.x, y=self.y / other.y)
-        if isinstance(other, Unit):
+        if isinstance(other, float):
             return Vector(x=self.x / other, y=self.y / other)
         if isinstance(other, (int, float)):
             return Vector(x=self.x / other, y=self.y / other)
@@ -127,27 +121,25 @@ class Vector(ModelType):
 
         Value returned is always between 0 and 360 (can be 0, never 360).
         """
-        v0 = self.normalize()
-        v1 = other.normalize()
+        v0 = self.normalized()
+        v1 = other.normalized()
         angle_radians = math.atan2(
-            ((v0.x * v1.y) - (v1.x * v0.y)).value,  # determinant
-            ((v0.x * v1.x) + (v0.y * v1.y)).value,  # dot product
+            ((v0.x * v1.y) - (v1.x * v0.y)),  # determinant
+            ((v0.x * v1.x) + (v0.y * v1.y)),  # dot product
         )
         angle_degrees = math.degrees(angle_radians)
         return angle_degrees + (360 * (angle_degrees < 0))
 
-    def normalize(self) -> Vector:
+    def normalized(self) -> Vector:
         """Return normalized (unit length) vector."""
         if self.x == 0 and self.y == 0:
             return Vector.from_tuple((1, 0))
 
         return self / self.length()
 
-    def length(self) -> Unit:
+    def length(self) -> float:
         """Return length of vector."""
-        return Unit.from_float(
-            math.sqrt((self.x * self.x).value + (self.y * self.y).value)
-        )
+        return math.sqrt((self.x * self.x) + (self.y * self.y))
 
 
 Vector.unit.x = Vector.from_tuple((1, 0))

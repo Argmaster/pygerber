@@ -6,11 +6,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List
 
+import pyparsing as pp
 from pydantic import BaseModel
 
 from pygerber.vm.base import CommandVisitor
 from pygerber.vm.commands.command import Command
-from pygerber.vm.types.unit import Unit
+from pygerber.vm.types.box import AutoBox
 from pygerber.vm.types.vector import Vector
 
 if TYPE_CHECKING:
@@ -19,6 +20,69 @@ if TYPE_CHECKING:
 
 class ShapeSegment(BaseModel):
     """Base class for shape segment types."""
+
+    @pp.cached_property
+    def outer_box(self) -> AutoBox:
+        """Get outer box of shape segment."""
+        raise NotImplementedError
+
+
+class Line(ShapeSegment):
+    """Draw a line from the current position to the given position."""
+
+    start: Vector
+    end: Vector
+
+    @classmethod
+    def from_tuples(cls, start: tuple[float, float], end: tuple[float, float]) -> Self:
+        """Create a new line from two tuples."""
+        return cls(start=Vector.from_tuple(start), end=Vector.from_tuple(end))
+
+    @pp.cached_property
+    def outer_box(self) -> AutoBox:
+        """Get outer box of shape segment."""
+        raise NotImplementedError
+
+
+class Arc(ShapeSegment):
+    """Draw a arc from the current position to the given position.
+
+    Arcs are always clockwise.
+    """
+
+    start: Vector
+    end: Vector
+    center: Vector
+    clockwise: bool
+
+    @classmethod
+    def from_tuples(
+        cls,
+        start: tuple[float, float],
+        end: tuple[float, float],
+        center: tuple[float, float],
+        *,
+        clockwise: bool,
+    ) -> Self:
+        """Create a new arc from two tuples."""
+        return cls(
+            start=Vector.from_tuple(start),
+            end=Vector.from_tuple(end),
+            center=Vector.from_tuple(center),
+            clockwise=clockwise,
+        )
+
+    def get_relative_start_point(self) -> Vector:
+        """Get starting point relative to arc center."""
+        return self.start - self.center
+
+    def get_relative_end_point(self) -> Vector:
+        """Get ending point relative to arc center."""
+        return self.end - self.center
+
+    def get_radius(self) -> float:
+        """Get radius of circle arc."""
+        return self.get_relative_start_point().length()
 
 
 class Shape(Command):
@@ -90,55 +154,39 @@ class Shape(Command):
             negative=negative,
         )
 
-
-class Line(ShapeSegment):
-    """Draw a line from the current position to the given position."""
-
-    start: Vector
-    end: Vector
-
     @classmethod
-    def from_tuples(cls, start: tuple[float, float], end: tuple[float, float]) -> Self:
-        """Create a new line from two tuples."""
-        return cls(start=Vector.from_tuple(start), end=Vector.from_tuple(end))
-
-
-class Arc(ShapeSegment):
-    """Draw a arc from the current position to the given position.
-
-    Arcs are always clockwise.
-    """
-
-    start: Vector
-    end: Vector
-    center: Vector
-    clockwise: bool
-
-    @classmethod
-    def from_tuples(
+    def new_cw_arc(
         cls,
         start: tuple[float, float],
         end: tuple[float, float],
         center: tuple[float, float],
+        thickness: float,
         *,
-        clockwise: bool,
+        negative: bool,
     ) -> Self:
-        """Create a new arc from two tuples."""
+        """Create polygon in shape of circle."""
+        start_vector = Vector.from_tuple(start)
+        extend_start_vector = start_vector.normalized() * (thickness / 2)
+
+        end_vector = Vector.from_tuple(end)
+        extend_end_vector = end_vector.normalized() * (thickness / 2)
+
+        center_vector = Vector.from_tuple(center)
+
         return cls(
-            start=Vector.from_tuple(start),
-            end=Vector.from_tuple(end),
-            center=Vector.from_tuple(center),
-            clockwise=clockwise,
+            commands=[
+                Arc(
+                    start=start_vector + extend_start_vector,
+                    end=end_vector + extend_end_vector,
+                    center=center_vector,
+                    clockwise=True,
+                ),
+                Arc(
+                    start=end_vector - extend_end_vector,
+                    end=start_vector - extend_start_vector,
+                    center=center_vector,
+                    clockwise=False,
+                ),
+            ],
+            negative=negative,
         )
-
-    def get_relative_start_point(self) -> Vector:
-        """Get starting point relative to arc center."""
-        return self.start - self.center
-
-    def get_relative_end_point(self) -> Vector:
-        """Get ending point relative to arc center."""
-        return self.end - self.center
-
-    def get_radius(self) -> Unit:
-        """Get radius of circle arc."""
-        return self.get_relative_start_point().length()

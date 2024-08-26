@@ -19,3 +19,7 @@ class BoxNotSetError(PillowVirtualMachineError):
 
 class LayerNotFoundError(PillowVirtualMachineError):
     """Raised when layer with given ID was not found during paste operation."""
+
+
+class LayerAlreadyExistsError(PillowVirtualMachineError):
+    """Raised when layer with given ID already exists during create operation."""

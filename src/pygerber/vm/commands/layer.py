@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pygerber.vm.command_visitor import CommandVisitor
 from pygerber.vm.commands.command import Command
-from pygerber.vm.types.box import Box
+from pygerber.vm.types.box import FixedBox
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.vector import Vector
 
@@ -18,14 +18,14 @@ class StartLayer(Command):
     """Draw a line from the current position to the given position."""
 
     id: LayerID
-    box: Box
+    box: FixedBox
 
     def visit(self, visitor: CommandVisitor) -> None:
         """Visit start layer command."""
         visitor.on_start_layer(self)
 
     @classmethod
-    def new(cls, id_: str, box: Box) -> Self:
+    def new(cls, id_: str, box: FixedBox) -> Self:
         """Create a new start layer command from values."""
         return cls(
             id=LayerID(id=id_),
