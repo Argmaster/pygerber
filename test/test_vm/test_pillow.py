@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import inspect
+from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
+
+from PIL import Image
 
 from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
@@ -13,20 +16,24 @@ from test.conftest import TEST_DIRECTORY
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from PIL import Image
 
 OUTPUT_PILLOW_DIRECTORY = TEST_DIRECTORY / ".vm-output" / "pillow"
 OUTPUT_PILLOW_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+
+REFERENCE_ASSETS_DIRECTORY = Path(__file__).parent / "test_pillow_assets"
 
 
 def run(dpmm: int, commands: Sequence[Command]) -> Image.Image:
     return PillowVirtualMachine(dpmm).run(commands).get_image()
 
 
-def save(image: Image.Image) -> None:
+def compare(image: Image.Image) -> None:
     caller_name = inspect.stack()[1].function
     save_destination = OUTPUT_PILLOW_DIRECTORY / f"{caller_name}.png"
     image.save(save_destination.as_posix())
+    reference_image = Image.open(REFERENCE_ASSETS_DIRECTORY / f"{caller_name}.png")
+    assert image.convert("RGBA") == reference_image.convert("RGBA")
 
 
 def test_draw_rectangle_in_center() -> None:
@@ -35,7 +42,7 @@ def test_draw_rectangle_in_center() -> None:
         Shape.new_rectangle((5, 5), 2, 1, negative=False),
         EndLayer(),
     ]
-    save(run(100, commands))
+    compare(run(100, commands))
 
 
 def test_draw_circle_in_center() -> None:
@@ -44,7 +51,7 @@ def test_draw_circle_in_center() -> None:
         Shape.new_circle((5, 5), 2, negative=False),
         EndLayer(),
     ]
-    save(run(100, commands))
+    compare(run(100, commands))
 
 
 def test_paste_rectangle_in_center() -> None:
@@ -58,7 +65,7 @@ def test_paste_rectangle_in_center() -> None:
         PasteLayer.new("rect", (5, 5), "main"),
         EndLayer(),
     ]
-    save(run(100, commands))
+    compare(run(100, commands))
 
 
 class TestCWArc:
@@ -77,7 +84,7 @@ class TestCWArc:
     # Quarter arcs
 
     def test_0_90(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -87,7 +94,7 @@ class TestCWArc:
         )
 
     def test_90_180(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -97,7 +104,7 @@ class TestCWArc:
         )
 
     def test_180_270(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -107,7 +114,7 @@ class TestCWArc:
         )
 
     def test_270_360(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -119,7 +126,7 @@ class TestCWArc:
     # Half arcs
 
     def test_0_180(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -129,7 +136,7 @@ class TestCWArc:
         )
 
     def test_90_270(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -139,7 +146,7 @@ class TestCWArc:
         )
 
     def test_180_360(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -149,7 +156,7 @@ class TestCWArc:
         )
 
     def test_270_420(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -163,7 +170,7 @@ class TestCWArc:
     _45_degrees_vector_x = 3.5355339059327378
 
     def test_45_135(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -179,7 +186,7 @@ class TestCWArc:
         )
 
     def test_135_225(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -195,7 +202,7 @@ class TestCWArc:
         )
 
     def test_225_315(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -211,7 +218,7 @@ class TestCWArc:
         )
 
     def test_315_405(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
@@ -227,7 +234,7 @@ class TestCWArc:
         )
 
     def test_full_circle_with_quarter_arcs(self) -> None:
-        save(
+        compare(
             run(
                 10,
                 self.template(
