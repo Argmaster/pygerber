@@ -17,13 +17,13 @@ class CommandVisitor:
     """Interface of a command visitor."""
 
     def on_shape(self, command: Shape) -> None:
-        """Visit shape command."""
+        """Visit `Shape` command."""
 
     def on_start_layer(self, command: StartLayer) -> None:
-        """Visit start layer command."""
+        """Visit `StartLayer` command."""
 
     def on_end_layer(self, command: EndLayer) -> None:
-        """Visit start end command."""
+        """Visit `EndLayer` command."""
 
     def on_paste_layer(self, command: PasteLayer) -> None:
-        """Visit paste layer command."""
+        """Visit `PasteLayer` command."""

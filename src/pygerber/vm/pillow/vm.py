@@ -10,16 +10,21 @@ from typing import Callable, Generator, Optional, Sequence
 
 from PIL import Image, ImageDraw
 
-from pygerber.vm.base import Result, VirtualMachine
+from pygerber.vm.base import (
+    DeferredLayer,
+    EagerLayer,
+    Layer,
+    Result,
+    VirtualMachine,
+)
 from pygerber.vm.commands.command import Command
-from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
+from pygerber.vm.commands.layer import PasteLayer
 from pygerber.vm.commands.shape import Arc, Line, Shape
 from pygerber.vm.pillow.errors import (
-    LayerAlreadyExistsError,
     LayerNotFoundError,
-    NoLayerSetError,
 )
-from pygerber.vm.types.box import FixedBox
+from pygerber.vm.types.box import AutoBox, FixedBox
+from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.style import Style
 from pygerber.vm.types.vector import Vector
@@ -49,12 +54,15 @@ class PillowResult(Result):
         return self.image
 
 
-class _PillowLayer:
-    """Layer in PillowVirtualMachine."""
+class PillowEagerLayer(EagerLayer):
+    """`PillowEagerLayer` class represents drawing space of known fixed size.
 
-    def __init__(self, dpmm: int, box: FixedBox) -> None:
+    It is specifically used by `PillowVirtualMachine` class.
+    """
+
+    def __init__(self, dpmm: int, layer_id: LayerID, box: FixedBox) -> None:
+        super().__init__(layer_id, box)
         self.dpmm = dpmm
-        self.box = box
         self.pixel_size = (
             self.to_pixel(self.box.width),
             self.to_pixel(self.box.height),
@@ -67,6 +75,18 @@ class _PillowLayer:
         return int(value * self.dpmm)
 
 
+class PillowDeferredLayer(DeferredLayer):
+    """`PillowDeferredLayer` class represents drawing space of size unknown at time of
+    creation of layer.
+
+    It is specifically used by `PillowVirtualMachine` class.
+    """
+
+    def __init__(self, dpmm: int, layer_id: LayerID, box: AutoBox) -> None:
+        super().__init__(layer_id, box)
+        self.dpmm = dpmm
+
+
 class PillowVirtualMachine(VirtualMachine):
     """Execute drawing commands using Pillow library."""
 
@@ -74,22 +94,21 @@ class PillowVirtualMachine(VirtualMachine):
         super().__init__()
         self.dpmm = dpmm
         self.angle_length_to_segment_count_ratio = 0.314
-        self.reset()
-
-    def reset(self) -> None:
-        """Reset state of the virtual machine."""
-        self.layers: dict[LayerID, _PillowLayer] = {}
-        self.layer_stack: list[_PillowLayer] = []
 
     @property
-    def layer(self) -> _PillowLayer:
+    def layer(self) -> PillowEagerLayer:
         """Get current layer."""
-        if self.layer_stack:
-            return self.layer_stack[-1]
+        return super().layer  # type: ignore[return-value]
 
-        raise NoLayerSetError
+    def create_eager_layer(self, layer_id: LayerID, box: FixedBox) -> Layer:
+        """Create new eager layer instances (factory method)."""
+        return PillowEagerLayer(self.dpmm, layer_id, box)
 
-    def on_shape(self, command: Shape) -> None:
+    def create_deferred_layer(self, layer_id: LayerID, box: AutoBox) -> Layer:
+        """Create new deferred layer instances (factory method)."""
+        return PillowDeferredLayer(self.dpmm, layer_id, box)
+
+    def on_shape_eager(self, command: Shape) -> None:
         """Visit shape command."""
         points: list[tuple[float, float]] = []
         for segment in command.commands:
@@ -171,6 +190,8 @@ class PillowVirtualMachine(VirtualMachine):
 
         radius = command.get_radius()
 
+        yield command.start.xy
+
         for angle in angle_generator:
             offset_vector = Vector(
                 x=radius * math.cos(math.radians(angle)),
@@ -178,6 +199,8 @@ class PillowVirtualMachine(VirtualMachine):
             )
 
             yield (command.center + offset_vector).xy
+
+        yield command.end.xy
 
     def _generate_arc_angles(
         self,
@@ -209,28 +232,19 @@ class PillowVirtualMachine(VirtualMachine):
             width=0,
         )
 
-    def on_start_layer(self, command: StartLayer) -> None:
-        """Visit start layer command."""
-        layer = _PillowLayer(self.dpmm, command.box)
-        if command.id in self.layers:
-            raise LayerAlreadyExistsError(command.id)
-
-        self.layers[command.id] = layer
-        self.layer_stack.append(layer)
-
-    def on_end_layer(self, command: EndLayer) -> None:
-        """Visit start end command."""
-        assert len(self.layer_stack) > 0
-        assert isinstance(command, EndLayer)
-        self.layer_stack.pop()
-
-    def on_paste_layer(self, command: PasteLayer) -> None:
+    def on_paste_layer_eager(self, command: PasteLayer) -> None:
         """Visit paste layer command."""
-        source_layer = self.layers.get(command.id, None)
+        source_layer = self.get_layer(command.id)
         if source_layer is None:
             raise LayerNotFoundError(command.id)
 
-        target_layer = self.layers.get(command.target_id, None)
+        if isinstance(source_layer, PillowDeferredLayer):
+            raise PasteDeferredLayerNotAllowedError(command.id)
+
+        assert isinstance(source_layer, PillowEagerLayer)
+        target_layer = self.get_layer(command.id)
+        assert isinstance(target_layer, (PillowEagerLayer, PillowDeferredLayer))
+
         if target_layer is None:
             raise LayerNotFoundError(command.target_id)
 

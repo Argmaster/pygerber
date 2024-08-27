@@ -110,9 +110,19 @@ class Vector(ModelType):
         return Vector(x=-self.x, y=-self.y)
 
     def angle_between(self, other: Vector) -> float:
-        """Calculate clockwise angle between two vectors in degrees clockwise.
+        """Calculate clockwise angle between two vectors in degrees.
 
         Value returned is always between 0 and 360 (can be 0, never 360).
+
+        self is the starting vector, other is the ending vector.
+
+        >>> from math import *
+        >>> s = Vector(x=sin(pi / 4) * 1, y=-sin(pi / 4) * 1)
+        >>> e = Vector(x=-sin(pi / 4) * 1, y=-sin(pi / 4) * 1)
+        >>> s.angle_between(e)
+        90.0
+        >>> e.angle_between(s)
+        270.0
         """
         return 360 - self.angle_between_cc(other)
 
@@ -145,3 +155,9 @@ class Vector(ModelType):
 Vector.unit.x = Vector.from_tuple((1, 0))
 Vector.unit.y = Vector.from_tuple((0, 1))
 Vector.unit.null = Vector.from_tuple((0, 0))
+
+
+if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod()

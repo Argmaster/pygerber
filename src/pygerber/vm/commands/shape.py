@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List
 
 import pyparsing as pp
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from pygerber.vm.base import CommandVisitor
 from pygerber.vm.commands.command import Command
@@ -41,7 +41,7 @@ class Line(ShapeSegment):
     @pp.cached_property
     def outer_box(self) -> AutoBox:
         """Get outer box of shape segment."""
-        raise NotImplementedError
+        return AutoBox.from_vectors(self.start, self.end)
 
 
 class Arc(ShapeSegment):
@@ -84,6 +84,53 @@ class Arc(ShapeSegment):
         """Get radius of circle arc."""
         return self.get_relative_start_point().length()
 
+    @pp.cached_property
+    def outer_box(self) -> AutoBox:
+        """Get outer box of shape segment."""
+        radius = self.get_radius()
+
+        total_angle = self.get_relative_start_point().angle_between(
+            self.get_relative_end_point(),
+        )
+
+        angle_x_plus = (
+            self.get_relative_start_point().angle_between(
+                Vector.unit.x,
+            )
+            % 360
+        )
+        angle_y_minus = (
+            self.get_relative_start_point().angle_between(
+                -Vector.unit.y,
+            )
+            % 360
+        )
+        angle_x_minus = (
+            self.get_relative_start_point().angle_between(
+                -Vector.unit.x,
+            )
+            % 360
+        )
+        angle_y_plus = (
+            self.get_relative_start_point().angle_between(
+                Vector.unit.y,
+            )
+            % 360
+        )
+
+        vectors = [Vector(x=0, y=0)]
+
+        if angle_x_plus < total_angle:
+            vectors.append(Vector(x=radius, y=0))
+        if angle_y_minus < total_angle:
+            vectors.append(Vector(x=0, y=-radius))
+        if angle_x_minus < total_angle:
+            vectors.append(Vector(x=-radius, y=0))
+        if angle_y_plus < total_angle:
+            vectors.append(Vector(x=0, y=radius))
+
+        return AutoBox.from_vectors(*vectors)
+
 
 class Shape(Command):
     """`Shape` command instructs VM to render a shape described by series of
@@ -94,8 +141,16 @@ class Shape(Command):
     they are connected by a straight line.
     """
 
-    commands: List[ShapeSegment]
+    commands: List[ShapeSegment] = Field(min_length=1)
     negative: bool = False
+
+    @pp.cached_property
+    def outer_box(self) -> AutoBox:
+        """Get outer box of shape segment."""
+        accumulator = self.commands[0].outer_box
+        for segment in self.commands[1:]:
+            accumulator += segment.outer_box
+        return accumulator
 
     def visit(self, visitor: CommandVisitor) -> None:
         """Visit polygon command."""

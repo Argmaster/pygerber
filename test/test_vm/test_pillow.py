@@ -10,7 +10,7 @@ from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
 from pygerber.vm.commands.shape import Shape
 from pygerber.vm.pillow.vm import PillowVirtualMachine
-from pygerber.vm.types.box import FixedBox
+from pygerber.vm.types.box import AutoBox, FixedBox
 from test.conftest import TEST_DIRECTORY
 
 if TYPE_CHECKING:
@@ -269,3 +269,13 @@ class TestCWArc:
                 ),
             )
         )
+
+
+def test_auto_box_sizing() -> None:
+    commands = [
+        StartLayer.new("main", AutoBox()),
+        Shape.new_circle((5, 5), 2, negative=False),
+        Shape.new_circle((0, 0), 2, negative=False),
+        EndLayer(),
+    ]
+    PillowVirtualMachine(10).run(commands)
