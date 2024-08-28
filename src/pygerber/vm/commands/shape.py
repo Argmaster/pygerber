@@ -9,13 +9,14 @@ from typing import TYPE_CHECKING, List
 import pyparsing as pp
 from pydantic import BaseModel, Field
 
-from pygerber.vm.base import CommandVisitor
 from pygerber.vm.commands.command import Command
 from pygerber.vm.types.box import AutoBox
 from pygerber.vm.types.vector import Vector
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from pygerber.vm.base import CommandVisitor
 
 
 class ShapeSegment(BaseModel):
@@ -88,37 +89,28 @@ class Arc(ShapeSegment):
     def outer_box(self) -> AutoBox:
         """Get outer box of shape segment."""
         radius = self.get_radius()
+        relative_start = self.get_relative_start_point()
 
-        total_angle = self.get_relative_start_point().angle_between(
+        total_angle = relative_start.angle_between(
             self.get_relative_end_point(),
         )
 
-        angle_x_plus = (
-            self.get_relative_start_point().angle_between(
-                Vector.unit.x,
-            )
-            % 360
-        )
-        angle_y_minus = (
-            self.get_relative_start_point().angle_between(
-                -Vector.unit.y,
-            )
-            % 360
-        )
-        angle_x_minus = (
-            self.get_relative_start_point().angle_between(
-                -Vector.unit.x,
-            )
-            % 360
-        )
-        angle_y_plus = (
-            self.get_relative_start_point().angle_between(
-                Vector.unit.y,
-            )
-            % 360
-        )
+        angle_x_plus = relative_start.angle_between(Vector.unit.x) % 360
+        angle_y_minus = relative_start.angle_between(-Vector.unit.y) % 360
+        angle_x_minus = relative_start.angle_between(-Vector.unit.x) % 360
+        angle_y_plus = relative_start.angle_between(Vector.unit.y) % 360
 
-        vectors = [Vector(x=0, y=0)]
+        vectors = [
+            Vector(x=0, y=0),
+            relative_start,
+            self.get_relative_end_point(),
+        ]
+        if not self.clockwise:
+            total_angle = 360 - total_angle
+            angle_x_plus = 360 - angle_x_plus
+            angle_y_minus = 360 - angle_y_minus
+            angle_x_minus = 360 - angle_x_minus
+            angle_y_plus = 360 - angle_y_plus
 
         if angle_x_plus < total_angle:
             vectors.append(Vector(x=radius, y=0))
@@ -129,7 +121,7 @@ class Arc(ShapeSegment):
         if angle_y_plus < total_angle:
             vectors.append(Vector(x=0, y=radius))
 
-        return AutoBox.from_vectors(*vectors)
+        return AutoBox.from_vectors(*(v + self.center for v in vectors))
 
 
 class Shape(Command):

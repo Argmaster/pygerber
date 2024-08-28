@@ -8,11 +8,11 @@ from pygerber.vm.command_visitor import CommandVisitor
 from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
 from pygerber.vm.commands.shape import Shape
-from pygerber.vm.pillow.errors import LayerNotFoundError
 from pygerber.vm.types.box import AutoBox, Box, FixedBox
 from pygerber.vm.types.errors import (
     EmptyAutoSizedLayerNotAllowedError,
     LayerAlreadyExistsError,
+    LayerNotFoundError,
     NoLayerSetError,
 )
 from pygerber.vm.types.layer_id import LayerID
@@ -127,10 +127,16 @@ class VirtualMachine(CommandVisitor):
         self._on_paste_layer_handler(command)
 
     def on_paste_layer_eager(self, command: PasteLayer) -> None:
-        """Visit `PasteLayer` command."""
+        """Visit `PasteLayer` command.
+
+        This method is used when currently selected layer is a eager layer.
+        """
 
     def on_paste_layer_deferred(self, command: PasteLayer) -> None:
-        """Visit `PasteLayer` command."""
+        """Visit `PasteLayer` command.
+
+        This method is used when currently selected layer is a deferred layer.
+        """
         layer = self.layer
         assert isinstance(layer, DeferredLayer)
         layer.commands.append(command)
@@ -201,16 +207,16 @@ class VirtualMachine(CommandVisitor):
         if isinstance(top_layer, EagerLayer):
             pass
 
-        if isinstance(top_layer, DeferredLayer):
+        elif isinstance(top_layer, DeferredLayer):
             box = self._calculate_deferred_layer_box(top_layer)
             if box is None:
                 # Empty layers are not retained.
                 raise EmptyAutoSizedLayerNotAllowedError(top_layer.layer_id)
 
-            layer = self.create_eager_layer(top_layer.layer_id, box.to_fixed_box())
-            self.set_layer(top_layer.layer_id, layer)
+            new_layer = self.create_eager_layer(top_layer.layer_id, box.to_fixed_box())
+            self.set_layer(top_layer.layer_id, new_layer)
 
-            self.push_layer_to_stack(layer)
+            self.push_layer_to_stack(new_layer)
             self.set_eager_handlers()
             self._eval_deferred_commands(top_layer.commands)
             self.pop_layer_from_stack()
@@ -230,20 +236,29 @@ class VirtualMachine(CommandVisitor):
         self, top_layer: DeferredLayer
     ) -> Optional[AutoBox]:
         box: Optional[AutoBox] = None
-        for cmd in top_layer.commands:
-            if isinstance(cmd, Shape):
-                if box is None:
-                    box = cmd.outer_box
-                else:
-                    box += cmd.outer_box
 
-            if isinstance(cmd, PasteLayer):
-                layer = self._layers[cmd.target_id]
+        cmd = top_layer.commands[0]
+
+        if isinstance(cmd, Shape):
+            box = cmd.outer_box
+        elif isinstance(cmd, PasteLayer):
+            layer = self._layers[cmd.source_layer_id]
+            assert isinstance(layer, EagerLayer)
+            box = AutoBox.from_fixed_box(layer.box)
+        else:
+            raise NotImplementedError(type(cmd))
+
+        for cmd in top_layer.commands[1:]:
+            if isinstance(cmd, Shape):
+                box = box + cmd.outer_box
+
+            elif isinstance(cmd, PasteLayer):
+                layer = self._layers[cmd.source_layer_id]
                 assert isinstance(layer, EagerLayer)
-                if box is None:
-                    box = AutoBox.from_fixed_box(layer.box)
-                else:
-                    box += layer.box
+                box = box + layer.box
+
+            else:
+                raise NotImplementedError(type(cmd))
 
         return box
 

@@ -98,18 +98,20 @@ class AutoBox(Box):
     def __iadd__(self, other: object) -> Self:
         """Add a vector to the box."""
         if isinstance(other, AutoBox):
-            self.min_x = min(self.min_x, other.min_x)
-            self.min_y = min(self.min_y, other.min_y)
-            self.max_x = max(self.max_x, other.max_x)
-            self.max_y = max(self.max_y, other.max_y)
-            return self
+            return self.__class__(
+                min_x=min(self.min_x, other.min_x),
+                min_y=min(self.min_y, other.min_y),
+                max_x=max(self.max_x, other.max_x),
+                max_y=max(self.max_y, other.max_y),
+            )
 
         if isinstance(other, FixedBox):
-            self.min_x = min(self.min_x, other.min_x)
-            self.min_y = min(self.min_y, other.min_y)
-            self.max_x = max(self.max_x, other.max_x)
-            self.max_y = max(self.max_y, other.max_y)
-            return self
+            return self.__class__(
+                min_x=min(self.min_x, other.min_x),
+                min_y=min(self.min_y, other.min_y),
+                max_x=max(self.max_x, other.max_x),
+                max_y=max(self.max_y, other.max_y),
+            )
 
         return NotImplemented
 

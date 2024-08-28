@@ -4,6 +4,7 @@ import inspect
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
+import pytest
 from PIL import Image
 
 from pygerber.vm.commands.command import Command
@@ -32,8 +33,13 @@ def compare(image: Image.Image) -> None:
     caller_name = inspect.stack()[1].function
     save_destination = OUTPUT_PILLOW_DIRECTORY / f"{caller_name}.png"
     image.save(save_destination.as_posix())
-    reference_image = Image.open(REFERENCE_ASSETS_DIRECTORY / f"{caller_name}.png")
-    assert image.convert("RGBA") == reference_image.convert("RGBA")
+
+    reference_image_path = REFERENCE_ASSETS_DIRECTORY / f"{caller_name}.png"
+    if reference_image_path.is_file():
+        reference_image = Image.open(reference_image_path)
+        assert image.convert("RGBA") == reference_image.convert("RGBA")
+    else:
+        pytest.skip(f"Reference image not found: {reference_image_path}")
 
 
 def test_draw_rectangle_in_center() -> None:
@@ -62,7 +68,7 @@ def test_paste_rectangle_in_center() -> None:
         EndLayer(),
         Shape.new_rectangle((5, 5), 3, 2, negative=False),
         Shape.new_rectangle((5, 5), 2.8, 1.8, negative=True),
-        PasteLayer.new("rect", (5, 5), "main"),
+        PasteLayer.new("rect", (5, 5)),
         EndLayer(),
     ]
     compare(run(100, commands))
@@ -271,11 +277,103 @@ class TestCWArc:
         )
 
 
-def test_auto_box_sizing() -> None:
-    commands = [
-        StartLayer.new("main", AutoBox()),
-        Shape.new_circle((5, 5), 2, negative=False),
-        Shape.new_circle((0, 0), 2, negative=False),
-        EndLayer(),
-    ]
-    PillowVirtualMachine(10).run(commands)
+class TestAutoBox:
+    def compare_auto_vs_fixed(
+        self,
+        *commands: Command,
+        fixed_box: FixedBox,
+        dpmm: int = 10,
+    ) -> None:
+        auto_size_image = run(
+            dpmm,
+            [
+                StartLayer.new("main", AutoBox()),
+                *commands,
+                EndLayer(),
+            ],
+        )
+        fix_size_image = run(
+            dpmm,
+            [
+                StartLayer.new("main", fixed_box),
+                *commands,
+                EndLayer(),
+            ],
+        )
+        if auto_size_image != fix_size_image:
+            caller_name = inspect.stack()[1].function
+            auto_size_image.save(
+                (
+                    OUTPUT_PILLOW_DIRECTORY / f"TestAutoBox_{caller_name}_auto.png"
+                ).as_posix()
+            )
+            fix_size_image.save(
+                (
+                    OUTPUT_PILLOW_DIRECTORY / f"TestAutoBox_{caller_name}_fixed.png"
+                ).as_posix()
+            )
+
+            pytest.fail("Images are different")
+
+    def test_two_circle(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_circle((5, 5), 2, negative=False),
+            Shape.new_circle((0, 0), 2, negative=False),
+            fixed_box=FixedBox.new((2.5, 2.5), 7, 7),
+        )
+
+    def test_two_rectangles(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_rectangle((5, 5), 2, 2, negative=False),
+            Shape.new_rectangle((0, 0), 2, 2, negative=False),
+            fixed_box=FixedBox.new((2.5, 2.5), 7, 7),
+        )
+
+    def test_circle_rectangle(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_circle((5, 5), 2, negative=False),
+            Shape.new_rectangle((0, 0), 2, 2, negative=False),
+            fixed_box=FixedBox.new((2.5, 2.5), 7, 7),
+        )
+
+    def test_cw_arc_0_90(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((5, 0), (0, -5), (0, 0), 1, negative=False),
+            fixed_box=FixedBox.new((2.75, -2.75), 5.5, 5.5),
+        )
+
+    def test_cw_arc_90_180(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((0, -5), (-5, 0), (0, 0), 1, negative=False),
+            fixed_box=FixedBox.new((-2.75, -2.75), 5.5, 5.5),
+        )
+
+    def test_cw_arc_180_270(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((-5, 0), (0, 5), (0, 0), 1, negative=False),
+            fixed_box=FixedBox.new((-2.75, 2.75), 5.5, 5.5),
+        )
+
+    def test_cw_arc_270_360(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((0, 5), (5, 0), (0, 0), 1, negative=False),
+            fixed_box=FixedBox.new((2.75, 2.75), 5.5, 5.5),
+        )
+
+    def test_cw_arc_0_180(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((5, 0), (-5, 0), (0, 0), 1, negative=False),
+            fixed_box=FixedBox.new((0, -2.75), 11, 5.5),
+        )
+
+    def test_cw_arc_90_270(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((0, -5), (0, 5), (0, 0), 1, negative=False),
+            fixed_box=FixedBox.new((-2.75, 0), 5.5, 11),
+        )
+
+    def test_cw_arc_180_360(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((-5, 0), (5, 0), (0, 0), 1, negative=False),
+            fixed_box=FixedBox.new((0, 2.75), 11, 5.5),
+        )

@@ -44,20 +44,18 @@ class EndLayer(Command):
 class PasteLayer(Command):
     """Paste contents of one layer into other layer."""
 
-    id: LayerID
+    source_layer_id: LayerID
 
     center: Vector
-    target_id: LayerID
 
     def visit(self, visitor: CommandVisitor) -> None:
         """Visit paste layer command."""
         visitor.on_paste_layer(self)
 
     @classmethod
-    def new(cls, id_: str, center: tuple[float, float], target_id: str) -> Self:
+    def new(cls, source_layer_id: str, center: tuple[float, float]) -> Self:
         """Create a new start layer command from values."""
         return cls(
-            id=LayerID(id=id_),
+            source_layer_id=LayerID(id=source_layer_id),
             center=Vector.from_tuple(center),
-            target_id=LayerID(id=target_id),
         )

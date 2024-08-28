@@ -20,9 +20,6 @@ from pygerber.vm.base import (
 from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.layer import PasteLayer
 from pygerber.vm.commands.shape import Arc, Line, Shape
-from pygerber.vm.pillow.errors import (
-    LayerNotFoundError,
-)
 from pygerber.vm.types.box import AutoBox, FixedBox
 from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
 from pygerber.vm.types.layer_id import LayerID
@@ -233,20 +230,14 @@ class PillowVirtualMachine(VirtualMachine):
         )
 
     def on_paste_layer_eager(self, command: PasteLayer) -> None:
-        """Visit paste layer command."""
-        source_layer = self.get_layer(command.id)
-        if source_layer is None:
-            raise LayerNotFoundError(command.id)
+        """Visit `PasteLayer` command."""
+        source_layer = self.get_layer(command.source_layer_id)
 
         if isinstance(source_layer, PillowDeferredLayer):
-            raise PasteDeferredLayerNotAllowedError(command.id)
+            raise PasteDeferredLayerNotAllowedError(command.source_layer_id)
 
         assert isinstance(source_layer, PillowEagerLayer)
-        target_layer = self.get_layer(command.id)
-        assert isinstance(target_layer, (PillowEagerLayer, PillowDeferredLayer))
-
-        if target_layer is None:
-            raise LayerNotFoundError(command.target_id)
+        target_layer = self.layer
 
         source_width_half = source_layer.box.width / 2
         source_height_half = source_layer.box.height / 2
@@ -286,10 +277,11 @@ class PillowVirtualMachine(VirtualMachine):
         """Execute all commands."""
         super().run(commands)
 
-        layer = self.layers.get(LayerID(id="main"), None)
-
-        self.reset()
+        layer = self._layers.get(LayerID(id="main"), None)
 
         if layer is None:
             return PillowResult(None)
+
+        assert isinstance(layer, PillowEagerLayer)
+
         return PillowResult(layer.image.transpose(Image.Transpose.FLIP_TOP_BOTTOM))
