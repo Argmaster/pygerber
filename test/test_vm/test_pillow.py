@@ -7,9 +7,7 @@ from typing import TYPE_CHECKING, Sequence
 import pytest
 from PIL import Image
 
-from pygerber.vm.commands.command import Command
-from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
-from pygerber.vm.commands.shape import Shape
+from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLayer
 from pygerber.vm.pillow.vm import PillowVirtualMachine
 from pygerber.vm.types.box import AutoBox, FixedBox
 from test.conftest import TEST_DIRECTORY

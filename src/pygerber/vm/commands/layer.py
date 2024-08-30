@@ -8,7 +8,6 @@ from pygerber.vm.command_visitor import CommandVisitor
 from pygerber.vm.commands.command import Command
 from pygerber.vm.types.box import Box
 from pygerber.vm.types.layer_id import LayerID
-from pygerber.vm.types.vector import Vector
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -39,23 +38,3 @@ class EndLayer(Command):
     def visit(self, visitor: CommandVisitor) -> None:
         """Visit end layer command."""
         visitor.on_end_layer(self)
-
-
-class PasteLayer(Command):
-    """Paste contents of one layer into other layer."""
-
-    source_layer_id: LayerID
-
-    center: Vector
-
-    def visit(self, visitor: CommandVisitor) -> None:
-        """Visit paste layer command."""
-        visitor.on_paste_layer(self)
-
-    @classmethod
-    def new(cls, source_layer_id: str, center: tuple[float, float]) -> Self:
-        """Create a new start layer command from values."""
-        return cls(
-            source_layer_id=LayerID(id=source_layer_id),
-            center=Vector.from_tuple(center),
-        )

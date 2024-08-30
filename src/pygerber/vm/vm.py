@@ -5,9 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Sequence, Union
 
 from pygerber.vm.command_visitor import CommandVisitor
-from pygerber.vm.commands.command import Command
-from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
-from pygerber.vm.commands.shape import Shape
+from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLayer
 from pygerber.vm.types.box import AutoBox, Box, FixedBox
 from pygerber.vm.types.errors import (
     EmptyAutoSizedLayerNotAllowedError,

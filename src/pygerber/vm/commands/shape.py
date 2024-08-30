@@ -7,121 +7,17 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List
 
 import pyparsing as pp
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from pygerber.vm.commands.command import Command
+from pygerber.vm.commands.shape_segments import Arc, Line, ShapeSegment
 from pygerber.vm.types.box import AutoBox
 from pygerber.vm.types.vector import Vector
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from pygerber.vm.base import CommandVisitor
-
-
-class ShapeSegment(BaseModel):
-    """Base class for shape segment types."""
-
-    @pp.cached_property
-    def outer_box(self) -> AutoBox:
-        """Get outer box of shape segment."""
-        raise NotImplementedError
-
-
-class Line(ShapeSegment):
-    """Draw a line from the current position to the given position."""
-
-    start: Vector
-    end: Vector
-
-    @classmethod
-    def from_tuples(cls, start: tuple[float, float], end: tuple[float, float]) -> Self:
-        """Create a new line from two tuples."""
-        return cls(start=Vector.from_tuple(start), end=Vector.from_tuple(end))
-
-    @pp.cached_property
-    def outer_box(self) -> AutoBox:
-        """Get outer box of shape segment."""
-        return AutoBox.from_vectors(self.start, self.end)
-
-
-class Arc(ShapeSegment):
-    """Draw a arc from the current position to the given position.
-
-    Arcs are always clockwise.
-    """
-
-    start: Vector
-    end: Vector
-    center: Vector
-    clockwise: bool
-
-    @classmethod
-    def from_tuples(
-        cls,
-        start: tuple[float, float],
-        end: tuple[float, float],
-        center: tuple[float, float],
-        *,
-        clockwise: bool,
-    ) -> Self:
-        """Create a new arc from two tuples."""
-        return cls(
-            start=Vector.from_tuple(start),
-            end=Vector.from_tuple(end),
-            center=Vector.from_tuple(center),
-            clockwise=clockwise,
-        )
-
-    def get_relative_start_point(self) -> Vector:
-        """Get starting point relative to arc center."""
-        return self.start - self.center
-
-    def get_relative_end_point(self) -> Vector:
-        """Get ending point relative to arc center."""
-        return self.end - self.center
-
-    def get_radius(self) -> float:
-        """Get radius of circle arc."""
-        return self.get_relative_start_point().length()
-
-    @pp.cached_property
-    def outer_box(self) -> AutoBox:
-        """Get outer box of shape segment."""
-        radius = self.get_radius()
-        relative_start = self.get_relative_start_point()
-
-        total_angle = relative_start.angle_between(
-            self.get_relative_end_point(),
-        )
-
-        angle_x_plus = relative_start.angle_between(Vector.unit.x) % 360
-        angle_y_minus = relative_start.angle_between(-Vector.unit.y) % 360
-        angle_x_minus = relative_start.angle_between(-Vector.unit.x) % 360
-        angle_y_plus = relative_start.angle_between(Vector.unit.y) % 360
-
-        vectors = [
-            Vector(x=0, y=0),
-            relative_start,
-            self.get_relative_end_point(),
-        ]
-        if not self.clockwise:
-            total_angle = 360 - total_angle
-            angle_x_plus = 360 - angle_x_plus
-            angle_y_minus = 360 - angle_y_minus
-            angle_x_minus = 360 - angle_x_minus
-            angle_y_plus = 360 - angle_y_plus
-
-        if angle_x_plus < total_angle:
-            vectors.append(Vector(x=radius, y=0))
-        if angle_y_minus < total_angle:
-            vectors.append(Vector(x=0, y=-radius))
-        if angle_x_minus < total_angle:
-            vectors.append(Vector(x=-radius, y=0))
-        if angle_y_plus < total_angle:
-            vectors.append(Vector(x=0, y=radius))
-
-        return AutoBox.from_vectors(*(v + self.center for v in vectors))
+    from pygerber.vm.vm import CommandVisitor
 
 
 class Shape(Command):

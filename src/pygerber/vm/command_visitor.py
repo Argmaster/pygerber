@@ -9,8 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
-    from pygerber.vm.commands.shape import Shape
+    from pygerber.vm.commands import EndLayer, PasteLayer, Shape, StartLayer
 
 
 class CommandVisitor:

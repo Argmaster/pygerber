@@ -10,21 +10,19 @@ from typing import Callable, Generator, Optional, Sequence
 
 from PIL import Image, ImageDraw
 
-from pygerber.vm.base import (
+from pygerber.vm.commands import Arc, Command, Line, PasteLayer, Shape
+from pygerber.vm.types.box import AutoBox, FixedBox
+from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
+from pygerber.vm.types.layer_id import LayerID
+from pygerber.vm.types.style import Style
+from pygerber.vm.types.vector import Vector
+from pygerber.vm.vm import (
     DeferredLayer,
     EagerLayer,
     Layer,
     Result,
     VirtualMachine,
 )
-from pygerber.vm.commands.command import Command
-from pygerber.vm.commands.layer import PasteLayer
-from pygerber.vm.commands.shape import Arc, Line, Shape
-from pygerber.vm.types.box import AutoBox, FixedBox
-from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
-from pygerber.vm.types.layer_id import LayerID
-from pygerber.vm.types.style import Style
-from pygerber.vm.types.vector import Vector
 
 FULL_ANGLE_DEGREES = 360
 
