@@ -56,6 +56,13 @@ class Arc(ShapeSegment):
         """Get radius of circle arc."""
         return self.get_relative_start_point().length()
 
+    def is_valid_arc(self) -> bool:
+        """Check if arc is valid."""
+        return (
+            self.get_relative_start_point().length()
+            == self.get_relative_end_point().length()
+        )
+
     @pp.cached_property
     def outer_box(self) -> AutoBox:
         """Get outer box of shape segment."""
