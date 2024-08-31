@@ -10,7 +10,8 @@ from typing import Callable, Generator, Optional, Sequence
 
 from PIL import Image, ImageDraw
 
-from pygerber.vm.commands import Arc, Command, Line, PasteLayer, Shape
+from pygerber.vm.commands import Arc, Line, PasteLayer, Shape
+from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.box import AutoBox, FixedBox
 from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
 from pygerber.vm.types.layer_id import LayerID
@@ -271,9 +272,9 @@ class PillowVirtualMachine(VirtualMachine):
         """Get color for positive or negative."""
         return 0 if negative else 1
 
-    def run(self, commands: Sequence[Command]) -> PillowResult:
+    def run(self, rvmc: RVMC) -> PillowResult:
         """Execute all commands."""
-        super().run(commands)
+        super().run(rvmc)
 
         layer = self._layers.get(LayerID(id="main"), None)
 

@@ -5,7 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Sequence, Union
 
 from pygerber.vm.command_visitor import CommandVisitor
-from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLayer
+from pygerber.vm.commands import EndLayer, PasteLayer, Shape, StartLayer
+from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.box import AutoBox, Box, FixedBox
 from pygerber.vm.types.errors import (
     EmptyAutoSizedLayerNotAllowedError,
@@ -270,9 +271,9 @@ class VirtualMachine(CommandVisitor):
         for cmd in commands:
             cmd.visit(self)
 
-    def run(self, commands: Sequence[Command]) -> Result:
+    def run(self, rvmc: RVMC) -> Result:
         """Execute all commands."""
-        for command in commands:
+        for command in rvmc.commands:
             command.visit(self)
 
         return Result()

@@ -9,6 +9,7 @@ from PIL import Image
 
 from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLayer
 from pygerber.vm.pillow.vm import PillowVirtualMachine
+from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.box import AutoBox, FixedBox
 from test.conftest import TEST_DIRECTORY
 
@@ -24,7 +25,7 @@ REFERENCE_ASSETS_DIRECTORY = Path(__file__).parent / "test_pillow_assets"
 
 
 def run(dpmm: int, commands: Sequence[Command]) -> Image.Image:
-    return PillowVirtualMachine(dpmm).run(commands).get_image()
+    return PillowVirtualMachine(dpmm).run(RVMC(commands)).get_image()
 
 
 def compare(image: Image.Image) -> None:
