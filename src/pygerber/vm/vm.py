@@ -151,6 +151,7 @@ class VirtualMachine(CommandVisitor):
 
         elif isinstance(command.box, AutoBox):
             layer = self.create_deferred_layer(command.id, command.box)
+            self.set_layer(command.id, layer)
             self.set_deferred_handlers()
 
         else:
@@ -163,8 +164,6 @@ class VirtualMachine(CommandVisitor):
 
         Overwriting existing layer is not allowed.
         """
-        if layer_id in self._layers:
-            raise LayerAlreadyExistsError(layer_id)
         self._layers[layer_id] = layer
 
     def get_layer(self, layer_id: LayerID) -> Layer:
@@ -197,7 +196,9 @@ class VirtualMachine(CommandVisitor):
 
     def on_end_layer(self, command: EndLayer) -> None:
         """Visit `EndLayer` command."""
-        assert len(self._layer_stack) > 0
+        if len(self._layer_stack) <= 0:
+            raise NoLayerSetError
+
         assert isinstance(command, EndLayer)
 
         top_layer = self.pop_layer_from_stack()
@@ -206,7 +207,7 @@ class VirtualMachine(CommandVisitor):
             pass
 
         elif isinstance(top_layer, DeferredLayer):
-            box = self._calculate_deferred_layer_box(top_layer)
+            box = self._calculate_deferred_layer_box(top_layer.commands)
             if box is None:
                 # Empty layers are not retained.
                 raise EmptyAutoSizedLayerNotAllowedError(top_layer.layer_id)
@@ -231,22 +232,27 @@ class VirtualMachine(CommandVisitor):
         self.set_handlers_for_layer(self.layer)
 
     def _calculate_deferred_layer_box(
-        self, top_layer: DeferredLayer
+        self, commands: Sequence[DrawCmdT]
     ) -> Optional[AutoBox]:
         box: Optional[AutoBox] = None
 
-        cmd = top_layer.commands[0]
+        if len(commands) == 0:
+            return None
+
+        cmd = commands[0]
 
         if isinstance(cmd, Shape):
             box = cmd.outer_box
+
         elif isinstance(cmd, PasteLayer):
             layer = self._layers[cmd.source_layer_id]
             assert isinstance(layer, EagerLayer)
-            box = AutoBox.from_fixed_box(layer.box)
+            box = AutoBox.from_fixed_box(layer.box) + cmd.center
+
         else:
             raise NotImplementedError(type(cmd))
 
-        for cmd in top_layer.commands[1:]:
+        for cmd in commands[1:]:
             if isinstance(cmd, Shape):
                 box = box + cmd.outer_box
 
@@ -264,13 +270,9 @@ class VirtualMachine(CommandVisitor):
         for cmd in commands:
             cmd.visit(self)
 
-    def create_result(self) -> Result:
-        """Create object containing result of drawing."""
-        return Result()
-
     def run(self, commands: Sequence[Command]) -> Result:
         """Execute all commands."""
         for command in commands:
             command.visit(self)
 
-        return self.create_result()
+        return Result()

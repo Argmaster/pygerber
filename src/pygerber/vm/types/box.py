@@ -76,54 +76,40 @@ class AutoBox(Box):
             height=self.max_y - self.min_y,
         )
 
-    def __add__(self, other: object) -> AutoBox:
+    def __add__(self, other: object) -> Self:
         """Add a vector to the box."""
         if isinstance(other, AutoBox):
-            return AutoBox(
+            return self.__class__(
                 min_x=min(self.min_x, other.min_x),
                 min_y=min(self.min_y, other.min_y),
                 max_x=max(self.max_x, other.max_x),
                 max_y=max(self.max_y, other.max_y),
             )
         if isinstance(other, FixedBox):
-            return AutoBox(
+            return self.__class__(
                 min_x=min(self.min_x, other.min_x),
                 min_y=min(self.min_y, other.min_y),
                 max_x=max(self.max_x, other.max_x),
                 max_y=max(self.max_y, other.max_y),
+            )
+
+        if isinstance(other, Vector):
+            return self.__class__(
+                min_x=self.min_x + other.x,
+                min_y=self.min_y + other.y,
+                max_x=self.max_x + other.x,
+                max_y=self.max_y + other.y,
             )
 
         return NotImplemented
 
     def __iadd__(self, other: object) -> Self:
         """Add a vector to the box."""
-        if isinstance(other, AutoBox):
-            return self.__class__(
-                min_x=min(self.min_x, other.min_x),
-                min_y=min(self.min_y, other.min_y),
-                max_x=max(self.max_x, other.max_x),
-                max_y=max(self.max_y, other.max_y),
-            )
+        return self + other
 
-        if isinstance(other, FixedBox):
-            return self.__class__(
-                min_x=min(self.min_x, other.min_x),
-                min_y=min(self.min_y, other.min_y),
-                max_x=max(self.max_x, other.max_x),
-                max_y=max(self.max_y, other.max_y),
-            )
-
-        return NotImplemented
-
-    def __radd__(self, other: object) -> AutoBox:
+    def __radd__(self, other: object) -> Self:
         """Add a vector to the box."""
-        if isinstance(other, AutoBox):
-            return self + other
-
-        if isinstance(other, FixedBox):
-            return self + other
-
-        return NotImplemented
+        return self + other
 
 
 class FixedBox(Box):
