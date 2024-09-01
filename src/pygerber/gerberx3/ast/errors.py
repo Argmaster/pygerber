@@ -56,3 +56,7 @@ class SourceNotAvailableError(AstError):
     def __init__(self, node: TF_MD5) -> None:
         super().__init__("Source is not available for MD5 check.")
         self.node = node
+
+
+class CoordinateFormatNotSetError(AstError):
+    """Raised when coordinate parsing is requested but format was not prior to it."""

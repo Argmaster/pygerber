@@ -15,6 +15,7 @@ from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 from pygerber.gerberx3.ast.errors import (
     ApertureNotFoundError,
     ApertureNotSelectedError,
+    CoordinateFormatNotSetError,
     DirectADHandlerDispatchNotSupportedError,
 )
 from pygerber.gerberx3.ast.nodes import (
@@ -61,6 +62,10 @@ from pygerber.gerberx3.ast.nodes import (
     TO,
     ADmacro,
     ApertureIdStr,
+    CoordinateI,
+    CoordinateJ,
+    CoordinateX,
+    CoordinateY,
     Dnn,
     Double,
     File,
@@ -392,12 +397,32 @@ class StateTrackingVisitor(AstVisitor):
         self._dispatch_d01_handler: Callable[[], None] = (
             self._dispatch_d01_handler_non_region
         )
-        self._dispatch_d01_handler()
+
+    @property
+    def coordinate_x(self) -> Double:
+        """Get X coordinate."""
+        coordinate = self.state.coordinate_x
+        if coordinate is None:
+            return self.state.current_x
+        return coordinate
+
+    @property
+    def coordinate_y(self) -> Double:
+        """Get Y coordinate."""
+        coordinate = self.state.coordinate_y
+        if coordinate is None:
+            return self.state.current_y
+        return coordinate
+
+    @property
+    def is_negative(self) -> bool:
+        """Check if current aperture is negative."""
+        return self.state.transform.polarity == Polarity.Clear
 
     # Aperture
 
     def on_ab(self, node: AB) -> None:
-        """Handle `ABclose` node."""
+        """Handle `AB` node."""
         self.state.apertures.blocks[node.open.aperture_id] = node
 
     def on_ad(self, node: AD) -> None:
@@ -636,6 +661,34 @@ class StateTrackingVisitor(AstVisitor):
     def on_m02(self, node: M02) -> None:
         """Handle `M02` node."""
         raise ProgramStop(node)
+
+    def on_coordinate_x(self, node: CoordinateX) -> None:
+        """Handle `Coordinate` node."""
+        super().on_coordinate_x(node)
+        if self.state.coordinate_format is None:
+            raise CoordinateFormatNotSetError(node)
+        self.state.coordinate_x = self.state.coordinate_format.unpack_x(node.value)
+
+    def on_coordinate_y(self, node: CoordinateY) -> None:
+        """Handle `Coordinate` node."""
+        super().on_coordinate_y(node)
+        if self.state.coordinate_format is None:
+            raise CoordinateFormatNotSetError(node)
+        self.state.coordinate_y = self.state.coordinate_format.unpack_y(node.value)
+
+    def on_coordinate_i(self, node: CoordinateI) -> None:
+        """Handle `Coordinate` node."""
+        super().on_coordinate_i(node)
+        if self.state.coordinate_format is None:
+            raise CoordinateFormatNotSetError(node)
+        self.state.coordinate_i = self.state.coordinate_format.unpack_x(node.value)
+
+    def on_coordinate_j(self, node: CoordinateJ) -> None:
+        """Handle `Coordinate` node."""
+        super().on_coordinate_j(node)
+        if self.state.coordinate_format is None:
+            raise CoordinateFormatNotSetError(node)
+        self.state.coordinate_j = self.state.coordinate_format.unpack_y(node.value)
 
     def on_as(self, node: AS) -> None:
         """Handle `AS` node."""
