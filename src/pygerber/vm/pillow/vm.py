@@ -11,6 +11,7 @@ from typing import Callable, Generator, Optional, Sequence
 from PIL import Image, ImageDraw
 
 from pygerber.vm.commands import Arc, Line, PasteLayer, Shape
+from pygerber.vm.pillow.errors import DPMMTooSmallError
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.box import AutoBox, FixedBox
 from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
@@ -29,6 +30,8 @@ FULL_ANGLE_DEGREES = 360
 
 DECREASE_ANGLE = (operator.sub, operator.gt)
 INCREASE_ANGLE = (operator.add, operator.lt)
+
+MIN_SEGMENT_COUNT = 12
 
 
 class PillowResult(Result):
@@ -89,7 +92,11 @@ class PillowVirtualMachine(VirtualMachine):
     def __init__(self, dpmm: int) -> None:
         super().__init__()
         self.dpmm = dpmm
-        self.angle_length_to_segment_count_ratio = 0.314
+        self.angle_length_to_segment_count = lambda angle_length: (
+            segment_count
+            if (segment_count := angle_length * 2) > MIN_SEGMENT_COUNT
+            else MIN_SEGMENT_COUNT
+        )
 
     @property
     def layer(self) -> PillowEagerLayer:
@@ -157,7 +164,11 @@ class PillowVirtualMachine(VirtualMachine):
         angle_delta = abs(start_angle - end_angle)
         angle_length = (angle_delta / 360) * (command.get_radius() * 2 * math.pi)
         angle_length_pixels = self.to_pixel(angle_length)
-        segment_count = angle_length_pixels * self.angle_length_to_segment_count_ratio
+        segment_count = self.angle_length_to_segment_count(angle_length_pixels)
+
+        if segment_count < 1:
+            raise DPMMTooSmallError(self.dpmm)
+
         angle_delta = angle_delta / segment_count
 
         assert angle_delta > 0
