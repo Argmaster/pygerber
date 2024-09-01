@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from pydantic import Field
 
@@ -25,6 +25,8 @@ class AutoBox(Box):
     min_y: float = Field(default=math.inf)
     max_x: float = Field(default=-math.inf)
     max_y: float = Field(default=-math.inf)
+
+    center_override: Vector | None = Field(default=None)
 
     @classmethod
     def from_vectors(cls, *vectors: Vector) -> Self:
@@ -58,20 +60,20 @@ class AutoBox(Box):
             max_y=box.max_y,
         )
 
-    def to_fixed_box(
-        self, center: Vector | Literal["mean", "zero"] = "mean"
-    ) -> FixedBox:
-        """Convert to a fixed box."""
-        if isinstance(center, str):
-            if center == "mean":
-                center = Vector(
-                    x=(self.min_x + self.max_x) / 2, y=(self.min_y + self.max_y) / 2
-                )
-            elif center == "zero":
-                center = Vector(x=0, y=0)
+    @property
+    def center(self) -> Vector:
+        """Get mean center of the box."""
+        if self.center_override is not None:
+            return self.center_override
+        return Vector(
+            x=(self.min_x + self.max_x) / 2,
+            y=(self.min_y + self.max_y) / 2,
+        )
 
+    def to_fixed_box(self) -> FixedBox:
+        """Convert to a fixed box."""
         return FixedBox(
-            center=center,
+            center=self.center,
             width=self.max_x - self.min_x,
             height=self.max_y - self.min_y,
         )

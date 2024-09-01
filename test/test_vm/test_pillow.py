@@ -79,6 +79,16 @@ def test_draw_circle_in_center() -> None:
     compare(run(100, commands))
 
 
+def test_draw_circle_over_circle_in_center() -> None:
+    commands = [
+        StartLayer.new("%main%", FixedBox.new((5, 5), 15, 10)),
+        Shape.new_circle((5, 5), 2, negative=False),
+        Shape.new_circle((5, 5), 1, negative=True),
+        EndLayer(),
+    ]
+    compare(run(100, commands))
+
+
 def test_paste_rectangle_in_center() -> None:
     commands = [
         StartLayer.new("%main%", FixedBox.new((5, 5), 15, 10)),
@@ -88,6 +98,19 @@ def test_paste_rectangle_in_center() -> None:
         Shape.new_rectangle((5, 5), 3, 2, negative=False),
         Shape.new_rectangle((5, 5), 2.8, 1.8, negative=True),
         PasteLayer.new("rect", (5, 5)),
+        EndLayer(),
+    ]
+    compare(run(100, commands))
+
+
+def test_paste_negative_rectangle_in_center() -> None:
+    commands = [
+        StartLayer.new("%main%", FixedBox.new((5, 5), 15, 10)),
+        StartLayer.new("rect", FixedBox.new((0, 0), 5, 5)),
+        Shape.new_rectangle((0, 0), 2, 1, negative=False),
+        EndLayer(),
+        Shape.new_rectangle((5, 5), 3, 2, negative=False),
+        PasteLayer.new("rect", (5, 5), is_negative=True),
         EndLayer(),
     ]
     compare(run(100, commands))

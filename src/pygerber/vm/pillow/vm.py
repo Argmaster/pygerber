@@ -8,7 +8,7 @@ import math
 import operator
 from typing import Callable, Generator, Optional, Sequence
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
 
 from pygerber.vm.commands import Arc, Line, PasteLayer, Shape
 from pygerber.vm.pillow.errors import DPMMTooSmallError
@@ -252,8 +252,13 @@ class PillowVirtualMachine(VirtualMachine):
         source_width_half = source_layer.box.width / 2
         source_height_half = source_layer.box.height / 2
 
+        if command.is_negative:
+            image = ImageOps.invert(source_layer.image.convert("L")).convert("1")
+        else:
+            image = source_layer.image
+
         target_layer.image.paste(
-            source_layer.image,
+            image,
             (
                 self.to_pixel(
                     self.correct_center_x(command.center.x - source_width_half)

@@ -143,6 +143,14 @@ class Mirroring(Enum):
     Y = "Y"
     XY = "XY"
 
+    @property
+    def kwargs(self) -> dict[str, bool]:
+        """Get mirroring kwargs."""
+        return {
+            "x": self in (Mirroring.X, Mirroring.XY),
+            "y": self in (Mirroring.Y, Mirroring.XY),
+        }
+
 
 class Polarity(Enum):
     """Polarity enum."""

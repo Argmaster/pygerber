@@ -218,6 +218,13 @@ class Transform(_StateModel):
     scaling: Double = Field(default=1.0)
     """Aperture scaling set with LS command. (Spec reference: 4.9.5)"""
 
+    @property
+    def tag(self) -> str:
+        """Get string tag identifying the transformation."""
+        return (
+            f"{self.polarity.value}%{self.mirroring.value}%{self.rotation:.8f}%{self.scaling:.8f}"
+        )
+
 
 class PlotMode(Enum):
     """Plot mode of the Gerber file."""

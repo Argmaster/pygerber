@@ -1,4 +1,4 @@
-"""`point` module contains `Point` class used to represent 2D coordinates."""
+"""`vector` module contains `Vector` class used to represent 2D coordinates."""
 
 from __future__ import annotations
 
@@ -10,6 +10,8 @@ from pygerber.vm.types.model import ModelType
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from pygerber.vm.types.matrix import Matrix3x3
 
 
 class Vector(ModelType):
@@ -150,6 +152,10 @@ class Vector(ModelType):
     def length(self) -> float:
         """Return length of vector."""
         return math.sqrt((self.x * self.x) + (self.y * self.y))
+
+    def transform(self, matrix: Matrix3x3) -> Vector:
+        """Transform vector by matrix."""
+        return matrix @ self
 
 
 Vector.unit.x = Vector.from_tuple((1, 0))

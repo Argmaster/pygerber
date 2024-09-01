@@ -7,8 +7,7 @@ from typing import TYPE_CHECKING
 import pyparsing as pp
 
 from pygerber.vm.commands.shape_segments.shape_segment import ShapeSegment
-from pygerber.vm.types.box import AutoBox
-from pygerber.vm.types.vector import Vector
+from pygerber.vm.types import AutoBox, Matrix3x3, Vector
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -29,3 +28,10 @@ class Line(ShapeSegment):
     def outer_box(self) -> AutoBox:
         """Get outer box of shape segment."""
         return AutoBox.from_vectors(self.start, self.end)
+
+    def transform(self, transform: Matrix3x3) -> Self:
+        """Transform points defining this line."""
+        return self.__class__(
+            start=self.start.transform(transform),
+            end=self.end.transform(transform),
+        )

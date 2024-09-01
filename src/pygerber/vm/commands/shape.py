@@ -12,6 +12,7 @@ from pydantic import Field
 from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.shape_segments import Arc, Line, ShapeSegment
 from pygerber.vm.types.box import AutoBox
+from pygerber.vm.types.matrix import Matrix3x3
 from pygerber.vm.types.vector import Vector
 
 if TYPE_CHECKING:
@@ -39,6 +40,13 @@ class Shape(Command):
         for segment in self.commands[1:]:
             accumulator += segment.outer_box
         return accumulator
+
+    def transform(self, transform: Matrix3x3) -> Self:
+        """Transpose shape by vector."""
+        return self.__class__(
+            commands=[segment.transform(transform) for segment in self.commands],
+            negative=self.negative,
+        )
 
     def visit(self, visitor: CommandVisitor) -> None:
         """Visit polygon command."""
