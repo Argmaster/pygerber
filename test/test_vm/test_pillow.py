@@ -43,7 +43,7 @@ def compare(image: Image.Image) -> None:
 
 def test_draw_rectangle_in_center() -> None:
     commands = [
-        StartLayer.new("main", FixedBox.new((5, 5), 15, 10)),
+        StartLayer.new("%main%", FixedBox.new((5, 5), 15, 10)),
         Shape.new_rectangle((5, 5), 2, 1, negative=False),
         EndLayer(),
     ]
@@ -52,7 +52,7 @@ def test_draw_rectangle_in_center() -> None:
 
 def test_draw_circle_in_center() -> None:
     commands = [
-        StartLayer.new("main", FixedBox.new((5, 5), 15, 10)),
+        StartLayer.new("%main%", FixedBox.new((5, 5), 15, 10)),
         Shape.new_circle((5, 5), 2, negative=False),
         EndLayer(),
     ]
@@ -61,7 +61,7 @@ def test_draw_circle_in_center() -> None:
 
 def test_paste_rectangle_in_center() -> None:
     commands = [
-        StartLayer.new("main", FixedBox.new((5, 5), 15, 10)),
+        StartLayer.new("%main%", FixedBox.new((5, 5), 15, 10)),
         StartLayer.new("rect", FixedBox.new((0, 0), 5, 5)),
         Shape.new_rectangle((0, 0), 2, 1, negative=False),
         EndLayer(),
@@ -80,7 +80,7 @@ class TestCWArc:
 
     def template(self, *arc: Shape) -> Sequence[Command]:
         return [
-            StartLayer.new("main", FixedBox.new((0, 0), 15, 15)),
+            StartLayer.new("%main%", FixedBox.new((0, 0), 15, 15)),
             *self.axes(),
             *arc,
             EndLayer(),
@@ -286,7 +286,7 @@ class TestAutoBox:
         auto_size_image = run(
             dpmm,
             [
-                StartLayer.new("main", AutoBox()),
+                StartLayer.new("%main%", AutoBox()),
                 *commands,
                 EndLayer(),
             ],
@@ -294,7 +294,7 @@ class TestAutoBox:
         fix_size_image = run(
             dpmm,
             [
-                StartLayer.new("main", fixed_box),
+                StartLayer.new("%main%", fixed_box),
                 *commands,
                 EndLayer(),
             ],

@@ -244,7 +244,7 @@ class TestVirtualMachine:
     def test_on_end_layer_correct_handler_reassignment(self) -> None:
         vm = VirtualMachine()
 
-        vm.on_start_layer(StartLayer(id=LayerID(id="main"), box=AutoBox()))
+        vm.on_start_layer(StartLayer(id=LayerID(id="%main%"), box=AutoBox()))
         vm.on_shape(Shape.new_circle((0, 0), 1, negative=False))
 
         vm.on_start_layer(

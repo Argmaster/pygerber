@@ -276,7 +276,7 @@ class PillowVirtualMachine(VirtualMachine):
         """Execute all commands."""
         super().run(rvmc)
 
-        layer = self._layers.get(LayerID(id="main"), None)
+        layer = self._layers.get(LayerID(id="%main%"), None)
 
         if layer is None:
             return PillowResult(None)
