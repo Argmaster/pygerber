@@ -50,6 +50,26 @@ def test_draw_rectangle_in_center() -> None:
     compare(run(100, commands))
 
 
+def test_draw_obround_horizontal_in_center() -> None:
+    commands = [
+        StartLayer.new("%main%", FixedBox.new((0, 0), 5, 5)),
+        Shape.new_obround((0, 1), 2, 1, negative=False),
+        Shape.new_rectangle((0, -1), 2, 1, negative=False),
+        EndLayer(),
+    ]
+    compare(run(100, commands))
+
+
+def test_draw_obround_vertical_in_center() -> None:
+    commands = [
+        StartLayer.new("%main%", FixedBox.new((0, 0), 5, 5)),
+        Shape.new_obround((-1, 0), 1, 2, negative=False),
+        Shape.new_rectangle((1, 0), 1, 2, negative=False),
+        EndLayer(),
+    ]
+    compare(run(100, commands))
+
+
 def test_draw_circle_in_center() -> None:
     commands = [
         StartLayer.new("%main%", FixedBox.new((5, 5), 15, 10)),

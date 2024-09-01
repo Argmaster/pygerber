@@ -53,21 +53,97 @@ class Shape(Command):
         half_width = width / 2
         return cls(
             commands=[
+                # Bottom line
                 Line.from_tuples(
                     (center[0] - half_width, center[1] - half_height),
                     (center[0] + half_width, center[1] - half_height),
                 ),
+                # Right line
                 Line.from_tuples(
                     (center[0] + half_width, center[1] - half_height),
                     (center[0] + half_width, center[1] + half_height),
                 ),
+                # Top line
                 Line.from_tuples(
                     (center[0] + half_width, center[1] + half_height),
                     (center[0] - half_width, center[1] + half_height),
                 ),
+                # Left line
                 Line.from_tuples(
                     (center[0] - half_width, center[1] + half_height),
                     (center[0] - half_width, center[1] - half_height),
+                ),
+            ],
+            negative=negative,
+        )
+
+    @classmethod
+    def new_obround(
+        cls, center: tuple[float, float], width: float, height: float, *, negative: bool
+    ) -> Self:
+        """Create polygon in shape of rectangle."""
+        half_height = height / 2
+        half_width = width / 2
+
+        if width < height:
+            delta = half_height - half_width
+
+            return cls(
+                commands=[
+                    # Bottom arc
+                    Arc.from_tuples(
+                        (center[0] - half_width, center[1] - half_height + delta),
+                        (center[0] + half_width, center[1] - half_height + delta),
+                        (center[0], center[1] - half_height + delta),
+                        clockwise=False,
+                    ),
+                    # Right line
+                    Line.from_tuples(
+                        (center[0] + half_width, center[1] - half_height + delta),
+                        (center[0] + half_width, center[1] + half_height - delta),
+                    ),
+                    # Top arc
+                    Arc.from_tuples(
+                        (center[0] + half_width, center[1] + half_height - delta),
+                        (center[0] - half_width, center[1] + half_height - delta),
+                        (center[0], center[1] + half_height - delta),
+                        clockwise=False,
+                    ),
+                    # Left line
+                    Line.from_tuples(
+                        (center[0] - half_width, center[1] + half_height - delta),
+                        (center[0] - half_width, center[1] - half_height + delta),
+                    ),
+                ],
+                negative=negative,
+            )
+
+        delta = half_width - half_height
+        return cls(
+            commands=[
+                # Bottom line
+                Line.from_tuples(
+                    (center[0] - half_width + delta, center[1] - half_height),
+                    (center[0] + half_width - delta, center[1] - half_height),
+                ),
+                # Right line
+                Arc.from_tuples(
+                    (center[0] + half_width - delta, center[1] - half_height),
+                    (center[0] + half_width - delta, center[1] + half_height),
+                    (center[0] + half_width - delta, center[1]),
+                    clockwise=False,
+                ),
+                # Top line
+                Line.from_tuples(
+                    (center[0] + half_width - delta, center[1] + half_height),
+                    (center[0] - half_width + delta, center[1] + half_height),
+                ),
+                # Left line
+                Arc.from_tuples(
+                    (center[0] - half_width + delta, center[1] + half_height),
+                    (center[0] - half_width + delta, center[1] - half_height),
+                    (center[0] - half_width + delta, center[1]),
+                    clockwise=False,
                 ),
             ],
             negative=negative,
@@ -92,6 +168,35 @@ class Shape(Command):
                     (center[0] - radius, center[1]),
                     center=center,
                     clockwise=True,
+                ),
+            ],
+            negative=negative,
+        )
+
+    @classmethod
+    def new_line(
+        cls,
+        start: tuple[float, float],
+        end: tuple[float, float],
+        thickness: float,
+        *,
+        negative: bool,
+    ) -> Self:
+        """Create polygon in shape of circle."""
+        start_vector = Vector.from_tuple(start)
+        end_vector = Vector.from_tuple(end)
+        parallel = (end_vector - start_vector).normalized()
+        perpendicular = Vector(x=-parallel.y, y=parallel.x) * (thickness / 2)
+
+        return cls(
+            commands=[
+                Line(
+                    start=start_vector + perpendicular,
+                    end=end_vector + perpendicular,
+                ),
+                Line(
+                    start=end_vector - perpendicular,
+                    end=start_vector - perpendicular,
                 ),
             ],
             negative=negative,
