@@ -58,6 +58,10 @@ class TestFcPolyTest(PillowRenderE2E):
         result = self._render(FcPoly_Test.bottom, dpmm=5000)
         result.get_image().save(OUTPUT_DUMP_DIRECTORY / f"{this_func_name()}.png")
 
+    def test_top(self) -> None:
+        result = self._render(FcPoly_Test.top, dpmm=5000)
+        result.get_image().save(OUTPUT_DUMP_DIRECTORY / f"{this_func_name()}.png")
+
 
 class TestFlashes(PillowRenderE2E):
     DPMM: ClassVar[int] = 50
