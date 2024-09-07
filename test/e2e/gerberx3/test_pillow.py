@@ -13,6 +13,7 @@ from test.assets.asset import GerberX3Asset
 from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
 from test.assets.gerberx3.FcPoly_Test import FcPoly_Test
 from test.assets.gerberx3.flashes import Flashes
+from test.assets.gerberx3.flashes_with_transform import FlashesWithTransform
 
 THIS_FILE = Path(__file__)
 THIS_DIRECTORY = THIS_FILE.parent
@@ -27,17 +28,12 @@ class PillowRenderE2E:
         rvmc = Compiler().compile(ast)
         return PillowVirtualMachine(dpmm=dpmm).run(rvmc)
 
+    def _save(self, result: PillowResult) -> None:
+        result.get_image().save(OUTPUT_DUMP_DIRECTORY / f"{this_func_name(up=2)}.png")
 
-def this_func_name() -> str:
-    frame = inspect.currentframe()
-    if frame is None:
-        return ""
 
-    back_frame = frame.f_back
-    if back_frame is None:
-        return ""
-
-    return back_frame.f_code.co_name
+def this_func_name(up: int = 1) -> str:
+    return inspect.stack()[up].function
 
 
 class TestOLinuXinoRevG(PillowRenderE2E):
@@ -148,3 +144,57 @@ class TestFlashes(PillowRenderE2E):
             dpmm=self.DPMM,
         )
         result.get_image().save(OUTPUT_DUMP_DIRECTORY / f"{this_func_name()}.png")
+
+
+class TestFlashesWithTransform(PillowRenderE2E):
+    def test_rectangle_rotation_30(self) -> None:
+        result = self._render(FlashesWithTransform.rectangle_rotation_30, dpmm=30)
+        self._save(result)
+
+    def test_rectangle_rotation_45(self) -> None:
+        result = self._render(FlashesWithTransform.rectangle_rotation_45, dpmm=30)
+        self._save(result)
+
+    def test_rectangle_rotation_60(self) -> None:
+        result = self._render(FlashesWithTransform.rectangle_rotation_60, dpmm=30)
+        self._save(result)
+
+    def test_rectangle_rotation_90(self) -> None:
+        result = self._render(FlashesWithTransform.rectangle_rotation_90, dpmm=30)
+        self._save(result)
+
+    def test_rectangle_rotation_45_mirror_x(self) -> None:
+        result = self._render(
+            FlashesWithTransform.rectangle_rotation_45_mirror_x, dpmm=30
+        )
+        self._save(result)
+
+    def test_rectangle_rotation_45_mirror_y(self) -> None:
+        result = self._render(
+            FlashesWithTransform.rectangle_rotation_45_mirror_y, dpmm=30
+        )
+        self._save(result)
+
+    def test_rectangle_rotation_45_mirror_xy(self) -> None:
+        result = self._render(
+            FlashesWithTransform.rectangle_rotation_45_mirror_xy, dpmm=30
+        )
+        self._save(result)
+
+    def test_rectangle_rotation_30_mirror_x(self) -> None:
+        result = self._render(
+            FlashesWithTransform.rectangle_rotation_30_mirror_x, dpmm=30
+        )
+        self._save(result)
+
+    def test_rectangle_rotation_30_mirror_y(self) -> None:
+        result = self._render(
+            FlashesWithTransform.rectangle_rotation_30_mirror_y, dpmm=30
+        )
+        self._save(result)
+
+    def test_rectangle_rotation_30_mirror_xy(self) -> None:
+        result = self._render(
+            FlashesWithTransform.rectangle_rotation_30_mirror_xy, dpmm=30
+        )
+        self._save(result)
