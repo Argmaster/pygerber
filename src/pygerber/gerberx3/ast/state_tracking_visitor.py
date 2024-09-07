@@ -221,9 +221,7 @@ class Transform(_StateModel):
     @property
     def tag(self) -> str:
         """Get string tag identifying the transformation."""
-        return (
-            f"{self.polarity.value}%{self.mirroring.value}%{self.rotation:.8f}%{self.scaling:.8f}"
-        )
+        return f"{self.mirroring.value}%{self.rotation:.8f}%{self.scaling:.8f}"
 
 
 class PlotMode(Enum):

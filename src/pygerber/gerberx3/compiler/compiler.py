@@ -5,7 +5,7 @@ transforming Gerber (AST) to PyGerber rendering VM commands (RVMC).
 from __future__ import annotations
 
 from math import cos, radians, sin
-from typing import Optional
+from typing import ClassVar, Optional
 
 from pygerber.gerberx3.ast.nodes import ADC, ADO, ADP, ADR, D01, D03, File
 from pygerber.gerberx3.ast.state_tracking_visitor import (
@@ -16,7 +16,7 @@ from pygerber.vm.commands import Command, PasteLayer, Shape
 from pygerber.vm.commands.layer import EndLayer, StartLayer
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types import Matrix3x3, Vector
-from pygerber.vm.types.box import AutoBox, FixedBox
+from pygerber.vm.types.box import Box
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.vm import DrawCmdT
 
@@ -27,18 +27,18 @@ class CommandBuffer:
     def __init__(
         self,
         id_: str,
-        box: Optional[AutoBox | FixedBox] = None,
-        commands: Optional[list[DrawCmdT]] = None,
-        depends_on: Optional[set[str]] = None,
-        resolved_dependencies: Optional[list[CommandBuffer]] = None,
+        box: Optional[Box],
+        origin: Vector,
+        commands: list[DrawCmdT],
+        depends_on: set[str],
+        resolved_dependencies: list[CommandBuffer],
     ) -> None:
         self.id_str = id_
-        self.commands: list[DrawCmdT] = [] if commands is None else commands
-        self.box = AutoBox() if box is None else box
-        self.depends_on: set[str] = set() if depends_on is None else depends_on
-        self.resolved_dependencies: list[CommandBuffer] = (
-            [] if resolved_dependencies is None else resolved_dependencies
-        )
+        self.commands = commands
+        self.box = box
+        self.origin = origin
+        self.depends_on = depends_on
+        self.resolved_dependencies = resolved_dependencies
 
     @property
     def layer_id(self) -> LayerID:
@@ -60,12 +60,13 @@ class Compiler(StateTrackingVisitor):
     commands (RVMC).
     """
 
+    MAIN_BUFFER_ID: ClassVar[str] = "%main%"
+
     def __init__(self, *, ignore_program_stop: bool = False) -> None:
         super().__init__(ignore_program_stop=ignore_program_stop)
         self._buffers: dict[str, CommandBuffer] = {}
         self._buffer_stack: list[str] = []
-        self._create_buffer("%main%")
-        self._push_buffer("%main%")
+        self._create_main_buffer()
 
         self._aperture_buffers: dict[str, CommandBuffer] = {}
 
@@ -78,9 +79,19 @@ class Compiler(StateTrackingVisitor):
     def _append_paste_to_current_buffer(self, command: PasteLayer) -> None:
         self._get_current_buffer().append_paste(command)
 
-    def _create_buffer(self, id_: str) -> CommandBuffer:
-        buffer = CommandBuffer(id_)
-        self._buffers[id_] = buffer
+    def _create_main_buffer(self) -> CommandBuffer:
+        buffer = CommandBuffer(
+            self.MAIN_BUFFER_ID,
+            box=None,
+            origin=Vector(x=0, y=0),
+            commands=[],
+            depends_on=set(),
+            resolved_dependencies=[],
+        )
+        assert self.MAIN_BUFFER_ID not in self._buffers
+        self._buffers[self.MAIN_BUFFER_ID] = buffer
+        self._push_buffer(self.MAIN_BUFFER_ID)
+
         return buffer
 
     def _push_buffer(self, id_: str) -> None:
@@ -112,13 +123,17 @@ class Compiler(StateTrackingVisitor):
     def on_adc(self, node: ADC) -> None:
         """Handle `AD` circle node."""
         self.on_ad(node)
-        buffer = CommandBuffer(
+        aperture_buffer = CommandBuffer(
             node.aperture_id,
-            box=AutoBox(center_override=Vector(x=0.0, y=0.0)),
+            box=None,
+            origin=Vector(x=0, y=0),
+            commands=[],
+            depends_on=set(),
+            resolved_dependencies=[],
         )
-        self._aperture_buffers[node.aperture_id] = buffer
+        self._aperture_buffers[node.aperture_id] = aperture_buffer
 
-        buffer.append_shape(
+        aperture_buffer.append_shape(
             Shape.new_circle(
                 (0.0, 0.0),
                 node.diameter,
@@ -126,7 +141,7 @@ class Compiler(StateTrackingVisitor):
             )
         )
         if node.hole_diameter is not None and node.hole_diameter > 0:
-            buffer.append_shape(
+            aperture_buffer.append_shape(
                 Shape.new_circle(
                     (0.0, 0.0),
                     node.hole_diameter,
@@ -201,7 +216,6 @@ class Compiler(StateTrackingVisitor):
         """Create new buffer with applied transformation."""
         layer_id = f"{buffer.id_str}%{self.state.transform.tag}"
         transform = self.state.transform
-        is_negative = self.is_negative
 
         mirroring_matrix = Matrix3x3.new_reflect(**transform.mirroring.kwargs)
         rotation_matrix = Matrix3x3.new_rotate(transform.rotation)
@@ -212,31 +226,28 @@ class Compiler(StateTrackingVisitor):
         commands: list[DrawCmdT] = []
         depends_on: set[str] = set()
 
-        for c in buffer.commands:
-            if isinstance(c, Shape):
-                commands.append(
-                    c.transform(transform_matrix).model_copy(
-                        update={"negative": is_negative}
-                    )
-                )
+        for cmd in buffer.commands:
+            if isinstance(cmd, Shape):
+                commands.append(cmd.transform(transform_matrix))
 
-            elif isinstance(c, PasteLayer):
-                aperture_buffer = self._get_aperture_buffer(c.source_layer_id.id)
+            elif isinstance(cmd, PasteLayer):
+                aperture_buffer = self._get_aperture_buffer(cmd.source_layer_id.id)
                 depends_on.add(aperture_buffer.id_str)
                 commands.append(
                     PasteLayer(
                         source_layer_id=LayerID(id=aperture_buffer.id_str),
-                        center=c.center.transform(transform_matrix),
-                        is_negative=is_negative,
+                        center=cmd.center.transform(transform_matrix),
+                        is_negative=cmd.is_negative,
                     )
                 )
 
             else:
-                raise NotImplementedError(type(c))
+                raise NotImplementedError(type(cmd))
 
         return CommandBuffer(
             layer_id,
-            AutoBox(center_override=buffer.box.center),
+            None,
+            origin=buffer.origin,
             commands=commands,
             depends_on=depends_on,
             resolved_dependencies=[],
@@ -280,7 +291,7 @@ class Compiler(StateTrackingVisitor):
 
             buffer_submit_order.append(buffer)
 
-        _(self._buffers["%main%"])
+        _(self._buffers[self.MAIN_BUFFER_ID])
 
         return buffer_submit_order
 
@@ -293,7 +304,7 @@ class Compiler(StateTrackingVisitor):
             commands.extend(buffer.commands)
             commands.append(EndLayer())
 
-        return RVMC(commands)
+        return RVMC(commands=commands)
 
     def compile(self, ast: File) -> RVMC:
         """Compile Gerber AST to RVMC."""

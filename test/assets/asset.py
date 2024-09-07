@@ -19,9 +19,9 @@ class TextAsset(Asset):
         return self.path.read_text(encoding=encoding, **kwargs)
 
 
-class GerberX3Assert(TextAsset):
+class GerberX3Asset(TextAsset):
     pass
 
 
-class ExcellonAssert(Asset):
+class ExcellonAsset(Asset):
     pass

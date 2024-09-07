@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING
 import pyparsing as pp
 
 from pygerber.vm.commands.shape_segments.shape_segment import ShapeSegment
-from pygerber.vm.types import AutoBox, Matrix3x3, Vector
+from pygerber.vm.types import Matrix3x3, Vector
+from pygerber.vm.types.box import Box
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -63,7 +64,7 @@ class Arc(ShapeSegment):
         )
 
     @pp.cached_property
-    def outer_box(self) -> AutoBox:
+    def outer_box(self) -> Box:
         """Get outer box of shape segment."""
         radius = self.get_radius()
         relative_start = self.get_relative_start_point()
@@ -98,7 +99,7 @@ class Arc(ShapeSegment):
         if angle_y_plus < total_angle:
             vectors.append(Vector(x=0, y=radius))
 
-        return AutoBox.from_vectors(*(v + self.center for v in vectors))
+        return Box.from_vectors(*(v + self.center for v in vectors))
 
     def transform(self, transform: Matrix3x3) -> Self:
         """Transform points defining this line."""

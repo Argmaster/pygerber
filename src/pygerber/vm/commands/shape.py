@@ -11,7 +11,7 @@ from pydantic import Field
 
 from pygerber.vm.commands.command import Command
 from pygerber.vm.commands.shape_segments import Arc, Line, ShapeSegment
-from pygerber.vm.types.box import AutoBox
+from pygerber.vm.types.box import Box
 from pygerber.vm.types.matrix import Matrix3x3
 from pygerber.vm.types.vector import Vector
 
@@ -34,7 +34,7 @@ class Shape(Command):
     negative: bool = False
 
     @pp.cached_property
-    def outer_box(self) -> AutoBox:
+    def outer_box(self) -> Box:
         """Get outer box of shape segment."""
         accumulator = self.commands[0].outer_box
         for segment in self.commands[1:]:

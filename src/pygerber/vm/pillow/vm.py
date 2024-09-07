@@ -13,13 +13,14 @@ from PIL import Image, ImageDraw, ImageOps
 from pygerber.vm.commands import Arc, Line, PasteLayer, Shape
 from pygerber.vm.pillow.errors import DPMMTooSmallError
 from pygerber.vm.rvmc import RVMC
-from pygerber.vm.types.box import AutoBox, FixedBox
+from pygerber.vm.types.box import Box
 from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.style import Style
 from pygerber.vm.types.vector import Vector
 from pygerber.vm.vm import (
     DeferredLayer,
+    DrawCmdT,
     EagerLayer,
     Layer,
     Result,
@@ -59,8 +60,9 @@ class PillowEagerLayer(EagerLayer):
     It is specifically used by `PillowVirtualMachine` class.
     """
 
-    def __init__(self, dpmm: int, layer_id: LayerID, box: FixedBox) -> None:
-        super().__init__(layer_id, box)
+    def __init__(self, dpmm: int, layer_id: LayerID, box: Box, origin: Vector) -> None:
+        super().__init__(layer_id, box, origin)
+        self.origin = origin
         self.dpmm = dpmm
         self.pixel_size = (
             self.to_pixel(self.box.width),
@@ -81,8 +83,10 @@ class PillowDeferredLayer(DeferredLayer):
     It is specifically used by `PillowVirtualMachine` class.
     """
 
-    def __init__(self, dpmm: int, layer_id: LayerID, box: AutoBox) -> None:
-        super().__init__(layer_id, box)
+    def __init__(
+        self, dpmm: int, layer_id: LayerID, origin: Vector, commands: list[DrawCmdT]
+    ) -> None:
+        super().__init__(layer_id, origin, commands)
         self.dpmm = dpmm
 
 
@@ -103,13 +107,15 @@ class PillowVirtualMachine(VirtualMachine):
         """Get current layer."""
         return super().layer  # type: ignore[return-value]
 
-    def create_eager_layer(self, layer_id: LayerID, box: FixedBox) -> Layer:
+    def create_eager_layer(self, layer_id: LayerID, box: Box, origin: Vector) -> Layer:
         """Create new eager layer instances (factory method)."""
-        return PillowEagerLayer(self.dpmm, layer_id, box)
+        assert box.width > 0
+        assert box.height > 0
+        return PillowEagerLayer(self.dpmm, layer_id, box, origin)
 
-    def create_deferred_layer(self, layer_id: LayerID, box: AutoBox) -> Layer:
+    def create_deferred_layer(self, layer_id: LayerID, origin: Vector) -> Layer:
         """Create new deferred layer instances (factory method)."""
-        return PillowDeferredLayer(self.dpmm, layer_id, box)
+        return PillowDeferredLayer(self.dpmm, layer_id, origin, commands=[])
 
     def on_shape_eager(self, command: Shape) -> None:
         """Visit shape command."""
@@ -249,9 +255,6 @@ class PillowVirtualMachine(VirtualMachine):
         assert isinstance(source_layer, PillowEagerLayer)
         target_layer = self.layer
 
-        source_width_half = source_layer.box.width / 2
-        source_height_half = source_layer.box.height / 2
-
         if command.is_negative:
             image = ImageOps.invert(source_layer.image.convert("L")).convert("1")
         else:
@@ -261,10 +264,20 @@ class PillowVirtualMachine(VirtualMachine):
             image,
             (
                 self.to_pixel(
-                    self.correct_center_x(command.center.x - source_width_half)
+                    self.correct_center_x(
+                        command.center.x
+                        - (source_layer.box.width / 2)
+                        + source_layer.box.center.x
+                        - source_layer.origin.x
+                    )
                 ),
                 self.to_pixel(
-                    self.correct_center_y(command.center.y - source_height_half)
+                    self.correct_center_y(
+                        command.center.y
+                        - (source_layer.box.height / 2)
+                        + source_layer.box.center.y
+                        - source_layer.origin.y
+                    )
                 ),
             ),
             mask=source_layer.image,
@@ -292,7 +305,7 @@ class PillowVirtualMachine(VirtualMachine):
         """Execute all commands."""
         super().run(rvmc)
 
-        layer = self._layers.get(LayerID(id="%main%"), None)
+        layer = self._layers.get(self.MAIN_LAYER_ID, None)
 
         if layer is None:
             return PillowResult(None)

@@ -7,19 +7,19 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pyparsing as pp
-from pydantic import BaseModel
 
-from pygerber.vm.types import AutoBox, Matrix3x3
+from pygerber.gerberx3.ast.nodes.model import ModelType
+from pygerber.vm.types import Box, Matrix3x3
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class ShapeSegment(BaseModel):
+class ShapeSegment(ModelType):
     """Base class for shape segment types."""
 
     @pp.cached_property
-    def outer_box(self) -> AutoBox:
+    def outer_box(self) -> Box:
         """Get outer box of shape segment."""
         raise NotImplementedError
 

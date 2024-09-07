@@ -5,7 +5,7 @@ import math as m
 import pytest
 
 from pygerber.vm.commands import Arc
-from pygerber.vm.types.box import AutoBox
+from pygerber.vm.types.box import Box
 from pygerber.vm.types.vector import Vector
 
 
@@ -17,7 +17,7 @@ class ArcParams:
         rel_end: tuple[float, float],
         center: tuple[float, float],
         clockwise: bool,  # noqa: FBT001
-        box: AutoBox,
+        box: Box,
     ) -> None:
         self.start = (rel_start[0] + center[0], rel_start[1] + center[1])
         self.end = (rel_end[0] + center[0], rel_end[1] + center[1])
@@ -108,7 +108,7 @@ class TestArc:
                 (0.0, -4.0),
                 (0.0, 0.0),
                 clockwise=True,
-                box=AutoBox(min_x=0.0, min_y=-4.0, max_x=4.0, max_y=0.0),
+                box=Box(min_x=0.0, min_y=-4.0, max_x=4.0, max_y=0.0),
             ),
             ArcParams(
                 "CCW 0.0 90.0 (0, 0)",
@@ -116,7 +116,7 @@ class TestArc:
                 (0.0, -4.0),
                 (0.0, 0.0),
                 clockwise=False,
-                box=AutoBox(min_x=-4.0, min_y=-4.0, max_x=4.0, max_y=4.0),
+                box=Box(min_x=-4.0, min_y=-4.0, max_x=4.0, max_y=4.0),
             ),
             ArcParams(
                 "CW 270.0 0.0 (0, 0)",
@@ -124,7 +124,7 @@ class TestArc:
                 (4.0, 0.0),
                 (0.0, 0.0),
                 clockwise=True,
-                box=AutoBox(min_x=0.0, min_y=0.0, max_x=4.0, max_y=4.0),
+                box=Box(min_x=0.0, min_y=0.0, max_x=4.0, max_y=4.0),
             ),
             ArcParams(
                 "CCW 270.0 0.0 (0, 0)",
@@ -132,7 +132,7 @@ class TestArc:
                 (4.0, 0.0),
                 (0.0, 0.0),
                 clockwise=False,
-                box=AutoBox(min_x=-4.0, min_y=-4.0, max_x=4.0, max_y=4.0),
+                box=Box(min_x=-4.0, min_y=-4.0, max_x=4.0, max_y=4.0),
             ),
             ArcParams(
                 "CW 270.0 0.0 (2, 3)",
@@ -140,7 +140,7 @@ class TestArc:
                 (4.0, 0.0),
                 (2.0, 3.0),
                 clockwise=True,
-                box=AutoBox(min_x=2.0, min_y=3.0, max_x=6.0, max_y=7.0),
+                box=Box(min_x=2.0, min_y=3.0, max_x=6.0, max_y=7.0),
             ),
             ArcParams(
                 "CCW 270.0 0.0 (2, 3)",
@@ -148,7 +148,7 @@ class TestArc:
                 (4.0, 0.0),
                 (2.0, 3.0),
                 clockwise=False,
-                box=AutoBox(min_x=-2.0, min_y=-1.0, max_x=6.0, max_y=7.0),
+                box=Box(min_x=-2.0, min_y=-1.0, max_x=6.0, max_y=7.0),
             ),
             ArcParams(
                 "CW 45.0 315.0 (0, 0)",
@@ -156,7 +156,7 @@ class TestArc:
                 (sin45, sin45),
                 (0.0, 0.0),
                 clockwise=True,
-                box=AutoBox(min_x=-1.0, min_y=-1.0, max_x=sin45, max_y=1.0),
+                box=Box(min_x=-1.0, min_y=-1.0, max_x=sin45, max_y=1.0),
             ),
             ArcParams(
                 "CCW 45.0 315.0 (0, 0)",
@@ -164,7 +164,7 @@ class TestArc:
                 (sin45, sin45),
                 (0.0, 0.0),
                 clockwise=False,
-                box=AutoBox(min_x=0.0, min_y=-sin45, max_x=1.0, max_y=sin45),
+                box=Box(min_x=0.0, min_y=-sin45, max_x=1.0, max_y=sin45),
             ),
         ],
         ids=lambda x: str(x),

@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Sequence, Union
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from pygerber.vm.command_visitor import CommandVisitor
 from pygerber.vm.commands import EndLayer, PasteLayer, Shape, StartLayer
 from pygerber.vm.rvmc import RVMC
-from pygerber.vm.types.box import AutoBox, Box, FixedBox
+from pygerber.vm.types.box import Box
 from pygerber.vm.types.errors import (
     EmptyAutoSizedLayerNotAllowedError,
     LayerAlreadyExistsError,
@@ -15,6 +15,7 @@ from pygerber.vm.types.errors import (
     NoLayerSetError,
 )
 from pygerber.vm.types.layer_id import LayerID
+from pygerber.vm.types.vector import Vector
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -36,9 +37,15 @@ class Layer:
     latter.
     """
 
-    def __init__(self, layer_id: LayerID, box: Box) -> None:
+    origin: Vector
+    """Origin of the layer.
+
+    Origin point represents local coordinates of the layer center.
+    """
+
+    def __init__(self, layer_id: LayerID, origin: Vector) -> None:
         self.layer_id = layer_id
-        self.box = box
+        self.origin = origin
 
 
 class EagerLayer(Layer):
@@ -47,10 +54,9 @@ class EagerLayer(Layer):
     Commands executed on this layer are executed immediately.
     """
 
-    box: FixedBox
-
-    def __init__(self, layer_id: LayerID, box: FixedBox) -> None:
-        super().__init__(layer_id, box)
+    def __init__(self, layer_id: LayerID, box: Box, origin: Vector) -> None:
+        super().__init__(layer_id, origin)
+        self.box = box
 
 
 class DeferredLayer(Layer):
@@ -63,15 +69,17 @@ class DeferredLayer(Layer):
     You cannot paste unfinished DeferredLayer into another unfinished DeferredLayer.
     """
 
-    box: AutoBox
-
-    def __init__(self, layer_id: LayerID, box: AutoBox) -> None:
-        super().__init__(layer_id, box)
-        self.commands: list[DrawCmdT] = []
+    def __init__(
+        self, layer_id: LayerID, origin: Vector, commands: list[DrawCmdT]
+    ) -> None:
+        super().__init__(layer_id, origin)
+        self.commands = commands
 
 
 class VirtualMachine(CommandVisitor):
     """Virtual machine for executing simple drawing commands."""
+
+    MAIN_LAYER_ID: ClassVar[LayerID] = LayerID(id="%main%")
 
     def __init__(self) -> None:
         self.set_eager_handlers()
@@ -100,13 +108,13 @@ class VirtualMachine(CommandVisitor):
         self._on_shape_handler = self.on_shape_deferred
         self._on_paste_layer_handler = self.on_paste_layer_deferred
 
-    def create_eager_layer(self, layer_id: LayerID, box: FixedBox) -> Layer:
+    def create_eager_layer(self, layer_id: LayerID, box: Box, origin: Vector) -> Layer:
         """Create new eager layer instances (factory method)."""
-        return EagerLayer(layer_id, box)
+        return EagerLayer(layer_id, box, origin)
 
-    def create_deferred_layer(self, layer_id: LayerID, box: AutoBox) -> Layer:
+    def create_deferred_layer(self, layer_id: LayerID, origin: Vector) -> Layer:
         """Create new deferred layer instances (factory method)."""
-        return DeferredLayer(layer_id, box)
+        return DeferredLayer(layer_id, origin, commands=[])
 
     def on_shape(self, command: Shape) -> None:
         """Visit `Shape` command."""
@@ -145,18 +153,15 @@ class VirtualMachine(CommandVisitor):
         if command.id in self._layers:
             raise LayerAlreadyExistsError(command.id)
 
-        if isinstance(command.box, FixedBox):
-            layer = self.create_eager_layer(command.id, command.box)
-            self.set_layer(command.id, layer)
-            self.set_eager_handlers()
-
-        elif isinstance(command.box, AutoBox):
-            layer = self.create_deferred_layer(command.id, command.box)
+        if command.box is None:
+            layer = self.create_deferred_layer(command.id, command.origin)
             self.set_layer(command.id, layer)
             self.set_deferred_handlers()
 
         else:
-            raise NotImplementedError(command.box)
+            layer = self.create_eager_layer(command.id, command.box, command.origin)
+            self.set_layer(command.id, layer)
+            self.set_eager_handlers()
 
         self.push_layer_to_stack(layer)
 
@@ -208,12 +213,14 @@ class VirtualMachine(CommandVisitor):
             pass
 
         elif isinstance(top_layer, DeferredLayer):
-            box = self._calculate_deferred_layer_box(top_layer.commands)
+            box = self._calculate_deferred_layer_box(top_layer)
             if box is None:
                 # Empty layers are not retained.
                 raise EmptyAutoSizedLayerNotAllowedError(top_layer.layer_id)
 
-            new_layer = self.create_eager_layer(top_layer.layer_id, box.to_fixed_box())
+            new_layer = self.create_eager_layer(
+                top_layer.layer_id, box, top_layer.origin
+            )
             self.set_layer(top_layer.layer_id, new_layer)
 
             self.push_layer_to_stack(new_layer)
@@ -233,9 +240,10 @@ class VirtualMachine(CommandVisitor):
         self.set_handlers_for_layer(self.layer)
 
     def _calculate_deferred_layer_box(
-        self, commands: Sequence[DrawCmdT]
-    ) -> Optional[AutoBox]:
-        box: Optional[AutoBox] = None
+        self, deferred_layer: DeferredLayer
+    ) -> Optional[Box]:
+        commands = deferred_layer.commands
+        box: Optional[Box] = None
 
         if len(commands) == 0:
             return None
@@ -248,7 +256,7 @@ class VirtualMachine(CommandVisitor):
         elif isinstance(cmd, PasteLayer):
             layer = self._layers[cmd.source_layer_id]
             assert isinstance(layer, EagerLayer)
-            box = AutoBox.from_fixed_box(layer.box) + cmd.center
+            box = layer.box + cmd.center - layer.origin
 
         else:
             raise NotImplementedError(type(cmd))
@@ -260,7 +268,7 @@ class VirtualMachine(CommandVisitor):
             elif isinstance(cmd, PasteLayer):
                 layer = self._layers[cmd.source_layer_id]
                 assert isinstance(layer, EagerLayer)
-                box = box + layer.box
+                box = box + (layer.box + cmd.center - layer.origin)
 
             else:
                 raise NotImplementedError(type(cmd))
