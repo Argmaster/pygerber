@@ -8,6 +8,9 @@ from math import cos, radians, sin
 from typing import ClassVar, Optional
 
 from pygerber.gerberx3.ast.nodes import ADC, ADO, ADP, ADR, D01, D03, File
+from pygerber.gerberx3.ast.nodes.aperture.AB import AB
+from pygerber.gerberx3.ast.nodes.aperture.ADmacro import ADmacro
+from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
 from pygerber.gerberx3.ast.state_tracking_visitor import (
     StateTrackingVisitor,
 )
@@ -123,15 +126,7 @@ class Compiler(StateTrackingVisitor):
     def on_adc(self, node: ADC) -> None:
         """Handle `AD` circle node."""
         self.on_ad(node)
-        aperture_buffer = CommandBuffer(
-            node.aperture_id,
-            box=None,
-            origin=Vector(x=0, y=0),
-            commands=[],
-            depends_on=set(),
-            resolved_dependencies=[],
-        )
-        self._aperture_buffers[node.aperture_id] = aperture_buffer
+        aperture_buffer = self._create_aperture_buffer(node.aperture_id)
 
         aperture_buffer.append_shape(
             Shape.new_circle(
@@ -144,21 +139,93 @@ class Compiler(StateTrackingVisitor):
             aperture_buffer.append_shape(
                 Shape.new_circle(
                     (0.0, 0.0),
-                    node.hole_diameter,
+                    min(node.hole_diameter, node.diameter),
                     negative=True,
                 )
             )
 
+    def _create_aperture_buffer(self, aperture_id: ApertureIdStr) -> CommandBuffer:
+        buffer = CommandBuffer(
+            aperture_id,
+            box=None,
+            origin=Vector(x=0, y=0),
+            commands=[],
+            depends_on=set(),
+            resolved_dependencies=[],
+        )
+        self._aperture_buffers[aperture_id] = buffer
+
+        return buffer
+
     def on_adr(self, node: ADR) -> None:
         """Handle `AD` rectangle node."""
         self.on_ad(node)
+        aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+
+        aperture_buffer.append_shape(
+            Shape.new_rectangle(
+                (0.0, 0.0),
+                node.width,
+                node.height,
+                negative=False,
+            )
+        )
+        if node.hole_diameter is not None and node.hole_diameter > 0:
+            aperture_buffer.append_shape(
+                Shape.new_circle(
+                    (0.0, 0.0),
+                    min(node.hole_diameter, node.width, node.height),
+                    negative=True,
+                )
+            )
 
     def on_ado(self, node: ADO) -> None:
         """Handle `AD` obround node."""
         self.on_ad(node)
+        aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+
+        aperture_buffer.append_shape(
+            Shape.new_obround(
+                (0.0, 0.0),
+                node.width,
+                node.height,
+                negative=False,
+            )
+        )
+        if node.hole_diameter is not None and node.hole_diameter > 0:
+            aperture_buffer.append_shape(
+                Shape.new_circle(
+                    (0.0, 0.0),
+                    min(node.hole_diameter, node.width, node.height),
+                    negative=True,
+                )
+            )
 
     def on_adp(self, node: ADP) -> None:
         """Handle `AD` polygon node."""
+        self.on_ad(node)
+        aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+
+        aperture_buffer.append_shape(
+            Shape.new_polygon(
+                (0.0, 0.0),
+                node.outer_diameter,
+                node.vertices,
+                node.rotation or 0.0,
+                is_negative=False,
+            )
+        )
+        if node.hole_diameter is not None and node.hole_diameter > 0:
+            aperture_buffer.append_shape(
+                Shape.new_circle(
+                    (0.0, 0.0),
+                    min(node.hole_diameter, node.outer_diameter),
+                    negative=True,
+                )
+            )
+
+    def on_ad_macro(self, node: ADmacro) -> None:
+        """Handle `AD` macro node."""
         self.on_ad(node)
 
     def on_draw_line(self, node: D01) -> None:  # noqa: ARG002
@@ -191,7 +258,10 @@ class Compiler(StateTrackingVisitor):
 
     def on_flash_circle(self, node: D03, aperture: ADC) -> None:  # noqa: ARG002
         """Handle `D03` node with `ADC` aperture."""
-        buffer = self._get_aperture_buffer(aperture.aperture_id)
+        self._on_flash_aperture(aperture.aperture_id)
+
+    def _on_flash_aperture(self, aperture_id: ApertureIdStr) -> None:
+        buffer = self._get_aperture_buffer(aperture_id)
 
         self._append_paste_to_current_buffer(
             PasteLayer(
@@ -255,25 +325,23 @@ class Compiler(StateTrackingVisitor):
 
     def on_flash_rectangle(self, node: D03, aperture: ADR) -> None:  # noqa: ARG002
         """Handle `D03` node with `ADC` aperture."""
-        self._append_shape_to_current_buffer(
-            Shape.new_rectangle(
-                (self.coordinate_x, self.coordinate_y),
-                aperture.width,
-                aperture.height,
-                negative=self.is_negative,
-            )
-        )
+        self._on_flash_aperture(aperture.aperture_id)
 
     def on_flash_obround(self, node: D03, aperture: ADO) -> None:  # noqa: ARG002
         """Handle `D03` node with `ADO` aperture."""
-        self._append_shape_to_current_buffer(
-            Shape.new_obround(
-                (self.coordinate_x, self.coordinate_y),
-                aperture.width,
-                aperture.height,
-                negative=self.is_negative,
-            )
-        )
+        self._on_flash_aperture(aperture.aperture_id)
+
+    def on_flash_polygon(self, node: D03, aperture: ADP) -> None:  # noqa: ARG002
+        """Handle `D03` node with `ADP` aperture."""
+        self._on_flash_aperture(aperture.aperture_id)
+
+    def on_flash_macro(self, node: D03, aperture: ADmacro) -> None:  # noqa: ARG002
+        """Handle `D03` node with `ADM` aperture."""
+        self._on_flash_aperture(aperture.aperture_id)
+
+    def on_flash_block(self, node: D03, aperture: AB) -> None:  # noqa: ARG002
+        """Handle `D03` node with `AB` aperture."""
+        self._on_flash_aperture(aperture.open.aperture_id)
 
     def _resolve_buffer_submit_order(self) -> list[CommandBuffer]:
         buffer_submit_order: list[CommandBuffer] = []

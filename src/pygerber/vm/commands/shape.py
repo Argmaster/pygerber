@@ -21,6 +21,10 @@ if TYPE_CHECKING:
     from pygerber.vm.vm import CommandVisitor
 
 
+FULL_ANGLE_DEGREES = 360
+VERTEX_COUNT_IN_TRIANGLE = 3
+
+
 class Shape(Command):
     """`Shape` command instructs VM to render a shape described by series of
     lines and arcs into currently active layer.
@@ -180,6 +184,47 @@ class Shape(Command):
             ],
             negative=negative,
         )
+
+    @classmethod
+    def new_polygon(
+        cls,
+        center: tuple[float, float],
+        outer_diameter: float,
+        vertices_count: int,
+        base_rotation: float,
+        *,
+        is_negative: bool,
+    ) -> Self:
+        """Create polygon in shape of circle."""
+        assert vertices_count >= VERTEX_COUNT_IN_TRIANGLE
+        base_rotation = base_rotation % 360
+        assert 0 <= base_rotation < FULL_ANGLE_DEGREES
+
+        center_vector = Vector.from_tuple(center)
+        commands: list[ShapeSegment] = []
+
+        angle_step = 360 / vertices_count
+        transform_matrix = Matrix3x3.new_rotate(angle_step)
+
+        local_vertex_offset = Vector.unit.x * outer_diameter / 2
+        local_vertex_offset = local_vertex_offset.transform(
+            Matrix3x3.new_rotate(base_rotation)
+        )
+        current_angle = base_rotation
+
+        while current_angle < FULL_ANGLE_DEGREES:
+            current_angle += angle_step
+            new_local_vertex_offset = local_vertex_offset.transform(transform_matrix)
+
+            commands.append(
+                Line(
+                    start=center_vector + local_vertex_offset,
+                    end=center_vector + new_local_vertex_offset,
+                )
+            )
+            local_vertex_offset = new_local_vertex_offset
+
+        return cls(commands=commands, negative=is_negative)
 
     @classmethod
     def new_line(

@@ -1,4 +1,57 @@
-"""`pygerber.vm` module contains RVMC builder class."""
+"""The `pygerber.vm.builder` module provides classes for programmatic generation of
+complicated RVMC.
+
+As opposed to manual construction of RVMC by individually constructing Command objects,
+builder interface is considered `stable`, hence it is guaranteed to not be modified
+across patch and minor releases without previous deprecation warning.
+
+To start building RVMC, create an instance of `Builder` class. The `Builder` class
+provides a method `layer` which should be called and used as context manager.
+This method will create main layer of RVMC. You can used methods on the `LayerBuilder`
+instance returned by context manager to add shapes to the layer.
+
+```python
+builder = Builder()
+
+with builder.layer() as layer:
+    layer.circle((0, 0), 1, is_negative=False)
+
+rvmc = builder.commands
+```
+
+To create a nested layer, use the `layer` method on the `LayerBuilder` instance.
+Then you can proceed to add shapes to the nested layer by invoking commands
+on nested layer instance. Nested layer created this way can be pasted into parent
+layer using `paste` method. The `paste` method takes the nested layer instance
+this explicitly disallows creation of cyclic dependencies in layers, as they will
+result in exception during rendering.
+
+```python
+builder = Builder()
+
+with builder.layer() as layer:
+    with layer.layer("D10") as nested_layer:
+        nested_layer.circle((0, 0), 1, is_negative=False)
+
+    layer.paste(nested_layer, at=(0, 0), is_negative=False)
+
+rvmc = builder.commands
+```
+
+Multiple nesting is allowed, layers defined and finalized previously can be used in any
+nested layers in the future. Layers and shapes are auto-magically recorded after
+corresponding method is called.
+
+Adding shapes to finalized layer is not allowed and will result in exception.
+Layers are automatically finalized after exiting the context manager corresponding
+to particular layer. Before context manager is exited, eg. in nested layers, the layers
+can not be used.
+
+Using parent layer in child layer will result in cyclic dependency and will raise
+exception during rendering. There is currently no mechanism preventing you from doing
+that during generation.
+
+"""
 
 from __future__ import annotations
 
@@ -13,7 +66,7 @@ from pygerber.vm.types import Box, LayerID, Vector
 from pygerber.vm.vm import VirtualMachine
 
 
-class _LayerBuilder:
+class LayerBuilder:
     """Layer builder class."""
 
     def __init__(
@@ -51,7 +104,7 @@ class _LayerBuilder:
         id_: str,
         box: Optional[Box] = None,
         origin: Optional[tuple[float, float]] = None,
-    ) -> Generator[_LayerBuilder, None, None]:
+    ) -> Generator[LayerBuilder, None, None]:
         """Create a new layer."""
         if self._active_layer_id is not None:
             msg = "Use _LayerContext to create a nested layer."
@@ -62,7 +115,7 @@ class _LayerBuilder:
             raise RuntimeError(msg)
 
         self._active_layer_id = LayerID(id=id_)
-        layer_context = _LayerBuilder(
+        layer_context = LayerBuilder(
             layer_id=self._active_layer_id, box=box, origin=origin
         )
         yield layer_context
@@ -119,6 +172,49 @@ class _LayerBuilder:
         self._commands.append(
             Shape.new_obround(
                 center=center, width=width, height=height, negative=is_negative
+            )
+        )
+
+    def polygon(
+        self,
+        center: tuple[float, float],
+        outer_diameter: float,
+        vertices_count: int,
+        base_rotation: float,
+        *,
+        is_negative: bool,
+    ) -> None:
+        """Add Shape object containing a regular polygon inscribed in bounding_circle
+        of diameter `outer_diameter`, with vertices count equal to `vertices_count`,
+        and starting rotation (counterclockwise) of `base_rotation` degrees.
+
+        Parameters
+        ----------
+        center : tuple[float, float]
+            Center of the polygon. A tuple of two floats.
+        outer_diameter : float
+            Diameter of the circle circumscribing the regular polygon, i.e.
+            the circle through the polygon vertices. A decimal > 0.
+        vertices_count : int
+            Number of vertices n, 3 ≤ n ≤ 12. An integer.
+        base_rotation : float
+            The rotation angle, in degrees counterclockwise. A decimal.
+            With rotation angle zero there is a vertex on the positive X-axis
+            through the aperture center.
+        is_negative : bool
+            Toggle switch for the negative polarity. If True, the aperture is
+            considered solid, otherwise a hole, possibly subtracting from existing
+            solid shapes.
+
+        """
+        self._check_not_finalized_in_add()
+        self._commands.append(
+            Shape.new_polygon(
+                center=center,
+                outer_diameter=outer_diameter,
+                vertices_count=vertices_count,
+                base_rotation=base_rotation,
+                is_negative=is_negative,
             )
         )
 
@@ -189,7 +285,7 @@ class _LayerBuilder:
         )
 
     def paste(
-        self, layer: _LayerBuilder, at: tuple[float, float], *, is_negative: bool
+        self, layer: LayerBuilder, at: tuple[float, float], *, is_negative: bool
     ) -> None:
         """Paste another layer."""
         self._check_not_finalized_in_add()
@@ -211,9 +307,9 @@ class Builder:
     @contextmanager
     def layer(
         self, box: Optional[Box] = None, origin: Optional[tuple[float, float]] = None
-    ) -> Generator[_LayerBuilder, None, None]:
+    ) -> Generator[LayerBuilder, None, None]:
         """Create a new layer."""
-        layer = _LayerBuilder(
+        layer = LayerBuilder(
             layer_id=VirtualMachine.MAIN_LAYER_ID, box=box, origin=origin
         )
         yield layer

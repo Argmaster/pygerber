@@ -4,7 +4,7 @@ images with use of simple generic stateless commands.
 
 from __future__ import annotations
 
-from pygerber.vm.builder import Builder
+from pygerber.vm.builder import Builder, LayerBuilder
 from pygerber.vm.rvmc import RVMC
 
-__all__ = ["Builder", "RVMC"]
+__all__ = ["Builder", "LayerBuilder", "RVMC"]
