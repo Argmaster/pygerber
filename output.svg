@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="35.000000" height="32.500000" viewBox="0 0 35.000000 32.500000">
+<defs>
+<mask id="d0">
+<rect x="-17.500000" y="-16.250000" width="70.000000" height="65.000000" fill="white" />
+</mask>
+<mask id="d1">
+<rect x="-7.50" y="-5.00" width="15.00" height="10.00" fill="white" />
+<circle cx="0" cy="0" r="2.50" fill="black" />
+</mask>
+<g mask="url(#d1)" id="d2">
+<rect x="-7.50" y="-5.00" width="15.00" height="10.00" fill="#133d91ff" transform="rotate(0.0)" />
+</g>
+<mask id="d3">
+<rect x="-7.50" y="-7.50" width="15.00" height="15.00" fill="white" />
+<circle cx="0" cy="0" r="5.0" fill="black" />
+</mask>
+<g mask="url(#d3)" id="d4">
+<circle cx="0" cy="0" r="7.5" fill="#133d91ff" />
+</g>
+<mask id="d5">
+<rect x="-7.50" y="-5.00" width="15.00" height="10.00" fill="white" />
+<circle cx="0" cy="0" r="3.00" fill="black" />
+</mask>
+<g mask="url(#d5)" id="d6">
+<rect x="-7.50" y="-5.00" width="15.00" height="10.00" fill="#133d91ff" rx="5.0" ry="5.0" transform="rotate(0.0)" />
+</g>
+<g id="d7">
+<path d="M7.471460235688091588990289437788305804133415222167968750000,0.653668070607436244023880078657384729012846946716308593750 L-4.3018232726328461956732951421145116910338401794433593750,6.1436403321674376565297848173941019922494888305664062500 L-3.1696369630552437279824573579389834776520729064941406250,-6.7973084027748761903886531854368513450026512145996093750 Z" fill="#133d91ff" />
+</g>
+</defs>
+<g mask="url(#d0)">
+<g></g>
+<use xlink:href="#d2" x="7.500000" y="27.500000" />
+<use xlink:href="#d4" x="7.500000" y="7.500000" />
+<use xlink:href="#d6" x="27.500000" y="27.500000" />
+<use xlink:href="#d7" x="27.500000" y="7.500000" />
+</g>
+</svg>
