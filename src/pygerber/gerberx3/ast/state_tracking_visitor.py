@@ -284,10 +284,6 @@ class ApertureStorage(_StateModel):
     """Macro definition storage."""
 
 
-class MacroContext(_StateModel):
-    """Macro evaluation context."""
-
-
 class State(_StateModel):
     """Internal state of the compiler."""
 
@@ -332,9 +328,6 @@ class State(_StateModel):
 
     apertures: ApertureStorage = Field(default_factory=ApertureStorage)
     """Container for different types of apertures."""
-
-    macro_context: MacroContext = Field(default_factory=MacroContext)
-    """Context used for macro evaluation."""
 
     attributes: Attributes = Field(default_factory=Attributes)
     """Container for holding currently active attributes."""

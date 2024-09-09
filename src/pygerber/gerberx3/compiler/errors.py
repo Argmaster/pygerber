@@ -24,3 +24,11 @@ class CyclicBufferDependencyError(CompilerError):
         )
         self.parent_buffer = parent_buffer
         self.child_buffer = child_buffer
+
+
+class MacroNotDefinedError(CompilerError):
+    """Raised when macro is not defined in the macro registry."""
+
+    def __init__(self, macro_name: str) -> None:
+        super().__init__(f"Macro {macro_name} was not defined before instantiation.")
+        self.macro_name = macro_name

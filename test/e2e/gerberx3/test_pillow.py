@@ -6,10 +6,16 @@ from typing import ClassVar
 
 import pytest
 
+from pygerber.gerberx3.ast.nodes import File
 from pygerber.gerberx3.compiler import Compiler
 from pygerber.gerberx3.parser.pyparsing.parser import Parser
 from pygerber.vm.pillow.vm import PillowResult, PillowVirtualMachine
 from test.assets.asset import GerberX3Asset
+from test.assets.generated.macro import (
+    get_custom_circle_local_2_0,
+    get_custom_circle_local_2_0_ring_rot_30,
+    get_custom_circle_local_2_0_rot_30,
+)
 from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
 from test.assets.gerberx3.FcPoly_Test import FcPoly_Test
 from test.assets.gerberx3.flashes import Flashes
@@ -25,6 +31,9 @@ OUTPUT_DUMP_DIRECTORY.mkdir(exist_ok=True)
 class PillowRenderE2E:
     def _render(self, source: GerberX3Asset, dpmm: int = 10) -> PillowResult:
         ast = Parser().parse(source.load())
+        return self._render_ast(ast, dpmm=dpmm)
+
+    def _render_ast(self, ast: File, dpmm: int = 10) -> PillowResult:
         rvmc = Compiler().compile(ast)
         return PillowVirtualMachine(dpmm=dpmm).run(rvmc)
 
@@ -201,4 +210,18 @@ class TestFlashesWithTransform(PillowRenderE2E):
         result = self._render(
             FlashesWithTransform.rectangle_rotation_30_mirror_xy, dpmm=30
         )
+        self._save(result)
+
+
+class TestMacro(PillowRenderE2E):
+    def test_custom_circle_local_2_0(self) -> None:
+        result = self._render_ast(get_custom_circle_local_2_0(), 100)
+        self._save(result)
+
+    def test_custom_circle_local_2_0_rot_30(self) -> None:
+        result = self._render_ast(get_custom_circle_local_2_0_rot_30(), 100)
+        self._save(result)
+
+    def test_custom_circle_local_2_0_ring_rot_30(self) -> None:
+        result = self._render_ast(get_custom_circle_local_2_0_ring_rot_30(), 100)
         self._save(result)

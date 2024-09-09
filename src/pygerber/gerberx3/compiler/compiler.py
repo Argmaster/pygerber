@@ -7,20 +7,42 @@ from __future__ import annotations
 from math import cos, radians, sin
 from typing import ClassVar, Optional
 
-from pygerber.gerberx3.ast.nodes import ADC, ADO, ADP, ADR, D01, D03, File
-from pygerber.gerberx3.ast.nodes.aperture.AB import AB
-from pygerber.gerberx3.ast.nodes.aperture.ADmacro import ADmacro
-from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
+from pygerber.gerberx3.ast.ast_visitor import AstVisitor
+from pygerber.gerberx3.ast.expression_eval_visitor import ExpressionEvalVisitor
+from pygerber.gerberx3.ast.nodes import (
+    AB,
+    ADC,
+    ADO,
+    ADP,
+    ADR,
+    D01,
+    D03,
+    ADmacro,
+    Code0,
+    Code1,
+    Code2,
+    Code4,
+    Code5,
+    Code6,
+    Code7,
+    Code20,
+    Code21,
+    Code22,
+    Expression,
+    File,
+)
+from pygerber.gerberx3.ast.nodes.math.assignment import Assignment
+from pygerber.gerberx3.ast.nodes.types import ApertureIdStr, Double
 from pygerber.gerberx3.ast.state_tracking_visitor import (
     StateTrackingVisitor,
 )
-from pygerber.gerberx3.compiler.errors import CyclicBufferDependencyError
-from pygerber.vm.commands import Command, PasteLayer, Shape
-from pygerber.vm.commands.layer import EndLayer, StartLayer
+from pygerber.gerberx3.compiler.errors import (
+    CyclicBufferDependencyError,
+    MacroNotDefinedError,
+)
+from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLayer
 from pygerber.vm.rvmc import RVMC
-from pygerber.vm.types import Matrix3x3, Vector
-from pygerber.vm.types.box import Box
-from pygerber.vm.types.layer_id import LayerID
+from pygerber.vm.types import Box, LayerID, Matrix3x3, Vector
 from pygerber.vm.vm import DrawCmdT
 
 
@@ -227,6 +249,18 @@ class Compiler(StateTrackingVisitor):
     def on_ad_macro(self, node: ADmacro) -> None:
         """Handle `AD` macro node."""
         self.on_ad(node)
+        aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+
+        if node.params is None:
+            scope = {}
+        else:
+            scope = {f"${i + 1}": param for i, param in enumerate(node.params)}
+
+        macro = self.state.apertures.macros.get(node.name)
+        if macro is None:
+            raise MacroNotDefinedError(node.name)
+
+        macro.visit(MacroEvalVisitor(aperture_buffer, scope))
 
     def on_draw_line(self, node: D01) -> None:  # noqa: ARG002
         """Handle `D01` node in linear interpolation mode."""
@@ -379,3 +413,120 @@ class Compiler(StateTrackingVisitor):
         ast.visit(self)
 
         return self._convert_buffers_to_rvmc()
+
+
+class MacroEvalVisitor(AstVisitor):
+    """Visitor for evaluating macro primitives."""
+
+    def __init__(
+        self, aperture_buffer: CommandBuffer, scope: dict[str, Double]
+    ) -> None:
+        self._aperture_buffer = aperture_buffer
+        self._scope = scope
+        self._expression_eval = ExpressionEvalVisitor(self._scope)
+
+    def _eval(self, node: Expression) -> float:
+        return self._expression_eval.evaluate(node)
+
+    def on_code_0(self, node: Code0) -> None:
+        """Handle `Code0` node."""
+
+    def on_code_1(self, node: Code1) -> None:
+        """Handle `Code1` node."""
+        exposure = self._eval(node.exposure)
+        diameter = self._eval(node.diameter)
+        center_x = self._eval(node.center_x)
+        center_y = self._eval(node.center_y)
+        rotation = self._eval(node.rotation) if node.rotation is not None else None
+
+        shape = Shape.new_circle(
+            (center_x, center_y),
+            diameter,
+            negative=(exposure == 0),
+        )
+        if rotation is not None:
+            shape = shape.transform(Matrix3x3.new_rotate(rotation))
+
+        self._aperture_buffer.append_shape(shape)
+
+    def on_code_2(self, node: Code2) -> None:
+        """Handle `Code2` node."""
+        node.exposure.visit(self)
+        node.width.visit(self)
+        node.start_x.visit(self)
+        node.start_y.visit(self)
+        node.end_x.visit(self)
+        node.end_y.visit(self)
+        node.rotation.visit(self)
+
+    def on_code_4(self, node: Code4) -> None:
+        """Handle `Code4` node."""
+        node.exposure.visit(self)
+        node.number_of_points.visit(self)
+        node.start_x.visit(self)
+        node.start_y.visit(self)
+        for point in node.points:
+            point.visit(self)
+        node.rotation.visit(self)
+
+    def on_code_5(self, node: Code5) -> None:
+        """Handle `Code5` node."""
+        node.exposure.visit(self)
+        node.number_of_vertices.visit(self)
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        node.diameter.visit(self)
+        node.rotation.visit(self)
+
+    def on_code_6(self, node: Code6) -> None:
+        """Handle `Code6` node."""
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        node.outer_diameter.visit(self)
+        node.ring_thickness.visit(self)
+        node.gap_between_rings.visit(self)
+        node.max_ring_count.visit(self)
+        node.crosshair_thickness.visit(self)
+        node.crosshair_length.visit(self)
+        node.rotation.visit(self)
+
+    def on_code_7(self, node: Code7) -> None:
+        """Handle `Code7` node."""
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        node.outer_diameter.visit(self)
+        node.inner_diameter.visit(self)
+        node.gap_thickness.visit(self)
+        node.rotation.visit(self)
+
+    def on_code_20(self, node: Code20) -> None:
+        """Handle `Code20` node."""
+        node.exposure.visit(self)
+        node.width.visit(self)
+        node.start_x.visit(self)
+        node.start_y.visit(self)
+        node.end_x.visit(self)
+        node.end_y.visit(self)
+        node.rotation.visit(self)
+
+    def on_code_21(self, node: Code21) -> None:
+        """Handle `Code21` node."""
+        node.exposure.visit(self)
+        node.width.visit(self)
+        node.height.visit(self)
+        node.center_x.visit(self)
+        node.center_y.visit(self)
+        node.rotation.visit(self)
+
+    def on_code_22(self, node: Code22) -> None:
+        """Handle `Code22` node."""
+        node.exposure.visit(self)
+        node.width.visit(self)
+        node.height.visit(self)
+        node.x_lower_left.visit(self)
+        node.y_lower_left.visit(self)
+        node.rotation.visit(self)
+
+    def on_assignment(self, node: Assignment) -> None:
+        """Handle `Assignment` node."""
+        self._scope[node.variable.variable] = self._eval(node.expression)
