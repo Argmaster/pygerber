@@ -4,9 +4,8 @@ which can then be dumped using formatter interface to Gerber files.
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 from io import StringIO
-from typing import Generator, Iterable, List, Optional
+from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence
 
 from pydantic import BaseModel, Field
 
@@ -28,11 +27,19 @@ from pygerber.gerberx3.ast.nodes import (
     ADmacro,
     AMclose,
     AMopen,
+    Code1,
+    Code4,
+    Code5,
+    Code7,
+    Code20,
+    Code21,
+    Constant,
     CoordinateX,
     CoordinateY,
     Dnn,
     File,
     Node,
+    Point,
     TA_AperFunction,
     TA_DrillTolerance,
     TA_UserName,
@@ -48,6 +55,12 @@ from pygerber.gerberx3.ast.nodes.enums import (
 from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
 from pygerber.gerberx3.ast.state_tracking_visitor import CoordinateFormat
 from pygerber.gerberx3.formatter import Formatter
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+
+NUMBER_OF_VERTICES_IN_TRIANGLE = 3
 
 
 class _Pad(BaseModel):
@@ -110,9 +123,15 @@ class _CustomPadCreator:
     def __init__(self, pad_creator: _PadCreator) -> None:
         self._pad_creator = pad_creator
         self._primitives: list[Node] = []
+        self._finalized = False
 
     def create(self) -> _Pad:
-        """Create the custom pad."""
+        """Finalize process of creating custom pad.
+
+        This method can be called only once.
+        After calling this method, no more primitives can be added to the pad.
+        """
+        self._check_finalized()
         macro_id = self._pad_creator._new_macro_id()  # noqa: SLF001
 
         self._pad_creator._macros.append(  # noqa: SLF001
@@ -131,7 +150,306 @@ class _CustomPadCreator:
             ),
         )
         self._pad_creator._pads.append(pad)  # noqa: SLF001
+        self._finalized = True
         return pad
+
+    def _check_finalized(self) -> None:
+        if self._finalized:
+            msg = "Custom pad already finalized"
+            raise RuntimeError(msg)
+
+    def add_circle(
+        self, diameter: float, center: tuple[float, float], rotation: float = 0.0
+    ) -> Self:
+        """Add a circle to the custom pad.
+
+        For corresponding element of Gerber standard see section 4.5.1.3 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=61
+        """
+        self._circle(1, diameter, center, rotation)
+        return self
+
+    def _circle(
+        self,
+        exposition: int,
+        diameter: float,
+        center: tuple[float, float],
+        rotation: float,
+    ) -> None:
+        self._check_finalized()
+        self._primitives.append(
+            Code1(
+                exposure=Constant(constant=exposition),
+                diameter=Constant(constant=diameter),
+                center_x=Constant(constant=center[0]),
+                center_y=Constant(constant=center[1]),
+                rotation=Constant(constant=rotation),
+            )
+        )
+
+    def cut_circle(
+        self, diameter: float, center: tuple[float, float], rotation: float = 0.0
+    ) -> Self:
+        """Add cut out in the shape of a circle.
+
+        For corresponding element of Gerber standard see section 4.5.1.3 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=61
+        """
+        self._circle(0, diameter, center, rotation)
+        return self
+
+    def add_vector_line(
+        self,
+        width: float,
+        start: tuple[float, float],
+        end: tuple[float, float],
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add a vector line to the custom pad.
+
+        For corresponding element of Gerber standard see section 4.5.1.4 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=62
+        """
+        self._vector_line(1, width, start, end, rotation)
+        return self
+
+    def _vector_line(
+        self,
+        exposition: int,
+        width: float,
+        start: tuple[float, float],
+        end: tuple[float, float],
+        rotation: float,
+    ) -> None:
+        self._check_finalized()
+        self._primitives.append(
+            Code20(
+                exposure=Constant(constant=exposition),
+                width=Constant(constant=width),
+                start_x=Constant(constant=start[0]),
+                start_y=Constant(constant=start[1]),
+                end_x=Constant(constant=end[0]),
+                end_y=Constant(constant=end[1]),
+                rotation=Constant(constant=rotation),
+            )
+        )
+
+    def cut_vector_line(
+        self,
+        width: float,
+        start: tuple[float, float],
+        end: tuple[float, float],
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add cut out in the shape of a vector line.
+
+        For corresponding element of Gerber standard see section 4.5.1.4 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=62
+        """
+        self._vector_line(0, width, start, end, rotation)
+        return self
+
+    def add_center_line(
+        self,
+        width: float,
+        height: float,
+        center: tuple[float, float],
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add a center line to the custom pad.
+
+        For corresponding element of Gerber standard see section 4.5.1.5 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=63
+        """
+        self._center_line(1, width, height, center, rotation)
+        return self
+
+    def _center_line(
+        self,
+        exposition: int,
+        width: float,
+        height: float,
+        center: tuple[float, float],
+        rotation: float,
+    ) -> None:
+        self._check_finalized()
+        self._primitives.append(
+            Code21(
+                exposure=Constant(constant=exposition),
+                width=Constant(constant=width),
+                height=Constant(constant=height),
+                center_x=Constant(constant=center[0]),
+                center_y=Constant(constant=center[1]),
+                rotation=Constant(constant=rotation),
+            )
+        )
+
+    def cut_center_line(
+        self,
+        width: float,
+        height: float,
+        center: tuple[float, float],
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add cut out in the shape of a center line.
+
+        For corresponding element of Gerber standard see section 4.5.1.5 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=63
+        """
+        self._center_line(0, width, height, center, rotation)
+        return self
+
+    def add_outline(
+        self,
+        points: Sequence[tuple[float, float]],
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add an outline to the custom pad.
+
+        For corresponding element of Gerber standard see section 4.5.1.6 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=64
+        """
+        assert (
+            len(points) >= NUMBER_OF_VERTICES_IN_TRIANGLE
+        ), "An outline must have at least 3 points"
+        self._outline(1, points, rotation=rotation)
+        return self
+
+    def _outline(
+        self,
+        exposition: int,
+        points: Sequence[tuple[float, float]],
+        rotation: float,
+    ) -> None:
+        self._check_finalized()
+        points_packed = [
+            Point(x=Constant(constant=point[0]), y=Constant(constant=point[1]))
+            for point in points
+        ]
+        self._primitives.append(
+            Code4(
+                exposure=Constant(constant=exposition),
+                number_of_points=Constant(constant=len(points_packed)),
+                start_x=points_packed[-1].x,
+                start_y=points_packed[-1].y,
+                points=points_packed,
+                rotation=Constant(constant=rotation),
+            )
+        )
+
+    def cut_outline(
+        self,
+        points: Sequence[tuple[float, float]],
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add cut out in the shape of an outline.
+
+        For corresponding element of Gerber standard see section 4.5.1.6 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=64
+        """
+        assert (
+            len(points) >= NUMBER_OF_VERTICES_IN_TRIANGLE
+        ), "An outline must have at least 3 points"
+        self._outline(0, points, rotation=rotation)
+        return self
+
+    def add_polygon(
+        self,
+        vertex_count: int,
+        center: tuple[float, float],
+        outer_diameter: float,
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add a regular polygon to the custom pad.
+
+        For corresponding element of Gerber standard see section 4.5.1.7 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=66
+        """
+        self._polygon(1, vertex_count, center, outer_diameter, rotation)
+        return self
+
+    def _polygon(
+        self,
+        exposition: int,
+        vertex_count: int,
+        center: tuple[float, float],
+        outer_diameter: float,
+        rotation: float,
+    ) -> None:
+        self._check_finalized()
+        self._primitives.append(
+            Code5(
+                exposure=Constant(constant=exposition),
+                number_of_vertices=Constant(constant=vertex_count),
+                diameter=Constant(constant=outer_diameter),
+                center_x=Constant(constant=center[0]),
+                center_y=Constant(constant=center[1]),
+                rotation=Constant(constant=rotation),
+            )
+        )
+
+    def cut_polygon(
+        self,
+        vertex_count: int,
+        center: tuple[float, float],
+        outer_diameter: float,
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add cut out in the shape of a polygon.
+
+        For corresponding element of Gerber standard see section 4.5.1.7 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=66
+        """
+        self._polygon(0, vertex_count, center, outer_diameter, rotation)
+        return self
+
+    def add_thermal(
+        self,
+        center: tuple[float, float],
+        outer_diameter: float,
+        inner_diameter: float,
+        gap_thickness: float,
+        rotation: float = 0.0,
+    ) -> Self:
+        """Add a thermal shape to the custom pad.
+
+        For corresponding element of Gerber standard see section 4.5.1.8 of
+        `The Gerber Layer Format Specification - Revision 2024.05`.
+
+        https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf#page=67
+        """
+        self._check_finalized()
+        self._primitives.append(
+            Code7(
+                center_x=Constant(constant=center[0]),
+                center_y=Constant(constant=center[1]),
+                outer_diameter=Constant(constant=outer_diameter),
+                inner_diameter=Constant(constant=inner_diameter),
+                gap_thickness=Constant(constant=gap_thickness),
+                rotation=Constant(constant=rotation),
+            )
+        )
+        return self
 
 
 class _PadCreator:
@@ -139,7 +457,7 @@ class _PadCreator:
 
     def __init__(self) -> None:
         self._id = 9
-        self._macro_id = 0
+        self._macro_id = -1
         self._pads: list[_Pad] = []
         self._macros: list[AM] = []
 
@@ -232,10 +550,9 @@ class _PadCreator:
         self._pads.append(pad)
         return pad
 
-    @contextmanager
-    def custom(self) -> Generator[_CustomPadCreator, None, None]:
+    def custom(self) -> _CustomPadCreator:
         """Create a custom pad."""
-        yield _CustomPadCreator(self)
+        return _CustomPadCreator(self)
 
 
 class _Draw(BaseModel):
@@ -256,7 +573,13 @@ class _Draw(BaseModel):
 
 
 class GerberX3Builder:
-    """Builder class for constructing Gerber ASTs."""
+    """Builder class for constructing Gerber ASTs.
+
+    Code generated is compliant with
+    `The Gerber Layer Format Specification - Revision 2024.05`.
+
+    https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf
+    """
 
     def __init__(self) -> None:
         self._pad_creator = _PadCreator()
@@ -387,7 +710,7 @@ class GerberX3Builder:
         self._draws.append(draw)
         return draw
 
-    def get_code(self) -> GerberCode:
+    def get_code(self) -> GerberX3Code:
         """Get the AST."""
         commands: list[Node] = []
         commands.append(
@@ -406,15 +729,21 @@ class GerberX3Builder:
             commands.extend(draw._get_nodes())  # noqa: SLF001
         commands.append(M02())
 
-        return GerberCode(File(nodes=commands))
+        return GerberX3Code(File(nodes=commands))
 
     def set_standard_attributes(self) -> None:
         """Set standard attributes for the file."""
         raise NotImplementedError
 
 
-class GerberCode:
-    """Container for Gerber code produced by the builder."""
+class GerberX3Code:
+    """Container for Gerber code produced by the builder.
+
+    Code generated is compliant with
+    `The Gerber Layer Format Specification - Revision 2024.05`.
+
+    https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf
+    """
 
     def __init__(self, ast: File) -> None:
         self._ast = ast

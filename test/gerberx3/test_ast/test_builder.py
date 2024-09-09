@@ -280,3 +280,307 @@ X0Y0D03*
 M02*
 """
         )
+
+
+class TestCustomPads:
+    def test_circle_0_0(self, builder: GerberX3Builder, default_header: str) -> None:
+        d10 = builder.new_pad().custom().add_circle(1, (0, 0)).create()
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+1,1.0,1.0,0.0,0.0,0.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_add_circle_5_5(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = builder.new_pad().custom().add_circle(1, (5, 5), rotation=60).create()
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+1,1.0,1.0,5.0,5.0,60.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_cut_circle_5_5(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = builder.new_pad().custom().cut_circle(1, (5, 5), rotation=60).create()
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+1,0.0,1.0,5.0,5.0,60.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_add_vector_line_0_0_1_1(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = (
+            builder.new_pad()
+            .custom()
+            .add_vector_line(1, (0, 0), (1, 1), rotation=30)
+            .create()
+        )
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+20,1.0,1.0,0.0,0.0,1.0,1.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_cut_vector_line_0_0_1_1(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = (
+            builder.new_pad()
+            .custom()
+            .cut_vector_line(1, (0, 0), (1, 1), rotation=30)
+            .create()
+        )
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+20,0.0,1.0,0.0,0.0,1.0,1.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_add_center_line_1_2_0_0(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = builder.new_pad().custom().add_center_line(1, 2, (0, 0), 30).create()
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+21,1.0,1.0,2.0,0.0,0.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_cut_center_line_1_2_0_0(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = builder.new_pad().custom().cut_center_line(1, 2, (0, 0), 30).create()
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+21,0.0,1.0,2.0,0.0,0.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_add_outline_4p(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = (
+            builder.new_pad()
+            .custom()
+            .add_outline([(0, 0), (1, 0), (1, 1), (0, 1)], rotation=30)
+            .create()
+        )
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+4,1.0,4.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_cut_outline_4p(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = (
+            builder.new_pad()
+            .custom()
+            .cut_outline([(0, 0), (1, 0), (1, 1), (0, 1)], rotation=30)
+            .create()
+        )
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+4,0.0,4.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_add_polygon_6p(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = (
+            builder.new_pad()
+            .custom()
+            .add_polygon(6, (0, 0), outer_diameter=1.0, rotation=30)
+            .create()
+        )
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+5,1.0,6.0,0.0,0.0,1.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_cut_polygon_6p(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = (
+            builder.new_pad()
+            .custom()
+            .cut_polygon(6, (0, 0), outer_diameter=1.0, rotation=30)
+            .create()
+        )
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+5,0.0,6.0,0.0,0.0,1.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_one_complicated(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = (
+            builder.new_pad()
+            .custom()
+            .add_circle(1, (0, 0))
+            .add_circle(1, (1, 1))
+            .add_vector_line(1, (0, 0), (1, 1), rotation=30)
+            .add_center_line(1, 2, (0, 0), 30)
+            .add_outline([(0, 0), (1, 0), (1, 1), (0, 1)], rotation=30)
+            .add_polygon(6, (0, 0), outer_diameter=1.0, rotation=30)
+            .create()
+        )
+        builder.add_pad(d10, (0, 0))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+1,1.0,1.0,0.0,0.0,0.0*
+1,1.0,1.0,1.0,1.0,0.0*
+20,1.0,1.0,0.0,0.0,1.0,1.0,30.0*
+21,1.0,1.0,2.0,0.0,0.0,30.0*
+4,1.0,4.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,30.0*
+5,1.0,6.0,0.0,0.0,1.0,30.0*%
+%ADD10M0*%
+D10*
+X0Y0D03*
+M02*
+"""
+        )
+
+    def test_two_complicated(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        d10 = (
+            builder.new_pad()
+            .custom()
+            .add_circle(1, (0, 0))
+            .add_circle(1, (1, 1))
+            .create()
+        )
+        builder.add_pad(d10, (0, 0))
+        d11 = (
+            builder.new_pad()
+            .custom()
+            .add_vector_line(1, (0, 0), (1, 1), rotation=30)
+            .add_center_line(1, 2, (0, 0), 30)
+            .add_outline([(0, 0), (1, 0), (1, 1), (0, 1)], rotation=30)
+            .add_polygon(6, (0, 0), outer_diameter=1.0, rotation=30)
+            .create()
+        )
+        builder.add_pad(d11, (3, 3))
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%AMM0*
+1,1.0,1.0,0.0,0.0,0.0*
+1,1.0,1.0,1.0,1.0,0.0*%
+%AMM1*
+20,1.0,1.0,0.0,0.0,1.0,1.0,30.0*
+21,1.0,1.0,2.0,0.0,0.0,30.0*
+4,1.0,4.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,30.0*
+5,1.0,6.0,0.0,0.0,1.0,30.0*%
+%ADD10M0*%
+%ADD11M1*%
+D10*
+X0Y0D03*
+D11*
+X3000000Y3000000D03*
+M02*
+"""
+        )
