@@ -151,6 +151,18 @@ class Mirroring(Enum):
             "y": self in (Mirroring.Y, Mirroring.XY),
         }
 
+    @classmethod
+    def new(cls, *, x: bool, y: bool) -> Mirroring:
+        """Create new mirroring."""
+        if x and y:
+            return cls.XY
+        if x:
+            return cls.X
+        if y:
+            return cls.Y
+
+        return cls.NONE
+
 
 class Polarity(Enum):
     """Polarity enum."""

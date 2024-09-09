@@ -16,13 +16,21 @@ from pygerber.gerberx3.ast.nodes import (
     ADP,
     ADR,
     AM,
+    D03,
     FS,
+    LM,
+    LP,
+    LR,
+    LS,
     M02,
     MO,
     TD,
     ADmacro,
     AMclose,
     AMopen,
+    CoordinateX,
+    CoordinateY,
+    Dnn,
     File,
     Node,
     TA_AperFunction,
@@ -32,10 +40,13 @@ from pygerber.gerberx3.ast.nodes import (
 from pygerber.gerberx3.ast.nodes.enums import (
     AperFunction,
     CoordinateNotation,
+    Mirroring,
+    Polarity,
     UnitMode,
     Zeros,
 )
 from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
+from pygerber.gerberx3.ast.state_tracking_visitor import CoordinateFormat
 from pygerber.gerberx3.formatter import Formatter
 
 
@@ -43,27 +54,32 @@ class _Pad(BaseModel):
     """Base class for pads."""
 
     node: Node
+    aperture_id: ApertureIdStr
     user_attributes: List[TA_UserName] = Field(default_factory=list)
     aper_function: Optional[TA_AperFunction] = None
     drill_tolerance: Optional[TA_DrillTolerance] = None
 
-    def add_standard_attribute(
+    def set_aperture_function(
         self,
-        aper_function: Optional[str] = None,
-        drill_tolerance_plus: Optional[float] = None,
-        drill_tolerance_minus: Optional[float] = None,
+        aper_function: str | AperFunction,
     ) -> None:
-        """Add standard attributes to the pad."""
-        if aper_function is not None:
-            self.aper_function = TA_AperFunction(function=AperFunction(aper_function))
-
-        if drill_tolerance_plus is not None or drill_tolerance_minus is not None:
-            self.drill_tolerance = TA_DrillTolerance(
-                plus_tolerance=drill_tolerance_plus,
-                minus_tolerance=drill_tolerance_minus,
+        """Set .AperFunction attribute for aperture."""
+        self.aper_function = TA_AperFunction(
+            function=(
+                AperFunction(aper_function)
+                if isinstance(aper_function, str)
+                else aper_function
             )
+        )
 
-    def add_custom_attribute(self, name: str, *values: str) -> None:
+    def set_drill_tolerance(self, plus: float, minus: float) -> None:
+        """Set .DrillTolerance attribute for aperture."""
+        self.drill_tolerance = TA_DrillTolerance(
+            plus_tolerance=plus,
+            minus_tolerance=minus,
+        )
+
+    def set_custom_attribute(self, name: str, *values: str) -> None:
         """Add custom attribute to the pad."""
         self.user_attributes.append(TA_UserName(user_name=name, fields=list(values)))
 
@@ -106,11 +122,13 @@ class _CustomPadCreator:
                 close=AMclose(),
             )
         )
+        aperture_id = self._pad_creator._new_id()  # noqa: SLF001
         pad = _Pad(
+            aperture_id=aperture_id,
             node=ADmacro(
-                aperture_id=self._pad_creator._new_id(),  # noqa: SLF001
+                aperture_id=aperture_id,
                 name=macro_id,
-            )
+            ),
         )
         self._pad_creator._pads.append(pad)  # noqa: SLF001
         return pad
@@ -140,12 +158,14 @@ class _PadCreator:
 
     def circle(self, diameter: float, hole_diameter: Optional[float] = None) -> _Pad:
         """Create a circle pad."""
+        aperture_id = self._new_id()
         pad = _Pad(
+            aperture_id=aperture_id,
             node=ADC(
-                aperture_id=self._new_id(),
+                aperture_id=aperture_id,
                 diameter=diameter,
                 hole_diameter=hole_diameter,
-            )
+            ),
         )
         self._pads.append(pad)
         return pad
@@ -157,13 +177,15 @@ class _PadCreator:
         hole_diameter: Optional[float] = None,
     ) -> _Pad:
         """Create a rectangle pad."""
+        aperture_id = self._new_id()
         pad = _Pad(
+            aperture_id=aperture_id,
             node=ADR(
-                aperture_id=self._new_id(),
+                aperture_id=aperture_id,
                 width=width,
                 height=height,
                 hole_diameter=hole_diameter,
-            )
+            ),
         )
         self._pads.append(pad)
         return pad
@@ -175,13 +197,15 @@ class _PadCreator:
         hole_diameter: Optional[float] = None,
     ) -> _Pad:
         """Create a rounded rectangle pad."""
+        aperture_id = self._new_id()
         pad = _Pad(
+            aperture_id=aperture_id,
             node=ADO(
-                aperture_id=self._new_id(),
+                aperture_id=aperture_id,
                 width=width,
                 height=height,
                 hole_diameter=hole_diameter,
-            )
+            ),
         )
         self._pads.append(pad)
         return pad
@@ -194,14 +218,16 @@ class _PadCreator:
         hole_diameter: Optional[float] = None,
     ) -> _Pad:
         """Create a regular polygon pad."""
+        aperture_id = self._new_id()
         pad = _Pad(
+            aperture_id=aperture_id,
             node=ADP(
-                aperture_id=self._new_id(),
+                aperture_id=aperture_id,
                 outer_diameter=outer_diameter,
                 vertices=number_of_vertices,
                 rotation=base_rotation_degrees,
                 hole_diameter=hole_diameter,
-            )
+            ),
         )
         self._pads.append(pad)
         return pad
@@ -212,22 +238,154 @@ class _PadCreator:
         yield _CustomPadCreator(self)
 
 
+class _Draw(BaseModel):
+    """The _Draw class represents any drawing operation with addison state
+    updating commands and attributes.
+    """
+
+    draw_op: Node
+    state_updates: list[Node] = Field(default_factory=list)
+    attributes: list[Node] = Field(default_factory=list)
+
+    def _get_nodes(self) -> Iterable[Node]:
+        yield from self.state_updates
+        yield from self.attributes
+        yield self.draw_op
+        if self.attributes:
+            yield TD()
+
+
 class GerberX3Builder:
     """Builder class for constructing Gerber ASTs."""
 
     def __init__(self) -> None:
         self._pad_creator = _PadCreator()
-        self._ops: list[Node] = []
+        self._draws: list[_Draw] = []
+
+        self._coordinate_format = CoordinateFormat(
+            zeros=Zeros.SKIP_LEADING,
+            coordinate_mode=CoordinateNotation.ABSOLUTE,
+            x_integral=4,
+            x_decimal=6,
+            y_integral=4,
+            y_decimal=6,
+        )
+
+        self._current_location = (0.0, 0.0)
+
+        self._selected_aperture: Optional[ApertureIdStr] = None
+        self._rotation: float = 0.0
+        self._mirroring: Mirroring = Mirroring.NONE
+        self._mirror_x: bool = False
+        self._mirror_y: bool = False
+        self._scale: float = 1.0
+        self._polarity: Polarity = Polarity.Dark
 
     def new_pad(self) -> _PadCreator:
         """Create a new pad."""
         return self._pad_creator
 
-    def add_pad(self, pad: _Pad) -> None:
+    def add_pad(
+        self,
+        pad: _Pad,
+        at: tuple[float, float],
+        *,
+        rotation: float = 0.0,
+        mirror_x: bool = False,
+        mirror_y: bool = False,
+        scale: float = 1.0,
+    ) -> _Draw:
         """Add a pad to the current layer."""
+        state_updates = list(
+            self._update_state(
+                selected_aperture=pad.aperture_id,
+                polarity=Polarity.Dark,
+                rotation=rotation,
+                mirror_x=mirror_x,
+                mirror_y=mirror_y,
+                scale=scale,
+            )
+        )
+        draw = _Draw(
+            state_updates=state_updates,
+            draw_op=D03(
+                x=CoordinateX(value=self._coordinate_format.pack_x(at[0])),
+                y=CoordinateY(value=self._coordinate_format.pack_y(at[1])),
+            ),
+        )
+        self._draws.append(draw)
+        return draw
 
-    def add_cutout(self) -> None:
-        """Add a cutout to the current layer."""
+    def _update_state(
+        self,
+        selected_aperture: Optional[ApertureIdStr] = None,
+        polarity: Optional[Polarity] = None,
+        rotation: Optional[float] = None,
+        mirror_x: Optional[bool] = None,
+        mirror_y: Optional[bool] = None,
+        scale: Optional[float] = None,
+    ) -> Iterable[Node]:
+        if (
+            selected_aperture is not None
+            and self._selected_aperture != selected_aperture
+        ):
+            self._selected_aperture = selected_aperture
+            yield Dnn(is_standalone=True, aperture_id=selected_aperture)
+
+        if polarity is not None and polarity != self._polarity:
+            self._polarity = polarity
+            yield LP(polarity=polarity)
+
+        if rotation is not None and rotation != self._rotation:
+            self._rotation = rotation
+            yield LR(rotation=rotation)
+
+        if mirror_x is None:
+            mirror_x = self._mirror_x
+
+        if mirror_y is None:
+            mirror_y = self._mirror_y
+
+        mirroring = Mirroring.new(x=mirror_x, y=mirror_y)
+
+        if mirroring != self._mirroring:
+            self._mirroring = mirroring
+            yield LM(mirroring=mirroring)
+
+        if scale is not None and scale != self._scale:
+            self._scale = scale
+            yield LS(scale=scale)
+
+    def add_cutout_pad(
+        self,
+        pad: _Pad,
+        at: tuple[float, float],
+        *,
+        rotation: float = 0.0,
+        mirror_x: bool = False,
+        mirror_y: bool = False,
+        scale: float = 1.0,
+    ) -> _Draw:
+        """Add cutout in shape of a pad to image."""
+        state_updates = list(
+            self._update_state(
+                selected_aperture=pad.aperture_id,
+                polarity=Polarity.Clear,
+                rotation=rotation,
+                mirror_x=mirror_x,
+                mirror_y=mirror_y,
+                scale=scale,
+            )
+        )
+        draw = _Draw(
+            state_updates=state_updates,
+            draw_op=D03(
+                x=CoordinateX(value=self._coordinate_format.pack_x(at[0])),
+                y=CoordinateY(value=self._coordinate_format.pack_y(at[1])),
+            ),
+        )
+        self._draws.append(draw)
+        return draw
 
     def get_code(self) -> GerberCode:
         """Get the AST."""
@@ -244,9 +402,15 @@ class GerberX3Builder:
         )
         commands.append(MO(mode=UnitMode.METRIC))
         commands.extend(self._pad_creator._get_nodes())  # noqa: SLF001
+        for draw in self._draws:
+            commands.extend(draw._get_nodes())  # noqa: SLF001
         commands.append(M02())
 
         return GerberCode(File(nodes=commands))
+
+    def set_standard_attributes(self) -> None:
+        """Set standard attributes for the file."""
+        raise NotImplementedError
 
 
 class GerberCode:
@@ -264,3 +428,8 @@ class GerberCode:
         dst = StringIO()
         self.dump(dst)
         return dst.getvalue()
+
+    @property
+    def raw(self) -> File:
+        """Get the raw AST."""
+        return self._ast

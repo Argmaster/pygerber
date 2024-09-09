@@ -111,6 +111,8 @@ class CoordinateFormat(_StateModel):
         if self.zeros == Zeros.SKIP_LEADING:
             self.unpack_x = self._unpack_skip_leading(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
             self.unpack_y = self._unpack_skip_leading(self.y_integral, self.y_decimal)  # type: ignore[method-assign]
+            self.pack_x = self._pack_skip_leading(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
+            self.pack_y = self._pack_skip_leading(self.y_integral, self.y_decimal)  # type: ignore[method-assign]
         elif self.zeros == Zeros.SKIP_TRAILING:
             self.unpack_x = self._unpack_skip_trailing(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
             self.unpack_y = self._unpack_skip_trailing(self.y_integral, self.y_decimal)  # type: ignore[method-assign]
@@ -149,6 +151,28 @@ class CoordinateFormat(_StateModel):
             decimal_value_str = padded_coordinate[integer:]
 
             return float(f"{integer_value_str}.{decimal_value_str}")
+
+        return _
+
+    def pack_x(self, coordinate: Double, /) -> PackedCoordinateStr:  # noqa: ARG002
+        """Unpack X coordinate using the current coordinate format."""
+        msg = "Coordinate format was not properly set."
+        raise NotImplementedError(msg)  # pragma: no cover
+
+    def pack_y(self, coordinate: Double, /) -> PackedCoordinateStr:  # noqa: ARG002
+        """Pack X coordinate using the current coordinate format."""
+        msg = "Coordinate format was not properly set."
+        raise NotImplementedError(msg)  # pragma: no cover
+
+    def _pack_skip_leading(
+        self,
+        integer: int,  # noqa: ARG002
+        decimal: int,
+    ) -> Callable[[Double], PackedCoordinateStr]:
+        def _(coordinate: Double) -> PackedCoordinateStr:
+            return PackedCoordinateStr(
+                "".join(f"{coordinate:.{decimal}f}".split(".")).lstrip("0") or "0"
+            )
 
         return _
 
