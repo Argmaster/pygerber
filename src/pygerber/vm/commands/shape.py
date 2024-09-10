@@ -293,6 +293,44 @@ class Shape(Command):
         )
 
     @classmethod
+    def new_ring(
+        cls,
+        center: tuple[float, float],
+        outer_diameter: float,
+        inner_diameter: float,
+        *,
+        is_negative: bool,
+    ) -> tuple[Self, Self]:
+        """Create polygon in shape of ring."""
+        thickness = outer_diameter - inner_diameter
+        inner_radius = inner_diameter / 2
+
+        assert thickness > 0
+        assert inner_radius > 0
+
+        half_thickness = thickness / 2
+
+        point_0 = (center[0] + inner_radius + half_thickness, center[1])
+        point_1 = (center[0] - inner_radius - half_thickness, center[1])
+
+        return (
+            cls.new_cw_arc(
+                point_0,
+                point_1,
+                center,
+                thickness=thickness,
+                negative=is_negative,
+            ),
+            cls.new_cw_arc(
+                point_1,
+                point_0,
+                center,
+                thickness=thickness,
+                negative=is_negative,
+            ),
+        )
+
+    @classmethod
     def new_connected_points(
         cls, *points: tuple[float, float], is_negative: bool
     ) -> Self:

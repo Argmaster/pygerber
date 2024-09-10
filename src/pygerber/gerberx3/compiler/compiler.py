@@ -511,15 +511,69 @@ class MacroEvalVisitor(AstVisitor):
 
     def on_code_6(self, node: Code6) -> None:
         """Handle `Code6` node."""
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        node.outer_diameter.visit(self)
-        node.ring_thickness.visit(self)
-        node.gap_between_rings.visit(self)
-        node.max_ring_count.visit(self)
-        node.crosshair_thickness.visit(self)
-        node.crosshair_length.visit(self)
-        node.rotation.visit(self)
+        center_x = self._eval(node.center_x)
+        center_y = self._eval(node.center_y)
+        outer_diameter = self._eval(node.outer_diameter)
+        ring_thickness = self._eval(node.ring_thickness)
+        gap_between_rings = self._eval(node.gap_between_rings)
+        max_ring_count = self._eval(node.max_ring_count)
+        crosshair_thickness = self._eval(node.crosshair_thickness)
+        crosshair_length = self._eval(node.crosshair_length)
+        rotation = self._eval(node.rotation)
+
+        center = (center_x, center_y)
+
+        shapes: list[Shape] = []
+        half_crosshair_length = crosshair_length / 2
+
+        if crosshair_length > 0 and crosshair_thickness > 0:
+            shapes.append(
+                Shape.new_line(
+                    (center_x, center_y - half_crosshair_length),
+                    (center_x, center_y + half_crosshair_length),
+                    crosshair_thickness,
+                    negative=False,
+                )
+            )
+            shapes.append(
+                Shape.new_line(
+                    (center_x - half_crosshair_length, center_y),
+                    (center_x + half_crosshair_length, center_y),
+                    crosshair_thickness,
+                    negative=False,
+                )
+            )
+
+        if ring_thickness > 0 and outer_diameter > 0 and max_ring_count > 0:
+            diameter_delta = gap_between_rings * 2 + ring_thickness * 2
+
+            current_outer_diameter = outer_diameter
+            current_inner_diameter = outer_diameter - ring_thickness
+
+            for _ in range(int(max_ring_count)):
+                if current_outer_diameter <= ring_thickness:
+                    shapes.append(
+                        Shape.new_circle(center, current_outer_diameter, negative=False)
+                    )
+                    break
+
+                shapes.extend(
+                    Shape.new_ring(
+                        center,
+                        current_outer_diameter,
+                        current_inner_diameter,
+                        is_negative=False,
+                    )
+                )
+                current_outer_diameter -= diameter_delta
+                current_inner_diameter -= diameter_delta
+
+        if rotation is not None:
+            matrix = Matrix3x3.new_rotate(rotation)
+            shapes = [shape.transform(matrix) for shape in shapes]
+
+        for shape in shapes:
+            self._aperture_buffer.append_shape(shape)
 
     def on_code_7(self, node: Code7) -> None:
         """Handle `Code7` node."""

@@ -252,3 +252,7 @@ class TestMacroCodes(PillowRenderE2E):
     def test_code_5(self) -> None:
         result = self._render(MacroCodeAssets.code_5, dpmm=50)
         self._save(result)
+
+    def test_code_6(self) -> None:
+        result = self._render(MacroCodeAssets.code_6, dpmm=50)
+        self._save(result)
