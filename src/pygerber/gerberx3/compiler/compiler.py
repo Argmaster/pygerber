@@ -490,12 +490,24 @@ class MacroEvalVisitor(AstVisitor):
 
     def on_code_5(self, node: Code5) -> None:
         """Handle `Code5` node."""
-        node.exposure.visit(self)
-        node.number_of_vertices.visit(self)
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        node.diameter.visit(self)
-        node.rotation.visit(self)
+        exposure = self._eval(node.exposure)
+        number_of_vertices = int(self._eval(node.number_of_vertices))
+        center_x = self._eval(node.center_x)
+        center_y = self._eval(node.center_y)
+        diameter = self._eval(node.diameter)
+        rotation = self._eval(node.rotation)
+
+        shape = Shape.new_polygon(
+            (center_x, center_y),
+            diameter,
+            number_of_vertices,
+            rotation,
+            is_negative=(exposure == 0),
+        )
+        if rotation is not None:
+            shape = shape.transform(Matrix3x3.new_rotate(rotation))
+
+        self._aperture_buffer.append_shape(shape)
 
     def on_code_6(self, node: Code6) -> None:
         """Handle `Code6` node."""
