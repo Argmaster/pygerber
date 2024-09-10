@@ -451,13 +451,25 @@ class MacroEvalVisitor(AstVisitor):
 
     def on_code_2(self, node: Code2) -> None:
         """Handle `Code2` node."""
-        node.exposure.visit(self)
-        node.width.visit(self)
-        node.start_x.visit(self)
-        node.start_y.visit(self)
-        node.end_x.visit(self)
-        node.end_y.visit(self)
-        node.rotation.visit(self)
+        self._on_vector_line(node)
+
+    def _on_vector_line(self, node: Code2 | Code20) -> None:
+        exposure = self._eval(node.exposure)
+        width = self._eval(node.width)
+        start = (self._eval(node.start_x), self._eval(node.start_y))
+        end = (self._eval(node.end_x), self._eval(node.end_y))
+        rotation = self._eval(node.rotation)
+
+        shape = Shape.new_line(
+            start,
+            end,
+            thickness=width,
+            negative=(exposure == 0),
+        )
+        if rotation is not None:
+            shape = shape.transform(Matrix3x3.new_rotate(rotation))
+
+        self._aperture_buffer.append_shape(shape)
 
     def on_code_4(self, node: Code4) -> None:
         """Handle `Code4` node."""
@@ -501,13 +513,7 @@ class MacroEvalVisitor(AstVisitor):
 
     def on_code_20(self, node: Code20) -> None:
         """Handle `Code20` node."""
-        node.exposure.visit(self)
-        node.width.visit(self)
-        node.start_x.visit(self)
-        node.start_y.visit(self)
-        node.end_x.visit(self)
-        node.end_y.visit(self)
-        node.rotation.visit(self)
+        self._on_vector_line(node)
 
     def on_code_21(self, node: Code21) -> None:
         """Handle `Code21` node."""

@@ -20,6 +20,7 @@ from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
 from test.assets.gerberx3.FcPoly_Test import FcPoly_Test
 from test.assets.gerberx3.flashes import Flashes
 from test.assets.gerberx3.flashes_with_transform import FlashesWithTransform
+from test.assets.gerberx3.macro.codes import MacroCodeAssets
 
 THIS_FILE = Path(__file__)
 THIS_DIRECTORY = THIS_FILE.parent
@@ -213,7 +214,7 @@ class TestFlashesWithTransform(PillowRenderE2E):
         self._save(result)
 
 
-class TestMacro(PillowRenderE2E):
+class TestGeneratedMacro(PillowRenderE2E):
     def test_custom_circle_local_2_0(self) -> None:
         result = self._render_ast(get_custom_circle_local_2_0(), 100)
         self._save(result)
@@ -224,4 +225,18 @@ class TestMacro(PillowRenderE2E):
 
     def test_custom_circle_local_2_0_ring_rot_30(self) -> None:
         result = self._render_ast(get_custom_circle_local_2_0_ring_rot_30(), 100)
+        self._save(result)
+
+
+class TestMacroCodes(PillowRenderE2E):
+    def test_code_1(self) -> None:
+        result = self._render(MacroCodeAssets.code_1, dpmm=100)
+        self._save(result)
+
+    def test_code_2(self) -> None:
+        result = self._render(MacroCodeAssets.code_2, dpmm=50)
+        self._save(result)
+
+    def test_code_20(self) -> None:
+        result = self._render(MacroCodeAssets.code_20, dpmm=50)
         self._save(result)
