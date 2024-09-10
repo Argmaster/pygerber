@@ -93,7 +93,7 @@ class Shape(Command):
     def new_obround(
         cls, center: tuple[float, float], width: float, height: float, *, negative: bool
     ) -> Self:
-        """Create polygon in shape of rectangle."""
+        """Create polygon in shape of rectangle with shorter side rounded."""
         half_height = height / 2
         half_width = width / 2
 
@@ -195,7 +195,7 @@ class Shape(Command):
         *,
         is_negative: bool,
     ) -> Self:
-        """Create polygon in shape of circle."""
+        """Create polygon in shape of regular polygon."""
         assert vertices_count >= VERTEX_COUNT_IN_TRIANGLE
         base_rotation = base_rotation % 360
         assert 0 <= base_rotation < FULL_ANGLE_DEGREES
@@ -235,7 +235,7 @@ class Shape(Command):
         *,
         negative: bool,
     ) -> Self:
-        """Create polygon in shape of circle."""
+        """Create polygon in shape of line with specified thickness."""
         start_vector = Vector.from_tuple(start)
         end_vector = Vector.from_tuple(end)
         parallel = (end_vector - start_vector).normalized()
@@ -265,7 +265,7 @@ class Shape(Command):
         *,
         negative: bool,
     ) -> Self:
-        """Create polygon in shape of circle."""
+        """Create polygon in shape of arc with specified thickness."""
         start_vector = Vector.from_tuple(start)
         extend_start_vector = start_vector.normalized() * (thickness / 2)
 
@@ -291,3 +291,14 @@ class Shape(Command):
             ],
             negative=negative,
         )
+
+    @classmethod
+    def new_connected_points(
+        cls, *points: tuple[float, float], is_negative: bool
+    ) -> Self:
+        """Create polygon from connected points."""
+        commands: list[ShapeSegment] = [
+            Line.from_tuples(points[i], points[i + 1]) for i in range(len(points) - 1)
+        ]
+        commands.append(Line.from_tuples(points[-1], points[0]))
+        return cls(commands=commands, negative=is_negative)
