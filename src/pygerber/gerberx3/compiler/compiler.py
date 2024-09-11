@@ -661,12 +661,23 @@ class MacroEvalVisitor(AstVisitor):
 
     def on_code_21(self, node: Code21) -> None:
         """Handle `Code21` node."""
-        node.exposure.visit(self)
-        node.width.visit(self)
-        node.height.visit(self)
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        node.rotation.visit(self)
+        exposure = self._eval(node.exposure)
+        width = self._eval(node.width)
+        height = self._eval(node.height)
+        center_x = self._eval(node.center_x)
+        center_y = self._eval(node.center_y)
+        rotation = self._eval(node.rotation)
+
+        shape = Shape.new_rectangle(
+            (center_x, center_y),
+            width,
+            height,
+            negative=(exposure == 0),
+        )
+        if rotation is not None:
+            shape = shape.transform(Matrix3x3.new_rotate(rotation))
+
+        self._aperture_buffer.append_shape(shape)
 
     def on_code_22(self, node: Code22) -> None:
         """Handle `Code22` node."""

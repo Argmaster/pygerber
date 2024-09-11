@@ -21,3 +21,4 @@ class MacroCodeAssets(Namespace):
     code_7_1 = GerberX3Asset(THIS_DIRECTORY / "code_7_1.grb")
     code_7_2 = GerberX3Asset(THIS_DIRECTORY / "code_7_2.grb")
     code_7_3 = GerberX3Asset(THIS_DIRECTORY / "code_7_3.grb")
+    code_21 = GerberX3Asset(THIS_DIRECTORY / "code_21.grb")
