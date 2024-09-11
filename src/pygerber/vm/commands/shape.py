@@ -302,7 +302,7 @@ class Shape(Command):
         is_negative: bool,
     ) -> tuple[Self, Self]:
         """Create polygon in shape of ring."""
-        thickness = outer_diameter - inner_diameter
+        thickness = (outer_diameter - inner_diameter) / 2
         inner_radius = inner_diameter / 2
 
         assert thickness > 0

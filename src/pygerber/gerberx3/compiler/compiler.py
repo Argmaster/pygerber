@@ -4,6 +4,8 @@ transforming Gerber (AST) to PyGerber rendering VM commands (RVMC).
 
 from __future__ import annotations
 
+import math
+import time
 from math import cos, radians, sin
 from typing import ClassVar, Optional
 
@@ -260,7 +262,7 @@ class Compiler(StateTrackingVisitor):
         if macro is None:
             raise MacroNotDefinedError(node.name)
 
-        macro.visit(MacroEvalVisitor(aperture_buffer, scope))
+        macro.visit(MacroEvalVisitor(self, aperture_buffer, scope))
 
     def on_draw_line(self, node: D01) -> None:  # noqa: ARG002
         """Handle `D01` node in linear interpolation mode."""
@@ -327,6 +329,11 @@ class Compiler(StateTrackingVisitor):
 
         transform_matrix = mirroring_matrix @ rotation_matrix @ scale_matrix
 
+        return self._apply_transform_to_buffer(buffer, layer_id, transform_matrix)
+
+    def _apply_transform_to_buffer(
+        self, buffer: CommandBuffer, layer_id: str, transform_matrix: Matrix3x3
+    ) -> CommandBuffer:
         commands: list[DrawCmdT] = []
         depends_on: set[str] = set()
 
@@ -419,8 +426,12 @@ class MacroEvalVisitor(AstVisitor):
     """Visitor for evaluating macro primitives."""
 
     def __init__(
-        self, aperture_buffer: CommandBuffer, scope: dict[str, Double]
+        self,
+        compiler: Compiler,
+        aperture_buffer: CommandBuffer,
+        scope: dict[str, Double],
     ) -> None:
+        self._compiler = compiler
         self._aperture_buffer = aperture_buffer
         self._scope = scope
         self._expression_eval = ExpressionEvalVisitor(self._scope)
@@ -545,10 +556,11 @@ class MacroEvalVisitor(AstVisitor):
             )
 
         if ring_thickness > 0 and outer_diameter > 0 and max_ring_count > 0:
-            diameter_delta = gap_between_rings * 2 + ring_thickness * 2
+            diameter_delta = (gap_between_rings * 2) + (ring_thickness * 2)
 
             current_outer_diameter = outer_diameter
-            current_inner_diameter = outer_diameter - ring_thickness
+            # Diameter is reduced from both sides, hence ring_thickness * 2.
+            current_inner_diameter = outer_diameter - (ring_thickness * 2)
 
             for _ in range(int(max_ring_count)):
                 if current_outer_diameter <= ring_thickness:
@@ -577,12 +589,71 @@ class MacroEvalVisitor(AstVisitor):
 
     def on_code_7(self, node: Code7) -> None:
         """Handle `Code7` node."""
-        node.center_x.visit(self)
-        node.center_y.visit(self)
-        node.outer_diameter.visit(self)
-        node.inner_diameter.visit(self)
-        node.gap_thickness.visit(self)
-        node.rotation.visit(self)
+        center_x = self._eval(node.center_x)
+        center_y = self._eval(node.center_y)
+        outer_diameter = self._eval(node.outer_diameter)
+        inner_diameter = self._eval(node.inner_diameter)
+
+        if inner_diameter >= outer_diameter:
+            return
+
+        gap_thickness = self._eval(node.gap_thickness)
+        rotation = self._eval(node.rotation)
+
+        thickness = outer_diameter - inner_diameter
+
+        if gap_thickness * math.sqrt(2) >= inner_diameter:
+            return
+
+        if thickness <= 0:
+            return
+
+        aperture_id = ApertureIdStr(f"%%Code7%{id(node)}%{time.time():.0f}")
+        aperture_buffer = self._compiler._create_aperture_buffer(  # noqa: SLF001
+            aperture_id
+        )
+
+        shapes: list[Shape] = []
+        shapes.extend(
+            Shape.new_ring((0, 0), outer_diameter, inner_diameter, is_negative=False)
+        )
+
+        # Compensate rounding errors with rotation.
+        radius_delta = outer_diameter / 2 + thickness / 1.99
+        shapes.append(
+            Shape.new_line(
+                (0 - radius_delta, 0),
+                (0 + radius_delta, 0),
+                thickness=gap_thickness,
+                negative=True,
+            )
+        )
+        shapes.append(
+            Shape.new_line(
+                (0, 0 - radius_delta),
+                (0, 0 + radius_delta),
+                thickness=gap_thickness,
+                negative=True,
+            )
+        )
+
+        paste_center = Vector(x=center_x, y=center_y)
+
+        if rotation is not None:
+            matrix = Matrix3x3.new_rotate(rotation)
+            shapes = [shape.transform(matrix) for shape in shapes]
+            paste_center = paste_center.transform(matrix)
+
+        for shape in shapes:
+            aperture_buffer.append_shape(shape)
+
+        self._aperture_buffer.append_paste(
+            PasteLayer.new(
+                source_layer_id=aperture_id,
+                center=paste_center.xy,
+                is_negative=False,
+            )
+        )
 
     def on_code_20(self, node: Code20) -> None:
         """Handle `Code20` node."""

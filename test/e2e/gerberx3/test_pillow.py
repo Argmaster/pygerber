@@ -256,3 +256,19 @@ class TestMacroCodes(PillowRenderE2E):
     def test_code_6(self) -> None:
         result = self._render(MacroCodeAssets.code_6, dpmm=50)
         self._save(result)
+
+    def test_code_7_0(self) -> None:
+        result = self._render(MacroCodeAssets.code_7_0, dpmm=200)
+        self._save(result)
+
+    def test_code_7_1(self) -> None:
+        result = self._render(MacroCodeAssets.code_7_1, dpmm=200)
+        self._save(result)
+
+    def test_code_7_2(self) -> None:
+        result = self._render(MacroCodeAssets.code_7_2, dpmm=200)
+        self._save(result)
+
+    def test_code_7_3(self) -> None:
+        result = self._render(MacroCodeAssets.code_7_3, dpmm=200)
+        self._save(result)
