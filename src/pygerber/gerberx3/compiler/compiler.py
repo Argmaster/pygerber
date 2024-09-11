@@ -7,7 +7,7 @@ from __future__ import annotations
 import math
 import time
 from math import cos, radians, sin
-from typing import ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 from pygerber.gerberx3.ast.expression_eval_visitor import ExpressionEvalVisitor
@@ -46,6 +46,20 @@ from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLaye
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types import Box, LayerID, Matrix3x3, Vector
 from pygerber.vm.vm import DrawCmdT
+
+if TYPE_CHECKING:
+    from typing_extensions import Protocol
+
+    class _ArcFactory(Protocol):
+        def __call__(
+            self,
+            start: tuple[float, float],
+            end: tuple[float, float],
+            center: tuple[float, float],
+            thickness: float,
+            *,
+            negative: bool,
+        ) -> Shape: ...
 
 
 class CommandBuffer:
@@ -266,31 +280,113 @@ class Compiler(StateTrackingVisitor):
 
     def on_draw_line(self, node: D01) -> None:  # noqa: ARG002
         """Handle `D01` node in linear interpolation mode."""
+        start_x = self.state.current_x
+        start_y = self.state.current_y
+        start_point = (start_x, start_y)
+
+        end_x = self.coordinate_x
+        end_y = self.coordinate_y
+        end_point = (end_x, end_y)
+
         thickness = self._get_line_thickness(
             Vector.from_tuple((self.coordinate_x, self.coordinate_y))
         )
         self._append_shape_to_current_buffer(
             Shape.new_circle(
-                (self.state.current_x, self.state.current_y),
+                start_point,
                 thickness,
                 negative=self.is_negative,
             )
         )
         self._append_shape_to_current_buffer(
             Shape.new_line(
-                (self.state.current_x, self.state.current_y),
-                (self.coordinate_x, self.coordinate_y),
+                start_point,
+                end_point,
                 thickness=thickness,
                 negative=self.is_negative,
             ),
         )
         self._append_shape_to_current_buffer(
             Shape.new_circle(
-                (self.coordinate_x, self.coordinate_y),
+                end_point,
                 thickness,
                 negative=self.is_negative,
             )
         )
+
+    def on_draw_cw_arc_mq(self, node: D01) -> None:  # noqa: ARG002
+        """Handle `D01` node in clockwise circular interpolation multi quadrant mode."""
+        self._on_draw_arc_mq(Shape.new_cw_arc)
+
+    def _on_draw_arc_mq(self, factory_method: _ArcFactory) -> None:
+        start_x = self.state.current_x
+        start_y = self.state.current_y
+        start_point = (start_x, start_y)
+
+        end_x = self.coordinate_x
+        end_y = self.coordinate_y
+        end_point = (end_x, end_y)
+
+        center_x = start_x + self.coordinate_i
+        center_y = start_y + self.coordinate_j
+        center = (center_x, center_y)
+
+        thickness = self._get_line_thickness(
+            Vector.from_tuple((self.coordinate_x, self.coordinate_y))
+        )
+
+        self._append_shape_to_current_buffer(
+            Shape.new_circle(
+                start_point,
+                thickness,
+                negative=self.is_negative,
+            )
+        )
+        if start_point == end_point:
+            end_point = (center_x + self.coordinate_i, start_y + self.coordinate_j)
+
+            self._append_shape_to_current_buffer(
+                factory_method(
+                    start_point,
+                    end_point,
+                    center,
+                    thickness,
+                    negative=self.is_negative,
+                )
+            )
+            self._append_shape_to_current_buffer(
+                factory_method(
+                    end_point,
+                    start_point,
+                    center,
+                    thickness,
+                    negative=self.is_negative,
+                )
+            )
+
+        else:
+            self._append_shape_to_current_buffer(
+                factory_method(
+                    start_point,
+                    end_point,
+                    center,
+                    thickness,
+                    negative=self.is_negative,
+                )
+            )
+        self._append_shape_to_current_buffer(
+            Shape.new_circle(
+                end_point,
+                thickness,
+                negative=self.is_negative,
+            )
+        )
+
+    def on_draw_ccw_arc_mq(self, node: D01) -> None:  # noqa: ARG002
+        """Handle `D01` node in counter-clockwise circular interpolation multi quadrant
+        mode.
+        """
+        self._on_draw_arc_mq(Shape.new_ccw_arc)
 
     def on_flash_circle(self, node: D03, aperture: ADC) -> None:  # noqa: ARG002
         """Handle `D03` node with `ADC` aperture."""

@@ -437,6 +437,22 @@ class StateTrackingVisitor(AstVisitor):
         return coordinate
 
     @property
+    def coordinate_i(self) -> Double:
+        """Get X coordinate."""
+        coordinate = self.state.coordinate_i
+        if coordinate is None:
+            return 0.0
+        return coordinate
+
+    @property
+    def coordinate_j(self) -> Double:
+        """Get Y coordinate."""
+        coordinate = self.state.coordinate_j
+        if coordinate is None:
+            return 0.0
+        return coordinate
+
+    @property
     def is_negative(self) -> bool:
         """Check if current aperture is negative."""
         return self.state.transform.polarity == Polarity.Clear

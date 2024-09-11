@@ -265,7 +265,7 @@ class Shape(Command):
         *,
         negative: bool,
     ) -> Self:
-        """Create polygon in shape of arc with specified thickness."""
+        """Create polygon in shape of clockwise arc with specified thickness."""
         start_vector = Vector.from_tuple(start)
         extend_start_vector = start_vector.normalized() * (thickness / 2)
 
@@ -289,6 +289,25 @@ class Shape(Command):
                     clockwise=False,
                 ),
             ],
+            negative=negative,
+        )
+
+    @classmethod
+    def new_ccw_arc(
+        cls,
+        start: tuple[float, float],
+        end: tuple[float, float],
+        center: tuple[float, float],
+        thickness: float,
+        *,
+        negative: bool,
+    ) -> Self:
+        """Create polygon in shape of counterclockwise arc with specified thickness."""
+        return cls.new_cw_arc(
+            start=end,
+            end=start,
+            center=center,
+            thickness=thickness,
             negative=negative,
         )
 
