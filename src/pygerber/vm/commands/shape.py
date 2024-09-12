@@ -97,8 +97,9 @@ class Shape(Command):
         half_height = height / 2
         half_width = width / 2
 
-        if width < height:
-            delta = half_height - half_width
+        if width <= height:
+            # Shape is taller than wider, hence rounding should be on bottom and top
+            delta = half_width
 
             return cls(
                 commands=[
@@ -130,7 +131,7 @@ class Shape(Command):
                 negative=negative,
             )
 
-        delta = half_width - half_height
+        delta = half_height
         return cls(
             commands=[
                 # Bottom line

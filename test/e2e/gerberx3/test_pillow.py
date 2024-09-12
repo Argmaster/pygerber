@@ -19,10 +19,13 @@ from test.assets.generated.macro import (
 from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
 from test.assets.gerberx3.arc.clockwise import ClockwiseArcAssets
 from test.assets.gerberx3.arc.counterclockwise import CounterClockwiseArcAssets
+from test.assets.gerberx3.ATMEGA328 import ATMEGA328Assets
 from test.assets.gerberx3.FcPoly_Test import FcPoly_Test
 from test.assets.gerberx3.flashes import Flashes
 from test.assets.gerberx3.flashes_with_transform import FlashesWithTransform
+from test.assets.gerberx3.KicadGerberX2 import KiCadGerberX2Assets
 from test.assets.gerberx3.macro.codes import MacroCodeAssets
+from test.assets.gerberx3.polarity_cutouts import PolarityCutouts
 from test.assets.gerberx3.ucamco import GerberSpecExampleAssets
 
 THIS_FILE = Path(__file__)
@@ -409,4 +412,80 @@ class TestGerberSpecExampleAssets(PillowRenderE2E):
     @pytest.mark.xfail(reason="AB not implemented")
     def test_asset_4_11_4(self) -> None:
         result = self._render(GerberSpecExampleAssets.asset_4_11_4, dpmm=10)
+        self._save(result)
+
+
+class TestATMEGA328(PillowRenderE2E):
+    dpmm = 100
+
+    def test_bottom_copper(self) -> None:
+        result = self._render(ATMEGA328Assets.bottom_copper, dpmm=self.dpmm)
+        self._save(result)
+
+    def test_bottom_mask(self) -> None:
+        result = self._render(ATMEGA328Assets.bottom_mask, dpmm=self.dpmm)
+        self._save(result)
+
+    def test_bottom_paste(self) -> None:
+        result = self._render(ATMEGA328Assets.bottom_paste, dpmm=self.dpmm)
+        self._save(result)
+
+    def test_bottom_silk(self) -> None:
+        result = self._render(ATMEGA328Assets.bottom_silk, dpmm=self.dpmm)
+        self._save(result)
+
+    def test_edge_cuts(self) -> None:
+        result = self._render(ATMEGA328Assets.edge_cuts, dpmm=self.dpmm)
+        self._save(result)
+
+    def test_top_copper(self) -> None:
+        result = self._render(ATMEGA328Assets.top_copper, dpmm=self.dpmm)
+        self._save(result)
+
+    def test_top_mask(self) -> None:
+        result = self._render(ATMEGA328Assets.top_mask, dpmm=self.dpmm)
+        self._save(result)
+
+    def test_top_paste(self) -> None:
+        result = self._render(ATMEGA328Assets.top_paste, dpmm=self.dpmm)
+        self._save(result)
+
+    def test_top_silk(self) -> None:
+        result = self._render(ATMEGA328Assets.top_silk, dpmm=self.dpmm)
+        self._save(result)
+
+
+class TestPolarityCutouts(PillowRenderE2E):
+    def test_sample(self) -> None:
+        result = self._render(PolarityCutouts.sample, dpmm=100)
+        self._save(result)
+
+
+class TestKiCadGerberX2(PillowRenderE2E):
+    def test_bottom_copper(self) -> None:
+        result = self._render(KiCadGerberX2Assets.bottom_copper, dpmm=100)
+        self._save(result)
+
+    def test_bottom_mask(self) -> None:
+        result = self._render(KiCadGerberX2Assets.bottom_mask, dpmm=100)
+        self._save(result)
+
+    def test_edge_cuts(self) -> None:
+        result = self._render(KiCadGerberX2Assets.edge_cuts, dpmm=100)
+        self._save(result)
+
+    def test_top_copper(self) -> None:
+        result = self._render(KiCadGerberX2Assets.top_copper, dpmm=100)
+        self._save(result)
+
+    def test_top_mask(self) -> None:
+        result = self._render(KiCadGerberX2Assets.top_mask, dpmm=100)
+        self._save(result)
+
+    def test_top_paste(self) -> None:
+        result = self._render(KiCadGerberX2Assets.top_paste, dpmm=100)
+        self._save(result)
+
+    def test_top_silk(self) -> None:
+        result = self._render(KiCadGerberX2Assets.top_silk, dpmm=100)
         self._save(result)
