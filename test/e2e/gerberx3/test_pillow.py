@@ -23,6 +23,7 @@ from test.assets.gerberx3.FcPoly_Test import FcPoly_Test
 from test.assets.gerberx3.flashes import Flashes
 from test.assets.gerberx3.flashes_with_transform import FlashesWithTransform
 from test.assets.gerberx3.macro.codes import MacroCodeAssets
+from test.assets.gerberx3.ucamco import GerberSpecExampleAssets
 
 THIS_FILE = Path(__file__)
 THIS_DIRECTORY = THIS_FILE.parent
@@ -353,3 +354,59 @@ class TestMqClockwiseArcs(ArcSuite):
 
 class TestMqCounterClockwiseArcs(ArcSuite):
     assets = CounterClockwiseArcAssets
+
+
+class TestGerberSpecExampleAssets(PillowRenderE2E):
+    def test_asset_2_1(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_2_1, dpmm=100)
+        self._save(result)
+
+    def test_asset_2_11_1(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_2_11_1, dpmm=100)
+        self._save(result)
+
+    def test_asset_2_11_2(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_2_11_2, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_4_6(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_4_6, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_9_1(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_9_1, dpmm=100)
+        self._save(result)
+
+    @pytest.mark.xfail(reason="Not implemented")
+    def test_asset_4_9_6(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_9_6, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_10_4_1(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_10_4_1, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_10_4_2(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_10_4_2, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_10_4_4(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_10_4_4, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_10_4_7(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_10_4_7, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_10_4_8(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_10_4_8, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_10_4_9(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_10_4_9, dpmm=100)
+        self._save(result)
+
+    @pytest.mark.xfail(reason="AB not implemented")
+    def test_asset_4_11_4(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_11_4, dpmm=10)
+        self._save(result)

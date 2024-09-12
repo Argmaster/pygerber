@@ -134,11 +134,21 @@ class CoordinateFormat(_StateModel):
         self, integer: int, decimal: int
     ) -> Callable[[PackedCoordinateStr], Double]:
         def _(coordinate: PackedCoordinateStr) -> Double:
-            padded_coordinate = coordinate.ljust((integer + decimal), "0")
+            assert len(coordinate) > 0, coordinate
+
+            sign = "+"
+
+            if coordinate[0] in ("+", "-"):
+                sign = coordinate[0]
+                coordinate_str = coordinate[1:]
+            else:
+                coordinate_str = str(coordinate)
+
+            padded_coordinate = coordinate_str.ljust((integer + decimal), "0")
             integer_value_str = padded_coordinate[:integer]
             decimal_value_str = padded_coordinate[integer:]
 
-            return float(f"{integer_value_str}.{decimal_value_str}")
+            return float(f"{sign}{integer_value_str}.{decimal_value_str}")
 
         return _
 
@@ -146,11 +156,19 @@ class CoordinateFormat(_StateModel):
         self, integer: int, decimal: int
     ) -> Callable[[PackedCoordinateStr], Double]:
         def _(coordinate: PackedCoordinateStr) -> Double:
-            padded_coordinate = coordinate.rjust((integer + decimal), "0")
+            sign = "+"
+
+            if coordinate[0] in ("+", "-"):
+                sign = coordinate[0]
+                coordinate_str = coordinate[1:]
+            else:
+                coordinate_str = str(coordinate)
+
+            padded_coordinate = coordinate_str.rjust((integer + decimal), "0")
             integer_value_str = padded_coordinate[:integer]
             decimal_value_str = padded_coordinate[integer:]
 
-            return float(f"{integer_value_str}.{decimal_value_str}")
+            return float(f"{sign}{integer_value_str}.{decimal_value_str}")
 
         return _
 
@@ -404,15 +422,6 @@ class StateTrackingVisitor(AstVisitor):
                 ArcInterpolation.MULTI_QUADRANT: self.on_in_region_draw_ccw_arc_mq,
             },
         }
-        self._on_d03_handler_dispatch_table = {
-            AD: lambda *_: throw(DirectADHandlerDispatchNotSupportedError()),
-            ADC: self.on_flash_circle,
-            ADR: self.on_flash_rectangle,
-            ADO: self.on_flash_obround,
-            ADP: self.on_flash_polygon,
-            ADmacro: self.on_flash_macro,
-            AB: self.on_flash_block,
-        }
         self._on_d03_handler: Callable[[D03, AD | AB], None] = lambda *_: throw(  # type: ignore[unreachable]
             ApertureNotSelectedError()
         )
@@ -532,6 +541,8 @@ class StateTrackingVisitor(AstVisitor):
         """Handle `D02` node."""
         super().on_d02(node)
         self._update_coordinates()
+        if self.state.is_region:
+            self.on_flush_region()
 
     def on_d03(self, node: D03) -> None:
         """Handle `D03` node."""
@@ -560,9 +571,26 @@ class StateTrackingVisitor(AstVisitor):
     def on_dnn(self, node: Dnn) -> None:
         """Handle `Dnn` node."""
         self.state.current_aperture_id = node.aperture_id
-        self._on_d03_handler = self._on_d03_handler_dispatch_table[  # type: ignore[assignment]
-            type(self.state.current_aperture)
-        ]
+
+        aperture = self.state.current_aperture
+        handler: Any
+
+        if isinstance(aperture, ADC):
+            handler = self.on_flash_circle
+        elif isinstance(aperture, ADR):
+            handler = self.on_flash_rectangle
+        elif isinstance(aperture, ADO):
+            handler = self.on_flash_obround
+        elif isinstance(aperture, ADP):
+            handler = self.on_flash_polygon
+        elif isinstance(aperture, ADmacro):
+            handler = self.on_flash_macro
+        elif isinstance(aperture, AB):
+            handler = self.on_flash_block
+        elif isinstance(aperture, AD):
+            raise DirectADHandlerDispatchNotSupportedError
+
+        self._on_d03_handler = handler
 
     # G codes
 
@@ -597,6 +625,10 @@ class StateTrackingVisitor(AstVisitor):
     def on_g36(self, node: G36) -> None:
         """Handle `G36` node."""
         super().on_g36(node)
+        self.on_start_region()
+
+    def on_start_region(self) -> None:
+        """Handle start of region."""
         self.state.is_region = True
         self._dispatch_d01_handler = self._dispatch_d01_handler_in_region
         self._dispatch_d01_handler()
@@ -627,6 +659,14 @@ class StateTrackingVisitor(AstVisitor):
     def on_g37(self, node: G37) -> None:
         """Handle `G37` node."""
         super().on_g37(node)
+        self.on_flush_region()
+        self.on_end_region()
+
+    def on_flush_region(self) -> None:
+        """Handle flush region after D02 command or after G37."""
+
+    def on_end_region(self) -> None:
+        """Handle end of region."""
         self.state.is_region = False
         self._dispatch_d01_handler = self._dispatch_d01_handler_non_region
         self._dispatch_d01_handler()
@@ -793,4 +833,4 @@ class StateTrackingVisitor(AstVisitor):
         if isinstance(exception, ProgramStop):
             return bool(self._ignore_program_stop)
 
-        return False
+        return True

@@ -20,6 +20,7 @@ from pygerber.gerberx3.ast.nodes import (
     D01,
     D03,
     ADmacro,
+    Assignment,
     Code0,
     Code1,
     Code2,
@@ -33,16 +34,25 @@ from pygerber.gerberx3.ast.nodes import (
     Expression,
     File,
 )
-from pygerber.gerberx3.ast.nodes.math.assignment import Assignment
 from pygerber.gerberx3.ast.nodes.types import ApertureIdStr, Double
 from pygerber.gerberx3.ast.state_tracking_visitor import (
     StateTrackingVisitor,
 )
 from pygerber.gerberx3.compiler.errors import (
+    ContourBufferNotSetError,
     CyclicBufferDependencyError,
     MacroNotDefinedError,
 )
-from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLayer
+from pygerber.vm.commands import (
+    Command,
+    EndLayer,
+    Line,
+    PasteLayer,
+    Shape,
+    ShapeSegment,
+    StartLayer,
+)
+from pygerber.vm.commands.shape_segments.arc import Arc
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types import Box, LayerID, Matrix3x3, Vector
 from pygerber.vm.vm import DrawCmdT
@@ -107,6 +117,7 @@ class Compiler(StateTrackingVisitor):
         super().__init__(ignore_program_stop=ignore_program_stop)
         self._buffers: dict[str, CommandBuffer] = {}
         self._buffer_stack: list[str] = []
+        self._contour_buffer: Optional[list[ShapeSegment]] = []
         self._create_main_buffer()
 
         self._aperture_buffers: dict[str, CommandBuffer] = {}
@@ -343,7 +354,9 @@ class Compiler(StateTrackingVisitor):
             )
         )
         if start_point == end_point:
-            end_point = (center_x + self.coordinate_i, start_y + self.coordinate_j)
+            length = Vector(x=self.coordinate_i, y=self.coordinate_j).length()
+            start_point = (center_x - length, center_y)
+            end_point = (center_x + length, center_y)
 
             self._append_shape_to_current_buffer(
                 factory_method(
@@ -387,6 +400,101 @@ class Compiler(StateTrackingVisitor):
         mode.
         """
         self._on_draw_arc_mq(Shape.new_ccw_arc)
+
+    def on_start_region(self) -> None:
+        """Handle start of region."""
+        super().on_start_region()
+        self._contour_buffer = []
+
+    def on_in_region_draw_line(self, node: D01) -> None:  # noqa: ARG002
+        """Handle `D01` node in linear interpolation mode in region."""
+        if self._contour_buffer is None:
+            raise ContourBufferNotSetError
+
+        start_x = self.state.current_x
+        start_y = self.state.current_y
+        start_point = (start_x, start_y)
+
+        end_x = self.coordinate_x
+        end_y = self.coordinate_y
+        end_point = (end_x, end_y)
+
+        self._contour_buffer.append(Line.from_tuples(start_point, end_point))
+
+    def on_in_region_draw_cw_arc_mq(self, node: D01) -> None:  # noqa: ARG002
+        """Handle `D01` node in clockwise circular interpolation multi quadrant mode
+        within region statement.
+        """
+        self._on_in_region_draw_arc_mq(is_clockwise=True)
+
+    def _on_in_region_draw_arc_mq(self, *, is_clockwise: bool) -> None:
+        if self._contour_buffer is None:
+            raise ContourBufferNotSetError
+
+        start_x = self.state.current_x
+        start_y = self.state.current_y
+        start_point = (start_x, start_y)
+
+        end_x = self.coordinate_x
+        end_y = self.coordinate_y
+        end_point = (end_x, end_y)
+
+        center_x = start_x + self.coordinate_i
+        center_y = start_y + self.coordinate_j
+        center = (center_x, center_y)
+
+        if start_point == end_point:
+            end_point = (center_x + self.coordinate_i, center_y + self.coordinate_j)
+
+            self._contour_buffer.append(
+                Arc.from_tuples(
+                    start_point,
+                    end_point,
+                    center,
+                    clockwise=is_clockwise,
+                )
+            )
+            self._contour_buffer.append(
+                Arc.from_tuples(
+                    end_point,
+                    start_point,
+                    center,
+                    clockwise=is_clockwise,
+                )
+            )
+
+        else:
+            self._contour_buffer.append(
+                Arc.from_tuples(
+                    start_point,
+                    end_point,
+                    center,
+                    clockwise=is_clockwise,
+                )
+            )
+
+    def on_in_region_draw_ccw_arc_mq(self, node: D01) -> None:  # noqa: ARG002
+        """Handle `D01` node in counter-clockwise circular interpolation multi quadrant
+        mode within region statement.
+        """
+        self._on_in_region_draw_arc_mq(is_clockwise=False)
+
+    def on_flush_region(self) -> None:
+        """Handle flush region after D02 command or after G37."""
+        if self._contour_buffer is None:
+            raise ContourBufferNotSetError
+
+        if len(self._contour_buffer) > 0:
+            self._append_shape_to_current_buffer(
+                Shape(commands=self._contour_buffer, negative=self.is_negative)
+            )
+
+        self._contour_buffer = []
+
+    def on_end_region(self) -> None:
+        """Handle end of region."""
+        super().on_end_region()
+        self._contour_buffer = None
 
     def on_flash_circle(self, node: D03, aperture: ADC) -> None:  # noqa: ARG002
         """Handle `D03` node with `ADC` aperture."""

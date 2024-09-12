@@ -32,3 +32,13 @@ class MacroNotDefinedError(CompilerError):
     def __init__(self, macro_name: str) -> None:
         super().__init__(f"Macro {macro_name} was not defined before instantiation.")
         self.macro_name = macro_name
+
+
+class ContourBufferNotSetError(CompilerError):
+    """Raised when contour buffer is not set before flushing a contour buffer."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            "Contour buffer is not set. Set contour buffer before "
+            "flushing a contour buffer."
+        )

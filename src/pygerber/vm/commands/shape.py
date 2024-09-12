@@ -266,13 +266,15 @@ class Shape(Command):
         negative: bool,
     ) -> Self:
         """Create polygon in shape of clockwise arc with specified thickness."""
-        start_vector = Vector.from_tuple(start)
-        extend_start_vector = start_vector.normalized() * (thickness / 2)
-
-        end_vector = Vector.from_tuple(end)
-        extend_end_vector = end_vector.normalized() * (thickness / 2)
-
         center_vector = Vector.from_tuple(center)
+        start_vector = Vector.from_tuple(start)
+        end_vector = Vector.from_tuple(end)
+
+        local_start_vector = start_vector - Vector.from_tuple(center)
+        extend_start_vector = local_start_vector.normalized() * (thickness / 2)
+
+        local_end_vector = end_vector - Vector.from_tuple(center)
+        extend_end_vector = local_end_vector.normalized() * (thickness / 2)
 
         return cls(
             commands=[
