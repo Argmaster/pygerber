@@ -18,12 +18,12 @@ class IP(Node):
 
     polarity: ImagePolarity
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> IP:
         """Handle visitor call."""
-        visitor.on_ip(self)
+        return visitor.on_ip(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], IP]:
         """Get callback function for the node."""
         return visitor.on_ip

@@ -19,12 +19,12 @@ class G04(G):
 
     string: Optional[str] = Field(default=None)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> G04:
         """Handle visitor call."""
-        visitor.on_g04(self)
+        return visitor.on_g04(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], G04]:
         """Get callback function for the node."""
         return visitor.on_g04

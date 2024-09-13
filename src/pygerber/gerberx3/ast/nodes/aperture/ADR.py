@@ -22,12 +22,12 @@ class ADR(AD):
     height: Double
     hole_diameter: Optional[Double] = Field(default=None)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> ADR:
         """Handle visitor call."""
-        visitor.on_adr(self)
+        return visitor.on_adr(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], ADR]:
         """Get callback function for the node."""
         return visitor.on_adr

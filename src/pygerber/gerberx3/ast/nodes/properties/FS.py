@@ -25,12 +25,12 @@ class FS(Node):
     y_integral: int
     y_decimal: int
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> FS:
         """Handle visitor call."""
-        visitor.on_fs(self)
+        return visitor.on_fs(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], FS]:
         """Get callback function for the node."""
         return visitor.on_fs

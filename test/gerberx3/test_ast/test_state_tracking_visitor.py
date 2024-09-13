@@ -239,8 +239,8 @@ def test_d03_flash_circle(default_d03: D03, mocker: MockerFixture) -> None:
 @pytest.fixture()
 def default_d03() -> D03:
     return D03(
-        x=CoordinateX(location=0, value=PackedCoordinateStr("1")),
-        y=CoordinateY(location=0, value=PackedCoordinateStr("1")),
+        x=CoordinateX(value=PackedCoordinateStr("1")),
+        y=CoordinateY(value=PackedCoordinateStr("1")),
     )
 
 

@@ -18,12 +18,12 @@ class ABopen(Node):
 
     aperture_id: ApertureIdStr
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> ABopen:
         """Handle visitor call."""
-        visitor.on_ab_open(self)
+        return visitor.on_ab_open(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], ABopen]:
         """Get callback function for the node."""
         return visitor.on_ab_open

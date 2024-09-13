@@ -15,12 +15,12 @@ if TYPE_CHECKING:
 class M01(Node):
     """Represents M01 Gerber command."""
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> M01:
         """Handle visitor call."""
-        visitor.on_m01(self)
+        return visitor.on_m01(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], M01]:
         """Get callback function for the node."""
         return visitor.on_m01

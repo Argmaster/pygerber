@@ -18,12 +18,12 @@ class MO(Node):
 
     mode: UnitMode
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> MO:
         """Handle visitor call."""
-        visitor.on_mo(self)
+        return visitor.on_mo(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], MO]:
         """Get callback function for the node."""
         return visitor.on_mo

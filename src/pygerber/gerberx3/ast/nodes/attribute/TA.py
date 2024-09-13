@@ -35,13 +35,13 @@ class TA_UserName(TA):  # noqa: N801
         """Get attribute name."""
         return self.user_name
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TA_UserName:
         """Handle visitor call."""
-        visitor.on_ta_user_name(self)
+        return visitor.on_ta_user_name(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TA_UserName]:
         """Get callback function for the node."""
         return visitor.on_ta_user_name
 
@@ -57,13 +57,13 @@ class TA_AperFunction(TA):  # noqa: N801
         """Get attribute name."""
         return ".AperFunction"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TA_AperFunction:
         """Handle visitor call."""
-        visitor.on_ta_aper_function(self)
+        return visitor.on_ta_aper_function(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TA_AperFunction]:
         """Get callback function for the node."""
         return visitor.on_ta_aper_function
 
@@ -79,13 +79,13 @@ class TA_DrillTolerance(TA):  # noqa: N801
         """Get attribute name."""
         return ".DrillTolerance"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TA_DrillTolerance:
         """Handle visitor call."""
-        visitor.on_ta_drill_tolerance(self)
+        return visitor.on_ta_drill_tolerance(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TA_DrillTolerance]:
         """Get callback function for the node."""
         return visitor.on_ta_drill_tolerance
 
@@ -105,12 +105,12 @@ class TA_FlashText(TA):  # noqa: N801
         """Get attribute name."""
         return ".FlashText"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TA_FlashText:
         """Handle visitor call."""
-        visitor.on_ta_flash_text(self)
+        return visitor.on_ta_flash_text(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TA_FlashText]:
         """Get callback function for the node."""
         return visitor.on_ta_flash_text

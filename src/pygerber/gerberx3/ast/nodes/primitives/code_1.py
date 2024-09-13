@@ -24,12 +24,12 @@ class Code1(Node):
     center_y: Expression
     rotation: Optional[Expression] = Field(default=None)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Code1:
         """Handle visitor call."""
-        visitor.on_code_1(self)
+        return visitor.on_code_1(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Code1]:
         """Get callback function for the node."""
         return visitor.on_code_1

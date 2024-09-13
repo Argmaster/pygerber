@@ -22,12 +22,12 @@ class Mul(Expression):
     head: Expression
     tail: List[Expression] = Field(min_length=1)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Mul:
         """Handle visitor call."""
-        visitor.on_mul(self)
+        return visitor.on_mul(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Mul]:
         """Get callback function for the node."""
         return visitor.on_mul

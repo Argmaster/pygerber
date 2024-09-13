@@ -24,13 +24,13 @@ class CoordinateX(Coordinate):
 
     value: PackedCoordinateStr
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> CoordinateX:
         """Handle visitor call."""
-        visitor.on_coordinate_x(self)
+        return visitor.on_coordinate_x(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], CoordinateX]:
         """Get callback function for the node."""
         return visitor.on_coordinate_x
 
@@ -40,13 +40,13 @@ class CoordinateY(Coordinate):
 
     value: PackedCoordinateStr
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> CoordinateY:
         """Handle visitor call."""
-        visitor.on_coordinate_y(self)
+        return visitor.on_coordinate_y(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], CoordinateY]:
         """Get callback function for the node."""
         return visitor.on_coordinate_y
 
@@ -56,13 +56,13 @@ class CoordinateI(Coordinate):
 
     value: PackedCoordinateStr
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> CoordinateI:
         """Handle visitor call."""
-        visitor.on_coordinate_i(self)
+        return visitor.on_coordinate_i(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], CoordinateI]:
         """Get callback function for the node."""
         return visitor.on_coordinate_i
 
@@ -72,12 +72,12 @@ class CoordinateJ(Coordinate):
 
     value: PackedCoordinateStr
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> CoordinateJ:
         """Handle visitor call."""
-        visitor.on_coordinate_j(self)
+        return visitor.on_coordinate_j(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], CoordinateJ]:
         """Get callback function for the node."""
         return visitor.on_coordinate_j

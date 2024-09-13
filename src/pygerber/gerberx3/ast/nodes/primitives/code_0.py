@@ -17,12 +17,12 @@ class Code0(Node):
 
     string: str
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Code0:
         """Handle visitor call."""
-        visitor.on_code_0(self)
+        return visitor.on_code_0(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Code0]:
         """Get callback function for the node."""
         return visitor.on_code_0

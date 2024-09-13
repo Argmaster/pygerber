@@ -17,12 +17,12 @@ if TYPE_CHECKING:
 class SRclose(Node):
     """Represents SR Gerber extended command."""
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> SRclose:
         """Handle visitor call."""
-        visitor.on_sr_close(self)
+        return visitor.on_sr_close(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], SRclose]:
         """Get callback function for the node."""
         return visitor.on_sr_close

@@ -18,12 +18,12 @@ class LM(Node):
 
     mirroring: Mirroring
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> LM:
         """Handle visitor call."""
-        visitor.on_lm(self)
+        return visitor.on_lm(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], LM]:
         """Get callback function for the node."""
         return visitor.on_lm

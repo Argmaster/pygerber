@@ -19,12 +19,12 @@ class Neg(Expression):
 
     operand: Expression
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Neg:
         """Handle visitor call."""
-        visitor.on_neg(self)
+        return visitor.on_neg(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Neg]:
         """Get callback function for the node."""
         return visitor.on_neg

@@ -18,12 +18,12 @@ class Dnn(D):
 
     aperture_id: ApertureIdStr
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Dnn:
         """Handle visitor call."""
-        visitor.on_dnn(self)
+        return visitor.on_dnn(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Dnn]:
         """Get callback function for the node."""
         return visitor.on_dnn

@@ -19,12 +19,12 @@ class Pos(Expression):
 
     operand: Expression
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Pos:
         """Handle visitor call."""
-        visitor.on_pos(self)
+        return visitor.on_pos(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Pos]:
         """Get callback function for the node."""
         return visitor.on_pos

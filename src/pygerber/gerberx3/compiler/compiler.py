@@ -21,7 +21,6 @@ from pygerber.gerberx3.ast.nodes import (
     D03,
     ADmacro,
     Assignment,
-    Code0,
     Code1,
     Code2,
     Code4,
@@ -172,7 +171,7 @@ class Compiler(StateTrackingVisitor):
 
         raise NotImplementedError(type(current_aperture))
 
-    def on_adc(self, node: ADC) -> None:
+    def on_adc(self, node: ADC) -> ADC:
         """Handle `AD` circle node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
@@ -192,6 +191,7 @@ class Compiler(StateTrackingVisitor):
                     negative=True,
                 )
             )
+        return node
 
     def _create_aperture_buffer(self, aperture_id: ApertureIdStr) -> CommandBuffer:
         buffer = CommandBuffer(
@@ -206,7 +206,7 @@ class Compiler(StateTrackingVisitor):
 
         return buffer
 
-    def on_adr(self, node: ADR) -> None:
+    def on_adr(self, node: ADR) -> ADR:
         """Handle `AD` rectangle node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
@@ -227,8 +227,9 @@ class Compiler(StateTrackingVisitor):
                     negative=True,
                 )
             )
+        return node
 
-    def on_ado(self, node: ADO) -> None:
+    def on_ado(self, node: ADO) -> ADO:
         """Handle `AD` obround node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
@@ -249,8 +250,9 @@ class Compiler(StateTrackingVisitor):
                     negative=True,
                 )
             )
+        return node
 
-    def on_adp(self, node: ADP) -> None:
+    def on_adp(self, node: ADP) -> ADP:
         """Handle `AD` polygon node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
@@ -272,8 +274,9 @@ class Compiler(StateTrackingVisitor):
                     negative=True,
                 )
             )
+        return node
 
-    def on_ad_macro(self, node: ADmacro) -> None:
+    def on_ad_macro(self, node: ADmacro) -> ADmacro:
         """Handle `AD` macro node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
@@ -288,6 +291,7 @@ class Compiler(StateTrackingVisitor):
             raise MacroNotDefinedError(node.name)
 
         macro.visit(MacroEvalVisitor(self, aperture_buffer, scope))
+        return node
 
     def on_draw_line(self, node: D01) -> None:  # noqa: ARG002
         """Handle `D01` node in linear interpolation mode."""
@@ -643,10 +647,7 @@ class MacroEvalVisitor(AstVisitor):
     def _eval(self, node: Expression) -> float:
         return self._expression_eval.evaluate(node)
 
-    def on_code_0(self, node: Code0) -> None:
-        """Handle `Code0` node."""
-
-    def on_code_1(self, node: Code1) -> None:
+    def on_code_1(self, node: Code1) -> Code1:
         """Handle `Code1` node."""
         exposure = self._eval(node.exposure)
         diameter = self._eval(node.diameter)
@@ -663,10 +664,12 @@ class MacroEvalVisitor(AstVisitor):
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
 
         self._aperture_buffer.append_shape(shape)
+        return node
 
-    def on_code_2(self, node: Code2) -> None:
+    def on_code_2(self, node: Code2) -> Code2:
         """Handle `Code2` node."""
         self._on_vector_line(node)
+        return node
 
     def _on_vector_line(self, node: Code2 | Code20) -> None:
         exposure = self._eval(node.exposure)
@@ -686,7 +689,7 @@ class MacroEvalVisitor(AstVisitor):
 
         self._aperture_buffer.append_shape(shape)
 
-    def on_code_4(self, node: Code4) -> None:
+    def on_code_4(self, node: Code4) -> Code4:
         """Handle `Code4` node."""
         exposure = self._eval(node.exposure)
         start = (self._eval(node.start_x), self._eval(node.start_y))
@@ -702,8 +705,9 @@ class MacroEvalVisitor(AstVisitor):
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
 
         self._aperture_buffer.append_shape(shape)
+        return node
 
-    def on_code_5(self, node: Code5) -> None:
+    def on_code_5(self, node: Code5) -> Code5:
         """Handle `Code5` node."""
         exposure = self._eval(node.exposure)
         number_of_vertices = int(self._eval(node.number_of_vertices))
@@ -723,8 +727,9 @@ class MacroEvalVisitor(AstVisitor):
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
 
         self._aperture_buffer.append_shape(shape)
+        return node
 
-    def on_code_6(self, node: Code6) -> None:
+    def on_code_6(self, node: Code6) -> Code6:
         """Handle `Code6` node."""
         center_x = self._eval(node.center_x)
         center_y = self._eval(node.center_y)
@@ -791,7 +796,9 @@ class MacroEvalVisitor(AstVisitor):
         for shape in shapes:
             self._aperture_buffer.append_shape(shape)
 
-    def on_code_7(self, node: Code7) -> None:
+        return node
+
+    def on_code_7(self, node: Code7) -> Code7:
         """Handle `Code7` node."""
         center_x = self._eval(node.center_x)
         center_y = self._eval(node.center_y)
@@ -799,7 +806,7 @@ class MacroEvalVisitor(AstVisitor):
         inner_diameter = self._eval(node.inner_diameter)
 
         if inner_diameter >= outer_diameter:
-            return
+            return node
 
         gap_thickness = self._eval(node.gap_thickness)
         rotation = self._eval(node.rotation)
@@ -807,10 +814,10 @@ class MacroEvalVisitor(AstVisitor):
         thickness = outer_diameter - inner_diameter
 
         if gap_thickness * math.sqrt(2) >= inner_diameter:
-            return
+            return node
 
         if thickness <= 0:
-            return
+            return node
 
         aperture_id = ApertureIdStr(f"%%Code7%{id(node)}%{time.time():.0f}")
         aperture_buffer = self._compiler._create_aperture_buffer(  # noqa: SLF001
@@ -858,12 +865,14 @@ class MacroEvalVisitor(AstVisitor):
                 is_negative=False,
             )
         )
+        return node
 
-    def on_code_20(self, node: Code20) -> None:
+    def on_code_20(self, node: Code20) -> Code20:
         """Handle `Code20` node."""
         self._on_vector_line(node)
+        return node
 
-    def on_code_21(self, node: Code21) -> None:
+    def on_code_21(self, node: Code21) -> Code21:
         """Handle `Code21` node."""
         exposure = self._eval(node.exposure)
         width = self._eval(node.width)
@@ -882,8 +891,9 @@ class MacroEvalVisitor(AstVisitor):
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
 
         self._aperture_buffer.append_shape(shape)
+        return node
 
-    def on_code_22(self, node: Code22) -> None:
+    def on_code_22(self, node: Code22) -> Code22:
         """Handle `Code22` node."""
         exposure = self._eval(node.exposure)
         width = self._eval(node.width)
@@ -902,7 +912,9 @@ class MacroEvalVisitor(AstVisitor):
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
 
         self._aperture_buffer.append_shape(shape)
+        return node
 
-    def on_assignment(self, node: Assignment) -> None:
+    def on_assignment(self, node: Assignment) -> Assignment:
         """Handle `Assignment` node."""
         self._scope[node.variable.variable] = self._eval(node.expression)
+        return node

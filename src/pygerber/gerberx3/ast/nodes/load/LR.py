@@ -18,12 +18,12 @@ class LR(Node):
 
     rotation: Double
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> LR:
         """Handle visitor call."""
-        visitor.on_lr(self)
+        return visitor.on_lr(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], LR]:
         """Get callback function for the node."""
         return visitor.on_lr

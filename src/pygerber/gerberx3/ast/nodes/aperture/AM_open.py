@@ -17,12 +17,12 @@ class AMopen(Node):
 
     name: str
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> AMopen:
         """Handle visitor call."""
-        visitor.on_am_open(self)
+        return visitor.on_am_open(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], AMopen]:
         """Get callback function for the node."""
         return visitor.on_am_open

@@ -409,7 +409,6 @@ class TestGerberSpecExampleAssets(PillowRenderE2E):
         result = self._render(GerberSpecExampleAssets.asset_4_10_4_9, dpmm=100)
         self._save(result)
 
-    @pytest.mark.xfail(reason="AB not implemented")
     def test_asset_4_11_4(self) -> None:
         result = self._render(GerberSpecExampleAssets.asset_4_11_4, dpmm=10)
         self._save(result)

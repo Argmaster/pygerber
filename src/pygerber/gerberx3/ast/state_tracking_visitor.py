@@ -468,47 +468,55 @@ class StateTrackingVisitor(AstVisitor):
 
     # Aperture
 
-    def on_ab(self, node: AB) -> None:
+    def on_ab(self, node: AB) -> AB:
         """Handle `AB` node."""
+        super().on_ab(node)
         self.state.apertures.blocks[node.open.aperture_id] = node
+        return node
 
     def on_ad(self, node: AD) -> None:
         """Handle `AD` node."""
         self.state.apertures.apertures[node.aperture_id] = node
 
-    def on_am(self, node: AM) -> None:
+    def on_am(self, node: AM) -> AM:
         """Handle `AM` root node."""
         self.state.apertures.macros[node.open.name] = node
+        return node
 
     # Attribute
 
-    def on_ta(self, node: TA) -> None:
+    def on_ta(self, node: TA) -> TA:
         """Handle `TA_UserName` node."""
         self.state.attributes.aperture_attributes[node.attribute_name] = node
+        return node
 
-    def on_tf(self, node: TF) -> None:
+    def on_tf(self, node: TF) -> TF:
         """Handle `TF` node."""
         self.state.attributes.file_attributes[node.attribute_name] = node
+        return node
 
-    def on_to(self, node: TO) -> None:
+    def on_to(self, node: TO) -> TO:
         """Handle `TO` node."""
         self.state.attributes.object_attributes[node.attribute_name] = node
+        return node
 
-    def on_td(self, node: TD) -> None:
+    def on_td(self, node: TD) -> TD:
         """Handle `TD` node."""
         if node.name is None:
             self.state.attributes.aperture_attributes.clear()
             self.state.attributes.object_attributes.clear()
-            return
+            return node
 
         self.state.attributes.aperture_attributes.pop(node.name, None)
         self.state.attributes.object_attributes.pop(node.name, None)
+        return node
 
-    def on_d01(self, node: D01) -> None:
+    def on_d01(self, node: D01) -> D01:
         """Handle `D01` node."""
         super().on_d01(node)
         self._on_d01_handler(node)
         self._update_coordinates()
+        return node
 
     def on_draw_line(self, node: D01) -> None:
         """Handle `D01` node in linear interpolation mode."""
@@ -537,18 +545,20 @@ class StateTrackingVisitor(AstVisitor):
         if self.state.coordinate_y is not None:
             self.state.current_y = self.state.coordinate_y
 
-    def on_d02(self, node: D02) -> None:
+    def on_d02(self, node: D02) -> D02:
         """Handle `D02` node."""
         super().on_d02(node)
         self._update_coordinates()
         if self.state.is_region:
             self.on_flush_region()
+        return node
 
-    def on_d03(self, node: D03) -> None:
+    def on_d03(self, node: D03) -> D03:
         """Handle `D03` node."""
         super().on_d03(node)
         self._on_d03_handler(node, self.state.current_aperture)
         self._update_coordinates()
+        return node
 
     def on_flash_circle(self, node: D03, aperture: ADC) -> None:
         """Handle `D03` node with `ADC` aperture."""
@@ -568,7 +578,7 @@ class StateTrackingVisitor(AstVisitor):
     def on_flash_block(self, node: D03, aperture: AB) -> None:
         """Handle `D03` node with `AB` aperture."""
 
-    def on_dnn(self, node: Dnn) -> None:
+    def on_dnn(self, node: Dnn) -> Dnn:
         """Handle `Dnn` node."""
         self.state.current_aperture_id = node.aperture_id
 
@@ -591,14 +601,16 @@ class StateTrackingVisitor(AstVisitor):
             raise DirectADHandlerDispatchNotSupportedError
 
         self._on_d03_handler = handler
+        return node
 
     # G codes
 
-    def on_g01(self, node: G01) -> None:
+    def on_g01(self, node: G01) -> G01:
         """Handle `G01` node."""
         super().on_g01(node)
         self.state.plot_mode = PlotMode.LINEAR
         self._dispatch_d01_handler()
+        return node
 
     def _dispatch_d01_handler_in_region(self) -> None:
         self._on_d01_handler = self._plot_mode_to_in_region_d01_handler[
@@ -610,22 +622,25 @@ class StateTrackingVisitor(AstVisitor):
             self.state.arc_interpolation
         ]
 
-    def on_g02(self, node: G02) -> None:
+    def on_g02(self, node: G02) -> G02:
         """Handle `G02` node."""
         super().on_g02(node)
         self.state.plot_mode = PlotMode.ARC
         self._dispatch_d01_handler()
+        return node
 
-    def on_g03(self, node: G03) -> None:
+    def on_g03(self, node: G03) -> G03:
         """Handle `G03` node."""
         super().on_g03(node)
         self.state.plot_mode = PlotMode.CCW_ARC
         self._dispatch_d01_handler()
+        return node
 
-    def on_g36(self, node: G36) -> None:
+    def on_g36(self, node: G36) -> G36:
         """Handle `G36` node."""
         super().on_g36(node)
         self.on_start_region()
+        return node
 
     def on_start_region(self) -> None:
         """Handle start of region."""
@@ -656,11 +671,12 @@ class StateTrackingVisitor(AstVisitor):
         mode within region statement.
         """
 
-    def on_g37(self, node: G37) -> None:
+    def on_g37(self, node: G37) -> G37:
         """Handle `G37` node."""
         super().on_g37(node)
         self.on_flush_region()
         self.on_end_region()
+        return node
 
     def on_flush_region(self) -> None:
         """Handle flush region after D02 command or after G37."""
@@ -671,109 +687,131 @@ class StateTrackingVisitor(AstVisitor):
         self._dispatch_d01_handler = self._dispatch_d01_handler_non_region
         self._dispatch_d01_handler()
 
-    def on_g70(self, node: G70) -> None:
+    def on_g70(self, node: G70) -> G70:
         """Handle `G70` node."""
         super().on_g70(node)
         self.state.unit_mode = UnitMode.IMPERIAL
+        return node
 
-    def on_g71(self, node: G71) -> None:
+    def on_g71(self, node: G71) -> G71:
         """Handle `G71` node."""
         super().on_g71(node)
         self.state.unit_mode = UnitMode.METRIC
+        return node
 
-    def on_g74(self, node: G74) -> None:
+    def on_g74(self, node: G74) -> G74:
         """Handle `G74` node."""
         super().on_g74(node)
         self.state.arc_interpolation = ArcInterpolation.SINGLE_QUADRANT
         self._dispatch_d01_handler()
+        return node
 
-    def on_g75(self, node: G75) -> None:
+    def on_g75(self, node: G75) -> G75:
         """Handle `G75` node."""
         super().on_g75(node)
         self.state.arc_interpolation = ArcInterpolation.MULTI_QUADRANT
         self._dispatch_d01_handler()
+        return node
 
-    def on_g90(self, node: G90) -> None:
+    def on_g90(self, node: G90) -> G90:
         """Handle `G90` node."""
         super().on_g90(node)
         if self.state.coordinate_format is None:
             self.state.coordinate_format = CoordinateFormat()
-        self.state.coordinate_format.coordinate_mode = CoordinateNotation.ABSOLUTE
 
-    def on_g91(self, node: G91) -> None:
+        self.state.coordinate_format.coordinate_mode = CoordinateNotation.ABSOLUTE
+        return node
+
+    def on_g91(self, node: G91) -> G91:
         """Handle `G91` node."""
         super().on_g91(node)
         if self.state.coordinate_format is None:
             self.state.coordinate_format = CoordinateFormat()
-        self.state.coordinate_format.coordinate_mode = CoordinateNotation.INCREMENTAL
 
-    def on_lm(self, node: LM) -> None:
+        self.state.coordinate_format.coordinate_mode = CoordinateNotation.INCREMENTAL
+        return node
+
+    def on_lm(self, node: LM) -> LM:
         """Handle `LM` node."""
         super().on_lm(node)
         self.state.transform.mirroring = node.mirroring
+        return node
 
-    def on_ln(self, node: LN) -> None:
+    def on_ln(self, node: LN) -> LN:
         """Handle `LN` node."""
         super().on_ln(node)
         self.state.image_attributes.file_name = node.name
+        return node
 
-    def on_lp(self, node: LP) -> None:
+    def on_lp(self, node: LP) -> LP:
         """Handle `LP` node."""
         super().on_lp(node)
         self.state.transform.polarity = node.polarity
+        return node
 
-    def on_lr(self, node: LR) -> None:
+    def on_lr(self, node: LR) -> LR:
         """Handle `LR` node."""
         super().on_lr(node)
         self.state.transform.rotation = node.rotation
+        return node
 
-    def on_ls(self, node: LS) -> None:
+    def on_ls(self, node: LS) -> LS:
         """Handle `LS` node."""
         super().on_ls(node)
         self.state.transform.scaling = node.scale
+        return node
 
-    def on_m00(self, node: M00) -> None:
+    def on_m00(self, node: M00) -> M00:
         """Handle `M00` node."""
         raise ProgramStop(node)
 
-    def on_m02(self, node: M02) -> None:
+    def on_m02(self, node: M02) -> M02:
         """Handle `M02` node."""
         raise ProgramStop(node)
 
-    def on_coordinate_x(self, node: CoordinateX) -> None:
+    def on_coordinate_x(self, node: CoordinateX) -> CoordinateX:
         """Handle `Coordinate` node."""
         super().on_coordinate_x(node)
         if self.state.coordinate_format is None:
             raise CoordinateFormatNotSetError(node)
-        self.state.coordinate_x = self.state.coordinate_format.unpack_x(node.value)
 
-    def on_coordinate_y(self, node: CoordinateY) -> None:
+        self.state.coordinate_x = self.state.coordinate_format.unpack_x(node.value)
+        return node
+
+    def on_coordinate_y(self, node: CoordinateY) -> CoordinateY:
         """Handle `Coordinate` node."""
         super().on_coordinate_y(node)
         if self.state.coordinate_format is None:
             raise CoordinateFormatNotSetError(node)
-        self.state.coordinate_y = self.state.coordinate_format.unpack_y(node.value)
 
-    def on_coordinate_i(self, node: CoordinateI) -> None:
+        self.state.coordinate_y = self.state.coordinate_format.unpack_y(node.value)
+        return node
+
+    def on_coordinate_i(self, node: CoordinateI) -> CoordinateI:
         """Handle `Coordinate` node."""
         super().on_coordinate_i(node)
         if self.state.coordinate_format is None:
             raise CoordinateFormatNotSetError(node)
-        self.state.coordinate_i = self.state.coordinate_format.unpack_x(node.value)
 
-    def on_coordinate_j(self, node: CoordinateJ) -> None:
+        self.state.coordinate_i = self.state.coordinate_format.unpack_x(node.value)
+        return node
+
+    def on_coordinate_j(self, node: CoordinateJ) -> CoordinateJ:
         """Handle `Coordinate` node."""
         super().on_coordinate_j(node)
         if self.state.coordinate_format is None:
             raise CoordinateFormatNotSetError(node)
-        self.state.coordinate_j = self.state.coordinate_format.unpack_y(node.value)
 
-    def on_as(self, node: AS) -> None:
+        self.state.coordinate_j = self.state.coordinate_format.unpack_y(node.value)
+        return node
+
+    def on_as(self, node: AS) -> AS:
         """Handle `AS` node."""
         super().on_as(node)
         self.state.image_attributes.axis_correspondence = node.correspondence
+        return node
 
-    def on_fs(self, node: FS) -> None:
+    def on_fs(self, node: FS) -> FS:
         """Handle `FS` node."""
         super().on_fs(node)
         self.state.coordinate_format = CoordinateFormat(
@@ -784,49 +822,58 @@ class StateTrackingVisitor(AstVisitor):
             y_integral=node.y_integral,
             y_decimal=node.y_decimal,
         )
+        return node
 
-    def on_in(self, node: IN) -> None:
+    def on_in(self, node: IN) -> IN:
         """Handle `IN` node."""
         super().on_in(node)
         self.state.image_attributes.image_name = node.name
+        return node
 
-    def on_ip(self, node: IP) -> None:
+    def on_ip(self, node: IP) -> IP:
         """Handle `IP` node."""
         super().on_ip(node)
         self.state.image_attributes.polarity = node.polarity
+        return node
 
-    def on_ir(self, node: IR) -> None:
+    def on_ir(self, node: IR) -> IR:
         """Handle `IR` node."""
         super().on_ir(node)
         self.state.image_attributes.rotation = node.rotation_degrees
+        return node
 
-    def on_mi(self, node: MI) -> None:
+    def on_mi(self, node: MI) -> MI:
         """Handle `MI` node."""
         super().on_mi(node)
         self.state.image_attributes.a_axis_mirroring = node.a_mirroring
         self.state.image_attributes.b_axis_mirroring = node.b_mirroring
+        return node
 
-    def on_mo(self, node: MO) -> None:
+    def on_mo(self, node: MO) -> MO:
         """Handle `MO` node."""
         super().on_mo(node)
         self.state.unit_mode = node.mode
+        return node
 
-    def on_of(self, node: OF) -> None:
+    def on_of(self, node: OF) -> OF:
         """Handle `OF` node."""
         super().on_of(node)
         self.state.image_attributes.a_axis_offset = node.a_offset
         self.state.image_attributes.b_axis_offset = node.b_offset
+        return node
 
-    def on_sf(self, node: SF) -> None:
+    def on_sf(self, node: SF) -> SF:
         """Handle `SF` node."""
         super().on_sf(node)
         self.state.image_attributes.a_axis_scale = node.a_scale
         self.state.image_attributes.b_axis_scale = node.b_scale
+        return node
 
-    def on_file(self, node: File) -> None:
+    def on_file(self, node: File) -> File:
         """Handle `File` node."""
         with suppress(ProgramStop):
             super().on_file(node)
+        return node
 
     def on_exception(self, node: Node, exception: Exception) -> bool:  # noqa: ARG002
         """Handle exception."""

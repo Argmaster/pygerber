@@ -21,12 +21,12 @@ class AB(Node):
     nodes: List[Node]
     close: ABclose
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> AB:
         """Handle visitor call."""
-        visitor.on_ab(self)
+        return visitor.on_ab(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], AB]:
         """Get callback function for the node."""
         return visitor.on_ab

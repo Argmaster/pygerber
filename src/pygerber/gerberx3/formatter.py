@@ -460,29 +460,32 @@ class Formatter(AstVisitor):
 
     @_decrease_base_indent("block_aperture_body_indent")
     @_decorator_insert_base_indent
-    def on_ab_close(self, node: ABclose) -> None:  # noqa: ARG002
+    def on_ab_close(self, node: ABclose) -> ABclose:
         """Handle `ABclose` node."""
         with self._extended_command("AB"):
             pass
+        return node
 
     @_decorator_insert_base_indent
     @_increase_base_indent("block_aperture_body_indent")
-    def on_ab_open(self, node: ABopen) -> None:
+    def on_ab_open(self, node: ABopen) -> ABopen:
         """Handle `ABopen` node."""
         with self._extended_command("AB"):
             self._write(node.aperture_id)
+        return node
 
     @_decorator_insert_base_indent
-    def on_adc(self, node: ADC) -> None:
+    def on_adc(self, node: ADC) -> ADC:
         """Handle `AD` circle node."""
         with self._extended_command(f"AD{node.aperture_id}C,"):
             self._write(self._fmt_double(node.diameter))
 
             if node.hole_diameter is not None:
                 self._write(f"X{self._fmt_double(node.hole_diameter)}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_adr(self, node: ADR) -> None:
+    def on_adr(self, node: ADR) -> ADR:
         """Handle `AD` rectangle node."""
         with self._extended_command(f"AD{node.aperture_id}R,"):
             self._write(self._fmt_double(node.width))
@@ -490,9 +493,10 @@ class Formatter(AstVisitor):
 
             if node.hole_diameter is not None:
                 self._write(f"X{self._fmt_double(node.hole_diameter)}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_ado(self, node: ADO) -> None:
+    def on_ado(self, node: ADO) -> ADO:
         """Handle `AD` obround node."""
         with self._extended_command(f"AD{node.aperture_id}O,"):
             self._write(self._fmt_double(node.width))
@@ -500,9 +504,10 @@ class Formatter(AstVisitor):
 
             if node.hole_diameter is not None:
                 self._write(f"X{self._fmt_double(node.hole_diameter)}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_adp(self, node: ADP) -> None:
+    def on_adp(self, node: ADP) -> ADP:
         """Handle `AD` polygon node."""
         with self._extended_command(f"AD{node.aperture_id}P,"):
             self._write(self._fmt_double(node.outer_diameter))
@@ -513,9 +518,10 @@ class Formatter(AstVisitor):
 
             if node.hole_diameter is not None:
                 self._write(f"X{self._fmt_double(node.hole_diameter)}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_ad_macro(self, node: ADmacro) -> None:
+    def on_ad_macro(self, node: ADmacro) -> ADmacro:
         """Handle `AD` macro node."""
         with self._extended_command(f"AD{node.aperture_id}{node.name}"):
             if node.params is not None:
@@ -523,31 +529,35 @@ class Formatter(AstVisitor):
                 self._write(f",{first}")
                 for param in rest:
                     self._write(f"X{param}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_am_close(self, node: AMclose) -> None:
+    def on_am_close(self, node: AMclose) -> AMclose:
         """Handle `AMclose` node."""
         super().on_am_close(node)
         if self.macro_end_in_new_line:
             self._write(f"{self.lf}")
         self._write(f"%{self.lf}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_am_open(self, node: AMopen) -> None:
+    def on_am_open(self, node: AMopen) -> AMopen:
         """Handle `AMopen` node."""
         super().on_am_open(node)
         self._write(f"%AM{node.name}*")
+        return node
 
     @_decrease_base_indent("step_and_repeat_body_indent")
     @_decorator_insert_base_indent
-    def on_sr_close(self, node: SRclose) -> None:  # noqa: ARG002
+    def on_sr_close(self, node: SRclose) -> SRclose:
         """Handle `SRclose` node."""
         with self._extended_command("SR"):
             pass
+        return node
 
     @_decorator_insert_base_indent
     @_increase_base_indent("step_and_repeat_body_indent")
-    def on_sr_open(self, node: SRopen) -> None:
+    def on_sr_open(self, node: SRopen) -> SRopen:
         """Handle `SRopen` node."""
         with self._extended_command("SR"):
             if node.x is not None:
@@ -562,18 +572,22 @@ class Formatter(AstVisitor):
             if node.x is not None:
                 self._write(f"J{node.j}")
 
+        return node
+
     # Attribute
 
     @_decorator_insert_base_indent
-    def on_ta_user_name(self, node: TA_UserName) -> None:
+    def on_ta_user_name(self, node: TA_UserName) -> TA_UserName:
         """Handle `TA_UserName` node."""
         with self._extended_command(f"TA{node.user_name}"):
             for field in node.fields:
                 self._write(",")
                 self._write(field)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_ta_aper_function(self, node: TA_AperFunction) -> None:
+    def on_ta_aper_function(self, node: TA_AperFunction) -> TA_AperFunction:
         """Handle `TA_AperFunction` node."""
         with self._extended_command("TA.AperFunction"):
             if node.function is not None:
@@ -584,8 +598,10 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(field)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_ta_drill_tolerance(self, node: TA_DrillTolerance) -> None:
+    def on_ta_drill_tolerance(self, node: TA_DrillTolerance) -> TA_DrillTolerance:
         """Handle `TA_DrillTolerance` node."""
         with self._extended_command("TA.DrillTolerance"):
             if node.plus_tolerance is not None:
@@ -596,8 +612,10 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(self._fmt_double(node.minus_tolerance))
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_ta_flash_text(self, node: TA_FlashText) -> None:
+    def on_ta_flash_text(self, node: TA_FlashText) -> TA_FlashText:
         """Handle `TA_FlashText` node."""
         with self._extended_command("TA.FlashText"):
             self._write(",")
@@ -634,23 +652,29 @@ class Formatter(AstVisitor):
                     self._write(",")
                     self._write(comment)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_td(self, node: TD) -> None:
+    def on_td(self, node: TD) -> TD:
         """Handle `TD` node."""
         with self._extended_command("TD"):
             if node.name is not None:
                 self._write(node.name)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_user_name(self, node: TF_UserName) -> None:
+    def on_tf_user_name(self, node: TF_UserName) -> TF_UserName:
         """Handle `TF_UserName` node."""
         with self._extended_command(f"TF{node.user_name}"):
             for field in node.fields:
                 self._write(",")
                 self._write(field)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_part(self, node: TF_Part) -> None:
+    def on_tf_part(self, node: TF_Part) -> TF_Part:
         """Handle `TF_Part` node."""
         with self._extended_command("TF.Part,"):
             self._write(node.part.value)
@@ -659,8 +683,10 @@ class Formatter(AstVisitor):
                     self._write(",")
                     self._write(field)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_file_function(self, node: TF_FileFunction) -> None:
+    def on_tf_file_function(self, node: TF_FileFunction) -> TF_FileFunction:
         """Handle `TF_FileFunction` node."""
         with self._extended_command("TF.FileFunction,"):
             self._write(node.file_function.value)
@@ -669,30 +695,40 @@ class Formatter(AstVisitor):
                     self._write(",")
                     self._write(field)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_file_polarity(self, node: TF_FilePolarity) -> None:
+    def on_tf_file_polarity(self, node: TF_FilePolarity) -> TF_FilePolarity:
         """Handle `TF_FilePolarity` node."""
         with self._extended_command("TF.FilePolarity,"):
             self._write(node.polarity)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_same_coordinates(self, node: TF_SameCoordinates) -> None:
+    def on_tf_same_coordinates(self, node: TF_SameCoordinates) -> TF_SameCoordinates:
         """Handle `TF_SameCoordinates` node."""
         with self._extended_command("TF.SameCoordinates"):
             if node.identifier is not None:
                 self._write(",")
                 self._write(node.identifier)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_creation_date(self, node: TF_CreationDate) -> None:
+    def on_tf_creation_date(self, node: TF_CreationDate) -> TF_CreationDate:
         """Handle `TF_CreationDate` node."""
         with self._extended_command("TF.CreationDate"):
             if node.creation_date is not None:
                 self._write(",")
                 self._write(node.creation_date.isoformat())
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_generation_software(self, node: TF_GenerationSoftware) -> None:
+    def on_tf_generation_software(
+        self, node: TF_GenerationSoftware
+    ) -> TF_GenerationSoftware:
         """Handle `TF_GenerationSoftware` node."""
         with self._extended_command("TF.GenerationSoftware"):
             self._write(",")
@@ -707,8 +743,10 @@ class Formatter(AstVisitor):
             if node.version is not None:
                 self._write(node.version)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_project_id(self, node: TF_ProjectId) -> None:
+    def on_tf_project_id(self, node: TF_ProjectId) -> TF_ProjectId:
         """Handle `TF_ProjectId` node."""
         with self._extended_command("TF.ProjectId"):
             self._write(",")
@@ -723,31 +761,39 @@ class Formatter(AstVisitor):
             if node.revision is not None:
                 self._write(node.revision)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_tf_md5(self, node: TF_MD5) -> None:
+    def on_tf_md5(self, node: TF_MD5) -> TF_MD5:
         """Handle `TF_MD5` node."""
         with self._extended_command("TF.MD5"):
             self._write(",")
             self._write(node.md5)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_user_name(self, node: TO_UserName) -> None:
+    def on_to_user_name(self, node: TO_UserName) -> TO_UserName:
         """Handle `TO_UserName` node."""
         with self._extended_command(f"TO{node.user_name}"):
             for field in node.fields:
                 self._write(",")
                 self._write(field)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_n(self, node: TO_N) -> None:
+    def on_to_n(self, node: TO_N) -> TO_N:
         """Handle `TO_N` node."""
         with self._extended_command("TO.N"):
             for field in node.net_names:
                 self._write(",")
                 self._write(field)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_p(self, node: TO_P) -> None:
+    def on_to_p(self, node: TO_P) -> TO_P:
         """Handle `TO_P` node`."""
         with self._extended_command("TO.P"):
             self._write(",")
@@ -758,92 +804,118 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(node.function)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_c(self, node: TO_C) -> None:
+    def on_to_c(self, node: TO_C) -> TO_C:
         """Handle `TO_C` node."""
         with self._extended_command("TO.C"):
             self._write(",")
             self._write(node.refdes)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_crot(self, node: TO_CRot) -> None:
+    def on_to_crot(self, node: TO_CRot) -> TO_CRot:
         """Handle `TO_CRot` node."""
         with self._extended_command("TO.CRot"):
             self._write(",")
             self._write(self._fmt_double(node.angle))
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_cmfr(self, node: TO_CMfr) -> None:
+    def on_to_cmfr(self, node: TO_CMfr) -> TO_CMfr:
         """Handle `TO_CMfr` node."""
         with self._extended_command("TO.CMfr"):
             self._write(",")
             self._write(node.manufacturer)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_cmnp(self, node: TO_CMNP) -> None:
+    def on_to_cmnp(self, node: TO_CMNP) -> TO_CMNP:
         """Handle `TO_CMNP` node."""
         with self._extended_command("TO.CMPN"):
             self._write(",")
             self._write(node.part_number)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_cval(self, node: TO_CVal) -> None:
+    def on_to_cval(self, node: TO_CVal) -> TO_CVal:
         """Handle `TO_CVal` node."""
         with self._extended_command("TO.CVal"):
             self._write(",")
             self._write(node.value)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_cmnt(self, node: TO_CMnt) -> None:
+    def on_to_cmnt(self, node: TO_CMnt) -> TO_CMnt:
         """Handle `TO_CVal` node."""
         with self._extended_command("TO.CMnt"):
             self._write(",")
             self._write(node.mount.value)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_cftp(self, node: TO_CFtp) -> None:
+    def on_to_cftp(self, node: TO_CFtp) -> TO_CFtp:
         """Handle `TO_Cftp` node."""
         with self._extended_command("TO.CFtp"):
             self._write(",")
             self._write(node.footprint)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_cpgn(self, node: TO_CPgN) -> None:
+    def on_to_cpgn(self, node: TO_CPgN) -> TO_CPgN:
         """Handle `TO_CPgN` node."""
         with self._extended_command("TO.CPgN"):
             self._write(",")
             self._write(node.name)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_cpgd(self, node: TO_CPgD) -> None:
+    def on_to_cpgd(self, node: TO_CPgD) -> TO_CPgD:
         """Handle `TO_CPgD` node."""
         with self._extended_command("TO.CPgD"):
             self._write(",")
             self._write(node.description)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_chgt(self, node: TO_CHgt) -> None:
+    def on_to_chgt(self, node: TO_CHgt) -> TO_CHgt:
         """Handle `TO_CHgt` node."""
         with self._extended_command("TO.CHgt"):
             self._write(",")
             self._write(self._fmt_double(node.height))
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_clbn(self, node: TO_CLbN) -> None:
+    def on_to_clbn(self, node: TO_CLbN) -> TO_CLbN:
         """Handle `TO_CLbN` node."""
         with self._extended_command("TO.CLbn"):
             self._write(",")
             self._write(node.name)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_clbd(self, node: TO_CLbD) -> None:
+    def on_to_clbd(self, node: TO_CLbD) -> TO_CLbD:
         """Handle `TO_CLbD` node."""
         with self._extended_command("TO.CLbD"):
             self._write(",")
             self._write(node.description)
 
+        return node
+
     @_decorator_insert_base_indent
-    def on_to_csup(self, node: TO_CSup) -> None:
+    def on_to_csup(self, node: TO_CSup) -> TO_CSup:
         """Handle `TO_CSup` node."""
         with self._extended_command("TO.CSup"):
             self._write(",")
@@ -854,9 +926,11 @@ class Formatter(AstVisitor):
                 self._write(",")
                 self._write(field)
 
+        return node
+
     # D codes
 
-    def on_d01(self, node: D01) -> None:
+    def on_d01(self, node: D01) -> D01:
         """Handle `D01` node."""
         if node.is_standalone or not self.keep_non_standalone_codes:
             self._insert_base_indent()
@@ -866,7 +940,9 @@ class Formatter(AstVisitor):
         with self._command("D01"):
             pass
 
-    def on_d02(self, node: D02) -> None:
+        return node
+
+    def on_d02(self, node: D02) -> D02:
         """Handle `D02` node."""
         if node.is_standalone or not self.keep_non_standalone_codes:
             self._insert_base_indent()
@@ -876,7 +952,9 @@ class Formatter(AstVisitor):
         with self._command("D02"):
             pass
 
-    def on_d03(self, node: D03) -> None:
+        return node
+
+    def on_d03(self, node: D03) -> D03:
         """Handle `D03` node."""
         if node.is_standalone or not self.keep_non_standalone_codes:
             self._insert_base_indent()
@@ -886,13 +964,17 @@ class Formatter(AstVisitor):
         with self._command("D03"):
             pass
 
-    def on_dnn(self, node: Dnn) -> None:
+        return node
+
+    def on_dnn(self, node: Dnn) -> Dnn:
         """Handle `Dnn` node."""
         if node.is_standalone or not self.keep_non_standalone_codes:
             self._insert_base_indent()
 
         with self._command(node.aperture_id):
             pass
+
+        return node
 
     # G codes
 
@@ -905,137 +987,159 @@ class Formatter(AstVisitor):
         self._write(cls.__qualname__)
 
     @_decorator_insert_base_indent
-    def on_g01(self, node: G01) -> None:
+    def on_g01(self, node: G01) -> G01:
         """Handle `G01` node."""
         self._handle_g(node, G01)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g02(self, node: G02) -> None:
+    def on_g02(self, node: G02) -> G02:
         """Handle `G02` node."""
         self._handle_g(node, G02)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g03(self, node: G03) -> None:
+    def on_g03(self, node: G03) -> G03:
         """Handle `G03` node."""
         self._handle_g(node, G03)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g04(self, node: G04) -> None:
+    def on_g04(self, node: G04) -> G04:
         """Handle `G04` node."""
         with self._command(f"G04{node.string or ''}"):
             pass
+        return node
 
     @_decorator_insert_base_indent
-    def on_g36(self, node: G36) -> None:
+    def on_g36(self, node: G36) -> G36:
         """Handle `G36` node."""
         self._handle_g(node, G36)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g37(self, node: G37) -> None:
+    def on_g37(self, node: G37) -> G37:
         """Handle `G37` node."""
         self._handle_g(node, G37)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g54(self, node: G54) -> None:
+    def on_g54(self, node: G54) -> G54:
         """Handle `G54` node."""
         if self.remove_g54:
-            return
+            return node
         self._handle_g(node, G54)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g55(self, node: G55) -> None:
+    def on_g55(self, node: G55) -> G55:
         """Handle `G55` node."""
         if self.remove_g55:
-            return
+            return node
         self._handle_g(node, G55)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g70(self, node: G70) -> None:
+    def on_g70(self, node: G70) -> G70:
         """Handle `G70` node."""
         self._handle_g(node, G70)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g71(self, node: G71) -> None:
+    def on_g71(self, node: G71) -> G71:
         """Handle `G71` node."""
         self._handle_g(node, G71)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g74(self, node: G74) -> None:
+    def on_g74(self, node: G74) -> G74:
         """Handle `G74` node."""
         self._handle_g(node, G74)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g75(self, node: G75) -> None:
+    def on_g75(self, node: G75) -> G75:
         """Handle `G75` node."""
         self._handle_g(node, G75)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g90(self, node: G90) -> None:
+    def on_g90(self, node: G90) -> G90:
         """Handle `G90` node."""
         self._handle_g(node, G90)
+        return node
 
     @_decorator_insert_base_indent
-    def on_g91(self, node: G91) -> None:
+    def on_g91(self, node: G91) -> G91:
         """Handle `G91` node."""
         self._handle_g(node, G91)
+        return node
 
     # Load
 
     @_decorator_insert_base_indent
-    def on_lm(self, node: LM) -> None:
+    def on_lm(self, node: LM) -> LM:
         """Handle `LM` node."""
         with self._extended_command(f"LM{node.mirroring.value}"):
             pass
+        return node
 
     @_decorator_insert_base_indent
-    def on_ln(self, node: LN) -> None:
+    def on_ln(self, node: LN) -> LN:
         """Handle `LN` node."""
         with self._extended_command(f"LN{node.name}"):
             pass
+        return node
 
     @_insert_var("empty_line_before_polarity_switch")
     @_decorator_insert_base_indent
-    def on_lp(self, node: LP) -> None:
+    def on_lp(self, node: LP) -> LP:
         """Handle `LP` node."""
         with self._extended_command(f"LP{node.polarity.value}"):
             pass
+        return node
 
     @_decorator_insert_base_indent
-    def on_lr(self, node: LR) -> None:
+    def on_lr(self, node: LR) -> LR:
         """Handle `LR` node."""
         with self._extended_command(f"LR{self._fmt_double(node.rotation)}"):
             pass
+        return node
 
     @_decorator_insert_base_indent
-    def on_ls(self, node: LS) -> None:
+    def on_ls(self, node: LS) -> LS:
         """Handle `LS` node."""
         with self._extended_command(f"LS{self._fmt_double(node.scale)}"):
             pass
+        return node
 
     # M Codes
 
     @_decorator_insert_base_indent
-    def on_m00(self, node: M00) -> None:  # noqa: ARG002
+    def on_m00(self, node: M00) -> M00:
         """Handle `M00` node."""
         with self._command("M00"):
             pass
+        return node
 
     @_decorator_insert_base_indent
-    def on_m01(self, node: M01) -> None:  # noqa: ARG002
+    def on_m01(self, node: M01) -> M01:
         """Handle `M01` node."""
         with self._command("M01"):
             pass
+        return node
 
     @_decorator_insert_base_indent
-    def on_m02(self, node: M02) -> None:  # noqa: ARG002
+    def on_m02(self, node: M02) -> M02:
         """Handle `M02` node."""
         with self._command("M02"):
             pass
+        return node
 
     # Math
 
     # Math :: Operators :: Binary
-    def on_add(self, node: Add) -> None:
+    def on_add(self, node: Add) -> Add:
         """Handle `Add` node."""
         if self.explicit_parenthesis:
             self._write("(")
@@ -1049,7 +1153,9 @@ class Formatter(AstVisitor):
         if self.explicit_parenthesis:
             self._write(")")
 
-    def on_div(self, node: Div) -> None:
+        return node
+
+    def on_div(self, node: Div) -> Div:
         """Handle `Div` node."""
         if self.explicit_parenthesis:
             self._write("(")
@@ -1063,7 +1169,9 @@ class Formatter(AstVisitor):
         if self.explicit_parenthesis:
             self._write(")")
 
-    def on_mul(self, node: Mul) -> None:
+        return node
+
+    def on_mul(self, node: Mul) -> Mul:
         """Handle `Mul` node."""
         if self.explicit_parenthesis:
             self._write("(")
@@ -1077,7 +1185,9 @@ class Formatter(AstVisitor):
         if self.explicit_parenthesis:
             self._write(")")
 
-    def on_sub(self, node: Sub) -> None:
+        return node
+
+    def on_sub(self, node: Sub) -> Sub:
         """Handle `Sub` node."""
         if self.explicit_parenthesis:
             self._write("(")
@@ -1091,20 +1201,24 @@ class Formatter(AstVisitor):
         if self.explicit_parenthesis:
             self._write(")")
 
+        return node
+
     # Math :: Operators :: Unary
 
-    def on_neg(self, node: Neg) -> None:
+    def on_neg(self, node: Neg) -> Neg:
         """Handle `Neg` node."""
         self._write("-")
         node.operand.visit(self)
+        return node
 
-    def on_pos(self, node: Pos) -> None:
+    def on_pos(self, node: Pos) -> Pos:
         """Handle `Pos` node."""
         self._write("+")
         node.operand.visit(self)
+        return node
 
     @_decorator_insert_base_indent
-    def on_assignment(self, node: Assignment) -> None:
+    def on_assignment(self, node: Assignment) -> Assignment:
         """Handle `Assignment` node."""
         self._write(self._macro_primitive_lf)
         node.variable.visit(self)
@@ -1112,11 +1226,14 @@ class Formatter(AstVisitor):
         node.expression.visit(self)
         self._write("*")
 
-    def on_constant(self, node: Constant) -> None:
+        return node
+
+    def on_constant(self, node: Constant) -> Constant:
         """Handle `Constant` node."""
         self._write(self._fmt_double(node.constant))
+        return node
 
-    def on_parenthesis(self, node: Parenthesis) -> None:
+    def on_parenthesis(self, node: Parenthesis) -> Parenthesis:
         """Handle `Parenthesis` node."""
         if not self.explicit_parenthesis:
             self._write("(")
@@ -1126,43 +1243,52 @@ class Formatter(AstVisitor):
         if not self.explicit_parenthesis:
             self._write(")")
 
-    def on_point(self, node: Point) -> None:
+        return node
+
+    def on_point(self, node: Point) -> Point:
         """Handle `Point` node."""
         node.x.visit(self)
         self._write(",")
         node.y.visit(self)
+        return node
 
-    def on_variable(self, node: Variable) -> None:
+    def on_variable(self, node: Variable) -> Variable:
         """Handle `Variable` node."""
         self._write(node.variable)
+        return node
 
     # Other
 
-    def on_coordinate_x(self, node: CoordinateX) -> None:
+    def on_coordinate_x(self, node: CoordinateX) -> CoordinateX:
         """Handle `Coordinate` node."""
         self._write(f"X{node.value}")
+        return node
 
-    def on_coordinate_y(self, node: CoordinateY) -> None:
+    def on_coordinate_y(self, node: CoordinateY) -> CoordinateY:
         """Handle `Coordinate` node."""
         self._write(f"Y{node.value}")
+        return node
 
-    def on_coordinate_i(self, node: CoordinateI) -> None:
+    def on_coordinate_i(self, node: CoordinateI) -> CoordinateI:
         """Handle `Coordinate` node."""
         self._write(f"I{node.value}")
+        return node
 
-    def on_coordinate_j(self, node: CoordinateJ) -> None:
+    def on_coordinate_j(self, node: CoordinateJ) -> CoordinateJ:
         """Handle `Coordinate` node."""
         self._write(f"J{node.value}")
+        return node
 
     # Primitives
 
     @_decorator_insert_base_indent
-    def on_code_0(self, node: Code0) -> None:
+    def on_code_0(self, node: Code0) -> Code0:
         """Handle `Code0` node."""
         self._write(f"{self._macro_primitive_lf}0{node.string}*")
+        return node
 
     @_decorator_insert_base_indent
-    def on_code_1(self, node: Code1) -> None:
+    def on_code_1(self, node: Code1) -> Code1:
         """Handle `Code1` node."""
         self._write(f"{self._macro_primitive_lf}1,{self._macro_param_lf}")
         node.exposure.visit(self)
@@ -1172,10 +1298,13 @@ class Formatter(AstVisitor):
         node.center_x.visit(self)
         self._write(f",{self._macro_param_lf}")
         node.center_y.visit(self)
+
         if node.rotation is not None:
             self._write(f",{self._macro_param_lf}")
             node.rotation.visit(self)
+
         self._write("*")
+        return node
 
     @cached_property
     def _macro_primitive_lf(self) -> str:
@@ -1206,7 +1335,7 @@ class Formatter(AstVisitor):
         raise NotImplementedError(msg)
 
     @_decorator_insert_base_indent
-    def on_code_2(self, node: Code2) -> None:
+    def on_code_2(self, node: Code2) -> Code2:
         """Handle `Code2` node."""
         self._write(f"{self._macro_primitive_lf}2,{self._macro_param_lf}")
         node.exposure.visit(self)
@@ -1223,9 +1352,10 @@ class Formatter(AstVisitor):
         self._write(f",{self._macro_param_lf}")
         node.rotation.visit(self)
         self._write("*")
+        return node
 
     @_decorator_insert_base_indent
-    def on_code_4(self, node: Code4) -> None:
+    def on_code_4(self, node: Code4) -> Code4:
         """Handle `Code4` node."""
         self._write(f"{self._macro_primitive_lf}4,{self._macro_param_lf}")
         node.exposure.visit(self)
@@ -1235,15 +1365,18 @@ class Formatter(AstVisitor):
         node.start_x.visit(self)
         self._write(f",{self._macro_param_lf}")
         node.start_y.visit(self)
+
         for point in node.points:
             self._write(f",{self._macro_param_lf}")
             point.visit(self)
+
         self._write(f",{self._macro_param_lf}")
         node.rotation.visit(self)
         self._write("*")
+        return node
 
     @_decorator_insert_base_indent
-    def on_code_5(self, node: Code5) -> None:
+    def on_code_5(self, node: Code5) -> Code5:
         """Handle `Code5` node."""
         self._write(f"{self._macro_primitive_lf}5,{self._macro_param_lf}")
         node.exposure.visit(self)
@@ -1258,9 +1391,10 @@ class Formatter(AstVisitor):
         self._write(f",{self._macro_param_lf}")
         node.rotation.visit(self)
         self._write("*")
+        return node
 
     @_decorator_insert_base_indent
-    def on_code_6(self, node: Code6) -> None:
+    def on_code_6(self, node: Code6) -> Code6:
         """Handle `Code6` node."""
         self._write(f"{self._macro_primitive_lf}6,{self._macro_param_lf}")
         node.center_x.visit(self)
@@ -1281,9 +1415,10 @@ class Formatter(AstVisitor):
         self._write(f",{self._macro_param_lf}")
         node.rotation.visit(self)
         self._write("*")
+        return node
 
     @_decorator_insert_base_indent
-    def on_code_7(self, node: Code7) -> None:
+    def on_code_7(self, node: Code7) -> Code7:
         """Handle `Code7` node."""
         self._write(f"{self._macro_primitive_lf}7,{self._macro_param_lf}")
         node.center_x.visit(self)
@@ -1298,9 +1433,10 @@ class Formatter(AstVisitor):
         self._write(f",{self._macro_param_lf}")
         node.rotation.visit(self)
         self._write("*")
+        return node
 
     @_decorator_insert_base_indent
-    def on_code_20(self, node: Code20) -> None:
+    def on_code_20(self, node: Code20) -> Code20:
         """Handle `Code20` node."""
         self._write(f"{self._macro_primitive_lf}20,{self._macro_param_lf}")
         node.exposure.visit(self)
@@ -1317,9 +1453,10 @@ class Formatter(AstVisitor):
         self._write(f",{self._macro_param_lf}")
         node.rotation.visit(self)
         self._write("*")
+        return node
 
     @_decorator_insert_base_indent
-    def on_code_21(self, node: Code21) -> None:
+    def on_code_21(self, node: Code21) -> Code21:
         """Handle `Code21` node."""
         self._write(f"{self._macro_primitive_lf}21,{self._macro_param_lf}")
         node.exposure.visit(self)
@@ -1334,9 +1471,10 @@ class Formatter(AstVisitor):
         self._write(f",{self._macro_param_lf}")
         node.rotation.visit(self)
         self._write("*")
+        return node
 
     @_decorator_insert_base_indent
-    def on_code_22(self, node: Code22) -> None:
+    def on_code_22(self, node: Code22) -> Code22:
         """Handle `Code22` node."""
         self._write(f"{self._macro_primitive_lf}22,{self._macro_param_lf}")
         node.exposure.visit(self)
@@ -1351,75 +1489,79 @@ class Formatter(AstVisitor):
         self._write(f",{self._macro_param_lf}")
         node.rotation.visit(self)
         self._write("*")
+        return node
 
     # Properties
 
     @_decorator_insert_base_indent
-    def on_as(self, node: AS) -> None:
+    def on_as(self, node: AS) -> AS:
         """Handle `AS` node."""
         with self._extended_command("AS"):
             self._write(node.correspondence.value)
+        return node
 
     @_decorator_insert_base_indent
-    def on_fs(self, node: FS) -> None:
+    def on_fs(self, node: FS) -> FS:
         """Handle `FS` node."""
         with self._extended_command("FS"):
             self._write(node.zeros.value)
             self._write(node.coordinate_mode.value)
             self._write(f"X{node.x_integral}{node.x_decimal}")
             self._write(f"Y{node.y_integral}{node.y_decimal}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_in(self, node: IN) -> None:
+    def on_in(self, node: IN) -> IN:
         """Handle `IN` node."""
         with self._extended_command("IN"):
             self._write(node.name)
+        return node
 
     @_decorator_insert_base_indent
-    def on_ip(self, node: IP) -> None:
+    def on_ip(self, node: IP) -> IP:
         """Handle `IP` node."""
         with self._extended_command("IP"):
             self._write(node.polarity.value)
+        return node
 
     @_decorator_insert_base_indent
-    def on_ir(self, node: IR) -> None:
+    def on_ir(self, node: IR) -> IR:
         """Handle `IR` node."""
         with self._extended_command("IR"):
             self._write(self._fmt_double(node.rotation_degrees))
+        return node
 
     @_decorator_insert_base_indent
-    def on_mi(self, node: MI) -> None:
+    def on_mi(self, node: MI) -> MI:
         """Handle `MI` node."""
         with self._extended_command("MI"):
             self._write(f"A{node.a_mirroring}")
             self._write(f"B{node.b_mirroring}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_mo(self, node: MO) -> None:
+    def on_mo(self, node: MO) -> MO:
         """Handle `MO` node."""
         with self._extended_command("MO"):
             self._write(node.mode.value)
+        return node
 
     @_decorator_insert_base_indent
-    def on_of(self, node: OF) -> None:
+    def on_of(self, node: OF) -> OF:
         """Handle `OF` node."""
         with self._extended_command("OF"):
             if node.a_offset is not None:
                 self._write(f"A{node.a_offset}")
             if node.b_offset is not None:
                 self._write(f"B{node.b_offset}")
+        return node
 
     @_decorator_insert_base_indent
-    def on_sf(self, node: SF) -> None:
+    def on_sf(self, node: SF) -> SF:
         """Handle `SF` node."""
         with self._extended_command("SF"):
             self._write("A")
             self._write(self._fmt_double(node.a_scale))
             self._write("B")
             self._write(self._fmt_double(node.b_scale))
-
-    # Root node
-
-    def on_file(self, node: File) -> None:
-        """Handle `File` node."""
-        super().on_file(node)
+        return node

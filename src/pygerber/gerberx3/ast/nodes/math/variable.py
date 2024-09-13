@@ -17,12 +17,12 @@ class Variable(Expression):
 
     variable: str
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Variable:
         """Handle visitor call."""
-        visitor.on_variable(self)
+        return visitor.on_variable(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Variable]:
         """Get callback function for the node."""
         return visitor.on_variable

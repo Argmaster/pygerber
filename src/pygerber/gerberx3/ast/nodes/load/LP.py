@@ -18,12 +18,12 @@ class LP(Node):
 
     polarity: Polarity
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> LP:
         """Handle visitor call."""
-        visitor.on_lp(self)
+        return visitor.on_lp(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], LP]:
         """Get callback function for the node."""
         return visitor.on_lp

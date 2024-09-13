@@ -19,12 +19,12 @@ class IN(Node):
 
     name: str = Field(default="")
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> IN:
         """Handle visitor call."""
-        visitor.on_in(self)
+        return visitor.on_in(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], IN]:
         """Get callback function for the node."""
         return visitor.on_in

@@ -38,13 +38,13 @@ class TF_UserName(TF):  # noqa: N801
         """Get attribute name."""
         return self.user_name
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_UserName:
         """Handle visitor call."""
-        visitor.on_tf_user_name(self)
+        return visitor.on_tf_user_name(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_UserName]:
         """Get callback function for the node."""
         return visitor.on_tf_user_name
 
@@ -60,13 +60,13 @@ class TF_Part(TF):  # noqa: N801
         """Get attribute name."""
         return ".Part"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_Part:
         """Handle visitor call."""
-        visitor.on_tf_part(self)
+        return visitor.on_tf_part(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_Part]:
         """Get callback function for the node."""
         return visitor.on_tf_part
 
@@ -82,13 +82,13 @@ class TF_FileFunction(TF):  # noqa: N801
         """Get attribute name."""
         return ".FileFunction"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_FileFunction:
         """Handle visitor call."""
-        visitor.on_tf_file_function(self)
+        return visitor.on_tf_file_function(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_FileFunction]:
         """Get callback function for the node."""
         return visitor.on_tf_file_function
 
@@ -103,13 +103,13 @@ class TF_FilePolarity(TF):  # noqa: N801
         """Get attribute name."""
         return ".FilePolarity"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_FilePolarity:
         """Handle visitor call."""
-        visitor.on_tf_file_polarity(self)
+        return visitor.on_tf_file_polarity(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_FilePolarity]:
         """Get callback function for the node."""
         return visitor.on_tf_file_polarity
 
@@ -124,13 +124,13 @@ class TF_SameCoordinates(TF):  # noqa: N801
         """Get attribute name."""
         return ".SameCoordinates"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_SameCoordinates:
         """Handle visitor call."""
-        visitor.on_tf_same_coordinates(self)
+        return visitor.on_tf_same_coordinates(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_SameCoordinates]:
         """Get callback function for the node."""
         return visitor.on_tf_same_coordinates
 
@@ -145,13 +145,13 @@ class TF_CreationDate(TF):  # noqa: N801
         """Get attribute name."""
         return ".CreationDate"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_CreationDate:
         """Handle visitor call."""
-        visitor.on_tf_creation_date(self)
+        return visitor.on_tf_creation_date(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_CreationDate]:
         """Get callback function for the node."""
         return visitor.on_tf_creation_date
 
@@ -168,13 +168,13 @@ class TF_GenerationSoftware(TF):  # noqa: N801
         """Get attribute name."""
         return ".GenerationSoftware"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_GenerationSoftware:
         """Handle visitor call."""
-        visitor.on_tf_generation_software(self)
+        return visitor.on_tf_generation_software(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_GenerationSoftware]:
         """Get callback function for the node."""
         return visitor.on_tf_generation_software
 
@@ -191,13 +191,13 @@ class TF_ProjectId(TF):  # noqa: N801
         """Get attribute name."""
         return ".ProjectId"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_ProjectId:
         """Handle visitor call."""
-        visitor.on_tf_project_id(self)
+        return visitor.on_tf_project_id(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_ProjectId]:
         """Get callback function for the node."""
         return visitor.on_tf_project_id
 
@@ -215,9 +215,9 @@ class TF_MD5(TF):  # noqa: N801
         """Get attribute name."""
         return ".MD5"
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TF_MD5:
         """Handle visitor call."""
-        visitor.on_tf_md5(self)
+        return visitor.on_tf_md5(self)
 
     def check_source_hash(self) -> bool:
         """Validate MD5 attribute."""
@@ -235,6 +235,6 @@ class TF_MD5(TF):  # noqa: N801
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TF_MD5]:
         """Get callback function for the node."""
         return visitor.on_tf_md5
