@@ -126,28 +126,58 @@ def test_override_aperture_attribute() -> None:
     )
 
 
+@pytest.fixture()
+def default_visitor(mocker: MockerFixture) -> StateTrackingVisitor:
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__)
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__)
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__)
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_flash_circle.__name__)
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_flash_polygon.__name__)
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_flash_obround.__name__)
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_flash_rectangle.__name__)
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_flash_macro.__name__)
+    mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_flash_block.__name__)
+    mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_line.__name__
+    )
+    mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_cw_arc_sq.__name__
+    )
+    mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_ccw_arc_sq.__name__
+    )
+    mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_cw_arc_mq.__name__
+    )
+    mocker.spy(
+        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_ccw_arc_mq.__name__
+    )
+
+    visitor = StateTrackingVisitor()
+    FS(
+        zeros=Zeros.SKIP_LEADING,
+        coordinate_mode=CoordinateNotation.ABSOLUTE,
+        x_integral=2,
+        x_decimal=6,
+        y_integral=2,
+        y_decimal=6,
+    ).visit(visitor)
+    return visitor
+
+
 def test_d01_draw_linear_default_quadrant(
-    default_d01: D01, mocker: MockerFixture
+    default_visitor: StateTrackingVisitor,
+    default_d01: D01,
 ) -> None:
     """Test if D02 command is handled correctly."""
-    on_draw_line = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
-    )
-    on_draw_cw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__
-    )
-    on_draw_ccw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__
-    )
-    visitor = StateTrackingVisitor()
 
     g_code = G01()
-    visitor.on_g01(g_code)
-    visitor.on_d01(default_d01)
+    g_code.visit(default_visitor)
+    default_d01.visit(default_visitor)
 
-    on_draw_line.assert_called()
-    on_draw_cw_arc.assert_not_called()
-    on_draw_ccw_arc.assert_not_called()
+    default_visitor.on_draw_line.assert_called()  # type: ignore[attr-defined]
+    default_visitor.on_draw_cw_arc_sq.assert_not_called()  # type: ignore[attr-defined]
+    default_visitor.on_draw_ccw_arc_sq.assert_not_called()  # type: ignore[attr-defined]
 
 
 @pytest.fixture()
@@ -165,79 +195,54 @@ def _default_d01() -> D01:
 
 
 def test_d01_draw_cw_arc_default_quadrant(
-    default_d01: D01, mocker: MockerFixture
+    default_visitor: StateTrackingVisitor,
+    default_d01: D01,
 ) -> None:
     """Test if D02 command is handled correctly."""
-    on_draw_line = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
-    )
-    on_draw_cw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__
-    )
-    on_draw_ccw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__
-    )
-    visitor = StateTrackingVisitor()
+    G02().visit(default_visitor)
+    default_d01.visit(default_visitor)
 
-    G02().visit(visitor)
-    default_d01.visit(visitor)
-
-    on_draw_line.assert_not_called()
-    on_draw_cw_arc.assert_called()
-    on_draw_ccw_arc.assert_not_called()
+    default_visitor.on_draw_line.assert_not_called()  # type: ignore[attr-defined]
+    default_visitor.on_draw_cw_arc_sq.assert_called()  # type: ignore[attr-defined]
+    default_visitor.on_draw_ccw_arc_sq.assert_not_called()  # type: ignore[attr-defined]
 
 
 def test_d01_draw_ccw_arc_default_quadrant(
-    default_d01: D01, mocker: MockerFixture
+    default_visitor: StateTrackingVisitor,
+    default_d01: D01,
 ) -> None:
     """Test if D02 command is handled correctly."""
-    on_draw_line = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
-    )
-    on_draw_cw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__
-    )
-    on_draw_ccw_arc = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__
-    )
-    visitor = StateTrackingVisitor()
+    G03().visit(default_visitor)
+    default_d01.visit(default_visitor)
 
-    G03().visit(visitor)
-    default_d01.visit(visitor)
-
-    on_draw_line.assert_not_called()
-    on_draw_cw_arc.assert_not_called()
-    on_draw_ccw_arc.assert_called()
+    default_visitor.on_draw_line.assert_not_called()  # type: ignore[attr-defined]
+    default_visitor.on_draw_cw_arc_sq.assert_not_called()  # type: ignore[attr-defined]
+    default_visitor.on_draw_ccw_arc_sq.assert_called()  # type: ignore[attr-defined]
 
 
-def test_d03_flash_no_aperture(default_d03: D03) -> None:
+def test_d03_flash_no_aperture(
+    default_visitor: StateTrackingVisitor, default_d03: D03
+) -> None:
     """Test if D03 command callbacks are correctly called."""
-    visitor = StateTrackingVisitor()
-
     with pytest.raises(ApertureNotSelectedError):
-        visitor.on_d03(default_d03)
+        default_visitor.on_d03(default_d03)
 
 
-def test_d03_flash_circle(default_d03: D03, mocker: MockerFixture) -> None:
+def test_d03_flash_circle(
+    default_visitor: StateTrackingVisitor, default_d03: D03
+) -> None:
     """Test if D03 command callbacks are correctly called."""
-    spy = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_flash_circle.__name__
-    )
-    visitor = StateTrackingVisitor()
-
-    ad = ADC(
+    ADC(
         aperture_id=ApertureIdStr("D10"),
         diameter=0.1,
-    )
-    dnn = Dnn(
+    ).visit(default_visitor)
+    Dnn(
         aperture_id=ApertureIdStr("D10"),
-    )
+    ).visit(default_visitor)
 
-    visitor.on_adc(ad)
-    visitor.on_dnn(dnn)
-    visitor.on_d03(default_d03)
+    default_d03.visit(default_visitor)
 
-    spy.assert_called_once()
+    default_visitor.on_flash_circle.assert_called_once()  # type: ignore[attr-defined]
 
 
 @pytest.fixture()
@@ -248,182 +253,135 @@ def default_d03() -> D03:
     )
 
 
-def test_d03_flash_rectangle(default_d03: D03, mocker: MockerFixture) -> None:
+def test_d03_flash_rectangle(
+    default_visitor: StateTrackingVisitor, default_d03: D03
+) -> None:
     """Test if D03 command callbacks are correctly called."""
-    spy = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_flash_rectangle.__name__
-    )
-    visitor = StateTrackingVisitor()
-
-    ad = ADR(
+    ADR(
         aperture_id=ApertureIdStr("D10"),
         width=0.1,
         height=0.1,
-    )
-    dnn = Dnn(
+    ).visit(default_visitor)
+    Dnn(
         aperture_id=ApertureIdStr("D10"),
-    )
+    ).visit(default_visitor)
 
-    visitor.on_adr(ad)
-    visitor.on_dnn(dnn)
-    visitor.on_d03(default_d03)
+    default_d03.visit(default_visitor)
 
-    spy.assert_called_once()
+    default_visitor.on_flash_rectangle.assert_called_once()  # type: ignore[attr-defined]
 
 
-def test_d03_flash_obround(default_d03: D03, mocker: MockerFixture) -> None:
+def test_d03_flash_obround(
+    default_visitor: StateTrackingVisitor, default_d03: D03
+) -> None:
     """Test if D03 command callbacks are correctly called."""
-    spy = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_flash_obround.__name__
-    )
-    visitor = StateTrackingVisitor()
-
-    ad = ADO(
+    ADO(
         aperture_id=ApertureIdStr("D10"),
         width=0.1,
         height=0.1,
-    )
-    dnn = Dnn(
+    ).visit(default_visitor)
+    Dnn(
         aperture_id=ApertureIdStr("D10"),
-    )
+    ).visit(default_visitor)
 
-    visitor.on_ado(ad)
-    visitor.on_dnn(dnn)
-    visitor.on_d03(default_d03)
+    default_d03.visit(default_visitor)
 
-    spy.assert_called_once()
+    default_visitor.on_flash_obround.assert_called_once()  # type: ignore[attr-defined]
 
 
-def test_d03_flash_polygon(default_d03: D03, mocker: MockerFixture) -> None:
+def test_d03_flash_polygon(
+    default_visitor: StateTrackingVisitor, default_d03: D03
+) -> None:
     """Test if D03 command callbacks are correctly called."""
-    spy = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_flash_polygon.__name__
-    )
-    visitor = StateTrackingVisitor()
-
-    ad = ADP(
+    ADP(
         aperture_id=ApertureIdStr("D10"),
         vertices=6,
         outer_diameter=0.1,
         rotation=0,
         hole_diameter=0.05,
-    )
-    dnn = Dnn(
+    ).visit(default_visitor)
+    Dnn(
         aperture_id=ApertureIdStr("D10"),
-    )
+    ).visit(default_visitor)
 
-    visitor.on_adp(ad)
-    visitor.on_dnn(dnn)
-    visitor.on_d03(default_d03)
+    default_d03.visit(default_visitor)
 
-    spy.assert_called_once()
+    default_visitor.on_flash_polygon.assert_called_once()  # type: ignore[attr-defined]
 
 
-def test_d03_flash_macro(default_d03: D03, mocker: MockerFixture) -> None:
+def test_d03_flash_macro(
+    default_visitor: StateTrackingVisitor, default_d03: D03
+) -> None:
     """Test if D03 command callbacks are correctly called."""
-    spy = mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_flash_macro.__name__)
-    visitor = StateTrackingVisitor()
-
-    am = AM(
+    AM(
         open=AMopen(name="MACRO0"),
         primitives=[],
         close=AMclose(),
-    )
-    ad = ADmacro(
+    ).visit(default_visitor)
+    ADmacro(
         aperture_id=ApertureIdStr("D10"),
         name="MACRO0",
-    )
-    dnn = Dnn(
+    ).visit(default_visitor)
+    Dnn(
         aperture_id=ApertureIdStr("D10"),
-    )
+    ).visit(default_visitor)
 
-    visitor.on_am(am)
-    visitor.on_ad_macro(ad)
-    visitor.on_dnn(dnn)
-    visitor.on_d03(default_d03)
+    default_d03.visit(default_visitor)
 
-    spy.assert_called_once()
+    default_visitor.on_flash_macro.assert_called_once()  # type: ignore[attr-defined]
 
 
-def test_d03_flash_block(default_d03: D03, mocker: MockerFixture) -> None:
+def test_d03_flash_block(
+    default_visitor: StateTrackingVisitor, default_d03: D03
+) -> None:
     """Test if D03 command callbacks are correctly called."""
-    spy = mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_flash_block.__name__)
-    visitor = StateTrackingVisitor()
-
-    ab = AB(
+    AB(
         open=ABopen(aperture_id=ApertureIdStr("D10")),
         nodes=[],
         close=ABclose(),
-    )
-    dnn = Dnn(
+    ).visit(default_visitor)
+    Dnn(
         aperture_id=ApertureIdStr("D10"),
-    )
+    ).visit(default_visitor)
 
-    visitor.on_ab(ab)
-    visitor.on_dnn(dnn)
-    visitor.on_d03(default_d03)
-
-    spy.assert_called_once()
+    default_d03.visit(default_visitor)
+    default_visitor.on_flash_block.assert_called_once()  # type: ignore[attr-defined]
 
 
 def test_switch_to_region_mode_linear_default_quadrant_plot(
-    default_d01: D01, mocker: MockerFixture
+    default_visitor: StateTrackingVisitor, default_d01: D01
 ) -> None:
     """Check if the visitor switches to region mode handlers properly."""
-    handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__
-    )
-    region_mode_handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_line.__name__
-    )
-    visitor = StateTrackingVisitor()
+    G01().visit(default_visitor)
+    G36().visit(default_visitor)
+    default_d01.visit(default_visitor)
 
-    G01().visit(visitor)
-    G36().visit(visitor)
-    default_d01.visit(visitor)
-
-    handler.assert_not_called()
-    region_mode_handler.assert_called()
+    StateTrackingVisitor.on_draw_line.assert_not_called()  # type: ignore[attr-defined]
+    StateTrackingVisitor.on_in_region_draw_line.assert_called()  # type: ignore[attr-defined]
 
 
 def test_switch_to_region_mode_arc_default_quadrant_plot(
-    default_d01: D01, mocker: MockerFixture
+    default_visitor: StateTrackingVisitor, default_d01: D01
 ) -> None:
     """Check if the visitor switches to region mode handlers properly."""
-    handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__
-    )
-    region_mode_handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_cw_arc_sq.__name__
-    )
-    visitor = StateTrackingVisitor()
+    G02().visit(default_visitor)
+    G36().visit(default_visitor)
+    default_d01.visit(default_visitor)
 
-    G02().visit(visitor)
-    G36().visit(visitor)
-    default_d01.visit(visitor)
-
-    handler.assert_not_called()
-    region_mode_handler.assert_called()
+    StateTrackingVisitor.on_draw_cw_arc_sq.assert_not_called()  # type: ignore[attr-defined]
+    StateTrackingVisitor.on_in_region_draw_cw_arc_sq.assert_called()  # type: ignore[attr-defined]
 
 
 def test_switch_to_region_mode_ccw_arc_default_quadrant_plot(
-    default_d01: D01, mocker: MockerFixture
+    default_visitor: StateTrackingVisitor, default_d01: D01
 ) -> None:
     """Check if the visitor switches to region mode handlers properly."""
-    handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_draw_ccw_arc_sq.__name__
-    )
-    region_mode_handler = mocker.spy(
-        StateTrackingVisitor, StateTrackingVisitor.on_in_region_draw_ccw_arc_sq.__name__
-    )
-    visitor = StateTrackingVisitor()
+    G03().visit(default_visitor)
+    G36().visit(default_visitor)
+    default_d01.visit(default_visitor)
 
-    G03().visit(visitor)
-    G36().visit(visitor)
-    default_d01.visit(visitor)
-
-    handler.assert_not_called()
-    region_mode_handler.assert_called()
+    StateTrackingVisitor.on_draw_ccw_arc_sq.assert_not_called()  # type: ignore[attr-defined]
+    StateTrackingVisitor.on_in_region_draw_ccw_arc_sq.assert_called()  # type: ignore[attr-defined]
 
 
 STATE_TRACKING_VISITOR_D01_CALLBACKS = {
