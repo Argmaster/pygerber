@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+from inspect import isclass
+from typing import TYPE_CHECKING, ClassVar, List
 
 import pytest
 
 from pygerber.gerberx3.ast.errors import (
     ApertureNotSelectedError,
+    PackedCoordinateTooLongError,
+    PackedCoordinateTooShortError,
 )
 from pygerber.gerberx3.ast.nodes import (
     AB,
@@ -54,6 +57,7 @@ from pygerber.gerberx3.ast.state_tracking_visitor import (
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
+    from typing_extensions import TypeAlias
 
 
 def test_set_file_attribute() -> None:
@@ -547,3 +551,180 @@ def test_coordinate_format(
         y_integral=y_integral,
         y_decimal=y_decimal,
     )
+
+
+class FMT(CoordinateFormat):
+    def __str__(self) -> str:
+        return f"{self.zeros.value}{self.coordinate_mode.value}{self.x_integral}{self.x_decimal}{self.y_integral}{self.y_decimal}"
+
+    __repr__ = __str__
+
+
+ParamsT: TypeAlias = "list[tuple[CoordinateFormat, str, float | type[Exception]]]"
+
+
+class TestCoordinateFormat:
+    fmt_0 = FMT(
+        zeros=Zeros.SKIP_LEADING,
+        coordinate_mode=CoordinateNotation.ABSOLUTE,
+        x_integral=2,
+        x_decimal=6,
+        y_integral=2,
+        y_decimal=6,
+    )
+
+    fmt_1 = FMT(
+        zeros=Zeros.SKIP_TRAILING,
+        coordinate_mode=CoordinateNotation.ABSOLUTE,
+        x_integral=2,
+        x_decimal=6,
+        y_integral=2,
+        y_decimal=6,
+    )
+
+    params_0: ClassVar[ParamsT] = [
+        (fmt_0, "0", 0),
+        (fmt_0, "1", 0.000001),
+        (fmt_0, "11", 0.000011),
+        (fmt_0, "101", 0.000101),
+        (fmt_0, "1001", 0.001001),
+        (fmt_0, "10001", 0.010001),
+        (fmt_0, "100001", 0.100001),
+        (fmt_0, "1000001", 1.000001),
+        (fmt_0, "10000001", 10.000001),
+    ]
+    params_1: ClassVar[ParamsT] = [
+        (fmt_0, "+0", 0),
+        (fmt_0, "+10", 0.00001),
+        (fmt_0, "+100", 0.0001),
+        (fmt_0, "+1000", 0.001),
+        (fmt_0, "+10000", 0.01),
+        (fmt_0, "+100000", 0.1),
+        (fmt_0, "+1000000", 1),
+        (fmt_0, "+10000000", 10),
+    ]
+    params_2: ClassVar[ParamsT] = [
+        (fmt_0, "-10", -0.00001),
+        (fmt_0, "-100", -0.0001),
+        (fmt_0, "-1000", -0.001),
+        (fmt_0, "-10000", -0.01),
+        (fmt_0, "-100000", -0.1),
+        (fmt_0, "-1000000", -1),
+        (fmt_0, "-10000000", -10),
+    ]
+    params_3: ClassVar[ParamsT] = [
+        (fmt_0, "+", PackedCoordinateTooShortError),
+        (fmt_0, "+100000000", PackedCoordinateTooLongError),
+        (fmt_0, "", PackedCoordinateTooShortError),
+        (fmt_0, "100000001", PackedCoordinateTooLongError),
+        (fmt_0, "-", PackedCoordinateTooShortError),
+        (fmt_0, "-100000000", PackedCoordinateTooLongError),
+        (fmt_1, "+1", 10),
+        (fmt_1, "-1", -10),
+        (fmt_0, "-0", -0),
+    ]
+    params_4: ClassVar[ParamsT] = [
+        (fmt_1, "00000001", 0.000001),
+        (fmt_1, "0000001", 0.00001),
+        (fmt_1, "000001", 0.0001),
+        (fmt_1, "00001", 0.001),
+        (fmt_1, "0001", 0.01),
+        (fmt_1, "001", 0.1),
+        (fmt_1, "01", 1),
+        (fmt_1, "1", 10),
+    ]
+    params_5: ClassVar[ParamsT] = [
+        (fmt_1, "10000001", 10.000001),
+        (fmt_1, "1000001", 10.00001),
+        (fmt_1, "100001", 10.0001),
+        (fmt_1, "10001", 10.001),
+        (fmt_1, "1001", 10.01),
+        (fmt_1, "101", 10.1),
+        (fmt_1, "11", 11),
+    ]
+    params_6: ClassVar[ParamsT] = [
+        (fmt_1, "-10000001", -10.000001),
+        (fmt_1, "-1000001", -10.00001),
+        (fmt_1, "-100001", -10.0001),
+        (fmt_1, "-10001", -10.001),
+        (fmt_1, "-1001", -10.01),
+        (fmt_1, "-101", -10.1),
+        (fmt_1, "-11", -11),
+    ]
+
+    @pytest.mark.parametrize(
+        ("fmt", "input_value", "expected"),
+        [
+            *params_0,
+            *params_1,
+            *params_2,
+            *params_3,
+            *params_4,
+            *params_5,
+            *params_6,
+        ],
+        ids=lambda x: x.__qualname__ if isclass(x) else str(x),
+    )
+    def test_unpack_x(
+        self,
+        fmt: CoordinateFormat,
+        input_value: PackedCoordinateStr,
+        expected: float | type[Exception],
+    ) -> None:
+        """Test if x coordinate is unpacked correctly."""
+        if not isinstance(expected, (int, float)):
+            with pytest.raises(expected):
+                fmt.unpack_x(input_value)
+        else:
+            assert fmt.unpack_x(input_value) == expected
+
+    @pytest.mark.parametrize(
+        ("fmt", "input_value", "expected"),
+        [
+            *params_0,
+            *params_1,
+            *params_2,
+            *params_3,
+            *params_4,
+            *params_5,
+            *params_6,
+        ],
+        ids=lambda x: x.__qualname__ if isclass(x) else str(x),
+    )
+    def test_unpack_y(
+        self,
+        fmt: CoordinateFormat,
+        input_value: PackedCoordinateStr,
+        expected: float | type[Exception],
+    ) -> None:
+        """Test if y coordinate is unpacked correctly."""
+        if not isinstance(expected, (int, float)):
+            with pytest.raises(expected):
+                fmt.unpack_y(input_value)
+        else:
+            assert fmt.unpack_y(input_value) == expected
+
+    @pytest.mark.parametrize(
+        ("fmt", "expected", "input_value"),
+        [
+            *params_0,
+            # *params_1,
+            *params_2,
+            # *params_3,
+            *params_4,
+            *params_5,
+            *params_6,
+        ],
+        ids=lambda x: x.__qualname__ if isclass(x) else str(x),
+    )
+    def test_pack_x(
+        self,
+        fmt: CoordinateFormat,
+        expected: PackedCoordinateStr,
+        input_value: float | type[Exception],
+    ) -> None:
+        """Test if x coordinate is unpacked correctly."""
+        if not isinstance(input_value, (int, float)):
+            pytest.skip()
+        else:
+            assert fmt.pack_x(input_value) == expected

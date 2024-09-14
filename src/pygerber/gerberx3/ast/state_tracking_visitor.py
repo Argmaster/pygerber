@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 from enum import Enum
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -17,6 +17,8 @@ from pygerber.gerberx3.ast.errors import (
     ApertureNotSelectedError,
     CoordinateFormatNotSetError,
     DirectADHandlerDispatchNotSupportedError,
+    PackedCoordinateTooLongError,
+    PackedCoordinateTooShortError,
 )
 from pygerber.gerberx3.ast.nodes import (
     AB,
@@ -116,6 +118,8 @@ class CoordinateFormat(_StateModel):
         elif self.zeros == Zeros.SKIP_TRAILING:
             self.unpack_x = self._unpack_skip_trailing(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
             self.unpack_y = self._unpack_skip_trailing(self.y_integral, self.y_decimal)  # type: ignore[method-assign]
+            self.pack_x = self._pack_skip_trailing(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
+            self.pack_y = self._pack_skip_trailing(self.y_integral, self.y_decimal)  # type: ignore[method-assign]
         else:
             msg = f"Unknown zeros mode: {self.zeros}"
             raise ValueError(msg)
@@ -134,15 +138,7 @@ class CoordinateFormat(_StateModel):
         self, integer: int, decimal: int
     ) -> Callable[[PackedCoordinateStr], Double]:
         def _(coordinate: PackedCoordinateStr) -> Double:
-            assert len(coordinate) > 0, coordinate
-
-            sign = "+"
-
-            if coordinate[0] in ("+", "-"):
-                sign = coordinate[0]
-                coordinate_str = coordinate[1:]
-            else:
-                coordinate_str = str(coordinate)
+            sign, coordinate_str = self._unpack_preprocess(coordinate, integer, decimal)
 
             padded_coordinate = coordinate_str.ljust((integer + decimal), "0")
             integer_value_str = padded_coordinate[:integer]
@@ -156,13 +152,7 @@ class CoordinateFormat(_StateModel):
         self, integer: int, decimal: int
     ) -> Callable[[PackedCoordinateStr], Double]:
         def _(coordinate: PackedCoordinateStr) -> Double:
-            sign = "+"
-
-            if coordinate[0] in ("+", "-"):
-                sign = coordinate[0]
-                coordinate_str = coordinate[1:]
-            else:
-                coordinate_str = str(coordinate)
+            sign, coordinate_str = self._unpack_preprocess(coordinate, integer, decimal)
 
             padded_coordinate = coordinate_str.rjust((integer + decimal), "0")
             integer_value_str = padded_coordinate[:integer]
@@ -171,6 +161,28 @@ class CoordinateFormat(_StateModel):
             return float(f"{sign}{integer_value_str}.{decimal_value_str}")
 
         return _
+
+    def _unpack_preprocess(
+        self, coordinate: PackedCoordinateStr, integer: int, decimal: int
+    ) -> tuple[Literal["-", "+"], str]:
+        if len(coordinate) <= 0:
+            raise PackedCoordinateTooShortError(coordinate, integer, decimal)
+
+        sign: Literal["+", "-"] = "+"
+
+        if coordinate[0] in ("+", "-"):
+            sign = coordinate[0]  # type: ignore[assignment]
+            coordinate_str = coordinate[1:]
+        else:
+            coordinate_str = str(coordinate)
+
+        if len(coordinate_str) > (integer + decimal):
+            raise PackedCoordinateTooLongError(coordinate, integer, decimal)
+
+        if len(coordinate_str) <= 0:
+            raise PackedCoordinateTooShortError(coordinate, integer, decimal)
+
+        return sign, coordinate_str
 
     def pack_x(self, coordinate: Double, /) -> PackedCoordinateStr:  # noqa: ARG002
         """Unpack X coordinate using the current coordinate format."""
@@ -184,13 +196,51 @@ class CoordinateFormat(_StateModel):
 
     def _pack_skip_leading(
         self,
-        integer: int,  # noqa: ARG002
+        integer: int,
         decimal: int,
     ) -> Callable[[Double], PackedCoordinateStr]:
         def _(coordinate: Double) -> PackedCoordinateStr:
-            return PackedCoordinateStr(
-                "".join(f"{coordinate:.{decimal}f}".split(".")).lstrip("0") or "0"
-            )
+            integer_str, decimal_str = f"{coordinate:.{decimal}f}".split(".")
+            assert len(integer_str) > 0
+            assert len(decimal_str) > 0
+
+            if integer_str[0] in ("+", "-"):
+                sign, integer_str = integer_str[0], integer_str[1:]
+            else:
+                sign = ""
+
+            if len(integer_str) > integer:
+                raise PackedCoordinateTooLongError(str(coordinate), integer, decimal)
+
+            packed_no_sign = f"{integer_str}{decimal_str}".lstrip("0") or "0"
+
+            return PackedCoordinateStr(f"{sign}{packed_no_sign}")
+
+        return _
+
+    def _pack_skip_trailing(
+        self,
+        integer: int,
+        decimal: int,
+    ) -> Callable[[Double], PackedCoordinateStr]:
+        def _(coordinate: Double) -> PackedCoordinateStr:
+            integer_str, decimal_str = f"{coordinate:.{decimal}f}".split(".")
+            assert len(integer_str) > 0
+            assert len(decimal_str) > 0
+
+            if integer_str[0] in ("+", "-"):
+                sign, integer_str = integer_str[0], integer_str[1:]
+            else:
+                sign = ""
+
+            if len(integer_str) > integer:
+                raise PackedCoordinateTooLongError(str(coordinate), integer, decimal)
+
+            integer_str = integer_str.rjust(integer, "0")
+
+            packed_no_sign = f"{integer_str}{decimal_str}".rstrip("0") or "0"
+
+            return PackedCoordinateStr(f"{sign}{packed_no_sign}")
 
         return _
 
