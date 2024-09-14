@@ -561,8 +561,8 @@ class _Draw(BaseModel):
     """
 
     draw_op: Node
-    state_updates: list[Node] = Field(default_factory=list)
-    attributes: list[Node] = Field(default_factory=list)
+    state_updates: List[Node] = Field(default_factory=list)
+    attributes: List[Node] = Field(default_factory=list)
 
     def _get_nodes(self) -> Iterable[Node]:
         yield from self.state_updates
