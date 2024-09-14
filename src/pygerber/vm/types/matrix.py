@@ -74,8 +74,8 @@ class Matrix3x3:
         """Create new reflection matrix."""
         return cls(
             (
-                (-1.0 if y else 1.0, 0.0, 0.0),
-                (0.0, -1.0 if x else 1.0, 0.0),
+                (-1.0 if x else 1.0, 0.0, 0.0),
+                (0.0, -1.0 if y else 1.0, 0.0),
                 (0.0, 0.0, 1.0),
             )
         )
@@ -112,3 +112,16 @@ class Matrix3x3:
             return Vector(x=x, y=y)  # type: ignore[return-value]
 
         return NotImplemented
+
+    @property
+    def tag(self) -> str:
+        """Return tag representing this matrix transform."""
+        return str(self.mtx).encode("utf-8").hex()
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}({self.mtx})"
+
+    __repr__ = __str__
+
+    def __getitem__(self, key: int) -> MatrixRowT:
+        return self.mtx[key]

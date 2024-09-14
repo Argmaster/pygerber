@@ -4,8 +4,6 @@ import inspect
 from pathlib import Path
 from typing import ClassVar, Type
 
-import pytest
-
 from pygerber.gerberx3.ast.nodes import File
 from pygerber.gerberx3.compiler import Compiler
 from pygerber.gerberx3.parser.pyparsing.parser import Parser
@@ -59,17 +57,14 @@ class PillowRenderE2E:
 
 
 class TestOLinuXinoRevG(PillowRenderE2E):
-    @pytest.mark.skip("Not implemented")
     def test_bottom_copper(self) -> None:
         result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Cu, dpmm=100)
         self._save(result)
 
-    @pytest.mark.skip("Not implemented")
     def test_bottom_mask(self) -> None:
         result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Mask, dpmm=100)
         self._save(result)
 
-    @pytest.mark.skip("Not implemented")
     def test_bottom_paste(self) -> None:
         result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Paste, dpmm=100)
         self._save(result)
@@ -380,9 +375,24 @@ class TestGerberSpecExampleAssets(PillowRenderE2E):
         result = self._render(GerberSpecExampleAssets.asset_4_9_1, dpmm=100)
         self._save(result)
 
-    @pytest.mark.xfail(reason="Not implemented")
     def test_asset_4_9_6(self) -> None:
         result = self._render(GerberSpecExampleAssets.asset_4_9_6, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_9_6_0(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_9_6_0, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_9_6_1(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_9_6_1, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_9_6_2(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_9_6_2, dpmm=100)
+        self._save(result)
+
+    def test_asset_4_9_6_3(self) -> None:
+        result = self._render(GerberSpecExampleAssets.asset_4_9_6_3, dpmm=100)
         self._save(result)
 
     def test_asset_4_10_4_1(self) -> None:

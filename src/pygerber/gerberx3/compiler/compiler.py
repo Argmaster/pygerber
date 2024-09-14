@@ -119,16 +119,35 @@ class Compiler(StateTrackingVisitor):
         self._contour_buffer: Optional[list[ShapeSegment]] = []
         self._create_main_buffer()
 
-        self._aperture_buffers: dict[str, CommandBuffer] = {}
+    def _set_buffer(self, buffer: CommandBuffer) -> None:
+        """Register buffer."""
+        self._buffers[buffer.id_str] = buffer
+
+    def _get_buffer(self, id_: str) -> CommandBuffer:
+        """Get buffer by id."""
+        return self._buffers[id_]
+
+    def _get_buffer_opt(self, id_: str) -> Optional[CommandBuffer]:
+        """Get buffer by id."""
+        return self._buffers.get(id_)
 
     def _get_current_buffer(self) -> CommandBuffer:
-        return self._buffers[self._buffer_stack[-1]]
+        return self._get_buffer(self._buffer_stack[-1])
 
     def _append_shape_to_current_buffer(self, command: Shape) -> None:
         self._get_current_buffer().append_shape(command)
 
     def _append_paste_to_current_buffer(self, command: PasteLayer) -> None:
         self._get_current_buffer().append_paste(command)
+
+    def _expand_buffer_to_current_buffer(self, buffer: CommandBuffer) -> None:
+        for command in buffer.commands:
+            if isinstance(command, Shape):
+                self._append_shape_to_current_buffer(command)
+            elif isinstance(command, PasteLayer):
+                self._append_paste_to_current_buffer(command)
+            else:
+                raise NotImplementedError(type(command))
 
     def _create_main_buffer(self) -> CommandBuffer:
         buffer = CommandBuffer(
@@ -140,7 +159,7 @@ class Compiler(StateTrackingVisitor):
             resolved_dependencies=[],
         )
         assert self.MAIN_BUFFER_ID not in self._buffers
-        self._buffers[self.MAIN_BUFFER_ID] = buffer
+        self._set_buffer(buffer)
         self._push_buffer(self.MAIN_BUFFER_ID)
 
         return buffer
@@ -170,6 +189,17 @@ class Compiler(StateTrackingVisitor):
             return current_aperture.outer_diameter
 
         raise NotImplementedError(type(current_aperture))
+
+    def on_ab(self, node: AB) -> AB:
+        """Handle `AB` node."""
+        aperture_buffer = self._create_aperture_buffer(node.open.aperture_id)
+        self._push_buffer(aperture_buffer.id_str)
+
+        super().on_ab(node)
+
+        self._pop_buffer()
+
+        return node
 
     def on_adc(self, node: ADC) -> ADC:
         """Handle `AD` circle node."""
@@ -202,7 +232,7 @@ class Compiler(StateTrackingVisitor):
             depends_on=set(),
             resolved_dependencies=[],
         )
-        self._aperture_buffers[aperture_id] = buffer
+        self._set_buffer(buffer)
 
         return buffer
 
@@ -516,19 +546,6 @@ class Compiler(StateTrackingVisitor):
         )
 
     def _get_aperture_buffer(self, aperture_id: str) -> CommandBuffer:
-        layer_id = f"{aperture_id}%{self.state.transform.tag}"
-        buffer = self._buffers.get(layer_id)
-
-        if buffer is None:
-            aperture_base_buffer = self._aperture_buffers[aperture_id]
-            buffer = self._transform_buffer(aperture_base_buffer)
-            self._buffers[layer_id] = buffer
-
-        return buffer
-
-    def _transform_buffer(self, buffer: CommandBuffer) -> CommandBuffer:
-        """Create new buffer with applied transformation."""
-        layer_id = f"{buffer.id_str}%{self.state.transform.tag}"
         transform = self.state.transform
 
         mirroring_matrix = Matrix3x3.new_reflect(**transform.mirroring.kwargs)
@@ -537,7 +554,23 @@ class Compiler(StateTrackingVisitor):
 
         transform_matrix = mirroring_matrix @ rotation_matrix @ scale_matrix
 
-        return self._apply_transform_to_buffer(buffer, layer_id, transform_matrix)
+        return self._get_buffer_with_transform(aperture_id, transform_matrix)
+
+    def _get_buffer_with_transform(
+        self, aperture_id: str, transform_matrix: Matrix3x3
+    ) -> CommandBuffer:
+        layer_id = f"{aperture_id}%{transform_matrix.tag}"
+        buffer = self._get_buffer_opt(layer_id)
+
+        if buffer is None:
+            aperture_base_buffer = self._get_buffer(aperture_id)
+            buffer = self._apply_transform_to_buffer(
+                aperture_base_buffer, layer_id, transform_matrix
+            )
+            assert buffer.id_str == layer_id
+            self._set_buffer(buffer)
+
+        return buffer
 
     def _apply_transform_to_buffer(
         self, buffer: CommandBuffer, layer_id: str, transform_matrix: Matrix3x3
@@ -590,27 +623,62 @@ class Compiler(StateTrackingVisitor):
 
     def on_flash_block(self, node: D03, aperture: AB) -> None:  # noqa: ARG002
         """Handle `D03` node with `AB` aperture."""
-        self._on_flash_aperture(aperture.open.aperture_id)
+        aperture_id = aperture.open.aperture_id
+        buffer = self._get_aperture_buffer(aperture_id)
+        tmp_buffer = self._apply_transform_to_buffer_non_recursive_tmp(
+            buffer, Matrix3x3.new_translate(x=self.coordinate_x, y=self.coordinate_y)
+        )
+
+        self._expand_buffer_to_current_buffer(tmp_buffer)
+
+    def _apply_transform_to_buffer_non_recursive_tmp(
+        self, buffer: CommandBuffer, transform_matrix: Matrix3x3
+    ) -> CommandBuffer:
+        commands: list[DrawCmdT] = []
+        depends_on: set[str] = set()
+
+        for cmd in buffer.commands:
+            if isinstance(cmd, Shape):
+                commands.append(cmd.transform(transform_matrix))
+
+            elif isinstance(cmd, PasteLayer):
+                depends_on.add(cmd.source_layer_id.id)
+                commands.append(
+                    PasteLayer(
+                        source_layer_id=cmd.source_layer_id,
+                        center=cmd.center.transform(transform_matrix),
+                        is_negative=cmd.is_negative,
+                    )
+                )
+
+            else:
+                raise NotImplementedError(type(cmd))
+
+        return CommandBuffer(
+            "%temporary%",
+            None,
+            origin=buffer.origin,
+            commands=commands,
+            depends_on=depends_on,
+            resolved_dependencies=[],
+        )
 
     def _resolve_buffer_submit_order(self) -> list[CommandBuffer]:
-        buffer_submit_order: list[CommandBuffer] = []
-
-        for buffer in self._buffers.values():
-            for dependency in buffer.depends_on:
-                buffer.resolved_dependencies.append(self._buffers[dependency])
+        buffer_submit_order: list[str] = []
 
         def _(buffer: CommandBuffer) -> None:
-            for dependency in buffer.resolved_dependencies:
+            for dependency_id in buffer.depends_on:
+                dependency = self._get_buffer(dependency_id)
                 _(dependency)
 
-            if buffer in buffer_submit_order:
-                raise CyclicBufferDependencyError(buffer, dependency)
+                if buffer.id_str in buffer_submit_order:
+                    raise CyclicBufferDependencyError(buffer, dependency)
 
-            buffer_submit_order.append(buffer)
+            buffer_submit_order.append(buffer.id_str)
 
-        _(self._buffers[self.MAIN_BUFFER_ID])
+        _(self._get_buffer(self.MAIN_BUFFER_ID))
 
-        return buffer_submit_order
+        return [self._get_buffer(id_) for id_ in buffer_submit_order]
 
     def _convert_buffers_to_rvmc(self) -> RVMC:
         commands: list[Command] = []

@@ -107,5 +107,9 @@ class Arc(ShapeSegment):
             start=self.start.transform(transform),
             end=self.end.transform(transform),
             center=self.center.transform(transform),
-            clockwise=self.clockwise,
+            clockwise=(
+                self.clockwise
+                if transform[0][0] * transform[1][1] > 0
+                else not self.clockwise
+            ),
         )
