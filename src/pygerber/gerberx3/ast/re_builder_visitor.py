@@ -636,24 +636,20 @@ class ReBuilderVisitor(AstVisitor):
     def on_coordinate_x(self, node: CoordinateX) -> CoordinateX:
         """Handle `Coordinate` node."""
         self.on_coordinate(node)
-        with self.use_parent(node):
-            return CoordinateX(value=node.value)
+        return CoordinateX(value=node.value)
 
     def on_coordinate_y(self, node: CoordinateY) -> CoordinateY:
         """Handle `Coordinate` node."""
         self.on_coordinate(node)
-        with self.use_parent(node):
-            return CoordinateY(value=node.value)
+        return CoordinateY(value=node.value)
 
     def on_coordinate_i(self, node: CoordinateI) -> CoordinateI:
         """Handle `Coordinate` node."""
-        with self.use_parent(node):
-            return CoordinateI(value=node.value)
+        return CoordinateI(value=node.value)
 
     def on_coordinate_j(self, node: CoordinateJ) -> CoordinateJ:
         """Handle `Coordinate` node."""
-        with self.use_parent(node):
-            return CoordinateJ(value=node.value)
+        return CoordinateJ(value=node.value)
 
     # Primitives
 
