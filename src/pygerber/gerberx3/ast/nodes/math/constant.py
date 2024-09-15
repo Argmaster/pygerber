@@ -27,3 +27,12 @@ class Constant(Expression):
     ) -> Callable[[Self], Constant]:
         """Get callback function for the node."""
         return visitor.on_constant
+
+    def __hash__(self) -> int:
+        return hash(self.constant)
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Constant):
+            return self.constant == value.constant
+
+        return NotImplemented
