@@ -23,12 +23,12 @@ class ADP(AD):
     rotation: Optional[Double] = Field(default=None)
     hole_diameter: Optional[Double] = Field(default=None)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> ADP:
         """Handle visitor call."""
-        visitor.on_adp(self)
+        return visitor.on_adp(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], ADP]:
         """Get callback function for the node."""
         return visitor.on_adp

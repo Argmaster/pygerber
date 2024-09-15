@@ -42,17 +42,15 @@ class Node(ModelType):
     """Base class for all nodes."""
 
     source_info: Optional[SourceInfo] = Field(default=None, repr=False, exclude=True)
-    source: str = Field(default="", repr=False, exclude=True)
-    location: int = Field(default=0, repr=False, exclude=True)
 
     @abstractmethod
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Self:
         """Handle visitor call."""
 
     @abstractmethod
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Self]:
         """Get callback function for the node."""
 
     def __len__(self) -> int:

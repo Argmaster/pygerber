@@ -23,12 +23,12 @@ class Code21(Node):
     center_y: Expression
     rotation: Expression
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Code21:
         """Handle visitor call."""
-        visitor.on_code_21(self)
+        return visitor.on_code_21(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Code21]:
         """Get callback function for the node."""
         return visitor.on_code_21

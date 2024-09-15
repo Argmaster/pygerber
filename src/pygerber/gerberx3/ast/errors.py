@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from pygerber.gerberx3.ast.nodes import TF_MD5
+    from pygerber.gerberx3.ast.nodes import TF_MD5, Node
     from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
 
 
@@ -56,3 +56,50 @@ class SourceNotAvailableError(AstError):
     def __init__(self, node: TF_MD5) -> None:
         super().__init__("Source is not available for MD5 check.")
         self.node = node
+
+
+class CoordinateFormatNotSetError(AstError):
+    """Raised when coordinate parsing is requested but format was not prior to it."""
+
+
+class PackedCoordinateTooLongError(AstError):
+    """Raised when packed coordinate is too long for the format."""
+
+    def __init__(self, coordinate: str, integer: int, decimal: int) -> None:
+        self.coordinate = coordinate
+        self.integer = integer
+        self.decimal = decimal
+        super().__init__(
+            f"Packed coordinate {coordinate!r} is too long for the format"
+            f"({integer},{decimal})."
+        )
+
+
+class PackedCoordinateTooShortError(AstError):
+    """Raised when packed coordinate is too short for the format."""
+
+    def __init__(self, coordinate: str, integer: int, decimal: int) -> None:
+        self.coordinate = coordinate
+        self.integer = integer
+        self.decimal = decimal
+        super().__init__(
+            f"Packed coordinate {coordinate!r} is too short for the format "
+            f"({integer},{decimal})."
+        )
+
+
+class ReBuilderError(Exception):
+    """ReBuilder error base class."""
+
+
+class ReturnValueError(ReBuilderError):
+    """Raised when value returned by visit is not valid in this context."""
+
+    def __init__(self, value: Any, visited: Node) -> None:
+        self.visited = visited
+        self.value = value
+        super().__init__(
+            f"Value {value!r} returned by visit method of "
+            f"{self.visited.__class__.__qualname__} "
+            "is not valid in this context."
+        )

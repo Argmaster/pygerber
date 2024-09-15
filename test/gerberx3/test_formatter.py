@@ -34,7 +34,7 @@ common_case_generator_config = {
 parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
-        "A64-OLinuXino-rev-G.*": Config(dpmm=40),
+        "A64_OLinuXino_rev_G.*": Config(dpmm=40),
         "flashes.*": Config(dpmm=40),
         "flashes.00_circle+h_4_tbh.grb": Config(
             xfail=True,
@@ -54,8 +54,8 @@ parametrize = CaseGenerator(
 parametrize = CaseGenerator(
     GERBER_ASSETS_INDEX,
     {
-        "A64-OLinuXino-rev-G.*": Config(skip=True),
-        "A64-OLinuXino-rev-G.A64-OlinuXino_Rev_G-B_Cu.gbr": Config(skip=False),
+        "A64_OLinuXino_rev_G.*": Config(skip=True),
+        "A64_OLinuXino_rev_G.A64-OlinuXino_Rev_G-B_Cu.gbr": Config(skip=False),
         "ATMEGA328-Motor-Board.*": Config(skip=True),
         "ATMEGA328-Motor-Board.ATMEGA328_Motor_Board-B.Cu.gbl": Config(skip=False),
         "expressions.*": Config(as_expression=True),

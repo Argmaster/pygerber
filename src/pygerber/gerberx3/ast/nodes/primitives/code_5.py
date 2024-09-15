@@ -23,12 +23,12 @@ class Code5(Node):
     diameter: Expression
     rotation: Expression
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Code5:
         """Handle visitor call."""
-        visitor.on_code_5(self)
+        return visitor.on_code_5(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Code5]:
         """Get callback function for the node."""
         return visitor.on_code_5

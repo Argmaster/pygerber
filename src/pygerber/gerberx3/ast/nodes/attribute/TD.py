@@ -19,12 +19,12 @@ class TD(Node):
 
     name: Optional[str] = Field(default=None)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> TD:
         """Handle visitor call."""
-        visitor.on_td(self)
+        return visitor.on_td(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], TD]:
         """Get callback function for the node."""
         return visitor.on_td

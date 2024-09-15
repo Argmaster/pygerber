@@ -39,7 +39,7 @@ class ExpressionEvalVisitor(AstVisitor):
         node.visit(self)
         return self.return_value
 
-    def on_add(self, node: Add) -> None:
+    def on_add(self, node: Add) -> Add:
         """Handle `Add` node."""
         node.head.visit(self)
         total = self.return_value
@@ -49,8 +49,9 @@ class ExpressionEvalVisitor(AstVisitor):
             total += self.return_value
 
         self.return_value = total
+        return node
 
-    def on_div(self, node: Div) -> None:
+    def on_div(self, node: Div) -> Div:
         """Handle `Div` node."""
         node.head.visit(self)
         total = self.return_value
@@ -60,8 +61,9 @@ class ExpressionEvalVisitor(AstVisitor):
             total /= self.return_value
 
         self.return_value = total
+        return node
 
-    def on_mul(self, node: Mul) -> None:
+    def on_mul(self, node: Mul) -> Mul:
         """Handle `Mul` node."""
         node.head.visit(self)
         total = self.return_value
@@ -71,8 +73,9 @@ class ExpressionEvalVisitor(AstVisitor):
             total *= self.return_value
 
         self.return_value = total
+        return node
 
-    def on_sub(self, node: Sub) -> None:
+    def on_sub(self, node: Sub) -> Sub:
         """Handle `Sub` node."""
         node.head.visit(self)
         total = self.return_value
@@ -82,23 +85,28 @@ class ExpressionEvalVisitor(AstVisitor):
             total -= self.return_value
 
         self.return_value = total
+        return node
 
     # Math :: Operators :: Unary
 
-    def on_neg(self, node: Neg) -> None:
+    def on_neg(self, node: Neg) -> Neg:
         """Handle `Neg` node."""
         node.operand.visit(self)
         self.return_value = -self.return_value
+        return node
 
-    def on_pos(self, node: Pos) -> None:
+    def on_pos(self, node: Pos) -> Pos:
         """Handle `Pos` node."""
         node.operand.visit(self)
         self.return_value = +self.return_value
+        return node
 
-    def on_variable(self, node: Variable) -> None:
+    def on_variable(self, node: Variable) -> Variable:
         """Handle `Variable` node."""
         self.return_value = self.scope[node.variable]
+        return node
 
-    def on_constant(self, node: Constant) -> None:
+    def on_constant(self, node: Constant) -> Constant:
         """Handle `Constant` node."""
         self.return_value = node.constant
+        return node

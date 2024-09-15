@@ -17,12 +17,12 @@ class IR(Node):
 
     rotation_degrees: int
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> IR:
         """Handle visitor call."""
-        visitor.on_ir(self)
+        return visitor.on_ir(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], IR]:
         """Get callback function for the node."""
         return visitor.on_ir

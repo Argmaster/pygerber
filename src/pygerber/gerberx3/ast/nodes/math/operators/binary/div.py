@@ -22,12 +22,12 @@ class Div(Expression):
     head: Expression
     tail: List[Expression] = Field(min_length=1)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Div:
         """Handle visitor call."""
-        visitor.on_div(self)
+        return visitor.on_div(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Div]:
         """Get callback function for the node."""
         return visitor.on_div

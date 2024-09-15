@@ -20,12 +20,12 @@ class Assignment(Node):
     variable: Variable
     expression: Expression
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Assignment:
         """Handle visitor call."""
-        visitor.on_assignment(self)
+        return visitor.on_assignment(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Assignment]:
         """Get callback function for the node."""
         return visitor.on_assignment

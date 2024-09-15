@@ -21,12 +21,12 @@ class ADmacro(AD):
     name: str
     params: Optional[List[Double]] = Field(default=None)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> ADmacro:
         """Handle visitor call."""
-        visitor.on_ad_macro(self)
+        return visitor.on_ad_macro(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], ADmacro]:
         """Get callback function for the node."""
         return visitor.on_ad_macro

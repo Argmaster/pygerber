@@ -20,12 +20,12 @@ class OF(Node):
     a_offset: Optional[float] = Field(default=None)
     b_offset: Optional[float] = Field(default=None)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> OF:
         """Handle visitor call."""
-        visitor.on_of(self)
+        return visitor.on_of(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], OF]:
         """Get callback function for the node."""
         return visitor.on_of

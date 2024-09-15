@@ -4,47 +4,47 @@ import math
 
 import pytest
 
-from pygerber.vm.types.vector import Unit, Vector
+from pygerber.vm.types.vector import Vector
 
 ANGLE_BETWEEN_CASES = [
     (
-        Vector.from_values(0, 1),  # 12 o'clock
-        Vector.from_values(0, 1),  # 12 o'clock
+        Vector(x=0, y=1),  # 12 o'clock
+        Vector(x=0, y=1),  # 12 o'clock
         0.0,
     ),
     (
-        Vector.from_values(0, 1),  # 12 o'clock
-        Vector.from_values(-1, 1),  # 10.30
+        Vector(x=0, y=1),  # 12 o'clock
+        Vector(x=-1, y=1),  # 10.30
         45.0,
     ),
     (
-        Vector.from_values(0, 1),  # 12 o'clock
-        Vector.from_values(-1, 0),  #  9 o'clock
+        Vector(x=0, y=1),  # 12 o'clock
+        Vector(x=-1, y=0),  #  9 o'clock
         90.0,
     ),
     (
-        Vector.from_values(0, 1),  # 12 o'clock
-        Vector.from_values(-1, -1),  #  7.30
+        Vector(x=0, y=1),  # 12 o'clock
+        Vector(x=-1, y=-1),  #  7.30
         135.0,
     ),
     (
-        Vector.from_values(0, 1),  # 12 o'clock
-        Vector.from_values(0, -1),  #  6 o'clock
+        Vector(x=0, y=1),  # 12 o'clock
+        Vector(x=0, y=-1),  #  6 o'clock
         180.0,
     ),
     (
-        Vector.from_values(0, 1),  # 12 o'clock
-        Vector.from_values(1, -1),  #  7:30
+        Vector(x=0, y=1),  # 12 o'clock
+        Vector(x=1, y=-1),  #  7:30
         225.0,
     ),
     (
-        Vector.from_values(0, 1),  # 12 o'clock
-        Vector.from_values(1, 0),  #  9 o'clock
+        Vector(x=0, y=1),  # 12 o'clock
+        Vector(x=1, y=0),  #  9 o'clock
         270.0,
     ),
     (
-        Vector.from_values(0, 1),  # 12 o'clock
-        Vector.from_values(1, 1),  # 10:30
+        Vector(x=0, y=1),  # 12 o'clock
+        Vector(x=1, y=1),  # 10:30
         315.0,
     ),
 ]
@@ -115,152 +115,152 @@ def test_angle_between_cc_flipped(
 
 
 def test_vector_addition() -> None:
-    v1 = Vector.from_values(1, 2)
-    v2 = Vector.from_values(3, 4)
+    v1 = Vector(x=1, y=2)
+    v2 = Vector(x=3, y=4)
     result = v1 + v2
-    assert result.x == Unit.from_float(4)
-    assert result.y == Unit.from_float(6)
+    assert result.x == float(4)
+    assert result.y == float(6)
 
 
 def test_unit_addition() -> None:
-    v = Vector.from_values(1, 2)
-    u = Unit.from_float(3)
+    v = Vector(x=1, y=2)
+    u = 3
     result = v + u
-    assert result.x == Unit.from_float(4)
-    assert result.y == Unit.from_float(5)
+    assert result.x == 4.0  # noqa: PLR2004
+    assert result.y == 5.0  # noqa: PLR2004
 
 
 def test_scalar_addition() -> None:
-    v = Vector.from_values(1, 2)
+    v = Vector(x=1, y=2)
     scalar = 3
     result = v + scalar
-    assert result.x == Unit.from_float(4)
-    assert result.y == Unit.from_float(5)
+    assert result.x == 4.0  # noqa: PLR2004
+    assert result.y == 5.0  # noqa: PLR2004
 
 
 def test_vector_subtraction() -> None:
-    v1 = Vector.from_values(4, 6)
-    v2 = Vector.from_values(1, 2)
+    v1 = Vector(x=4, y=6)
+    v2 = Vector(x=1, y=2)
     result = v1 - v2
-    assert result.x == Unit.from_float(3)
-    assert result.y == Unit.from_float(4)
+    assert result.x == 3.0  # noqa: PLR2004
+    assert result.y == 4.0  # noqa: PLR2004
 
 
 def test_unit_subtraction() -> None:
-    v = Vector.from_values(4, 6)
-    u = Unit.from_float(3)
+    v = Vector(x=4, y=6)
+    u = 3.0
     result = v - u
-    assert result.x == Unit.from_float(1)
-    assert result.y == Unit.from_float(3)
+    assert result.x == 1.0
+    assert result.y == 3.0  # noqa: PLR2004
 
 
 def test_scalar_subtraction() -> None:
-    v = Vector.from_values(4, 6)
+    v = Vector(x=4, y=6)
     scalar = 3
     result = v - scalar
-    assert result.x == Unit.from_float(1)
-    assert result.y == Unit.from_float(3)
+    assert result.x == 1
+    assert result.y == 3  # noqa: PLR2004
 
 
 def test_vector_multiplication() -> None:
-    v1 = Vector.from_values(2, 3)
-    v2 = Vector.from_values(4, 5)
+    v1 = Vector(x=2, y=3)
+    v2 = Vector(x=4, y=5)
     result = v1 * v2
-    assert result.x == Unit.from_float(8)
-    assert result.y == Unit.from_float(15)
+    assert result.x == 8  # noqa: PLR2004
+    assert result.y == 15  # noqa: PLR2004
 
 
 def test_unit_multiplication() -> None:
-    v = Vector.from_values(2, 3)
-    u = Unit.from_float(4)
+    v = Vector(x=2, y=3)
+    u = 4.0
     result = v * u
-    assert result.x == Unit.from_float(8)
-    assert result.y == Unit.from_float(12)
+    assert result.x == 8  # noqa: PLR2004
+    assert result.y == 12  # noqa: PLR2004
 
 
 def test_scalar_multiplication() -> None:
-    v = Vector.from_values(2, 3)
+    v = Vector(x=2, y=3)
     scalar = 4
     result = v * scalar
-    assert result.x == Unit.from_float(8)
-    assert result.y == Unit.from_float(12)
+    assert result.x == 8  # noqa: PLR2004
+    assert result.y == 12  # noqa: PLR2004
 
 
 def test_vector_division() -> None:
-    v1 = Vector.from_values(8, 15)
-    v2 = Vector.from_values(2, 3)
+    v1 = Vector(x=8, y=15)
+    v2 = Vector(x=2, y=3)
     result = v1 / v2
-    assert result.x == Unit.from_float(4)
-    assert result.y == Unit.from_float(5)
+    assert result.x == 4  # noqa: PLR2004
+    assert result.y == 5  # noqa: PLR2004
 
 
 def test_unit_division() -> None:
-    v = Vector.from_values(8, 15)
-    u = Unit.from_float(2)
+    v = Vector(x=8, y=15)
+    u = 2
     result = v / u
-    assert result.x == Unit.from_float(4)
-    assert result.y == Unit.from_float(7.5)
+    assert result.x == 4  # noqa: PLR2004
+    assert result.y == 7.5  # noqa: PLR2004
 
 
 def test_scalar_division() -> None:
-    v = Vector.from_values(8, 15)
+    v = Vector(x=8, y=15)
     scalar = 2
     result = v / scalar
-    assert result.x == Unit.from_float(4)
-    assert result.y == Unit.from_float(7.5)
+    assert result.x == 4  # noqa: PLR2004
+    assert result.y == 7.5  # noqa: PLR2004
 
 
 def test_vector_equality() -> None:
-    v1 = Vector.from_values(1, 2)
-    v2 = Vector.from_values(1, 2)
+    v1 = Vector(x=1, y=2)
+    v2 = Vector(x=1, y=2)
     assert v1 == v2
 
 
 def test_vector_inequality() -> None:
-    v1 = Vector.from_values(1, 2)
-    v2 = Vector.from_values(3, 4)
+    v1 = Vector(x=1, y=2)
+    v2 = Vector(x=3, y=4)
     assert v1 != v2
 
 
 def test_vector_less_than() -> None:
-    v1 = Vector.from_values(1, 2)
-    v2 = Vector.from_values(3, 4)
+    v1 = Vector(x=1, y=2)
+    v2 = Vector(x=3, y=4)
     assert v1 < v2
 
 
 def test_vector_greater_than() -> None:
-    v1 = Vector.from_values(3, 4)
-    v2 = Vector.from_values(1, 2)
+    v1 = Vector(x=3, y=4)
+    v2 = Vector(x=1, y=2)
     assert v1 > v2
 
 
 def test_vector_greater_than_or_equal() -> None:
-    v1 = Vector.from_values(3, 4)
-    v2 = Vector.from_values(1, 2)
+    v1 = Vector(x=3, y=4)
+    v2 = Vector(x=1, y=2)
     assert v1 >= v2
 
 
 def test_vector_less_than_or_equal() -> None:
-    v1 = Vector.from_values(1, 2)
-    v2 = Vector.from_values(3, 4)
+    v1 = Vector(x=1, y=2)
+    v2 = Vector(x=3, y=4)
     assert v1 <= v2
 
 
 def test_vector_negation() -> None:
-    v = Vector.from_values(1, 2)
+    v = Vector(x=1, y=2)
     result = -v
-    assert result.x == Unit.from_float(-1)
-    assert result.y == Unit.from_float(-2)
+    assert result.x == -1
+    assert result.y == -2  # noqa: PLR2004
 
 
 def test_vector_normalize() -> None:
-    v = Vector.from_values(3, 4)
-    result = v.normalize()
-    assert math.isclose(result.x.value, 0.6, rel_tol=1e-6)
-    assert math.isclose(result.y.value, 0.8, rel_tol=1e-6)
+    v = Vector(x=3, y=4)
+    result = v.normalized()
+    assert math.isclose(result.x, 0.6, rel_tol=1e-6)
+    assert math.isclose(result.y, 0.8, rel_tol=1e-6)
 
 
 def test_vector_length() -> None:
-    v = Vector.from_values(3, 4)
+    v = Vector(x=3, y=4)
     result = v.length()
-    assert math.isclose(result.value, 5.0, rel_tol=1e-6)
+    assert math.isclose(result, 5.0, rel_tol=1e-6)

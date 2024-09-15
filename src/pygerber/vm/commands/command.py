@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from pygerber.vm.types.model import ModelType
 
 if TYPE_CHECKING:
-    from pygerber.vm.base import CommandVisitor
+    from pygerber.vm.vm import CommandVisitor
 
 
 class Command(ModelType):

@@ -21,12 +21,12 @@ class SR(Node):
     nodes: List[Node]
     close: SRclose
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> SR:
         """Handle visitor call."""
-        visitor.on_sr(self)
+        return visitor.on_sr(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], SR]:
         """Get callback function for the node."""
         return visitor.on_sr

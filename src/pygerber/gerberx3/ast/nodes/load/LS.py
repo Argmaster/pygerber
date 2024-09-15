@@ -18,12 +18,12 @@ class LS(Node):
 
     scale: Double
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> LS:
         """Handle visitor call."""
-        visitor.on_ls(self)
+        return visitor.on_ls(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], LS]:
         """Get callback function for the node."""
         return visitor.on_ls

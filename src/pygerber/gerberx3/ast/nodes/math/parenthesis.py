@@ -19,12 +19,12 @@ class Parenthesis(Expression):
 
     inner: Expression
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Parenthesis:
         """Handle visitor call."""
-        visitor.on_parenthesis(self)
+        return visitor.on_parenthesis(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Parenthesis]:
         """Get callback function for the node."""
         return visitor.on_parenthesis

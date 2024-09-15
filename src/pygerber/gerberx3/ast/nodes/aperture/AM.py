@@ -21,12 +21,12 @@ class AM(Node):
     primitives: List[Node]
     close: AMclose
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> AM:
         """Handle visitor call."""
-        visitor.on_am(self)
+        return visitor.on_am(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], AM]:
         """Get callback function for the node."""
         return visitor.on_am

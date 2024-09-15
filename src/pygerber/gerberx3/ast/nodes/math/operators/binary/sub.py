@@ -22,12 +22,12 @@ class Sub(Expression):
     head: Expression
     tail: List[Expression] = Field(min_length=1)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Sub:
         """Handle visitor call."""
-        visitor.on_sub(self)
+        return visitor.on_sub(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Sub]:
         """Get callback function for the node."""
         return visitor.on_sub

@@ -9,13 +9,11 @@ class PillowVirtualMachineError(VirtualMachineError):
     """Base class for all exceptions in the PillowVirtualMachine."""
 
 
-class NoLayerSetError(PillowVirtualMachineError):
-    """Raised when no layer was set prior to drawing shapes."""
+class DPMMTooSmallError(PillowVirtualMachineError):
+    """Raised when dots per millimeter is too small for the given DPI."""
 
-
-class BoxNotSetError(PillowVirtualMachineError):
-    """Raised when main box was set prior to drawing shapes."""
-
-
-class LayerNotFoundError(PillowVirtualMachineError):
-    """Raised when layer with given ID was not found during paste operation."""
+    def __init__(self, dpmm: int) -> None:
+        super().__init__(
+            f"Dots per millimeter ({dpmm}) is to small to render desired image."
+        )
+        self.dpmm = dpmm

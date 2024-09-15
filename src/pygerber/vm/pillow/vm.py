@@ -8,26 +8,31 @@ import math
 import operator
 from typing import Callable, Generator, Optional, Sequence
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
 
-from pygerber.vm.base import Result, VirtualMachine
-from pygerber.vm.commands.command import Command
-from pygerber.vm.commands.layer import EndLayer, PasteLayer, StartLayer
-from pygerber.vm.commands.shape import Arc, Line, Shape
-from pygerber.vm.pillow.errors import (
-    LayerNotFoundError,
-    NoLayerSetError,
-)
+from pygerber.vm.commands import Arc, Line, PasteLayer, Shape
+from pygerber.vm.pillow.errors import DPMMTooSmallError
+from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.box import Box
+from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.style import Style
-from pygerber.vm.types.unit import Unit
 from pygerber.vm.types.vector import Vector
+from pygerber.vm.vm import (
+    DeferredLayer,
+    DrawCmdT,
+    EagerLayer,
+    Layer,
+    Result,
+    VirtualMachine,
+)
 
 FULL_ANGLE_DEGREES = 360
 
 DECREASE_ANGLE = (operator.sub, operator.gt)
 INCREASE_ANGLE = (operator.add, operator.lt)
+
+MIN_SEGMENT_COUNT = 12
 
 
 class PillowResult(Result):
@@ -49,12 +54,16 @@ class PillowResult(Result):
         return self.image
 
 
-class _PillowLayer:
-    """Layer in PillowVirtualMachine."""
+class PillowEagerLayer(EagerLayer):
+    """`PillowEagerLayer` class represents drawing space of known fixed size.
 
-    def __init__(self, dpmm: int, box: Box) -> None:
+    It is specifically used by `PillowVirtualMachine` class.
+    """
+
+    def __init__(self, dpmm: int, layer_id: LayerID, box: Box, origin: Vector) -> None:
+        super().__init__(layer_id, box, origin)
+        self.origin = origin
         self.dpmm = dpmm
-        self.box = box
         self.pixel_size = (
             self.to_pixel(self.box.width),
             self.to_pixel(self.box.height),
@@ -62,11 +71,23 @@ class _PillowLayer:
         self.image = Image.new("1", self.pixel_size, 0)
         self.draw = ImageDraw.Draw(self.image)
 
-    def to_pixel(self, value: float | Unit) -> int:
+    def to_pixel(self, value: float) -> int:
         """Convert value in mm to pixels."""
-        if isinstance(value, Unit):
-            return int(value.value * self.dpmm)
         return int(value * self.dpmm)
+
+
+class PillowDeferredLayer(DeferredLayer):
+    """`PillowDeferredLayer` class represents drawing space of size unknown at time of
+    creation of layer.
+
+    It is specifically used by `PillowVirtualMachine` class.
+    """
+
+    def __init__(
+        self, dpmm: int, layer_id: LayerID, origin: Vector, commands: list[DrawCmdT]
+    ) -> None:
+        super().__init__(layer_id, origin, commands)
+        self.dpmm = dpmm
 
 
 class PillowVirtualMachine(VirtualMachine):
@@ -75,25 +96,30 @@ class PillowVirtualMachine(VirtualMachine):
     def __init__(self, dpmm: int) -> None:
         super().__init__()
         self.dpmm = dpmm
-        self.angle_length_to_segment_count_ratio = 0.314
-        self.reset()
-
-    def reset(self) -> None:
-        """Reset state of the virtual machine."""
-        self.layers: dict[LayerID, _PillowLayer] = {}
-        self.layer_stack: list[_PillowLayer] = []
+        self.angle_length_to_segment_count = lambda angle_length: (
+            segment_count
+            if (segment_count := angle_length * 2) > MIN_SEGMENT_COUNT
+            else MIN_SEGMENT_COUNT
+        )
 
     @property
-    def layer(self) -> _PillowLayer:
+    def layer(self) -> PillowEagerLayer:
         """Get current layer."""
-        if self.layer_stack:
-            return self.layer_stack[-1]
+        return super().layer  # type: ignore[return-value]
 
-        raise NoLayerSetError
+    def create_eager_layer(self, layer_id: LayerID, box: Box, origin: Vector) -> Layer:
+        """Create new eager layer instances (factory method)."""
+        assert box.width > 0
+        assert box.height > 0
+        return PillowEagerLayer(self.dpmm, layer_id, box, origin)
 
-    def on_shape(self, command: Shape) -> None:
+    def create_deferred_layer(self, layer_id: LayerID, origin: Vector) -> Layer:
+        """Create new deferred layer instances (factory method)."""
+        return PillowDeferredLayer(self.dpmm, layer_id, origin, commands=[])
+
+    def on_shape_eager(self, command: Shape) -> None:
         """Visit shape command."""
-        points: list[tuple[Unit, Unit]] = []
+        points: list[tuple[float, float]] = []
         for segment in command.commands:
             if isinstance(segment, Line):
                 start = (segment.start.x, segment.start.y)
@@ -117,11 +143,11 @@ class PillowVirtualMachine(VirtualMachine):
             else:
                 raise NotImplementedError
 
-        self._polygon(points, negative=command.negative)
+        self._polygon(points, is_negative=command.is_negative)
 
     def _calculate_arc_points(
         self, command: Arc
-    ) -> Generator[tuple[Unit, Unit], None, None]:
+    ) -> Generator[tuple[float, float], None, None]:
         """Calculate points on arc."""
         start_angle = (
             command.get_relative_start_point().angle_between(
@@ -142,9 +168,13 @@ class PillowVirtualMachine(VirtualMachine):
         assert end_angle < FULL_ANGLE_DEGREES
 
         angle_delta = abs(start_angle - end_angle)
-        angle_length = (angle_delta / 360) * (command.get_radius().value * 2 * math.pi)
+        angle_length = (angle_delta / 360) * (command.get_radius() * 2 * math.pi)
         angle_length_pixels = self.to_pixel(angle_length)
-        segment_count = angle_length_pixels * self.angle_length_to_segment_count_ratio
+        segment_count = self.angle_length_to_segment_count(angle_length_pixels)
+
+        if segment_count < 1:
+            raise DPMMTooSmallError(self.dpmm)
+
         angle_delta = angle_delta / segment_count
 
         assert angle_delta > 0
@@ -173,6 +203,8 @@ class PillowVirtualMachine(VirtualMachine):
 
         radius = command.get_radius()
 
+        yield command.start.xy
+
         for angle in angle_generator:
             offset_vector = Vector(
                 x=radius * math.cos(math.radians(angle)),
@@ -180,6 +212,8 @@ class PillowVirtualMachine(VirtualMachine):
             )
 
             yield (command.center + offset_vector).xy
+
+        yield command.end.xy
 
     def _generate_arc_angles(
         self,
@@ -195,90 +229,84 @@ class PillowVirtualMachine(VirtualMachine):
             current_angle = apply_delta(current_angle, delta)
         yield end
 
-    def _polygon(self, points: Sequence[tuple[Unit, Unit]], *, negative: bool) -> None:
+    def _polygon(
+        self, points: Sequence[tuple[float, float]], *, is_negative: bool
+    ) -> None:
         """Draw a polygon."""
-        self.layer.draw.polygon(
+        layer = self.layer
+        layer_box = layer.box
+        x_offset = layer_box.center.x - layer_box.width / 2
+        y_offset = layer_box.center.y - layer_box.height / 2
+
+        layer.draw.polygon(
             [
                 (
-                    self.to_pixel(self.correct_center_x(x)),
-                    self.to_pixel(self.correct_center_y(y)),
+                    self.to_pixel(x - x_offset),
+                    self.to_pixel(y - y_offset),
                 )
                 for (x, y) in points
             ],
-            fill=self.get_color(negative=negative),
+            fill=self.get_color(is_negative=is_negative),
             width=0,
         )
 
-    def on_start_layer(self, command: StartLayer) -> None:
-        """Visit start layer command."""
-        layer = _PillowLayer(self.dpmm, command.box)
-        self.layers[command.id] = layer
-        self.layer_stack.append(layer)
+    def on_paste_layer_eager(self, command: PasteLayer) -> None:
+        """Visit `PasteLayer` command."""
+        source_layer = self.get_layer(command.source_layer_id)
 
-    def on_end_layer(self, command: EndLayer) -> None:
-        """Visit start end command."""
-        assert len(self.layer_stack) > 0
-        assert isinstance(command, EndLayer)
-        self.layer_stack.pop()
+        if isinstance(source_layer, PillowDeferredLayer):
+            raise PasteDeferredLayerNotAllowedError(command.source_layer_id)
 
-    def on_paste_layer(self, command: PasteLayer) -> None:
-        """Visit paste layer command."""
-        source_layer = self.layers.get(command.id, None)
-        if source_layer is None:
-            raise LayerNotFoundError(command.id)
+        assert isinstance(source_layer, PillowEagerLayer)
 
-        target_layer = self.layers.get(command.target_id, None)
-        if target_layer is None:
-            raise LayerNotFoundError(command.target_id)
+        if command.is_negative:
+            image = ImageOps.invert(source_layer.image.convert("L")).convert("1")
+        else:
+            image = source_layer.image
 
-        source_width_half = source_layer.box.width / 2
-        source_height_half = source_layer.box.height / 2
+        layer = self.layer
+        layer_box = layer.box
+        x_offset = layer_box.center.x - layer_box.width / 2
+        y_offset = layer_box.center.y - layer_box.height / 2
 
-        target_layer.image.paste(
-            source_layer.image,
+        layer.image.paste(
+            image,
             (
                 self.to_pixel(
-                    self.correct_center_x(command.center.x - source_width_half)
+                    command.center.x
+                    - (source_layer.box.width / 2)
+                    + source_layer.box.center.x
+                    - source_layer.origin.x
+                    - x_offset
                 ),
                 self.to_pixel(
-                    self.correct_center_y(command.center.y - source_height_half)
+                    command.center.y
+                    - (source_layer.box.height / 2)
+                    + source_layer.box.center.y
+                    - source_layer.origin.y
+                    - y_offset
                 ),
             ),
             mask=source_layer.image,
         )
 
-    def to_pixel(self, value: float | Unit) -> int:
+    def to_pixel(self, value: float) -> int:
         """Convert value in mm to pixels."""
-        if isinstance(value, Unit):
-            return int(value.value * self.dpmm)
         return int(value * self.dpmm)
 
-    def correct_center_x(self, x: float | Unit) -> float:
-        """Correct x coordinate for center."""
-        offset = self.layer.box.center.x.value - self.layer.box.width / 2
-        if isinstance(x, Unit):
-            return x.value - offset
-        return x - offset
-
-    def correct_center_y(self, y: float | Unit) -> float:
-        """Correct x coordinate for center."""
-        offset = self.layer.box.center.y.value - self.layer.box.height / 2
-        if isinstance(y, Unit):
-            return y.value - offset
-        return y - offset
-
-    def get_color(self, *, negative: bool) -> int:
+    def get_color(self, *, is_negative: bool) -> int:
         """Get color for positive or negative."""
-        return 0 if negative else 1
+        return 0 if is_negative else 1
 
-    def run(self, commands: Sequence[Command]) -> PillowResult:
+    def run(self, rvmc: RVMC) -> PillowResult:
         """Execute all commands."""
-        super().run(commands)
+        super().run(rvmc)
 
-        layer = self.layers.get(LayerID(id="main"), None)
-
-        self.reset()
+        layer = self._layers.get(self.MAIN_LAYER_ID, None)
 
         if layer is None:
             return PillowResult(None)
+
+        assert isinstance(layer, PillowEagerLayer)
+
         return PillowResult(layer.image.transpose(Image.Transpose.FLIP_TOP_BOTTOM))

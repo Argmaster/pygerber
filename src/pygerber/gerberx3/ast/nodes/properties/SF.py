@@ -21,12 +21,12 @@ class SF(Node):
     a_scale: Double = Field(default=1.0)
     b_scale: Double = Field(default=1.0)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> SF:
         """Handle visitor call."""
-        visitor.on_sf(self)
+        return visitor.on_sf(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], SF]:
         """Get callback function for the node."""
         return visitor.on_sf

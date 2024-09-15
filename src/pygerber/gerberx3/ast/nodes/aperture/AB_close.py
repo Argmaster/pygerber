@@ -15,12 +15,12 @@ if TYPE_CHECKING:
 class ABclose(Node):
     """Represents AB Gerber extended command."""
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> ABclose:
         """Handle visitor call."""
-        visitor.on_ab_close(self)
+        return visitor.on_ab_close(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], ABclose]:
         """Get callback function for the node."""
         return visitor.on_ab_close

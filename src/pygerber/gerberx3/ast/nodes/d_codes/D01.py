@@ -28,12 +28,12 @@ class D01(D):
     i: Optional[CoordinateI] = Field(default=None)
     j: Optional[CoordinateJ] = Field(default=None)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> D01:
         """Handle visitor call."""
-        visitor.on_d01(self)
+        return visitor.on_d01(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], D01]:
         """Get callback function for the node."""
         return visitor.on_d01

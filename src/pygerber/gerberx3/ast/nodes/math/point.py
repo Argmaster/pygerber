@@ -21,12 +21,12 @@ class Point(Node):
     x: Expression
     y: Expression
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> Point:
         """Handle visitor call."""
-        visitor.on_point(self)
+        return visitor.on_point(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], Point]:
         """Get callback function for the node."""
         return visitor.on_point

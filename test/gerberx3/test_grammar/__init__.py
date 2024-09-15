@@ -1,1 +1,0 @@
-"""Manual grammar tests."""

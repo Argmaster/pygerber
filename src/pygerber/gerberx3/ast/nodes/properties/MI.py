@@ -20,12 +20,12 @@ class MI(Node):
     a_mirroring: int = Field(default=0)
     b_mirroring: int = Field(default=0)
 
-    def visit(self, visitor: AstVisitor) -> None:
+    def visit(self, visitor: AstVisitor) -> MI:
         """Handle visitor call."""
-        visitor.on_mi(self)
+        return visitor.on_mi(self)
 
     def get_visitor_callback_function(
         self, visitor: AstVisitor
-    ) -> Callable[[Self], None]:
+    ) -> Callable[[Self], MI]:
         """Get callback function for the node."""
         return visitor.on_mi

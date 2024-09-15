@@ -15,7 +15,8 @@ def test_check_source_hash() -> None:
     output = parser.parse(source, strict=True)
 
     class CheckMD5(AstVisitor):
-        def on_tf_md5(self, node: TF_MD5) -> None:
+        def on_tf_md5(self, node: TF_MD5) -> TF_MD5:
             assert node.check_source_hash() is True
+            return node
 
     CheckMD5().on_file(output)
