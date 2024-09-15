@@ -98,7 +98,7 @@ class PillowVirtualMachine(VirtualMachine):
         self.dpmm = dpmm
         self.angle_length_to_segment_count = lambda angle_length: (
             segment_count
-            if (segment_count := angle_length * 2) > MIN_SEGMENT_COUNT
+            if (segment_count := angle_length * 1) > MIN_SEGMENT_COUNT
             else MIN_SEGMENT_COUNT
         )
 
@@ -233,11 +233,16 @@ class PillowVirtualMachine(VirtualMachine):
         self, points: Sequence[tuple[float, float]], *, negative: bool
     ) -> None:
         """Draw a polygon."""
-        self.layer.draw.polygon(
+        layer = self.layer
+        layer_box = layer.box
+        x_offset = layer_box.center.x - layer_box.width / 2
+        y_offset = layer_box.center.y - layer_box.height / 2
+
+        layer.draw.polygon(
             [
                 (
-                    self.to_pixel(self.correct_center_x(x)),
-                    self.to_pixel(self.correct_center_y(y)),
+                    self.to_pixel(x - x_offset),
+                    self.to_pixel(y - y_offset),
                 )
                 for (x, y) in points
             ],
@@ -253,31 +258,33 @@ class PillowVirtualMachine(VirtualMachine):
             raise PasteDeferredLayerNotAllowedError(command.source_layer_id)
 
         assert isinstance(source_layer, PillowEagerLayer)
-        target_layer = self.layer
 
         if command.is_negative:
             image = ImageOps.invert(source_layer.image.convert("L")).convert("1")
         else:
             image = source_layer.image
 
-        target_layer.image.paste(
+        layer = self.layer
+        layer_box = layer.box
+        x_offset = layer_box.center.x - layer_box.width / 2
+        y_offset = layer_box.center.y - layer_box.height / 2
+
+        layer.image.paste(
             image,
             (
                 self.to_pixel(
-                    self.correct_center_x(
-                        command.center.x
-                        - (source_layer.box.width / 2)
-                        + source_layer.box.center.x
-                        - source_layer.origin.x
-                    )
+                    command.center.x
+                    - (source_layer.box.width / 2)
+                    + source_layer.box.center.x
+                    - source_layer.origin.x
+                    - x_offset
                 ),
                 self.to_pixel(
-                    self.correct_center_y(
-                        command.center.y
-                        - (source_layer.box.height / 2)
-                        + source_layer.box.center.y
-                        - source_layer.origin.y
-                    )
+                    command.center.y
+                    - (source_layer.box.height / 2)
+                    + source_layer.box.center.y
+                    - source_layer.origin.y
+                    - y_offset
                 ),
             ),
             mask=source_layer.image,
@@ -286,16 +293,6 @@ class PillowVirtualMachine(VirtualMachine):
     def to_pixel(self, value: float) -> int:
         """Convert value in mm to pixels."""
         return int(value * self.dpmm)
-
-    def correct_center_x(self, x: float) -> float:
-        """Correct x coordinate for center."""
-        offset = self.layer.box.center.x - self.layer.box.width / 2
-        return x - offset
-
-    def correct_center_y(self, y: float) -> float:
-        """Correct x coordinate for center."""
-        offset = self.layer.box.center.y - self.layer.box.height / 2
-        return y - offset
 
     def get_color(self, *, negative: bool) -> int:
         """Get color for positive or negative."""

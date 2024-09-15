@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING
 
+import pyparsing as pp
 from pydantic import Field
 
 from pygerber.vm.types.model import ModelType
@@ -56,17 +57,17 @@ class Box(ModelType):
             max_y=center[1] + height / 2,
         )
 
-    @property
+    @pp.cached_property
     def width(self) -> float:
         """Get width of the box."""
         return abs(self.max_x - self.min_x)
 
-    @property
+    @pp.cached_property
     def height(self) -> float:
         """Get height of the box."""
         return abs(self.max_y - self.min_y)
 
-    @property
+    @pp.cached_property
     def center(self) -> Vector:
         """Get mean center of the box."""
         return Vector(
