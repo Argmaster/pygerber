@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.language_server._internals import (
+from pygerber.gerberx3.language_server2._internals import (
     IS_LANGUAGE_SERVER_FEATURE_AVAILABLE,
 )
 

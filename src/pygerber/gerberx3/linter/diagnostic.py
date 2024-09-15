@@ -9,7 +9,7 @@ from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.common.position import Position
-from pygerber.gerberx3.language_server._internals import (
+from pygerber.gerberx3.language_server2._internals import (
     IS_LANGUAGE_SERVER_FEATURE_AVAILABLE,
 )
 
