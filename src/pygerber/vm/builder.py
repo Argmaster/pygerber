@@ -135,7 +135,7 @@ class LayerBuilder:
         """Add a command to the layer."""
         self._check_not_finalized_in_add()
         self._commands.append(
-            Shape.new_circle(center=center, diameter=diameter, negative=is_negative)
+            Shape.new_circle(center=center, diameter=diameter, is_negative=is_negative)
         )
 
     def _check_not_finalized_in_add(self) -> None:
@@ -155,7 +155,7 @@ class LayerBuilder:
         self._check_not_finalized_in_add()
         self._commands.append(
             Shape.new_rectangle(
-                center=center, width=width, height=height, negative=is_negative
+                center=center, width=width, height=height, is_negative=is_negative
             )
         )
 
@@ -171,7 +171,7 @@ class LayerBuilder:
         self._check_not_finalized_in_add()
         self._commands.append(
             Shape.new_obround(
-                center=center, width=width, height=height, negative=is_negative
+                center=center, width=width, height=height, is_negative=is_negative
             )
         )
 
@@ -230,7 +230,7 @@ class LayerBuilder:
         self._check_not_finalized_in_add()
         self._commands.append(
             Shape.new_line(
-                start=start, end=end, thickness=thickness, negative=is_negative
+                start=start, end=end, thickness=thickness, is_negative=is_negative
             )
         )
 
@@ -247,12 +247,12 @@ class LayerBuilder:
         self._check_not_finalized_in_add()
         self._commands.append(
             Shape.new_rectangle(
-                center=center, width=width, height=thickness, negative=is_negative
+                center=center, width=width, height=thickness, is_negative=is_negative
             )
         )
         self._commands.append(
             Shape.new_rectangle(
-                center=center, width=thickness, height=height, negative=is_negative
+                center=center, width=thickness, height=height, is_negative=is_negative
             )
         )
 
@@ -272,7 +272,7 @@ class LayerBuilder:
                 start=(center[0] + half_length, center[1] + half_length),
                 end=(center[0] - half_length, center[1] - half_length),
                 thickness=thickness,
-                negative=is_negative,
+                is_negative=is_negative,
             )
         )
         self._commands.append(
@@ -280,7 +280,7 @@ class LayerBuilder:
                 start=(center[0] - half_length, center[1] + half_length),
                 end=(center[0] + half_length, center[1] - half_length),
                 thickness=thickness,
-                negative=is_negative,
+                is_negative=is_negative,
             )
         )
 

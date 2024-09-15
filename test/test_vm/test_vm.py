@@ -226,7 +226,7 @@ class TestVirtualMachine:
         layer_id = LayerID(id="layer")
 
         vm.on_start_layer(StartLayer(id=layer_id, box=None, origin=Vector(x=0, y=0)))
-        vm.on_shape(Shape.new_circle((0, 0), 1, negative=False))
+        vm.on_shape(Shape.new_circle((0, 0), 1, is_negative=False))
         vm.on_end_layer(EndLayer())
 
         assert layer_id in vm._layers
@@ -258,7 +258,7 @@ class TestVirtualMachine:
         vm.on_start_layer(
             StartLayer(id=LayerID(id="%main%"), box=None, origin=Vector(x=0, y=0))
         )
-        vm.on_shape(Shape.new_circle((0, 0), 1, negative=False))
+        vm.on_shape(Shape.new_circle((0, 0), 1, is_negative=False))
 
         vm.on_start_layer(
             StartLayer(
@@ -269,7 +269,7 @@ class TestVirtualMachine:
         )
         self.check_eager_handlers(vm)
 
-        vm.on_shape(Shape.new_circle((1, 1), 1, negative=False))
+        vm.on_shape(Shape.new_circle((1, 1), 1, is_negative=False))
         vm.on_end_layer(EndLayer())
 
         self.check_deferred_handlers(vm)
@@ -285,7 +285,7 @@ class TestVirtualMachine:
             DeferredLayer(
                 layer_id=LayerID(id="layer"),
                 origin=Vector(x=0, y=0),
-                commands=[Shape.new_circle((0, 0), 1, negative=False)],
+                commands=[Shape.new_circle((0, 0), 1, is_negative=False)],
             )
         )
         assert isinstance(box, Box)
@@ -314,7 +314,7 @@ class TestVirtualMachine:
         layer_id = LayerID(id=f"layer-{time.time():.0f}")
 
         StartLayer(id=layer_id, box=Box()).visit(vm)
-        Shape.new_circle((0, 0), 1, negative=False).visit(vm)
+        Shape.new_circle((0, 0), 1, is_negative=False).visit(vm)
         EndLayer().visit(vm)
 
         return layer_id
@@ -341,7 +341,7 @@ class TestVirtualMachine:
                 layer_id=LayerID(id="layer"),
                 origin=Vector(x=0, y=0),
                 commands=[
-                    Shape.new_circle((0, 0), 1, negative=False),
+                    Shape.new_circle((0, 0), 1, is_negative=False),
                     PasteLayer(source_layer_id=layer_id, center=Vector(x=0, y=0)),
                 ],
             )
@@ -358,7 +358,7 @@ class TestVirtualMachine:
                 layer_id=LayerID(id="layer"),
                 origin=Vector(x=0, y=0),
                 commands=[
-                    Shape.new_circle((0, 0), 1, negative=False),
+                    Shape.new_circle((0, 0), 1, is_negative=False),
                     PasteLayer(source_layer_id=layer_id, center=Vector(x=0, y=0)),
                 ],
             )
@@ -376,7 +376,7 @@ class TestVirtualMachine:
                     layer_id=LayerID(id="layer"),
                     origin=Vector(x=0, y=0),
                     commands=[
-                        Shape.new_circle((0, 0), 1, negative=False),
+                        Shape.new_circle((0, 0), 1, is_negative=False),
                         mocker.MagicMock(),
                     ],
                 )

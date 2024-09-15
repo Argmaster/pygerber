@@ -13,7 +13,7 @@ def test_circle() -> None:
     assert build_circle() == RVMC(
         commands=[
             default_start_main_layer(),
-            Shape.new_circle(center=(0.0, 0.0), diameter=1.0, negative=False),
+            Shape.new_circle(center=(0.0, 0.0), diameter=1.0, is_negative=False),
             default_end_layer(),
         ]
     )
@@ -51,7 +51,7 @@ def test_nested_layer_circle_paste() -> None:
         commands=[
             default_start_main_layer(),
             default_start_layer("D10"),
-            Shape.new_circle(center=(0.0, 0.0), diameter=1.0, negative=False),
+            Shape.new_circle(center=(0.0, 0.0), diameter=1.0, is_negative=False),
             default_end_layer(),
             PasteLayer(
                 source_layer_id=LayerID(id="D10"),
@@ -90,7 +90,7 @@ def test_nested_layer_circle_paste_with_offset() -> None:
         commands=[
             default_start_main_layer(),
             default_start_layer("D10"),
-            Shape.new_circle(center=(0.0, 0.0), diameter=1.0, negative=False),
+            Shape.new_circle(center=(0.0, 0.0), diameter=1.0, is_negative=False),
             default_end_layer(),
             PasteLayer(
                 source_layer_id=LayerID(id="D10"),

@@ -9,14 +9,14 @@ from pydantic import Field
 
 from pygerber.common.frozen_general_model import FrozenGeneralModel
 from pygerber.common.position import Position
-from pygerber.gerberx3.language_server2._internals import (
-    IS_LANGUAGE_SERVER_FEATURE_AVAILABLE,
+from pygerber.gerberx3.language_server.status import (
+    is_language_server_available,
 )
 
 if TYPE_CHECKING:
     import lsprotocol.types as lspt
 
-if IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:
+if is_language_server_available():
     import lsprotocol.types as lspt
 
 

@@ -143,7 +143,7 @@ class PillowVirtualMachine(VirtualMachine):
             else:
                 raise NotImplementedError
 
-        self._polygon(points, negative=command.negative)
+        self._polygon(points, is_negative=command.is_negative)
 
     def _calculate_arc_points(
         self, command: Arc
@@ -230,7 +230,7 @@ class PillowVirtualMachine(VirtualMachine):
         yield end
 
     def _polygon(
-        self, points: Sequence[tuple[float, float]], *, negative: bool
+        self, points: Sequence[tuple[float, float]], *, is_negative: bool
     ) -> None:
         """Draw a polygon."""
         layer = self.layer
@@ -246,7 +246,7 @@ class PillowVirtualMachine(VirtualMachine):
                 )
                 for (x, y) in points
             ],
-            fill=self.get_color(negative=negative),
+            fill=self.get_color(is_negative=is_negative),
             width=0,
         )
 
@@ -294,9 +294,9 @@ class PillowVirtualMachine(VirtualMachine):
         """Convert value in mm to pixels."""
         return int(value * self.dpmm)
 
-    def get_color(self, *, negative: bool) -> int:
+    def get_color(self, *, is_negative: bool) -> int:
         """Get color for positive or negative."""
-        return 0 if negative else 1
+        return 0 if is_negative else 1
 
     def run(self, rvmc: RVMC) -> PillowResult:
         """Execute all commands."""

@@ -68,7 +68,7 @@ if TYPE_CHECKING:
             center: tuple[float, float],
             thickness: float,
             *,
-            negative: bool,
+            is_negative: bool,
         ) -> Shape: ...
 
 
@@ -244,7 +244,7 @@ class Compiler(StateTrackingVisitor):
             Shape.new_circle(
                 (0.0, 0.0),
                 node.diameter,
-                negative=False,
+                is_negative=False,
             )
         )
         if node.hole_diameter is not None and node.hole_diameter > 0:
@@ -252,7 +252,7 @@ class Compiler(StateTrackingVisitor):
                 Shape.new_circle(
                     (0.0, 0.0),
                     min(node.hole_diameter, node.diameter),
-                    negative=True,
+                    is_negative=True,
                 )
             )
         return node
@@ -280,7 +280,7 @@ class Compiler(StateTrackingVisitor):
                 (0.0, 0.0),
                 node.width,
                 node.height,
-                negative=False,
+                is_negative=False,
             )
         )
         if node.hole_diameter is not None and node.hole_diameter > 0:
@@ -288,7 +288,7 @@ class Compiler(StateTrackingVisitor):
                 Shape.new_circle(
                     (0.0, 0.0),
                     min(node.hole_diameter, node.width, node.height),
-                    negative=True,
+                    is_negative=True,
                 )
             )
         return node
@@ -303,7 +303,7 @@ class Compiler(StateTrackingVisitor):
                 (0.0, 0.0),
                 node.width,
                 node.height,
-                negative=False,
+                is_negative=False,
             )
         )
         if node.hole_diameter is not None and node.hole_diameter > 0:
@@ -311,7 +311,7 @@ class Compiler(StateTrackingVisitor):
                 Shape.new_circle(
                     (0.0, 0.0),
                     min(node.hole_diameter, node.width, node.height),
-                    negative=True,
+                    is_negative=True,
                 )
             )
         return node
@@ -335,7 +335,7 @@ class Compiler(StateTrackingVisitor):
                 Shape.new_circle(
                     (0.0, 0.0),
                     min(node.hole_diameter, node.outer_diameter),
-                    negative=True,
+                    is_negative=True,
                 )
             )
         return node
@@ -374,7 +374,7 @@ class Compiler(StateTrackingVisitor):
             Shape.new_circle(
                 start_point,
                 thickness,
-                negative=self.is_negative,
+                is_negative=self.is_negative,
             )
         )
         self._append_shape_to_current_buffer(
@@ -382,14 +382,14 @@ class Compiler(StateTrackingVisitor):
                 start_point,
                 end_point,
                 thickness=thickness,
-                negative=self.is_negative,
+                is_negative=self.is_negative,
             ),
         )
         self._append_shape_to_current_buffer(
             Shape.new_circle(
                 end_point,
                 thickness,
-                negative=self.is_negative,
+                is_negative=self.is_negative,
             )
         )
 
@@ -418,7 +418,7 @@ class Compiler(StateTrackingVisitor):
             Shape.new_circle(
                 start_point,
                 thickness,
-                negative=self.is_negative,
+                is_negative=self.is_negative,
             )
         )
         if start_point == end_point:
@@ -432,7 +432,7 @@ class Compiler(StateTrackingVisitor):
                     end_point,
                     center,
                     thickness,
-                    negative=self.is_negative,
+                    is_negative=self.is_negative,
                 )
             )
             self._append_shape_to_current_buffer(
@@ -441,7 +441,7 @@ class Compiler(StateTrackingVisitor):
                     start_point,
                     center,
                     thickness,
-                    negative=self.is_negative,
+                    is_negative=self.is_negative,
                 )
             )
 
@@ -452,14 +452,14 @@ class Compiler(StateTrackingVisitor):
                     end_point,
                     center,
                     thickness,
-                    negative=self.is_negative,
+                    is_negative=self.is_negative,
                 )
             )
         self._append_shape_to_current_buffer(
             Shape.new_circle(
                 end_point,
                 thickness,
-                negative=self.is_negative,
+                is_negative=self.is_negative,
             )
         )
 
@@ -554,7 +554,7 @@ class Compiler(StateTrackingVisitor):
 
         if len(self._contour_buffer) > 0:
             self._append_shape_to_current_buffer(
-                Shape(commands=self._contour_buffer, negative=self.is_negative)
+                Shape(commands=self._contour_buffer, is_negative=self.is_negative)
             )
 
         self._contour_buffer = []
@@ -760,7 +760,7 @@ class MacroEvalVisitor(AstVisitor):
         shape = Shape.new_circle(
             (center_x, center_y),
             diameter,
-            negative=(exposure == 0),
+            is_negative=(exposure == 0),
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
@@ -784,7 +784,7 @@ class MacroEvalVisitor(AstVisitor):
             start,
             end,
             thickness=width,
-            negative=(exposure == 0),
+            is_negative=(exposure == 0),
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
@@ -854,7 +854,7 @@ class MacroEvalVisitor(AstVisitor):
                     (center_x, center_y - half_crosshair_length),
                     (center_x, center_y + half_crosshair_length),
                     crosshair_thickness,
-                    negative=False,
+                    is_negative=False,
                 )
             )
             shapes.append(
@@ -862,7 +862,7 @@ class MacroEvalVisitor(AstVisitor):
                     (center_x - half_crosshair_length, center_y),
                     (center_x + half_crosshair_length, center_y),
                     crosshair_thickness,
-                    negative=False,
+                    is_negative=False,
                 )
             )
 
@@ -876,7 +876,9 @@ class MacroEvalVisitor(AstVisitor):
             for _ in range(int(max_ring_count)):
                 if current_outer_diameter <= ring_thickness:
                     shapes.append(
-                        Shape.new_circle(center, current_outer_diameter, negative=False)
+                        Shape.new_circle(
+                            center, current_outer_diameter, is_negative=False
+                        )
                     )
                     break
 
@@ -938,7 +940,7 @@ class MacroEvalVisitor(AstVisitor):
                 (0 - radius_delta, 0),
                 (0 + radius_delta, 0),
                 thickness=gap_thickness,
-                negative=True,
+                is_negative=True,
             )
         )
         shapes.append(
@@ -946,7 +948,7 @@ class MacroEvalVisitor(AstVisitor):
                 (0, 0 - radius_delta),
                 (0, 0 + radius_delta),
                 thickness=gap_thickness,
-                negative=True,
+                is_negative=True,
             )
         )
 
@@ -987,7 +989,7 @@ class MacroEvalVisitor(AstVisitor):
             (center_x, center_y),
             width,
             height,
-            negative=(exposure == 0),
+            is_negative=(exposure == 0),
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
@@ -1008,7 +1010,7 @@ class MacroEvalVisitor(AstVisitor):
             (x_lower_left + (width / 2), y_lower_left + (height / 2)),
             width,
             height,
-            negative=(exposure == 0),
+            is_negative=(exposure == 0),
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))

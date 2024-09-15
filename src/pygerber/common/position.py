@@ -5,15 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pygerber.gerberx3.language_server2._internals import (
-    IS_LANGUAGE_SERVER_FEATURE_AVAILABLE,
+from pygerber.gerberx3.language_server.status import (
+    is_language_server_available,
 )
 
 if TYPE_CHECKING:
     import lsprotocol.types as lspt
     from typing_extensions import Self
 
-if IS_LANGUAGE_SERVER_FEATURE_AVAILABLE:
+if is_language_server_available():
     import lsprotocol.types as lspt
 
 

@@ -70,7 +70,7 @@ def test_draw_rectangle_in_center() -> None:
         make_main_layer(
             Box.from_center_width_height((5, 5), 15, 10), origin=Vector(x=5, y=5)
         ),
-        Shape.new_rectangle((5, 5), 2, 1, negative=False),
+        Shape.new_rectangle((5, 5), 2, 1, is_negative=False),
         EndLayer(),
     ]
     compare(run(100, commands))
@@ -79,8 +79,8 @@ def test_draw_rectangle_in_center() -> None:
 def test_draw_obround_horizontal_in_center() -> None:
     commands = [
         make_main_layer(Box.from_center_width_height((0, 0), 5, 5)),
-        Shape.new_obround((0, 1), 2, 1, negative=False),
-        Shape.new_rectangle((0, -1), 2, 1, negative=False),
+        Shape.new_obround((0, 1), 2, 1, is_negative=False),
+        Shape.new_rectangle((0, -1), 2, 1, is_negative=False),
         EndLayer(),
     ]
     compare(run(100, commands))
@@ -89,8 +89,8 @@ def test_draw_obround_horizontal_in_center() -> None:
 def test_draw_obround_vertical_in_center() -> None:
     commands = [
         make_main_layer(Box.from_center_width_height((0, 0), 5, 5)),
-        Shape.new_obround((-1, 0), 1, 2, negative=False),
-        Shape.new_rectangle((1, 0), 1, 2, negative=False),
+        Shape.new_obround((-1, 0), 1, 2, is_negative=False),
+        Shape.new_rectangle((1, 0), 1, 2, is_negative=False),
         EndLayer(),
     ]
     compare(run(100, commands))
@@ -101,7 +101,7 @@ def test_draw_circle_in_center() -> None:
         make_main_layer(
             Box.from_center_width_height((5, 5), 15, 10), origin=Vector(x=5, y=5)
         ),
-        Shape.new_circle((5, 5), 2, negative=False),
+        Shape.new_circle((5, 5), 2, is_negative=False),
         EndLayer(),
     ]
     compare(run(100, commands))
@@ -110,8 +110,8 @@ def test_draw_circle_in_center() -> None:
 def test_draw_circle_over_circle_in_center() -> None:
     commands = [
         make_main_layer(Box.from_center_width_height((5, 5), 15, 10)),
-        Shape.new_circle((5, 5), 2, negative=False),
-        Shape.new_circle((5, 5), 1, negative=True),
+        Shape.new_circle((5, 5), 2, is_negative=False),
+        Shape.new_circle((5, 5), 1, is_negative=True),
         EndLayer(),
     ]
     compare(run(100, commands))
@@ -149,10 +149,10 @@ def test_paste_rectangle_in_center() -> None:
         make_layer(
             "rect", Box.from_center_width_height((0, 0), 5, 5), Vector(x=0, y=0)
         ),
-        Shape.new_rectangle((0, 0), 2, 1, negative=False),
+        Shape.new_rectangle((0, 0), 2, 1, is_negative=False),
         EndLayer(),
-        Shape.new_rectangle((5, 5), 3, 2, negative=False),
-        Shape.new_rectangle((5, 5), 2.8, 1.8, negative=True),
+        Shape.new_rectangle((5, 5), 3, 2, is_negative=False),
+        Shape.new_rectangle((5, 5), 2.8, 1.8, is_negative=True),
         PasteLayer.new("rect", (5, 5)),
         EndLayer(),
     ]
@@ -163,9 +163,9 @@ def test_paste_negative_rectangle_in_center() -> None:
     commands = [
         make_main_layer(Box.from_center_width_height((5, 5), 15, 10), Vector(x=5, y=5)),
         make_layer("rect", Box.from_center_width_height((0, 0), 5, 5)),
-        Shape.new_rectangle((0, 0), 2, 1, negative=False),
+        Shape.new_rectangle((0, 0), 2, 1, is_negative=False),
         EndLayer(),
-        Shape.new_rectangle((5, 5), 3, 2, negative=False),
+        Shape.new_rectangle((5, 5), 3, 2, is_negative=False),
         PasteLayer.new("rect", (5, 5), is_negative=True),
         EndLayer(),
     ]
@@ -174,8 +174,8 @@ def test_paste_negative_rectangle_in_center() -> None:
 
 class TestCWArc:
     def axes(self) -> Iterable[Shape]:
-        yield Shape.new_rectangle((0, 0), 15, 0.1, negative=False)
-        yield Shape.new_rectangle((0, 0), 0.1, 15, negative=False)
+        yield Shape.new_rectangle((0, 0), 15, 0.1, is_negative=False)
+        yield Shape.new_rectangle((0, 0), 0.1, 15, is_negative=False)
 
     def template(self, *arc: Shape) -> Sequence[Command]:
         return [
@@ -192,7 +192,7 @@ class TestCWArc:
             run(
                 10,
                 self.template(
-                    Shape.new_cw_arc((5, 0), (0, -5), (0, 0), 1, negative=False)
+                    Shape.new_cw_arc((5, 0), (0, -5), (0, 0), 1, is_negative=False)
                 ),
             )
         )
@@ -202,7 +202,7 @@ class TestCWArc:
             run(
                 10,
                 self.template(
-                    Shape.new_cw_arc((0, -5), (-5, 0), (0, 0), 1, negative=False)
+                    Shape.new_cw_arc((0, -5), (-5, 0), (0, 0), 1, is_negative=False)
                 ),
             )
         )
@@ -212,7 +212,7 @@ class TestCWArc:
             run(
                 10,
                 self.template(
-                    Shape.new_cw_arc((-5, 0), (0, 5), (0, 0), 1, negative=False)
+                    Shape.new_cw_arc((-5, 0), (0, 5), (0, 0), 1, is_negative=False)
                 ),
             )
         )
@@ -222,7 +222,7 @@ class TestCWArc:
             run(
                 10,
                 self.template(
-                    Shape.new_cw_arc((0, 5), (5, 0), (0, 0), 1, negative=False)
+                    Shape.new_cw_arc((0, 5), (5, 0), (0, 0), 1, is_negative=False)
                 ),
             )
         )
@@ -234,7 +234,7 @@ class TestCWArc:
             run(
                 10,
                 self.template(
-                    Shape.new_cw_arc((5, 0), (-5, 0), (0, 0), 1, negative=False)
+                    Shape.new_cw_arc((5, 0), (-5, 0), (0, 0), 1, is_negative=False)
                 ),
             )
         )
@@ -244,7 +244,7 @@ class TestCWArc:
             run(
                 10,
                 self.template(
-                    Shape.new_cw_arc((0, -5), (0, 5), (0, 0), 1, negative=False)
+                    Shape.new_cw_arc((0, -5), (0, 5), (0, 0), 1, is_negative=False)
                 ),
             )
         )
@@ -254,7 +254,7 @@ class TestCWArc:
             run(
                 10,
                 self.template(
-                    Shape.new_cw_arc((-5, 0), (5, 0), (0, 0), 1, negative=False)
+                    Shape.new_cw_arc((-5, 0), (5, 0), (0, 0), 1, is_negative=False)
                 ),
             )
         )
@@ -264,7 +264,7 @@ class TestCWArc:
             run(
                 10,
                 self.template(
-                    Shape.new_cw_arc((0, 5), (0, -5), (0, 0), 1, negative=False)
+                    Shape.new_cw_arc((0, 5), (0, -5), (0, 0), 1, is_negative=False)
                 ),
             )
         )
@@ -283,7 +283,7 @@ class TestCWArc:
                         (-self._45_degrees_vector_x, -self._45_degrees_vector_x),
                         (0, 0),
                         1,
-                        negative=False,
+                        is_negative=False,
                     )
                 ),
             )
@@ -299,7 +299,7 @@ class TestCWArc:
                         (-self._45_degrees_vector_x, self._45_degrees_vector_x),
                         (0, 0),
                         1,
-                        negative=False,
+                        is_negative=False,
                     )
                 ),
             )
@@ -315,7 +315,7 @@ class TestCWArc:
                         (self._45_degrees_vector_x, self._45_degrees_vector_x),
                         (0, 0),
                         1,
-                        negative=False,
+                        is_negative=False,
                     )
                 ),
             )
@@ -331,7 +331,7 @@ class TestCWArc:
                         (self._45_degrees_vector_x, -self._45_degrees_vector_x),
                         (0, 0),
                         1,
-                        negative=False,
+                        is_negative=False,
                     )
                 ),
             )
@@ -347,28 +347,28 @@ class TestCWArc:
                         (-self._45_degrees_vector_x, -self._45_degrees_vector_x),
                         (0, 0),
                         1,
-                        negative=False,
+                        is_negative=False,
                     ),
                     Shape.new_cw_arc(
                         (-self._45_degrees_vector_x, -self._45_degrees_vector_x),
                         (-self._45_degrees_vector_x, self._45_degrees_vector_x),
                         (0, 0),
                         1,
-                        negative=False,
+                        is_negative=False,
                     ),
                     Shape.new_cw_arc(
                         (-self._45_degrees_vector_x, self._45_degrees_vector_x),
                         (self._45_degrees_vector_x, self._45_degrees_vector_x),
                         (0, 0),
                         1,
-                        negative=False,
+                        is_negative=False,
                     ),
                     Shape.new_cw_arc(
                         (self._45_degrees_vector_x, self._45_degrees_vector_x),
                         (self._45_degrees_vector_x, -self._45_degrees_vector_x),
                         (0, 0),
                         1,
-                        negative=False,
+                        is_negative=False,
                     ),
                 ),
             )
@@ -414,73 +414,73 @@ class TestBox:
 
     def test_two_circle(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_circle((5, 5), 2, negative=False),
-            Shape.new_circle((0, 0), 2, negative=False),
+            Shape.new_circle((5, 5), 2, is_negative=False),
+            Shape.new_circle((0, 0), 2, is_negative=False),
             fixed_box=Box.from_center_width_height((2.5, 2.5), 7, 7),
             origin=Vector(x=2.5, y=2.5),
         )
 
     def test_two_rectangles(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_rectangle((5, 5), 2, 2, negative=False),
-            Shape.new_rectangle((0, 0), 2, 2, negative=False),
+            Shape.new_rectangle((5, 5), 2, 2, is_negative=False),
+            Shape.new_rectangle((0, 0), 2, 2, is_negative=False),
             fixed_box=Box.from_center_width_height((2.5, 2.5), 7, 7),
             origin=Vector(x=2.5, y=2.5),
         )
 
     def test_circle_rectangle(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_circle((5, 5), 2, negative=False),
-            Shape.new_rectangle((0, 0), 2, 2, negative=False),
+            Shape.new_circle((5, 5), 2, is_negative=False),
+            Shape.new_rectangle((0, 0), 2, 2, is_negative=False),
             fixed_box=Box.from_center_width_height((2.5, 2.5), 7, 7),
             origin=Vector(x=2.5, y=2.5),
         )
 
     def test_cw_arc_0_90(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_cw_arc((5, 0), (0, -5), (0, 0), 1, negative=False),
+            Shape.new_cw_arc((5, 0), (0, -5), (0, 0), 1, is_negative=False),
             fixed_box=Box.from_center_width_height((2.75, -2.75), 5.5, 5.5),
             origin=Vector(x=2.75, y=-2.75),
         )
 
     def test_cw_arc_90_180(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_cw_arc((0, -5), (-5, 0), (0, 0), 1, negative=False),
+            Shape.new_cw_arc((0, -5), (-5, 0), (0, 0), 1, is_negative=False),
             fixed_box=Box.from_center_width_height((-2.75, -2.75), 5.5, 5.5),
             origin=Vector(x=-2.75, y=-2.75),
         )
 
     def test_cw_arc_180_270(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_cw_arc((-5, 0), (0, 5), (0, 0), 1, negative=False),
+            Shape.new_cw_arc((-5, 0), (0, 5), (0, 0), 1, is_negative=False),
             fixed_box=Box.from_center_width_height((-2.75, 2.75), 5.5, 5.5),
             origin=Vector(x=-2.75, y=2.75),
         )
 
     def test_cw_arc_270_360(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_cw_arc((0, 5), (5, 0), (0, 0), 1, negative=False),
+            Shape.new_cw_arc((0, 5), (5, 0), (0, 0), 1, is_negative=False),
             fixed_box=Box.from_center_width_height((2.75, 2.75), 5.5, 5.5),
             origin=Vector(x=2.75, y=2.75),
         )
 
     def test_cw_arc_0_180(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_cw_arc((5, 0), (-5, 0), (0, 0), 1, negative=False),
+            Shape.new_cw_arc((5, 0), (-5, 0), (0, 0), 1, is_negative=False),
             fixed_box=Box.from_center_width_height((0, -2.75), 11, 5.5),
             origin=Vector(x=0, y=-2.75),
         )
 
     def test_cw_arc_90_270(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_cw_arc((0, -5), (0, 5), (0, 0), 1, negative=False),
+            Shape.new_cw_arc((0, -5), (0, 5), (0, 0), 1, is_negative=False),
             fixed_box=Box.from_center_width_height((-2.75, 0), 5.5, 11),
             origin=Vector(x=-2.75, y=0),
         )
 
     def test_cw_arc_180_360(self) -> None:
         self.compare_auto_vs_fixed(
-            Shape.new_cw_arc((-5, 0), (5, 0), (0, 0), 1, negative=False),
+            Shape.new_cw_arc((-5, 0), (5, 0), (0, 0), 1, is_negative=False),
             fixed_box=Box.from_center_width_height((0, 2.75), 11, 5.5),
             origin=Vector(x=0, y=2.75),
         )

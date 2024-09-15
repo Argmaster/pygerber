@@ -5,21 +5,31 @@ server feature is available.
 from __future__ import annotations
 
 import importlib.util
+from typing import Optional
 
 from pygerber.gerberx3.language_server.errors import LanguageServerNotAvailableError
+
+_IS_LANGUAGE_SERVER_AVAILABLE: Optional[bool] = None
 
 
 def is_language_server_available() -> bool:
     """Check if the language server feature is available."""
-    try:
-        _spec_pygls = importlib.util.find_spec("pygls")
-        _spec_lsprotocol = importlib.util.find_spec("lsprotocol")
+    global _IS_LANGUAGE_SERVER_AVAILABLE  # noqa: PLW0603
 
-    except (ImportError, ValueError):
-        return False
+    if _IS_LANGUAGE_SERVER_AVAILABLE is None:
+        try:
+            _spec_pygls = importlib.util.find_spec("pygls")
+            _spec_lsprotocol = importlib.util.find_spec("lsprotocol")
 
-    else:
-        return (_spec_pygls is not None) and (_spec_lsprotocol is not None)
+        except (ImportError, ValueError):
+            return False
+
+        else:
+            _IS_LANGUAGE_SERVER_AVAILABLE = (_spec_pygls is not None) and (
+                _spec_lsprotocol is not None
+            )
+
+    return _IS_LANGUAGE_SERVER_AVAILABLE
 
 
 def throw_if_server_not_available() -> None:
