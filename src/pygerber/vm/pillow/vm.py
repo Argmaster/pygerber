@@ -98,7 +98,7 @@ class PillowVirtualMachine(VirtualMachine):
         self.dpmm = dpmm
         self.angle_length_to_segment_count = lambda angle_length: (
             segment_count
-            if (segment_count := angle_length * 1) > MIN_SEGMENT_COUNT
+            if (segment_count := angle_length * 2) > MIN_SEGMENT_COUNT
             else MIN_SEGMENT_COUNT
         )
 
