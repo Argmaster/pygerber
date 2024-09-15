@@ -33,6 +33,7 @@ from pygerber.gerberx3.ast.nodes import (
     Expression,
     File,
 )
+from pygerber.gerberx3.ast.nodes.aperture.SR import SR
 from pygerber.gerberx3.ast.nodes.types import ApertureIdStr, Double
 from pygerber.gerberx3.ast.state_tracking_visitor import (
     StateTrackingVisitor,
@@ -127,6 +128,10 @@ class Compiler(StateTrackingVisitor):
         """Get buffer by id."""
         return self._buffers[id_]
 
+    def _del_buffer(self, id_: str) -> None:
+        """Delete buffer by id."""
+        del self._buffers[id_]
+
     def _get_buffer_opt(self, id_: str) -> Optional[CommandBuffer]:
         """Get buffer by id."""
         return self._buffers.get(id_)
@@ -199,6 +204,35 @@ class Compiler(StateTrackingVisitor):
 
         self._pop_buffer()
 
+        return node
+
+    def on_sr(self, node: SR) -> SR:
+        """Handle `SR` node."""
+        aperture_buffer = self._create_aperture_buffer(
+            ApertureIdStr(f"%%SR%{id(node)}%{time.time():.0f}")
+        )
+        self._push_buffer(aperture_buffer.id_str)
+
+        super().on_sr(node)
+
+        self._pop_buffer()
+
+        buffer = self._get_buffer(aperture_buffer.id_str)
+
+        x_delta = node.open.x_delta
+        y_delta = node.open.y_delta
+
+        for x in range(node.open.x_repeats):
+            for y in range(node.open.y_repeats):
+                x_coordinate = self.coordinate_x + (x * x_delta)
+                y_coordinate = self.coordinate_y + (y * y_delta)
+                tmp_buffer = self._apply_transform_to_buffer_non_recursive_tmp(
+                    buffer, Matrix3x3.new_translate(x=x_coordinate, y=y_coordinate)
+                )
+
+                self._expand_buffer_to_current_buffer(tmp_buffer)
+
+        self._del_buffer(aperture_buffer.id_str)
         return node
 
     def on_adc(self, node: ADC) -> ADC:

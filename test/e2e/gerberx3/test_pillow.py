@@ -24,6 +24,7 @@ from test.assets.gerberx3.flashes_with_transform import FlashesWithTransform
 from test.assets.gerberx3.KicadGerberX2 import KiCadGerberX2Assets
 from test.assets.gerberx3.macro.codes import MacroCodeAssets
 from test.assets.gerberx3.polarity_cutouts import PolarityCutouts
+from test.assets.gerberx3.step_and_repeat import StepAndRepeatAssets
 from test.assets.gerberx3.ucamco import GerberSpecExampleAssets
 
 THIS_FILE = Path(__file__)
@@ -497,4 +498,76 @@ class TestKiCadGerberX2(PillowRenderE2E):
 
     def test_top_silk(self) -> None:
         result = self._render(KiCadGerberX2Assets.top_silk, dpmm=100)
+        self._save(result)
+
+
+class TestStepAndRepeat(PillowRenderE2E):
+    def test_cr_x_3(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_x_3, dpmm=100)
+        self._save(result)
+
+    def test_cr_x_6(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_x_6, dpmm=100)
+        self._save(result)
+
+    def test_cr_y_3(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_y_3, dpmm=100)
+        self._save(result)
+
+    def test_cr_y_6(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_y_6, dpmm=100)
+        self._save(result)
+
+    def test_cr_xy_3_6(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_xy_3_6, dpmm=100)
+        self._save(result)
+
+    def test_cr_xy_6_6(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_xy_6_6, dpmm=100)
+        self._save(result)
+
+    # Rot 30
+
+    def test_cr_x_3_rot_30(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_x_3_rot_30, dpmm=100)
+        self._save(result)
+
+    def test_cr_x_6_rot_30(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_x_6_rot_30, dpmm=100)
+        self._save(result)
+
+    def test_cr_y_3_rot_30(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_y_3_rot_30, dpmm=100)
+        self._save(result)
+
+    def test_cr_y_6_rot_30(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_y_6_rot_30, dpmm=100)
+        self._save(result)
+
+    def test_cr_xy_3_6_rot_30(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_xy_3_6_rot_30, dpmm=100)
+        self._save(result)
+
+    def test_cr_xy_6_6_rot_30(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_xy_6_6_rot_30, dpmm=100)
+        self._save(result)
+
+    # Line
+
+    def test_cr_xy_2_2_line(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_xy_2_2_line, dpmm=100)
+        self._save(result)
+
+    def test_cr_xy_2_2_line_rot_30(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_xy_2_2_line_rot_30, dpmm=100)
+        self._save(result)
+
+    # AB
+
+    def test_cr_xy_2_2_ab(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_xy_2_2_ab, dpmm=100)
+        self._save(result)
+
+    def test_cr_xy_2_2_ab_rot_30(self) -> None:
+        result = self._render(StepAndRepeatAssets.cr_xy_2_2_ab_rot_30, dpmm=100)
         self._save(result)
