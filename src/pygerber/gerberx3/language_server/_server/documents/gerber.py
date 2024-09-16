@@ -3,13 +3,15 @@ from __future__ import annotations
 import hashlib
 from typing import Optional
 
+from pygerber.gerberx3.ast.node_finder import NodeFinder, ZeroBasedPosition
 from pygerber.gerberx3.ast.nodes.file import File
 from pygerber.gerberx3.language_server._server.documents.document import Document
+from pygerber.gerberx3.language_server._server.hover.gerber import GerberHoverCreator
 from pygerber.gerberx3.language_server.status import is_language_server_available
 from pygerber.gerberx3.parser.pyparsing.parser import Parser
 
 if is_language_server_available():
-    import lsprotocol.types as lspt  # noqa: TCH002
+    import lsprotocol.types as lspt
     from pygls.server import LanguageServer  # noqa: TCH002
 
 
@@ -57,3 +59,31 @@ class GerberDocument(Document):
     async def on_change(self, params: lspt.DidChangeTextDocumentParams) -> None:
         """Handle the document change event."""
         self.load_ast_from_uri(params.text_document.uri)
+
+    async def on_hover(self, params: lspt.HoverParams) -> lspt.Hover | None:
+        """Handle the hover event."""
+        position = ZeroBasedPosition(
+            line=params.position.line, column=params.position.character
+        ).to_one_based()
+
+        if self.ast is None:
+            return None
+
+        node = NodeFinder(self.ast).find_node(position)
+
+        if node is None:
+            return None
+
+        message = GerberHoverCreator(self.ast).create_hover_markdown(node)
+
+        source_info = node.source_info
+        if source_info is None:
+            return None
+
+        return lspt.Hover(
+            contents=lspt.MarkupContent(value=message, kind=lspt.MarkupKind.Markdown),
+            range=lspt.Range(
+                start=lspt.Position(source_info.line, source_info.column),
+                end=lspt.Position(source_info.end_line, source_info.end_column),
+            ),
+        )

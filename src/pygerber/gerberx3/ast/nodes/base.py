@@ -37,6 +37,25 @@ class SourceInfo(ModelType):
         """
         return pp.col(self.location, self.source)
 
+    @pp.cached_property
+    def end_line(self) -> int:
+        """Get the line number of the end location within the string; the first line
+        is line 1, newlines start new rows.
+        """
+        return pp.lineno(self.location + self.length, self.source)
+
+    @pp.cached_property
+    def end_column(self) -> int:
+        """Get the column number of the end location within the string; the first
+        column is column 1, newlines reset the column number to 1.
+        """
+        return pp.col(self.location + self.length, self.source)
+
+    @pp.cached_property
+    def end_location(self) -> int:
+        """Get the end location of the source."""
+        return self.location + self.length
+
 
 class Node(ModelType):
     """Base class for all nodes."""
