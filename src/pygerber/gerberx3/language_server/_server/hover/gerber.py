@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import base64
 import io
-import textwrap
 from contextlib import contextmanager, suppress
 from io import StringIO
-from typing import TYPE_CHECKING, Generator, Optional
+from typing import TYPE_CHECKING, Generator, Optional, cast
 
 from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 from pygerber.gerberx3.ast.nodes import (
@@ -22,6 +21,10 @@ from pygerber.gerberx3.ast.nodes import (
     LS,
     M02,
     MO,
+    TA,
+    TD,
+    TF,
+    TO,
     TO_C,
     TO_CMNP,
     TO_N,
@@ -49,6 +52,11 @@ from pygerber.gerberx3.ast.nodes import (
     TO_CVal,
     TO_UserName,
 )
+from pygerber.gerberx3.ast.nodes.aperture.AD import AD
+from pygerber.gerberx3.ast.nodes.aperture.ADC import ADC
+from pygerber.gerberx3.ast.nodes.aperture.ADO import ADO
+from pygerber.gerberx3.ast.nodes.aperture.ADP import ADP
+from pygerber.gerberx3.ast.nodes.aperture.ADR import ADR
 from pygerber.gerberx3.ast.nodes.enums import Mirroring, Polarity
 from pygerber.gerberx3.ast.state_tracking_visitor import (
     ArcInterpolation,
@@ -370,7 +378,8 @@ class GerberHoverCreator(AstVisitor):
         serializer = ToMarkdown()
 
         for attr in attributes.values():
-            self._print_line(serializer.to_markdown(attr), end="<br/>")
+            self._print("-")
+            self._print_line(serializer.to_markdown(attr))
 
         self._print_line()
 
@@ -386,8 +395,8 @@ class GerberHoverCreator(AstVisitor):
         serializer = ToMarkdown()
 
         for attr in attributes.values():
+            self._print("-")
             self._print_line(serializer.to_markdown(attr))
-            self._single_break()
 
         self._print_line()
 
@@ -426,7 +435,6 @@ class GerberHoverCreator(AstVisitor):
                 ),
             )
         )
-        assert self.state.current_aperture_id is not None
         nodes.extend(self.state.apertures.macros.values())
         nodes.extend(self.state.apertures.apertures.values())
         nodes.extend(self.state.apertures.macros.values())
@@ -448,11 +456,12 @@ class GerberHoverCreator(AstVisitor):
         nodes.append(LS(scale=self.state.transform.scaling))
         nodes.append(LR(rotation=self.state.transform.rotation))
 
-        nodes.append(
-            Dnn(
-                aperture_id=self.state.current_aperture_id,
+        if self.state.current_aperture_id is not None:
+            nodes.append(
+                Dnn(
+                    aperture_id=self.state.current_aperture_id,
+                )
             )
-        )
         nodes.extend(extra_commands)
 
         rvmc = compile(File(nodes=nodes))
@@ -466,8 +475,8 @@ class GerberHoverCreator(AstVisitor):
     def _spec_ref(self, bullets: str) -> None:
         self._sep()
         self._single_break()
-        self._print_line(">" + spec.spec_title())
-        self._print_line(textwrap.indent(bullets, ">"))
+        self._print_line(spec.spec_title())
+        self._print_line(bullets)
         self._single_break()
 
     def on_d01(self, node: D01) -> D01:
@@ -521,7 +530,7 @@ class GerberHoverCreator(AstVisitor):
             Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._append_xy(
-            "Ends at:", node.x, node.y, self.state.current_x, self.state.current_y
+            "Flash at:", node.x, node.y, self.state.current_x, self.state.current_y
         )
 
         self._sep()
@@ -545,3 +554,119 @@ class GerberHoverCreator(AstVisitor):
         self._spec_ref(spec.d03())
 
         return node
+
+    def on_to(self, node: TO) -> None:
+        with self._code_block("gerber"):
+            Formatter().format(File(nodes=[node]), self.hover_markdown)
+
+        self._spec_ref(spec.to())
+
+    def on_ta(self, node: TA) -> None:
+        with self._code_block("gerber"):
+            Formatter().format(File(nodes=[node]), self.hover_markdown)
+
+        self._spec_ref(spec.ta())
+
+    def on_tf(self, node: TF) -> None:
+        with self._code_block("gerber"):
+            Formatter().format(File(nodes=[node]), self.hover_markdown)
+
+        self._spec_ref(spec.tf())
+
+    def on_td(self, node: TD) -> TD:
+        with self._code_block("gerber"):
+            Formatter().format(File(nodes=[node]), self.hover_markdown)
+
+        self._spec_ref(spec.td())
+
+        return node
+
+    def on_dnn(self, node: Dnn) -> Dnn:
+        with self._code_block("gerber"):
+            Formatter().format(File(nodes=[node]), self.hover_markdown)
+
+        self._aperture_attributes(node.aperture_id)
+
+        self._object_attributes()
+
+        if self.state.coordinate_format is not None:
+            self._sep()
+            self._print_line("### Visualization")
+            self._double_break()
+            self._visualize_draw_op(
+                cast(
+                    "list[Node]",
+                    [
+                        node,
+                        D03(
+                            x=CoordinateX(
+                                value=self.state.coordinate_format.pack_x(0.0)
+                            ),
+                            y=CoordinateY(
+                                value=self.state.coordinate_format.pack_y(0.0)
+                            ),
+                        ),
+                    ],
+                )
+            )
+            self._double_break()
+
+        self._spec_ref(spec.dnn())
+        return node
+
+    def on_ad(self, node: AD) -> None:
+        with self._code_block("gerber"):
+            Formatter().format(File(nodes=[node]), self.hover_markdown)
+
+        self._aperture_attributes(node.aperture_id)
+
+        if self.state.coordinate_format is not None:
+            self._sep()
+            self._print_line("### Visualization")
+            self._double_break()
+            self._visualize_draw_op(
+                cast(
+                    "list[Node]",
+                    [
+                        node,
+                        Dnn(aperture_id=node.aperture_id),
+                        D03(
+                            x=CoordinateX(
+                                value=self.state.coordinate_format.pack_x(0.0)
+                            ),
+                            y=CoordinateY(
+                                value=self.state.coordinate_format.pack_y(0.0)
+                            ),
+                        ),
+                    ],
+                )
+            )
+            self._double_break()
+
+    def on_adc(self, node: ADC) -> ADC:
+        return_value = super().on_adc(node)
+
+        self._spec_ref(spec.adc())
+
+        return return_value
+
+    def on_adr(self, node: ADR) -> ADR:
+        return_value = super().on_adr(node)
+
+        self._spec_ref(spec.adr())
+
+        return return_value
+
+    def on_ado(self, node: ADO) -> ADO:
+        return_value = super().on_ado(node)
+
+        self._spec_ref(spec.ado())
+
+        return return_value
+
+    def on_adp(self, node: ADP) -> ADP:
+        return_value = super().on_adp(node)
+
+        self._spec_ref(spec.adp())
+
+        return return_value

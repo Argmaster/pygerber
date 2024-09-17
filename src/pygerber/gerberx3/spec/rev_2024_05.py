@@ -17,7 +17,7 @@ def spec_url() -> str:
 
 def spec_title() -> str:
     """Get the title of the Gerber specification."""
-    return "## The Gerber Layer Format Specification - Revision 2024.05"
+    return "### The Gerber Layer Format Specification - Revision 2024.05"
 
 
 @dataclass
@@ -42,7 +42,7 @@ class Page:
     @property
     def markdown(self) -> str:
         """Get the markdown of the page."""
-        return f"### [{self.pretty_title}]({self.url})"
+        return f"#### [{self.pretty_title}]({self.url})"
 
 
 class Sections(Namespace):
@@ -269,4 +269,71 @@ def d03() -> str:
     return f"""
 - {Sections.s_2_6.markdown}
 - {Sections.s_4_8_4.markdown}
+"""
+
+
+def to() -> str:
+    """Get doc about TO command."""
+    return f"""
+- {Sections.s_5_4.markdown}
+"""
+
+
+def ta() -> str:
+    """Get doc about TA command."""
+    return f"""
+- {Sections.s_5_3.markdown}
+"""
+
+
+def tf() -> str:
+    """Get doc about TF command."""
+    return f"""
+- {Sections.s_5_2.markdown}
+"""
+
+
+def td() -> str:
+    """Get doc about TD command."""
+    return f"""
+- {Sections.s_5_5.markdown}
+"""
+
+
+def dnn() -> str:
+    """Get doc about Dnn command."""
+    return f"""
+- {Sections.s_4_6.markdown}
+"""
+
+
+def adc() -> str:
+    """Get doc about AD command."""
+    return f"""
+- {Sections.s_4_3.markdown}
+- {Sections.s_4_4_2.markdown}
+"""
+
+
+def adr() -> str:
+    """Get doc about AD command."""
+    return f"""
+- {Sections.s_4_3.markdown}
+- {Sections.s_4_4_3.markdown}
+"""
+
+
+def ado() -> str:
+    """Get doc about AD command."""
+    return f"""
+- {Sections.s_4_3.markdown}
+- {Sections.s_4_4_4.markdown}
+"""
+
+
+def adp() -> str:
+    """Get doc about AD command."""
+    return f"""
+- {Sections.s_4_3.markdown}
+- {Sections.s_4_4_5.markdown}
 """

@@ -544,20 +544,17 @@ class StateTrackingVisitor(AstVisitor):
 
     # Attribute
 
-    def on_ta(self, node: TA) -> TA:
+    def on_ta(self, node: TA) -> None:
         """Handle `TA_UserName` node."""
         self.state.attributes.aperture_attributes[node.attribute_name] = node
-        return node
 
-    def on_tf(self, node: TF) -> TF:
+    def on_tf(self, node: TF) -> None:
         """Handle `TF` node."""
         self.state.attributes.file_attributes[node.attribute_name] = node
-        return node
 
-    def on_to(self, node: TO) -> TO:
+    def on_to(self, node: TO) -> None:
         """Handle `TO` node."""
         self.state.attributes.object_attributes[node.attribute_name] = node
-        return node
 
     def on_td(self, node: TD) -> TD:
         """Handle `TD` node."""
