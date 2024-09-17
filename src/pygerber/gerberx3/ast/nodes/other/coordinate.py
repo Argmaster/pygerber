@@ -18,11 +18,11 @@ if TYPE_CHECKING:
 class Coordinate(Node):
     """Represents Coordinate node."""
 
+    value: PackedCoordinateStr
+
 
 class CoordinateX(Coordinate):
     """Represents X Coordinate node."""
-
-    value: PackedCoordinateStr
 
     def visit(self, visitor: AstVisitor) -> CoordinateX:
         """Handle visitor call."""
@@ -38,8 +38,6 @@ class CoordinateX(Coordinate):
 class CoordinateY(Coordinate):
     """Represents Y Coordinate node."""
 
-    value: PackedCoordinateStr
-
     def visit(self, visitor: AstVisitor) -> CoordinateY:
         """Handle visitor call."""
         return visitor.on_coordinate_y(self)
@@ -54,8 +52,6 @@ class CoordinateY(Coordinate):
 class CoordinateI(Coordinate):
     """Represents I Coordinate node."""
 
-    value: PackedCoordinateStr
-
     def visit(self, visitor: AstVisitor) -> CoordinateI:
         """Handle visitor call."""
         return visitor.on_coordinate_i(self)
@@ -69,8 +65,6 @@ class CoordinateI(Coordinate):
 
 class CoordinateJ(Coordinate):
     """Represents J Coordinate node."""
-
-    value: PackedCoordinateStr
 
     def visit(self, visitor: AstVisitor) -> CoordinateJ:
         """Handle visitor call."""

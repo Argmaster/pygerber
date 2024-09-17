@@ -351,6 +351,9 @@ class ApertureStorage(_StateModel):
     macros: Dict[str, AM] = Field(default_factory=dict)
     """Macro definition storage."""
 
+    per_aperture_attributes: Dict[str, Dict[str, TA]] = Field(default_factory=dict)
+    """Attributes assigned to apertures during creation."""
+
 
 class State(_StateModel):
     """Internal state of the compiler."""
@@ -522,11 +525,17 @@ class StateTrackingVisitor(AstVisitor):
         """Handle `AB` node."""
         super().on_ab(node)
         self.state.apertures.blocks[node.open.aperture_id] = node
+        self.state.apertures.per_aperture_attributes[node.open.aperture_id] = (
+            self.state.attributes.aperture_attributes.copy()
+        )
         return node
 
     def on_ad(self, node: AD) -> None:
         """Handle `AD` node."""
         self.state.apertures.apertures[node.aperture_id] = node
+        self.state.apertures.per_aperture_attributes[node.aperture_id] = (
+            self.state.attributes.aperture_attributes.copy()
+        )
 
     def on_am(self, node: AM) -> AM:
         """Handle `AM` root node."""
