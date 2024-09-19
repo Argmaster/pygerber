@@ -8,6 +8,11 @@ from typing import TYPE_CHECKING, Generator, Optional, cast
 
 from pygerber.gerberx3.ast.ast_visitor import AstVisitor
 from pygerber.gerberx3.ast.nodes import (
+    AD,
+    ADC,
+    ADO,
+    ADP,
+    ADR,
     D01,
     D02,
     D03,
@@ -29,6 +34,10 @@ from pygerber.gerberx3.ast.nodes import (
     TO_CMNP,
     TO_N,
     TO_P,
+    ADmacro,
+    Code1,
+    Code2,
+    Code20,
     Coordinate,
     CoordinateX,
     CoordinateY,
@@ -52,11 +61,6 @@ from pygerber.gerberx3.ast.nodes import (
     TO_CVal,
     TO_UserName,
 )
-from pygerber.gerberx3.ast.nodes.aperture.AD import AD
-from pygerber.gerberx3.ast.nodes.aperture.ADC import ADC
-from pygerber.gerberx3.ast.nodes.aperture.ADO import ADO
-from pygerber.gerberx3.ast.nodes.aperture.ADP import ADP
-from pygerber.gerberx3.ast.nodes.aperture.ADR import ADR
 from pygerber.gerberx3.ast.nodes.enums import Mirroring, Polarity
 from pygerber.gerberx3.ast.state_tracking_visitor import (
     ArcInterpolation,
@@ -405,9 +409,7 @@ class GerberHoverCreator(AstVisitor):
         image.save(buffered, format="JPEG")
         image_bytes = buffered.getvalue()
         encoded_image = base64.b64encode(image_bytes).decode("utf-8")
-        return (
-            f'<img src="data:image/jpeg;base64,{encoded_image}" alt="Embedded Image" />'
-        )
+        return f'<p align="center"><img src="data:image/jpeg;base64,{encoded_image}" alt="Embedded Image" /></p>'
 
     def _visualize_draw_op(self, extra_commands: list[Node]) -> None:
         nodes: list[Node] = []
@@ -547,9 +549,9 @@ class GerberHoverCreator(AstVisitor):
 
         self._sep()
         self._print_line("### Visualization")
-        self._double_break()
+        self._single_break()
         self._visualize_draw_op([node])
-        self._double_break()
+        self._single_break()
 
         self._spec_ref(spec.d03())
 
@@ -592,7 +594,7 @@ class GerberHoverCreator(AstVisitor):
         if self.state.coordinate_format is not None:
             self._sep()
             self._print_line("### Visualization")
-            self._double_break()
+            self._single_break()
             self._visualize_draw_op(
                 cast(
                     "list[Node]",
@@ -609,21 +611,25 @@ class GerberHoverCreator(AstVisitor):
                     ],
                 )
             )
-            self._double_break()
+            self._single_break()
 
         self._spec_ref(spec.dnn())
         return node
 
     def on_ad(self, node: AD) -> None:
-        with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
-
+        self._add_code_block_format_node(node)
         self._aperture_attributes(node.aperture_id)
+        self._visualize_aperture_definition(node)
 
+    def _add_code_block_format_node(self, node: Node) -> None:
+        with self._code_block("gerber"):
+            Formatter().format_node(node, self.hover_markdown)
+
+    def _visualize_aperture_definition(self, node: AD) -> None:
         if self.state.coordinate_format is not None:
             self._sep()
             self._print_line("### Visualization")
-            self._double_break()
+            self._single_break()
             self._visualize_draw_op(
                 cast(
                     "list[Node]",
@@ -641,32 +647,145 @@ class GerberHoverCreator(AstVisitor):
                     ],
                 )
             )
-            self._double_break()
+            self._single_break()
 
     def on_adc(self, node: ADC) -> ADC:
-        return_value = super().on_adc(node)
+        self._add_code_block_format_node(node)
+
+        self._print("\n - standard template: `Circle`")
+        self._print(f"\n - diameter: `{node.diameter}`")
+        self._print(f"\n - hole_diameter: `{node.hole_diameter}`")
+
+        self._aperture_attributes(node.aperture_id)
+        self._visualize_aperture_definition(node)
 
         self._spec_ref(spec.adc())
 
-        return return_value
+        return node
 
     def on_adr(self, node: ADR) -> ADR:
-        return_value = super().on_adr(node)
+        self._add_code_block_format_node(node)
+
+        self._print("\n - standard template: `Rectangle`")
+        self._print(f"\n - width: `{node.width}`")
+        self._print(f"\n - height: `{node.height}`")
+        self._print(f"\n - hole_diameter: `{node.hole_diameter}`")
+
+        self._aperture_attributes(node.aperture_id)
+        self._visualize_aperture_definition(node)
 
         self._spec_ref(spec.adr())
 
-        return return_value
+        return node
 
     def on_ado(self, node: ADO) -> ADO:
-        return_value = super().on_ado(node)
+        self._add_code_block_format_node(node)
+
+        self._print("\n - standard template: `Obround`")
+        self._print(f"\n - width: `{node.width}`")
+        self._print(f"\n - height: `{node.height}`")
+        self._print(f"\n - hole_diameter: `{node.hole_diameter}`")
+
+        self._aperture_attributes(node.aperture_id)
+        self._visualize_aperture_definition(node)
 
         self._spec_ref(spec.ado())
 
-        return return_value
+        return node
 
     def on_adp(self, node: ADP) -> ADP:
-        return_value = super().on_adp(node)
+        self._add_code_block_format_node(node)
+
+        self._print("\n - standard template: `Polygon`")
+        self._print(f"\n - outer diameter: `{node.outer_diameter}`")
+        self._print(f"\n - vertex count: `{node.vertices}`")
+        self._print(f"\n - rotation: `{node.rotation or 0.0}°`")
+        self._print(f"\n - hole_diameter: `{node.hole_diameter}`")
+
+        self._aperture_attributes(node.aperture_id)
+        self._visualize_aperture_definition(node)
 
         self._spec_ref(spec.adp())
 
-        return return_value
+        return node
+
+    def on_ad_macro(self, node: ADmacro) -> ADmacro:
+        self._add_code_block_format_node(node)
+
+        self._print(f"\n - macro name: `{node.name}`")
+        if node.params:
+            for i, param in enumerate(node.params, start=1):
+                self._print(f"\n - parameter `${i}`: `{param}`")
+
+        self._aperture_attributes(node.aperture_id)
+        self._visualize_aperture_definition(node)
+
+        self._spec_ref(spec.ad_macro())
+
+        return node
+
+    def on_code_1(self, node: Code1) -> Code1:
+        formatter = Formatter(macro_split_mode=Formatter.MacroSplitMode.NONE)
+
+        with self._code_block("gerber"):
+            formatter.format_node(node, self.hover_markdown)
+            self._print_line()
+
+        self._print("\n - exposure: `")
+        formatter.format_node(node.exposure, self.hover_markdown)
+
+        self._print("`\n - diameter: `")
+        formatter.format_node(node.diameter, self.hover_markdown)
+
+        self._print("`\n - center_x: `")
+        formatter.format_node(node.center_x, self.hover_markdown)
+
+        self._print("`\n - center_y: `")
+        formatter.format_node(node.center_y, self.hover_markdown)
+
+        self._print("`\n - rotation: `")
+        if node.rotation is not None:
+            formatter.format_node(node.rotation, self.hover_markdown)
+            self._print("°`\n")
+        else:
+            self._print_line("None`")
+
+        self._spec_ref(spec.code_1())
+
+        return node
+
+    def on_code_2(self, node: Code2) -> Code2:
+        formatter = Formatter(macro_split_mode=Formatter.MacroSplitMode.NONE)
+
+        with self._code_block("gerber"):
+            formatter.format_node(node, self.hover_markdown)
+            self._print_line()
+
+        self._print("\n - exposure: `")
+        formatter.format_node(node.exposure, self.hover_markdown)
+
+        self._print("`\n - width: `")
+        formatter.format_node(node.width, self.hover_markdown)
+
+        self._print("`\n - start_x: `")
+        formatter.format_node(node.start_x, self.hover_markdown)
+
+        self._print("`\n - start_y: `")
+        formatter.format_node(node.start_y, self.hover_markdown)
+
+        self._print("`\n - end_x: `")
+        formatter.format_node(node.end_x, self.hover_markdown)
+
+        self._print("`\n - end_y: `")
+        formatter.format_node(node.end_y, self.hover_markdown)
+
+        self._print("`\n - rotation: `")
+        formatter.format_node(node.rotation, self.hover_markdown)
+        self._print("°`\n")
+
+        self._spec_ref(spec.code_1())
+
+        return node
+
+    def on_code_20(self, node: Code20) -> Code20:
+        return super().on_code_20(node)

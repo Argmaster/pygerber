@@ -100,6 +100,14 @@ class Sections(Namespace):
     s_4_4_6 = Page((4, 4, 6), 56, "Transparency of Holes")
     s_4_5 = Page((4, 5), 57, "Aperture Macro (AM)")
     s_4_5_1 = Page((4, 5, 1), 59, "Primitives")
+    s_4_5_1_1 = Page((4, 5, 1, 2), 59, "Overview")
+    s_4_5_1_2 = Page((4, 5, 1, 2), 60, "Comment, Code 0")
+    s_4_5_1_3 = Page((4, 5, 1, 3), 61, "Circle, Code 1")
+    s_4_5_1_4 = Page((4, 5, 1, 4), 62, "Vector Line, Code 20")
+    s_4_5_1_5 = Page((4, 5, 1, 5), 63, "Center Line, Code 21")
+    s_4_5_1_6 = Page((4, 5, 1, 6), 64, "Outline, Code 4")
+    s_4_5_1_7 = Page((4, 5, 1, 7), 66, "Polygon, Code 5")
+    s_4_5_1_8 = Page((4, 5, 1, 8), 67, "Thermal, Code 7")
     s_4_5_2 = Page((4, 5, 2), 68, "Exposure Parameter")
     s_4_5_3 = Page((4, 5, 3), 69, "Rotation Parameter")
     s_4_5_4 = Page((4, 5, 4), 70, "Macro Variables and Expressions")
@@ -336,4 +344,24 @@ def adp() -> str:
     return f"""
 - {Sections.s_4_3.markdown}
 - {Sections.s_4_4_5.markdown}
+"""
+
+
+def ad_macro() -> str:
+    """Get doc about AD command."""
+    return f"""
+- {Sections.s_4_3.markdown}
+- {Sections.s_4_5.markdown}
+"""
+
+
+def code_1() -> str:
+    """Get doc about Code 1 primitive."""
+    return f"""
+- {Sections.s_4_5.markdown}
+- {Sections.s_4_5_1_2.markdown}
+- {Sections.s_4_5_1.markdown}
+- {Sections.s_4_5_2.markdown}
+- {Sections.s_4_5_3.markdown}
+- {Sections.s_4_5_4.markdown}
 """

@@ -203,6 +203,13 @@ class GerberDocument(Document):
                     detail="Set counterclockwise circular plot mode",
                 ),
                 lspt.CompletionItem(
+                    label="G04${1:comment}*",
+                    kind=lspt.CompletionItemKind.Text,
+                    detail="Add comment",
+                    insert_text="G04${1:comment}*",
+                    insert_text_format=lspt.InsertTextFormat.Snippet,
+                ),
+                lspt.CompletionItem(
                     label="G36*",
                     kind=lspt.CompletionItemKind.Function,
                     detail="Open region statement",
@@ -252,28 +259,89 @@ class GerberDocument(Document):
 
     def get_completion_extended_command(self) -> lspt.CompletionList | None:
         """Get the list of extended commands."""
-        state = self.get_gerber_state()
-        if state is None:
-            return None
-
-        next_code = state.apertures.get_next_free_aperture_code()
-
         return lspt.CompletionList(
             is_incomplete=False,
             items=[
+                *self._get_completion_ad_commands(),
                 lspt.CompletionItem(
-                    label=f"%ADD{next_code}C,${{diameter}}X${{hole_diameter}}*%",
-                    kind=lspt.CompletionItemKind.Constructor,
-                    detail="Add circle aperture definition",
-                    insert_text=f"ADD{next_code}C,${{1:diameter}}X${{2:hole_diameter}}*",
+                    label="FSLAX46Y46*",
+                    kind=lspt.CompletionItemKind.Function,
+                    documentation="",
+                    insert_text="FSLAX${1:4}${2:6}Y${1:4}${2:6}*",
                     insert_text_format=lspt.InsertTextFormat.Snippet,
                 ),
                 lspt.CompletionItem(
-                    label=f"%ADD{next_code}R,${{width}}X${{height}}X${{hole_diameter}}*%",
-                    kind=lspt.CompletionItemKind.Constructor,
-                    detail="Add circle aperture definition",
-                    insert_text=f"ADD{next_code}C,${{1:width}}X${{2:height}}X${{3:hole_diameter}}*",
+                    label="MOMM*",
+                    kind=lspt.CompletionItemKind.Function,
+                    documentation="",
+                    insert_text="MO${1:MM}*",
+                    insert_text_format=lspt.InsertTextFormat.Snippet,
+                ),
+                lspt.CompletionItem(
+                    label="LPD*",
+                    kind=lspt.CompletionItemKind.Function,
+                    documentation="",
+                    insert_text="LP${1:D}*",
+                    insert_text_format=lspt.InsertTextFormat.Snippet,
+                ),
+                lspt.CompletionItem(
+                    label="LPC*",
+                    kind=lspt.CompletionItemKind.Function,
+                    documentation="",
+                    insert_text="LP${1:C}*",
                     insert_text_format=lspt.InsertTextFormat.Snippet,
                 ),
             ],
         )
+
+    def _get_completion_ad_commands(self) -> list[lspt.CompletionItem]:
+        """Get the list of AD commands."""
+        state = self.get_gerber_state()
+        if state is None:
+            return []
+
+        next_code = state.apertures.get_next_free_aperture_code()
+
+        return [
+            lspt.CompletionItem(
+                label=string,
+                kind=lspt.CompletionItemKind.Constructor,
+                documentation=doc,
+                insert_text=string,
+                insert_text_format=lspt.InsertTextFormat.Snippet,
+            )
+            for string, doc in [
+                (
+                    f"ADD{next_code}C,${{1:diameter}}*",
+                    "Add circle aperture definition",
+                ),
+                (
+                    f"ADD{next_code}C,${{1:diameter}}X${{2:hole_diameter}}*",
+                    "Add circle aperture definition",
+                ),
+                (
+                    f"ADD{next_code}R,${{1:width}}X${{2:height}}*",
+                    "Add rectangle aperture definition",
+                ),
+                (
+                    f"ADD{next_code}R,${{1:width}}X${{2:height}}X${{3:hole_diameter}}*",
+                    "Add rectangle aperture definition",
+                ),
+                (
+                    f"ADD{next_code}O,${{1:width}}X${{2:height}}*",
+                    "Add obround aperture definition",
+                ),
+                (
+                    f"ADD{next_code}O,${{1:width}}X${{2:height}}X${{3:hole_diameter}}*",
+                    "Add obround aperture definition",
+                ),
+                (
+                    f"ADD{next_code}P,${{1:outer_diameter}}X${{2:vertices}}X${{3:rotation}}*",
+                    "Add polygon aperture definition",
+                ),
+                (
+                    f"ADD{next_code}P,${{1:outer_diameter}}X${{2:vertices}}X${{3:rotation}}X${{4:hole_diameter}}*",
+                    "Add polygon aperture definition",
+                ),
+            ]
+        ]
