@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from pygerber.gerberx3.ast.nodes.invalid import Invalid
+
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes import (
         AB,
@@ -790,3 +792,7 @@ class AstVisitor:
         If return value is True, exception will be re-raised.
         """
         return True
+
+    def on_invalid(self, node: Invalid) -> Invalid:
+        """Handle invalid node."""
+        return node

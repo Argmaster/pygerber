@@ -79,6 +79,7 @@ from pygerber.gerberx3.ast.nodes.g_codes.G74 import G74
 from pygerber.gerberx3.ast.nodes.g_codes.G75 import G75
 from pygerber.gerberx3.ast.nodes.g_codes.G90 import G90
 from pygerber.gerberx3.ast.nodes.g_codes.G91 import G91
+from pygerber.gerberx3.ast.nodes.invalid import Invalid
 from pygerber.gerberx3.ast.nodes.load.LM import LM
 from pygerber.gerberx3.ast.nodes.load.LN import LN
 from pygerber.gerberx3.ast.nodes.load.LP import LP
@@ -251,4 +252,5 @@ __all__ = [
     "AB",
     "AM",
     "SourceInfo",
+    "Invalid",
 ]

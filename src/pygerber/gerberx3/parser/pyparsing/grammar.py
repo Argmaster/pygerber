@@ -82,6 +82,7 @@ from pygerber.gerberx3.ast.nodes import (
     Div,
     Dnn,
     File,
+    Invalid,
     Mul,
     Neg,
     Node,
@@ -171,6 +172,42 @@ class Grammar:
                         self.attribute,
                         self.properties,
                         self.m_codes,
+                    ]
+                )
+            )
+            .set_results_name("root_node")
+            .set_parse_action(_)
+        )
+
+        if self.enable_packrat:
+            root.enable_packrat(cache_size_limit=self.packrat_cache_size)
+
+        if self.enable_debug:
+            root.set_debug()
+
+        return root
+
+    def build_resilient(self) -> pp.ParserElement:
+        """Build the grammar."""
+
+        def _(s: str, loc: int, tokens: pp.ParseResults) -> File:
+            return self.get_cls(File)(
+                source_info=SourceInfo(source=s, location=loc, length=len(s) - loc),
+                nodes=tokens.as_list(),
+            )
+
+        root = (
+            pp.OneOrMore(
+                pp.MatchFirst(
+                    [
+                        self.d_codes_standalone,
+                        self.g_codes,
+                        self.load_commands,
+                        self.aperture(),
+                        self.attribute,
+                        self.properties,
+                        self.m_codes,
+                        self._invalid_token,
                     ]
                 )
             )
@@ -1781,6 +1818,15 @@ class Grammar:
             )
             .set_parse_action(self.make_unpack_callback(SF))
             .set_name("SF")
+        )
+
+    @pp.cached_property
+    def _invalid_token(self) -> pp.ParserElement:
+        syntax = pp.Combine(pp.Regex(r".+"))
+        return (
+            syntax.set_results_name("string")
+            .set_name("Invalid")
+            .set_parse_action(self.make_unpack_callback(Invalid))
         )
 
 

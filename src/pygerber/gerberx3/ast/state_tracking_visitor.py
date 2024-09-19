@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 from enum import Enum
+from itertools import chain
 from typing import Any, Callable, Dict, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -353,6 +354,16 @@ class ApertureStorage(_StateModel):
 
     per_aperture_attributes: Dict[str, Dict[str, TA]] = Field(default_factory=dict)
     """Attributes assigned to apertures during creation."""
+
+    def get_next_free_aperture_code(self) -> int:
+        """Get next free aperture code."""
+        return (
+            max(
+                int(aperture_id.lstrip("D"))
+                for aperture_id in chain(self.apertures.keys(), self.blocks.keys())
+            )
+            + 1
+        )
 
 
 class State(_StateModel):
