@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## Release 3.0.0a1
+
+- Added `pygerber.gerberx3.formatter` for formatting Gerber files.
+- Added `GerberX3Builder` class for building Gerber code from scratch.
+- Redesigned PyGerber Parser implementation and AST classes.
+- Added intermediate step between parsing and rendering done by
+  `pygerber.gerberx3.compiler`.
+- Redesigned rendering principles, now implemented in `pygerber.vm`, supports only
+  rendering raster images with Pillow. SVG rendering is planned to be included in 3.0.0
+  release.
+- Ported language server to new parser.
+
 ## Release 2.4.1
 
 - Added support for comment based attributes (#217)
