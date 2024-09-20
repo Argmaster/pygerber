@@ -94,8 +94,8 @@ class GerberDocument(Document):
         return lspt.Hover(
             contents=lspt.MarkupContent(value=message, kind=lspt.MarkupKind.Markdown),
             range=lspt.Range(
-                start=lspt.Position(source_info.line, source_info.column),
-                end=lspt.Position(source_info.end_line, source_info.end_column),
+                start=lspt.Position(source_info.line - 1, source_info.column - 1),
+                end=lspt.Position(source_info.end_line - 1, source_info.end_column - 1),
             ),
         )
 
