@@ -19,11 +19,8 @@ a pad. This is just confusing. If there is nothing, put nothing.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Iterable, List, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional
 
-from pygerber.gerberx3.math.offset import Offset
-from pygerber.gerberx3.math.vector_2d import Vector2D
-from pygerber.gerberx3.state_enums import Polarity
 from pygerber.gerberx3.tokenizer.tokens.bases.extended_command import (
     ExtendedCommandToken,
 )
@@ -33,9 +30,6 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -150,45 +144,6 @@ class DefineCircle(DefineAperture):
             hole_diameter=hole_diameter,
         )
 
-    def update_drawing_state(
-        self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Update drawing state."""
-        handle = backend.create_aperture_handle(self.aperture_id)
-        with handle:
-            handle.add_draw(
-                backend.get_draw_circle_cls()(
-                    backend=backend,
-                    diameter=Offset.new(self.diameter, state.get_units()),
-                    polarity=Polarity.Dark,
-                    center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-                ),
-            )
-            if self.hole_diameter is not None:
-                handle.add_draw(
-                    backend.get_draw_circle_cls()(
-                        backend=backend,
-                        diameter=Offset.new(self.hole_diameter, state.get_units()),
-                        polarity=Polarity.Clear,
-                        center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-                    ),
-                )
-        frozen_handle = handle.get_public_handle()
-
-        new_aperture_dict = {**state.apertures}
-        new_aperture_dict[self.aperture_id] = frozen_handle
-
-        return (
-            state.model_copy(
-                update={
-                    "apertures": new_aperture_dict,
-                },
-            ),
-            (),
-        )
-
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""
         context.get_hooks().define_circle_aperture.pre_parser_visit_token(self, context)
@@ -301,46 +256,6 @@ class DefineRectangle(DefineAperture):
             x_size=x_size,
             y_size=y_size,
             hole_diameter=hole_diameter,
-        )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Update drawing state."""
-        handle = backend.create_aperture_handle(self.aperture_id)
-        with handle:
-            handle.add_draw(
-                backend.get_draw_rectangle_cls()(
-                    backend=backend,
-                    x_size=Offset.new(self.x_size, state.get_units()),
-                    y_size=Offset.new(self.y_size, state.get_units()),
-                    polarity=Polarity.Dark,
-                    center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-                ),
-            )
-            if self.hole_diameter is not None:
-                handle.add_draw(
-                    backend.get_draw_circle_cls()(
-                        backend=backend,
-                        diameter=Offset.new(self.hole_diameter, state.get_units()),
-                        polarity=Polarity.Clear,
-                        center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-                    ),
-                )
-        frozen_handle = handle.get_public_handle()
-
-        new_aperture_dict = {**state.apertures}
-        new_aperture_dict[self.aperture_id] = frozen_handle
-
-        return (
-            state.model_copy(
-                update={
-                    "apertures": new_aperture_dict,
-                },
-            ),
-            (),
         )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
@@ -461,86 +376,6 @@ class DefineObround(DefineAperture):
             x_size=x_size,
             y_size=y_size,
             hole_diameter=hole_diameter,
-        )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Update drawing state."""
-        handle = backend.create_aperture_handle(self.aperture_id)
-
-        x_size = Offset.new(self.x_size, state.get_units())
-        y_size = Offset.new(self.y_size, state.get_units())
-
-        if self.x_size < self.y_size:
-            # Obround is thin and tall.
-            circle_diameter = x_size
-
-            middle_rectangle_x = x_size
-            middle_rectangle_y = y_size - x_size
-
-            circle_positive = Vector2D(x=Offset.NULL, y=middle_rectangle_y / 2)
-            circle_negative = Vector2D(x=Offset.NULL, y=-middle_rectangle_y / 2)
-
-        else:
-            # Obround is wide and short.
-            circle_diameter = y_size
-
-            middle_rectangle_x = x_size - y_size
-            middle_rectangle_y = y_size
-
-            circle_positive = Vector2D(x=middle_rectangle_x / 2, y=Offset.NULL)
-            circle_negative = Vector2D(x=-middle_rectangle_x / 2, y=Offset.NULL)
-
-        with handle:
-            handle.add_draw(
-                backend.get_draw_rectangle_cls()(
-                    backend=backend,
-                    x_size=middle_rectangle_x,
-                    y_size=middle_rectangle_y,
-                    polarity=Polarity.Dark,
-                    center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-                ),
-            )
-            handle.add_draw(
-                backend.get_draw_circle_cls()(
-                    backend=backend,
-                    diameter=circle_diameter,
-                    polarity=Polarity.Dark,
-                    center_position=circle_positive,
-                ),
-            )
-            handle.add_draw(
-                backend.get_draw_circle_cls()(
-                    backend=backend,
-                    diameter=circle_diameter,
-                    polarity=Polarity.Dark,
-                    center_position=circle_negative,
-                ),
-            )
-            if self.hole_diameter is not None:
-                handle.add_draw(
-                    backend.get_draw_circle_cls()(
-                        backend=backend,
-                        diameter=Offset.new(self.hole_diameter, state.get_units()),
-                        polarity=Polarity.Clear,
-                        center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-                    ),
-                )
-        frozen_handle = handle.get_public_handle()
-
-        new_aperture_dict = {**state.apertures}
-        new_aperture_dict[self.aperture_id] = frozen_handle
-
-        return (
-            state.model_copy(
-                update={
-                    "apertures": new_aperture_dict,
-                },
-            ),
-            (),
         )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
@@ -668,47 +503,6 @@ class DefinePolygon(DefineAperture):
             number_of_vertices=number_of_vertices,
             rotation=rotation,
             hole_diameter=hole_diameter,
-        )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Update drawing state."""
-        handle = backend.create_aperture_handle(self.aperture_id)
-        with handle:
-            handle.add_draw(
-                backend.get_draw_polygon_cls()(
-                    backend=backend,
-                    outer_diameter=Offset.new(self.outer_diameter, state.get_units()),
-                    number_of_vertices=self.number_of_vertices,
-                    rotation=Decimal("0.0") if self.rotation is None else self.rotation,
-                    polarity=Polarity.Dark,
-                    center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-                ),
-            )
-            if self.hole_diameter is not None:
-                handle.add_draw(
-                    backend.get_draw_circle_cls()(
-                        backend=backend,
-                        diameter=Offset.new(self.hole_diameter, state.get_units()),
-                        polarity=Polarity.Clear,
-                        center_position=Vector2D(x=Offset.NULL, y=Offset.NULL),
-                    ),
-                )
-        frozen_handle = handle.get_public_handle()
-
-        new_aperture_dict = {**state.apertures}
-        new_aperture_dict[self.aperture_id] = frozen_handle
-
-        return (
-            state.model_copy(
-                update={
-                    "apertures": new_aperture_dict,
-                },
-            ),
-            (),
         )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
@@ -851,35 +645,6 @@ class DefineMacro(DefineAperture):
             aperture_type=aperture_type,
             aperture_id=aperture_id,
             am_param=am_param,
-        )
-
-    def update_drawing_state(
-        self,
-        state: State,
-        backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Update drawing state."""
-        handle = backend.create_aperture_handle(self.aperture_id)
-        with handle:
-            macro = state.macros[self.aperture_type]
-            parameters = {
-                f"${i + 1}": Offset.new(value, state.get_units())
-                for i, value in enumerate(self.am_param)
-            }
-            macro.evaluate(state, handle, parameters)
-
-        frozen_handle = handle.get_public_handle()
-
-        new_aperture_dict = {**state.apertures}
-        new_aperture_dict[self.aperture_id] = frozen_handle
-
-        return (
-            state.model_copy(
-                update={
-                    "apertures": new_aperture_dict,
-                },
-            ),
-            (),
         )
 
     def parser2_visit_token(self, context: Parser2Context) -> None:

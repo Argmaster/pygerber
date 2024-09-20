@@ -804,6 +804,7 @@ class Parser2Hooks(Parser2HooksBase):
                 if math.isclose(exposure, Decimal("0.0"))
                 else Polarity.Dark
             )
+            rotation_degrees = primitive.rotation.on_parser2_eval_expression(context)
             context.get_macro_eval_buffer().add_command(
                 Flash2(
                     transform=ApertureTransform(
@@ -830,7 +831,7 @@ class Parser2Hooks(Parser2HooksBase):
                             context.get_draw_units(),
                         ),
                     ),
-                ),
+                ).get_rotated(rotation_degrees),
             )
 
         def on_code_2_vector_line(

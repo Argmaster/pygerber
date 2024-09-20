@@ -5,10 +5,6 @@ from __future__ import annotations
 from operator import add, mul, sub, truediv
 from typing import TYPE_CHECKING, Any, Callable
 
-from pygerber.gerberx3.math.offset import Offset
-from pygerber.gerberx3.tokenizer.tokens.macro.expressions.errors import (
-    InvalidArithmeticExpressionError,
-)
 from pygerber.gerberx3.tokenizer.tokens.macro.expressions.macro_expression import (
     MacroExpressionToken,
 )
@@ -17,10 +13,8 @@ if TYPE_CHECKING:
     from pyparsing import ParseResults
     from typing_extensions import Self
 
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
     from pygerber.gerberx3.parser2.macro2.expressions2.expression2 import Expression2
-    from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 
 
 class BinaryOperator(MacroExpressionToken):
@@ -61,17 +55,6 @@ class BinaryOperator(MacroExpressionToken):
     def to_parser2_expression(self, context: Parser2Context) -> Expression2:
         """Convert to `Expression2` descendant class."""
         raise NotImplementedError
-
-    def evaluate_numeric(self, macro_context: MacroContext, state: State) -> Offset:
-        """Evaluate numeric value of this macro expression."""
-        left = self.left.evaluate_numeric(macro_context, state)
-        right = self.right.evaluate_numeric(macro_context, state)
-        output = self.operator(left, right)
-
-        if not isinstance(output, Offset):
-            raise InvalidArithmeticExpressionError
-
-        return output
 
     def get_gerber_code(
         self,

@@ -4,15 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pygerber.backend.abstract.aperture_handle import PrivateApertureHandle
-from pygerber.gerberx3.parser.state import State
 from pygerber.gerberx3.tokenizer.tokens.macro.expressions.macro_expression import (
     MacroExpressionToken,
 )
 from pygerber.gerberx3.tokenizer.tokens.macro.expressions.variable_name import (
     MacroVariableName,
 )
-from pygerber.gerberx3.tokenizer.tokens.macro.macro_context import MacroContext
 from pygerber.gerberx3.tokenizer.tokens.macro.statements.statement import (
     MacroStatementToken,
 )
@@ -116,19 +113,6 @@ class MacroVariableAssignment(MacroStatementToken):
             variable=variable,
             value=value,
         )
-
-    def evaluate(
-        self,
-        macro_context: MacroContext,
-        state: State,
-        handle: PrivateApertureHandle,
-    ) -> None:
-        """Evaluate macro expression."""
-        name = self.variable.name
-        value = self.value.evaluate_numeric(macro_context, state)
-        macro_context.variables[name] = value
-
-        return super().evaluate(macro_context, state, handle)
 
     def parser2_visit_token(self, context: Parser2Context) -> None:
         """Perform actions on the context implicated by this token."""

@@ -3,22 +3,18 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Iterable, Iterator, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Iterable, Iterator
 
 from pyparsing import col, lineno
 
 from pygerber.common.position import Position
 from pygerber.gerberx3.linter import diagnostic
 from pygerber.gerberx3.tokenizer.tokens.bases.gerber_code import GerberCode
-from pygerber.gerberx3.tokenizer.tokens.bases.token_accessor import TokenAccessor
 
 if TYPE_CHECKING:
     from pyparsing import ParserElement, ParseResults
     from typing_extensions import Self
 
-    from pygerber.backend.abstract.backend_cls import Backend
-    from pygerber.backend.abstract.draw_commands.draw_command import DrawCommand
-    from pygerber.gerberx3.parser.state import State
     from pygerber.gerberx3.parser2.context2 import Parser2Context
 
 
@@ -71,14 +67,6 @@ class Token(GerberCode):
     ) -> None:
         """Update drawing state for Gerber AST parser, version 2."""
 
-    def update_drawing_state(
-        self,
-        state: State,
-        _backend: Backend,
-    ) -> Tuple[State, Iterable[DrawCommand]]:
-        """Update drawing state."""
-        return state, ()
-
     def get_token_position(self) -> Position:
         """Get position of token."""
         return self._token_position
@@ -89,40 +77,6 @@ class Token(GerberCode):
             lineno(self.location, self.string),
             col(self.location, self.string),
         )
-
-    def get_hover_message(self, state: State) -> str:
-        """Return language server hover message."""
-        ref_doc = "\n".join(s.strip() for s in str(self.__doc__).split("\n"))
-        op_specific_extra = self.get_state_based_hover_message(state)
-        return (
-            "```gerber\n"
-            f"{self.get_gerber_code_one_line_pretty_display()}"
-            "\n"
-            "```"
-            "\n"
-            "---"
-            "\n"
-            f"{op_specific_extra}\n"
-            "\n"
-            "---"
-            "\n"
-            f"{ref_doc}"
-        )
-
-    def get_state_based_hover_message(
-        self,
-        state: State,  # noqa: ARG002
-    ) -> str:
-        """Return operation specific extra information about token."""
-        return ""
-
-    def find_closest_token(
-        self,
-        pos: Position,  # noqa: ARG002
-        parent: Optional[TokenAccessor] = None,
-    ) -> TokenAccessor:
-        """Find token closest to specified position."""
-        return TokenAccessor(self, parent)
 
     def get_gerber_code_one_line_pretty_display(self) -> str:
         """Get gerber code represented by this token."""
