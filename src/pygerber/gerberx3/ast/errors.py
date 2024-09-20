@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pygerber.gerberx3.ast.nodes import TF_MD5, Node
+    from pygerber.gerberx3.ast.nodes import TF_MD5
     from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
 
 
@@ -85,21 +85,4 @@ class PackedCoordinateTooShortError(AstError):
         super().__init__(
             f"Packed coordinate {coordinate!r} is too short for the format "
             f"({integer},{decimal})."
-        )
-
-
-class ReBuilderError(Exception):
-    """ReBuilder error base class."""
-
-
-class ReturnValueError(ReBuilderError):
-    """Raised when value returned by visit is not valid in this context."""
-
-    def __init__(self, value: Any, visited: Node) -> None:
-        self.visited = visited
-        self.value = value
-        super().__init__(
-            f"Value {value!r} returned by visit method of "
-            f"{self.visited.__class__.__qualname__} "
-            "is not valid in this context."
         )
