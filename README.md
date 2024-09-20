@@ -2,7 +2,7 @@
    <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/b7aeb3e1-cd59-4f5b-b078-c01272461367" alt="" />
 </p>
 
-<h1 align="center"> PyGerber </h1>
+# PyGerber
 
 <p align="center">
   <a href="https://github.com/Argmaster/pygerber/releases/"><img src="https://img.shields.io/github/v/release/Argmaster/pygerber?style=flat" alt="GitHub release"></a>
@@ -23,36 +23,33 @@
   <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code Style"></a>
 </p>
 
-PyGerber is a Python implementation of Gerber X3/X2 format. It is based on Ucamco's
-`The Gerber Layer Format Specification. Revision 2023.03` (Available on
-[Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2023-03_en.pdf)
-and in
-[this repository](https://github.com/Argmaster/pygerber/blob/main/docs/gerber_specification/gerber-layer-format-specification-revision-2023-03_en.pdf)).
-The goal of this project is to provide support for wide variety of Gerber-like syntaxes,
-with support for most of deprecated features along with support for modern ones.
+## 📖 Overview
 
-<center><a href="https://argmaster.github.io/pygerber/latest"> 📚 See online documentation 📚 </a></center>
+PyGerber is a collection of tools aimed at simplifying the use of the Gerber X3 format.
+It is based on Ucamco's `The Gerber Layer Format Specification. Revision 2024.05`
+(Available on
+[Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf).
 
-### Target set of tools:
+PyGerber can be used both as a executable with use of its command line interface and as
+a Python library.
 
-- [x] Tokenizer
-- [x] Parser
-- [ ] Optimizer
-- [x] [Introspection API](https://argmaster.github.io/pygerber/latest/gerber/introspection/0_usage.html)
-- [x] Rasterized 2D rendering engine (With
-      [Pillow](https://github.com/python-pillow/Pillow))
-- [x] Vector 2D rendering engine (With [drawsvg](https://github.com/cduck/drawsvg))
-- [ ] Model 3D rendering engine (With [Blender](https://www.blender.org/))
-- [ ] Formatter
-- [ ] Linter (eg. deprecated syntax detection)
-- [x] Gerber X3/X2 Language Server (with `language-server` extras)
+PyGerber supports modern solutions available in the latest version of the standard
+(2024.05). At the same time, it includes the implementation of most outdated and
+selected removed functionalities. This allows it to be used not only with files
+compliant with the X3 standard but also with those compliant with X2, RS-274X, and
+RS-274D. Due to limited access to files in older standards and ambiguities within them,
+there is a risk that some older functionalities may behave incorrectly.
 
-You can view progress of development in
-[Gerber features support](#gerber-features-support) section down below. All Gerber
-source files which can be redistributed under MIT license and included in this
-repository for testing purposes will be greatly appreciated.
+If you have found a bug in the PyGerber library, please report it in the
+[Issues](https://github.com/Argmaster/pygerber/issues/new/choose) section of our
+project's repository. We will be glad to examine your report and possibly fix the
+problem.
 
-## Installation
+If you have any questions or suggestions, please open a new discussion thread in the
+[Discussions](https://github.com/Argmaster/pygerber/discussions) section of our
+repository. We will be happy to help you and discuss your ideas.
+
+### 📦 Installation
 
 PyGerber can be installed with `pip` from PyPI:
 
@@ -60,195 +57,151 @@ PyGerber can be installed with `pip` from PyPI:
 pip install pygerber
 ```
 
+This way only the core of PyGerber features will be installed. It will not include
+language server, SVG rendering support and other optional features. If you want to
+install all available features, include `all` extras set in installation request, like
+this:
+
+```
+pip install pygerber[all]
+```
+
 Alternatively, it is also possible to install it directly from repository:
 
 ```
+
 pip install git+https://github.com/Argmaster/pygerber
+
 ```
 
-## Command line usage
+## 📚 Documentation
 
-After installing `pygerber`, depending on your environment, it should become available
-in your command line:
+PyGerber has a online documentation hosted on Github Pages. It will be a great starting
+point for your journey with PyGerber. You can find documentation here
+[here](https://argmaster.github.io/pygerber/latest). If you are looking for
+documentation of older version of PyGerber, please use version selector dropdown
+available next to the title in top bar menu.
+
+### 📜 License
+
+PyGerber is licensed under MIT license. You can find full text of the license in the
+[LICENSE](https://github.com/Argmaster/pygerber/blob/main/LICENSE.md) file in the root
+directory of the repository.
+
+## 🛠 Tools
+
+Collection of tool available in PyGerber constantly grows. Most of the tools can be
+accessed both with command line and as a Python API. Below you can find list of all
+currently available ones:
+
+- Image generator (PNG/JPEG)
+- Code formatter
+- Language server
+  ([Visual Studio Code extension available](https://marketplace.visualstudio.com/items?itemName=argmaster.gerber-x3-x2-format-support))
+
+## 🖮 PyGerber APIs
+
+PyGerber provides APIs for accessing most of its functionalities. There are selected
+modules designed to be used as libraries, they reexport public parts of implementation
+in a convenient way. Avoid importing stuff from modules not listed below and not
+mentioned in documentation, as this may inflict suffering and damnation upon you 💀
+(Just joking, but they may get deleted/moved at any time, so you know 😼).
+
+Below you can find list of available APIs:
+
+- `pygerber.gerberx3.api`
+- `pygerber.gerberx3.ast`
+- `pygerber.gerberx3.ast.nodes`
+- `pygerber.gerberx3.compiler`
+- `pygerber.gerberx3.parser`
+- `pygerber.gerberx3.formatter`
+- `pygerber.vm`
+- `pygerber.vm.commands`
+- `pygerber.vm.pillow`
+- `pygerber.vm.types`
+
+If you need something that is not reexported from those modules, eg. some exception
+class you need to catch, please open an
+[Issue](https://github.com/Argmaster/pygerber/issues/new/choose) so we can evaluate that
+issue and possibly add missing reexport.
+
+## 💻 PyGerber CLI
+
+PyGerber provides non-interactive command line interface which provides means to access
+some of its features. `pygerber` command is available after installation and can be used
+to access tools with use of subcommands.
+
+To check version of PyGerber available in your environment, you can use:
 
 ```bash
 pygerber --version
 ```
 
-Output should be similar to one below **⇩**, where `x.y.z` should match version of
-PyGerber installed.
+To access PyGerbers image rendering feature, you can use `render` subcommand. Assuming
+that your Gerber file is named `source.gbr` and you want to render a PNG image of it,
+you can use following command:
 
-```
-$ pygerber --version
-pygerber, version x.y.z
-```
-
-Use `--help` to display help messages for individual commands:
-
-```
-pygerber render --help
-```
-
-To render 2D PNG image of some gerber file you can simply use:
-
-```
+```bash
 pygerber render raster source.gbr -o output.png
 ```
 
-Image will be saved to `output.png` in current working directory.
+This will create `output.png` file in current working directory. Depending on your image
+size you may need to adjust `--dpmm` parameter to raise or lower the resolution of
+image.
 
 ![example_pcb_image](https://github.com/Argmaster/pygerber/assets/56170852/9bca28bf-8aa6-4215-aac1-62c386490485)
 
-For guide on how to render SVG images and multi-layer projects with CLI please refer to
-PyGerber documentation.
+PyGerber has also a lot more options related to rendering available. For extensible
+guide on how to use PyGerber CLI, please refer to documentation.
 
-## Programmatic usage
+## § Language Server
 
-### JPG
-
-PyGerber can be used programmatically to render Gerber files. Below is an minimalistic
-example of how to render one of the example files included with PyGerber release to JPEG
-image:
-
-```python
-from pygerber.examples import ExamplesEnum, get_example_path
-from pygerber.gerberx3.api.v2 import GerberFile
-
-GerberFile.from_file(
-    get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes),
-).parse().render_raster("output.jpg")
-```
-
-Running code above will create `output.jpg` file in current working directory which
-should look like this:
-
-<p align="center">
-  <img height="400" src="https://github.com/Argmaster/pygerber/assets/56170852/d17ebee8-e851-4c86-b110-8cd8aeca993e">
-</p>
-
-### PNG
-
-It is also possible to render Gerber files to PNG with custom resolution and different
-color schemes:
-
-```python
-from pygerber.examples import ExamplesEnum, get_example_path
-from pygerber.gerberx3.api.v2 import ColorScheme, GerberFile, PixelFormatEnum
-
-GerberFile.from_file(
-    get_example_path(ExamplesEnum.ShapeFlashes),
-).parse().render_raster(
-    "output.png",
-    dpmm=100,
-    color_scheme=ColorScheme.COPPER_ALPHA,
-    pixel_format=PixelFormatEnum.RGBA,
-)
-```
-
-Code above renders following image:
-
-<p align="center">
-  <img height="400" src="https://github.com/Argmaster/pygerber/assets/56170852/0a5a42f3-8792-4b9a-be61-bac12f0e1c03">
-</p>
-
-### SVG
-
-Finally you can also create SVG files with PyGerber:
-
-```python
-from pygerber.examples import ExamplesEnum, load_example
-from pygerber.gerberx3.api.v2 import GerberFile
-
-source_code = load_example(ExamplesEnum.UCAMCO_ex_2_Shapes)
-GerberFile.from_str(source_code).parse().render_svg("output.svg")
-
-```
-
-### Multiple layers
-
-PyGerber can also render multiple layers to single image. Below is an example of how to
-render four layers to single PNG image with use of `Project` class:
-
-```python
-from pygerber.examples import ExamplesEnum, load_example
-from pygerber.gerberx3.api.v2 import FileTypeEnum, GerberFile, Project
-
-Project(
-    [
-        GerberFile.from_str(
-            load_example(ExamplesEnum.simple_2layer_F_Cu),
-            FileTypeEnum.COPPER,
-        ),
-        GerberFile.from_str(
-            load_example(ExamplesEnum.simple_2layer_F_Mask),
-            FileTypeEnum.MASK,
-        ),
-        GerberFile.from_str(
-            load_example(ExamplesEnum.simple_2layer_F_Paste),
-            FileTypeEnum.PASTE,
-        ),
-        GerberFile.from_str(
-            load_example(ExamplesEnum.simple_2layer_F_Silkscreen),
-            FileTypeEnum.SILK,
-        ),
-    ],
-).parse().render_raster("output.png", dpmm=40)
-```
-
-Here is the result:
-
-<p align="center">
-  <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/9b3f3823-67b3-49f1-8c76-e2bddaca81fe">
-</p>
-
-### Advanced usage
-
-Additionally to examples presented above which use high level API, PyGerber provides low
-level API which allows to directly access PyGerber internals and change behavior of
-parser, tokenizer and renderers. This can be used for code introspection and potentially
-other purposed. Check out documentation for more information.
-
-### Language Server
-
-Since release 2.1.0 PyGerber provides Gerber X3/X2 Language Server with
-[LSP](https://microsoft.github.io/language-server-protocol/) support. It can be enabled
-by installing PyGerber extras set `language-server` with following command:
+PyGerber provides Gerber X3/X2 Language Server conforming to
+[Language Servere Protocol](https://microsoft.github.io/language-server-protocol/)
+defined by Microsoft. It can be enabled by installing PyGerber extras set
+`language-server` with following command:
 
 ```
 pip install pygerber[language-server]
 ```
 
-Afterwards you can use `pygerber is-language-server-available` to check if language
-server was correctly enabled. Please report all issues in
-[PyGerber Issues](https://github.com/Argmaster/pygerber/issues) section.
+Afterwards you can use following command to check if PyGerber correctly recognized that
+language server feature should be enabled:
 
-You can utilize power of this language server with use of Visual Studio Code extension
+```
+pygerber is-language-server-available
+```
+
+If you have encountered a problem with language server please report it in the
+[Issues](https://github.com/Argmaster/pygerber/issues/new/choose) section of Github
+repository of this project.
+
+If you have a suggestion for improvement, please open a new discussion thread in the
+[Discussions](https://github.com/Agrmaster/pygerber/discussions) section of our
+repository.
+
+To fully utilize power of this language server you can use Visual Studio Code extension
 [Gerber X3/X2 Format Support](https://marketplace.visualstudio.com/items?itemName=argmaster.gerber-x3-x2-format-support)
-(`argmaster.gerber-x3-x2-format-support`).
-
-## Documentation
-
-Official documentations is hosted on Github Pages and can be found
-[here](https://argmaster.github.io/pygerber/latest).
-
-## Gerber features support
-
-For detailed list of features which are supported/not supported by each tool please
-refer to documentation:
-
-- [Tokenizer](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/0_tokenizer.html),
-- [Parser2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/1_parser2.html),
-- [RasterRenderer2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/2_rasterrenderer2.html),
-- [SvgRenderer2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/3_svgrenderer2.html),
+(`argmaster.gerber-x3-x2-format-support`). Repository of this extension is available
+[here](https://github.com/Argmaster/vscode-gerber-format-support). If you encounter any
+problems with that extension, please report them in the
+[Issues](https://github.com/Argmaster/vscode-gerber-format-support/issues/new) section
+of its repository. If you are not sure whether the problem is caused by extension or by
+language server, please report it in the
+[Issues](https://github.com/Argmaster/vscode-gerber-format-support/issues/new) section
+of the extension, we will move it to PyGerber repository if necessary.
 
 ## Development
 
 For development guidelines please visit documentation `Development` section
 [here](https://argmaster.github.io/pygerber/latest).
 
-## Gerber reference archive
+## Acknowledgments
 
-This repository contains also archival reference files. Although new specs contain
-dedicated changelog section it may still be helpful in some rare cases to look through
-old Gerber specs. Archival files can be found
-[here](https://github.com/Argmaster/pygerber/tree/main/docs/gerber_specification).
+I would like to thank Professor Janusz Młodzianowski from the University of Gdańsk, who
+inspired me with the idea to implement the Gerber format at the beginning of my
+bachelor's degree. I would like to also express my gratitude to Karel Tavernier, the
+long-time steward of the Gerber format, for his support and expert guidance during my
+work on this project. Without them, this project would have never come to life. Finally,
+I would like to thank all the people who have contributed, are contributing and will
+contribute to PyGerber. Your help is invaluable and I am grateful for it.
