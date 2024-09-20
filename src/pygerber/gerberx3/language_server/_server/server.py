@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from pygls.server import LanguageServer
 
 
-def get_server() -> LanguageServer:  # noqa: PLR0915
+def get_server() -> LanguageServer:  # noqa: PLR0915, C901
     """Get the language server instance."""
     throw_if_server_not_available()
 
@@ -116,5 +116,20 @@ def get_server() -> LanguageServer:  # noqa: PLR0915
             await document.release()
 
         return hover
+
+    @gls.feature(
+        lspt.TEXT_DOCUMENT_COMPLETION,
+        lspt.CompletionOptions(trigger_characters=["G", "D", "%"]),
+    )
+    async def _(params: lspt.CompletionParams) -> lspt.CompletionList | None:
+        async with open_documents:
+            document = await get_document(params.text_document.uri)
+            await document.acquire()
+
+        try:
+            return await document.on_completion(params)
+
+        finally:
+            await document.release()
 
     return gls

@@ -15,6 +15,9 @@ class Flashes(Namespace):
         THIS_DIRECTORY / "00_circle+h_4_tbh.grb"
     )
     asset_00_circle_4_grb = GerberX3Asset(THIS_DIRECTORY / "00_circle_4.grb")
+    asset_00_circle_4_node_finder_grb = GerberX3Asset(
+        THIS_DIRECTORY / "00_circle_4_node_finder.grb"
+    )
     asset_01_rectangle_h_4_grb = GerberX3Asset(THIS_DIRECTORY / "01_rectangle+h_4.grb")
     asset_01_rectangle_v_h_4_grb = GerberX3Asset(
         THIS_DIRECTORY / "01_rectangle+v+h_4.grb"

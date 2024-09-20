@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 from enum import Enum
+from itertools import chain
 from typing import Any, Callable, Dict, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -351,6 +352,19 @@ class ApertureStorage(_StateModel):
     macros: Dict[str, AM] = Field(default_factory=dict)
     """Macro definition storage."""
 
+    per_aperture_attributes: Dict[str, Dict[str, TA]] = Field(default_factory=dict)
+    """Attributes assigned to apertures during creation."""
+
+    def get_next_free_aperture_code(self) -> int:
+        """Get next free aperture code."""
+        return (
+            max(
+                int(aperture_id.lstrip("D"))
+                for aperture_id in chain(self.apertures.keys(), self.blocks.keys())
+            )
+            + 1
+        )
+
 
 class State(_StateModel):
     """Internal state of the compiler."""
@@ -522,11 +536,17 @@ class StateTrackingVisitor(AstVisitor):
         """Handle `AB` node."""
         super().on_ab(node)
         self.state.apertures.blocks[node.open.aperture_id] = node
+        self.state.apertures.per_aperture_attributes[node.open.aperture_id] = (
+            self.state.attributes.aperture_attributes.copy()
+        )
         return node
 
     def on_ad(self, node: AD) -> None:
         """Handle `AD` node."""
         self.state.apertures.apertures[node.aperture_id] = node
+        self.state.apertures.per_aperture_attributes[node.aperture_id] = (
+            self.state.attributes.aperture_attributes.copy()
+        )
 
     def on_am(self, node: AM) -> AM:
         """Handle `AM` root node."""
@@ -535,20 +555,17 @@ class StateTrackingVisitor(AstVisitor):
 
     # Attribute
 
-    def on_ta(self, node: TA) -> TA:
+    def on_ta(self, node: TA) -> None:
         """Handle `TA_UserName` node."""
         self.state.attributes.aperture_attributes[node.attribute_name] = node
-        return node
 
-    def on_tf(self, node: TF) -> TF:
+    def on_tf(self, node: TF) -> None:
         """Handle `TF` node."""
         self.state.attributes.file_attributes[node.attribute_name] = node
-        return node
 
-    def on_to(self, node: TO) -> TO:
+    def on_to(self, node: TO) -> None:
         """Handle `TO` node."""
         self.state.attributes.object_attributes[node.attribute_name] = node
-        return node
 
     def on_td(self, node: TD) -> TD:
         """Handle `TD` node."""

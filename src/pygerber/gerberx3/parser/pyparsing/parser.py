@@ -15,9 +15,16 @@ class Parser:
     """Gerber X3 parser implementation."""
 
     def __init__(
-        self, ast_node_class_overrides: Optional[dict[str, Type[Node]]] = None
+        self,
+        ast_node_class_overrides: Optional[dict[str, Type[Node]]] = None,
+        *,
+        resilient: bool = False,
     ) -> None:
-        self.grammar = Grammar(ast_node_class_overrides or {}).build()
+        builder = Grammar(ast_node_class_overrides or {})
+        if resilient:
+            self.grammar = builder.build_resilient()
+        else:
+            self.grammar = builder.build()
 
     def parse(self, code: str, *, strict: bool = True) -> File:
         """Parse the input."""

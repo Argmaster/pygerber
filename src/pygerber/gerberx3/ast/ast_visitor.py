@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from pygerber.gerberx3.ast.nodes.invalid import Invalid
+
 if TYPE_CHECKING:
     from pygerber.gerberx3.ast.nodes import (
         AB,
@@ -216,9 +218,8 @@ class AstVisitor:
 
     # Attribute
 
-    def on_ta(self, node: TA) -> TA:
+    def on_ta(self, node: TA) -> None:
         """Handle `TA` node."""
-        return node
 
     def on_ta_user_name(self, node: TA_UserName) -> TA_UserName:
         """Handle `TA_UserName` node."""
@@ -244,9 +245,8 @@ class AstVisitor:
         """Handle `TD` node."""
         return node
 
-    def on_tf(self, node: TF) -> TF:
+    def on_tf(self, node: TF) -> None:
         """Handle `TF` node."""
-        return node
 
     def on_tf_user_name(self, node: TF_UserName) -> TF_UserName:
         """Handle `TF_UserName` node."""
@@ -295,9 +295,8 @@ class AstVisitor:
         self.on_tf(node)
         return node
 
-    def on_to(self, node: TO) -> TO:
+    def on_to(self, node: TO) -> None:
         """Handle `TO` node."""
-        return node
 
     def on_to_user_name(self, node: TO_UserName) -> TO_UserName:
         """Handle `TO_UserName` node."""
@@ -793,3 +792,7 @@ class AstVisitor:
         If return value is True, exception will be re-raised.
         """
         return True
+
+    def on_invalid(self, node: Invalid) -> Invalid:
+        """Handle invalid node."""
+        return node

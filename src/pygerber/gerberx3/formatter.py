@@ -7,8 +7,8 @@ from __future__ import annotations
 from contextlib import contextmanager
 from enum import Enum
 from functools import wraps
+from io import StringIO
 from typing import (
-    TYPE_CHECKING,
     Callable,
     Generator,
     Literal,
@@ -95,6 +95,7 @@ from pygerber.gerberx3.ast.nodes import (
     G,
     Mul,
     Neg,
+    Node,
     Parenthesis,
     Point,
     Pos,
@@ -127,9 +128,6 @@ from pygerber.gerberx3.ast.nodes import (
     TO_UserName,
     Variable,
 )
-
-if TYPE_CHECKING:
-    from io import StringIO
 
 
 class FormatterError(Exception):
@@ -414,6 +412,27 @@ class Formatter(AstVisitor):
         finally:
             self._output = None
             self._base_indent = ""
+
+    def formats(self, source: File) -> str:
+        """Format Gerber AST according to rules specified in Formatter constructor."""
+        out = StringIO()
+        self.format(source, out)
+        return out.getvalue()
+
+    def format_node(self, node: Node, output: StringIO) -> None:
+        """Format single node according to rules specified in Formatter constructor."""
+        self._output = output
+        try:
+            node.visit(self)
+        finally:
+            self._output = None
+            self._base_indent = ""
+
+    def formats_node(self, node: File) -> str:
+        """Format single node according to rules specified in Formatter constructor."""
+        out = StringIO()
+        self.format_node(node, out)
+        return out.getvalue()
 
     @property
     def output(self) -> StringIO:

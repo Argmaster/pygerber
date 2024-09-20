@@ -37,6 +37,11 @@ class Document:
     async def on_hover(self, params: lspt.HoverParams) -> lspt.Hover | None:
         """Handle the hover event."""
 
+    async def on_completion(
+        self, params: lspt.CompletionParams
+    ) -> lspt.CompletionList | None:
+        """Handle the completion event."""
+
     def log_info(self, msg: Any) -> None:
         """Log an informational message to server log."""
         self.gls.show_message_log(str(msg), lspt.MessageType.Info)
