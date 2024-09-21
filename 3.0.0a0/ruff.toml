@@ -1,0 +1,6 @@
+[lint]
+ignore = [
+    "S101", # Assertions are OK in test code.
+    "N802", # Project names are used as test names thus causing conflicts with this rule.
+    "INP001",  # Ignore implicit namespaces.
+]
