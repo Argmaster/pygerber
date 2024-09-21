@@ -2,7 +2,7 @@
    <img width="400" src="https://github.com/Argmaster/pygerber/assets/56170852/b7aeb3e1-cd59-4f5b-b078-c01272461367" alt="" />
 </p>
 
-# PyGerber
+<h1 align="center"> PyGerber </h1>
 
 <p align="center">
   <a href="https://github.com/Argmaster/pygerber/releases/"><img src="https://img.shields.io/github/v/release/Argmaster/pygerber?style=flat" alt="GitHub release"></a>
@@ -69,9 +69,7 @@ pip install pygerber[all]
 Alternatively, it is also possible to install it directly from repository:
 
 ```
-
 pip install git+https://github.com/Argmaster/pygerber
-
 ```
 
 ## 📚 Documentation
@@ -99,7 +97,7 @@ currently available ones:
 - Language server
   ([Visual Studio Code extension available](https://marketplace.visualstudio.com/items?itemName=argmaster.gerber-x3-x2-format-support))
 
-## 🖮 PyGerber APIs
+### 🖮 PyGerber APIs
 
 PyGerber provides APIs for accessing most of its functionalities. There are selected
 modules designed to be used as libraries, they reexport public parts of implementation
@@ -125,7 +123,7 @@ class you need to catch, please open an
 [Issue](https://github.com/Argmaster/pygerber/issues/new/choose) so we can evaluate that
 issue and possibly add missing reexport.
 
-## 💻 PyGerber CLI
+### 💻 PyGerber CLI
 
 PyGerber provides non-interactive command line interface which provides means to access
 some of its features. `pygerber` command is available after installation and can be used
