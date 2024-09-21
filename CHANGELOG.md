@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
-## Release 3.0.0a1
+## Pre-Release 3.0.0a1
+
+- Fixed README headers.
+
+## Pre-Release 3.0.0a0
 
 - Added `pygerber.gerberx3.formatter` for formatting Gerber files.
 - Added `GerberX3Builder` class for building Gerber code from scratch.
