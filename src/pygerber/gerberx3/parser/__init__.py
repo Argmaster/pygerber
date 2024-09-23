@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, Optional, Type
 
 from typing_extensions import Protocol
 
-from pygerber.gerberx3.ast.nodes.file import File
+if TYPE_CHECKING:
+    from pygerber.gerberx3.ast.nodes import File, Node
 
 
 class ParserProtocol(Protocol):
@@ -21,13 +22,49 @@ def parse(
     *,
     strict: bool = True,
     parser: Literal["pyparsing"] = "pyparsing",
-    **options: Any,
+    resilient: bool = False,
+    ast_node_class_overrides: Optional[dict[str, Type[Node]]] = None,
 ) -> File:
-    """Parse GerberX3 file source code and construct AST from it."""
+    """Parse GerberX3 file source code and construct AST from it.
+
+    Parameters
+    ----------
+    code : str
+        Gerber source code.
+    strict : bool, optional
+        Toggle enforcement of parsing whole code, by default True
+        When set to False, parser will try to parse as much as possible and will stop
+        after it encounters first unrecognized token.
+    parser : Literal[&quot;pyparsing&quot;], optional
+        Parsing backend to use, by default "pyparsing"
+    resilient : bool, optional
+        Toggle resilient parsing. When set to True, when parser encounters invalid token
+        it will wrap it in `InvalidToken` node and continue parsing, by default False
+    ast_node_class_overrides : Optional[dict[str, Type[Node]]], optional
+        Override classes representing nodes used by parser to construct abstract syntax
+        tree, by default None
+        When dictionary is provided, parser will check if there is a class override
+        available for given node. Keys in dictionary have to be string corresponding to
+        names of overridden node classes for parser to use them. In most cases it is
+        necessary for replacement node class to inherit from original one.
+
+    Returns
+    -------
+    File
+        Abstract syntax tree of parsed Gerber file.
+
+    Raises
+    ------
+    NotImplementedError
+        For unrecognized parser backend names.
+
+    """
     if parser == "pyparsing":
         from pygerber.gerberx3.parser.pyparsing.parser import Parser
 
-        return Parser(**options).parse(code, strict=strict)
+        return Parser(
+            resilient=resilient, ast_node_class_overrides=ast_node_class_overrides
+        ).parse(code, strict=strict)
 
     msg = f"Parser '{parser}' is not supported."  # type: ignore[unreachable]
     raise NotImplementedError(msg)
