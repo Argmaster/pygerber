@@ -4,18 +4,8 @@ Gerber X3/X2 files.
 
 from __future__ import annotations
 
-from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
-from pygerber.common.rgba import RGBA
-from pygerber.gerberx3.api._errors import (
-    GerberX3APIError,
-    MutuallyExclusiveViolationError,
-    RenderingResultNotReadyError,
-)
+from pygerber.gerberx3.api._enums import FileTypeEnum
+from pygerber.gerberx3.api._gerber_file import GerberFile, GerberFileInfo
+from pygerber.gerberx3.api._project import Project
 
-__all__ = [
-    "RGBA",
-    "ColorScheme",
-    "GerberX3APIError",
-    "RenderingResultNotReadyError",
-    "MutuallyExclusiveViolationError",
-]
+__all__ = ["FileTypeEnum", "GerberFile", "Project", "GerberFileInfo"]

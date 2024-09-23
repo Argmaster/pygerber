@@ -8,8 +8,9 @@ G04 Ucamco ex. 2: Shapes*           G04 Comment                                 
 %TF.FileFunction,Other,Sample*%     G04 Attribute: the is not a PCB layer, it is just an                     *
                                     G04 example                                                              *
 G04 Define Apertures*               G04 Comment                                                              *
-%AMTHERMAL80*                       G04 Define the aperture macro 'THERMAL80'                                *
-7,0,0,0.800,0.550,0.125,45*%        G04 Use thermal primitive in the macro                                   *
+%AMTHERMAL80*
+7,0,0,0.800,0.550,0.125,45*%        G04 Define the aperture macro 'THERMAL80'                                *
+                                    G04 Use thermal primitive in the macro                                   *
 %ADD10C,0.1*%                       G04 Define aperture 10 as a circle with diameter 0.1 mm                  *
 %ADD11C,0.6*%                       G04 Define aperture 11 as a circle with diameter 0.6 mm                  *
 %ADD12R,0.6X0.6*%                   G04 Define aperture 12 as a rectangle with size 0.6 x 0.6 mm             *

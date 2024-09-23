@@ -71,7 +71,7 @@ class AssetLoader:
 GLOBAL_ASSET_LOADER = AssetLoader(ASSETS_DIRECTORY)
 
 
-@pytest.fixture()
+@pytest.fixture
 def asset_loader() -> AssetLoader:
     """Acquire global asset loader."""
     return GLOBAL_ASSET_LOADER

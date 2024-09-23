@@ -25,7 +25,7 @@ from dulwich.repo import Repo
 from filelock import FileLock
 from PIL import Image, ImageDraw
 
-from pygerber.gerberx3.api.v2 import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
+from pygerber.gerberx3.api._enums import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
 from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
 from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
 

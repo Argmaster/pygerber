@@ -41,7 +41,7 @@ class Code5PolygonToken(MacroPrimitiveToken):
 
     symbol: ClassVar[str] = "5"
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         string: str,
         location: int,

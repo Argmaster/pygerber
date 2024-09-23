@@ -15,7 +15,7 @@ def test_raster_render_all_default() -> None:
         result = runner.invoke(
             _raster,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.png",
             ],
@@ -39,7 +39,7 @@ def test_raster_render_dpmm_40() -> None:
         result = runner.invoke(
             _raster,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.png",
                 "-d",
@@ -59,7 +59,7 @@ def test_raster_render_pixel_format_rgba_png() -> None:
         result = runner.invoke(
             _raster,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.png",
                 "-p",
@@ -85,7 +85,7 @@ def test_raster_render_file_type_copper_rgb_png() -> None:
         result = runner.invoke(
             _raster,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.png",
                 "-p",
@@ -113,7 +113,7 @@ def test_raster_render_file_type_copper_rgba_png() -> None:
         result = runner.invoke(
             _raster,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.png",
                 "-p",
@@ -141,7 +141,7 @@ def test_raster_render_pixel_format_rgba_jpg() -> None:
         result = runner.invoke(
             _raster,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.jpg",
                 "-p",
@@ -165,7 +165,7 @@ def test_raster_render_file_type_copper_rgb_jpg() -> None:
         result = runner.invoke(
             _raster,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.jpg",
                 "-p",
@@ -191,7 +191,7 @@ def test_vector_render_all_default() -> None:
         result = runner.invoke(
             _vector,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.svg",
             ],
@@ -214,7 +214,7 @@ def test_vector_render_file_type_copper() -> None:
         result = runner.invoke(
             _vector,
             [
-                get_example_path(ExamplesEnum.UCAMCO_ex_2_Shapes).as_posix(),
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
                 "-o",
                 "output.svg",
                 "-t",

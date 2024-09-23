@@ -25,7 +25,7 @@ repos:
       - id: debug-statements
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.4.6"
+    rev: "v0.6.5"
     hooks:
       # Run the linter.
       - id: ruff

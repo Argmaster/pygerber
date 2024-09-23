@@ -56,7 +56,7 @@ class Code4OutlineToken(MacroPrimitiveToken):
 
     symbol: ClassVar[str] = "4"
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         string: str,
         location: int,

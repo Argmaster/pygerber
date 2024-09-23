@@ -25,7 +25,7 @@ class DrawArc(DrawCommand):
     is_clockwise: bool
     is_multi_quadrant: bool
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         backend: Backend,
         polarity: Polarity,

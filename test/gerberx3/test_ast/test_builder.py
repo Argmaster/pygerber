@@ -5,7 +5,7 @@ import pytest
 from pygerber.gerberx3.ast.builder import GerberX3Builder
 
 
-@pytest.fixture()
+@pytest.fixture
 def builder() -> GerberX3Builder:
     return GerberX3Builder()
 

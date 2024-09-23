@@ -126,7 +126,7 @@ def test_override_aperture_attribute() -> None:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def default_visitor(mocker: MockerFixture) -> StateTrackingVisitor:
     mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_draw_line.__name__)
     mocker.spy(StateTrackingVisitor, StateTrackingVisitor.on_draw_cw_arc_sq.__name__)
@@ -180,7 +180,7 @@ def test_d01_draw_linear_default_quadrant(
     default_visitor.on_draw_ccw_arc_sq.assert_not_called()  # type: ignore[attr-defined]
 
 
-@pytest.fixture()
+@pytest.fixture
 def default_d01() -> D01:
     return _default_d01()
 
@@ -245,7 +245,7 @@ def test_d03_flash_circle(
     default_visitor.on_flash_circle.assert_called_once()  # type: ignore[attr-defined]
 
 
-@pytest.fixture()
+@pytest.fixture
 def default_d03() -> D03:
     return D03(
         x=CoordinateX(value=PackedCoordinateStr("1")),

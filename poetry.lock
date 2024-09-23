@@ -3154,4 +3154,4 @@ svg = ["drawsvg"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<3.13"
-content-hash = "c007a3a4f36b20bdf542bceda4d248edfab3c7f0c50b1810b0a981b513edcc57"
+content-hash = "94b2f1be3b381bb67baa8c0b2e4cb76e3734d5400e8475baf150f41fa0a12a96"

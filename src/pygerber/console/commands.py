@@ -2,20 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Generator
-
 import click
 
 import pygerber
-from pygerber.gerberx3.api.v2 import (
-    DEFAULT_ALPHA_COLOR_MAP,
-    DEFAULT_COLOR_MAP,
-    FileTypeEnum,
-    GerberFile,
-    ImageFormatEnum,
-    PixelFormatEnum,
-    Project,
-)
+from pygerber.gerberx3.api import FileTypeEnum
 
 
 @click.group("pygerber")
@@ -92,25 +82,7 @@ def _raster(
     quality: int,
 ) -> None:
     """Render Gerber file with API V2 as raster (PNG/JPEG) image."""
-    parsed_file = GerberFile.from_file(
-        source, file_type=FileTypeEnum(file_type)
-    ).parse()
-
-    color_map = DEFAULT_COLOR_MAP
-
-    if pixel_format.upper() == "RGBA":
-        color_map = DEFAULT_ALPHA_COLOR_MAP
-
-    color_scheme = color_map[parsed_file.get_file_type()]
-
-    parsed_file.render_raster(
-        output,
-        color_scheme=color_scheme,
-        dpmm=dpmm,
-        pixel_format=PixelFormatEnum(pixel_format.upper()),
-        image_format=ImageFormatEnum(image_format.lower()),
-        quality=quality,
-    )
+    raise NotImplementedError
 
 
 @_render.command("vector")
@@ -148,11 +120,7 @@ def _vector(
     scale: float,
 ) -> None:
     """Render Gerber file with API V2 as vector (SVG) image."""
-    parsed_file = GerberFile.from_file(
-        source, file_type=FileTypeEnum(file_type)
-    ).parse()
-    color_scheme = DEFAULT_COLOR_MAP[parsed_file.get_file_type()]
-    parsed_file.render_svg(output, color_scheme=color_scheme, scale=scale)
+    raise NotImplementedError
 
 
 @_render.command("project")
@@ -170,15 +138,4 @@ def _project(files: str, output: str, dpmm: int) -> None:
 
     Layers are merged from first to last, thus last layer will be on top.
     """
-
-    def _() -> Generator[GerberFile, None, None]:
-        for file in files:
-            file_path, *other = file.split("@")
-
-            file_type = FileTypeEnum.INFER
-            if len(other) != 0:
-                file_type = FileTypeEnum(other[0].upper())
-
-            yield GerberFile.from_file(file_path, file_type)
-
-    Project(list(_())).parse().render_raster(output, dpmm=dpmm)
+    raise NotImplementedError

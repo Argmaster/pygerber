@@ -41,7 +41,7 @@ class Code21CenterLineToken(MacroPrimitiveToken):
 
     symbol: ClassVar[str] = "21"
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         string: str,
         location: int,
