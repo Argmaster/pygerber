@@ -9,6 +9,10 @@ class VirtualMachineError(Exception):
     """Base class for all exceptions in the VirtualMachine infrastructure."""
 
 
+class NoMainLayerError(VirtualMachineError):
+    """Raised when no main layer was created by executing RVMC."""
+
+
 class EmptyAutoSizedLayerNotAllowedError(VirtualMachineError):
     """Raised when an empty AutoSizedLayer is attempted to be created."""
 

@@ -428,7 +428,7 @@ class Formatter(AstVisitor):
             self._output = None
             self._base_indent = ""
 
-    def formats_node(self, node: File) -> str:
+    def formats_node(self, node: Node) -> str:
         """Format single node according to rules specified in Formatter constructor."""
         out = StringIO()
         self.format_node(node, out)

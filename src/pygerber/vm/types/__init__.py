@@ -9,6 +9,7 @@ from pygerber.vm.types.errors import (
     LayerAlreadyExistsError,
     LayerNotFoundError,
     NoLayerSetError,
+    NoMainLayerError,
     PasteDeferredLayerNotAllowedError,
     VirtualMachineError,
 )
@@ -28,4 +29,5 @@ __all__ = [
     "LayerNotFoundError",
     "LayerAlreadyExistsError",
     "PasteDeferredLayerNotAllowedError",
+    "NoMainLayerError",
 ]

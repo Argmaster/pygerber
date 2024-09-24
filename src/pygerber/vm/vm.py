@@ -13,6 +13,7 @@ from pygerber.vm.types.errors import (
     LayerAlreadyExistsError,
     LayerNotFoundError,
     NoLayerSetError,
+    NoMainLayerError,
 )
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.vector import Vector
@@ -25,6 +26,11 @@ DrawCmdT: TypeAlias = Union[Shape, PasteLayer]
 
 class Result:
     """Result of drawing."""
+
+    main_box: Box
+
+    def __init__(self, main_box: Box) -> None:
+        self.main_box = main_box
 
 
 class Layer:
@@ -283,5 +289,10 @@ class VirtualMachine(CommandVisitor):
         """Execute all commands."""
         for command in rvmc.commands:
             command.visit(self)
+        layer = self._layers.get(self.MAIN_LAYER_ID, None)
 
-        return Result()
+        if layer is None:
+            raise NoMainLayerError
+
+        assert isinstance(layer, EagerLayer)
+        return Result(layer.box)

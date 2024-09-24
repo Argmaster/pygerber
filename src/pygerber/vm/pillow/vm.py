@@ -14,7 +14,7 @@ from pygerber.vm.commands import Arc, Line, PasteLayer, Shape
 from pygerber.vm.pillow.errors import DPMMTooSmallError
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.box import Box
-from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
+from pygerber.vm.types.errors import NoMainLayerError, PasteDeferredLayerNotAllowedError
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.style import Style
 from pygerber.vm.types.vector import Vector
@@ -38,7 +38,8 @@ MIN_SEGMENT_COUNT = 12
 class PillowResult(Result):
     """Result of drawing commands."""
 
-    def __init__(self, image: Optional[Image.Image]) -> None:
+    def __init__(self, main_box: Box, image: Optional[Image.Image]) -> None:
+        super().__init__(main_box)
         self.image = image
 
     def is_success(self) -> bool:
@@ -51,7 +52,45 @@ class PillowResult(Result):
         if self.image is None:
             msg = "Image is not available."
             raise ValueError(msg)
-        return self.image
+
+        image = replace_color(
+            self.image, (255, 255, 255, 255), style.foreground.as_rgba_int()
+        )
+        return replace_color_in_place(
+            image, (0, 0, 0, 255), style.background.as_rgba_int()
+        )
+
+
+def replace_color(
+    input_image: Image.Image,
+    original: tuple[int, ...] | int,
+    replacement: tuple[int, ...] | int,
+    *,
+    output_image_mode: str = "RGBA",
+) -> Image.Image:
+    """Replace `original` color from input image with `replacement` color."""
+    if input_image.mode != output_image_mode:
+        output_image = input_image.convert(output_image_mode)
+    else:
+        output_image = input_image.copy()
+
+    replace_color_in_place(output_image, original, replacement)
+
+    return output_image
+
+
+def replace_color_in_place(
+    image: Image.Image,
+    original: tuple[int, ...] | int,
+    replacement: tuple[int, ...] | int,
+) -> Image.Image:
+    """Replace `original` color from input image with `replacement` color."""
+    for x in range(image.width):
+        for y in range(image.height):
+            if image.getpixel((x, y)) == original:
+                image.putpixel((x, y), replacement)
+
+    return image
 
 
 class PillowEagerLayer(EagerLayer):
@@ -305,8 +344,9 @@ class PillowVirtualMachine(VirtualMachine):
         layer = self._layers.get(self.MAIN_LAYER_ID, None)
 
         if layer is None:
-            return PillowResult(None)
+            raise NoMainLayerError
 
         assert isinstance(layer, PillowEagerLayer)
-
-        return PillowResult(layer.image.transpose(Image.Transpose.FLIP_TOP_BOTTOM))
+        return PillowResult(
+            layer.box, layer.image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+        )
