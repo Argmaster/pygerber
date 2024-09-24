@@ -5,9 +5,10 @@ implemented using the pyparsing library.
 from __future__ import annotations
 
 from enum import IntFlag
-from typing import Any, Callable, Literal, Type, TypeVar, cast
+from typing import Any, Callable, Iterable, Literal, Optional, Type, TypeVar, cast
 
 import pyparsing as pp
+from pydantic import BaseModel
 
 from pygerber.gerberx3.ast.nodes import (
     AB,
@@ -131,12 +132,43 @@ class Optimization(IntFlag):
     DISCARD_ATTRIBUTES = 0b0000_0100
 
 
+class SyntaxSwitches(BaseModel):
+    """The `SyntaxSwitches` class contains switches for toggling support for different
+    variants of Gerber derived grammars not compatible with Gerber X3.
+    """
+
+    allow_d01_without_code: bool = True
+    """Allow D01 commands with `D01` literal omitted.
+
+    Example:
+    --------
+
+    ```gerber
+    X2331205Y10807331I4J-31018*
+    ```
+
+    """
+
+    allow_non_standalone_d_codes: bool = True
+    """Allow G codes merged with D codes.
+
+    Example:
+    --------
+
+    ```gerber
+    G01X2241001Y10806845D02*
+    ```
+
+    """
+
+
 class Grammar:
     """Internal representation of the Gerber X3 grammar."""
 
     def __init__(
         self,
         ast_node_class_overrides: dict[str, Type[Node]],
+        syntax_switches: Optional[SyntaxSwitches] = None,
         *,
         enable_packrat: bool = False,
         packrat_cache_size: int = 128,
@@ -144,6 +176,8 @@ class Grammar:
         optimization: int = 0,
     ) -> None:
         self.ast_node_class_overrides = ast_node_class_overrides
+        self.syntax_switches = syntax_switches or SyntaxSwitches()
+
         self.enable_packrat = enable_packrat
         self.packrat_cache_size = packrat_cache_size
         self.enable_debug = enable_debug
@@ -1125,13 +1159,17 @@ class Grammar:
         )
 
     def _d01(self, *, is_standalone: bool) -> pp.ParserElement:
+        regex_d01: pp.ParserElement = pp.Regex(r"D0*1")
+        if self.syntax_switches.allow_d01_without_code:
+            regex_d01 = pp.Opt(regex_d01)
+
         return (
             self._command(
                 pp.Opt(self._coordinate_x.set_results_name("x"))
                 + pp.Opt(self._coordinate_y.set_results_name("y"))
                 + pp.Opt(self._coordinate_i.set_results_name("i"))
                 + pp.Opt(self._coordinate_j.set_results_name("j"))
-                + pp.Regex(r"D0*1")
+                + regex_d01
             )
             .set_parse_action(
                 self.make_unpack_callback(D01, is_standalone=is_standalone)
@@ -1204,6 +1242,30 @@ class Grammar:
                 .set_parse_action(self.make_unpack_callback(cls, is_standalone=False))
             ) + self.d_codes_non_standalone
 
+        if self.syntax_switches.allow_non_standalone_d_codes:
+            non_standalone_codes: Iterable[pp.ParserElement] = (
+                _non_standalone(cast(Type[Node], cls))
+                for cls in reversed(
+                    (
+                        G01,
+                        G02,
+                        G03,
+                        G36,
+                        G37,
+                        G54,
+                        G55,
+                        G70,
+                        G71,
+                        G74,
+                        G75,
+                        G90,
+                        G91,
+                    )
+                )
+            )
+        else:
+            non_standalone_codes = ()
+
         return pp.MatchFirst(
             [
                 g04_comment,
@@ -1227,26 +1289,7 @@ class Grammar:
                         )
                     )
                 ),
-                *(
-                    _non_standalone(cast(Type[Node], cls))
-                    for cls in reversed(
-                        (
-                            G01,
-                            G02,
-                            G03,
-                            G36,
-                            G37,
-                            G54,
-                            G55,
-                            G70,
-                            G71,
-                            G74,
-                            G75,
-                            G90,
-                            G91,
-                        )
-                    )
-                ),
+                *non_standalone_codes,
             ]
         )
 
