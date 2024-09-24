@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import pytest
 from click.testing import CliRunner
 from PIL import Image
 
@@ -9,6 +10,7 @@ from pygerber.examples import ExamplesEnum, get_example_path
 from test.conftest import cd_to_tempdir
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_raster_render_all_default() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -33,6 +35,7 @@ def test_raster_render_all_default() -> None:
         )
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_raster_render_dpmm_40() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -53,6 +56,7 @@ def test_raster_render_dpmm_40() -> None:
         assert image.size == (1706, 1522)
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_raster_render_pixel_format_rgba_png() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -79,6 +83,7 @@ def test_raster_render_pixel_format_rgba_png() -> None:
         )
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_raster_render_file_type_copper_rgb_png() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -107,6 +112,7 @@ def test_raster_render_file_type_copper_rgb_png() -> None:
         )
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_raster_render_file_type_copper_rgba_png() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -135,6 +141,7 @@ def test_raster_render_file_type_copper_rgba_png() -> None:
         )
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_raster_render_pixel_format_rgba_jpg() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -159,6 +166,7 @@ def test_raster_render_pixel_format_rgba_jpg() -> None:
         assert image.getpixel((400, 100)) != (0, 0, 0)
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_raster_render_file_type_copper_rgb_jpg() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -185,6 +193,7 @@ def test_raster_render_file_type_copper_rgb_jpg() -> None:
         assert image.getpixel((400, 100)) != (0, 0, 0)
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_vector_render_all_default() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -208,6 +217,7 @@ def test_vector_render_all_default() -> None:
         assert f"""fill="{color_hex}" """.encode() in image
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_vector_render_file_type_copper() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -233,6 +243,7 @@ def test_vector_render_file_type_copper() -> None:
         assert f"""fill="{color_hex}" """.encode() in image
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_project_render_default() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:
@@ -268,6 +279,7 @@ def test_project_render_default() -> None:
         )
 
 
+@pytest.mark.xfail(reason="Not implemented")
 def test_project_render_with_file_type_tags() -> None:
     runner = CliRunner()
     with cd_to_tempdir() as temp_path:

@@ -13,6 +13,7 @@ from pygerber.vm.pillow.vm import PillowVirtualMachine
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.box import Box
 from pygerber.vm.types.layer_id import LayerID
+from pygerber.vm.types.style import Style
 from pygerber.vm.types.vector import Vector
 from test.conftest import TEST_DIRECTORY
 from test.test_vm.test_builder import (
@@ -36,7 +37,9 @@ def run(dpmm: int, commands: Sequence[Command]) -> Image.Image:
 
 
 def run_rvmc(dpmm: int, rvmc: RVMC) -> Image.Image:
-    return PillowVirtualMachine(dpmm).run(rvmc).get_image()
+    return (
+        PillowVirtualMachine(dpmm).run(rvmc).get_image(style=Style.presets.BLACK_WHITE)
+    )
 
 
 def compare(image: Image.Image) -> None:
