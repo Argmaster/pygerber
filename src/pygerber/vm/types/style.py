@@ -81,6 +81,9 @@ class Style(ModelType):
         DEBUG_1_ALPHA: ClassVar[Style]
         """Debug color scheme with alpha channel."""
 
+        BLACK_WHITE: ClassVar[Style]
+        """Black and white color scheme."""
+
 
 Style.presets.SILK = Style(
     background=Color.from_hex("#000000"),
@@ -130,4 +133,9 @@ Style.presets.DEBUG_1 = Style(
 Style.presets.DEBUG_1_ALPHA = Style(
     background=Color.from_rgba(0, 0, 0, 0),
     foreground=Color.from_rgba(19, 61, 145, 255),
+)
+
+Style.presets.BLACK_WHITE = Style(
+    background=Color.from_rgba(0, 0, 0, 0),
+    foreground=Color.from_rgba(255, 255, 255, 255),
 )
