@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from pprint import pformat
 
 from mkdocs_macros.plugin import MacrosPlugin
 
@@ -42,3 +43,21 @@ def define_env(env: MacrosPlugin) -> None:
         options_str = " ".join(f'{k}="{v}"' for k, v in options.items())
 
         return f"```{language} {options_str}\n" + "".join(line_range) + "```"
+
+    @env.macro
+    def pformat_variable(module: str, variable: str) -> str:
+        """Pretty format a variable from a module."""
+        module = __import__(module, fromlist=[variable])
+        value = getattr(module, variable)
+        return "```python\n" + variable + " = " + pformat(value) + "\n```"
+
+    @env.macro
+    def include_definition(symbol: str, **options: str) -> str:
+        """Include the signature of a class without the docstring."""
+        options_string = "        ".join(f"{k}: {v}\n" for k, v in options.items())
+        return f"""
+::: {symbol}
+    options:
+        {options_string}
+
+"""

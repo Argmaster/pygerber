@@ -209,7 +209,16 @@ class GerberFile:
         file_path: str | Path,
         file_type: FileTypeEnum = FileTypeEnum.INFER,
     ) -> Self:
-        """Initialize object with Gerber source code loaded from file on disk."""
+        """Initialize object with Gerber source code loaded from file on disk.
+
+        Parameters
+        ----------
+        file_path : str | Path
+            Path to Gerber file on disk.
+        file_type : FileTypeEnum, optional
+            File type classification, by default FileTypeEnum.INFER
+
+        """
         file_path = Path(file_path)
         if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
             file_type = FileTypeEnum.infer_from_extension(file_path.suffix)
@@ -239,7 +248,7 @@ class GerberFile:
         Returns
         -------
         Self
-            _description_
+            New instance of GerberFile object.
 
         """
         if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
@@ -252,25 +261,86 @@ class GerberFile:
         buffer: TextIO,
         file_type: FileTypeEnum = FileTypeEnum.INFER,
     ) -> Self:
-        """Initialize object with Gerber source code from readable buffer."""
+        """Initialize object with Gerber source code from readable buffer.
+
+        Parameters
+        ----------
+        buffer : TextIO
+            Readable buffer with Gerber source code.
+        file_type : FileTypeEnum, optional
+            File type classification, by default FileTypeEnum.INFER
+
+        """
         if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
             file_type = FileTypeEnum.UNDEFINED
         return cls(buffer.read(), file_type)
 
     def set_parser_options(self, **options: Any) -> Self:
-        """Set parser options for this Gerber file."""
+        """Set parser options for this Gerber file.
+
+        This is a window into advanced parser settings, only reason to use this method
+        should be for advanced user to tweak parser behavior without binging more
+        advanced PyGerber APIs into consideration.
+
+        Parameters
+        ----------
+        **options : Any
+            Parser options.
+
+        Returns
+        -------
+        Self
+            Returns self for method chaining.
+
+        """
         self._flush_cached()
         self._parser_options = options
         return self
 
     def set_compiler_options(self, **options: Any) -> Self:
-        """Set compiler options for this Gerber file."""
+        """Set compiler options for this Gerber file.
+
+        This is a window into advanced compiler settings, only
+        reason to use this method should be for advanced user to tweak compiler
+        behavior without binging more advanced PyGerber APIs into consideration.
+
+        Parameters
+        ----------
+        **options : Any
+            Compiler options.
+
+        Returns
+        -------
+        Self
+            Returns self for method chaining
+
+        """
         self._flush_cached()
         self._compiler_options = options
         return self
 
     def set_color_map(self, color_map: COLOR_MAP_T) -> Self:
-        """Set color map for this Gerber file."""
+        """Set color map for rendering of this Gerber file.
+
+        Gerber files themselves do not contain color data. Therefore only way to get
+        colorful image is to explicitly ask rendering backend to apply particular color
+        to image.
+
+        Parameters
+        ----------
+        color_map : COLOR_MAP_T
+            Color map to be used for rendering Gerber file. You can use one of two
+            predefined color maps: `DEFAULT_COLOR_MAP` or `DEFAULT_ALPHA_COLOR_MAP` or
+            your own. They are both available in `pygerber.gerber.api` module.
+            In most basic cases there is no need to alter default color map, as it
+            already includes alpha channel thus allows for image stacking.
+
+        Returns
+        -------
+        Self
+            Returns self for method chaining.
+
+        """
         self._color_map = color_map
         return self
 
@@ -301,7 +371,8 @@ class GerberFile:
         style: Optional[Style] = None,
         dpmm: int = 20,
     ) -> PillowImage:
-        """Render Gerber file to raster image.
+        """Render Gerber file to raster image using rendering backend based on Pillow
+        library.
 
         Parameters
         ----------
@@ -352,9 +423,9 @@ class GerberFile:
         return self._color_map[self.file_type]
 
     def format(self, output: TextIO, options: Optional[formatter.Options]) -> None:
-        """Format Gerber file to string."""
+        """Format Gerber code and write it to `output` stream."""
         return formatter.format(self._get_ast(), output, options)
 
     def formats(self, options: Optional[formatter.Options]) -> str:
-        """Format Gerber file to string."""
+        """Format Gerber code and return it as `str` object."""
         return formatter.formats(self._get_ast(), options)
