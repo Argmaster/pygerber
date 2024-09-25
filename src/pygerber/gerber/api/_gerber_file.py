@@ -226,7 +226,21 @@ class GerberFile:
         source_code: str,
         file_type: FileTypeEnum = FileTypeEnum.INFER,
     ) -> Self:
-        """Initialize object with Gerber source code from string."""
+        """Initialize GerberFile object with Gerber source code from string.
+
+        Parameters
+        ----------
+        source_code : str
+            Gerber source code as `str`object.
+        file_type : FileTypeEnum, optional
+            File type classification, by default FileTypeEnum.INFER
+
+        Returns
+        -------
+        Self
+            _description_
+
+        """
         if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
             file_type = FileTypeEnum.UNDEFINED
         return cls(source_code, file_type)
