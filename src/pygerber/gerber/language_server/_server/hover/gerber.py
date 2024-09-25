@@ -6,6 +6,7 @@ from contextlib import contextmanager, suppress
 from io import StringIO
 from typing import TYPE_CHECKING, Generator, Optional, cast
 
+from pygerber.gerber import formatter
 from pygerber.gerber.ast.ast_visitor import AstVisitor
 from pygerber.gerber.ast.nodes import (
     AD,
@@ -69,7 +70,6 @@ from pygerber.gerber.ast.state_tracking_visitor import (
     StateTrackingVisitor,
 )
 from pygerber.gerber.compiler import compile
-from pygerber.gerber.formatter import Formatter
 from pygerber.gerber.spec import rev_2024_05 as spec
 from pygerber.vm import render
 from pygerber.vm.pillow import PillowResult
@@ -483,7 +483,7 @@ class GerberHoverCreator(AstVisitor):
 
     def on_d01(self, node: D01) -> D01:
         with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
+            formatter.Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._append_current_xy()
         self._append_xy(
@@ -517,7 +517,7 @@ class GerberHoverCreator(AstVisitor):
 
     def on_d02(self, node: D02) -> D02:
         with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
+            formatter.Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._append_xy(
             "Relocate to:", node.x, node.y, self.state.current_x, self.state.current_y
@@ -529,7 +529,7 @@ class GerberHoverCreator(AstVisitor):
 
     def on_d03(self, node: D03) -> D03:
         with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
+            formatter.Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._append_xy(
             "Flash at:", node.x, node.y, self.state.current_x, self.state.current_y
@@ -559,25 +559,25 @@ class GerberHoverCreator(AstVisitor):
 
     def on_to(self, node: TO) -> None:
         with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
+            formatter.Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._spec_ref(spec.to())
 
     def on_ta(self, node: TA) -> None:
         with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
+            formatter.Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._spec_ref(spec.ta())
 
     def on_tf(self, node: TF) -> None:
         with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
+            formatter.Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._spec_ref(spec.tf())
 
     def on_td(self, node: TD) -> TD:
         with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
+            formatter.Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._spec_ref(spec.td())
 
@@ -585,7 +585,7 @@ class GerberHoverCreator(AstVisitor):
 
     def on_dnn(self, node: Dnn) -> Dnn:
         with self._code_block("gerber"):
-            Formatter().format(File(nodes=[node]), self.hover_markdown)
+            formatter.Formatter().format(File(nodes=[node]), self.hover_markdown)
 
         self._aperture_attributes(node.aperture_id)
 
@@ -623,7 +623,7 @@ class GerberHoverCreator(AstVisitor):
 
     def _add_code_block_format_node(self, node: Node) -> None:
         with self._code_block("gerber"):
-            Formatter().format_node(node, self.hover_markdown)
+            formatter.Formatter().format_node(node, self.hover_markdown)
 
     def _visualize_aperture_definition(self, node: AD) -> None:
         if self.state.coordinate_format is not None:
@@ -725,27 +725,29 @@ class GerberHoverCreator(AstVisitor):
         return node
 
     def on_code_1(self, node: Code1) -> Code1:
-        formatter = Formatter(macro_split_mode=Formatter.MacroSplitMode.NONE)
+        fmt = formatter.Formatter(
+            formatter.Options(macro_split_mode=formatter.MacroSplitMode.NoSplit)
+        )
 
         with self._code_block("gerber"):
-            formatter.format_node(node, self.hover_markdown)
+            fmt.format_node(node, self.hover_markdown)
             self._print_line()
 
         self._print("\n - exposure: `")
-        formatter.format_node(node.exposure, self.hover_markdown)
+        fmt.format_node(node.exposure, self.hover_markdown)
 
         self._print("`\n - diameter: `")
-        formatter.format_node(node.diameter, self.hover_markdown)
+        fmt.format_node(node.diameter, self.hover_markdown)
 
         self._print("`\n - center_x: `")
-        formatter.format_node(node.center_x, self.hover_markdown)
+        fmt.format_node(node.center_x, self.hover_markdown)
 
         self._print("`\n - center_y: `")
-        formatter.format_node(node.center_y, self.hover_markdown)
+        fmt.format_node(node.center_y, self.hover_markdown)
 
         self._print("`\n - rotation: `")
         if node.rotation is not None:
-            formatter.format_node(node.rotation, self.hover_markdown)
+            fmt.format_node(node.rotation, self.hover_markdown)
             self._print("°`\n")
         else:
             self._print_line("None`")
@@ -755,32 +757,34 @@ class GerberHoverCreator(AstVisitor):
         return node
 
     def on_code_2(self, node: Code2) -> Code2:
-        formatter = Formatter(macro_split_mode=Formatter.MacroSplitMode.NONE)
+        fmt = formatter.Formatter(
+            formatter.Options(macro_split_mode=formatter.MacroSplitMode.NoSplit)
+        )
 
         with self._code_block("gerber"):
-            formatter.format_node(node, self.hover_markdown)
+            fmt.format_node(node, self.hover_markdown)
             self._print_line()
 
         self._print("\n - exposure: `")
-        formatter.format_node(node.exposure, self.hover_markdown)
+        fmt.format_node(node.exposure, self.hover_markdown)
 
         self._print("`\n - width: `")
-        formatter.format_node(node.width, self.hover_markdown)
+        fmt.format_node(node.width, self.hover_markdown)
 
         self._print("`\n - start_x: `")
-        formatter.format_node(node.start_x, self.hover_markdown)
+        fmt.format_node(node.start_x, self.hover_markdown)
 
         self._print("`\n - start_y: `")
-        formatter.format_node(node.start_y, self.hover_markdown)
+        fmt.format_node(node.start_y, self.hover_markdown)
 
         self._print("`\n - end_x: `")
-        formatter.format_node(node.end_x, self.hover_markdown)
+        fmt.format_node(node.end_x, self.hover_markdown)
 
         self._print("`\n - end_y: `")
-        formatter.format_node(node.end_y, self.hover_markdown)
+        fmt.format_node(node.end_y, self.hover_markdown)
 
         self._print("`\n - rotation: `")
-        formatter.format_node(node.rotation, self.hover_markdown)
+        fmt.format_node(node.rotation, self.hover_markdown)
         self._print("°`\n")
 
         self._spec_ref(spec.code_1())

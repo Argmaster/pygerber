@@ -5,14 +5,13 @@ configurable Gerber code formatting.
 from __future__ import annotations
 
 from contextlib import contextmanager
-from enum import Enum
 from functools import wraps
 from io import StringIO
 from typing import (
     Callable,
     Generator,
-    Literal,
     Optional,
+    TextIO,
     Type,
     TypeVar,
 )
@@ -128,6 +127,17 @@ from pygerber.gerber.ast.nodes import (
     TO_UserName,
     Variable,
 )
+from pygerber.gerber.formatter.enums import (
+    EmptyLineBeforePolaritySwitch,
+    ExplicitParenthesis,
+    KeepNonStandaloneCodes,
+    MacroEndInNewLine,
+    MacroSplitMode,
+    RemoveG54,
+    RemoveG55,
+    StripWhitespace,
+)
+from pygerber.gerber.formatter.options import Options
 
 
 class FormatterError(Exception):
@@ -218,176 +228,94 @@ def _insert_var(
 class Formatter(AstVisitor):
     """Gerber X3 compatible formatter."""
 
-    class MacroSplitMode(Enum):
-        """Macro split mode."""
-
-        NONE = "none"
-        PRIMITIVES = "primitives"
-        PARAMETERS = "parameters"
-
-    def __init__(  # noqa: PLR0913
-        self,
-        *,
-        indent_character: Literal[" ", "\t"] = " ",
-        macro_body_indent: str | int = 0,
-        macro_param_indent: str | int = 0,
-        macro_split_mode: MacroSplitMode = MacroSplitMode.PRIMITIVES,
-        macro_end_in_new_line: bool = False,
-        block_aperture_body_indent: str | int = 0,
-        step_and_repeat_body_indent: str | int = 0,
-        float_decimal_places: int = -1,
-        float_trim_trailing_zeros: bool = True,
-        d01_indent: int | str = 0,
-        d02_indent: int | str = 0,
-        d03_indent: int | str = 0,
-        line_end: Literal["\n", "\r\n"] = "\n",
-        empty_line_before_polarity_switch: bool = False,
-        keep_non_standalone_codes: bool = True,
-        remove_g54: bool = False,
-        remove_g55: bool = False,
-        explicit_parenthesis: bool = False,
-        strip_whitespace: bool = False,
+    def __init__(  # noqa: PLR0912, PLR0915
+        self, options: Optional[Options] = None
     ) -> None:
         r"""Initialize Formatter instance.
 
         Parameters
         ----------
-        indent_character: Literal[" ", "\t"], optional
-            Character used for indentation, by default " "
-        macro_body_indent : str | int, optional
-            Indentation of macro body, by default 0
-        macro_param_indent: str | int, optional
-            Indentation of macro parameters, by default 0
-            This indentation is added on top of macro body indentation.
-            This has effect only when `macro_split_mode` is `PARAMETERS`.
-        macro_split_mode : `Formatter.MacroSplitMode`, optional
-            Changes how macro definitions are formatted, by default `NONE`
-            When `NONE` is selected, macro will be formatted as a single line.
-            ```gerber
-            %AMDonut*1,1,$1,$2,$3*$4=$1x0.75*1,0,$4,$2,$3*%
-            ```
-            When `PRIMITIVES` is selected, macro will be formatted with each primitive
-            on a new line.
-            ```gerber
-            %AMDonut*
-            1,1,$1,$2,$3*
-            $4=$1x0.75*
-            1,0,$4,$2,$3*%
-            ```
-            When `PARAMETERS` is selected, macro will be formatted with each primitive
-            on a new line and each parameter of a primitive on a new line.
-            ```gerber
-            %AMDonut*
-            1,
-            1,
-            $1,
-            $2,
-            $3*
-            $4=$1x0.75*
-            1,
-            0,
-            $4,
-            $2,
-            $3*%
-            ```
-            Use `macro_body_indent` and `macro_param_indent` to control indentation.
-        macro_end_in_new_line: bool, optional
-            Place % sign which marks the end of macro in new line, by default False
-        block_aperture_body_indent : str | int, optional
-            Indentation of block aperture definition body, by default 0
-            This indentations stacks for nested block apertures.
-        step_and_repeat_body_indent : str | int, optional
-            Indentation of step and repeat definition body, by default 0
-            This indentations stacks for nested step and repeat blocks.
-        float_decimal_places : int, optional
-            Limit number of decimal places shown for float values, by default -1
-            Negative values are interpreted as no limit.
-        float_trim_trailing_zeros : bool, optional
-            Remove trailing zeros from floats, by default True
-            When this is enabled, after floating point number is formatted with respect
-            to `float_decimal_places`, trailing zeros are removed. If all zeros after
-            decimal point are removed, decimal point is also removed.
-        d01_indent : str | int, optional
-            Custom indentation of D01 command, by default 0
-        d02_indent : str | int, optional
-            Custom indentation of D02 command, by default 0
-        d03_indent : str | int, optional
-            Custom indentation of D03 command, by default 0
-        line_end : Literal["\n", "\r\n"], optional
-            Line ending character, Unix or Windows style, by default "\n" (Unix style)
-            If `strip_whitespace` is enabled, no line end will be used.
-        empty_line_before_polarity_switch : bool, optional
-            Add empty line before polarity switch, by default False
-            This enhances visibility of sequences of commands with different
-            polarities.
-        keep_non_standalone_codes: bool, optional
-            Keep non-standalone codes in the output, by default True
-            If this option is disabled, codes that are not standalone, ie. `G70D02*`
-            will be divided into two separate commands, `G70*` and `D02*`, otherwise
-            they will be kept as is.
-        remove_g54: bool, optional
-            Remove G54 code from output, by default False
-            G54 code has no effect on the output, it was used in legacy files to
-            prefix select aperture command.
-        remove_g55: bool, optional
-            Remove G55 code from output, by default False
-            G55 code has no effect on the output, it was used in legacy files to
-            prefix flash command.
-        explicit_parenthesis: bool, optional
-            Add explicit parenthesis around all mathematical
-            expressions within macro, by default False
-            When false, original parenthesis are kept.
-        strip_whitespace : bool, optional
-            Remove all semantically insignificant whitespace, by default False
+        options : Options
+            Formatter options container.
 
         """
         super().__init__()
-        self.indent_character = indent_character
+        self.options = options or Options()
 
-        if isinstance(macro_body_indent, int):
-            macro_body_indent = indent_character * macro_body_indent
-        self.macro_body_indent = macro_body_indent
+        self.indent_character = self.options.indent_character
 
-        if isinstance(macro_param_indent, int):
-            macro_param_indent = indent_character * macro_param_indent
-        self.macro_param_indent = macro_param_indent
+        if isinstance(self.options.macro_body_indent, int):
+            self.macro_body_indent = (
+                self.options.indent_character * self.options.macro_body_indent
+            )
+        else:
+            self.macro_body_indent = self.options.macro_body_indent
 
-        self.macro_split_mode = macro_split_mode
-        self.macro_end_in_new_line = macro_end_in_new_line
+        if isinstance(self.options.macro_param_indent, int):
+            self.macro_param_indent = (
+                self.options.indent_character * self.options.macro_param_indent
+            )
+        else:
+            self.macro_param_indent = self.options.macro_param_indent
 
-        if isinstance(block_aperture_body_indent, int):
-            block_aperture_body_indent = indent_character * block_aperture_body_indent
-        self.block_aperture_body_indent = block_aperture_body_indent
-
-        if isinstance(step_and_repeat_body_indent, int):
-            step_and_repeat_body_indent = indent_character * step_and_repeat_body_indent
-        self.step_and_repeat_body_indent = step_and_repeat_body_indent
-
-        self.float_decimal_places = float_decimal_places
-
-        self.float_trim_trailing_zeros = float_trim_trailing_zeros
-
-        if isinstance(d01_indent, int):
-            d01_indent = indent_character * d01_indent
-        self.d01_indent = d01_indent
-
-        if isinstance(d02_indent, int):
-            d02_indent = indent_character * d02_indent
-        self.d02_indent = d02_indent
-
-        if isinstance(d03_indent, int):
-            d03_indent = indent_character * d03_indent
-        self.d03_indent = d03_indent
-
-        self.lf = line_end
-        self.empty_line_before_polarity_switch = (
-            self.lf if empty_line_before_polarity_switch else ""
+        self.macro_split_mode = self.options.macro_split_mode
+        self.macro_end_in_new_line = (
+            self.options.macro_end_in_new_line == MacroEndInNewLine.Yes
         )
-        self.keep_non_standalone_codes = keep_non_standalone_codes
-        self.remove_g54 = remove_g54
-        self.remove_g55 = remove_g55
-        self.explicit_parenthesis = explicit_parenthesis
-        self.strip_whitespace = strip_whitespace
+
+        if isinstance(self.options.block_aperture_body_indent, int):
+            self.block_aperture_body_indent = (
+                self.options.indent_character * self.options.block_aperture_body_indent
+            )
+        else:
+            self.block_aperture_body_indent = self.options.block_aperture_body_indent
+
+        if isinstance(self.options.step_and_repeat_body_indent, int):
+            self.step_and_repeat_body_indent = (
+                self.options.indent_character * self.options.step_and_repeat_body_indent
+            )
+        else:
+            self.step_and_repeat_body_indent = self.options.step_and_repeat_body_indent
+
+        self.float_decimal_places = self.options.float_decimal_places
+
+        self.float_trim_trailing_zeros = self.options.float_trim_trailing_zeros
+
+        if isinstance(self.options.d01_indent, int):
+            self.d01_indent = self.options.indent_character * self.options.d01_indent
+        else:
+            self.d01_indent = self.options.d01_indent
+
+        if isinstance(self.options.d02_indent, int):
+            self.d02_indent = self.options.indent_character * self.options.d02_indent
+        else:
+            self.d02_indent = self.options.d02_indent
+
+        if isinstance(self.options.d03_indent, int):
+            self.d03_indent = self.options.indent_character * self.options.d03_indent
+        else:
+            self.d03_indent = self.options.d03_indent
+
+        self.lf = self.options.line_end
+        self.empty_line_before_polarity_switch = (
+            self.lf
+            if (
+                self.options.empty_line_before_polarity_switch
+                == EmptyLineBeforePolaritySwitch.Yes
+            )
+            else ""
+        )
+        self.keep_non_standalone_codes = (
+            self.options.keep_non_standalone_codes == KeepNonStandaloneCodes.Keep
+        )
+        self.remove_g54 = self.options.remove_g54 == RemoveG54.Remove
+        self.remove_g55 = self.options.remove_g55 == RemoveG55.Remove
+        self.explicit_parenthesis = (
+            self.options.explicit_parenthesis == ExplicitParenthesis.AddExplicit
+        )
+        self.strip_whitespace = (
+            self.options.strip_whitespace == StripWhitespace.StripAll
+        )
 
         if self.strip_whitespace:
             self.lf = ""  # type: ignore[assignment]
@@ -401,10 +329,10 @@ class Formatter(AstVisitor):
             self.d03_indent = ""
             self.empty_line_before_polarity_switch = ""
 
-        self._output: Optional[StringIO] = None
+        self._output: Optional[TextIO] = None
         self._base_indent: str = ""
 
-    def format(self, source: File, output: StringIO) -> None:
+    def format(self, source: File, output: TextIO) -> None:
         """Format Gerber AST according to rules specified in Formatter constructor."""
         self._output = output
         try:
@@ -435,7 +363,7 @@ class Formatter(AstVisitor):
         return out.getvalue()
 
     @property
-    def output(self) -> StringIO:
+    def output(self) -> TextIO:
         """Get output buffer."""
         if self._output is None:
             msg = "Output buffer is not set."
@@ -1327,12 +1255,12 @@ class Formatter(AstVisitor):
 
     @cached_property
     def _macro_primitive_lf(self) -> str:
-        if self.macro_split_mode == self.MacroSplitMode.NONE:
+        if self.macro_split_mode == MacroSplitMode.NoSplit:
             return ""
 
         if self.macro_split_mode in (
-            self.MacroSplitMode.PRIMITIVES,
-            self.MacroSplitMode.PARAMETERS,
+            MacroSplitMode.SplitOnPrimitives,
+            MacroSplitMode.SplitOnParameters,
         ):
             return self.lf + self.macro_body_indent
 
@@ -1342,12 +1270,12 @@ class Formatter(AstVisitor):
     @cached_property
     def _macro_param_lf(self) -> str:
         if self.macro_split_mode in (
-            self.MacroSplitMode.NONE,
-            self.MacroSplitMode.PRIMITIVES,
+            MacroSplitMode.NoSplit,
+            MacroSplitMode.SplitOnPrimitives,
         ):
             return ""
 
-        if self.macro_split_mode == self.MacroSplitMode.PARAMETERS:
+        if self.macro_split_mode == MacroSplitMode.SplitOnParameters:
             return self.lf + self.macro_param_indent + self.macro_body_indent
 
         msg = f"Unsupported macro split mode: {self.macro_split_mode}"

@@ -54,7 +54,6 @@ from pygerber.gerber.ast.nodes.enums import (
 )
 from pygerber.gerber.ast.nodes.types import ApertureIdStr
 from pygerber.gerber.ast.state_tracking_visitor import CoordinateFormat
-from pygerber.gerber.formatter import Formatter
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -750,6 +749,8 @@ class GerberX3Code:
 
     def dump(self, dst: StringIO) -> None:
         """Dump the Gerber code to file or other buffer."""
+        from pygerber.gerber.formatter import Formatter
+
         Formatter().format(self._ast, dst)
 
     def dumps(self) -> str:

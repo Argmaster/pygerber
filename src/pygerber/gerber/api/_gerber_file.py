@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Optional, TextIO
 
 import pyparsing as pp
 
+from pygerber.gerber import formatter
 from pygerber.gerber.api._enums import (
     COLOR_MAP_T,
     DEFAULT_ALPHA_COLOR_MAP,
@@ -349,3 +350,11 @@ class GerberFile:
             )
 
         return self._color_map[self.file_type]
+
+    def format(self, output: TextIO, options: Optional[formatter.Options]) -> None:
+        """Format Gerber file to string."""
+        return formatter.format(self._get_ast(), output, options)
+
+    def formats(self, options: Optional[formatter.Options]) -> str:
+        """Format Gerber file to string."""
+        return formatter.formats(self._get_ast(), options)

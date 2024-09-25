@@ -7,6 +7,18 @@ from typing import Any
 import pytest
 
 from pygerber.gerber.formatter import Formatter
+from pygerber.gerber.formatter.enums import (
+    EmptyLineBeforePolaritySwitch,
+    ExplicitParenthesis,
+    FloatTrimTrailingZeros,
+    KeepNonStandaloneCodes,
+    MacroEndInNewLine,
+    MacroSplitMode,
+    RemoveG54,
+    RemoveG55,
+    StripWhitespace,
+)
+from pygerber.gerber.formatter.options import Options
 from pygerber.gerber.parser.pyparsing.parser import Parser
 from test.gerberx3.common import (
     GERBER_ASSETS_INDEX,
@@ -105,7 +117,7 @@ def test_indent_character_space() -> None:
         DONUT_MACRO_SOURCE,
         indent_character=" ",
         macro_body_indent=4,
-        macro_split_mode=Formatter.MacroSplitMode.PRIMITIVES,
+        macro_split_mode=MacroSplitMode.SplitOnPrimitives,
         macro_end_in_new_line=False,
     )
     assert (
@@ -121,29 +133,30 @@ def test_indent_character_space() -> None:
 def _format(source: str, **kwargs: Any) -> str:
     ast = Parser().parse(source)
     output_buffer = StringIO()
-    formatter_params = {
-        "indent_character": " ",
-        "macro_body_indent": 0,
-        "macro_param_indent": 0,
-        "macro_split_mode": Formatter.MacroSplitMode.PRIMITIVES,
-        "macro_end_in_new_line": False,
-        "block_aperture_body_indent": 0,
-        "step_and_repeat_body_indent": 0,
-        "float_decimal_places": 6,
-        "float_trim_trailing_zeros": True,
-        "d01_indent": 0,
-        "d02_indent": 0,
-        "d03_indent": 0,
-        "line_end": "\n",
-        "empty_line_before_polarity_switch": False,
-        "keep_non_standalone_codes": True,
-        "remove_g54": False,
-        "remove_g55": False,
-        "explicit_parenthesis": False,
-        "strip_whitespace": False,
-    }
-    formatter_params.update(kwargs)
-    Formatter(**formatter_params).format(ast, output_buffer)  # type: ignore[arg-type]
+
+    formatter_options = Options(
+        indent_character=" ",
+        macro_body_indent=0,
+        macro_param_indent=0,
+        macro_split_mode=MacroSplitMode.SplitOnPrimitives,
+        macro_end_in_new_line=MacroEndInNewLine.No,
+        block_aperture_body_indent=0,
+        step_and_repeat_body_indent=0,
+        float_decimal_places=6,
+        float_trim_trailing_zeros=FloatTrimTrailingZeros.Yes,
+        d01_indent=0,
+        d02_indent=0,
+        d03_indent=0,
+        line_end="\n",
+        empty_line_before_polarity_switch=EmptyLineBeforePolaritySwitch.No,
+        keep_non_standalone_codes=KeepNonStandaloneCodes.Keep,
+        remove_g54=RemoveG54.Keep,
+        remove_g55=RemoveG55.Keep,
+        explicit_parenthesis=ExplicitParenthesis.KeepOriginal,
+        strip_whitespace=StripWhitespace.Default,
+    )
+    formatter_options = formatter_options.model_copy(update=kwargs)
+    Formatter(options=formatter_options).format(ast, output_buffer)  # type: ignore[arg-type]
 
     output_buffer.seek(0)
     return output_buffer.read()
@@ -154,7 +167,7 @@ def test_indent_character_tab() -> None:
         DONUT_MACRO_SOURCE,
         indent_character="\t",
         macro_body_indent=1,
-        macro_split_mode=Formatter.MacroSplitMode.PRIMITIVES,
+        macro_split_mode=MacroSplitMode.SplitOnPrimitives,
         macro_end_in_new_line=False,
     )
     assert (
@@ -173,8 +186,8 @@ class TestMacroSplitMode:
             DONUT_MACRO_SOURCE,
             indent_character=" ",
             macro_body_indent=4,
-            macro_split_mode=Formatter.MacroSplitMode.NONE,
-            macro_end_in_new_line=False,
+            macro_split_mode=MacroSplitMode.NoSplit,
+            macro_end_in_new_line=MacroEndInNewLine.No,
         )
         assert (
             formatted_source
@@ -187,8 +200,8 @@ class TestMacroSplitMode:
             DONUT_MACRO_SOURCE,
             indent_character=" ",
             macro_body_indent=4,
-            macro_split_mode=Formatter.MacroSplitMode.PRIMITIVES,
-            macro_end_in_new_line=False,
+            macro_split_mode=MacroSplitMode.SplitOnPrimitives,
+            macro_end_in_new_line=MacroEndInNewLine.No,
         )
         assert (
             formatted_source
@@ -205,8 +218,8 @@ class TestMacroSplitMode:
             indent_character=" ",
             macro_body_indent=4,
             macro_param_indent=4,
-            macro_split_mode=Formatter.MacroSplitMode.PARAMETERS,
-            macro_end_in_new_line=False,
+            macro_split_mode=MacroSplitMode.SplitOnParameters,
+            macro_end_in_new_line=MacroEndInNewLine.No,
         )
         assert (
             formatted_source
@@ -231,8 +244,8 @@ class TestMacroSplitMode:
             indent_character=" ",
             macro_body_indent=4,
             macro_param_indent=4,
-            macro_split_mode=Formatter.MacroSplitMode.NONE,
-            macro_end_in_new_line=True,
+            macro_split_mode=MacroSplitMode.NoSplit,
+            macro_end_in_new_line=MacroEndInNewLine.Yes,
         )
         assert (
             formatted_source
@@ -247,8 +260,8 @@ class TestMacroSplitMode:
             indent_character=" ",
             macro_body_indent=4,
             macro_param_indent=4,
-            macro_split_mode=Formatter.MacroSplitMode.PRIMITIVES,
-            macro_end_in_new_line=True,
+            macro_split_mode=MacroSplitMode.SplitOnPrimitives,
+            macro_end_in_new_line=MacroEndInNewLine.Yes,
         )
         assert (
             formatted_source
@@ -266,8 +279,8 @@ class TestMacroSplitMode:
             indent_character=" ",
             macro_body_indent=4,
             macro_param_indent=4,
-            macro_split_mode=Formatter.MacroSplitMode.PARAMETERS,
-            macro_end_in_new_line=True,
+            macro_split_mode=MacroSplitMode.SplitOnParameters,
+            macro_end_in_new_line=MacroEndInNewLine.Yes,
         )
         assert (
             formatted_source
@@ -424,7 +437,7 @@ $2=100-$1/1.75+$2*
 def test_explicit_parenthesis() -> None:
     formatted_source = _format(
         AM_TEST1,
-        explicit_parenthesis=True,
+        explicit_parenthesis=ExplicitParenthesis.AddExplicit,
     )
     assert (
         formatted_source
@@ -437,7 +450,7 @@ $2=((100-($1/1.75))+$2)*%
 def test_no_explicit_parenthesis() -> None:
     formatted_source = _format(
         AM_TEST1,
-        explicit_parenthesis=False,
+        explicit_parenthesis=ExplicitParenthesis.KeepOriginal,
     )
     assert (
         formatted_source
@@ -456,7 +469,7 @@ def test_no_explicit_parenthesis_keep_original_same_order() -> None:
         """%AMTEST1*
 $2=100-($1/1.75)+$2*%
 """,
-        explicit_parenthesis=False,
+        explicit_parenthesis=ExplicitParenthesis.KeepOriginal,
     )
     assert (
         formatted_source
@@ -475,7 +488,7 @@ def test_no_explicit_parenthesis_keep_original_different_order() -> None:
         """%AMTEST1*
 $2=(100-$1)/1.75+$2*%
 """,
-        explicit_parenthesis=False,
+        explicit_parenthesis=ExplicitParenthesis.KeepOriginal,
     )
     assert (
         formatted_source
