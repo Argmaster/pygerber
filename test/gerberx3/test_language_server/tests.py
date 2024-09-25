@@ -30,7 +30,7 @@ from test.gerberx3.common import GERBER_ASSETS_DIRECTORY
         server_command=[
             sys.executable,
             "-m",
-            "pygerber.gerberx3.language_server",
+            "pygerber.gerber.language_server",
             "--quiet",
         ],
     ),

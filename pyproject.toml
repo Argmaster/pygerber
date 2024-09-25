@@ -108,7 +108,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 pygerber = "pygerber.__main__:main"
-pygerber_language_server = "pygerber.gerberx3.language_server.__main__:main"
+pygerber_language_server = "pygerber.gerber.language_server.__main__:main"
 
 [tool.poe.tasks]
 # -------------------------------------------------------------------------------------

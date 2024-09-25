@@ -4,4 +4,4 @@ exclude_lines =
     if TYPE_CHECKING:
 
 omit =
-    src/pygerber/gerberx3/language_server/*
+    src/pygerber/gerber/language_server/*

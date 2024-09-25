@@ -6,7 +6,6 @@ import fnmatch
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Generator,
@@ -25,13 +24,7 @@ from dulwich.repo import Repo
 from filelock import FileLock
 from PIL import Image, ImageDraw
 
-from pygerber.gerberx3.api._enums import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
-from pygerber.gerberx3.tokenizer.tokenizer import Tokenizer
-from pygerber.gerberx3.tokenizer.tokens.groups.ast import AST
-
-if TYPE_CHECKING:
-    from test.conftest import AssetLoader
-
+from pygerber.gerber.api._enums import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
 
 ASSET_PATH_BASE = "test/assets/gerberx3"
 
@@ -43,36 +36,6 @@ def find_gerberx3_asset_files(directory: str | Path) -> Iterable[tuple[str, str]
     for path in sorted(directory_to_inspect.resolve().rglob("*.g??")):
         relative_path = path.relative_to(asset_path_base)
         yield relative_path.parent.as_posix(), relative_path.name
-
-
-def tokenize_gerberx3(
-    asset_loader: AssetLoader,
-    directory: Path,
-    file_name: str,
-    *,
-    only_expressions: bool = False,
-) -> AST:
-    string = asset_loader.load_asset(f"gerberx3/{directory}/{file_name}").decode(
-        "utf-8",
-    )
-    if only_expressions:
-        return Tokenizer().tokenize_expressions(string)
-
-    return Tokenizer().tokenize(string)
-
-
-def save_token_stack(
-    stack: AST,
-    test_file_path: str,
-    directory: Path,
-    file_name: str,
-) -> None:
-    output_directory = Path(test_file_path).parent / ".output" / directory
-    output_directory.mkdir(0o777, parents=True, exist_ok=True)
-    token_file_path = (output_directory / file_name).with_suffix(".txt")
-    content = stack.get_gerber_code()
-    token_file_path.touch(0o777, exist_ok=True)
-    token_file_path.write_text(content)
 
 
 ASSETS_DIRECTORY = Path(__file__).parent.parent / "assets"

@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 
 import pygerber
-from pygerber.gerberx3.api import FileTypeEnum
+from pygerber.gerber.api import FileTypeEnum
 
 
 @click.group("pygerber")
@@ -18,7 +18,7 @@ def main() -> None:
 
 @main.command("is-language-server-available")
 def _is_language_server_available() -> None:
-    from pygerber.gerberx3.language_server.status import is_language_server_available
+    from pygerber.gerber.language_server.status import is_language_server_available
 
     if is_language_server_available():
         click.echo("Language server is available.")

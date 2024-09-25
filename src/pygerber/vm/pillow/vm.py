@@ -60,6 +60,14 @@ class PillowResult(Result):
             image, (0, 0, 0, 255), style.background.as_rgba_int()
         )
 
+    def get_image_no_style(self) -> Image.Image:
+        """Get image without any color scheme."""
+        if self.image is None:
+            msg = "Image is not available."
+            raise ValueError(msg)
+
+        return self.image
+
 
 def replace_color(
     input_image: Image.Image,

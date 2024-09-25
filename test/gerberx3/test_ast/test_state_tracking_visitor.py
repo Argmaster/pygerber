@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, ClassVar, List
 
 import pytest
 
-from pygerber.gerberx3.ast.errors import (
+from pygerber.gerber.ast.errors import (
     ApertureNotSelectedError,
     PackedCoordinateTooLongError,
     PackedCoordinateTooShortError,
 )
-from pygerber.gerberx3.ast.nodes import (
+from pygerber.gerber.ast.nodes import (
     AB,
     ADC,
     ADO,
@@ -43,14 +43,14 @@ from pygerber.gerberx3.ast.nodes import (
     TA_DrillTolerance,
     TF_FileFunction,
 )
-from pygerber.gerberx3.ast.nodes.enums import (
+from pygerber.gerber.ast.nodes.enums import (
     AperFunction,
     CoordinateNotation,
     FileFunction,
     Zeros,
 )
-from pygerber.gerberx3.ast.nodes.types import ApertureIdStr
-from pygerber.gerberx3.ast.state_tracking_visitor import (
+from pygerber.gerber.ast.nodes.types import ApertureIdStr
+from pygerber.gerber.ast.state_tracking_visitor import (
     CoordinateFormat,
     StateTrackingVisitor,
 )

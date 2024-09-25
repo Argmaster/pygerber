@@ -107,12 +107,12 @@ mentioned in documentation, as this may inflict suffering and damnation upon you
 
 Below you can find list of available APIs:
 
-- `pygerber.gerberx3.api`
-- `pygerber.gerberx3.ast`
-- `pygerber.gerberx3.ast.nodes`
-- `pygerber.gerberx3.compiler`
-- `pygerber.gerberx3.parser`
-- `pygerber.gerberx3.formatter`
+- `pygerber.gerber.api`
+- `pygerber.gerber.ast`
+- `pygerber.gerber.ast.nodes`
+- `pygerber.gerber.compiler`
+- `pygerber.gerber.parser`
+- `pygerber.gerber.formatter`
 - `pygerber.vm`
 - `pygerber.vm.commands`
 - `pygerber.vm.pillow`

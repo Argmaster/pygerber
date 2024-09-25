@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from pygerber.gerberx3.ast.expression_eval_visitor import ExpressionEvalVisitor
-from pygerber.gerberx3.ast.nodes import (
+from pygerber.gerber.ast.expression_eval_visitor import ExpressionEvalVisitor
+from pygerber.gerber.ast.nodes import (
     Add,
     Constant,
     Div,

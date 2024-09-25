@@ -4,8 +4,8 @@ import cProfile
 from pathlib import Path
 from typing import cast
 
-from pygerber.gerberx3.compiler import compile
-from pygerber.gerberx3.parser import parse
+from pygerber.gerber.compiler import compile
+from pygerber.gerber.parser import parse
 from pygerber.vm import render
 from pygerber.vm.pillow.vm import PillowResult
 from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G

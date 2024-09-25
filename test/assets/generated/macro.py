@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from pygerber.gerberx3.ast.builder import GerberX3Builder
-from pygerber.gerberx3.ast.nodes import File
+from pygerber.gerber.ast.builder import GerberX3Builder
+from pygerber.gerber.ast.nodes import File
 
 
 def get_custom_circle_local_2_0() -> File:

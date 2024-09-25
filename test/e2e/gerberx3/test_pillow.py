@@ -4,9 +4,9 @@ import inspect
 from pathlib import Path
 from typing import ClassVar, Type
 
-from pygerber.gerberx3.ast.nodes import File
-from pygerber.gerberx3.compiler import Compiler
-from pygerber.gerberx3.parser.pyparsing.parser import Parser
+from pygerber.gerber.ast.nodes import File
+from pygerber.gerber.compiler import Compiler
+from pygerber.gerber.parser.pyparsing.parser import Parser
 from pygerber.vm.pillow.vm import PillowResult, PillowVirtualMachine
 from test.assets.asset import GerberX3Asset
 from test.assets.generated.macro import (
@@ -54,7 +54,7 @@ class PillowRenderE2E:
         else:
             dump_directory = OUTPUT_DUMP_DIRECTORY
 
-        result.get_image().save(dump_directory / f"{caller_function_name}.png")
+        result.get_image_no_style().save(dump_directory / f"{caller_function_name}.png")
 
 
 class TestOLinuXinoRevG(PillowRenderE2E):

@@ -7,7 +7,7 @@ from __future__ import annotations
 from math import cos, radians, sin
 from typing import TYPE_CHECKING, Tuple, TypeVar
 
-from pygerber.gerberx3.ast.nodes.types import Double
+from pygerber.gerber.ast.nodes.types import Double
 from pygerber.vm.types.vector import Vector
 
 if TYPE_CHECKING:

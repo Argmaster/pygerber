@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import pyparsing as pp
 
-from pygerber.gerberx3.ast.nodes.model import ModelType
+from pygerber.gerber.ast.nodes.model import ModelType
 from pygerber.vm.types import Box, Matrix3x3
 
 if TYPE_CHECKING:

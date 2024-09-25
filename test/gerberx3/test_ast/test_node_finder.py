@@ -4,8 +4,8 @@ from typing import Any, Optional
 
 import pytest
 
-from pygerber.gerberx3.ast.node_finder import NodeFinder, OneBasedPosition
-from pygerber.gerberx3.ast.nodes import (
+from pygerber.gerber.ast.node_finder import NodeFinder, OneBasedPosition
+from pygerber.gerber.ast.nodes import (
     AD,
     D03,
     FS,
@@ -18,8 +18,8 @@ from pygerber.gerberx3.ast.nodes import (
     SRclose,
     SRopen,
 )
-from pygerber.gerberx3.ast.nodes.math.constant import Constant
-from pygerber.gerberx3.parser import parse
+from pygerber.gerber.ast.nodes.math.constant import Constant
+from pygerber.gerber.parser import parse
 from test.assets.gerberx3.flashes import Flashes
 from test.assets.gerberx3.macro.codes import MacroCodeAssets
 from test.assets.gerberx3.step_and_repeat import StepAndRepeatAssets

@@ -6,8 +6,8 @@ from typing import Any
 
 import pytest
 
-from pygerber.gerberx3.formatter import Formatter
-from pygerber.gerberx3.parser.pyparsing.parser import Parser
+from pygerber.gerber.formatter import Formatter
+from pygerber.gerber.parser.pyparsing.parser import Parser
 from test.gerberx3.common import (
     GERBER_ASSETS_INDEX,
     Asset,

@@ -1,4 +1,4 @@
-from pygerber.gerberx3.api import GerberFile, Project
+from pygerber.gerber.api import GerberFile, Project
 
 from pygerber.examples import ExamplesEnum, load_example
 

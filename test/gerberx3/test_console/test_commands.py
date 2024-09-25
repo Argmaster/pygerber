@@ -4,9 +4,9 @@ import pytest
 from click.testing import CliRunner
 from PIL import Image
 
-from pygerber.backend.rasterized_2d.color_scheme import ColorScheme
 from pygerber.console.commands import _project, _raster, _vector
 from pygerber.examples import ExamplesEnum, get_example_path
+from pygerber.vm.types.style import Style
 from test.conftest import cd_to_tempdir
 
 
@@ -31,7 +31,7 @@ def test_raster_render_all_default() -> None:
         assert image.getpixel((0, 0)) == (0, 0, 0)
         assert (
             image.getpixel((400, 100))
-            == ColorScheme.DEBUG_1_ALPHA.solid_region_color.as_rgb_int()
+            == Style.presets.DEBUG_1_ALPHA.foreground.as_rgb_int()
         )
 
 
@@ -79,7 +79,7 @@ def test_raster_render_pixel_format_rgba_png() -> None:
         assert image.getpixel((0, 0)) == (0, 0, 0, 0)
         assert (
             image.getpixel((400, 100))
-            == ColorScheme.DEBUG_1_ALPHA.solid_region_color.as_rgba_int()
+            == Style.presets.DEBUG_1_ALPHA.foreground.as_rgba_int()
         )
 
 
@@ -107,8 +107,7 @@ def test_raster_render_file_type_copper_rgb_png() -> None:
 
         assert image.getpixel((0, 0)) == (0, 0, 0)
         assert (
-            image.getpixel((400, 100))
-            == ColorScheme.COPPER.solid_region_color.as_rgb_int()
+            image.getpixel((400, 100)) == Style.presets.COPPER.foreground.as_rgb_int()
         )
 
 
@@ -137,7 +136,7 @@ def test_raster_render_file_type_copper_rgba_png() -> None:
         assert image.getpixel((0, 0)) == (0, 0, 0, 0)
         assert (
             image.getpixel((400, 100))
-            == ColorScheme.COPPER_ALPHA.solid_region_color.as_rgba_int()
+            == Style.presets.COPPER_ALPHA.foreground.as_rgba_int()
         )
 
 
@@ -212,7 +211,7 @@ def test_vector_render_all_default() -> None:
         assert len(image) > 0
         assert image.startswith(b"""<?xml version="1.0" encoding="UTF-8"?>""")
 
-        color_hex = ColorScheme.DEBUG_1_ALPHA.solid_region_color.to_hex()
+        color_hex = Style.presets.DEBUG_1_ALPHA.foreground.to_hex()
 
         assert f"""fill="{color_hex}" """.encode() in image
 
@@ -238,7 +237,7 @@ def test_vector_render_file_type_copper() -> None:
         assert len(image) > 0
         assert image.startswith(b"""<?xml version="1.0" encoding="UTF-8"?>""")
 
-        color_hex = ColorScheme.COPPER.solid_region_color.to_hex()
+        color_hex = Style.presets.COPPER.foreground.to_hex()
 
         assert f"""fill="{color_hex}" """.encode() in image
 
@@ -266,17 +265,13 @@ def test_project_render_default() -> None:
 
         assert image.getpixel((0, 0)) == (0, 0, 0)
         assert (
-            image.getpixel((400, 100))
-            == ColorScheme.COPPER.solid_region_color.as_rgb_int()
+            image.getpixel((400, 100)) == Style.presets.COPPER.foreground.as_rgb_int()
         )
         assert (
             image.getpixel((80, 100))
-            == ColorScheme.PASTE_MASK.solid_region_color.as_rgb_int()
+            == Style.presets.PASTE_MASK.foreground.as_rgb_int()
         )
-        assert (
-            image.getpixel((190, 392))
-            == ColorScheme.SILK.solid_region_color.as_rgb_int()
-        )
+        assert image.getpixel((190, 392)) == Style.presets.SILK.foreground.as_rgb_int()
 
 
 @pytest.mark.xfail(reason="Not implemented")
@@ -302,14 +297,10 @@ def test_project_render_with_file_type_tags() -> None:
 
         assert image.getpixel((0, 0)) == (0, 0, 0)
         assert (
-            image.getpixel((400, 100))
-            == ColorScheme.COPPER.solid_region_color.as_rgb_int()
+            image.getpixel((400, 100)) == Style.presets.COPPER.foreground.as_rgb_int()
         )
         assert (
             image.getpixel((80, 100))
-            == ColorScheme.PASTE_MASK.solid_region_color.as_rgb_int()
+            == Style.presets.PASTE_MASK.foreground.as_rgb_int()
         )
-        assert (
-            image.getpixel((190, 392))
-            == ColorScheme.SILK.solid_region_color.as_rgb_int()
-        )
+        assert image.getpixel((190, 392)) == Style.presets.SILK.foreground.as_rgb_int()

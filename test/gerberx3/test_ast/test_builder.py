@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from pygerber.gerberx3.ast.builder import GerberX3Builder
+from pygerber.gerber.ast.builder import GerberX3Builder
 
 
 @pytest.fixture
