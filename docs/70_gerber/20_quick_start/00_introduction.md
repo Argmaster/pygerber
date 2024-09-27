@@ -45,7 +45,7 @@ type (eg. silk screen, copper, drill etc.). If second argument is not provided, 
 behavior is to try to guess file type based on file extension or file attributes. Method
 returns `GerberFile` instance.
 
-{{ include_code("test/examples/gerberx3/api/_90_quick_start_from_str.py", "python", title="example_from_str.py", linenums="1", hl_lines="12") }}
+{{ include_code("test/examples/gerberx3/api/_60_quick_start_from_str.quickstart.py", "python", title="example_from_str.py", linenums="1", hl_lines="12") }}
 
 ---
 
@@ -61,7 +61,7 @@ and can be used to manually set file type (eg. silk screen, copper, drill etc.).
 second argument is not provided, default behavior is to try to guess file type based on
 file extension or file attributes. Method returns `GerberFile` instance.
 
-{{ include_code("test/examples/gerberx3/api/_91_quick_start_from_file.py", "python", title="example_from_file.py", linenums="1", hl_lines="6") }}
+{{ include_code("test/examples/gerberx3/api/_61_quick_start_from_file.quickstart.py", "python", title="example_from_file.py", linenums="1", hl_lines="6") }}
 
 ---
 
@@ -77,7 +77,7 @@ to manually set file type (eg. silk screen, copper, drill etc.). If second argum
 not provided, default behavior is to try to guess file type based on file extension or
 file attributes. Method returns `GerberFile` instance.
 
-{{ include_code("test/examples/gerberx3/api/_92_quick_start_from_buffer.py", "python", title="example_from_buffer.py", linenums="1", hl_lines="5") }}
+{{ include_code("test/examples/gerberx3/api/_62_quick_start_from_buffer.quickstart.py", "python", title="example_from_buffer.py", linenums="1", hl_lines="5") }}
 
 ---
 

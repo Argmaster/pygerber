@@ -17,6 +17,7 @@ from pygerber.gerber.api._gerber_file import (
     Units,
 )
 from pygerber.gerber.api._project import Project
+from pygerber.gerber.formatter.options import Options
 
 __all__ = [
     "FileTypeEnum",
@@ -28,4 +29,5 @@ __all__ = [
     "PillowImage",
     "DEFAULT_COLOR_MAP",
     "DEFAULT_ALPHA_COLOR_MAP",
+    "Options",
 ]

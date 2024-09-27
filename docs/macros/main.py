@@ -61,3 +61,14 @@ def define_env(env: MacrosPlugin) -> None:
         {options_string}
 
 """
+
+    @env.macro
+    def run_capture_stdout(command: str, title: str, language: str = "log") -> str:
+        """Run a command and capture its stdout."""
+        from subprocess import check_output
+
+        return (
+            f'```{language} title="$ {title}"\n'
+            + check_output(command, shell=True).decode(encoding="utf-8")
+            + "```"
+        )

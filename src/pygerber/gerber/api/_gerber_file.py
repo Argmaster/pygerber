@@ -154,6 +154,18 @@ class ImageSpace:
         """Maximum Y coordinate of image in pixels."""
         return int(self.max_y_mm * self.dpmm)
 
+    def __str__(self) -> str:
+        return f"""
+ImageSpace(
+    units = {self.units},
+    min_x_mm = {self.min_x_mm},
+    min_y_mm = {self.min_y_mm},
+    max_x_mm = {self.max_x_mm},
+    max_y_mm = {self.max_y_mm},
+    dpmm = {self.dpmm},
+)
+"""
+
 
 class Image:
     """The `Image` class is a base class for all rendered images returned by
