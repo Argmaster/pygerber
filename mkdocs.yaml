@@ -79,13 +79,16 @@ plugins:
       handlers:
         # https://mkdocstrings.github.io/python/
         python:
+          import:
+            - https://docs.python.org/3/objects.inv
+            - https://typing-extensions.readthedocs.io/en/latest/objects.inv
           # https://mkdocstrings.github.io/python/usage/configuration/docstrings/
           options:
             # https://mkdocstrings.github.io/python/usage/configuration/general/
             docstring_style: numpy
             show_bases: true
             allow_inspection: true
-            heading_level: 2
+            heading_level: 1
             show_root_heading: true
             show_root_full_path: false
             show_root_members_full_path: false
@@ -93,13 +96,19 @@ plugins:
             show_root_toc_entry: true
             show_symbol_type_heading: true
             show_symbol_type_toc: true
-            filters:
-              - "!^_"
-              - "^__"
             show_signature: true
             separate_signature: true
             show_signature_annotations: true
             group_by_category: true
+            show_inheritance_diagram: true
+            inherited_members: false
+            signature_crossrefs: true
+            relative_crossrefs: true
+            scoped_crossrefs: true
+            docstring_section_style: list
+            summary: true
+            show_source: false
+            preload_modules: [pygerber]
   # https://oprypin.github.io/mkdocs-gen-files/
   - gen-files:
       scripts:

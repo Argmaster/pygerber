@@ -25,7 +25,7 @@ def build_circle() -> RVMC:
     with builder.layer() as layer:
         layer.circle((0, 0), 1, is_negative=False)
 
-    return builder.commands
+    return builder.get_rvmc()
 
 
 def default_start_main_layer(origin: Optional[Vector] = None) -> StartLayer:
@@ -71,7 +71,7 @@ def build_nested_layer_circle_paste() -> RVMC:
             d10.circle((0, 0), 1, is_negative=False)
         layer.paste(d10, (0, 0), is_negative=False)
 
-    return builder.commands
+    return builder.get_rvmc()
 
 
 def build_nested_layer_circle_paste_with_offset() -> RVMC:
@@ -82,7 +82,7 @@ def build_nested_layer_circle_paste_with_offset() -> RVMC:
             d10.circle((0, 0), 1, is_negative=False)
         layer.paste(d10, (5, 5), is_negative=False)
 
-    return builder.commands
+    return builder.get_rvmc()
 
 
 def test_nested_layer_circle_paste_with_offset() -> None:
@@ -117,7 +117,7 @@ def build_main_origin_x_y_layer_origin_x_y_paste_x_y(
         layer.cross((0, 0), 9, 9, 0.05, is_negative=False)
         layer.x(main_origin, 1, 0.05, is_negative=False)
 
-    return builder.commands
+    return builder.get_rvmc()
 
 
 def build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark(
@@ -134,4 +134,4 @@ def build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark(
         layer.paste(d10, paste, is_negative=False)
         layer.cross((0, 0), 9, 9, 0.05, is_negative=False)
 
-    return builder.commands
+    return builder.get_rvmc()

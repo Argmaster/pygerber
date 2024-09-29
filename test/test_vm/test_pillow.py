@@ -129,7 +129,7 @@ def test_paste_circle_over_circle_in_center() -> None:
 
         layer.paste(d11, (0, 0), is_negative=False)
 
-    compare(run_rvmc(100, builder.commands))
+    compare(run_rvmc(100, builder.get_rvmc()))
 
 
 def test_paste_circle_over_paste_circle_in_center() -> None:
@@ -143,7 +143,7 @@ def test_paste_circle_over_paste_circle_in_center() -> None:
         layer.paste(d10, (0, 0), is_negative=False)
         layer.paste(d11, (0, 0), is_negative=True)
 
-    compare(run_rvmc(100, builder.commands))
+    compare(run_rvmc(100, builder.get_rvmc()))
 
 
 def test_paste_rectangle_in_center() -> None:

@@ -66,6 +66,71 @@ from pygerber.vm.types import Box, LayerID, Vector
 from pygerber.vm.vm import VirtualMachine
 
 
+class RvmcBuilder:
+    """The `RvmcBuilder` class provides a way to programmatically generate RVMC code."""
+
+    def __init__(self) -> None:
+        self._commands: list[Command] = []
+        self._is_locked: bool = False
+
+    @contextmanager
+    def layer(
+        self, box: Optional[Box] = None, origin: Optional[tuple[float, float]] = None
+    ) -> Generator[LayerBuilder, None, None]:
+        """Create main RVMC layer.
+
+        Using main layer you can add more objects into the image.
+
+        Parameters
+        ----------
+        box : Optional[Box], optional
+            Fixed size, if not provided, size will be determined automatically at
+            render time, by default None
+        origin : Optional[tuple[float, float]], optional
+            Origin of image space, in None, (0.0, 0.0) is used, by default None
+
+        Yields
+        ------
+        Generator[LayerBuilder, None, None]
+            Object allowing you to add elements to the layer.
+
+        Raises
+        ------
+        LockedBuilderError
+            Raised when `get_rvmc()` is called before calling this function or
+            before exiting the context manager block.
+
+        """
+        if self._is_locked:
+            msg = (
+                "Builder was locked by calling `get_rvmc()`."
+                "You need to create a new builder."
+            )
+            raise LockedBuilderError(msg)
+
+        layer = LayerBuilder(
+            layer_id=VirtualMachine.MAIN_LAYER_ID, box=box, origin=origin
+        )
+        yield layer
+
+        layer.finalize()
+
+        if self._is_locked:
+            msg = (  # type: ignore[unreachable]
+                "Builder was locked by calling `get_rvmc()` before it got finalized."
+                "Do not call `get_rvmc()` before exiting `layer()` context manager "
+                "block. You need to create a new builder."
+            )
+            raise LockedBuilderError(msg)
+
+        self._commands.extend(layer.commands)
+
+    def get_rvmc(self) -> RVMC:
+        """Return the generated RVMC code."""
+        self._is_locked = True
+        return RVMC(commands=self._commands)
+
+
 class LayerBuilder:
     """Layer builder class."""
 
@@ -287,7 +352,7 @@ class LayerBuilder:
     def paste(
         self, layer: LayerBuilder, at: tuple[float, float], *, is_negative: bool
     ) -> None:
-        """Paste another layer."""
+        """Paste another layer into this layer."""
         self._check_not_finalized_in_add()
         self._commands.append(
             PasteLayer(
@@ -298,25 +363,5 @@ class LayerBuilder:
         )
 
 
-class RvmcBuilder:
-    """RVMC builder class."""
-
-    def __init__(self) -> None:
-        self._commands: list[Command] = []
-
-    @contextmanager
-    def layer(
-        self, box: Optional[Box] = None, origin: Optional[tuple[float, float]] = None
-    ) -> Generator[LayerBuilder, None, None]:
-        """Create a new layer."""
-        layer = LayerBuilder(
-            layer_id=VirtualMachine.MAIN_LAYER_ID, box=box, origin=origin
-        )
-        yield layer
-        layer.finalize()
-        self._commands.extend(layer.commands)
-
-    @property
-    def commands(self) -> RVMC:
-        """Return commands."""
-        return RVMC(commands=self._commands)
+class LockedBuilderError(Exception):
+    """Exception raised when trying to modify a builder after it produced RVMC."""

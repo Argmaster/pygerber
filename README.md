@@ -113,6 +113,8 @@ Below you can find list of available APIs:
 - `pygerber.gerber.compiler`
 - `pygerber.gerber.parser`
 - `pygerber.gerber.formatter`
+- `pygerber.builder.gerber`
+- `pygerber.builder.rvmc`
 - `pygerber.vm`
 - `pygerber.vm.commands`
 - `pygerber.vm.pillow`
