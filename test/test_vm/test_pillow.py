@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Optional, Sequence
 import pytest
 from PIL import Image
 
-from pygerber.vm import Builder
+from pygerber.builder.rvmc import RvmcBuilder
 from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLayer
 from pygerber.vm.pillow.vm import PillowVirtualMachine
 from pygerber.vm.rvmc import RVMC
@@ -16,7 +16,7 @@ from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.style import Style
 from pygerber.vm.types.vector import Vector
 from test.conftest import TEST_DIRECTORY
-from test.test_vm.test_builder import (
+from test.gerberx3.test_builder.test_rvmc import (
     build_main_origin_x_y_layer_origin_x_y_paste_x_y,
     build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark,
 )
@@ -121,7 +121,7 @@ def test_draw_circle_over_circle_in_center() -> None:
 
 
 def test_paste_circle_over_circle_in_center() -> None:
-    builder = Builder()
+    builder = RvmcBuilder()
     with builder.layer(box=Box.from_center_width_height((0, 0), 15, 10)) as layer:
         with layer.layer("D11") as d11:
             d11.circle((0, 0), 2, is_negative=False)
@@ -133,7 +133,7 @@ def test_paste_circle_over_circle_in_center() -> None:
 
 
 def test_paste_circle_over_paste_circle_in_center() -> None:
-    builder = Builder()
+    builder = RvmcBuilder()
     with builder.layer() as layer:
         with layer.layer("D10") as d10:
             d10.circle((0, 0), 2, is_negative=False)

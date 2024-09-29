@@ -6,14 +6,11 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pygerber.vm.builder import Builder, LayerBuilder
 from pygerber.vm.command_visitor import CommandVisitor
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.vm import DeferredLayer, EagerLayer, Layer, Result, VirtualMachine
 
 __all__ = [
-    "Builder",
-    "LayerBuilder",
     "RVMC",
     "VirtualMachine",
     "CommandVisitor",

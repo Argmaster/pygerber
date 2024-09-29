@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pygerber.vm import Builder
+from pygerber.builder.rvmc import RvmcBuilder
 from pygerber.vm.commands import EndLayer, PasteLayer, Shape, StartLayer
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.layer_id import LayerID
@@ -20,7 +20,7 @@ def test_circle() -> None:
 
 
 def build_circle() -> RVMC:
-    builder = Builder()
+    builder = RvmcBuilder()
 
     with builder.layer() as layer:
         layer.circle((0, 0), 1, is_negative=False)
@@ -64,7 +64,7 @@ def test_nested_layer_circle_paste() -> None:
 
 
 def build_nested_layer_circle_paste() -> RVMC:
-    builder = Builder()
+    builder = RvmcBuilder()
 
     with builder.layer() as layer:
         with layer.layer("D10") as d10:
@@ -75,7 +75,7 @@ def build_nested_layer_circle_paste() -> RVMC:
 
 
 def build_nested_layer_circle_paste_with_offset() -> RVMC:
-    builder = Builder()
+    builder = RvmcBuilder()
 
     with builder.layer() as layer:
         with layer.layer("D10") as d10:
@@ -108,7 +108,7 @@ def build_main_origin_x_y_layer_origin_x_y_paste_x_y(
     paste: tuple[float, float],
     circle_at: tuple[float, float] = (0, 0),
 ) -> RVMC:
-    builder = Builder()
+    builder = RvmcBuilder()
 
     with builder.layer(origin=main_origin) as layer:
         with layer.layer("D10", origin=layer_origin) as d10:
@@ -126,7 +126,7 @@ def build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark(
     paste: tuple[float, float],
     circle_at: tuple[float, float] = (0, 0),
 ) -> RVMC:
-    builder = Builder()
+    builder = RvmcBuilder()
 
     with builder.layer(origin=main_origin) as layer:
         with layer.layer("D10", origin=layer_origin) as d10:

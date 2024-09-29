@@ -298,7 +298,7 @@ class LayerBuilder:
         )
 
 
-class Builder:
+class RvmcBuilder:
     """RVMC builder class."""
 
     def __init__(self) -> None:
