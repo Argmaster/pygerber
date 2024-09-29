@@ -63,6 +63,18 @@ from pygerber.gerber.ast.nodes.d_codes.D01 import D01
 from pygerber.gerber.ast.nodes.d_codes.D02 import D02
 from pygerber.gerber.ast.nodes.d_codes.D03 import D03
 from pygerber.gerber.ast.nodes.d_codes.Dnn import Dnn
+from pygerber.gerber.ast.nodes.enums import (
+    AperFunction,
+    AxisCorrespondence,
+    CoordinateNotation,
+    FileFunction,
+    ImagePolarity,
+    Mirroring,
+    Mount,
+    Polarity,
+    UnitMode,
+    Zeros,
+)
 from pygerber.gerber.ast.nodes.file import File
 from pygerber.gerber.ast.nodes.g_codes.G import G
 from pygerber.gerber.ast.nodes.g_codes.G01 import G01
@@ -253,4 +265,14 @@ __all__ = [
     "AM",
     "SourceInfo",
     "Invalid",
+    "AperFunction",
+    "CoordinateNotation",
+    "Mirroring",
+    "Polarity",
+    "UnitMode",
+    "Zeros",
+    "FileFunction",
+    "Mount",
+    "AxisCorrespondence",
+    "ImagePolarity",
 ]

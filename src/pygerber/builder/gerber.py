@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence, Tuple
 
 from pydantic import BaseModel, Field
 
+from pygerber.gerber.ast import CoordinateFormat
 from pygerber.gerber.ast.nodes import (
     ADC,
     ADO,
@@ -30,6 +31,8 @@ from pygerber.gerber.ast.nodes import (
     ADmacro,
     AMclose,
     AMopen,
+    AperFunction,
+    ApertureIdStr,
     Code1,
     Code4,
     Code5,
@@ -37,26 +40,21 @@ from pygerber.gerber.ast.nodes import (
     Code20,
     Code21,
     Constant,
+    CoordinateNotation,
     CoordinateX,
     CoordinateY,
     Dnn,
     File,
+    Mirroring,
     Node,
     Point,
+    Polarity,
     TA_AperFunction,
     TA_DrillTolerance,
     TA_UserName,
-)
-from pygerber.gerber.ast.nodes.enums import (
-    AperFunction,
-    CoordinateNotation,
-    Mirroring,
-    Polarity,
     UnitMode,
     Zeros,
 )
-from pygerber.gerber.ast.nodes.types import ApertureIdStr
-from pygerber.gerber.ast.state_tracking_visitor import CoordinateFormat
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias

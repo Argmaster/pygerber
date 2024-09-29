@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pygerber.gerber.ast.builder import GerberX3Builder
+from pygerber.builder.gerber import GerberX3Builder
 from pygerber.gerber.ast.nodes import File
 
 

@@ -5,7 +5,6 @@ the Gerber X3 abstract syntax tree.
 from __future__ import annotations
 
 from pygerber.gerber.ast.ast_visitor import AstVisitor
-from pygerber.gerber.ast.builder import GerberX3Builder
 from pygerber.gerber.ast.errors import (
     ApertureNotFoundError,
     ApertureNotSelectedError,
@@ -35,7 +34,6 @@ from pygerber.gerber.ast.state_tracking_visitor import (
 
 __all__ = [
     "AstVisitor",
-    "GerberX3Builder",
     "AstError",
     "VisitorError",
     "StateTrackingVisitor",
