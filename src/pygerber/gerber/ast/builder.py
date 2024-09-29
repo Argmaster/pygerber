@@ -4,8 +4,9 @@ which can then be dumped using formatter interface to Gerber files.
 
 from __future__ import annotations
 
+from abc import abstractmethod
 from io import StringIO
-from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence
+from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +16,8 @@ from pygerber.gerber.ast.nodes import (
     ADP,
     ADR,
     AM,
+    D01,
+    D02,
     D03,
     FS,
     LM,
@@ -56,10 +59,13 @@ from pygerber.gerber.ast.nodes.types import ApertureIdStr
 from pygerber.gerber.ast.state_tracking_visitor import CoordinateFormat
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Self, TypeAlias
 
 
 NUMBER_OF_VERTICES_IN_TRIANGLE = 3
+
+
+Loc2D: TypeAlias = Tuple[float, float]
 
 
 class _Pad(BaseModel):
@@ -559,16 +565,44 @@ class _Draw(BaseModel):
     updating commands and attributes.
     """
 
-    draw_op: Node
+    draw_ops: List[Node]
     state_updates: List[Node] = Field(default_factory=list)
     attributes: List[Node] = Field(default_factory=list)
 
     def _get_nodes(self) -> Iterable[Node]:
         yield from self.state_updates
         yield from self.attributes
-        yield self.draw_op
+        yield from self.draw_ops
         if self.attributes:
             yield TD()
+
+    @property
+    @abstractmethod
+    def _new_current_location(self) -> Loc2D:
+        """Get new current location after the draw operation."""
+
+
+class _PadDraw(_Draw):
+    """The `_PadDraw` represents a drawing operation of creating a pad."""
+
+    location: tuple[float, float]
+
+    @property
+    def _new_current_location(self) -> Loc2D:
+        """Get new current location after the draw operation."""
+        return self.location
+
+
+class _TraceDraw(_Draw):
+    """The `_TraceDraw` represents a drawing operation of creating a trace."""
+
+    begin_location: tuple[float, float]
+    end_location: tuple[float, float]
+
+    @property
+    def _new_current_location(self) -> Loc2D:
+        """Get new current location after the draw operation."""
+        return self.end_location
 
 
 class GerberX3Builder:
@@ -603,6 +637,12 @@ class GerberX3Builder:
         self._scale: float = 1.0
         self._polarity: Polarity = Polarity.Dark
 
+        self._trace_pads: dict[float, _Pad] = {}
+
+    def _add_draw(self, draw: _Draw) -> None:
+        self._current_location = draw._new_current_location  # noqa: SLF001
+        self._draws.append(draw)
+
     def new_pad(self) -> _PadCreator:
         """Create a new pad."""
         return self._pad_creator
@@ -610,16 +650,45 @@ class GerberX3Builder:
     def add_pad(
         self,
         pad: _Pad,
-        at: tuple[float, float],
+        at: Loc2D | _TraceDraw,
         *,
         rotation: float = 0.0,
         mirror_x: bool = False,
         mirror_y: bool = False,
         scale: float = 1.0,
-    ) -> _Draw:
-        """Add a pad to the current layer."""
+    ) -> _PadDraw:
+        """Add pad in shape of a pad to image.
+
+        This corresponds to the flash with positive polarity in Gerber standard.
+
+        Parameters
+        ----------
+        pad : _Pad
+            Previously defined pad object to be used for drawing.
+        at : Loc2D | _TraceDraw
+            Location to flash at. Can be a 2-tuple of floats or _TraceDraw object
+            returned from `add_trace()` or `add_arc_trace()`, then the end
+            location of that trace will be used.
+        rotation : float, optional
+            Pad rotation (rotation around pad origin), by default 0.0
+        mirror_x : bool, optional
+            Pad X mirroring (mirroring of pad orientation relative to pad origin
+            X axis), by default False
+        mirror_y : bool, optional
+            Pad Y mirroring (mirroring of pad orientation relative to pad origin
+            Y axis), by default False
+        scale : float, optional
+            Pad scaling (pad grows in all directions), by default 1.0
+
+        Returns
+        -------
+        _PadDraw
+            Object which can be used to set attributes of the pad or use it as start
+            point for another  trace.
+
+        """
         state_updates = list(
-            self._update_state(
+            self._create_state_updates(
                 selected_aperture=pad.aperture_id,
                 polarity=Polarity.Dark,
                 rotation=rotation,
@@ -628,17 +697,22 @@ class GerberX3Builder:
                 scale=scale,
             )
         )
-        draw = _Draw(
+        location = at.end_location if isinstance(at, _TraceDraw) else at
+
+        draw = _PadDraw(
             state_updates=state_updates,
-            draw_op=D03(
-                x=CoordinateX(value=self._coordinate_format.pack_x(at[0])),
-                y=CoordinateY(value=self._coordinate_format.pack_y(at[1])),
-            ),
+            draw_ops=[
+                D03(
+                    x=CoordinateX(value=self._coordinate_format.pack_x(location[0])),
+                    y=CoordinateY(value=self._coordinate_format.pack_y(location[1])),
+                )
+            ],
+            location=location,
         )
-        self._draws.append(draw)
+        self._add_draw(draw)
         return draw
 
-    def _update_state(
+    def _create_state_updates(
         self,
         selected_aperture: Optional[ApertureIdStr] = None,
         polarity: Optional[Polarity] = None,
@@ -681,16 +755,47 @@ class GerberX3Builder:
     def add_cutout_pad(
         self,
         pad: _Pad,
-        at: tuple[float, float],
+        at: Loc2D | _TraceDraw,
         *,
         rotation: float = 0.0,
         mirror_x: bool = False,
         mirror_y: bool = False,
         scale: float = 1.0,
-    ) -> _Draw:
-        """Add cutout in shape of a pad to image."""
+    ) -> _PadDraw:
+        """Add cutout in shape of a pad to image.
+
+        This corresponds to the flash with negative polarity in Gerber standard.
+        The result will be a hole in shape of a pad cut out of whatever was previously
+        at the given location.
+
+        Parameters
+        ----------
+        pad : _Pad
+            Previously defined pad object to be used for drawing.
+        at : Loc2D | _TraceDraw
+            Location to flash at. Can be a 2-tuple of floats or _TraceDraw object
+            returned from `add_trace()` or `add_arc_trace()`, then the end
+            location of that trace will be used.
+        rotation : float, optional
+            Pad rotation (rotation around pad origin), by default 0.0
+        mirror_x : bool, optional
+            Pad X mirroring (mirroring of pad orientation relative to pad origin
+            X axis), by default False
+        mirror_y : bool, optional
+            Pad Y mirroring (mirroring of pad orientation relative to pad origin
+            Y axis), by default False
+        scale : float, optional
+            Pad scaling (pad grows in all directions), by default 1.0
+
+        Returns
+        -------
+        _PadDraw
+            Object which can be used to set attributes of the pad or use it as start
+            point for trace.
+
+        """
         state_updates = list(
-            self._update_state(
+            self._create_state_updates(
                 selected_aperture=pad.aperture_id,
                 polarity=Polarity.Clear,
                 rotation=rotation,
@@ -699,18 +804,115 @@ class GerberX3Builder:
                 scale=scale,
             )
         )
-        draw = _Draw(
+        location = at.end_location if isinstance(at, _TraceDraw) else at
+
+        draw = _PadDraw(
             state_updates=state_updates,
-            draw_op=D03(
-                x=CoordinateX(value=self._coordinate_format.pack_x(at[0])),
-                y=CoordinateY(value=self._coordinate_format.pack_y(at[1])),
-            ),
+            draw_ops=[
+                D03(
+                    x=CoordinateX(value=self._coordinate_format.pack_x(location[0])),
+                    y=CoordinateY(value=self._coordinate_format.pack_y(location[1])),
+                )
+            ],
+            location=location,
         )
-        self._draws.append(draw)
+        self._add_draw(draw)
+        return draw
+
+    def add_trace(
+        self,
+        width: float,
+        begin: tuple[float, float] | _PadDraw | _TraceDraw,
+        end: tuple[float, float] | _PadDraw | _TraceDraw,
+    ) -> _TraceDraw:
+        """Add a trace to the image.
+
+        Parameters
+        ----------
+        width : float
+            Width of a trace.
+        begin : tuple[float, float] | _PadDraw | _TraceDraw
+            Begin point of the trace. When 2-tuple of floats is provided, it is
+            interpreted as absolute coordinates. When _PadDraw is provided, the
+            location of the center of the pad is used. When _TraceDraw is provided, the
+            end location of the trace is used.
+        end : tuple[float, float] | _PadDraw | _TraceDraw
+            End point of the trace. When 2-tuple of floats is provided, it is
+            interpreted as absolute coordinates. When _PadDraw is provided, the
+            location of the center of the pad is used. When _TraceDraw is provided, the
+            begin location of the trace is used.
+
+        Returns
+        -------
+        _TraceDraw
+            Object which can be used to set attributes of the pad, as start
+            point for another trace or a center of a pad.
+
+        """
+        if (aperture := self._trace_pads.get(width)) is None:
+            aperture = self.new_pad().circle(width)
+            self._trace_pads[width] = aperture
+
+        if isinstance(begin, tuple):
+            begin_location = begin
+        elif isinstance(begin, _PadDraw):
+            begin_location = begin.location
+        elif isinstance(begin, _TraceDraw):
+            begin_location = begin.end_location
+        else:
+            raise NotImplementedError
+
+        if isinstance(end, tuple):
+            end_location = end
+        elif isinstance(end, _PadDraw):
+            end_location = end.location
+        elif isinstance(end, _TraceDraw):
+            end_location = end.begin_location
+        else:
+            raise NotImplementedError
+
+        state_updates = list(
+            self._create_state_updates(
+                selected_aperture=aperture.aperture_id,
+                polarity=Polarity.Dark,
+                rotation=0.0,
+                mirror_x=False,
+                mirror_y=False,
+                scale=1.0,
+            )
+        )
+
+        draw_ops: list[Node] = []
+        if self._current_location != begin_location:
+            draw_ops.append(
+                D02(
+                    x=CoordinateX(
+                        value=self._coordinate_format.pack_x(begin_location[0])
+                    ),
+                    y=CoordinateY(
+                        value=self._coordinate_format.pack_y(begin_location[1])
+                    ),
+                )
+            )
+
+        draw_ops.append(
+            D01(
+                x=CoordinateX(value=self._coordinate_format.pack_x(end_location[0])),
+                y=CoordinateY(value=self._coordinate_format.pack_y(end_location[1])),
+            )
+        )
+
+        draw = _TraceDraw(
+            state_updates=state_updates,
+            draw_ops=draw_ops,
+            begin_location=begin_location,
+            end_location=end_location,
+        )
+        self._add_draw(draw)
         return draw
 
     def get_code(self) -> GerberX3Code:
-        """Get the AST."""
+        """Generate Gerber code created with builder until this point."""
         commands: list[Node] = []
         commands.append(
             FS(

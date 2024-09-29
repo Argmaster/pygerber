@@ -584,3 +584,139 @@ X3000000Y3000000D03*
 M02*
 """
         )
+
+
+class TestTraces:
+    def test_one_trace(self, builder: GerberX3Builder, default_header: str) -> None:
+        builder.add_trace(0.1, (0, 0), (1, 1))
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,0.1*%
+D10*
+X1000000Y1000000D01*
+M02*
+"""
+        )
+
+    def test_two_traces_same_width(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        builder.add_trace(0.1, (0, 0), (1, 1))
+        builder.add_trace(0.1, (1, 1), (1, 2))
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,0.1*%
+D10*
+X1000000Y1000000D01*
+X1000000Y2000000D01*
+M02*
+"""
+        )
+
+    def test_two_traces_different_width(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        builder.add_trace(0.1, (0, 0), (1, 1))
+        builder.add_trace(0.2, (1, 1), (1, 2))
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,0.1*%
+%ADD11C,0.2*%
+D10*
+X1000000Y1000000D01*
+D11*
+X1000000Y2000000D01*
+M02*
+"""
+        )
+
+    def test_three_traces(self, builder: GerberX3Builder, default_header: str) -> None:
+        builder.add_trace(0.1, (0, 0), (1, 1))
+        builder.add_trace(0.2, (1, 1), (1, 2))
+        builder.add_trace(0.1, (1, 2), (2, 1))
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,0.1*%
+%ADD11C,0.2*%
+D10*
+X1000000Y1000000D01*
+D11*
+X1000000Y2000000D01*
+D10*
+X2000000Y1000000D01*
+M02*
+"""
+        )
+
+    def test_two_traces_discontinued(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        builder.add_trace(0.1, (0, 0), (1, 1))
+        builder.add_trace(0.1, (2, 2), (3, 3))
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,0.1*%
+D10*
+X1000000Y1000000D01*
+X2000000Y2000000D02*
+X3000000Y3000000D01*
+M02*
+"""
+        )
+
+    def test_trace_connect_two_pads(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        pad = builder.new_pad().circle(1.0)
+
+        pad0 = builder.add_pad(pad, (0, 0))
+        pad1 = builder.add_pad(pad, (2, 2))
+
+        builder.add_trace(0.1, pad0, pad1)
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,1.0*%
+%ADD11C,0.1*%
+D10*
+X0Y0D03*
+X2000000Y2000000D03*
+D11*
+X0Y0D02*
+X2000000Y2000000D01*
+M02*
+"""
+        )
+
+    def test_two_trace_connect_two_pads(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        pad = builder.new_pad().circle(1.0)
+
+        pad0 = builder.add_pad(pad, (0, 0))
+        pad1 = builder.add_pad(pad, (2, 2))
+
+        trace0 = builder.add_trace(0.1, pad0, (1, 1))
+        builder.add_trace(0.1, trace0, pad1)
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,1.0*%
+%ADD11C,0.1*%
+D10*
+X0Y0D03*
+X2000000Y2000000D03*
+D11*
+X0Y0D02*
+X1000000Y1000000D01*
+X2000000Y2000000D01*
+M02*
+"""
+        )
