@@ -26,3 +26,11 @@ To create `Project` object you can use `Project` constructor. It accepts list of
 {{ include_code("test/examples/gerberx3/api/_70_project_constructor_showcase.project.py", "python", title="create_project.py", linenums="1") }}
 
 {{ run_capture_stdout("python test/examples/gerberx3/api/_70_project_constructor_showcase.project.py", "python create_project.py") }}
+
+## Rendering Project
+
+{{ include_code("test/examples/gerberx3/api/_71_project_render_with_pillow.example.py", "python", title="render_project.py", linenums="1") }}
+
+<p align="center">
+    <img src="render_project.png" alt="render_project" width="300" />
+</p>

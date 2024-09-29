@@ -19,7 +19,7 @@ THIS_DIRECTORY = THIS_FILE.parent
     ],
     ids=lambda path: path.name,
 )
-def test_examples(example_path: Path) -> None:
+def test_examples_with_output_image(example_path: Path) -> None:
     with cd_to_tempdir():
         exec(example_path.read_text(encoding="utf-8"))  # noqa: S102
         assert (Path.cwd() / "output.png").exists()

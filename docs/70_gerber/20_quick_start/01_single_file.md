@@ -140,7 +140,7 @@ image size, etc, as presented below:
 `GerberFile` object exposes `format()` and `formats()` methods which generate Gerber
 code formatted according to the specified configuration. For detailed documentation of
 formatting options, please refer to
-[Formatter -> Configuration](../60_formatter/05_configuration.md).
+[Formatter -> Configuration](../60_formatter/10_configuration.md).
 
 The difference between `format()` and `formats()` methods is that `format()` method
 writes formatted code to `TextIO`-like object while `formats()` returns it as a `str`
