@@ -73,6 +73,10 @@ Loc2D: TypeAlias = Tuple[float, float]
 class GerberX3Builder:
     """Builder class for constructing Gerber ASTs.
 
+    Builder uses metric units (millimeters) and absolute coordinates.
+    This default can not be changed. Use of imperial units and incremental coordinates
+    in Gerber files is deprecated.
+
     Code generated is compliant with
     [The Gerber Layer Format Specification - Revision 2024.05](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf).
     """

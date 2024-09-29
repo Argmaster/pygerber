@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import base64
+import io
 import os
 from pprint import pformat
 
+from PIL import Image
 from mkdocs_macros.plugin import MacrosPlugin
+
+from pygerber.gerber.api import GerberFile
 
 
 def define_env(env: MacrosPlugin) -> None:
@@ -72,3 +77,21 @@ def define_env(env: MacrosPlugin) -> None:
             + check_output(command, shell=True).decode(encoding="utf-8")
             + "```"
         )
+
+    @env.macro
+    def run_render_gerber_from_stdout(command: str, dpmm: int) -> str:
+        """Run a command and capture its stdout and render it as Gerber code."""
+        from subprocess import check_output
+
+        code = check_output(command, shell=True).decode(encoding="utf-8")
+        out = GerberFile.from_str(code).render_with_pillow(dpmm=dpmm)
+
+        return _base64_image_tag(out.get_image())
+
+
+def _base64_image_tag(image: Image.Image) -> str:
+    buffered = io.BytesIO()
+    image.save(buffered, format="PNG")
+    image_bytes = buffered.getvalue()
+    encoded_image = base64.b64encode(image_bytes).decode("utf-8")
+    return f'<p align="center"><img src="data:image/png;base64,{encoded_image}" alt="Embedded Image" /></p>'
