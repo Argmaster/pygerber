@@ -47,14 +47,24 @@ if is_pygments_available():
                 (r"Y(?=[0-9]+)", Keyword),
                 (r"I(?=[0-9]+)", Keyword),
                 (r"J(?=[0-9]+)", Keyword),
+                # properties
                 (r"(?<=%)FS", Keyword),
                 (r"(?<=%FS)[LT][AI]", Keyword.Constant),
+                (r"(?<=%)IP", Keyword),
+                (r"(?<=%)IR", Keyword),
+                (r"(?<=%)MO(?=MM|IN)", Keyword),
+                (r"(?<=%MO)(MM|IN)", Keyword.Constant),
+                (r"(?<=%)OF", Keyword),
+                (r"(?<=%)AS", Keyword),
+                (r"(?<=%)MI", Keyword),
+                (r"(?<=%)IN", Keyword),
+                (r"(?<=%)SF", Keyword),
+                # attributes
                 (r"(?<=%)TA", Keyword),
                 (r"(?<=%)TO", Keyword),
                 (r"(?<=%)TF", Keyword),
                 (r"(?<=%)TD", Keyword),
-                (r"(?<=%)MO(?=MM|IN)", Keyword),
-                (r"(?<=%MO)(MM|IN)", Keyword.Constant),
+                # apertures
                 (r"(?<=%ADD[0-9])[._a-zA-Z$][._a-zA-Z0-9]*", Name.Class),
                 (r"(?<=%ADD[0-9][0-9])[._a-zA-Z$][._a-zA-Z0-9]*", Name.Class),
                 (r"(?<=%ADD[0-9][0-9][0-9])[._a-zA-Z$][._a-zA-Z0-9]*", Name.Class),
@@ -63,14 +73,18 @@ if is_pygments_available():
                 (r"(?<=%AM)[._a-zA-Z$][._a-zA-Z0-9]*", Name.Class),
                 (r"(?<=%)AB", Keyword),
                 (r"(?<=%)SR", Keyword),
+                # D codes
                 (r"D0*1(?=\*)", Keyword),
                 (r"D0*2(?=\*)", Keyword),
                 (r"D0*3(?=\*)", Keyword),
                 (r"D[0-9]+", Name.Variable),
+                # G codes
                 (r"G[0-9]+", Keyword),
+                # M codes
                 (r"M[0-9]+", Keyword),
-                (r"[0-9]+\.[0-9]+", Number),
-                (r"[0-9]+", Number),
+                (r"\$[0-9]+", Name.Variable),
+                (r"[+-]*[0-9]+\.[0-9]+", Number),
+                (r"[+-]*[0-9]+", Number),
             ]
         }
 
