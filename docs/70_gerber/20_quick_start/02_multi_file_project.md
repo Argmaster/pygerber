@@ -12,8 +12,6 @@ For full reference of `pygerber.gerber.api` module check out
 
 ## Creating Project instance
 
-{{ include_definition("pygerber.gerber.api.Project", members="False", show_docstring_description="False", show_source="False", show_docstring_parameters="False", show_docstring_returns="False", heading_level="3") }}
-
 `Project` class is a simple wrapper around multiple `GerberFile` objects. It
 automatically aligns all images and determines how big final image has to be to fit all
 images and merges them into single image. It is still possible to retrieve individual
