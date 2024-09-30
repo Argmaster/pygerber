@@ -149,6 +149,27 @@ if is_pygments_available():
             **{  # noqa: PIE800
                 "TraceDraw": Name.Class,
             },
+            **{  # noqa: PIE800
+                "GerberFile": Name.Class,
+                "from_str": Name.Function,
+                "from_file": Name.Function,
+                "from_buffer": Name.Function,
+                "render_with_pillow": Name.Function,
+                "format": Name.Function,
+                "formats": Name.Function,
+                "get_image": Name.Function,
+            },
+            **{  # noqa: PIE800
+                "Project": Name.Class,
+                "render_with_pillow": Name.Function,
+                "get_image": Name.Function,
+                "get_sub_images": Name.Function,
+            },
+            **{  # noqa: PIE800
+                "FileTypeEnum": Name.Class,
+            },
+            "ExamplesEnum": Name.Class,
+            "load_example": Name.Function,
         }
 
         def get_tokens_unprocessed(self, text: Any) -> Any:

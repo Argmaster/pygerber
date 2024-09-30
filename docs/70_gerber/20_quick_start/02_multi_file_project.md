@@ -1,34 +1,46 @@
 # Multi file project guide
 
 This guide shows how to use `Project` class in par with `GerberFile` class to render
-multiple Gerber files into single, aligned image. Both classes can be imported from
-`pygerber.gerber.api`. For overview of `pygerber.gerber.api` module check out
-[Introduction](./00_introduction.md). For guide on how to operate on individual Gerber
-files and create `GerberFile` class instances, check out
-[Single file guide](./01_single_file.md).
-
-For full reference of `pygerber.gerber.api` module check out
-[Reference](./20_pygerber_gerber_api_reference.md)
+multiple Gerber files into single, aligned image.
 
 ## Creating Project instance
 
-`Project` class is a simple wrapper around multiple `GerberFile` objects. It
-automatically aligns all images and determines how big final image has to be to fit all
-images and merges them into single image. It is still possible to retrieve individual
-images from result returned by rendering methods.
+[`Project`](../../reference/pygerber/gerber/api/__init__.md#pygerber.gerber.api.Project)
+class is a simple wrapper around multiple
+[`GerberFile`](../../reference/pygerber/gerber/api/__init__.md#pygerber.gerber.api.GerberFile)
+objects. It automatically aligns all images and determines how big final image has to be
+to fit all images and merges them into single image. It is still possible to retrieve
+individual images from result returned by rendering methods.
 
 To create `Project` object you can use `Project` constructor. It accepts list of
-`GerberFile` objects as its only parameter. You can add more files to project by using
-`add_file()` method.
+`GerberFile` objects as its only parameter.
 
-{{ include_code("test/examples/gerberx3/api/_70_project_constructor_showcase.project.py", "python", title="create_project.py", linenums="1") }}
+{{ include_code("test/examples/gerberx3/api/_70_project_constructor_showcase.project.py", "docspygerberlexer", title="create_project.py", linenums="1") }}
 
 {{ run_capture_stdout("python test/examples/gerberx3/api/_70_project_constructor_showcase.project.py", "python create_project.py") }}
 
 ## Rendering Project
 
-{{ include_code("test/examples/gerberx3/api/_71_project_render_with_pillow.example.py", "python", title="render_project.py", linenums="1") }}
+Rendering `Project` object is similar to rendering `GerberFile` object. `Project` object
+exposes `render_with_pillow()` method which renders all files into single image.
+
+{{ include_code("test/examples/gerberx3/api/_71_project_render_with_pillow.example.py", "docspygerberlexer", title="render_project.py", linenums="1") }}
 
 <p align="center">
     <img src="render_project.png" alt="render_project" width="300" />
 </p>
+
+## Accessing individual images
+
+After rendering `Project` object you can access individual images by using
+[`get_sub_images()`](../../reference/pygerber/gerber/api/__init__.md#pygerber.gerber.api.CompositeImage.get_sub_images)
+of
+[`CompositeImage`](../../reference/pygerber/gerber/api/__init__.md#pygerber.gerber.api.CompositeImage)
+object returned by `render_with_pillow()` method.
+
+`TODO: Add example`
+
+## Further reading
+
+Check out full reference of
+[`pygerber.gerber.api`](../../reference/pygerber/gerber/api/__init__.md).

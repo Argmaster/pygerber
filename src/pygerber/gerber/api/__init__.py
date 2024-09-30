@@ -16,7 +16,7 @@ from pygerber.gerber.api._gerber_file import (
     PillowImage,
     Units,
 )
-from pygerber.gerber.api._project import Project
+from pygerber.gerber.api._project import CompositeImage, Project
 from pygerber.gerber.formatter.options import Options
 
 __all__ = [
@@ -27,6 +27,7 @@ __all__ = [
     "ImageSpace",
     "Image",
     "PillowImage",
+    "CompositeImage",
     "DEFAULT_COLOR_MAP",
     "DEFAULT_ALPHA_COLOR_MAP",
     "Options",

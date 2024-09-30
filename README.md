@@ -30,15 +30,15 @@ It is based on Ucamco's `The Gerber Layer Format Specification. Revision 2024.05
 (Available on
 [Ucamco's webpage](https://www.ucamco.com/files/downloads/file_en/456/gerber-layer-format-specification-revision-2024-05_en.pdf).
 
-PyGerber can be used both as a executable with use of its command line interface and as
-a Python library.
+PyGerber can be used both as a executable (with command line interface) and as a Python
+library.
 
-PyGerber supports modern solutions available in the latest version of the standard
-(2024.05). At the same time, it includes the implementation of most outdated and
-selected removed functionalities. This allows it to be used not only with files
-compliant with the X3 standard but also with those compliant with X2, RS-274X, and
-RS-274D. Due to limited access to files in older standards and ambiguities within them,
-there is a risk that some older functionalities may behave incorrectly.
+PyGerber supports modern features available in the latest version of the standard
+(2024.05). At the same time, it includes the implementation of many of outdated and
+removed functionalities for backwards compatibility. This allows it to be used not only
+with files compliant with the X3 standard but also with those compliant with X2,
+RS-274X, and RS-274D. Due to limited access to files in older standards and ambiguities
+within them, there is a risk that some older functionalities may behave incorrectly.
 
 If you have found a bug in the PyGerber library, please report it in the
 [Issues](https://github.com/Argmaster/pygerber/issues/new/choose) section of our
@@ -75,8 +75,8 @@ pip install git+https://github.com/Argmaster/pygerber
 ## 📚 Documentation
 
 PyGerber has a online documentation hosted on Github Pages. It will be a great starting
-point for your journey with PyGerber. You can find documentation here
-[here](https://argmaster.github.io/pygerber/latest). If you are looking for
+point for your journey with PyGerber.
+[You can it here](https://argmaster.github.io/pygerber/latest). If you are looking for
 documentation of older version of PyGerber, please use version selector dropdown
 available next to the title in top bar menu.
 
