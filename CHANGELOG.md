@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## Pre-Release 3.0.0a2
+
+- Removed `Parser2` and related infrastructure. It was already replaced by `Parser` in
+  previous release, but I didn't have time to make sure all of dependencies were gone.
+- Removed most of the old documentation.
+- Moved `pygerber.gerberx3` to `pygerber.gerber`. I acknowledge this is a breaking
+  change, but using `gerberx3` as a package name when it in fact contained code mostly
+  compatible with more than just X3 was misleading.
+- Moved `pygerber.gerber.ast.builder` to `pygerber.builder.gerber`.
+- Moved `pygerber.vm.builder` to `pygerber.builder.rvmc`.
+- Added new documentation layout.
+- Added documentation for `GerberX3Builder` from `pygerber.builder.gerber` module.
+- Added `Quick start` guide to documentation.
+- Added `pygerber.gerber.pygments`, a Pygments lexer for Gerber files. To use it you
+  have to install `pygments` extras package (or just have pygments installed from other
+  source).
+- Added support for deprecated syntax construct of `D01` with code omitted.
+- Changed `pygerber.gerber.formatter` API and structure. Formatter options are no longer
+  directly passed to `Formatter` class, they are stored in dedicated `Options` class.
+- Added 2 high level formatter API functions available in `pygerber.gerber.formatter`:
+  `format`, `formats`.
+- Improved docstrings in `pygerber.builder.gerber`
+- Improved `pygerber.gerber.formatter` docstrings, especially ones related to formatter
+  options.
+- Changed `pygerber.gerber.api` to use `pygerber.builder.gerber`. This is a major change
+  in how this API works. I am planning to create some guide on how to migrate code from
+  PyGerber 2.4.x to 3.x.x, there is placeholder docs page for that.
+- Deleted implementation of command line interface. Unfortunately, command line
+  interface is not functional right now.
+
 ## Pre-Release 3.0.0a1
 
 - Fixed README headers.
