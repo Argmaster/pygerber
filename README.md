@@ -94,8 +94,9 @@ currently available ones:
 
 - Image generator (PNG/JPEG)
 - Code formatter
-- Language server
+- Language server (requires `language_server` extras)
   ([Visual Studio Code extension available](https://marketplace.visualstudio.com/items?itemName=argmaster.gerber-x3-x2-format-support))
+- Pygments Gerber syntax lexer plugin (requires `pygments` extras)
 
 ### 🖮 PyGerber APIs
 

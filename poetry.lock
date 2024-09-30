@@ -3147,11 +3147,12 @@ docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.link
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [extras]
-all = ["drawsvg", "lsprotocol", "pygls"]
+all = ["drawsvg", "lsprotocol", "pygls", "pygments"]
 language-server = ["lsprotocol", "pygls"]
+pygments = ["pygments"]
 svg = ["drawsvg"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<3.13"
-content-hash = "94b2f1be3b381bb67baa8c0b2e4cb76e3734d5400e8475baf150f41fa0a12a96"
+content-hash = "faba48c9974cde3494ea0ed15150cf652dd123a2216ab5e82c99bc8bcd8671ac"

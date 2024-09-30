@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pygerber"
-version = "3.0.0a0"
+version = "3.0.0a2"
 description = "Parsing, formatting and rendering toolkit for Gerber X3 file format"
 authors = ["Krzysztof Wisniewski <argmaster.world@gmail.com>"]
 license = "MIT"
@@ -59,6 +59,7 @@ pygls = { version = "^1.0.2", optional = true }
 lsprotocol = { version = "^2023.0.0a3", optional = true }
 drawsvg = { version = "^2.3.0", optional = true }
 typing-extensions = "^4.12.2"
+pygments = { version = "^2.18.0", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"
@@ -100,7 +101,8 @@ black = "^24.4.0"
 [tool.poetry.extras]
 language_server = ["pygls", "lsprotocol"]
 svg = ["drawsvg"]
-all = ["pygls", "lsprotocol", "drawsvg"]
+pygments = ["pygments"]
+all = ["pygls", "lsprotocol", "drawsvg", "pygments"]
 
 [build-system]
 requires = ["poetry-core"]
@@ -108,7 +110,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 pygerber = "pygerber.__main__:main"
-pygerber_language_server = "pygerber.gerber.language_server.__main__:main"
+
+[tool.poetry.plugins."pygments.lexers"]
+pygerber_docs_lexer = "pygerber.gerber.pygments:PyGerberDocsLexer"
+gerber_lexer = "pygerber.gerber.pygments:GerberLexer"
 
 [tool.poe.tasks]
 # -------------------------------------------------------------------------------------

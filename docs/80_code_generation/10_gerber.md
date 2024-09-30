@@ -22,7 +22,7 @@ method to create a new pad shape which can be added to the image with
 [`add_pad()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_pad)
 method.
 
-{{ include_code("test/examples/builder/gerber/_00_circle_pad.ex.py", "python", title="example.py", linenums="1") }}
+{{ include_code("test/examples/builder/gerber/_00_circle_pad.ex.py", "docspygerberlexer", title="example.py", linenums="1") }}
 
 {{ run_capture_stdout("python test/examples/builder/gerber/_00_circle_pad.ex.py", "python example.py", "gerber") }}
 
@@ -39,10 +39,10 @@ This is the rendered result of the example presented above:
 You can also add traces to the image with
 [`new_trace()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_trace)
 method and
-[`add_arc_trace()`](<(../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_arc_trace)>)
+[`add_arc_trace()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_arc_trace)
 method.
 
-{{ include_code("test/examples/builder/gerber/_10_circle_pad_and_trace.ex.py", "python", title="example.py", linenums="1") }}
+{{ include_code("test/examples/builder/gerber/_10_circle_pad_and_trace.ex.py", "docspygerberlexer", title="example.py", linenums="1") }}
 
 {{ run_capture_stdout("python test/examples/builder/gerber/_10_circle_pad_and_trace.ex.py", "python example.py", "gerber") }}
 
@@ -61,7 +61,7 @@ Commands creating graphical elements, like `add_pad()` or `add_trace()` return s
 for `new_pad()` or `new_trace()` methods. This way you don not have to retype
 coordinates for draws which are connected to previous objects.
 
-{{ include_code("test/examples/builder/gerber/_11_circle_pad_and_trace_with_reuse.ex.py", "python", title="example.py", linenums="1") }}
+{{ include_code("test/examples/builder/gerber/_11_circle_pad_and_trace_with_reuse.ex.py", "docspygerberlexer", title="example.py", linenums="1") }}
 
 {{ run_capture_stdout("python test/examples/builder/gerber/_11_circle_pad_and_trace_with_reuse.ex.py", "python example.py", "gerber") }}
 
@@ -86,7 +86,7 @@ After calling `create()`, you cannot and new elements to that custom pad.
 Custom pad is used in the same way as any other pad, to add it to the image you should
 use `add_pad()` method.
 
-{{ include_code("test/examples/builder/gerber/_20_custom_pad.ex.py", "python", title="custom_pad_example.py", linenums="1") }}
+{{ include_code("test/examples/builder/gerber/_20_custom_pad.ex.py", "docspygerberlexer", title="custom_pad_example.py", linenums="1") }}
 
 {{ run_capture_stdout("python test/examples/builder/gerber/_20_custom_pad.ex.py", "python custom_pad_example.py", "gerber") }}
 

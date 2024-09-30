@@ -11,6 +11,9 @@ from mkdocs_macros.plugin import MacrosPlugin
 from pygerber.gerber.api import GerberFile
 
 
+os.environ["MKDOCS_MODE"] = "1"
+
+
 def define_env(env: MacrosPlugin) -> None:
     """This is the hook for defining variables, macros and filters
 
