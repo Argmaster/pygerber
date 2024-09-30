@@ -32,42 +32,88 @@ class OnParserErrorEnum(Enum):
 
 @unique
 class FileTypeEnum(Enum):
-    """Enumeration of possible Gerber file types.
-
-    If file type is not listed here you can request adding it by creating an issue on
-    https://github.com/Argmaster/pygerber/issues
-    """
+    """Enumeration of possible Gerber file types."""
 
     COPPER = "COPPER"
+    """Copper layer."""
+
     MASK = "MASK"
+    """Mask layer."""
+
     PASTE = "PASTE"
+    """Paste layer."""
+
     SILK = "SILK"
+    """Silk layer."""
+
     EDGE = "EDGE"
+    """Edge layer."""
 
     PLATED = "PLATED"
+    """Plated layer."""
+
     NON_PLATED = "NON_PLATED"
+    """Non-plated layer."""
+
     PROFILE = "PROFILE"
+    """Profile layer."""
+
     SOLDERMASK = "SOLDERMASK"
+    """Solder mask layer."""
+
     LEGEND = "LEGEND"
+    """Legend layer."""
+
     COMPONENT = "COMPONENT"
+    """Component layer."""
+
     GLUE = "GLUE"
+    """Glue layer."""
+
     CARBONMASK = "CARBONMASK"
+    """Carbon mask layer."""
+
     GOLDMASK = "GOLDMASK"
+    """Gold mask layer."""
+
     HEATSINKMASK = "HEATSINKMASK"
+    """Heat sink mask layer."""
+
     PEELABLEMASK = "PEELABLEMASK"
+    """Peelable mask layer."""
+
     SILVERMASK = "SILVERMASK"
+    """Silver mask layer."""
+
     TINMASK = "TINMASK"
+    """Tin mask layer."""
+
     DEPTHROUT = "DEPTHROUT"
+    """Depth out layer."""
+
     VCUT = "VCUT"
+    """V cut layer."""
+
     VIAFILL = "VIAFILL"
+    """Via fill layer."""
+
     PADS = "PADS"
+    """Pads layer."""
 
     OTHER = "OTHER"
+    """Other layer."""
+
     UNDEFINED = "UNDEFINED"
+    """Unrecognized layer sentinel."""
 
     INFER_FROM_EXTENSION = "INFER_FROM_EXTENSION"
+    """Represents request to identify layer type from file extension."""
+
     INFER_FROM_ATTRIBUTES = "INFER_FROM_ATTRIBUTES"
+    """Represents request to identify layer type from file attributes."""
+
     INFER = "INFER"
+    """Represents request to identify layer type from file extension or attributes."""
 
     @classmethod
     def infer_from_attributes(cls, file_function: Optional[str] = None) -> FileTypeEnum:
