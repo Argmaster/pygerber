@@ -83,6 +83,7 @@ plugins:
           import:
             - https://docs.python.org/3/objects.inv
             - https://typing-extensions.readthedocs.io/en/latest/objects.inv
+            - https://pillow.readthedocs.io/en/stable/objects.inv
           # https://mkdocstrings.github.io/python/usage/configuration/docstrings/
           options:
             # https://mkdocstrings.github.io/python/usage/configuration/general/
