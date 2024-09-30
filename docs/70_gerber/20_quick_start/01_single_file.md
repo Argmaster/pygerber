@@ -148,4 +148,4 @@ object.
 
 {{ include_code("test/examples/gerberx3/api/_51_single_file_format.singlefile.py", "python", title="format_file.py", linenums="1") }}
 
-{{ run_capture_stdout("python test/examples/gerberx3/api/_51_single_file_format.singlefile.py", "python format_file.py") }}
+{{ run_capture_stdout("python test/examples/gerberx3/api/_51_single_file_format.singlefile.py", "python format_file.py", "gerber") }}
