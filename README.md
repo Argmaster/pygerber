@@ -40,9 +40,10 @@ with files compliant with the X3 standard but also with those compliant with X2,
 RS-274X, and RS-274D. Due to limited access to files in older standards and ambiguities
 within them, there is a risk that some older functionalities may behave incorrectly.
 
-If you have found a bug in the PyGerber library, please report it in the
-[Issues](https://github.com/Argmaster/pygerber/issues/new/choose) section of our
-project's repository. We will be glad to examine your report and possibly fix the
+If you have found a bug in the PyGerber library, please file a bug report with use of
+one of issue templates available on
+[Create new issue](https://github.com/Argmaster/pygerber/issues/new/choose) page in
+PyGerber repository. We will be glad to examine your report and possibly fix the
 problem.
 
 If you have any questions or suggestions, please open a new discussion thread in the
@@ -66,7 +67,8 @@ this:
 pip install pygerber[all]
 ```
 
-Alternatively, it is also possible to install it directly from repository:
+To install latest development version of PyGerber, you can use URL of the Github
+repository with `git+` prefix:
 
 ```
 pip install git+https://github.com/Argmaster/pygerber
@@ -86,17 +88,22 @@ PyGerber is licensed under MIT license. You can find full text of the license in
 [LICENSE](https://github.com/Argmaster/pygerber/blob/main/LICENSE.md) file in the root
 directory of the repository.
 
+Some of the testing assets may be licensed under different licenses. License files for
+those assets are available in the same directory as the assets themselves.
+
 ## 🛠 Tools
 
-Collection of tool available in PyGerber constantly grows. Most of the tools can be
-accessed both with command line and as a Python API. Below you can find list of all
-currently available ones:
+Collection of tools available in PyGerber constantly grows. Some of the tools can be
+accessed only with API, others provide command line interface too. Below you can find
+list of all currently available ones:
 
-- Image generator (PNG/JPEG)
-- Code formatter
+- Image renderer (PNG/JPEG) `[API]` `[CLI]`
+- Code formatter `[API]` `[CLI]`
+- Code generation `[API]`
 - Language server (requires `language_server` extras)
   ([Visual Studio Code extension available](https://marketplace.visualstudio.com/items?itemName=argmaster.gerber-x3-x2-format-support))
-- Pygments Gerber syntax lexer plugin (requires `pygments` extras)
+  `[CLI]`
+- Pygments Gerber syntax lexer plugin (requires `pygments` extras) `[CLI]`
 
 ### 🖮 PyGerber APIs
 
@@ -109,22 +116,45 @@ mentioned in documentation, as this may inflict suffering and damnation upon you
 Below you can find list of available APIs:
 
 - `pygerber.gerber.api`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=bug%2Cwaiting-for-checkboxes&projects=&template=pygerber_generic_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 - `pygerber.gerber.ast`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=bug%2Cwaiting-for-checkboxes&projects=&template=pygerber_generic_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 - `pygerber.gerber.ast.nodes`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=bug%2Cwaiting-for-checkboxes&projects=&template=pygerber_generic_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 - `pygerber.gerber.compiler`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=bug%2Cwaiting-for-checkboxes&projects=&template=pygerber_generic_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 - `pygerber.gerber.parser`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=bug%2Cwaiting-for-checkboxes&projects=&template=pygerber_generic_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 - `pygerber.gerber.formatter`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
 - `pygerber.builder.gerber`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-builder%2Cbug%2Cwaiting-for-checkboxes&projects=&template=builder_gerber.md&title=%5BGerber+Builder%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 - `pygerber.builder.rvmc`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
 - `pygerber.vm`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
 - `pygerber.vm.commands`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
 - `pygerber.vm.pillow`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
 - `pygerber.vm.types`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
 
-If you need something that is not reexported from those modules, eg. some exception
-class you need to catch, please open an
-[Issue](https://github.com/Argmaster/pygerber/issues/new/choose) so we can evaluate that
-issue and possibly add missing reexport.
+If you need a symbol that is not reexported from those modules, eg. some exception class
+you need to catch, please open an issue with corresponding `open issue` link so we can
+evaluate that issue and possibly add missing reexport. Don't worry about template being
+for bugs, we will figure that out in the process, just fill the fields in template
+according to guidelines contained in it.
+
+If you have found a bug in a particular part of PyGerber, please use `open issue` link
+next to module name above to open issue submission form. Alternatively you can choose
+one of the issue templates on
+[Create new issue](https://github.com/Argmaster/pygerber/issues/new/choose) page in
+PyGerber repository. Please fill the template according to guidelines contained in it to
+simplify process of reproducing the issue for maintainers. If there is no dedicated
+template, use
+[PyGerber Bug Report](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=bug%2Cwaiting-for-checkboxes&projects=&template=pygerber_generic_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E)
+template.
 
 ### 💻 PyGerber CLI
 
