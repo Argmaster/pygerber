@@ -3,7 +3,7 @@ name: PyGerber Bug Report
 about:
   Report a bug somewhere in PyGerber. If possible, please use more specific templates.
 title: "[PyGerber]: <when-i-am-doing-something-then-something-fails>"
-labels: ["language-server", "bug", "waiting-for-checkboxes"]
+labels: ["bug", "waiting-for-checkboxes"]
 projects: ["argmaster/3"]
 assignees: "Argmaster"
 ---

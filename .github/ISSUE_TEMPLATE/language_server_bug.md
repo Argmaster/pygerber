@@ -88,8 +88,8 @@ assignees: "Argmaster"
 > Agreements listed below are optional, but consider checking them if it is not harmful
 > for you to do so. You can greatly improve PyGerber doing so.
 
-- [ ] I want to contribute example source files attached to this issue in the test suite
-      of PyGerber for regression testing purposes.
+- [ ] I want to contribute example source files attached to this issue to the the test
+      suite of PyGerber for regression testing purposes.
 - [ ] I want to include separate LICENSE file for resource files attached as a result of
       an agreement described in first checkbox in this section.
 - [ ] I want to include separate README file for resource files attached as a result of
