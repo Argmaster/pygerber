@@ -6,6 +6,7 @@ import fnmatch
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Generator,
@@ -13,6 +14,7 @@ from typing import (
     Iterable,
     Optional,
     Sequence,
+    Tuple,
     TypeVar,
     Union,
     cast,
@@ -25,6 +27,9 @@ from filelock import FileLock
 from PIL import Image, ImageDraw
 
 from pygerber.gerber.api._enums import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
 ASSET_PATH_BASE = "test/assets/gerberx3"
 
@@ -181,6 +186,9 @@ REFERENCE_ASSET_SHA = "fd3d59618be220fc5554e03de2b18e66009c30c9"
 REFERENCE_ASSETS_MANAGER = ReferenceAssetsManager(REFERENCE_ASSET_SHA)
 
 
+_RGBA_PIXEL: TypeAlias = Tuple[int, int, int, int]
+
+
 def highlight_differences(first: Image.Image, second: Image.Image) -> Image.Image:
     """
     Highlight the differences between two images.
@@ -197,8 +205,8 @@ def highlight_differences(first: Image.Image, second: Image.Image) -> Image.Imag
     draw = ImageDraw.Draw(diff_img)
     for x in range(max_width):
         for y in range(max_height):
-            r1, g1, b1, a1 = img1_centered.getpixel((x, y))
-            r2, g2, b2, a2 = img2_centered.getpixel((x, y))
+            r1, g1, b1, a1 = cast(_RGBA_PIXEL, img1_centered.getpixel((x, y)))
+            r2, g2, b2, a2 = cast(_RGBA_PIXEL, img2_centered.getpixel((x, y)))
             draw.point(
                 (x, y),
                 fill=(
