@@ -73,6 +73,7 @@ from pygerber.gerber.compiler import compile
 from pygerber.gerber.spec import rev_2024_05 as spec
 from pygerber.vm import render
 from pygerber.vm.pillow import PillowResult
+from pygerber.vm.types.style import Style
 
 if TYPE_CHECKING:
     from PIL import Image
@@ -466,11 +467,14 @@ class GerberHoverCreator(AstVisitor):
             )
         nodes.extend(extra_commands)
 
-        rvmc = compile(File(nodes=nodes))
-        result = render(rvmc, dpmm=100)
+        bytecode = compile(File(nodes=nodes))
+        temp_result = render(bytecode, dpmm=1)
+
+        dpmm = 200 / temp_result.main_box.width
+        result = render(bytecode, dpmm=dpmm)
         assert isinstance(result, PillowResult)
 
-        tag = self._base64_image_tag(result.get_image())
+        tag = self._base64_image_tag(result.get_image(Style.presets.COPPER_ALPHA))
 
         self._print_line(tag)
 
