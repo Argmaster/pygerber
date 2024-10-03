@@ -406,10 +406,10 @@ class GerberHoverCreator(AstVisitor):
 
     def _base64_image_tag(self, image: Image.Image) -> str:
         buffered = io.BytesIO()
-        image.save(buffered, format="JPEG")
+        image.save(buffered, format="PNG")
         image_bytes = buffered.getvalue()
         encoded_image = base64.b64encode(image_bytes).decode("utf-8")
-        return f'<p align="center"><img src="data:image/jpeg;base64,{encoded_image}" alt="Embedded Image" /></p>'
+        return f'<p align="center"><img src="data:image/png;base64,{encoded_image}" alt="Embedded Image" /></p>'
 
     def _visualize_draw_op(self, extra_commands: list[Node]) -> None:
         nodes: list[Node] = []
