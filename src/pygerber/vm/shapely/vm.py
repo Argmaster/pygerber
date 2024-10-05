@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Callable, Generator, Optional, Sequence, TextIO
 
 import numpy as np
-from shapely import Polygon
 
 from pygerber.vm.commands import Arc, Line, Shape
 from pygerber.vm.commands.paste import PasteLayer
@@ -37,16 +36,13 @@ def is_shapely_available() -> bool:
 
     if _IS_shapely_AVAILABLE is None:
         try:
-            _spec_pygls = importlib.util.find_spec("pygls")
-            _spec_lsprotocol = importlib.util.find_spec("lsprotocol")
+            _spec_shapely = importlib.util.find_spec("shapely")
 
         except (ImportError, ValueError):
-            return False
+            _IS_shapely_AVAILABLE = False
 
         else:
-            _IS_shapely_AVAILABLE = (_spec_pygls is not None) and (
-                _spec_lsprotocol is not None
-            )
+            _IS_shapely_AVAILABLE = _spec_shapely is not None
 
     return _IS_shapely_AVAILABLE
 
@@ -143,7 +139,7 @@ class ShapelyEagerLayer(EagerLayer):
         if not is_shapely_available():
             raise ShapelyNotInstalledError
 
-        self.shape: list[Polygon] = []
+        self.shape: list[sh.Polygon] = []
 
 
 class ShapelyDeferredLayer(DeferredLayer):
@@ -167,11 +163,11 @@ class ShapelyVirtualMachine(VirtualMachine):
         grid_size: Optional[float] = None,
     ) -> None:
         super().__init__()
-        self.angle_length_to_segment_count = angle_length_to_segment_count
-        self.grid_size = grid_size
-
         if not is_shapely_available():
             raise ShapelyNotInstalledError
+
+        self.angle_length_to_segment_count = angle_length_to_segment_count
+        self.grid_size = grid_size
 
     @property
     def layer(self) -> ShapelyEagerLayer:

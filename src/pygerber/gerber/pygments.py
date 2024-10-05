@@ -15,16 +15,13 @@ def is_pygments_available() -> bool:
 
     if _IS_PYGMENTS_AVAILABLE is None:
         try:
-            _spec_pygls = importlib.util.find_spec("pygls")
-            _spec_lsprotocol = importlib.util.find_spec("lsprotocol")
+            _spec_pygments = importlib.util.find_spec("pygments")
 
         except (ImportError, ValueError):
-            return False
+            _IS_PYGMENTS_AVAILABLE = False
 
         else:
-            _IS_PYGMENTS_AVAILABLE = (_spec_pygls is not None) and (
-                _spec_lsprotocol is not None
-            )
+            _IS_PYGMENTS_AVAILABLE = _spec_pygments is not None
 
     return _IS_PYGMENTS_AVAILABLE
 
