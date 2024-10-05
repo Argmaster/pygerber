@@ -12,10 +12,14 @@ from contextlib import suppress
 from pathlib import Path
 from typing import Callable, Generator, Optional, Sequence, TextIO
 
+import numpy as np
+
 from pygerber.vm.commands import Arc, Line, Shape
+from pygerber.vm.commands.paste import PasteLayer
 from pygerber.vm.rvmc import RVMC
 from pygerber.vm.shapely.errors import ShapelyNotInstalledError
 from pygerber.vm.types import Box, LayerID, NoMainLayerError, Style, Vector
+from pygerber.vm.types.errors import PasteDeferredLayerNotAllowedError
 from pygerber.vm.vm import DeferredLayer, EagerLayer, Layer, Result, VirtualMachine
 
 FULL_ANGLE_DEGREES = 360
@@ -24,6 +28,9 @@ DECREASE_ANGLE = (operator.sub, operator.gt)
 INCREASE_ANGLE = (operator.add, operator.lt)
 
 _IS_shapely_AVAILABLE: Optional[bool] = None
+
+
+GRID_SIZE = 1e-9
 
 
 def is_shapely_available() -> bool:
@@ -58,10 +65,12 @@ class ShapelyResult(Result):
     `ShapelyVirtualMachine` class as a result of executing rendering instruction.
     """
 
-    def __init__(self, main_box: Box, shape: sh.geometry.base.BaseGeometry) -> None:
+    def __init__(self, main_box: Box, shape: sh.MultiPolygon) -> None:
         super().__init__(main_box)
         if not is_shapely_available():
             raise ShapelyNotInstalledError
+
+        assert isinstance(shape, sh.MultiPolygon), type(shape)
         self.shape = shape
 
     def save_svg(
@@ -89,6 +98,9 @@ class ShapelyResult(Result):
         elif isinstance(destination, TextIO):
             self._dump_svg(destination, color)
 
+        else:
+            raise NotImplementedError(type(destination))
+
     def _dump_svg(self, out: TextIO, color: Style) -> None:
         out.write(
             '<svg xmlns="http://www.w3.org/2000/svg" '
@@ -105,7 +117,7 @@ class ShapelyResult(Result):
         width = dx
         height = dy
 
-        fill_color = color.foreground
+        fill_color = color.foreground.to_hex()
 
         view_box = f"{xmin} {ymin} {dx} {dy}"
         transform = f"matrix(1,0,0,-1,0,{ymax + ymin})"
@@ -135,7 +147,8 @@ class ShapelyEagerLayer(EagerLayer):
         super().__init__(layer_id, box, origin)
         if not is_shapely_available():
             raise ShapelyNotInstalledError
-        self.shape: sh.geometry.base.BaseGeometry = sh.MultiPolygon()
+
+        self.shape = sh.MultiPolygon()
 
 
 class ShapelyDeferredLayer(DeferredLayer):
@@ -154,7 +167,7 @@ class ShapelyVirtualMachine(VirtualMachine):
     def __init__(
         self,
         angle_length_to_segment_count: Callable[[float], int] = lambda angle_length: (
-            int(math.log(abs(angle_length) + 1.2) * 100)
+            int((math.log((abs(angle_length) + 1)) + 1) * 20)
         ),
     ) -> None:
         super().__init__()
@@ -194,11 +207,12 @@ class ShapelyVirtualMachine(VirtualMachine):
                     points.append(start)
 
                 points.extend(self._calculate_arc_points(segment))
-                end = (segment.end.x, segment.end.y)
 
-                points.append(end)
+                end = (segment.end.x, segment.end.y)
+                if end != points[-1]:
+                    points.append(end)
             else:
-                raise NotImplementedError
+                raise NotImplementedError(type(segment))
 
         if points:
             points.append(points[0])
@@ -209,23 +223,35 @@ class ShapelyVirtualMachine(VirtualMachine):
         self, points: Sequence[tuple[float, float]], *, is_negative: bool
     ) -> None:
         """Draw a polygon."""
-        layer = self.layer
-        x_offset = layer.origin.x
-        y_offset = layer.origin.y
+        polygon = sh.Polygon(points)
 
-        polygon = sh.Polygon(
-            [
-                (
-                    x - x_offset,
-                    y - y_offset,
-                )
-                for (x, y) in points
-            ],
-        )
+        layer = self.layer
+        x_offset = -layer.origin.x
+        y_offset = -layer.origin.y
+
+        transformed_shape = sh.transform(
+            polygon,
+            lambda p: np.array(
+                [
+                    p[:, 0] + x_offset,
+                    p[:, 1] + y_offset,
+                ]
+            ).T,
+        ).buffer(0)
+
         if is_negative:
-            self.layer.shape = self.layer.shape.difference(polygon)
+            shape = self.layer.shape.difference(transformed_shape, grid_size=GRID_SIZE)
         else:
-            self.layer.shape = self.layer.shape.union(polygon)
+            shape = self.layer.shape.union(transformed_shape, grid_size=GRID_SIZE)
+
+        if isinstance(shape, sh.Polygon):
+            shape = sh.MultiPolygon([shape])
+        elif isinstance(shape, sh.MultiPolygon):
+            shape = sh.MultiPolygon(shape)
+        else:
+            raise NotImplementedError(type(shape))
+
+        self.layer.shape = shape
 
     def _calculate_arc_points(
         self, command: Arc
@@ -280,8 +306,6 @@ class ShapelyVirtualMachine(VirtualMachine):
 
         radius = command.get_radius()
 
-        yield command.start.xy
-
         for angle in angle_generator:
             offset_vector = Vector(
                 x=radius * math.cos(math.radians(angle)),
@@ -289,8 +313,6 @@ class ShapelyVirtualMachine(VirtualMachine):
             )
 
             yield (command.center + offset_vector).xy
-
-        yield command.end.xy
 
     def _generate_arc_angles(
         self,
@@ -305,6 +327,43 @@ class ShapelyVirtualMachine(VirtualMachine):
             yield current_angle
             current_angle = apply_delta(current_angle, delta)
         yield end
+
+    def on_paste_layer_eager(self, command: PasteLayer) -> None:
+        """Visit `PasteLayer` command."""
+        source_layer = self.get_layer(command.source_layer_id)
+
+        if isinstance(source_layer, ShapelyDeferredLayer):
+            raise PasteDeferredLayerNotAllowedError(command.source_layer_id)
+
+        assert isinstance(source_layer, ShapelyEagerLayer), type(source_layer)
+
+        layer = self.layer
+        x_offset = -layer.origin.x + command.center.x
+        y_offset = -layer.origin.y + command.center.y
+
+        transformed_shape = sh.transform(
+            source_layer.shape,
+            lambda p: np.array(
+                [
+                    p[:, 0] + x_offset,
+                    p[:, 1] + y_offset,
+                ]
+            ).T,
+        ).buffer(0)
+
+        if command.is_negative:
+            shape = self.layer.shape.difference(transformed_shape, grid_size=GRID_SIZE)
+        else:
+            shape = self.layer.shape.union(transformed_shape, grid_size=GRID_SIZE)
+
+        if isinstance(shape, sh.Polygon):
+            shape = sh.MultiPolygon([shape])
+        elif isinstance(shape, sh.MultiPolygon):
+            shape = sh.MultiPolygon(shape)
+        else:
+            raise NotImplementedError(type(shape))
+
+        self.layer.shape = shape
 
     def run(self, rvmc: RVMC) -> ShapelyResult:
         """Execute all commands."""
