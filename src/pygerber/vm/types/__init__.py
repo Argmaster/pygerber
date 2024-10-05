@@ -15,6 +15,7 @@ from pygerber.vm.types.errors import (
 )
 from pygerber.vm.types.layer_id import LayerID
 from pygerber.vm.types.matrix import Matrix3x3
+from pygerber.vm.types.style import Style
 from pygerber.vm.types.vector import Vector
 
 __all__ = [
@@ -30,4 +31,5 @@ __all__ = [
     "LayerAlreadyExistsError",
     "PasteDeferredLayerNotAllowedError",
     "NoMainLayerError",
+    "Style",
 ]

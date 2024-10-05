@@ -7,18 +7,26 @@ from typing import TYPE_CHECKING, Optional, Sequence
 import pytest
 from PIL import Image
 
-from pygerber.builder.rvmc import RvmcBuilder
-from pygerber.vm.commands import Command, EndLayer, PasteLayer, Shape, StartLayer
-from pygerber.vm.pillow.vm import PillowVirtualMachine
-from pygerber.vm.rvmc import RVMC
-from pygerber.vm.types.box import Box
-from pygerber.vm.types.layer_id import LayerID
-from pygerber.vm.types.style import Style
-from pygerber.vm.types.vector import Vector
+from pygerber.vm import RVMC
+from pygerber.vm.commands import Command, EndLayer, Shape
+from pygerber.vm.pillow import PillowVirtualMachine
+from pygerber.vm.types import Box, Style, Vector
 from test.conftest import TEST_DIRECTORY
 from test.gerberx3.test_builder.test_rvmc import (
     build_main_origin_x_y_layer_origin_x_y_paste_x_y,
     build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark,
+)
+from test.test_vm.command_builders import (
+    make_circle_in_center_fixed_canvas,
+    make_circle_over_circle_in_center_fixed_canvas,
+    make_main_layer,
+    make_obround_horizontal_in_center_fixed_canvas,
+    make_obround_vertical_in_center_fixed_canvas,
+    make_paste_circle_over_circle_in_center_fixed_canvas,
+    make_paste_circle_over_paste_circle_in_center_dynamic_canvas,
+    make_paste_negative_rectangle_in_center_fixed_canvas,
+    make_paste_rectangle_in_center_fixed_canvas,
+    make_rectangle_in_center_fixed_canvas,
 )
 
 if TYPE_CHECKING:
@@ -56,123 +64,47 @@ def compare(image: Image.Image) -> None:
         pytest.skip(f"Reference image not found: {reference_image_path}")
 
 
-def make_main_layer(box: Optional[Box], origin: Optional[Vector] = None) -> StartLayer:
-    return StartLayer(
-        id=LayerID(id="%main%"), box=box, origin=origin or Vector(x=0, y=0)
-    )
-
-
-def make_layer(
-    id_: str, box: Optional[Box], origin: Optional[Vector] = None
-) -> StartLayer:
-    return StartLayer(id=LayerID(id=id_), box=box, origin=origin or Vector(x=0, y=0))
-
-
 def test_draw_rectangle_in_center() -> None:
-    commands = [
-        make_main_layer(
-            Box.from_center_width_height((5, 5), 15, 10), origin=Vector(x=5, y=5)
-        ),
-        Shape.new_rectangle((5, 5), 2, 1, is_negative=False),
-        EndLayer(),
-    ]
+    commands = make_rectangle_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
 def test_draw_obround_horizontal_in_center() -> None:
-    commands = [
-        make_main_layer(Box.from_center_width_height((0, 0), 5, 5)),
-        Shape.new_obround((0, 1), 2, 1, is_negative=False),
-        Shape.new_rectangle((0, -1), 2, 1, is_negative=False),
-        EndLayer(),
-    ]
+    commands = make_obround_horizontal_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
 def test_draw_obround_vertical_in_center() -> None:
-    commands = [
-        make_main_layer(Box.from_center_width_height((0, 0), 5, 5)),
-        Shape.new_obround((-1, 0), 1, 2, is_negative=False),
-        Shape.new_rectangle((1, 0), 1, 2, is_negative=False),
-        EndLayer(),
-    ]
+    commands = make_obround_vertical_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
 def test_draw_circle_in_center() -> None:
-    commands = [
-        make_main_layer(
-            Box.from_center_width_height((5, 5), 15, 10), origin=Vector(x=5, y=5)
-        ),
-        Shape.new_circle((5, 5), 2, is_negative=False),
-        EndLayer(),
-    ]
+    commands = make_circle_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
 def test_draw_circle_over_circle_in_center() -> None:
-    commands = [
-        make_main_layer(Box.from_center_width_height((5, 5), 15, 10)),
-        Shape.new_circle((5, 5), 2, is_negative=False),
-        Shape.new_circle((5, 5), 1, is_negative=True),
-        EndLayer(),
-    ]
+    commands = make_circle_over_circle_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
 def test_paste_circle_over_circle_in_center() -> None:
-    builder = RvmcBuilder()
-    with builder.layer(box=Box.from_center_width_height((0, 0), 15, 10)) as layer:
-        with layer.layer("D11") as d11:
-            d11.circle((0, 0), 2, is_negative=False)
-            d11.circle((0, 0), 1, is_negative=True)
-
-        layer.paste(d11, (0, 0), is_negative=False)
-
-    compare(run_rvmc(100, builder.get_rvmc()))
+    compare(run_rvmc(100, make_paste_circle_over_circle_in_center_fixed_canvas()))
 
 
 def test_paste_circle_over_paste_circle_in_center() -> None:
-    builder = RvmcBuilder()
-    with builder.layer() as layer:
-        with layer.layer("D10") as d10:
-            d10.circle((0, 0), 2, is_negative=False)
-        with layer.layer("D11") as d11:
-            d11.circle((0, 0), 1, is_negative=False)
-
-        layer.paste(d10, (0, 0), is_negative=False)
-        layer.paste(d11, (0, 0), is_negative=True)
-
-    compare(run_rvmc(100, builder.get_rvmc()))
+    compare(
+        run_rvmc(100, make_paste_circle_over_paste_circle_in_center_dynamic_canvas())
+    )
 
 
 def test_paste_rectangle_in_center() -> None:
-    commands = [
-        make_main_layer(Box.from_center_width_height((5, 5), 15, 10), Vector(x=5, y=5)),
-        make_layer(
-            "rect", Box.from_center_width_height((0, 0), 5, 5), Vector(x=0, y=0)
-        ),
-        Shape.new_rectangle((0, 0), 2, 1, is_negative=False),
-        EndLayer(),
-        Shape.new_rectangle((5, 5), 3, 2, is_negative=False),
-        Shape.new_rectangle((5, 5), 2.8, 1.8, is_negative=True),
-        PasteLayer.new("rect", (5, 5)),
-        EndLayer(),
-    ]
-    compare(run(100, commands))
+    compare(run(100, make_paste_rectangle_in_center_fixed_canvas()))
 
 
 def test_paste_negative_rectangle_in_center() -> None:
-    commands = [
-        make_main_layer(Box.from_center_width_height((5, 5), 15, 10), Vector(x=5, y=5)),
-        make_layer("rect", Box.from_center_width_height((0, 0), 5, 5)),
-        Shape.new_rectangle((0, 0), 2, 1, is_negative=False),
-        EndLayer(),
-        Shape.new_rectangle((5, 5), 3, 2, is_negative=False),
-        PasteLayer.new("rect", (5, 5), is_negative=True),
-        EndLayer(),
-    ]
-    compare(run(100, commands))
+    compare(run(100, make_paste_negative_rectangle_in_center_fixed_canvas()))
 
 
 class TestCWArc:
