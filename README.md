@@ -132,13 +132,15 @@ Below you can find list of available APIs:
 - `pygerber.builder.rvmc`
   ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
 - `pygerber.vm`
-  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=virtual-machine%2Cbug%2Cwaiting-for-checkboxes&projects=&template=pygerber_vm_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 - `pygerber.vm.commands`
-  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
-- `pygerber.vm.pillow`
-  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=virtual-machine%2Cbug%2Cwaiting-for-checkboxes&projects=&template=pygerber_vm_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 - `pygerber.vm.types`
-  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=gerber-formatter%2Cbug%2Cwaiting-for-checkboxes&projects=&template=gerber_formatter_bug.md&title=%5BGerber+Formatter%5D%3A+%3Cincorrect-formatting-of-such-and-such-structure%3E))
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=virtual-machine%2Cbug%2Cwaiting-for-checkboxes&projects=&template=pygerber_vm_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
+- `pygerber.vm.pillow`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=virtual-machine%2Cbug%2Cwaiting-for-checkboxes&projects=&template=pygerber_vm_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
+- `pygerber.vm.shapely`
+  ([open issue](https://github.com/Argmaster/pygerber/issues/new?assignees=Argmaster&labels=virtual-machine%2Cbug%2Cwaiting-for-checkboxes&projects=&template=pygerber_vm_bug.md&title=%5BPyGerber%5D%3A+%3Cwhen-i-am-doing-something-then-something-fails%3E))
 
 If you need a symbol that is not reexported from those modules, eg. some exception class
 you need to catch, please open an issue with corresponding `open issue` link so we can
