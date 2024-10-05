@@ -25,7 +25,11 @@ DrawCmdT: TypeAlias = Union[Shape, PasteLayer]
 
 
 class Result:
-    """Result of drawing."""
+    """The `Result` class is a wrapper around items returned from virtual machine.
+
+    It is used as a base class for results returned from vms extending `VirtualMachine`
+    class.
+    """
 
     main_box: Box
 

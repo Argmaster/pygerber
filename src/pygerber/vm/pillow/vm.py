@@ -13,11 +13,14 @@ from PIL import Image, ImageDraw, ImageOps
 from pygerber.vm.commands import Arc, Line, PasteLayer, Shape
 from pygerber.vm.pillow.errors import DPMMTooSmallError
 from pygerber.vm.rvmc import RVMC
-from pygerber.vm.types.box import Box
-from pygerber.vm.types.errors import NoMainLayerError, PasteDeferredLayerNotAllowedError
-from pygerber.vm.types.layer_id import LayerID
-from pygerber.vm.types.style import Style
-from pygerber.vm.types.vector import Vector
+from pygerber.vm.types import (
+    Box,
+    LayerID,
+    NoMainLayerError,
+    PasteDeferredLayerNotAllowedError,
+    Style,
+    Vector,
+)
 from pygerber.vm.vm import (
     DeferredLayer,
     DrawCmdT,
@@ -36,7 +39,9 @@ MIN_SEGMENT_COUNT = 12
 
 
 class PillowResult(Result):
-    """Result of drawing commands."""
+    """The `PillowResult` class is a wrapper around items returned
+    `PillowVirtualMachine` class as a result of executing rendering instruction.
+    """
 
     def __init__(self, main_box: Box, image: Optional[Image.Image]) -> None:
         super().__init__(main_box)
@@ -138,13 +143,15 @@ class PillowDeferredLayer(DeferredLayer):
 
 
 class PillowVirtualMachine(VirtualMachine):
-    """Execute drawing commands using Pillow library."""
+    """The `PillowVirtualMachine` class is a concrete implementation of
+    `VirtualMachine` which uses Shapely library for rendering commands.
+    """
 
     def __init__(self, dpmm: int) -> None:
         super().__init__()
         self.dpmm = dpmm
         self.angle_length_to_segment_count = lambda angle_length: (
-            segment_count
+            int(segment_count)
             if (segment_count := angle_length * 2) > MIN_SEGMENT_COUNT
             else MIN_SEGMENT_COUNT
         )
@@ -223,7 +230,6 @@ class PillowVirtualMachine(VirtualMachine):
             raise DPMMTooSmallError(self.dpmm)
 
         angle_delta = angle_delta / segment_count
-
         assert angle_delta > 0
 
         angle_generator: Generator[float, None, None]

@@ -22,13 +22,18 @@ __all__ = [
 
 
 def render(
-    rvmc: RVMC, *, backend: Literal["pillow"] = "pillow", **options: Any
+    rvmc: RVMC, *, backend: Literal["pillow", "shapely"] = "pillow", **options: Any
 ) -> Result:
     """Render RVMC code using given builder."""
     if backend == "pillow":
         from pygerber.vm.pillow import PillowVirtualMachine
 
         return PillowVirtualMachine(**options).run(rvmc)
+
+    if backend == "shapely":
+        from pygerber.vm.shapely import ShapelyVirtualMachine
+
+        return ShapelyVirtualMachine(**options).run(rvmc)
 
     msg = f"Backend '{backend}' is not supported."  # type: ignore[unreachable]
     raise NotImplementedError(msg)

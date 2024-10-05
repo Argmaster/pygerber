@@ -22,7 +22,7 @@ def is_language_server_available() -> bool:
             _spec_lsprotocol = importlib.util.find_spec("lsprotocol")
 
         except (ImportError, ValueError):
-            return False
+            _IS_LANGUAGE_SERVER_AVAILABLE = False
 
         else:
             _IS_LANGUAGE_SERVER_AVAILABLE = (_spec_pygls is not None) and (
