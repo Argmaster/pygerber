@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Callable, Generator, Optional, Sequence, TextIO
 
 import numpy as np
+from shapely import Polygon
 
 from pygerber.vm.commands import Arc, Line, Shape
 from pygerber.vm.commands.paste import PasteLayer
@@ -28,9 +29,6 @@ DECREASE_ANGLE = (operator.sub, operator.gt)
 INCREASE_ANGLE = (operator.add, operator.lt)
 
 _IS_shapely_AVAILABLE: Optional[bool] = None
-
-
-GRID_SIZE = 1e-9
 
 
 def is_shapely_available() -> bool:
@@ -55,9 +53,7 @@ def is_shapely_available() -> bool:
 
 with suppress(Exception):
     import shapely as sh
-
-
-MIN_SEGMENT_COUNT = 12
+    import shapely.strtree as shtree
 
 
 class ShapelyResult(Result):
@@ -65,12 +61,11 @@ class ShapelyResult(Result):
     `ShapelyVirtualMachine` class as a result of executing rendering instruction.
     """
 
-    def __init__(self, main_box: Box, shape: sh.MultiPolygon) -> None:
+    def __init__(self, main_box: Box, shape: sh.geometry.base.BaseGeometry) -> None:
         super().__init__(main_box)
         if not is_shapely_available():
             raise ShapelyNotInstalledError
 
-        assert isinstance(shape, sh.MultiPolygon), type(shape)
         self.shape = shape
 
     def save_svg(
@@ -148,7 +143,7 @@ class ShapelyEagerLayer(EagerLayer):
         if not is_shapely_available():
             raise ShapelyNotInstalledError
 
-        self.shape = sh.MultiPolygon()
+        self.shape: list[Polygon] = []
 
 
 class ShapelyDeferredLayer(DeferredLayer):
@@ -167,11 +162,14 @@ class ShapelyVirtualMachine(VirtualMachine):
     def __init__(
         self,
         angle_length_to_segment_count: Callable[[float], int] = lambda angle_length: (
-            int((math.log((abs(angle_length) + 1)) + 1) * 20)
+            int(abs(angle_length) * 0.4 + 24)
         ),
+        grid_size: Optional[float] = None,
     ) -> None:
         super().__init__()
         self.angle_length_to_segment_count = angle_length_to_segment_count
+        self.grid_size = grid_size
+
         if not is_shapely_available():
             raise ShapelyNotInstalledError
 
@@ -240,18 +238,13 @@ class ShapelyVirtualMachine(VirtualMachine):
         ).buffer(0)
 
         if is_negative:
-            shape = self.layer.shape.difference(transformed_shape, grid_size=GRID_SIZE)
-        else:
-            shape = self.layer.shape.union(transformed_shape, grid_size=GRID_SIZE)
+            tree = shtree.STRtree(self.layer.shape)
+            idx = tree.query(transformed_shape)
 
-        if isinstance(shape, sh.Polygon):
-            shape = sh.MultiPolygon([shape])
-        elif isinstance(shape, sh.MultiPolygon):
-            shape = sh.MultiPolygon(shape)
+            for i in idx.reshape(-1):
+                self.layer.shape[i] = self.layer.shape[i].difference(transformed_shape)
         else:
-            raise NotImplementedError(type(shape))
-
-        self.layer.shape = shape
+            self.layer.shape.append(transformed_shape)
 
     def _calculate_arc_points(
         self, command: Arc
@@ -341,29 +334,29 @@ class ShapelyVirtualMachine(VirtualMachine):
         x_offset = -layer.origin.x + command.center.x
         y_offset = -layer.origin.y + command.center.y
 
-        transformed_shape = sh.transform(
-            source_layer.shape,
-            lambda p: np.array(
-                [
-                    p[:, 0] + x_offset,
-                    p[:, 1] + y_offset,
-                ]
-            ).T,
-        ).buffer(0)
+        transformed_shape = [
+            sh.transform(
+                geom,
+                lambda p: np.array(
+                    [
+                        p[:, 0] + x_offset,
+                        p[:, 1] + y_offset,
+                    ]
+                ).T,
+            )
+            for geom in source_layer.shape
+        ]
 
         if command.is_negative:
-            shape = self.layer.shape.difference(transformed_shape, grid_size=GRID_SIZE)
-        else:
-            shape = self.layer.shape.union(transformed_shape, grid_size=GRID_SIZE)
+            dest_layer_tree = shtree.STRtree(self.layer.shape)
+            dest_idx = dest_layer_tree.query(transformed_shape).T
 
-        if isinstance(shape, sh.Polygon):
-            shape = sh.MultiPolygon([shape])
-        elif isinstance(shape, sh.MultiPolygon):
-            shape = sh.MultiPolygon(shape)
+            for i, j in dest_idx:
+                self.layer.shape[j] = self.layer.shape[j].difference(
+                    transformed_shape[i]
+                )
         else:
-            raise NotImplementedError(type(shape))
-
-        self.layer.shape = shape
+            self.layer.shape.extend(transformed_shape)
 
     def run(self, rvmc: RVMC) -> ShapelyResult:
         """Execute all commands."""
@@ -375,4 +368,4 @@ class ShapelyVirtualMachine(VirtualMachine):
             raise NoMainLayerError
 
         assert isinstance(layer, ShapelyEagerLayer)
-        return ShapelyResult(layer.box, layer.shape)
+        return ShapelyResult(layer.box, sh.unary_union(layer.shape))
