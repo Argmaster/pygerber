@@ -13,6 +13,9 @@ class Asset:
     def load(self) -> str:
         raise NotImplementedError
 
+    def __str__(self) -> str:
+        return self.__class__.__qualname__ + "::" + self.path.name
+
 
 class TextAsset(Asset):
     def load(self, encoding: str = "utf-8", **kwargs: Any) -> str:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
+from typing import Optional
 
 from pygerber.gerber.ast.ast_visitor import AstVisitor
 from pygerber.gerber.ast.nodes import (
@@ -69,6 +70,7 @@ from pygerber.gerber.ast.nodes import (
     Code7,
     Code20,
     Code21,
+    Code22,
     Constant,
     CoordinateI,
     CoordinateJ,
@@ -123,6 +125,13 @@ class BasePass(AstVisitor):
 
     def __init__(self) -> None:
         """Initialize base pass."""
+        self._original: Optional[File] = None
+
+    @property
+    def original(self) -> File:
+        """Get original AST."""
+        assert self._original is not None
+        return self._original
 
     def on_ab(self, node: AB) -> AB:
         """Handle `AB` root node."""
@@ -690,6 +699,17 @@ class BasePass(AstVisitor):
             rotation=node.rotation.visit(self),
         )
 
+    def on_code_22(self, node: Code22) -> Code22:
+        """Handle `Code22` node."""
+        return Code22.model_construct(
+            exposure=node.exposure.visit(self),
+            width=node.width.visit(self),
+            height=node.height.visit(self),
+            x_lower_left=node.x_lower_left.visit(self),
+            y_lower_left=node.y_lower_left.visit(self),
+            rotation=node.rotation.visit(self),
+        )
+
     def on_as(self, node: AS) -> AS:
         """Handle `AS` node."""
         return AS.model_construct(
@@ -769,7 +789,6 @@ class BasePass(AstVisitor):
         finally:
             self.on_end_of_file(node)
 
-        del self.original
         return node
 
     def on_invalid(self, node: Invalid) -> Invalid:
@@ -778,10 +797,10 @@ class BasePass(AstVisitor):
 
     def optimize(self, node: File) -> File:
         """Optimize AST."""
-        self.original = node
+        self._original = node
         try:
             result = node.visit(self)
         finally:
-            del self.original
+            self._original = None
 
         return result
