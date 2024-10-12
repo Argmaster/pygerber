@@ -1,8 +1,10 @@
+from pygerber.gerber.api import GerberFile, CompositeView, FileTypeEnum
+
 from pygerber.examples import ExamplesEnum, load_example
-from pygerber.gerber.api import Project, GerberFile, FileTypeEnum
 
+gerber_source_code = load_example(ExamplesEnum.UCAMCO_2_11_2)
 
-project = Project(
+project = CompositeView(
     [
         GerberFile.from_str(
             load_example(ExamplesEnum.simple_2layer_F_Cu),
@@ -22,4 +24,5 @@ project = Project(
         ),
     ],
 )
-print(project)
+image = project.render_with_pillow(dpmm=40)
+image.get_image().save("output.png")

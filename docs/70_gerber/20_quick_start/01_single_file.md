@@ -3,10 +3,10 @@
 This guide shows how to create and use `GerberFile` class instances to render and format
 individual Gerber files.
 
-## Creating `GerberFile` object
+## Creating `GerberFile` instance
 
-To perform any operations on Gerber file(s), like rendering or formatting, you have to
-create
+To perform any operations on individual Gerber file(s), like rendering or formatting,
+you have to create
 [`GerberFile`](../../reference/pygerber/gerber/api/__init__.md#pygerber.gerber.api.GerberFile)
 class instance wrapping actual Gerber code. Recommended way is to use one of 3 factory
 methods provided by `GerberFile` class: `from_str()`, `from_file()` or `from_buffer()`

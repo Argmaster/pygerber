@@ -4,6 +4,11 @@ Gerber X3/X2 files.
 
 from __future__ import annotations
 
+from pygerber.gerber.api._composite_view import (
+    CompositeImage,
+    CompositePillowImage,
+    CompositeView,
+)
 from pygerber.gerber.api._enums import (
     DEFAULT_ALPHA_COLOR_MAP,
     DEFAULT_COLOR_MAP,
@@ -27,13 +32,13 @@ from pygerber.gerber.api._gerber_job_file import (
     ProjectId,
     Size,
 )
-from pygerber.gerber.api._project import CompositeImage, Project
 from pygerber.gerber.formatter.options import Options
 
 __all__ = [
     "FileTypeEnum",
     "GerberFile",
-    "Project",
+    "CompositeView",
+    "CompositePillowImage",
     "Units",
     "ImageSpace",
     "Image",

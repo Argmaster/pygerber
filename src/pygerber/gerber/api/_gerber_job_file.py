@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, ClassVar, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class _ModelType(BaseModel):
     """Model Type."""
 
-    config = ConfigDict(
+    config: ClassVar[ConfigDict] = ConfigDict(
         extra="allow",
     )
 

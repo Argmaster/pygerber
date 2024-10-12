@@ -8,6 +8,11 @@ this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 ## Pre-Release 3.0.0a3
 
 - Restored `pygerber_language_server` command.
+- Rename `Project` class from `pygerber.gerber.api` to `CompositeView`.
+- Added custom `__str__` to `CompositeView` and `GerberFile` classes.
+- Changed `source_code` and `file_type` attributes of `GerberFile` to be read-only.
+- Changed return type of `CompositeView.render_with_pillow` to `CompositePillowImage`.
+  Interface of `CompositePillowImage` is the same as previously `CompositeView`.
 
 ## Pre-Release 3.0.0a2
 

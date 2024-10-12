@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, TextIO
+from typing import TYPE_CHECKING, Any, Literal, Optional, TextIO
 
 import pyparsing as pp
 
@@ -200,15 +200,31 @@ class GerberFile:
     This objects provides interface for loading and parsing Gerber files.
     """
 
-    def __init__(self, source_code: str, file_type: FileTypeEnum) -> None:
-        self.source_code = source_code
-        self.file_type = file_type
+    def __init__(
+        self,
+        source_code: str,
+        file_type: FileTypeEnum,
+        source_type_or_path: Literal["@buffer", "@string"] | Path,
+    ) -> None:
+        self._source_code = source_code
+        self._file_type = file_type
         self._parser_options: dict[str, Any] = {}
         self._compiler_options: dict[str, Any] = {}
         self._cached_ast: Optional[File] = None
         self._cached_rvmc: Optional[RVMC] = None
         self._cached_final_state: Optional[State] = None
         self._color_map = DEFAULT_ALPHA_COLOR_MAP
+        self._source_type_or_path = source_type_or_path
+
+    @property
+    def source_code(self) -> str:
+        """Gerber source code."""
+        return self._source_code
+
+    @property
+    def file_type(self) -> FileTypeEnum:
+        """File type classification."""
+        return self._file_type
 
     def _flush_cached(self) -> None:
         self._cached_ast = None
@@ -240,7 +256,7 @@ class GerberFile:
             if file_type == FileTypeEnum.UNDEFINED:
                 file_type = FileTypeEnum.INFER_FROM_ATTRIBUTES
 
-        return cls(file_path.read_text(encoding="utf-8"), file_type)
+        return cls(file_path.read_text(encoding="utf-8"), file_type, file_path)
 
     @classmethod
     def from_str(
@@ -265,7 +281,7 @@ class GerberFile:
         """
         if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
             file_type = FileTypeEnum.UNDEFINED
-        return cls(source_code, file_type)
+        return cls(source_code, file_type, "@string")
 
     @classmethod
     def from_buffer(
@@ -285,7 +301,7 @@ class GerberFile:
         """
         if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
             file_type = FileTypeEnum.UNDEFINED
-        return cls(buffer.read(), file_type)
+        return cls(buffer.read(), file_type, "@buffer")
 
     def set_parser_options(self, **options: Any) -> Self:
         """Set parser options for this Gerber file.
@@ -364,7 +380,7 @@ class GerberFile:
 
     def _get_ast(self) -> File:
         if self._cached_ast is None:
-            self._cached_ast = parse(self.source_code, **self._parser_options)
+            self._cached_ast = parse(self._source_code, **self._parser_options)
 
         assert self._cached_ast is not None
         return self._cached_ast
@@ -397,11 +413,11 @@ class GerberFile:
             Resolution of image in dots per millimeter, by default 20
 
         """
-        if self.file_type in (FileTypeEnum.INFER_FROM_ATTRIBUTES, FileTypeEnum.INFER):
+        if self._file_type in (FileTypeEnum.INFER_FROM_ATTRIBUTES, FileTypeEnum.INFER):
             style = self._get_style_from_file_function()
 
         if style is None:
-            style = self._color_map[self.file_type]
+            style = self._color_map[self._file_type]
 
         rvmc = self._get_rvmc()
         result = render(
@@ -424,15 +440,15 @@ class GerberFile:
             ".FileFunction"
         )
         if file_function_node is None:
-            self.file_type = FileTypeEnum.UNDEFINED
+            self._file_type = FileTypeEnum.UNDEFINED
 
         else:
             assert isinstance(file_function_node, TF_FileFunction)
-            self.file_type = FileTypeEnum.infer_from_attributes(
+            self._file_type = FileTypeEnum.infer_from_attributes(
                 file_function_node.file_function.value
             )
 
-        return self._color_map[self.file_type]
+        return self._color_map[self._file_type]
 
     def format(self, output: TextIO, options: Optional[formatter.Options]) -> None:
         """Format Gerber code and write it to `output` stream."""
@@ -441,3 +457,19 @@ class GerberFile:
     def formats(self, options: Optional[formatter.Options]) -> str:
         """Format Gerber code and return it as `str` object."""
         return formatter.formats(self._get_ast(), options)
+
+    @pp.cached_property
+    def sha256(self) -> str:
+        """SHA256 hash of Gerber source code."""
+        import hashlib
+
+        return hashlib.sha256(self._source_code.encode("utf-8")).hexdigest()
+
+    def __str__(self) -> str:
+        return (
+            f"{self.__class__.__qualname__}(size={len(self._source_code)!r}, "
+            f"sha256={self.sha256!r}, source={self._source_type_or_path!r})"
+        )
+
+    def __repr__(self) -> str:
+        return str(self)
