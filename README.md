@@ -89,7 +89,11 @@ PyGerber is licensed under MIT license. You can find full text of the license in
 directory of the repository.
 
 Some of the testing assets may be licensed under different licenses. License files for
-those assets are available in the same directory as the assets themselves.
+those assets are available alongside those files.
+
+Some of the example files shipped with PyGerber may be licensed under different
+licenses. In particular, files from KiCad demo projects are licensed under
+`CC BY-SA 4.0` license. Copy of the license file is provided alongside those files.
 
 ## 🛠 Tools
 

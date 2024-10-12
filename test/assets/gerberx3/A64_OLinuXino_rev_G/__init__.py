@@ -55,3 +55,4 @@ class A64_OlinuXino_Rev_G(Namespace):  # noqa: N801
     A64_OlinuXino_Rev_G_PTH = ExcellonAsset(
         THIS_DIRECTORY / "A64-OlinuXino_Rev_G-PTH.drl"
     )
+    gbrjob = GerberX3Asset(THIS_DIRECTORY / "A64-OlinuXino_Rev_G-job.gbrjob")

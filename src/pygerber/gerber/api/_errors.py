@@ -11,3 +11,7 @@ class GerberX3APIError(Exception):
     `#!python try: ... except GerberX3APIError: ...` block to catch all exceptions
     raised by this API while allowing other exceptions to interrupt execution.
     """
+
+
+class PathToGerberJobProjectNotDefinedError(GerberX3APIError):
+    """Raised when path to Gerber Job project is not defined."""

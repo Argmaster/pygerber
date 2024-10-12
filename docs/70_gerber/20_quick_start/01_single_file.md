@@ -115,4 +115,4 @@ Check out full reference of
 [`pygerber.gerber.api`](../../reference/pygerber/gerber/api/__init__.md).
 
 For guide on how to arrange multiple files into single image using `Project` class check
-out [Multi file project](./02_multi_file_project.md).
+out [Multi file project](./02_multi_file.md).

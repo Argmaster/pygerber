@@ -41,7 +41,12 @@ class CompositeView:
     """
 
     def __init__(self, files: Iterable[GerberFile]) -> None:
-        self.files = tuple(files)
+        self._files = tuple(files)
+
+    @property
+    def files(self) -> tuple[GerberFile, ...]:
+        """Get sequence of Gerber files."""
+        return self._files
 
     def render_with_pillow(
         self,
@@ -88,3 +93,6 @@ class CompositeView:
 
     def __str__(self) -> str:
         return f"{self.__class__.__qualname__}({self.files})"
+
+    def __len__(self) -> int:
+        return len(self.files)

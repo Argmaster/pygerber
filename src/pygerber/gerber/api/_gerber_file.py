@@ -466,9 +466,12 @@ class GerberFile:
         return hashlib.sha256(self._source_code.encode("utf-8")).hexdigest()
 
     def __str__(self) -> str:
+        path = self._source_type_or_path
+        path_string = path.name if isinstance(path, Path) else path
+
         return (
-            f"{self.__class__.__qualname__}(size={len(self._source_code)!r}, "
-            f"sha256={self.sha256!r}, source={self._source_type_or_path!r})"
+            f"{self.__class__.__qualname__}(source={path_string!r}, "
+            f"sha256={self.sha256!r})"
         )
 
     def __repr__(self) -> str:
