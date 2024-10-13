@@ -14,11 +14,13 @@ from pygerber.gerber.api._enums import (
     DEFAULT_COLOR_MAP,
     FileTypeEnum,
 )
+from pygerber.gerber.api._errors import PathToGerberJobProjectNotDefinedError
 from pygerber.gerber.api._gerber_file import (
     GerberFile,
     Image,
     ImageSpace,
     PillowImage,
+    ShapelyImage,
     Units,
 )
 from pygerber.gerber.api._gerber_job_file import (
@@ -33,27 +35,31 @@ from pygerber.gerber.api._gerber_job_file import (
     Size,
 )
 from pygerber.gerber.formatter.options import Options
+from pygerber.vm.types.style import Style
 
 __all__ = [
-    "FileTypeEnum",
-    "GerberFile",
-    "CompositeView",
-    "CompositePillowImage",
-    "Units",
-    "ImageSpace",
-    "Image",
-    "PillowImage",
     "CompositeImage",
-    "DEFAULT_COLOR_MAP",
+    "CompositePillowImage",
+    "CompositeView",
     "DEFAULT_ALPHA_COLOR_MAP",
-    "Options",
-    "GerberJobFile",
+    "DEFAULT_COLOR_MAP",
     "DesignRules",
     "FilesAttributes",
+    "FileTypeEnum",
     "GeneralSpecs",
     "GenerationSoftware",
+    "GerberFile",
+    "GerberJobFile",
     "Header",
+    "Image",
+    "ImageSpace",
     "MaterialStackup",
+    "PathToGerberJobProjectNotDefinedError",
+    "PillowImage",
     "ProjectId",
+    "ShapelyImage",
     "Size",
+    "Style",
+    "Units",
+    "Options",
 ]

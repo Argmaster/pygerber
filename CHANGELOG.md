@@ -7,15 +7,26 @@ this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
 ## Pre-Release 3.0.0a3
 
-- Restored `pygerber_language_server` command.
+- Removed legacy error types from `pygerber.gerber.api._errors`.
+- Removed `pygerber.common.general_model` module.
+- Removed `pygerber.common.immutable_map_model` module.
+- Removed `pygerber.common.rgba` module.
 - Rename `Project` class from `pygerber.gerber.api` to `CompositeView`.
 - Changed `source_code` and `file_type` attributes of `GerberFile` to be read-only.
 - Changed return type of `CompositeView.render_with_pillow` to `CompositePillowImage`.
   Interface of `CompositePillowImage` is the same as previously `CompositeView`.
+- Changed miniatures displayed by language server to be fixed size due to repeating
+  problems with apertures being too small or too large.
 - Added custom `__str__` to `CompositeView` and `GerberFile` classes.
 - Added `GerberJobFile` class for handling `.gbrjob` files.
 - Added `Project` class for grouping multiple `CompositeView` objects.
 - Added documentation for `GerberJobFile` and `Project` classes.
+- Added `pygerber.vm.shapely` package containing implementation of Gerber vm (renderer)
+  using shapely library.
+- Added `render_with_shapely` to `GerberFile` class.
+- Updated `Quick start` guide.
+- Updated many of docstrings in `pygerber.gerber.api` package.
+- Restored `pygerber_language_server` command.
 
 ## Pre-Release 3.0.0a2
 

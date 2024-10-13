@@ -19,10 +19,23 @@ THIS_DIRECTORY = THIS_FILE.parent
     ],
     ids=lambda path: path.name,
 )
-def test_examples_with_output_image(example_path: Path) -> None:
-    with cd_to_tempdir():
-        exec(example_path.read_text(encoding="utf-8"))  # noqa: S102
-        assert (Path.cwd() / "output.png").exists()
+def test_examples_with_output_png_image(example_path: Path) -> None:
+    # with cd_to_tempdir():
+    exec(example_path.read_text(encoding="utf-8"))  # noqa: S102
+    assert (Path.cwd() / "output.png").exists()
+
+
+@pytest.mark.parametrize(
+    "example_path",
+    [
+        *THIS_DIRECTORY.glob("*.example_svg.py"),
+    ],
+    ids=lambda path: path.name,
+)
+def test_examples_with_output_svg_image(example_path: Path) -> None:
+    # with cd_to_tempdir():
+    exec(example_path.read_text(encoding="utf-8"))  # noqa: S102
+    assert (Path.cwd() / "output.svg").exists()
 
 
 @pytest.mark.parametrize(

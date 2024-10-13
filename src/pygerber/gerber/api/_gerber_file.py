@@ -21,6 +21,7 @@ from pygerber.gerber.compiler import compile
 from pygerber.gerber.parser import parse
 from pygerber.vm import render
 from pygerber.vm.pillow.vm import PillowResult
+from pygerber.vm.shapely.vm import ShapelyResult
 from pygerber.vm.types.box import Box
 from pygerber.vm.types.style import Style
 
@@ -192,6 +193,31 @@ class PillowImage(Image):
     def get_image(self) -> PIL.Image.Image:
         """Get image object."""
         return self._image
+
+
+class ShapelyImage(Image):
+    """The `ShapelyImage` class is a rendered image returned by
+    `GerberFile.render_with_shapely` method.
+    """
+
+    def __init__(
+        self, image_space: ImageSpace, result: ShapelyResult, style: Style
+    ) -> None:
+        super().__init__(image_space=image_space)
+        self._result = result
+        self._style = style
+
+    def save(self, destination: str | Path | TextIO) -> None:
+        """Write rendered image as SVG to location or buffer.
+
+        Parameters
+        ----------
+        destination : str | Path
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `TextIO`-like (files, StringIO) objects are written to directly.
+
+        """
+        self._result.save_svg(destination, self._style)
 
 
 class GerberFile:
@@ -405,19 +431,14 @@ class GerberFile:
         Parameters
         ----------
         style : Style, optional
-            Style (color scheme) of rendered image, if value is None, style will be
-            inferred from file_type if it possible to determine file_type
-            (for FileTypeEnum.INFER*) or specific file_type was specified in
-            constructor, by default None
+            Style (color scheme) of rendered image, if value is None, `file_type` will
+            be used. `file_type` was one of `FileTypeEnum.INFER*` attempt will be done
+            to guess `file_type` based on extension and/or attributes, by default None
         dpmm : int, optional
             Resolution of image in dots per millimeter, by default 20
 
         """
-        if self._file_type in (FileTypeEnum.INFER_FROM_ATTRIBUTES, FileTypeEnum.INFER):
-            style = self._get_style_from_file_function()
-
-        if style is None:
-            style = self._color_map[self._file_type]
+        style = self._dispatch_style(style)
 
         rvmc = self._get_rvmc()
         result = render(
@@ -435,20 +456,81 @@ class GerberFile:
             image=result.get_image(style=style),
         )
 
-    def _get_style_from_file_function(self) -> Style:
+    def _dispatch_style(self, style: Optional[Style]) -> Style:
+        if style is not None:
+            return style
+
+        if self._file_type in (FileTypeEnum.INFER_FROM_EXTENSION, FileTypeEnum.INFER):
+            self._file_type = self._get_file_type_from_extension()
+
+        if self._file_type in (FileTypeEnum.INFER_FROM_ATTRIBUTES, FileTypeEnum.INFER):
+            self._file_type = self._get_file_type_from_attributes()
+
+        return self._color_map[self._file_type]
+
+    def _get_file_type_from_extension(self) -> FileTypeEnum:
+        if not isinstance(self._source_type_or_path, Path):
+            if self._file_type == FileTypeEnum.INFER_FROM_EXTENSION:
+                return FileTypeEnum.UNDEFINED
+
+            if self._file_type == FileTypeEnum.INFER:
+                return FileTypeEnum.INFER_FROM_ATTRIBUTES
+
+            raise NotImplementedError(self._file_type)
+
+        file_type = FileTypeEnum.infer_from_extension(self._source_type_or_path.suffix)
+
+        if file_type == FileTypeEnum.UNDEFINED:
+            if self._file_type == FileTypeEnum.INFER_FROM_EXTENSION:
+                return file_type
+
+            if self._file_type == FileTypeEnum.INFER:
+                return FileTypeEnum.INFER_FROM_ATTRIBUTES
+
+            raise NotImplementedError(self._file_type)
+
+        return file_type
+
+    def _get_file_type_from_attributes(self) -> FileTypeEnum:
         file_function_node = self._get_final_state().attributes.file_attributes.get(
             ".FileFunction"
         )
         if file_function_node is None:
-            self._file_type = FileTypeEnum.UNDEFINED
+            return FileTypeEnum.UNDEFINED
 
-        else:
-            assert isinstance(file_function_node, TF_FileFunction)
-            self._file_type = FileTypeEnum.infer_from_attributes(
-                file_function_node.file_function.value
-            )
+        assert isinstance(file_function_node, TF_FileFunction)
+        return FileTypeEnum.infer_from_attributes(
+            file_function_node.file_function.value
+        )
 
-        return self._color_map[self._file_type]
+    def render_with_shapely(self, style: Optional[Style] = None) -> ShapelyImage:
+        """Render Gerber file to vector image using rendering backend based on Shapely
+        library.
+
+        Parameters
+        ----------
+        style : Style, optional
+            Style (color scheme) of rendered image, if value is None, `file_type` will
+            be used. `file_type` was one of `FileTypeEnum.INFER*` attempt will be done
+            to guess `file_type` based on extension and/or attributes, by default None
+            Only foreground color is used, as all operations with clear polarity
+            are performing actual boolean difference operations on geometry.
+
+        """
+        style = self._dispatch_style(style)
+
+        rvmc = self._get_rvmc()
+        result = render(rvmc, backend="shapely")
+        assert isinstance(result, ShapelyResult)
+        return ShapelyImage(
+            image_space=ImageSpace(
+                units=self._get_final_state().unit_mode,
+                box=result.main_box,
+                dpmm=0,
+            ),
+            result=result,
+            style=style,
+        )
 
     def format(self, output: TextIO, options: Optional[formatter.Options]) -> None:
         """Format Gerber code and write it to `output` stream."""

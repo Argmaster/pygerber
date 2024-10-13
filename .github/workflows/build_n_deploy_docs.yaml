@@ -38,7 +38,7 @@ jobs:
         run: pip install poetry==1.6.1
 
       - name: Install dependencies
-        run: poetry install --with=docs --no-cache --sync
+        run: poetry install --with=docs --no-cache --sync --extras=all
 
       - name: Configure Git
         run: |

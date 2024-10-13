@@ -25,7 +25,7 @@ For guide on how to use `GerberFile` class, check out
 [Single file guide](./01_single_file.md).
 
 For guide on how to use `Project` class, check out
-[Multi file project guide](./02_multi_file_project.md).
+[Multi file project guide](./02_multi_file.md).
 
 Most of code examples (those with file name at the top of code frame) can be directly
 copied and pasted into Python file, interactive shell or Jupyter notebook and executed.
