@@ -300,3 +300,5 @@ output.png
 \#*.*
 .reference-assets/
 .reference-assets.lock
+output.svg
+formatted.gbr

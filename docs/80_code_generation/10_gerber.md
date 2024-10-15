@@ -66,7 +66,7 @@ For full reference of shapes available in `PadCreator` check out
 class also provides means to add traces to the Gerber image. You can use
 [`new_trace()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_trace)
 and
-[`add_arc_trace()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_arc_trace)
+[`add_clockwise_arc_trace()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_clockwise_arc_trace)
 methods to do that. Fist one creates a straight lines, second one creates arcs. You
 don't need to create pads to add traces, but you have to provide width of the trace as
 first argument.

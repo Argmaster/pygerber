@@ -622,6 +622,8 @@ class TestTraces:
 %ADD10C,0.1*%
 G75*
 D10*
+G01*
+X0Y0D02*
 X1000000Y1000000D01*
 M02*
 """
@@ -638,6 +640,8 @@ M02*
 %ADD10C,0.1*%
 G75*
 D10*
+G01*
+X0Y0D02*
 X1000000Y1000000D01*
 X1000000Y2000000D01*
 M02*
@@ -656,6 +660,8 @@ M02*
 %ADD11C,0.2*%
 G75*
 D10*
+G01*
+X0Y0D02*
 X1000000Y1000000D01*
 D11*
 X1000000Y2000000D01*
@@ -674,6 +680,8 @@ M02*
 %ADD11C,0.2*%
 G75*
 D10*
+G01*
+X0Y0D02*
 X1000000Y1000000D01*
 D11*
 X1000000Y2000000D01*
@@ -694,6 +702,8 @@ M02*
 %ADD10C,0.1*%
 G75*
 D10*
+G01*
+X0Y0D02*
 X1000000Y1000000D01*
 X2000000Y2000000D02*
 X3000000Y3000000D01*
@@ -721,6 +731,7 @@ D10*
 X0Y0D03*
 X2000000Y2000000D03*
 D11*
+G01*
 X0Y0D02*
 X2000000Y2000000D01*
 M02*
@@ -748,9 +759,44 @@ D10*
 X0Y0D03*
 X2000000Y2000000D03*
 D11*
+G01*
 X0Y0D02*
 X1000000Y1000000D01*
 X2000000Y2000000D01*
+M02*
+"""
+        )
+
+    def test_one_clockwise_trace(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        builder.add_clockwise_arc_trace(0.1, (1, 0), (0, 1), (0, 0))
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,0.1*%
+G75*
+D10*
+G02*
+X1000000Y0D02*
+X0Y1000000I-1000000J0D01*
+M02*
+"""
+        )
+
+    def test_one_counter_clockwise_trace(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        builder.add_counter_clockwise_arc_trace(0.1, (1, 0), (0, 1), (0, 0))
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,0.1*%
+G75*
+D10*
+G03*
+X1000000Y0D02*
+X0Y1000000I-1000000J0D01*
 M02*
 """
         )
@@ -809,6 +855,36 @@ G01*
 X0Y2000000D01*
 X2000000Y2000000D01*
 G02*
+X0Y0I-2000000J0D01*
+G37*
+X0Y0D02*
+M02*
+"""
+        )
+
+    def test_lines_and_counter_clockwise_arcs(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        (
+            builder.new_region((0, 0))
+            .add_line((0, 2))
+            .add_line((2, 2))
+            .add_counterclockwise_arc((0, 0), (0, 2))
+            .create()
+        )
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,1.0*%
+G75*
+D10*
+G36*
+X0Y0D02*
+G01*
+X0Y2000000D01*
+X2000000Y2000000D01*
+G03*
 X0Y0I-2000000J0D01*
 G37*
 X0Y0D02*
