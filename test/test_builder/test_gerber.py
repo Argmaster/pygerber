@@ -24,6 +24,7 @@ class TestCirclePad:
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -39,6 +40,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 X0Y2000000D03*
@@ -59,6 +61,7 @@ M02*
             == f"""{default_header}
 %ADD10C,0.5*%
 %ADD11C,0.4*%
+G75*
 D10*
 X0Y0D03*
 D11*
@@ -75,6 +78,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 %LPC*%
 X0Y0D03*
@@ -93,6 +97,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 %LPC*%
@@ -110,6 +115,7 @@ def test_rectangle_pad(builder: GerberX3Builder, default_header: str) -> None:
         builder.get_code().dumps()
         == f"""{default_header}
 %ADD10R,0.4X0.7*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -125,6 +131,7 @@ def test_rounded_rectangle_pad(builder: GerberX3Builder, default_header: str) ->
         builder.get_code().dumps()
         == f"""{default_header}
 %ADD10O,0.4X0.7*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -142,6 +149,7 @@ def test_regular_polygon_pad(builder: GerberX3Builder, default_header: str) -> N
         builder.get_code().dumps()
         == f"""{default_header}
 %ADD10P,0.5X6X0.0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -160,6 +168,7 @@ class TestChangeTransform:
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 %LR90.0*%
@@ -180,6 +189,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 %LMX*%
@@ -200,6 +210,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 %LMY*%
@@ -220,6 +231,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 %LMXY*%
@@ -244,6 +256,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 %LMX*%
@@ -271,6 +284,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.5*%
+G75*
 D10*
 X0Y0D03*
 %LS2.0*%
@@ -293,6 +307,7 @@ class TestCustomPads:
 %AMM0*
 1,1.0,1.0,0.0,0.0,0.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -311,6 +326,7 @@ M02*
 %AMM0*
 1,1.0,1.0,5.0,5.0,60.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -329,6 +345,7 @@ M02*
 %AMM0*
 1,0.0,1.0,5.0,5.0,60.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -352,6 +369,7 @@ M02*
 %AMM0*
 20,1.0,1.0,0.0,0.0,1.0,1.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -375,6 +393,7 @@ M02*
 %AMM0*
 20,0.0,1.0,0.0,0.0,1.0,1.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -393,6 +412,7 @@ M02*
 %AMM0*
 21,1.0,1.0,2.0,0.0,0.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -411,6 +431,7 @@ M02*
 %AMM0*
 21,0.0,1.0,2.0,0.0,0.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -434,6 +455,7 @@ M02*
 %AMM0*
 4,1.0,4.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -457,6 +479,7 @@ M02*
 %AMM0*
 4,0.0,4.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -480,6 +503,7 @@ M02*
 %AMM0*
 5,1.0,6.0,0.0,0.0,1.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -503,6 +527,7 @@ M02*
 %AMM0*
 5,0.0,6.0,0.0,0.0,1.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -536,6 +561,7 @@ M02*
 4,1.0,4.0,0.0,1.0,0.0,0.0,1.0,0.0,1.0,1.0,0.0,1.0,30.0*
 5,1.0,6.0,0.0,0.0,1.0,30.0*%
 %ADD10M0*%
+G75*
 D10*
 X0Y0D03*
 M02*
@@ -577,6 +603,7 @@ M02*
 5,1.0,6.0,0.0,0.0,1.0,30.0*%
 %ADD10M0*%
 %ADD11M1*%
+G75*
 D10*
 X0Y0D03*
 D11*
@@ -593,6 +620,7 @@ class TestTraces:
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.1*%
+G75*
 D10*
 X1000000Y1000000D01*
 M02*
@@ -608,6 +636,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.1*%
+G75*
 D10*
 X1000000Y1000000D01*
 X1000000Y2000000D01*
@@ -625,6 +654,7 @@ M02*
             == f"""{default_header}
 %ADD10C,0.1*%
 %ADD11C,0.2*%
+G75*
 D10*
 X1000000Y1000000D01*
 D11*
@@ -642,6 +672,7 @@ M02*
             == f"""{default_header}
 %ADD10C,0.1*%
 %ADD11C,0.2*%
+G75*
 D10*
 X1000000Y1000000D01*
 D11*
@@ -661,6 +692,7 @@ M02*
             builder.get_code().dumps()
             == f"""{default_header}
 %ADD10C,0.1*%
+G75*
 D10*
 X1000000Y1000000D01*
 X2000000Y2000000D02*
@@ -684,6 +716,7 @@ M02*
             == f"""{default_header}
 %ADD10C,1.0*%
 %ADD11C,0.1*%
+G75*
 D10*
 X0Y0D03*
 X2000000Y2000000D03*
@@ -710,6 +743,7 @@ M02*
             == f"""{default_header}
 %ADD10C,1.0*%
 %ADD11C,0.1*%
+G75*
 D10*
 X0Y0D03*
 X2000000Y2000000D03*
@@ -717,6 +751,39 @@ D11*
 X0Y0D02*
 X1000000Y1000000D01*
 X2000000Y2000000D01*
+M02*
+"""
+        )
+
+
+class TestRegions:
+    def test_region_lines_only(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        (
+            builder.new_region((0, 0))
+            .add_line((0, 2))
+            .add_line((2, 2))
+            .add_line((2, 0))
+            .add_line((0, 0))
+            .create()
+        )
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,1.0*%
+G75*
+D10*
+G36*
+X0Y0D02*
+G01*
+X0Y2000000D01*
+X2000000Y2000000D01*
+X2000000Y0D01*
+X0Y0D01*
+G37*
+X0Y0D02*
 M02*
 """
         )

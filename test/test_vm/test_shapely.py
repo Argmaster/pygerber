@@ -12,7 +12,7 @@ from pygerber.vm.shapely import ShapelyVirtualMachine
 from pygerber.vm.shapely.vm import ShapelyResult
 from pygerber.vm.types.box import Box
 from test.conftest import TEST_DIRECTORY
-from test.gerberx3.test_builder.test_rvmc import (
+from test.test_builder.test_rvmc import (
     build_main_origin_x_y_layer_origin_x_y_paste_x_y,
     build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark,
 )
