@@ -757,9 +757,7 @@ M02*
 
 
 class TestRegions:
-    def test_region_lines_only(
-        self, builder: GerberX3Builder, default_header: str
-    ) -> None:
+    def test_lines_only(self, builder: GerberX3Builder, default_header: str) -> None:
         (
             builder.new_region((0, 0))
             .add_line((0, 2))
@@ -782,6 +780,36 @@ X0Y2000000D01*
 X2000000Y2000000D01*
 X2000000Y0D01*
 X0Y0D01*
+G37*
+X0Y0D02*
+M02*
+"""
+        )
+
+    def test_lines_and_arcs(
+        self, builder: GerberX3Builder, default_header: str
+    ) -> None:
+        (
+            builder.new_region((0, 0))
+            .add_line((0, 2))
+            .add_line((2, 2))
+            .add_clockwise_arc((0, 0), (0, 2))
+            .create()
+        )
+
+        assert (
+            builder.get_code().dumps()
+            == f"""{default_header}
+%ADD10C,1.0*%
+G75*
+D10*
+G36*
+X0Y0D02*
+G01*
+X0Y2000000D01*
+X2000000Y2000000D01*
+G02*
+X0Y0I-2000000J0D01*
 G37*
 X0Y0D02*
 M02*

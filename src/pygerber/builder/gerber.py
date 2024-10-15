@@ -1348,10 +1348,12 @@ class _LineSegment(_OutlineSegment):
 
 
 class _CwArcSegment(_OutlineSegment):
+    begin: Loc2D
     center: Loc2D
 
 
 class _CcwArcSegment(_OutlineSegment):
+    begin: Loc2D
     center: Loc2D
 
 
@@ -1370,6 +1372,7 @@ class RegionCreator:
         self._builder = builder
         self._begin = begin
         self._outline: list[_OutlineSegment] = []
+        self._previous_end = begin
 
     def add_line(self, to: tuple[float, float]) -> Self:
         """Add a line to the region outline.
@@ -1386,6 +1389,7 @@ class RegionCreator:
 
         """
         self._outline.append(_LineSegment(end=to))
+        self._previous_end = to
         return self
 
     def add_clockwise_arc(
@@ -1406,7 +1410,9 @@ class RegionCreator:
             Same RegionCreator object for method chaining.
 
         """
-        self._outline.append(_CwArcSegment(center=center, end=to))
+        self._outline.append(
+            _CwArcSegment(begin=self._previous_end, center=center, end=to)
+        )
         self._previous_end = to
         return self
 
@@ -1428,7 +1434,9 @@ class RegionCreator:
             Same RegionCreator object for method chaining.
 
         """
-        self._outline.append(_CcwArcSegment(center=center, end=to))
+        self._outline.append(
+            _CcwArcSegment(begin=self._previous_end, center=center, end=to)
+        )
         self._previous_end = to
         return self
 
@@ -1484,8 +1492,12 @@ class RegionCreator:
                     yield D01(
                         x=self._builder._pack_x(segment.end[0]),  # noqa: SLF001
                         y=self._builder._pack_y(segment.end[1]),  # noqa: SLF001
-                        i=self._builder._pack_i(segment.center[0]),  # noqa: SLF001
-                        j=self._builder._pack_j(segment.center[1]),  # noqa: SLF001
+                        i=self._builder._pack_i(  # noqa: SLF001
+                            segment.center[0] - segment.begin[0]
+                        ),
+                        j=self._builder._pack_j(  # noqa: SLF001
+                            segment.center[1] - segment.begin[1]
+                        ),
                     )
 
                 elif isinstance(segment, _CcwArcSegment):
@@ -1496,8 +1508,12 @@ class RegionCreator:
                     yield D01(
                         x=self._builder._pack_x(segment.end[0]),  # noqa: SLF001
                         y=self._builder._pack_y(segment.end[1]),  # noqa: SLF001
-                        i=self._builder._pack_i(segment.center[0]),  # noqa: SLF001
-                        j=self._builder._pack_j(segment.center[1]),  # noqa: SLF001
+                        i=self._builder._pack_i(  # noqa: SLF001
+                            segment.center[0] - segment.begin[0]
+                        ),
+                        j=self._builder._pack_j(  # noqa: SLF001
+                            segment.center[1] - segment.begin[1]
+                        ),
                     )
 
                 else:
