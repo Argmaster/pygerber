@@ -615,7 +615,7 @@ M02*
 
 class TestTraces:
     def test_one_trace(self, builder: GerberX3Builder, default_header: str) -> None:
-        builder.add_trace(0.1, (0, 0), (1, 1))
+        builder.add_line_trace(0.1, (0, 0), (1, 1))
         assert (
             builder.get_code().dumps()
             == f"""{default_header}
@@ -632,8 +632,8 @@ M02*
     def test_two_traces_same_width(
         self, builder: GerberX3Builder, default_header: str
     ) -> None:
-        builder.add_trace(0.1, (0, 0), (1, 1))
-        builder.add_trace(0.1, (1, 1), (1, 2))
+        builder.add_line_trace(0.1, (0, 0), (1, 1))
+        builder.add_line_trace(0.1, (1, 1), (1, 2))
         assert (
             builder.get_code().dumps()
             == f"""{default_header}
@@ -651,8 +651,8 @@ M02*
     def test_two_traces_different_width(
         self, builder: GerberX3Builder, default_header: str
     ) -> None:
-        builder.add_trace(0.1, (0, 0), (1, 1))
-        builder.add_trace(0.2, (1, 1), (1, 2))
+        builder.add_line_trace(0.1, (0, 0), (1, 1))
+        builder.add_line_trace(0.2, (1, 1), (1, 2))
         assert (
             builder.get_code().dumps()
             == f"""{default_header}
@@ -670,9 +670,9 @@ M02*
         )
 
     def test_three_traces(self, builder: GerberX3Builder, default_header: str) -> None:
-        builder.add_trace(0.1, (0, 0), (1, 1))
-        builder.add_trace(0.2, (1, 1), (1, 2))
-        builder.add_trace(0.1, (1, 2), (2, 1))
+        builder.add_line_trace(0.1, (0, 0), (1, 1))
+        builder.add_line_trace(0.2, (1, 1), (1, 2))
+        builder.add_line_trace(0.1, (1, 2), (2, 1))
         assert (
             builder.get_code().dumps()
             == f"""{default_header}
@@ -694,8 +694,8 @@ M02*
     def test_two_traces_discontinued(
         self, builder: GerberX3Builder, default_header: str
     ) -> None:
-        builder.add_trace(0.1, (0, 0), (1, 1))
-        builder.add_trace(0.1, (2, 2), (3, 3))
+        builder.add_line_trace(0.1, (0, 0), (1, 1))
+        builder.add_line_trace(0.1, (2, 2), (3, 3))
         assert (
             builder.get_code().dumps()
             == f"""{default_header}
@@ -719,7 +719,7 @@ M02*
         pad0 = builder.add_pad(pad, (0, 0))
         pad1 = builder.add_pad(pad, (2, 2))
 
-        builder.add_trace(0.1, pad0, pad1)
+        builder.add_line_trace(0.1, pad0, pad1)
 
         assert (
             builder.get_code().dumps()
@@ -746,8 +746,8 @@ M02*
         pad0 = builder.add_pad(pad, (0, 0))
         pad1 = builder.add_pad(pad, (2, 2))
 
-        trace0 = builder.add_trace(0.1, pad0, (1, 1))
-        builder.add_trace(0.1, trace0, pad1)
+        trace0 = builder.add_line_trace(0.1, pad0, (1, 1))
+        builder.add_line_trace(0.1, trace0, pad1)
 
         assert (
             builder.get_code().dumps()

@@ -64,7 +64,7 @@ For full reference of shapes available in `PadCreator` check out
 
 [`GerberX3Builder`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder)
 class also provides means to add traces to the Gerber image. You can use
-[`new_trace()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_trace)
+[`new_trace()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_line_trace)
 and
 [`add_clockwise_arc_trace()`](../reference/pygerber/builder/gerber.md#pygerber.builder.gerber.GerberX3Builder.add_clockwise_arc_trace)
 methods to do that. Fist one creates a straight lines, second one creates arcs. You
@@ -95,10 +95,10 @@ with PyGerber:
 
 ## Using objects as locations
 
-Commands creating graphical elements, like `add_pad()` or `add_trace()` return special
-`Draw` objects (`PadDraw` or `TraceDraw` respectively) which can be used as locations
-for `new_pad()` or `new_trace()` method calls. This way you don not have to retype
-coordinates for draws which are connected to previous objects.
+Commands creating graphical elements, like `add_pad()` or `add_line_trace()` return
+special `Draw` objects (`PadDraw` or `TraceDraw` respectively) which can be used as
+locations for `new_pad()` or `new_trace()` method calls. This way you don not have to
+retype coordinates for draws which are connected to previous objects.
 
 !!! warning
 

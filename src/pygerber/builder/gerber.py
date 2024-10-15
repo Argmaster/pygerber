@@ -163,8 +163,8 @@ class GerberX3Builder:
             Previously defined pad object to be used for drawing.
         at : Loc2D | TraceDraw
             Location to flash at. Can be a 2-tuple of floats or TraceDraw object
-            returned from `add_trace()` or `add_clockwise_arc_trace()`, then the end
-            location of that trace will be used.
+            returned from `add_line_trace()` or `add_clockwise_arc_trace()`, then the
+            end location of that trace will be used.
         rotation : float, optional
             Pad rotation (rotation around pad origin), by default 0.0
         mirror_x : bool, optional
@@ -288,8 +288,8 @@ class GerberX3Builder:
             Previously defined pad object to be used for drawing.
         at : Loc2D | TraceDraw
             Location to flash at. Can be a 2-tuple of floats or TraceDraw object
-            returned from `add_trace()` or `add_clockwise_arc_trace()`, then the end
-            location of that trace will be used.
+            returned from `add_line_trace()` or `add_clockwise_arc_trace()`, then the
+            end location of that trace will be used.
         rotation : float, optional
             Pad rotation (rotation around pad origin), by default 0.0
         mirror_x : bool, optional
@@ -335,7 +335,7 @@ class GerberX3Builder:
         self._add_draw(draw)
         return draw
 
-    def add_trace(
+    def add_line_trace(
         self,
         width: float,
         begin: Loc2D | PadDraw | TraceDraw,

@@ -98,7 +98,7 @@ if is_pygments_available():
                 "new_pad": Name.Function,
                 "add_pad": Name.Function,
                 "add_cutout_pad": Name.Function,
-                "add_trace": Name.Function,
+                "add_line_trace": Name.Function,
                 "add_clockwise_arc_trace": Name.Function,
                 "add_counter_clockwise_arc_trace": Name.Function,
                 "get_code": Name.Function,
