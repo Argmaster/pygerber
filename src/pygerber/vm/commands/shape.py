@@ -25,7 +25,80 @@ FULL_ANGLE_DEGREES = 360
 VERTEX_COUNT_IN_TRIANGLE = 3
 
 
-class Shape(Command):
+from abc import ABC, abstractmethod
+from typing import Any, Protocol
+
+
+class DrawingBackend(Protocol):
+    def draw_line(self, start: Vector, end: Vector) -> None:
+        ...
+
+    def draw_arc(self, start: Vector, end: Vector, center: Vector, clockwise: bool) -> None:
+        ...
+
+    def draw_rectangle(self, center: Vector, width: float, height: float) -> None:
+        ...
+
+    def draw_circle(self, center: Vector, diameter: float) -> None:
+        ...
+
+    def draw_polygon(self, points: list[Vector]) -> None:
+        ...
+
+
+class ShapeType(ABC):
+    @abstractmethod
+    def draw(self, backend: DrawingBackend) -> None:
+        pass
+
+
+class Line(ShapeType):
+    def __init__(self, start: Vector, end: Vector):
+        self.start = start
+        self.end = end
+
+    def draw(self, backend: DrawingBackend) -> None:
+        backend.draw_line(self.start, self.end)
+
+
+class Arc(ShapeType):
+    def __init__(self, start: Vector, end: Vector, center: Vector, clockwise: bool):
+        self.start = start
+        self.end = end
+        self.center = center
+        self.clockwise = clockwise
+
+    def draw(self, backend: DrawingBackend) -> None:
+        backend.draw_arc(self.start, self.end, self.center, self.clockwise)
+
+
+class Rectangle(ShapeType):
+    def __init__(self, center: Vector, width: float, height: float):
+        self.center = center
+        self.width = width
+        self.height = height
+
+    def draw(self, backend: DrawingBackend) -> None:
+        backend.draw_rectangle(self.center, self.width, self.height)
+
+
+class Circle(ShapeType):
+    def __init__(self, center: Vector, diameter: float):
+        self.center = center
+        self.diameter = diameter
+
+    def draw(self, backend: DrawingBackend) -> None:
+        backend.draw_circle(self.center, self.diameter)
+
+
+class Polygon(ShapeType):
+    def __init__(self, points: list[Vector]):
+        self.points = points
+
+    def draw(self, backend: DrawingBackend) -> None:
+        backend.draw_polygon(self.points)
+
+
     """`Shape` command instructs VM to render a shape described by series of
     lines and arcs into currently active layer.
 
@@ -34,11 +107,36 @@ class Shape(Command):
     they are connected by a straight line.
     """
 
-    commands: List[ShapeSegment] = Field(min_length=1)
+    shape: ShapeType = Field(...)
+    is_negative: bool = False
+
+    def draw(self, backend: DrawingBackend) -> None:
+        self.shape.draw(backend)
+
+    @pp.cached_property
     is_negative: bool = False
 
     @pp.cached_property
     def outer_box(self) -> Box:
+        if isinstance(self.shape, (Line, Arc)):
+            return Box.from_vectors(self.shape.start, self.shape.end)
+        elif isinstance(self.shape, Rectangle):
+            half_width = self.shape.width / 2
+            half_height = self.shape.height / 2
+            return Box.from_vectors(
+                self.shape.center + Vector(-half_width, -half_height),
+                self.shape.center + Vector(half_width, half_height)
+            )
+        elif isinstance(self.shape, Circle):
+            radius = self.shape.diameter / 2
+            return Box.from_vectors(
+                self.shape.center + Vector(-radius, -radius),
+                self.shape.center + Vector(radius, radius)
+            )
+        elif isinstance(self.shape, Polygon):
+            return Box.from_vectors(*self.shape.points)
+        else:
+            raise NotImplementedError(f"Unsupported shape type: {type(self.shape)}")
         """Get outer box of shape segment."""
         accumulator = self.commands[0].outer_box
         for segment in self.commands[1:]:
@@ -46,6 +144,26 @@ class Shape(Command):
         return accumulator
 
     def transform(self, transform: Matrix3x3) -> Self:
+        if isinstance(self.shape, (Line, Arc)):
+            new_shape = type(self.shape)(
+                start=self.shape.start.transform(transform),
+                end=self.shape.end.transform(transform),
+                center=self.shape.center.transform(transform) if isinstance(self.shape, Arc) else None,
+                clockwise=self.shape.clockwise if isinstance(self.shape, Arc) else None
+            )
+        elif isinstance(self.shape, (Rectangle, Circle)):
+            new_shape = type(self.shape)(
+                center=self.shape.center.transform(transform),
+                width=self.shape.width if isinstance(self.shape, Rectangle) else None,
+                height=self.shape.height if isinstance(self.shape, Rectangle) else None,
+                diameter=self.shape.diameter if isinstance(self.shape, Circle) else None
+            )
+        elif isinstance(self.shape, Polygon):
+            new_shape = Polygon([point.transform(transform) for point in self.shape.points])
+        else:
+            raise NotImplementedError(f"Unsupported shape type: {type(self.shape)}")
+
+        return self.__class__(shape=new_shape, is_negative=self.is_negative)
         """Transpose shape by vector."""
         return self.__class__(
             commands=[segment.transform(transform) for segment in self.commands],
@@ -57,7 +175,67 @@ class Shape(Command):
         visitor.on_shape(self)
 
     @classmethod
-    def new_rectangle(
+    @classmethod
+    def new_rectangle(cls, center: tuple[float, float], width: float, height: float, *, is_negative: bool) -> Self:
+        return cls(shape=Rectangle(Vector.from_tuple(center), width, height), is_negative=is_negative)
+
+    @classmethod
+    def new_obround(cls, center: tuple[float, float], width: float, height: float, *, is_negative: bool) -> Self:
+        # Implement obround as a combination of rectangle and two circles
+        if width <= height:
+            rect_height = height - width
+            circle_diameter = width
+            circle1_center = Vector.from_tuple(center) + Vector(0, rect_height / 2)
+            circle2_center = Vector.from_tuple(center) - Vector(0, rect_height / 2)
+        else:
+            rect_width = width - height
+            circle_diameter = height
+            circle1_center = Vector.from_tuple(center) + Vector(rect_width / 2, 0)
+            circle2_center = Vector.from_tuple(center) - Vector(rect_width / 2, 0)
+
+        return cls(
+            shape=Polygon([
+                Rectangle(Vector.from_tuple(center), min(width, height), max(width, height)),
+                Circle(circle1_center, circle_diameter),
+                Circle(circle2_center, circle_diameter)
+            ]),
+            is_negative=is_negative
+        )
+
+    @classmethod
+    def new_circle(cls, center: tuple[float, float], diameter: float, *, is_negative: bool) -> Self:
+        return cls(shape=Circle(Vector.from_tuple(center), diameter), is_negative=is_negative)
+
+    @classmethod
+    def new_polygon(cls, center: tuple[float, float], outer_diameter: float, vertices_count: int, base_rotation: float, *, is_negative: bool) -> Self:
+        points = []
+        for i in range(vertices_count):
+            angle = base_rotation + i * (360 / vertices_count)
+            point = Vector.from_tuple(center) + Vector.from_polar(outer_diameter / 2, angle)
+            points.append(point)
+        return cls(shape=Polygon(points), is_negative=is_negative)
+
+    @classmethod
+    def new_line(cls, start: tuple[float, float], end: tuple[float, float], thickness: float, *, is_negative: bool) -> Self:
+        return cls(shape=Line(Vector.from_tuple(start), Vector.from_tuple(end)), is_negative=is_negative)
+
+    @classmethod
+    def new_cw_arc(cls, start: tuple[float, float], end: tuple[float, float], center: tuple[float, float], thickness: float, *, is_negative: bool) -> Self:
+        return cls(shape=Arc(Vector.from_tuple(start), Vector.from_tuple(end), Vector.from_tuple(center), clockwise=True), is_negative=is_negative)
+
+    @classmethod
+    def new_ccw_arc(cls, start: tuple[float, float], end: tuple[float, float], center: tuple[float, float], thickness: float, *, is_negative: bool) -> Self:
+        return cls(shape=Arc(Vector.from_tuple(start), Vector.from_tuple(end), Vector.from_tuple(center), clockwise=False), is_negative=is_negative)
+
+    @classmethod
+    def new_ring(cls, center: tuple[float, float], outer_diameter: float, inner_diameter: float, *, is_negative: bool) -> tuple[Self, Self]:
+        outer_circle = cls.new_circle(center, outer_diameter, is_negative=is_negative)
+        inner_circle = cls.new_circle(center, inner_diameter, is_negative=not is_negative)
+        return outer_circle, inner_circle
+
+    @classmethod
+    def new_connected_points(cls, *points: tuple[float, float], is_negative: bool) -> Self:
+        return cls(shape=Polygon([Vector.from_tuple(p) for p in points]), is_negative=is_negative)
         cls,
         center: tuple[float, float],
         width: float,
