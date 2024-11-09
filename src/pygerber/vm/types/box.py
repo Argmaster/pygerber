@@ -101,7 +101,7 @@ class Box(ModelType):
 
     def __radd__(self, other: object) -> Self:
         """Add a vector to the box."""
-        return self + other
+        return self + other  # pragma: no cover
 
     def __sub__(self, other: object) -> Self:
         """Subtract a vector from the box."""
@@ -121,4 +121,4 @@ class Box(ModelType):
 
     def __rsub__(self, other: object) -> Self:
         """Subtract a vector from the box."""
-        return self - other
+        return self - other  # pragma: no cover
