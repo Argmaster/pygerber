@@ -6,26 +6,27 @@ repos:
       - id: prettier
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: "v4.4.0"
+    rev: "v5.0.0"
     hooks:
-      - id: check-byte-order-marker
+      - id: check-illegal-windows-names
+      - id: check-case-conflict
       - id: check-merge-conflict
         args: [--assume-in-merge]
       - id: check-case-conflict
       - id: trailing-whitespace
-      - id: end-of-file-fixer
       - id: debug-statements
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
       - id: check-added-large-files
         args: ["--maxkb=5000"]
       - id: check-toml
-      # - id: check-json
       - id: mixed-line-ending
         args: ["--fix=lf"]
       - id: trailing-whitespace
       - id: debug-statements
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.6.5"
+    rev: "v0.7.3"
     hooks:
       # Run the linter.
       - id: ruff

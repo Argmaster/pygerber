@@ -298,7 +298,7 @@ class JsonWalker:
             return cast(T, self.on_bool(data))
 
         if data is None:
-            return self.on_none(data)  # type: ignore[unreachable]
+            return self.on_none(data)  # type: ignore[unreachable, no-any-return, func-returns-value]
 
         raise TypeError(type(data))
 
