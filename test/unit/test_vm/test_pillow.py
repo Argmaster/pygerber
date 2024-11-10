@@ -12,6 +12,7 @@ from pygerber.vm.commands import Command, EndLayer, Shape
 from pygerber.vm.pillow import PillowVirtualMachine
 from pygerber.vm.types import Box, Style, Vector
 from test.conftest import TEST_DIRECTORY
+from test.tags import Tag, tag
 from test.test_builder.test_rvmc import (
     build_main_origin_x_y_layer_origin_x_y_paste_x_y,
     build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark,
@@ -64,45 +65,54 @@ def compare(image: Image.Image) -> None:
         pytest.skip(f"Reference image not found: {reference_image_path}")
 
 
+@tag(Tag.PILLOW)
 def test_draw_rectangle_in_center() -> None:
     commands = make_rectangle_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
+@tag(Tag.PILLOW)
 def test_draw_obround_horizontal_in_center() -> None:
     commands = make_obround_horizontal_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
+@tag(Tag.PILLOW)
 def test_draw_obround_vertical_in_center() -> None:
     commands = make_obround_vertical_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
+@tag(Tag.PILLOW)
 def test_draw_circle_in_center() -> None:
     commands = make_circle_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
+@tag(Tag.PILLOW)
 def test_draw_circle_over_circle_in_center() -> None:
     commands = make_circle_over_circle_in_center_fixed_canvas()
     compare(run(100, commands))
 
 
+@tag(Tag.PILLOW)
 def test_paste_circle_over_circle_in_center() -> None:
     compare(run_rvmc(100, make_paste_circle_over_circle_in_center_fixed_canvas()))
 
 
+@tag(Tag.PILLOW)
 def test_paste_circle_over_paste_circle_in_center() -> None:
     compare(
         run_rvmc(100, make_paste_circle_over_paste_circle_in_center_dynamic_canvas())
     )
 
 
+@tag(Tag.PILLOW)
 def test_paste_rectangle_in_center() -> None:
     compare(run(100, make_paste_rectangle_in_center_fixed_canvas()))
 
 
+@tag(Tag.PILLOW)
 def test_paste_negative_rectangle_in_center() -> None:
     compare(run(100, make_paste_negative_rectangle_in_center_fixed_canvas()))
 
@@ -122,6 +132,7 @@ class TestCWArc:
 
     # Quarter arcs
 
+    @tag(Tag.PILLOW)
     def test_0_90(self) -> None:
         compare(
             run(
@@ -132,6 +143,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_90_180(self) -> None:
         compare(
             run(
@@ -142,6 +154,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_180_270(self) -> None:
         compare(
             run(
@@ -152,6 +165,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_270_360(self) -> None:
         compare(
             run(
@@ -164,6 +178,7 @@ class TestCWArc:
 
     # Half arcs
 
+    @tag(Tag.PILLOW)
     def test_0_180(self) -> None:
         compare(
             run(
@@ -174,6 +189,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_90_270(self) -> None:
         compare(
             run(
@@ -184,6 +200,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_180_360(self) -> None:
         compare(
             run(
@@ -194,6 +211,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_270_420(self) -> None:
         compare(
             run(
@@ -208,6 +226,7 @@ class TestCWArc:
 
     _45_degrees_vector_x = 3.5355339059327378
 
+    @tag(Tag.PILLOW)
     def test_45_135(self) -> None:
         compare(
             run(
@@ -224,6 +243,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_135_225(self) -> None:
         compare(
             run(
@@ -240,6 +260,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_225_315(self) -> None:
         compare(
             run(
@@ -256,6 +277,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_315_405(self) -> None:
         compare(
             run(
@@ -272,6 +294,7 @@ class TestCWArc:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_full_circle_with_quarter_arcs(self) -> None:
         compare(
             run(
@@ -347,6 +370,7 @@ class TestBox:
 
             pytest.fail("Images are different")
 
+    @tag(Tag.PILLOW)
     def test_two_circle(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_circle((5, 5), 2, is_negative=False),
@@ -355,6 +379,7 @@ class TestBox:
             origin=Vector(x=2.5, y=2.5),
         )
 
+    @tag(Tag.PILLOW)
     def test_two_rectangles(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_rectangle((5, 5), 2, 2, is_negative=False),
@@ -363,6 +388,7 @@ class TestBox:
             origin=Vector(x=2.5, y=2.5),
         )
 
+    @tag(Tag.PILLOW)
     def test_circle_rectangle(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_circle((5, 5), 2, is_negative=False),
@@ -371,6 +397,7 @@ class TestBox:
             origin=Vector(x=2.5, y=2.5),
         )
 
+    @tag(Tag.PILLOW)
     def test_cw_arc_0_90(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_cw_arc((5, 0), (0, -5), (0, 0), 1, is_negative=False),
@@ -378,6 +405,7 @@ class TestBox:
             origin=Vector(x=2.75, y=-2.75),
         )
 
+    @tag(Tag.PILLOW)
     def test_cw_arc_90_180(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_cw_arc((0, -5), (-5, 0), (0, 0), 1, is_negative=False),
@@ -385,6 +413,7 @@ class TestBox:
             origin=Vector(x=-2.75, y=-2.75),
         )
 
+    @tag(Tag.PILLOW)
     def test_cw_arc_180_270(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_cw_arc((-5, 0), (0, 5), (0, 0), 1, is_negative=False),
@@ -392,6 +421,7 @@ class TestBox:
             origin=Vector(x=-2.75, y=2.75),
         )
 
+    @tag(Tag.PILLOW)
     def test_cw_arc_270_360(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_cw_arc((0, 5), (5, 0), (0, 0), 1, is_negative=False),
@@ -399,6 +429,7 @@ class TestBox:
             origin=Vector(x=2.75, y=2.75),
         )
 
+    @tag(Tag.PILLOW)
     def test_cw_arc_0_180(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_cw_arc((5, 0), (-5, 0), (0, 0), 1, is_negative=False),
@@ -406,6 +437,7 @@ class TestBox:
             origin=Vector(x=0, y=-2.75),
         )
 
+    @tag(Tag.PILLOW)
     def test_cw_arc_90_270(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_cw_arc((0, -5), (0, 5), (0, 0), 1, is_negative=False),
@@ -413,6 +445,7 @@ class TestBox:
             origin=Vector(x=-2.75, y=0),
         )
 
+    @tag(Tag.PILLOW)
     def test_cw_arc_180_360(self) -> None:
         self.compare_auto_vs_fixed(
             Shape.new_cw_arc((-5, 0), (5, 0), (0, 0), 1, is_negative=False),
@@ -422,6 +455,7 @@ class TestBox:
 
 
 class TestPasteWithOffset:
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_0_0_paste_0_0_expect_circle_at_0_0(
         self,
     ) -> None:
@@ -434,6 +468,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_0_0_paste_2_2_expect_circle_at_2_2(
         self,
     ) -> None:
@@ -446,6 +481,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_0_0_paste_8_8_expect_circle_at_8_8(
         self,
     ) -> None:
@@ -458,6 +494,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_2_2_paste_0_0_expect_circle_at_neg_2_neg_2(
         self,
     ) -> None:
@@ -470,6 +507,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_2_2_paste_2_2_expect_circle_at_0_0(
         self,
     ) -> None:
@@ -482,6 +520,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_8_8_paste_8_8_expect_circle_at_0_0(
         self,
     ) -> None:
@@ -494,6 +533,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_2_2_layer_origin_0_0_paste_0_0_expect_circle_at_0_0(
         self,
     ) -> None:
@@ -506,6 +546,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_2_2_layer_origin_0_0_paste_2_2_expect_circle_at_2_2(
         self,
     ) -> None:
@@ -518,6 +559,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_2_2_layer_origin_2_2_paste_0_0_expect_circle_at_neg_2_neg_2(
         self,
     ) -> None:
@@ -530,6 +572,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_2_2_layer_origin_2_2_paste_2_2_expect_circle_at_0_0(
         self,
     ) -> None:
@@ -542,6 +585,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_0_0_paste_0_0_circle_at_2_2_expect_circle_at_2_2(
         self,
     ) -> None:
@@ -557,6 +601,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_0_0_paste_2_2_circle_at_2_2_expect_circle_at_4_4(
         self,
     ) -> None:
@@ -572,6 +617,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_0_0_layer_origin_2_2_paste_2_2_circle_at_2_2_expect_circle_at_2_2(
         self,
     ) -> None:
@@ -587,6 +633,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_neg_8_neg_8_layer_origin_4_4_paste_2_2_circle_at_2_2_expect_circle_at_0_0(
         self,
     ) -> None:
@@ -602,6 +649,7 @@ class TestPasteWithOffset:
             )
         )
 
+    @tag(Tag.PILLOW)
     def test_main_origin_neg_8_neg_8_layer_origin_4_4_paste_2_2_circle_at_2_2_expect_circle_at_0_0_no_main_origin_mark(
         self,
     ) -> None:

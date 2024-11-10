@@ -138,42 +138,54 @@ gerber_lexer = "pygerber.gerber.pygments:GerberLexer"
 
 [tool.poe.tasks]
 # -------------------------------------------------------------------------------------
-# git hooks
 install-hooks = [
     { cmd = "poetry install --sync --with=docs,style --extras=all  --no-ansi" },
     { cmd = "poetry run python -m scripts.install_hooks" },
     { cmd = "poetry run pre-commit install --install-hooks --overwrite" },
 ]
+# --------- Style ---------
 prepare-test-style = [
     { cmd = "poetry install --sync --with=docs,style --extras=all  --no-ansi" },
 ]
 test-style = [
     { cmd = "poetry run pre-commit run --all-files -v" },
 ]
+# --------- All ---------
 prepare-test-all = [
-    { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
+    { cmd = "poetry install --sync --extras=all  --no-ansi" },
 ]
 test-all = [
     { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/" },
 ]
+# --------- Unit ---------
 prepare-test-unit = [
-    { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
+    { cmd = "poetry install --sync --extras=all  --no-ansi" },
 ]
 test-unit = [
     { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/unit/" },
 ]
+# --------- E2E ---------
 prepare-test-e2e = [
-    { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
+    { cmd = "poetry install --sync --extras=all  --no-ansi" },
 ]
 test-e2e = [
     { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/e2e/" },
 ]
+# --------- Type ---------
 prepare-test-type = [
-    { cmd = "poetry install --sync --with=docs,style --extras=all  --no-ansi" },
+    { cmd = "poetry install --sync --with=style --extras=all  --no-ansi" },
 ]
 test-type = [
     { cmd = "poetry run mypy --config-file=pyproject.toml src/pygerber/ test/" },
 ]
+# --------- No Extras ---------
+prepare-test-no-extras = [
+    { cmd = "poetry install --sync  --no-ansi" },
+]
+test-no-extras = [
+    { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered --exclude-tags=extras test/" },
+]
+# --------- Docs ---------
 prepare-deploy-docs = [
     { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
 ]
@@ -183,6 +195,7 @@ deploy-latest-docs = [
 deploy-stable-docs = [
     { cmd = "poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') stable --config-file mkdocs.yaml" }
 ]
+# --------- Package ---------
 prepare-deploy-package = [
     { cmd = "poetry install --sync --with=deploy --extras=all  --no-ansi" },
 ]

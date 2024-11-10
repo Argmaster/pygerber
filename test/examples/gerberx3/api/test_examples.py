@@ -7,6 +7,7 @@ import pytest
 
 from pygerber.examples import ExamplesEnum, get_example_path
 from test.conftest import cd_to_tempdir
+from test.tags import Tag, tag
 
 THIS_FILE = Path(__file__)
 THIS_DIRECTORY = THIS_FILE.parent
@@ -25,6 +26,7 @@ def test_examples_with_output_png_image(example_path: Path) -> None:
     assert (Path.cwd() / "output.png").exists()
 
 
+@tag(Tag.SHAPELY, Tag.EXTRAS)
 @pytest.mark.parametrize(
     "example_path",
     [

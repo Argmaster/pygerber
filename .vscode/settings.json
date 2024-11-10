@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "addinivalue",
+        "addoption",
         "Altium",
         "AMDONUTCAL",
         "AMDONUTVAR",
@@ -39,6 +41,7 @@
         "lspt",
         "mkdocs",
         "mkdocstrings",
+        "modifyitems",
         "Moiré",
         "MOMM",
         "mypy",

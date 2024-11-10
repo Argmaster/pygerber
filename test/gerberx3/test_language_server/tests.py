@@ -23,6 +23,7 @@ from pytest_lsp import (
 
 import pygerber
 from test.gerberx3.common import GERBER_ASSETS_DIRECTORY
+from test.tags import Tag, tag
 
 
 @pytest_lsp.fixture(
@@ -54,6 +55,7 @@ async def client(  # type: ignore[no-untyped-def]  # noqa: ANN201
     await lsp_client.shutdown_session()
 
 
+@tag(Tag.LSP, Tag.EXTRAS)
 @pytest.mark.xfail
 @pytest.mark.asyncio
 async def test_completion(client: LanguageClient) -> None:
@@ -73,6 +75,7 @@ async def test_completion(client: LanguageClient) -> None:
     assert all(item.label.startswith("G") for item in result.items)
 
 
+@tag(Tag.LSP, Tag.EXTRAS)
 @pytest.mark.xfail
 @pytest.mark.asyncio
 async def test_hover_d01(client: LanguageClient) -> None:
@@ -93,6 +96,7 @@ async def test_hover_d01(client: LanguageClient) -> None:
     assert "## 4.8.2 Plot (D01)." in result.contents.value
 
 
+@tag(Tag.LSP, Tag.EXTRAS)
 @pytest.mark.xfail
 @pytest.mark.asyncio
 async def test_hover_invalid_expression(client: LanguageClient) -> None:
