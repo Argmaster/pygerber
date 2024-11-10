@@ -1,0 +1,66 @@
+---
+name: Unit Tests
+
+on:
+  push:
+    paths:
+      - src/**
+      - test/**
+      - .github/**
+      - pyproject.toml
+      - poetry.lock
+  schedule:
+    - cron: 0 12 * * 6
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.action_path }}-${{ github.ref }}-test-unit
+  cancel-in-progress: false
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, windows-2022, windows-2019]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.6.0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install basic dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for unit tests
+        run: poetry run poe prepare-test-unit
+
+      - name: Run unit tests
+        run: poetry run poe test-unit
+
+      - name: Create XML coverage files
+        run: poetry run coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
+          flags: unit
+          files: ./coverage.xml
+          verbose: true

@@ -2,29 +2,23 @@ from __future__ import annotations
 
 import inspect
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import TYPE_CHECKING, Optional, Sequence
+
+import pytest
+from PIL import Image
 
 from pygerber.vm import RVMC
-from pygerber.vm.commands import Command
-from pygerber.vm.commands.layer import EndLayer
-from pygerber.vm.commands.shape import Shape
-from pygerber.vm.shapely import ShapelyVirtualMachine
-from pygerber.vm.shapely.vm import ShapelyResult
-from pygerber.vm.types.box import Box
+from pygerber.vm.commands import Command, EndLayer, Shape
+from pygerber.vm.pillow import PillowVirtualMachine
+from pygerber.vm.types import Box, Style, Vector
 from test.conftest import TEST_DIRECTORY
 from test.test_builder.test_rvmc import (
     build_main_origin_x_y_layer_origin_x_y_paste_x_y,
     build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark,
 )
-from test.test_vm.command_builders import (
+from test.unit.test_vm.command_builders import (
     make_circle_in_center_fixed_canvas,
     make_circle_over_circle_in_center_fixed_canvas,
-    make_intersecting_circle_circle,
-    make_intersecting_circle_circle_negative,
-    make_intersecting_cross_0_0_circle_5_5,
-    make_intersecting_rectangle_circle,
-    make_intersecting_rectangles_2_dynamic_canvas,
-    make_intersecting_rectangles_dynamic_canvas,
     make_main_layer,
     make_obround_horizontal_in_center_fixed_canvas,
     make_obround_vertical_in_center_fixed_canvas,
@@ -35,84 +29,82 @@ from test.test_vm.command_builders import (
     make_rectangle_in_center_fixed_canvas,
 )
 
-OUTPUT_SHAPELY_DIRECTORY = TEST_DIRECTORY / ".vm-output" / "shapely"
-OUTPUT_SHAPELY_DIRECTORY.mkdir(parents=True, exist_ok=True)
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
-REFERENCE_ASSETS_DIRECTORY = Path(__file__).parent / "test_shapely_assets"
+OUTPUT_PILLOW_DIRECTORY = TEST_DIRECTORY / ".vm-output" / "pillow"
+OUTPUT_PILLOW_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
 
-def run(commands: Sequence[Command]) -> ShapelyResult:
-    return run_rvmc(RVMC(commands=commands))
+REFERENCE_ASSETS_DIRECTORY = Path(__file__).parent / "test_pillow_assets"
 
 
-def run_rvmc(rvmc: RVMC) -> ShapelyResult:
-    return ShapelyVirtualMachine().run(rvmc)
+def run(dpmm: int, commands: Sequence[Command]) -> Image.Image:
+    return run_rvmc(dpmm, RVMC(commands=commands))
 
 
-def save(result: ShapelyResult) -> None:
+def run_rvmc(dpmm: int, rvmc: RVMC) -> Image.Image:
+    return (
+        PillowVirtualMachine(dpmm).run(rvmc).get_image(style=Style.presets.BLACK_WHITE)
+    )
+
+
+def compare(image: Image.Image) -> None:
     caller_name = inspect.stack()[1].function
-    result.save_svg((OUTPUT_SHAPELY_DIRECTORY / caller_name).with_suffix(".svg"))
+    save_destination = OUTPUT_PILLOW_DIRECTORY / f"{caller_name}.png"
+    image.save(save_destination.as_posix())
+
+    reference_image_path = REFERENCE_ASSETS_DIRECTORY / f"{caller_name}.png"
+    if reference_image_path.is_file():
+        reference_image = Image.open(reference_image_path)
+        if image.convert("RGBA") != reference_image.convert("RGBA"):
+            raise AssertionError(image.size, reference_image.size)
+    else:
+        pytest.skip(f"Reference image not found: {reference_image_path}")
 
 
 def test_draw_rectangle_in_center() -> None:
-    save(run(make_rectangle_in_center_fixed_canvas()))
+    commands = make_rectangle_in_center_fixed_canvas()
+    compare(run(100, commands))
 
 
 def test_draw_obround_horizontal_in_center() -> None:
-    save(run(make_obround_horizontal_in_center_fixed_canvas()))
+    commands = make_obround_horizontal_in_center_fixed_canvas()
+    compare(run(100, commands))
 
 
 def test_draw_obround_vertical_in_center() -> None:
-    save(run(make_obround_vertical_in_center_fixed_canvas()))
+    commands = make_obround_vertical_in_center_fixed_canvas()
+    compare(run(100, commands))
 
 
 def test_draw_circle_in_center() -> None:
-    save(run(make_circle_in_center_fixed_canvas()))
+    commands = make_circle_in_center_fixed_canvas()
+    compare(run(100, commands))
 
 
 def test_draw_circle_over_circle_in_center() -> None:
-    save(run(make_circle_over_circle_in_center_fixed_canvas()))
+    commands = make_circle_over_circle_in_center_fixed_canvas()
+    compare(run(100, commands))
 
 
 def test_paste_circle_over_circle_in_center() -> None:
-    save(run_rvmc(make_paste_circle_over_circle_in_center_fixed_canvas()))
+    compare(run_rvmc(100, make_paste_circle_over_circle_in_center_fixed_canvas()))
 
 
 def test_paste_circle_over_paste_circle_in_center() -> None:
-    save(run_rvmc(make_paste_circle_over_paste_circle_in_center_dynamic_canvas()))
+    compare(
+        run_rvmc(100, make_paste_circle_over_paste_circle_in_center_dynamic_canvas())
+    )
 
 
 def test_paste_rectangle_in_center() -> None:
-    save(run(make_paste_rectangle_in_center_fixed_canvas()))
+    compare(run(100, make_paste_rectangle_in_center_fixed_canvas()))
 
 
 def test_paste_negative_rectangle_in_center() -> None:
-    save(run(make_paste_negative_rectangle_in_center_fixed_canvas()))
-
-
-def test_intersecting_rectangles_dynamic_canvas() -> None:
-    save(run_rvmc(make_intersecting_rectangles_dynamic_canvas()))
-
-
-def test_intersecting_rectangles_2_dynamic_canvas() -> None:
-    save(run_rvmc(make_intersecting_rectangles_2_dynamic_canvas()))
-
-
-def test_intersecting_rectangle_circle() -> None:
-    save(run_rvmc(make_intersecting_rectangle_circle()))
-
-
-def test_intersecting_circle_circle() -> None:
-    save(run_rvmc(make_intersecting_circle_circle()))
-
-
-def test_intersecting_circle_circle_negative() -> None:
-    save(run_rvmc(make_intersecting_circle_circle_negative()))
-
-
-def test_intersecting_cross_0_0_circle_5_5() -> None:
-    save(run_rvmc(make_intersecting_cross_0_0_circle_5_5()))
+    compare(run(100, make_paste_negative_rectangle_in_center_fixed_canvas()))
 
 
 class TestCWArc:
@@ -131,8 +123,9 @@ class TestCWArc:
     # Quarter arcs
 
     def test_0_90(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc((5, 0), (0, -5), (0, 0), 1, is_negative=False)
                 ),
@@ -140,8 +133,9 @@ class TestCWArc:
         )
 
     def test_90_180(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc((0, -5), (-5, 0), (0, 0), 1, is_negative=False)
                 ),
@@ -149,8 +143,9 @@ class TestCWArc:
         )
 
     def test_180_270(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc((-5, 0), (0, 5), (0, 0), 1, is_negative=False)
                 ),
@@ -158,8 +153,9 @@ class TestCWArc:
         )
 
     def test_270_360(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc((0, 5), (5, 0), (0, 0), 1, is_negative=False)
                 ),
@@ -169,8 +165,9 @@ class TestCWArc:
     # Half arcs
 
     def test_0_180(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc((5, 0), (-5, 0), (0, 0), 1, is_negative=False)
                 ),
@@ -178,8 +175,9 @@ class TestCWArc:
         )
 
     def test_90_270(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc((0, -5), (0, 5), (0, 0), 1, is_negative=False)
                 ),
@@ -187,8 +185,9 @@ class TestCWArc:
         )
 
     def test_180_360(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc((-5, 0), (5, 0), (0, 0), 1, is_negative=False)
                 ),
@@ -196,8 +195,9 @@ class TestCWArc:
         )
 
     def test_270_420(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc((0, 5), (0, -5), (0, 0), 1, is_negative=False)
                 ),
@@ -209,8 +209,9 @@ class TestCWArc:
     _45_degrees_vector_x = 3.5355339059327378
 
     def test_45_135(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc(
                         (self._45_degrees_vector_x, -self._45_degrees_vector_x),
@@ -224,8 +225,9 @@ class TestCWArc:
         )
 
     def test_135_225(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc(
                         (-self._45_degrees_vector_x, -self._45_degrees_vector_x),
@@ -239,8 +241,9 @@ class TestCWArc:
         )
 
     def test_225_315(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc(
                         (-self._45_degrees_vector_x, self._45_degrees_vector_x),
@@ -254,8 +257,9 @@ class TestCWArc:
         )
 
     def test_315_405(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc(
                         (self._45_degrees_vector_x, self._45_degrees_vector_x),
@@ -269,8 +273,9 @@ class TestCWArc:
         )
 
     def test_full_circle_with_quarter_arcs(self) -> None:
-        save(
+        compare(
             run(
+                10,
                 self.template(
                     Shape.new_cw_arc(
                         (self._45_degrees_vector_x, -self._45_degrees_vector_x),
@@ -305,12 +310,124 @@ class TestCWArc:
         )
 
 
+class TestBox:
+    def compare_auto_vs_fixed(
+        self,
+        *commands: Command,
+        fixed_box: Box,
+        origin: Optional[Vector] = None,
+        dpmm: int = 10,
+    ) -> None:
+        auto_size_image = run(
+            dpmm,
+            [
+                make_main_layer(None, origin),
+                *commands,
+                EndLayer(),
+            ],
+        )
+        fix_size_image = run(
+            dpmm,
+            [
+                make_main_layer(fixed_box, origin),
+                *commands,
+                EndLayer(),
+            ],
+        )
+        if auto_size_image != fix_size_image:
+            caller_name = inspect.stack()[1].function
+            auto_size_image.save(
+                (OUTPUT_PILLOW_DIRECTORY / f"TestBox_{caller_name}_auto.png").as_posix()
+            )
+            fix_size_image.save(
+                (
+                    OUTPUT_PILLOW_DIRECTORY / f"TestBox_{caller_name}_fixed.png"
+                ).as_posix()
+            )
+
+            pytest.fail("Images are different")
+
+    def test_two_circle(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_circle((5, 5), 2, is_negative=False),
+            Shape.new_circle((0, 0), 2, is_negative=False),
+            fixed_box=Box.from_center_width_height((2.5, 2.5), 7, 7),
+            origin=Vector(x=2.5, y=2.5),
+        )
+
+    def test_two_rectangles(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_rectangle((5, 5), 2, 2, is_negative=False),
+            Shape.new_rectangle((0, 0), 2, 2, is_negative=False),
+            fixed_box=Box.from_center_width_height((2.5, 2.5), 7, 7),
+            origin=Vector(x=2.5, y=2.5),
+        )
+
+    def test_circle_rectangle(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_circle((5, 5), 2, is_negative=False),
+            Shape.new_rectangle((0, 0), 2, 2, is_negative=False),
+            fixed_box=Box.from_center_width_height((2.5, 2.5), 7, 7),
+            origin=Vector(x=2.5, y=2.5),
+        )
+
+    def test_cw_arc_0_90(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((5, 0), (0, -5), (0, 0), 1, is_negative=False),
+            fixed_box=Box.from_center_width_height((2.75, -2.75), 5.5, 5.5),
+            origin=Vector(x=2.75, y=-2.75),
+        )
+
+    def test_cw_arc_90_180(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((0, -5), (-5, 0), (0, 0), 1, is_negative=False),
+            fixed_box=Box.from_center_width_height((-2.75, -2.75), 5.5, 5.5),
+            origin=Vector(x=-2.75, y=-2.75),
+        )
+
+    def test_cw_arc_180_270(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((-5, 0), (0, 5), (0, 0), 1, is_negative=False),
+            fixed_box=Box.from_center_width_height((-2.75, 2.75), 5.5, 5.5),
+            origin=Vector(x=-2.75, y=2.75),
+        )
+
+    def test_cw_arc_270_360(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((0, 5), (5, 0), (0, 0), 1, is_negative=False),
+            fixed_box=Box.from_center_width_height((2.75, 2.75), 5.5, 5.5),
+            origin=Vector(x=2.75, y=2.75),
+        )
+
+    def test_cw_arc_0_180(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((5, 0), (-5, 0), (0, 0), 1, is_negative=False),
+            fixed_box=Box.from_center_width_height((0, -2.75), 11, 5.5),
+            origin=Vector(x=0, y=-2.75),
+        )
+
+    def test_cw_arc_90_270(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((0, -5), (0, 5), (0, 0), 1, is_negative=False),
+            fixed_box=Box.from_center_width_height((-2.75, 0), 5.5, 11),
+            origin=Vector(x=-2.75, y=0),
+        )
+
+    def test_cw_arc_180_360(self) -> None:
+        self.compare_auto_vs_fixed(
+            Shape.new_cw_arc((-5, 0), (5, 0), (0, 0), 1, is_negative=False),
+            fixed_box=Box.from_center_width_height((0, 2.75), 11, 5.5),
+            origin=Vector(x=0, y=2.75),
+        )
+
+
 class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_0_0_paste_0_0_expect_circle_at_0_0(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0), layer_origin=(0, 0), paste=(0, 0)
                 ),
@@ -320,8 +437,9 @@ class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_0_0_paste_2_2_expect_circle_at_2_2(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0), layer_origin=(0, 0), paste=(2, 2)
                 ),
@@ -331,8 +449,9 @@ class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_0_0_paste_8_8_expect_circle_at_8_8(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0), layer_origin=(0, 0), paste=(8, 8)
                 ),
@@ -342,8 +461,9 @@ class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_2_2_paste_0_0_expect_circle_at_neg_2_neg_2(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0), layer_origin=(2, 2), paste=(0, 0)
                 ),
@@ -353,8 +473,9 @@ class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_2_2_paste_2_2_expect_circle_at_0_0(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0), layer_origin=(2, 2), paste=(2, 2)
                 ),
@@ -364,8 +485,9 @@ class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_8_8_paste_8_8_expect_circle_at_0_0(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0), layer_origin=(8, 8), paste=(8, 8)
                 ),
@@ -375,8 +497,9 @@ class TestPasteWithOffset:
     def test_main_origin_2_2_layer_origin_0_0_paste_0_0_expect_circle_at_0_0(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(2, 2), layer_origin=(0, 0), paste=(0, 0)
                 ),
@@ -386,8 +509,9 @@ class TestPasteWithOffset:
     def test_main_origin_2_2_layer_origin_0_0_paste_2_2_expect_circle_at_2_2(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(2, 2), layer_origin=(0, 0), paste=(2, 2)
                 ),
@@ -397,8 +521,9 @@ class TestPasteWithOffset:
     def test_main_origin_2_2_layer_origin_2_2_paste_0_0_expect_circle_at_neg_2_neg_2(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(2, 2), layer_origin=(2, 2), paste=(0, 0)
                 ),
@@ -408,8 +533,9 @@ class TestPasteWithOffset:
     def test_main_origin_2_2_layer_origin_2_2_paste_2_2_expect_circle_at_0_0(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(2, 2), layer_origin=(2, 2), paste=(2, 2)
                 ),
@@ -419,8 +545,9 @@ class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_0_0_paste_0_0_circle_at_2_2_expect_circle_at_2_2(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0),
                     layer_origin=(0, 0),
@@ -433,8 +560,9 @@ class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_0_0_paste_2_2_circle_at_2_2_expect_circle_at_4_4(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0),
                     layer_origin=(0, 0),
@@ -447,8 +575,9 @@ class TestPasteWithOffset:
     def test_main_origin_0_0_layer_origin_2_2_paste_2_2_circle_at_2_2_expect_circle_at_2_2(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(0, 0),
                     layer_origin=(2, 2),
@@ -461,8 +590,9 @@ class TestPasteWithOffset:
     def test_main_origin_neg_8_neg_8_layer_origin_4_4_paste_2_2_circle_at_2_2_expect_circle_at_0_0(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y(
                     main_origin=(-8, -8),
                     layer_origin=(4, 4),
@@ -475,8 +605,9 @@ class TestPasteWithOffset:
     def test_main_origin_neg_8_neg_8_layer_origin_4_4_paste_2_2_circle_at_2_2_expect_circle_at_0_0_no_main_origin_mark(
         self,
     ) -> None:
-        save(
+        compare(
             run_rvmc(
+                20,
                 build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark(
                     main_origin=(-8, -8),
                     layer_origin=(4, 4),

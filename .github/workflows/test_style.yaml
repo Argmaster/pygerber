@@ -1,0 +1,44 @@
+---
+name: Test Style
+
+on:
+  push:
+  schedule:
+    - cron: 0 12 * * 6
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.action_path }}-${{ github.ref }}-code-quality
+  cancel-in-progress: false
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8", "3.11"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.6.0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install basic dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for style tests
+        run: poetry run poe prepare-test-style
+
+      - name: Run style tests
+        run: poetry run poe test-style

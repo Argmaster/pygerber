@@ -5,10 +5,7 @@ name: Publish 📦 to Test PyPI
 on:
   push:
     branches:
-      - dev
       - main
-      - release/**
-      - maintenance/**
 
 jobs:
   deploy-to-pypi:
@@ -27,10 +24,10 @@ jobs:
           architecture: "x64"
 
       - name: Install Poetry 📜
-        run: pip install poetry==1.6.1
+        run: pip install poetry==1.8.4
 
-      - name: Install dependencies 🗄️
-        run: poetry install --no-cache --sync
+      - name: Install base dependencies 🗄️
+        run: poetry install --no-cache
 
       - name: Bump Version for development 🔨 release
         run: |

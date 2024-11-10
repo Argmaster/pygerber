@@ -1,19 +1,18 @@
 ---
-name: Build & Deploy Docs
+name: Deploy Latest Documentation
 
 on:
   push:
     tags:
       - "v*"
-
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.action_path }}-${{ github.ref }}-build-n-deploy-docs
+  group: ${{ github.action_path }}-${{ github.ref }}-latest-docs
   cancel-in-progress: false
 
 jobs:
-  run-build-n-deploy-docs:
+  docs:
     strategy:
       fail-fast: false
       matrix:
@@ -35,16 +34,18 @@ jobs:
           architecture: "x64"
 
       - name: Install Poetry
-        run: pip install poetry==1.6.1
+        run: pip install poetry==1.8.4
 
-      - name: Install dependencies
-        run: poetry install --with=docs --no-cache --sync --extras=all
+      - name: Install base dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for docs deploy
+        run: poetry run poe prepare-deploy-docs
 
       - name: Configure Git
         run: |
           git config user.name github-actions
           git config user.email argmaster.world@gmail.com
 
-      - name: Run build & deploy documentation
-        run: |
-          poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') latest -F mkdocs.yaml
+      - name: Deploy documentation
+        run: poetry run poe run deploy-latest-docs

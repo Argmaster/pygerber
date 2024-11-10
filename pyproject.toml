@@ -74,25 +74,33 @@ pygments = { version = ">=2.10.0,<3.0.0", optional = true }
 shapely = { version = ">=2.0.0,<3.0.0", optional = true }
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.13.0"
 poethepoet = "^0.29.0"
-pytest = "^8.3.3"
-ruff = "^0.7.3"
 jinja2 = "^3.1.2"
-pre-commit = "^3.3.3"
 autoflake = "^2.2.0"
-types-tzlocal = "^5.0.1.1"
-ipykernel = "^6.25.0"
-twine = ">=4.0.2,<6.0.0"
-docutils = "0.20.1"
 filelock = "^3.14.0"
 dulwich = "^0.22.1"
 tzlocal = "^5.0.1"
+types-tzlocal = "^5.0.1.1"
 pytest-xdist = { extras = ["psutil"], version = "^3.3.1" }
+pytest = "^8.3.3"
 pytest-cov = ">=4.1,<6.0"
 pytest-lsp = "^0.4.2"
 pytest-asyncio = ">=0.23.7,<0.25.0"
 pytest-mock = "^3.14.0"
+
+[tool.poetry.group.style]
+optional = true
+
+[tool.poetry.group.style.dependencies]
+ruff = "^0.7.3"
+mypy = "^1.13.0"
+pre-commit = "^3.3.3"
+
+[tool.poetry.group.deploy]
+optional = true
+
+[tool.poetry.group.deploy.dependencies]
+twine = "^5.1"
 
 [tool.poetry.group.docs]
 optional = true
@@ -132,23 +140,51 @@ gerber_lexer = "pygerber.gerber.pygments:GerberLexer"
 # -------------------------------------------------------------------------------------
 # git hooks
 install-hooks = [
-    { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
+    { cmd = "poetry install --sync --with=docs,style --extras=all  --no-ansi" },
     { cmd = "poetry run python -m scripts.install_hooks" },
     { cmd = "poetry run pre-commit install --install-hooks --overwrite" },
 ]
-# -------------
-# hook triggers
-run-code-quality-checks = [
-    { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
+prepare-test-style = [
+    { cmd = "poetry install --sync --with=docs,style --extras=all  --no-ansi" },
+]
+test-style = [
     { cmd = "poetry run pre-commit run --all-files -v" },
 ]
-# -------------------------------------------------------------------------------------
-run-unit-tests = [
+prepare-test-all = [
     { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
-    { cmd = "poetry run pytest --log-level=DEBUG -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered" },
 ]
-run-type-checks = [
+test-all = [
+    { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/" },
+]
+prepare-test-unit = [
+    { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
+]
+test-unit = [
+    { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/unit/" },
+]
+prepare-test-e2e = [
+    { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
+]
+test-e2e = [
+    { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/e2e/" },
+]
+prepare-test-type = [
+    { cmd = "poetry install --sync --with=docs,style --extras=all  --no-ansi" },
+]
+test-type = [
     { cmd = "poetry run mypy --config-file=pyproject.toml src/pygerber/ test/" },
+]
+prepare-deploy-docs = [
+    { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
+]
+deploy-latest-docs = [
+    { cmd = "poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') latest --config-file mkdocs.yaml" }
+]
+deploy-stable-docs = [
+    { cmd = "poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') stable --config-file mkdocs.yaml" }
+]
+prepare-deploy-package = [
+    { cmd = "poetry install --sync --with=deploy --extras=all  --no-ansi" },
 ]
 
 [tool.ruff]
@@ -345,3 +381,4 @@ required_plugins = [
     "pytest-xdist",
     "pytest-cov",
 ]
+asyncio_default_fixture_loop_scope = "function"

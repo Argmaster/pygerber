@@ -1,55 +1,29 @@
 ---
-name: Unit Tests
+name: All Tests
 
 on:
   push:
-    branches:
-      - main
-      - dev
-      - fix/**
-      - hotfix/**
-      - feature/**
-      - release/**
-      - dependabot/**
-      - maintenance/**
-      - refactor/**
     paths:
       - src/**
       - test/**
       - .github/**
       - pyproject.toml
       - poetry.lock
-
-  pull_request:
-    branches:
-      - main
-      - dev
-      - fix/**
-      - hotfix/**
-      - feature/**
-      - release/**
-      - dependabot/**
-      - maintenance/**
-    types:
-      - opened
-      - reopened
-
   schedule:
     - cron: 0 12 * * 6
-
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.action_path }}-${{ github.ref }}-unit-tests
+  group: ${{ github.action_path }}-${{ github.ref }}-test-all
   cancel-in-progress: false
 
 jobs:
-  run-unit-tests:
+  tests:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.13"]
 
     env:
       OS: ${{ matrix.os }}
@@ -68,15 +42,18 @@ jobs:
           architecture: "x64"
 
       - name: Install Poetry
-        run: pip install poetry==1.6.1
+        run: pip install poetry==1.8.4
 
-      - name: Install dependencies
-        run: poetry install --no-cache --sync --extras=svg
+      - name: Install basic dependencies
+        run: poetry install --no-cache
 
-      - name: Run unit tests
-        run: poetry run poe run-unit-tests
+      - name: Prepare environment for all tests
+        run: poetry run poe prepare-test-all
 
-      - name: Dump coverage
+      - name: Run all tests
+        run: poetry run poe test-all
+
+      - name: Create XML coverage files
         run: poetry run coverage xml
 
       - name: Upload coverage to Codecov
@@ -84,6 +61,6 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           env_vars: OS,PYTHON
-          flags: unittests
+          flags: all
           files: ./coverage.xml
           verbose: true

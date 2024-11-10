@@ -26,18 +26,13 @@ jobs:
           architecture: "x64"
 
       - name: Install Poetry 📜
-        run: pip install poetry==1.6.1
+        run: pip install poetry==1.8.4
 
-      - name: Install dependencies 🗄️
-        run: poetry install --no-cache --sync
+      - name: Install base dependencies 🗄️
+        run: poetry install --no-cache
 
       - name: Build distribution 📦
         run: poetry run poetry build
-
-      - name: Detect Version of project
-        id: project-version
-        run: |
-          echo "version=$(poetry version | awk '{ print $2 }')" >> $GITHUB_OUTPUT
 
       - name: Publish distribution 📦 to PyPI
         # Executed only for version tag push event
