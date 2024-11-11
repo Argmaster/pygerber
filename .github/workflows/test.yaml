@@ -62,8 +62,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,PYTHON
-          flags: all
+          flags: all,${{ matrix.os }},${{ matrix.python-version}}
           files: ./coverage.xml
           verbose: true
 
@@ -111,8 +110,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,PYTHON
-          flags: unit
+          flags: unit,${{ matrix.os }},${{ matrix.python-version}}
           files: ./coverage.xml
           verbose: true
 
@@ -160,8 +158,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,PYTHON
-          flags: e2e
+          flags: e2e,${{ matrix.os }},${{ matrix.python-version}}
           files: ./coverage.xml
           verbose: true
 
