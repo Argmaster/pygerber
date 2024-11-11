@@ -22,8 +22,8 @@ from pytest_lsp import (
 )
 
 import pygerber
-from test.gerberx3.common import GERBER_ASSETS_DIRECTORY
 from test.tags import Tag, tag
+from test.unit.test_gerber.common import GERBER_ASSETS_DIRECTORY
 
 
 @pytest_lsp.fixture(

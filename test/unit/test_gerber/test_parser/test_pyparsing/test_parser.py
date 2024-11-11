@@ -5,7 +5,7 @@ from dataclasses import dataclass
 import pytest
 
 from pygerber.gerber.parser.pyparsing.parser import Parser
-from test.gerberx3.common import (
+from test.unit.test_gerber.common import (
     GERBER_ASSETS_INDEX,
     Asset,
     CaseGenerator,

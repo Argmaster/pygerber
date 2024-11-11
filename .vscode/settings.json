@@ -50,6 +50,7 @@
         "Netlist",
         "numpy",
         "obround",
+        "OlinuXino",
         "prec",
         "putpixel",
         "pydantic",
@@ -68,6 +69,7 @@
         "superfences",
         "tasklist",
         "tobytes",
+        "ucamco",
         "Ucamco's",
         "ungroup",
         "Xino"
