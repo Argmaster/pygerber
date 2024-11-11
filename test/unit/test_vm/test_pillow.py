@@ -13,7 +13,7 @@ from pygerber.vm.pillow import PillowVirtualMachine
 from pygerber.vm.types import Box, Style, Vector
 from test.conftest import TEST_DIRECTORY
 from test.tags import Tag, tag
-from test.test_builder.test_rvmc import (
+from test.unit.test_builder.test_rvmc import (
     build_main_origin_x_y_layer_origin_x_y_paste_x_y,
     build_main_origin_x_y_layer_origin_x_y_paste_x_y_no_main_origin_mark,
 )
