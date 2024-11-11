@@ -24,7 +24,7 @@ class LoadPolarity(ExtendedCommandToken):
 
     Loads the scale object transformation parameter.
 
-    See section 4.9.2 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    See section 4.9.2 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/stable/gerber_specification/revision_2023_03.html
     """
 
     def __init__(

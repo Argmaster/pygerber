@@ -46,7 +46,7 @@ class ImageName(ExtendedCommandToken):
     IN has no effect on the image. A reader can ignore this command. The informal
     information provide by IN can also be put a G04 comment.
 
-    See section 8.1.3 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    See section 8.1.3 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/stable/gerber_specification/revision_2023_03.html
     """
 
     def __init__(self, string: str, location: int, content: str) -> None:

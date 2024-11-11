@@ -232,8 +232,8 @@ def highlight_differences(first: Image.Image, second: Image.Image) -> Image.Imag
     draw = ImageDraw.Draw(diff_img)
     for x in range(max_width):
         for y in range(max_height):
-            r1, g1, b1, a1 = img1_centered.getpixel((x, y))
-            r2, g2, b2, a2 = img2_centered.getpixel((x, y))
+            r1, g1, b1, a1 = img1_centered.getpixel((x, y))  # type: ignore[misc]
+            r2, g2, b2, a2 = img2_centered.getpixel((x, y))  # type: ignore[misc]
             draw.point(
                 (x, y),
                 fill=(
@@ -325,7 +325,7 @@ class JsonWalker:
             return cast(T, self.on_bool(data))
 
         if data is None:
-            return self.on_none(data)  # type: ignore[unreachable]
+            return self.on_none(data)  # type: ignore[unreachable, no-any-return, func-returns-value]
 
         raise TypeError(type(data))
 

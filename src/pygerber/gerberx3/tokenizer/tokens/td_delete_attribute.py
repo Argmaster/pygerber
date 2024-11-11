@@ -19,7 +19,7 @@ class DeleteAttribute(AttributeToken):
     The TD command deletes an aperture attribute or object attribute from the attributes
     dictionary. (File attributes are immutable and are not deleted.)
 
-    See section 5.5 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    See section 5.5 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/stable/gerber_specification/revision_2023_03.html
     """
 
     def __init__(self, string: str, location: int, name: Optional[str]) -> None:

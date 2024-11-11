@@ -31,20 +31,16 @@ and in
 The goal of this project is to provide support for wide variety of Gerber-like syntaxes,
 with support for most of deprecated features along with support for modern ones.
 
-<center><a href="https://argmaster.github.io/pygerber/latest"> 📚 See online documentation 📚 </a></center>
+<center><a href="https://argmaster.github.io/pygerber/stable"> 📚 See online documentation 📚 </a></center>
 
 ### Target set of tools:
 
 - [x] Tokenizer
 - [x] Parser
-- [ ] Optimizer
-- [x] [Introspection API](https://argmaster.github.io/pygerber/latest/gerber/introspection/0_usage.html)
+- [x] [Introspection API](https://argmaster.github.io/pygerber/stable/gerber/introspection/0_usage.html)
 - [x] Rasterized 2D rendering engine (With
       [Pillow](https://github.com/python-pillow/Pillow))
 - [x] Vector 2D rendering engine (With [drawsvg](https://github.com/cduck/drawsvg))
-- [ ] Model 3D rendering engine (With [Blender](https://www.blender.org/))
-- [ ] Formatter
-- [ ] Linter (eg. deprecated syntax detection)
 - [x] Gerber X3/X2 Language Server (with `language-server` extras)
 
 You can view progress of development in
@@ -229,22 +225,22 @@ You can utilize power of this language server with use of Visual Studio Code ext
 ## Documentation
 
 Official documentations is hosted on Github Pages and can be found
-[here](https://argmaster.github.io/pygerber/latest).
+[here](https://argmaster.github.io/pygerber/stable).
 
 ## Gerber features support
 
 For detailed list of features which are supported/not supported by each tool please
 refer to documentation:
 
-- [Tokenizer](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/0_tokenizer.html),
-- [Parser2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/1_parser2.html),
-- [RasterRenderer2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/2_rasterrenderer2.html),
-- [SvgRenderer2](https://argmaster.github.io/pygerber/latest/70_gerber/40_feature_support/3_svgrenderer2.html),
+- [Tokenizer](https://argmaster.github.io/pygerber/stable/70_gerber/40_feature_support/0_tokenizer.html),
+- [Parser2](https://argmaster.github.io/pygerber/stable/70_gerber/40_feature_support/1_parser2.html),
+- [RasterRenderer2](https://argmaster.github.io/pygerber/stable/70_gerber/40_feature_support/2_rasterrenderer2.html),
+- [SvgRenderer2](https://argmaster.github.io/pygerber/stable/70_gerber/40_feature_support/3_svgrenderer2.html),
 
 ## Development
 
 For development guidelines please visit documentation `Development` section
-[here](https://argmaster.github.io/pygerber/latest).
+[here](https://argmaster.github.io/pygerber/stable).
 
 ## Gerber reference archive
 

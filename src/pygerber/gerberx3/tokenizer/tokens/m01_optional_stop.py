@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class M01OptionalStop(CommandToken):
     """Wrapper for optional stop token.
 
-    See section 8.1.1 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    See section 8.1.1 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/stable/gerber_specification/revision_2023_03.html
     """
 
     def update_drawing_state(

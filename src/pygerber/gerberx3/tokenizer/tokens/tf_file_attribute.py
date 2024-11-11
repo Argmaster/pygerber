@@ -19,7 +19,7 @@ class FileAttribute(SetAttributeToken):
     the header of the file. File attributes are immutable. They cannot be redefined or
     deleted.
 
-    See section 5.2 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    See section 5.2 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/stable/gerber_specification/revision_2023_03.html
     """
 
     def parser2_visit_token(self, context: Parser2Context) -> None:

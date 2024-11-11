@@ -104,7 +104,7 @@ def raster_2d(
 
     \x08
     RGBA type documentation:
-    https://argmaster.github.io/pygerber/latest/reference/pygerber/gerberx3/api/__init__.html#pygerber.common.rgba.RGBA.from_hex
+    https://argmaster.github.io/pygerber/stable/reference/pygerber/gerberx3/api/__init__.html#pygerber.common.rgba.RGBA.from_hex
     """  # noqa: D301
     gerber_code = source.read()
     Rasterized2DLayer(

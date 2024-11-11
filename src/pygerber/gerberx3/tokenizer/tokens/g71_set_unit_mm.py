@@ -24,7 +24,7 @@ class SetUnitMillimeters(CommandToken):
     This historic codes perform a function handled by the MO command.
     Sometimes used. Deprecated in 2012
 
-    See section 4.2.1 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html
+    See section 4.2.1 of The Gerber Layer Format Specification Revision 2023.03 - https://argmaster.github.io/pygerber/stable/gerber_specification/revision_2023_03.html
     """
 
     def update_drawing_state(
@@ -38,7 +38,7 @@ class SetUnitMillimeters(CommandToken):
             logging.warning(
                 "Overriding coordinate units is illegal. "
                 "(See section 4.2.2 of The Gerber Layer Format Specification "
-                "Revision 2023.03 - https://argmaster.github.io/pygerber/latest/gerber_specification/revision_2023_03.html)",
+                "Revision 2023.03 - https://argmaster.github.io/pygerber/stable/gerber_specification/revision_2023_03.html)",
             )
         return (
             state.model_copy(
