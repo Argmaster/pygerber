@@ -74,6 +74,21 @@ this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
   release.
 - Ported language server to new parser.
 
+## Release 2.4.2
+
+- Relaxed `pyparsing` dependency requirements to allow for use of `3.2` and above for
+  supported Python versions.
+- Relaxed `numpy` dependency requirements to allow for use of `2.x` and above for
+  supported Python versions.
+- Relaxed `pydantic` dependency requirements to allow for use of `2.x` and above for
+  supported Python versions.
+- Relaxed `pillow` dependency requirements to allow for use of `8.x` and above for
+  supported Python versions.
+- Relaxed `click` dependency requirements to allow for use of `8.x` and above for
+  supported Python versions.
+- Relaxed Python version requirement to allow for use of `3.8` and above.
+- Changed documentation deployment flow to include `latest`, `stable` and `dev` links.
+
 ## Release 2.4.1
 
 - Added support for comment based attributes (#217)

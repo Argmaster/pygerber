@@ -15,7 +15,8 @@ import pygerber
 
 @click.command()
 @click.option("--is-dev", is_flag=True, default=False)
-def main(*, is_dev: bool) -> None:
+@click.option("--check-only", is_flag=True, default=False)
+def main(*, is_dev: bool, check_only: bool) -> None:
     version = Version(pygerber.__version__)
 
     is_unstable = version.is_devrelease or version.is_prerelease
@@ -29,18 +30,20 @@ def main(*, is_dev: bool) -> None:
 
         latest_unstable = find_latest_unstable(versions)
 
-        if version > latest_unstable:
+        if version >= latest_unstable:
             aliases.append("latest")
 
         latest_stable = find_latest_stable(versions)
 
-        if not is_unstable and version > latest_stable:
+        if not is_unstable and version >= latest_stable:
             aliases.append("stable")
 
     else:
         aliases.append("dev")
 
-    print("Aliases:", aliases)  # noqa: T201
+    if check_only:
+        print("Aliases:", aliases)  # noqa: T201
+        return
 
     sys_argv_original = sys.argv.copy()
 
