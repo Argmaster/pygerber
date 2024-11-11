@@ -27,6 +27,13 @@
     "aliases": []
   },
   {
+    "version": "2.4.2",
+    "title": "2.4.2",
+    "aliases": [
+      "stable"
+    ]
+  },
+  {
     "version": "2.4.1",
     "title": "2.4.1",
     "aliases": []
