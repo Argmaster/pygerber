@@ -59,7 +59,7 @@ jobs:
         run: poetry run coverage xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.6.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: "all/${{ matrix.os }}/${{ matrix.python-version}}"
@@ -155,7 +155,7 @@ jobs:
         run: poetry run coverage xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.6.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: "e2e/${{ matrix.os }}/${{ matrix.python-version}}"
@@ -231,6 +231,14 @@ jobs:
 
       - name: Run tests without extras
         run: poetry run poe test-no-extras
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4.6.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: "no-extras/${{ matrix.os }}/${{ matrix.python-version}}"
+          files: ./coverage.xml
+          verbose: true
 
   docs:
     strategy:
