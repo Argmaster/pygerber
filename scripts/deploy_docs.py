@@ -47,7 +47,15 @@ def main(*, is_dev: bool, check_only: bool) -> None:
 
     sys_argv_original = sys.argv.copy()
 
-    sys.argv = ["mike", "deploy", "--push", "--update-aliases", *aliases]
+    sys.argv = [
+        "mike",
+        "deploy",
+        "--push",
+        "--update-aliases",
+        *aliases,
+        "--config-file",
+        "mkdocs.yaml",
+    ]
     mike_main()
 
     sys.argv = sys_argv_original

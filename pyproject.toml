@@ -189,12 +189,6 @@ test-no-extras = [
 prepare-deploy-docs = [
     { cmd = "poetry install --sync --with=docs --extras=all  --no-ansi" },
 ]
-deploy-latest-docs = [
-    { cmd = "poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') latest --config-file mkdocs.yaml" }
-]
-deploy-stable-docs = [
-    { cmd = "poetry run mike deploy --push --update-aliases $(poetry version | awk '{ print $2 }') stable --config-file mkdocs.yaml" }
-]
 # --------- Package ---------
 prepare-deploy-package = [
     { cmd = "poetry install --sync --with=deploy --extras=all  --no-ansi" },
