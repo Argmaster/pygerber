@@ -62,7 +62,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: all,${{ matrix.os }},${{ matrix.python-version}}
+          flags: "all/${{ matrix.os }}/${{ matrix.python-version}}"
           files: ./coverage.xml
           verbose: true
 
@@ -107,10 +107,10 @@ jobs:
         run: poetry run coverage xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.6.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: unit,${{ matrix.os }},${{ matrix.python-version}}
+          flags: "unit/${{ matrix.os }}/${{ matrix.python-version}}"
           files: ./coverage.xml
           verbose: true
 
@@ -118,7 +118,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-24.04, windows-2022]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     name: E2E on ${{ matrix.os }} with Python ${{ matrix.python-version }}
@@ -158,7 +158,7 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: e2e,${{ matrix.os }},${{ matrix.python-version}}
+          flags: "e2e/${{ matrix.os }}/${{ matrix.python-version}}"
           files: ./coverage.xml
           verbose: true
 
@@ -166,7 +166,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04, windows-2022]
         python-version: ["3.8", "3.13"]
 
     name: Style on ${{ matrix.os }} with Python ${{ matrix.python-version }}
@@ -199,8 +199,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.8"]
+        os: [ubuntu-24.04, windows-2022]
+        python-version: ["3.8", "3.13"]
 
     name: No extras on ${{ matrix.os }} with Python ${{ matrix.python-version }}
 
