@@ -78,7 +78,7 @@ pip install git+https://github.com/Argmaster/pygerber
 
 PyGerber has a online documentation hosted on Github Pages. It will be a great starting
 point for your journey with PyGerber.
-[You can it here](https://argmaster.github.io/pygerber/latest). If you are looking for
+[You can it here](https://argmaster.github.io/pygerber/stable). If you are looking for
 documentation of older version of PyGerber, please use version selector dropdown
 available next to the title in top bar menu.
 
@@ -231,7 +231,7 @@ of the extension, we will move it to PyGerber repository if necessary.
 ## Development
 
 For development guidelines please visit documentation `Development` section
-[here](https://argmaster.github.io/pygerber/latest).
+[here](https://argmaster.github.io/pygerber/stable).
 
 ## Acknowledgments
 
