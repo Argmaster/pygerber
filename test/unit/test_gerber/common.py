@@ -27,6 +27,7 @@ from filelock import FileLock
 from PIL import Image, ImageDraw
 
 from pygerber.gerber.api._enums import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
+from test.assets import THIS_DIRECTORY as ASSETS_DIRECTORY
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -43,7 +44,6 @@ def find_gerberx3_asset_files(directory: str | Path) -> Iterable[tuple[str, str]
         yield relative_path.parent.as_posix(), relative_path.name
 
 
-ASSETS_DIRECTORY = Path(__file__).parent.parent / "assets"
 GERBER_ASSETS_DIRECTORY = ASSETS_DIRECTORY / "gerberx3"
 REFERENCE_ASSETS_HASH = ""
 
