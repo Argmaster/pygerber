@@ -1,14 +1,14 @@
 ---
-name: Deploy Latest Documentation
+name: Deploy Development Documentation
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.action_path }}-${{ github.ref }}-latest-docs
+  group: ${{ github.action_path }}-${{ github.ref }}-dev-docs
   cancel-in-progress: false
 
 jobs:
@@ -26,6 +26,7 @@ jobs:
         uses: actions/checkout@v3.6.0
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4.7.0
@@ -48,4 +49,4 @@ jobs:
           git config user.email argmaster.world@gmail.com
 
       - name: Deploy documentation
-        run: poetry run poe run deploy-latest-docs
+        run: poetry run python -m scripts.deploy_docs --is-dev

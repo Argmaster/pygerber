@@ -1,0 +1,52 @@
+---
+name: Deploy Documentation
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.action_path }}-${{ github.ref }}-release-docs
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3.6.0
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install base dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for docs deploy
+        run: poetry run poe prepare-deploy-docs
+
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email argmaster.world@gmail.com
+
+      - name: Deploy documentation
+        run: poetry run python -m scripts.deploy_docs
