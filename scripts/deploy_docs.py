@@ -30,12 +30,12 @@ def main(*, is_dev: bool, check_only: bool) -> None:
 
         latest_unstable = find_latest_unstable(versions)
 
-        if version > latest_unstable:
+        if version >= latest_unstable:
             aliases.append("latest")
 
         latest_stable = find_latest_stable(versions)
 
-        if not is_unstable and version > latest_stable:
+        if not is_unstable and version >= latest_stable:
             aliases.append("stable")
 
     else:
