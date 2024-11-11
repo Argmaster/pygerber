@@ -15,12 +15,12 @@ on:
 
 concurrency:
   group: ${{ github.action_path }}-${{ github.ref }}-test
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   all:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, windows-2022, windows-2019]
         python-version: ["3.8", "3.13"]
@@ -68,7 +68,7 @@ jobs:
 
   unit:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, windows-2022, windows-2019]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
@@ -116,7 +116,7 @@ jobs:
 
   e2e:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
@@ -164,7 +164,7 @@ jobs:
 
   style:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.8", "3.13"]
@@ -197,7 +197,7 @@ jobs:
 
   no-extras:
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.8"]
