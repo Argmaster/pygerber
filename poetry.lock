@@ -1386,24 +1386,28 @@ files = [
 
 [[package]]
 name = "mike"
-version = "1.1.2"
+version = "2.1.3"
 description = "Manage multiple versions of your MkDocs-powered documentation"
 optional = false
 python-versions = "*"
 files = [
-    {file = "mike-1.1.2-py3-none-any.whl", hash = "sha256:4c307c28769834d78df10f834f57f810f04ca27d248f80a75f49c6fa2d1527ca"},
-    {file = "mike-1.1.2.tar.gz", hash = "sha256:56c3f1794c2d0b5fdccfa9b9487beb013ca813de2e3ad0744724e9d34d40b77b"},
+    {file = "mike-2.1.3-py3-none-any.whl", hash = "sha256:d90c64077e84f06272437b464735130d380703a76a5738b152932884c60c062a"},
+    {file = "mike-2.1.3.tar.gz", hash = "sha256:abd79b8ea483fb0275b7972825d3082e5ae67a41820f8d8a0dc7a3f49944e810"},
 ]
 
 [package.dependencies]
-jinja2 = "*"
+importlib-metadata = "*"
+importlib-resources = "*"
+jinja2 = ">=2.7"
 mkdocs = ">=1.0"
+pyparsing = ">=3.0"
 pyyaml = ">=5.1"
+pyyaml-env-tag = "*"
 verspec = "*"
 
 [package.extras]
-dev = ["coverage", "flake8 (>=3.0)", "shtab"]
-test = ["coverage", "flake8 (>=3.0)", "shtab"]
+dev = ["coverage", "flake8 (>=3.0)", "flake8-quotes", "shtab"]
+test = ["coverage", "flake8 (>=3.0)", "flake8-quotes", "shtab"]
 
 [[package]]
 name = "mkdocs"
@@ -3466,4 +3470,4 @@ svg = ["drawsvg"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "d451541de65243e49b45548fa1f82237aab47c3678cfa30e9c1e8e34f9e9d946"
+content-hash = "b5ca899c5906ae3eb9803586124090f868303817df8341ae05a54dd80b1d8949"
