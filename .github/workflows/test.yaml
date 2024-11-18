@@ -9,6 +9,13 @@ on:
       - .github/**
       - pyproject.toml
       - poetry.lock
+  pull_request:
+    paths:
+      - src/**
+      - test/**
+      - .github/**
+      - pyproject.toml
+      - poetry.lock
   schedule:
     - cron: 0 12 * * 6
   workflow_dispatch:
