@@ -14,6 +14,9 @@ class Zeros(Enum):
     SKIP_TRAILING = "T"
     """Skip trailing zeros mode."""
 
+    SKIP_LEADING_IMPLIED = ""
+    """Implied skip leading zeros mode."""
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}.{self.name}"
 
