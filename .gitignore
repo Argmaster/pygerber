@@ -302,3 +302,6 @@ output.png
 .reference-assets.lock
 output.svg
 formatted.gbr
+
+# Local test files
+test/local/
