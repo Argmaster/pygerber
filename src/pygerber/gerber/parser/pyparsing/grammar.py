@@ -1762,7 +1762,7 @@ class Grammar:
         return (
             self._extended_command(
                 pp.Literal("FS")
-                + pp.one_of(("L", "T")).set_results_name("zeros")
+                + pp.one_of(("L", "T", "")).set_results_name("zeros")
                 + pp.one_of(("I", "A")).set_results_name("coordinate_mode")
                 + pp.CaselessLiteral("X")
                 + pp.Regex(r"[0-9]").set_results_name("x_integral")

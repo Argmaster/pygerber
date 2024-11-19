@@ -111,7 +111,7 @@ class CoordinateFormat(_StateModel):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-        if self.zeros == Zeros.SKIP_LEADING:
+        if self.zeros in (Zeros.SKIP_LEADING, Zeros.SKIP_LEADING_IMPLIED):
             self.unpack_x = self._unpack_skip_leading(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
             self.unpack_y = self._unpack_skip_leading(self.y_integral, self.y_decimal)  # type: ignore[method-assign]
             self.pack_x = self._pack_skip_leading(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
