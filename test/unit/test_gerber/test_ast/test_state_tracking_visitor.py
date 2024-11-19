@@ -464,6 +464,14 @@ def test_d01_dispatch(
             7,
         ),
         (
+            Zeros.SKIP_LEADING_IMPLIED,
+            CoordinateNotation.ABSOLUTE,
+            2,
+            6,
+            3,
+            7,
+        ),
+        (
             Zeros.SKIP_LEADING,
             CoordinateNotation.INCREMENTAL,
             2,
@@ -473,6 +481,14 @@ def test_d01_dispatch(
         ),
         (
             Zeros.SKIP_TRAILING,
+            CoordinateNotation.INCREMENTAL,
+            2,
+            6,
+            3,
+            7,
+        ),
+        (
+            Zeros.SKIP_LEADING_IMPLIED,
             CoordinateNotation.INCREMENTAL,
             2,
             6,
@@ -540,6 +556,15 @@ class TestCoordinateFormat:
         y_decimal=6,
     )
 
+    fmt_2 = FMT(
+        zeros=Zeros.SKIP_LEADING_IMPLIED,
+        coordinate_mode=CoordinateNotation.ABSOLUTE,
+        x_integral=2,
+        x_decimal=6,
+        y_integral=2,
+        y_decimal=6,
+    )
+
     params_0: ClassVar[ParamsT] = [
         (fmt_0, "0", 0),
         (fmt_0, "1", 0.000001),
@@ -580,6 +605,13 @@ class TestCoordinateFormat:
         (fmt_1, "+1", 10),
         (fmt_1, "-1", -10),
         (fmt_0, "-0", -0),
+        (fmt_2, "+", PackedCoordinateTooShortError),
+        (fmt_2, "+100000000", PackedCoordinateTooLongError),
+        (fmt_2, "", PackedCoordinateTooShortError),
+        (fmt_2, "100000001", PackedCoordinateTooLongError),
+        (fmt_2, "-", PackedCoordinateTooShortError),
+        (fmt_2, "-100000000", PackedCoordinateTooLongError),
+        (fmt_2, "-0", -0),
     ]
     params_4: ClassVar[ParamsT] = [
         (fmt_1, "00000001", 0.000001),
@@ -608,6 +640,36 @@ class TestCoordinateFormat:
         (fmt_1, "-1001", -10.01),
         (fmt_1, "-101", -10.1),
         (fmt_1, "-11", -11),
+    ]
+    params_7: ClassVar[ParamsT] = [
+        (fmt_2, "0", 0),
+        (fmt_2, "1", 0.000001),
+        (fmt_2, "11", 0.000011),
+        (fmt_2, "101", 0.000101),
+        (fmt_2, "1001", 0.001001),
+        (fmt_2, "10001", 0.010001),
+        (fmt_2, "100001", 0.100001),
+        (fmt_2, "1000001", 1.000001),
+        (fmt_2, "10000001", 10.000001),
+    ]
+    params_8: ClassVar[ParamsT] = [
+        (fmt_2, "+0", 0),
+        (fmt_2, "+10", 0.00001),
+        (fmt_2, "+100", 0.0001),
+        (fmt_2, "+1000", 0.001),
+        (fmt_2, "+10000", 0.01),
+        (fmt_2, "+100000", 0.1),
+        (fmt_2, "+1000000", 1),
+        (fmt_2, "+10000000", 10),
+    ]
+    params_9: ClassVar[ParamsT] = [
+        (fmt_2, "-10", -0.00001),
+        (fmt_2, "-100", -0.0001),
+        (fmt_2, "-1000", -0.001),
+        (fmt_2, "-10000", -0.01),
+        (fmt_2, "-100000", -0.1),
+        (fmt_2, "-1000000", -1),
+        (fmt_2, "-10000000", -10),
     ]
 
     @pytest.mark.parametrize(
