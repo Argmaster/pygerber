@@ -265,6 +265,7 @@ cython_debug/
 ### Python Patch ###
 # Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
 poetry.toml
+A
 
 # ruff
 .ruff_cache/
@@ -302,6 +303,3 @@ output.png
 .reference-assets.lock
 output.svg
 formatted.gbr
-
-# Local test files
-test/local/
