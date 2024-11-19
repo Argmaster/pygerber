@@ -55,7 +55,7 @@ Check out [Custom color maps](./10_custom_color_maps.md) for more details.
 [`set_parser_options()`](../../reference/pygerber/gerber/api/__init__.md#pygerber.gerber.api.GerberFile.set_parser_options)
 allows you to modify advanced parser settings. It is available to allow tweaking
 predefined parser behavior options. If you need more control than provided here, please
-check out [Advanced Guide](../30_advanced_guide/00_introduction.md). `**options` are
+check out [Extending Guide](../90_extend/00_introduction.md). `**options` are
 intentionally not precisely defined here, as they are different for different parser
 implementations, only way to use this method is to already understand what you are
 doing.
@@ -63,10 +63,10 @@ doing.
 [`set_compiler_options()`](../../reference/pygerber/gerber/api/__init__.md#pygerber.gerber.api.GerberFile.set_compiler_options)
 allows you to modify advanced compiler settings. It is available to allow tweaking
 predefined compiler behavior options. If you need more control than provided here,
-please check out [Advanced Guide](../30_advanced_guide/00_introduction.md). `**options`
-are intentionally not precisely defined here, as they are different for different
-compiler implementations, only way to use this method is to already understand what you
-are doing.
+please check out [Extending Guide](../90_extend/00_introduction.md). `**options` are
+intentionally not precisely defined here, as they are different for different compiler
+implementations, only way to use this method is to already understand what you are
+doing.
 
 ## Rendering Gerber file
 
