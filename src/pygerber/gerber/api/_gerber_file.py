@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, Optional, TextIO
+from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Optional, TextIO
 
 import pyparsing as pp
 
@@ -207,7 +207,7 @@ class ShapelyImage(Image):
         self._result = result
         self._style = style
 
-    def save(self, destination: str | Path | TextIO) -> None:
+    def save(self, destination: str | Path | BinaryIO) -> None:
         """Write rendered image as SVG to location or buffer.
 
         Parameters

@@ -9,8 +9,9 @@ import importlib.util
 import math
 import operator
 from contextlib import suppress
+from io import BytesIO
 from pathlib import Path
-from typing import Callable, Generator, Optional, Sequence, TextIO
+from typing import Any, BinaryIO, Callable, Generator, Optional, Sequence
 
 import numpy as np
 
@@ -64,41 +65,87 @@ class ShapelyResult(Result):
 
         self.shape = shape
 
+    def save(
+        self,
+        destination: str | Path | BinaryIO,
+        file_format: str,
+        color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in `file_format`.
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        file_format : str
+            Format to save the image in. Supported formats vary depending on the
+            VirtualMachine used. You can expect though that vector images will support
+            SVG and raster images will support PNG and JPEG formats. Other formats
+            are possible, please check the documentation of the VirtualMachine you are
+            using.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to save implementation.
+
+        """
+        if file_format.casefold() == "svg".casefold():
+            self.save_svg(destination, color, **kwargs)
+        else:
+            raise NotImplementedError(file_format)
+
     def save_svg(
         self,
-        destination: str | Path | TextIO,
+        destination: str | Path | BinaryIO,
         color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
     ) -> None:
         """Save result to a file or buffer in SVG format.
 
         Parameters
         ----------
-        destination : str | Path | TextIO
+        destination : str | Path | BinaryIO
             `str` and `Path` objects are interpreted as file paths and opened with
-            truncation. `TextIO`-like (files, StringIO) objects are written to directly.
+            truncation. `BinaryIO`-like (files, StringIO) objects are written to
+            directly.
         color : Style, optional
             Color to use for SVG, background is ignored as it is always rendered as
             empty space, so only foreground applies, by default
             Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to implementation.
+            In particular, `encoding` can be used to specify encoding of the data,
+            default is `utf-8`.
 
         """
-        if isinstance(destination, (str, Path)):
-            with Path(destination).open("w") as file:
-                self._dump_svg(file, color)
+        encoding = kwargs.get("encoding", "utf-8")
 
-        elif isinstance(destination, TextIO):
-            self._dump_svg(destination, color)
+        if isinstance(destination, (str, Path)):
+            with Path(destination).open("wb") as file:
+                self._dump_svg(file, color, encoding=encoding)
+
+        elif isinstance(destination, (BinaryIO, BytesIO)):
+            self._dump_svg(destination, color, encoding=encoding)
 
         else:
             raise NotImplementedError(type(destination))
 
-    def _dump_svg(self, out: TextIO, color: Style) -> None:
+    def _dump_svg(
+        self, out: BinaryIO, color: Style, *, encoding: str = "utf-8"
+    ) -> None:
         out.write(
-            '<svg xmlns="http://www.w3.org/2000/svg" '
-            'xmlns:xlink="http://www.w3.org/1999/xlink" '
+            (
+                '<svg xmlns="http://www.w3.org/2000/svg" '
+                'xmlns:xlink="http://www.w3.org/1999/xlink" '
+            ).encode(encoding)
         )
         if self.shape.is_empty:
-            out.write("/>")
+            out.write("/>".encode(encoding))
             return
 
         xmin, ymin, xmax, ymax = self.shape.bounds
@@ -113,19 +160,21 @@ class ShapelyResult(Result):
         view_box = f"{xmin} {ymin} {dx} {dy}"
         transform = f"matrix(1,0,0,-1,0,{ymax + ymin})"
 
-        out.write(f'width="{width}" ')
-        out.write(f'height="{height}" ')
-        out.write(f'viewBox="{view_box}" ')
-        out.write('preserveAspectRatio="xMidYMid meet" ')
-        out.write(">")
+        out.write(f'width="{width}" '.encode(encoding))
+        out.write(f'height="{height}" '.encode(encoding))
+        out.write(f'viewBox="{view_box}" '.encode(encoding))
+        out.write('preserveAspectRatio="xMidYMid meet" '.encode(encoding))
+        out.write(">".encode(encoding))
         out.write(
             (
                 f'<g transform="{transform}">'
                 f"{self.shape.svg(scale_factor=0.0, fill_color=fill_color)}"
                 "</g>"
-            ).replace('stroke="#555555"', 'stroke="#00000000"')
+            )
+            .replace('stroke="#555555"', 'stroke="#00000000"')
+            .encode(encoding)
         )
-        out.write("</svg>")
+        out.write("</svg>".encode(encoding))
 
 
 class ShapelyEagerLayer(EagerLayer):

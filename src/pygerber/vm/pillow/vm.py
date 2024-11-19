@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import math
 import operator
-from typing import Callable, Generator, Optional, Sequence
+from typing import TYPE_CHECKING, Any, BinaryIO, Callable, Generator, Optional, Sequence
 
 from PIL import Image, ImageDraw, ImageOps
 
@@ -30,6 +30,9 @@ from pygerber.vm.vm import (
     VirtualMachine,
 )
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 FULL_ANGLE_DEGREES = 360
 
 DECREASE_ANGLE = (operator.sub, operator.gt)
@@ -51,7 +54,183 @@ class PillowResult(Result):
         """Check if result is successful."""
         return self.image is not None
 
-    def get_image(self, style: Style = Style.presets.COPPER) -> Image.Image:
+    def save(
+        self,
+        destination: str | Path | BinaryIO,
+        file_format: str,
+        color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in `file_format`.
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        file_format : str
+            Format to save the image in. Supported formats vary depending on the
+            VirtualMachine used. You can expect though that vector images will support
+            SVG and raster images will support PNG and JPEG formats. Other formats
+            are possible, please check the documentation of the VirtualMachine you are
+            using.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to save implementation.
+
+        """
+        if file_format.casefold() == "bmp".casefold():
+            self.save_bmp(destination, color, **kwargs)
+        elif file_format.casefold() == "png".casefold():
+            self.save_png(destination, color, **kwargs)
+        elif file_format.casefold() == "jpeg".casefold():
+            self.save_jpeg(destination, color, **kwargs)
+        elif file_format.casefold() == "tiff".casefold():
+            self.save_tiff(destination, color, **kwargs)
+        elif file_format.casefold() == "webp".casefold():
+            self.save_webp(destination, color, **kwargs)
+        else:
+            raise NotImplementedError(file_format)
+
+    def save_bmp(
+        self,
+        destination: str | Path | BinaryIO,
+        color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in BMP format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#bmp).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image(color).save(fp=destination, format="BMP", **kwargs)
+
+    def save_png(
+        self,
+        destination: str | Path | BinaryIO,
+        color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in PNG format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#png).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image(color).save(fp=destination, format="PNG", **kwargs)
+
+    def save_jpeg(
+        self,
+        destination: str | Path | BinaryIO,
+        color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in JPEG format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#jpeg).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image(color).convert("RGB").save(
+            fp=destination, format="JPEG", **kwargs
+        )
+
+    def save_tiff(
+        self,
+        destination: str | Path | BinaryIO,
+        color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in TIFF format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#tiff).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image(color).save(fp=destination, format="TIFF", **kwargs)
+
+    def save_webp(
+        self,
+        destination: str | Path | BinaryIO,
+        color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in WEBP format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#webp).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image(color).convert("RGB").save(
+            fp=destination, format="WEBP", **kwargs
+        )
+
+    def get_image(self, style: Style = Style.presets.COPPER_ALPHA) -> Image.Image:
         """Get image with given color scheme."""
         assert isinstance(style, Style)
         if self.image is None:
