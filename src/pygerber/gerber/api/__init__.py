@@ -35,7 +35,7 @@ from pygerber.gerber.api._gerber_job_file import (
     Size,
 )
 from pygerber.gerber.formatter.options import Options
-from pygerber.vm.types.style import Style
+from pygerber.vm.types import Color, Style
 
 __all__ = [
     "CompositeImage",
@@ -60,6 +60,7 @@ __all__ = [
     "ShapelyImage",
     "Size",
     "Style",
+    "Color",
     "Units",
     "Options",
 ]

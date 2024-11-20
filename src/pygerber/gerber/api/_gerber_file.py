@@ -190,6 +190,152 @@ class PillowImage(Image):
         super().__init__(image_space=image_space)
         self._image = image
 
+    def save(
+        self,
+        destination: str | Path | BinaryIO,
+        file_format: str,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in `file_format`.
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        file_format : str
+            Format to save the image in. Supported formats vary depending on the
+            VirtualMachine used. You can expect though that vector images will support
+            SVG and raster images will support PNG and JPEG formats. Other formats
+            are possible, please check the documentation of the VirtualMachine you are
+            using.
+        kwargs : Any
+            Additional keyword arguments to pass to save implementation.
+
+        """
+        if file_format.casefold() == "bmp".casefold():
+            self.save_bmp(destination, **kwargs)
+        elif file_format.casefold() == "png".casefold():
+            self.save_png(destination, **kwargs)
+        elif file_format.casefold() == "jpeg".casefold():
+            self.save_jpeg(destination, **kwargs)
+        elif file_format.casefold() == "tiff".casefold():
+            self.save_tiff(destination, **kwargs)
+        elif file_format.casefold() == "webp".casefold():
+            self.save_webp(destination, **kwargs)
+        else:
+            raise NotImplementedError(file_format)
+
+    def save_bmp(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in BMP format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#bmp).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().save(fp=destination, format="BMP", **kwargs)
+
+    def save_png(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in PNG format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#png).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().save(fp=destination, format="PNG", **kwargs)
+
+    def save_jpeg(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in JPEG format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#jpeg).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().convert("RGB").save(fp=destination, format="JPEG", **kwargs)
+
+    def save_tiff(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in TIFF format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#tiff).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().save(fp=destination, format="TIFF", **kwargs)
+
+    def save_webp(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in WEBP format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#webp).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().convert("RGB").save(fp=destination, format="WEBP", **kwargs)
+
     def get_image(self) -> PIL.Image.Image:
         """Get image object."""
         return self._image
