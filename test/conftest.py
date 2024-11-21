@@ -15,6 +15,7 @@ from typing import Any, Generator
 import pytest
 import tzlocal
 
+from test.assets import assetlib
 from test.tags import Tag
 
 THIS_FILE = Path(__file__)
@@ -88,13 +89,33 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
-    parser.addoption("--exclude-tags", action="append")
-    parser.addoption("--regenerate", action="append")
+    parser.addoption(
+        "--exclude-tags", action="append", help="Excelude tests with these tags."
+    )
+    parser.addoption(
+        "--regenerate",
+        action="store_true",
+        default=False,
+        help="Regenerate test assets.",
+    )
+    parser.addoption(
+        "--auto-commit-regenerated",
+        action="store_true",
+        default=False,
+        help="Automatically commit regenerated assets to upstream repositories.",
+    )
+
+
+@pytest.fixture
+def is_regeneration_enabled(pytestconfig: pytest.Config) -> bool:
+    return bool(pytestconfig.getoption("--regenerate"))
 
 
 def pytest_collection_modifyitems(
     config: pytest.Config, items: list[pytest.Item]
 ) -> None:
+    assetlib.AUTO_COMMIT_CHANGES = bool(config.getoption("--auto-commit-regenerated"))
+
     exclude_tags = config.getoption("--exclude-tags")
     assert exclude_tags is None or isinstance(exclude_tags, list), type(exclude_tags)
 

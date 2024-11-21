@@ -13,6 +13,8 @@ class Tag(Enum):
     PILLOW = "pillow"
     EXTRAS = "extras"
     LSP = "lsp"
+    OPENCV = "opencv"
+    SKIMAGE = "skimage"
 
     @classmethod
     def _missing_(cls, value: object) -> Any:

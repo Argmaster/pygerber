@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 import click
 
@@ -204,7 +204,120 @@ def _sanitize_style(
 @_get_foreground_option()
 @_get_background_option()
 @_get_raster_implementation_option()
-def jpeg(
+@click.option(
+    "-q",
+    "--quality",
+    type=int,
+    default=95,
+    help="Compression algorithm quality control parameter.",
+)
+def jpeg(  # noqa: PLR0913
+    source: str,
+    output: str,
+    file_type: str,
+    style: Optional[str],
+    foreground: Optional[str],
+    background: Optional[str],
+    dpmm: int,
+    implementation: str,
+    quality: int,
+) -> None:
+    """Convert Gerber image file to JPEG image."""
+    style_obj = _sanitize_style(style, foreground, background)
+    file = GerberFile.from_file(source, file_type=FileTypeEnum(file_type.upper()))
+
+    if implementation.lower() == "pillow":
+        result = file.render_with_pillow(style_obj, dpmm)
+        result.save_jpeg(output, quality=quality)
+
+    else:
+        msg = f"Implementation {implementation!r} is not supported."
+        raise NotImplementedError(msg)
+
+
+@convert.command("tiff")
+@_get_source_file_argument()
+@_get_output_file_option()
+@_get_dpmm_option()
+@_get_file_type_option()
+@_get_style_option()
+@_get_foreground_option()
+@_get_background_option()
+@_get_raster_implementation_option()
+@click.option(
+    "-c",
+    "--compression",
+    type=click.Choice(
+        [
+            "group3",
+            "group4",
+            "jpeg",
+            "lzma",
+            "packbits",
+            "tiff_adobe_deflate",
+            "tiff_ccitt",
+            "tiff_lzw",
+            "tiff_raw_16",
+            "tiff_sgilog",
+            "tiff_sgilog24",
+            "tiff_thunderscan",
+            "webp",
+            "zstd",
+        ]
+    ),
+    default="lzma",
+    help="Compression algorithm.",
+)
+@click.option(
+    "-q",
+    "--quality",
+    type=int,
+    default=95,
+    help=(
+        "Compression algorithm quality control parameter, applicable "
+        "only for JPEG compression."
+    ),
+)
+def tiff(  # noqa: PLR0913
+    source: str,
+    output: str,
+    file_type: str,
+    style: Optional[str],
+    foreground: Optional[str],
+    background: Optional[str],
+    dpmm: int,
+    implementation: str,
+    compression: str,
+    quality: int,
+) -> None:
+    """Convert Gerber image file to TIFF image."""
+    style_obj = _sanitize_style(style, foreground, background)
+    file = GerberFile.from_file(source, file_type=FileTypeEnum(file_type.upper()))
+
+    if implementation.lower() == "pillow":
+        result = file.render_with_pillow(style_obj, dpmm)
+
+        opts: dict[str, Any] = {"compression": compression}
+        if compression == "jpeg":
+            opts["quality"] = quality
+
+        result.save_tiff(output, **opts)
+
+    else:
+        msg = f"Implementation {implementation!r} is not supported."
+        raise NotImplementedError(msg)
+
+
+@convert.command("bmp")
+@_get_source_file_argument()
+@_get_output_file_option()
+@_get_dpmm_option()
+@_get_file_type_option()
+@_get_style_option()
+@_get_foreground_option()
+@_get_background_option()
+@_get_raster_implementation_option()
+def bmp(
     source: str,
     output: str,
     file_type: str,
@@ -214,13 +327,64 @@ def jpeg(
     dpmm: int,
     implementation: str,
 ) -> None:
-    """Convert Gerber image file to JPEG image."""
+    """Convert Gerber image file to BMP image."""
     style_obj = _sanitize_style(style, foreground, background)
     file = GerberFile.from_file(source, file_type=FileTypeEnum(file_type.upper()))
 
     if implementation.lower() == "pillow":
         result = file.render_with_pillow(style_obj, dpmm)
-        result.save_jpeg(output)
+        result.save_bmp(output)
+
+    else:
+        msg = f"Implementation {implementation!r} is not supported."
+        raise NotImplementedError(msg)
+
+
+@convert.command("webp")
+@_get_source_file_argument()
+@_get_output_file_option()
+@_get_dpmm_option()
+@_get_file_type_option()
+@_get_style_option()
+@_get_foreground_option()
+@_get_background_option()
+@_get_raster_implementation_option()
+@click.option(
+    "-l",
+    "--lossless",
+    is_flag=True,
+    default=False,
+    help="Instructs the WebP writer to use lossless compression.",
+)
+@click.option(
+    "-q",
+    "--quality",
+    type=int,
+    default=80,
+    help=(
+        "Compression algorithm quality control parameter, applicable "
+        "only for JPEG compression."
+    ),
+)
+def webp(  # noqa: PLR0913
+    source: str,
+    output: str,
+    file_type: str,
+    style: Optional[str],
+    foreground: Optional[str],
+    background: Optional[str],
+    dpmm: int,
+    implementation: str,
+    lossless: str,
+    quality: int,
+) -> None:
+    """Convert Gerber image file to WEBP image."""
+    style_obj = _sanitize_style(style, foreground, background)
+    file = GerberFile.from_file(source, file_type=FileTypeEnum(file_type.upper()))
+
+    if implementation.lower() == "pillow":
+        result = file.render_with_pillow(style_obj, dpmm)
+        result.save_webp(output, lossless=lossless, quality=quality)
 
     else:
         msg = f"Implementation {implementation!r} is not supported."

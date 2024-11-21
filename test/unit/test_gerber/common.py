@@ -21,13 +21,10 @@ from typing import (
 )
 
 import pytest
-from dulwich import porcelain
-from dulwich.repo import Repo
-from filelock import FileLock
 from PIL import Image, ImageDraw
 
 from pygerber.gerber.api._enums import GERBER_EXTENSION_TO_FILE_TYPE_MAPPING
-from test.assets import THIS_DIRECTORY as ASSETS_DIRECTORY
+from test.assets.reference.pygerber.console import THIS_DIRECTORY as ASSETS_DIRECTORY
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -155,35 +152,6 @@ class CaseGenerator(Generic[ConfigT]):
             self,
             ids=[a.alias for a in GERBER_ASSETS_INDEX],
         )
-
-
-class ReferenceAssetsManager:
-    def __init__(self, sha: str) -> None:
-        self.sha = sha
-        self.repository_directory = Path().cwd() / ".reference-assets"
-
-        self._prepare_repository()
-
-    def _prepare_repository(self) -> None:
-        lock = FileLock(self.repository_directory.with_suffix(".lock"))
-        with lock:
-            if not self.repository_directory.exists():
-                porcelain.clone(
-                    "https://github.com/Argmaster/pygerber-reference-assets",
-                    self.repository_directory,
-                )
-            repository = Repo(self.repository_directory.as_posix())
-            sha = repository.head().decode(encoding="utf-8")
-            if sha != self.sha:
-                porcelain.fetch(repository, "origin")
-                porcelain.checkout_branch(repository, self.sha)
-
-    def get_asset_path(self, tag: str, relative_path: Path) -> Path:
-        return self.repository_directory / f".reference{tag}" / relative_path
-
-
-REFERENCE_ASSET_SHA = "fd3d59618be220fc5554e03de2b18e66009c30c9"
-REFERENCE_ASSETS_MANAGER = ReferenceAssetsManager(REFERENCE_ASSET_SHA)
 
 
 _RGBA_PIXEL: TypeAlias = Tuple[int, int, int, int]

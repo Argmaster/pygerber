@@ -87,6 +87,11 @@ pytest-cov = ">=4.1,<6.0"
 pytest-lsp = "^0.4.2"
 pytest-asyncio = ">=0.23.7,<0.25.0"
 pytest-mock = "^3.14.0"
+opencv-python = "^4.10.0.84"
+scikit-image = [
+    { version = ">=0.20.0,<0.22.0", python = ">=3.8,<3.9" }, # Pillow dropped support for 3.8 in 8.0
+    { version = ">=0.22.0", python = ">=3.9" },
+]
 
 [tool.poetry.group.style]
 optional = true
