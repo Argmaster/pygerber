@@ -2,19 +2,27 @@ from __future__ import annotations
 
 import inspect
 from pathlib import Path
-from typing import Type
+from tempfile import TemporaryDirectory
+from typing import Literal, Type
+
+import pytest
+from PIL import Image
+from reportlab.graphics import renderPM
+from svglib.svglib import svg2rlg
 
 from pygerber.gerber.ast.nodes.file import File
 from pygerber.gerber.compiler import compile
 from pygerber.gerber.parser import parse
+from pygerber.vm import render
 from pygerber.vm.shapely.vm import ShapelyResult, ShapelyVirtualMachine
 from test.assets.asset import GerberX3Asset
+from test.assets.assetlib import ImageAnalyzer, ImageAsset, TextAsset
 from test.assets.generated.macro import (
     get_custom_circle_local_2_0,
     get_custom_circle_local_2_0_ring_rot_30,
     get_custom_circle_local_2_0_rot_30,
 )
-from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
+from test.assets.gerberx3 import A64_OLinuXino_rev_G
 from test.assets.gerberx3.arc.clockwise import ClockwiseArcAssets
 from test.assets.gerberx3.arc.counterclockwise import CounterClockwiseArcAssets
 from test.assets.gerberx3.ATMEGA328 import ATMEGA328Assets
@@ -33,6 +41,85 @@ THIS_DIRECTORY = THIS_FILE.parent
 
 OUTPUT_DUMP_DIRECTORY = THIS_DIRECTORY / f"{THIS_FILE.name}.output"
 OUTPUT_DUMP_DIRECTORY.mkdir(exist_ok=True)
+
+
+class ShapelyRender:
+    parser: Literal["pyparsing"] = "pyparsing"
+    dpmm: int = 20
+
+    def create_image(self, source: str) -> Image.Image:
+        ast = parse(source, parser=self.parser)
+        rvmc = compile(ast)
+        result = render(rvmc, backend="shapely")
+
+        with TemporaryDirectory() as tempdir:
+            svg_path = Path(tempdir) / "tmp.svg"
+            png_path = Path(tempdir) / "tmp.png"
+
+            result.save(svg_path, file_format="SVG")
+
+            drawing = svg2rlg(svg_path.as_posix())
+            assert drawing is not None
+
+            renderPM.drawToFile(
+                drawing,
+                png_path.as_posix(),
+                fmt="PNG",
+                dpi=(self.dpmm * 25.4),
+            )
+            img = Image.open(png_path.as_posix(), formats=["png"])
+            # Pillow images are lazy-loaded and since we are using temporary directory
+            # we have to load image before temp dir is deleted.
+            img.load()
+
+        return img
+
+    def compare_with_reference(
+        self, reference: ImageAsset, ssim_threshold: float, image: Image.Image
+    ) -> None:
+        ia = ImageAnalyzer(reference.load())
+        ia.assert_same_size(image)
+        (
+            ia.histogram_compare_color(image)
+            .assert_channel_count(3)
+            .assert_greater_or_equal_values(0.99)
+        )
+        assert ia.structural_similarity(image) > ssim_threshold
+
+
+class TestOLinuXinoRevG(ShapelyRender):
+    dpmm: int = 40
+
+    @tag(Tag.SHAPELY, Tag.EXTRAS, Tag.OPENCV, Tag.SKIMAGE, Tag.SVGLIB)
+    @pytest.mark.parametrize(
+        ("asset", "reference", "ssim_threshold"),
+        [
+            (
+                A64_OLinuXino_rev_G.A64_OlinuXino_Rev_G_B_Cu,
+                A64_OLinuXino_rev_G.A64_OlinuXino_Rev_G_B_Cu_png_shapely,
+                0.99,
+            ),
+            (
+                A64_OLinuXino_rev_G.A64_OlinuXino_Rev_G_F_Cu,
+                A64_OLinuXino_rev_G.A64_OlinuXino_Rev_G_F_Cu_png_shapely,
+                0.99,
+            ),
+        ],
+        ids=["B_Cu", "F_Cu"],
+    )
+    def test_render_shapely(
+        self,
+        asset: TextAsset,
+        reference: ImageAsset,
+        ssim_threshold: float,
+        *,
+        is_regeneration_enabled: bool,
+    ) -> None:
+        image = self.create_image(asset.load())
+        if is_regeneration_enabled:
+            reference.update(image)
+        else:
+            self.compare_with_reference(reference, ssim_threshold, image)
 
 
 class ShapelyRenderE2E:
@@ -56,23 +143,6 @@ class ShapelyRenderE2E:
             dump_directory = OUTPUT_DUMP_DIRECTORY
 
         result.save_svg((dump_directory / caller_function_name).with_suffix(".svg"))
-
-
-class TestOLinuXinoRevG(ShapelyRenderE2E):
-    @tag(Tag.SHAPELY, Tag.EXTRAS)
-    def test_bottom_copper(self) -> None:
-        result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Cu)
-        self._save(result)
-
-    @tag(Tag.SHAPELY, Tag.EXTRAS)
-    def test_bottom_mask(self) -> None:
-        result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Mask)
-        self._save(result)
-
-    @tag(Tag.SHAPELY, Tag.EXTRAS)
-    def test_bottom_paste(self) -> None:
-        result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Paste)
-        self._save(result)
 
 
 class TestFcPolyTest(ShapelyRenderE2E):

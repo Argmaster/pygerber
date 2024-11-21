@@ -81,9 +81,9 @@ def test_no_output_examples(example_path: Path) -> None:
 
 def test_multi_layer_gerber_job() -> None:
     from pygerber.gerber.api._gerber_job_file import GerberJobFile
-    from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
+    import test.assets.gerberx3.A64_OLinuXino_rev_G as A64_OlinuXino_Rev_G
 
-    gerber_job = GerberJobFile.from_file(A64_OlinuXino_Rev_G.gbrjob.path)
+    gerber_job = GerberJobFile.from_file(A64_OlinuXino_Rev_G.gbrjob.src.absolute_path)
     project = gerber_job.to_project()
 
     assert len(project.top) != 0

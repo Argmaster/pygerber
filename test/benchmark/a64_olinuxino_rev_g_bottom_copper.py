@@ -4,11 +4,11 @@ import cProfile
 from pathlib import Path
 from typing import cast
 
+import test.assets.gerberx3.A64_OLinuXino_rev_G as A64_OlinuXino_Rev_G
 from pygerber.gerber.compiler import compile
 from pygerber.gerber.parser import parse
 from pygerber.vm import render
 from pygerber.vm.pillow.vm import PillowResult
-from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
 
 THIS_FILE = Path(__file__)
 THIS_DIRECTORY = THIS_FILE.parent

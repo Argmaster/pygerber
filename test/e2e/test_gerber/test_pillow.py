@@ -1,20 +1,27 @@
 from __future__ import annotations
 
 import inspect
+from io import BytesIO
 from pathlib import Path
-from typing import ClassVar, Type
+from typing import ClassVar, Literal, Type
 
+import pytest
+from PIL import Image
+
+import test.assets.gerberx3.A64_OLinuXino_rev_G as A64_OlinuXino_Rev_G
 from pygerber.gerber.ast.nodes import File
-from pygerber.gerber.compiler import Compiler
+from pygerber.gerber.compiler import compile
+from pygerber.gerber.parser import parse
 from pygerber.gerber.parser.pyparsing.parser import Parser
+from pygerber.vm import render
 from pygerber.vm.pillow.vm import PillowResult, PillowVirtualMachine
 from test.assets.asset import GerberX3Asset
+from test.assets.assetlib import ImageAnalyzer, ImageAsset, TextAsset
 from test.assets.generated.macro import (
     get_custom_circle_local_2_0,
     get_custom_circle_local_2_0_ring_rot_30,
     get_custom_circle_local_2_0_rot_30,
 )
-from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
 from test.assets.gerberx3.arc.clockwise import ClockwiseArcAssets
 from test.assets.gerberx3.arc.counterclockwise import CounterClockwiseArcAssets
 from test.assets.gerberx3.ATMEGA328 import ATMEGA328Assets
@@ -41,7 +48,7 @@ class PillowRenderE2E:
         return self._render_ast(ast, dpmm=dpmm)
 
     def _render_ast(self, ast: File, dpmm: int = 10) -> PillowResult:
-        rvmc = Compiler().compile(ast)
+        rvmc = compile(ast)
         return PillowVirtualMachine(dpmm=dpmm).run(rvmc)
 
     def _save(self, result: PillowResult) -> None:
@@ -58,21 +65,67 @@ class PillowRenderE2E:
         result.get_image_no_style().save(dump_directory / f"{caller_function_name}.png")
 
 
-class TestOLinuXinoRevG(PillowRenderE2E):
-    @tag(Tag.PILLOW)
-    def test_bottom_copper(self) -> None:
-        result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Cu, dpmm=100)
-        self._save(result)
+class PillowRender:
+    parser: Literal["pyparsing"] = "pyparsing"
+    dpmm: int = 20
 
-    @tag(Tag.PILLOW)
-    def test_bottom_mask(self) -> None:
-        result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Mask, dpmm=100)
-        self._save(result)
+    def create_image(self, source: str) -> Image.Image:
+        ast = parse(source, parser=self.parser)
+        rvmc = compile(ast)
+        result = render(rvmc, dpmm=self.dpmm)
 
-    @tag(Tag.PILLOW)
-    def test_bottom_paste(self) -> None:
-        result = self._render(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Paste, dpmm=100)
-        self._save(result)
+        buffer = BytesIO()
+        result.save(buffer, file_format="PNG")
+
+        buffer.seek(0)
+        return Image.open(buffer, formats=["png"])
+
+    def compare_with_reference(
+        self, reference: ImageAsset, ssim_threshold: float, image: Image.Image
+    ) -> None:
+        ia = ImageAnalyzer(reference.load())
+        ia.assert_same_size(image)
+        (
+            ia.histogram_compare_color(image)
+            .assert_channel_count(4)
+            .assert_greater_or_equal_values(0.99)
+        )
+        assert ia.structural_similarity(image) > ssim_threshold
+
+
+class TestOLinuXinoRevG(PillowRender):
+    dpmm: int = 40
+
+    @tag(Tag.PILLOW, Tag.OPENCV, Tag.SKIMAGE)
+    @pytest.mark.parametrize(
+        ("asset", "reference", "ssim_threshold"),
+        [
+            (
+                A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Cu,
+                A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Cu_png,
+                0.99,
+            ),
+            (
+                A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_F_Cu,
+                A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_F_Cu_png,
+                0.99,
+            ),
+        ],
+        ids=["B_Cu", "F_Cu"],
+    )
+    def test_render_pillow(
+        self,
+        asset: TextAsset,
+        reference: ImageAsset,
+        ssim_threshold: float,
+        *,
+        is_regeneration_enabled: bool,
+    ) -> None:
+        image = self.create_image(asset.load())
+        if is_regeneration_enabled:
+            reference.update(image)
+        else:
+            self.compare_with_reference(reference, ssim_threshold, image)
 
 
 class TestFcPolyTest(PillowRenderE2E):

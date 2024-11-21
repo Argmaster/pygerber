@@ -21,7 +21,7 @@ import skimage
 from attr import dataclass
 from filelock import FileLock
 from PIL import Image
-from pydantic import BaseModel, Field, FilePath, HttpUrl
+from pydantic import BaseModel, DirectoryPath, Field, HttpUrl
 from pydantic_core import Url
 
 if TYPE_CHECKING:
@@ -181,17 +181,50 @@ class GitFile(Source):
             )
 
 
-class File(Source):
-    """Asset source representing a file."""
+class Directory(BaseModel):
+    """Asset source representing a file system location."""
 
-    file_path: FilePath
+    directory: DirectoryPath
 
     @classmethod
-    def new(cls, file_path: Path | str) -> Self:
-        """Create a new FilePath instance."""
-        if isinstance(file_path, str):
-            file_path = Path(file_path)
-        return cls(file_path=file_path)
+    def new(cls, directory: Path | str) -> Self:
+        """Create a new Directory instance."""
+        if isinstance(directory, str):
+            directory = Path(directory)
+        return cls(directory=directory.resolve())
+
+    def file(self, path: str | Path) -> File:
+        """Get a File instance for the directory."""
+        return File(
+            directory=self, file_path=Path(path) if isinstance(path, str) else path
+        )
+
+
+class File(Source):
+    """Asset source representing a file system location."""
+
+    directory: Directory
+    """Directory information."""
+
+    file_path: Path
+    """Path to the file within the directory, relative to directory root."""
+
+    def load(self) -> bytes:
+        """Load the asset from the source."""
+        src = self.absolute_path
+        return src.read_bytes()
+
+    def update(self, content: bytes) -> None:
+        """Update the asset from the source."""
+        dest = self.absolute_path
+        dest.parent.mkdir(0o777, parents=True, exist_ok=True)
+        dest.touch(0o777, exist_ok=True)
+        dest.write_bytes(content)
+
+    @property
+    def absolute_path(self) -> Path:
+        """Get the absolute path to the file."""
+        return self.directory.directory / self.file_path
 
 
 SourceT = TypeVar("SourceT", bound=Source)
@@ -216,6 +249,11 @@ class TextAsset(Asset[SourceT]):
     def update(self, content: str) -> None:
         """Update the asset from the source."""
         self.src.update(content.encode(encoding=self.encoding))
+
+    @classmethod
+    def new(cls, src: SourceT) -> TextAsset[SourceT]:
+        """Create a new TextAsset instance."""
+        return cls(src=src)
 
 
 class ImageFormat(Enum):
