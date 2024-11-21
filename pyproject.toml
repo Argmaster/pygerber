@@ -87,6 +87,11 @@ pytest-cov = ">=4.1,<6.0"
 pytest-lsp = "^0.4.2"
 pytest-asyncio = ">=0.23.7,<0.25.0"
 pytest-mock = "^3.14.0"
+
+[tool.poetry.group.image_analysis]
+optional = true
+
+[tool.poetry.group.image_analysis.dependencies]
 opencv-python = "^4.10.0.84"
 scikit-image = [
     { version = ">=0.20.0,<0.22.0", python = ">=3.8,<3.9" },
@@ -162,33 +167,33 @@ install-hooks = [
 ]
 # --------- Style ---------
 prepare-test-style = [
-    { cmd = "poetry install --sync --with=docs,style --extras=all  --no-ansi" },
+    { cmd = "poetry install --sync --with=docs,style,image_analysis --extras=all --no-ansi" },
 ]
 test-style = [{ cmd = "poetry run pre-commit run --all-files -v" }]
 # --------- All ---------
-prepare-test-all = [{ cmd = "poetry install --sync --extras=all  --no-ansi" }]
+prepare-test-all = [{ cmd = "poetry install --sync --with=image_analysis --extras=all --no-ansi" }]
 test-all = [
     { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/" },
 ]
 # --------- Unit ---------
-prepare-test-unit = [{ cmd = "poetry install --sync --extras=all  --no-ansi" }]
+prepare-test-unit = [{ cmd = "poetry install --sync --with=image_analysis --extras=all --no-ansi" }]
 test-unit = [
     { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/unit/" },
 ]
 # --------- E2E ---------
-prepare-test-e2e = [{ cmd = "poetry install --sync --extras=all  --no-ansi" }]
+prepare-test-e2e = [{ cmd = "poetry install --sync --with=image_analysis --extras=all --no-ansi" }]
 test-e2e = [
     { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered test/e2e/" },
 ]
 # --------- Type ---------
 prepare-test-type = [
-    { cmd = "poetry install --sync --with=style --extras=all  --no-ansi" },
+    { cmd = "poetry install --sync --with=style --with=image_analysis --extras=all --no-ansi" },
 ]
 test-type = [
     { cmd = "poetry run mypy --config-file=pyproject.toml src/pygerber/ test/" },
 ]
 # --------- No Extras ---------
-prepare-test-no-extras = [{ cmd = "poetry install --sync  --no-ansi" }]
+prepare-test-no-extras = [{ cmd = "poetry install --sync --with=image_analysis --no-ansi" }]
 test-no-extras = [
     { cmd = "poetry run pytest -s -n logical --cov=pygerber --cov-report=term-missing:skip-covered --exclude-tags=extras test/" },
 ]
