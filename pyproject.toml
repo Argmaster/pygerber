@@ -91,6 +91,7 @@ opencv-python = "^4.10.0.84"
 scikit-image = [
     { version = ">=0.20.0,<0.22.0", python = ">=3.8,<3.9" }, # Pillow dropped support for 3.8 in 8.0
     { version = ">=0.22.0,<1.0.0", python = ">=3.9" },
+    { version = ">=0.25.0rc1,<1.0.0", python = ">=3.13,<4.0" },
 ]
 scipy = [
     { version = ">=1.10.0,<1.11.0", python = ">=3.8,<3.9" }, # Pillow dropped support for 3.8 in 8.0
