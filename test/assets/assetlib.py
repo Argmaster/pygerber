@@ -349,8 +349,8 @@ class ImageAnalyzer:
 
         for channel in range(min_channels):  # 0: Blue, 1: Green, 2: Red
             # Compute histograms
-            hist1 = cv2.calcHist([img1], [channel], None, [256], [0, 256])
-            hist2 = cv2.calcHist([img2], [channel], None, [256], [0, 256])
+            hist1 = cv2.calcHist([img1], [channel], None, [256], [0, 256])  # type: ignore[list-item]
+            hist2 = cv2.calcHist([img2], [channel], None, [256], [0, 256])  # type: ignore[list-item]
 
             # Normalize histograms
             hist1 = cv2.normalize(hist1, hist1).flatten()
