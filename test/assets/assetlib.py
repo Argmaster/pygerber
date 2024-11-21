@@ -130,9 +130,9 @@ class GitRepository(BaseModel):
         """Initialize the repository."""
         dest = self.get_clone_dest()
         self.local_path = dest
+        lock = self.get_clone_dest_lock_path()
 
         if not dest.exists():
-            lock = self.get_clone_dest_lock_path()
             with FileLock(lock.as_posix()):
                 # Check if repository doesn't exist in case we were blocked by another process
                 # which already created the repository
@@ -145,9 +145,10 @@ class GitRepository(BaseModel):
                     return self
 
         repo = self.get_dulwich_repository()
-        dulwich.porcelain.checkout_branch(repo, self.checkout_target)
-        dulwich.porcelain.fetch(dest.as_posix(), str(self.remote))
-        dulwich.porcelain.reset(repo, "hard", f"origin/{self.checkout_target}")
+        with FileLock(lock.as_posix()):
+            dulwich.porcelain.checkout_branch(repo, self.checkout_target)
+            dulwich.porcelain.fetch(dest.as_posix(), str(self.remote))
+            dulwich.porcelain.reset(repo, "hard", f"origin/{self.checkout_target}")
         return self
 
 
