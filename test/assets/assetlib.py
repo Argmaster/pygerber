@@ -12,12 +12,10 @@ from io import BytesIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Generic, Optional, Sequence, TypeVar
 
-import cv2
 import dulwich
 import dulwich.porcelain
 import dulwich.repo
 import numpy as np
-import skimage
 from attr import dataclass
 from filelock import FileLock
 from PIL import Image
@@ -25,6 +23,7 @@ from pydantic import BaseModel, DirectoryPath, Field, HttpUrl
 from pydantic_core import Url
 
 if TYPE_CHECKING:
+    import cv2
     from typing_extensions import Self
 
 
@@ -338,9 +337,14 @@ class ImageAnalyzer:
         self.reference = reference
 
     def histogram_compare_color(
-        self, other: Image.Image, method: int = cv2.HISTCMP_CORREL
+        self, other: Image.Image, method: Optional[int] = None
     ) -> HistCompValues:
         """Compare the histograms of two color images."""
+        import cv2
+
+        if method is None:
+            method = cv2.HISTCMP_CORREL
+
         img1 = np.array(self.reference)
         img2 = np.array(other)
 
@@ -364,6 +368,8 @@ class ImageAnalyzer:
 
     def structural_similarity(self, other: Image.Image) -> float:
         """Compute the structural similarity index between two images."""
+        import skimage
+
         img1 = np.array(self.reference)
         img2 = np.array(other)
 
