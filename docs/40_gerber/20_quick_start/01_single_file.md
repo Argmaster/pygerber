@@ -6,6 +6,10 @@ concerned with operating on collections of Gerber files. Most of the functionali
 exposed as methods on `GerberFile` class which can be imported from
 `pygerber.gerber.api` module and we will be using it throughout this document.
 
+Currently `GerberFile` class provides means to render Gerber files into raster and
+vector image formats and format Gerber code. Code optimization, cleanup and diagnostics
+are on the roadmap.
+
 ## Creating `GerberFile` instance
 
 To perform any operations on individual Gerber file(s), like rendering or formatting,
@@ -158,7 +162,7 @@ maps see [Custom color maps](./10_custom_color_maps.md).
 and
 [`formats()`](../../reference/pygerber/gerber/api/__init__.md#pygerber.gerber.api.GerberFile.formats)
 methods which format Gerber code. For detailed documentation of formatting options,
-please refer to [Formatter -> Configuration](../60_formatter/10_configuration.md).
+please refer to [Formatter -> Configuration](../60_formatter/05_api_usage.md#).
 
 The difference between `format()` and `formats()` methods is that first one writes
 formatted code to `TextIO`-like object while second one returns it as a `str` object.
