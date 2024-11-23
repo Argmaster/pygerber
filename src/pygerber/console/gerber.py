@@ -7,6 +7,7 @@ from typing import Any, Callable, Optional
 import click
 
 from pygerber.gerber.api import Color, FileTypeEnum, GerberFile, Style
+from pygerber.vm.shapely.vm import is_shapely_available
 from pygerber.vm.types.color import InvalidHexColorLiteralError
 
 
@@ -77,14 +78,14 @@ def _get_background_option() -> Callable[[click.decorators.FC], click.decorators
     )
 
 
-def _get_raster_implementation_option() -> (
-    Callable[[click.decorators.FC], click.decorators.FC]
-):
+def _get_raster_implementation_option(
+    *vals: str,
+) -> Callable[[click.decorators.FC], click.decorators.FC]:
     return click.option(
         "-i",
         "--implementation",
-        type=click.Choice(["pillow"], case_sensitive=False),
-        default="pillow",
+        type=click.Choice(vals, case_sensitive=False),
+        default=vals[0],
         help="Name of rendering Virtual Machine to be used.",
     )
 
@@ -124,7 +125,7 @@ def _get_source_file_argument() -> Callable[[click.decorators.FC], click.decorat
 @_get_style_option()
 @_get_foreground_option()
 @_get_background_option()
-@_get_raster_implementation_option()
+@_get_raster_implementation_option("pillow")
 def png(
     source: str,
     output: str,
@@ -203,7 +204,7 @@ def _sanitize_style(
 @_get_style_option()
 @_get_foreground_option()
 @_get_background_option()
-@_get_raster_implementation_option()
+@_get_raster_implementation_option("pillow")
 @click.option(
     "-q",
     "--quality",
@@ -243,7 +244,7 @@ def jpeg(  # noqa: PLR0913
 @_get_style_option()
 @_get_foreground_option()
 @_get_background_option()
-@_get_raster_implementation_option()
+@_get_raster_implementation_option("pillow")
 @click.option(
     "-c",
     "--compression",
@@ -316,7 +317,7 @@ def tiff(  # noqa: PLR0913
 @_get_style_option()
 @_get_foreground_option()
 @_get_background_option()
-@_get_raster_implementation_option()
+@_get_raster_implementation_option("pillow")
 def bmp(
     source: str,
     output: str,
@@ -348,7 +349,7 @@ def bmp(
 @_get_style_option()
 @_get_foreground_option()
 @_get_background_option()
-@_get_raster_implementation_option()
+@_get_raster_implementation_option("pillow")
 @click.option(
     "-l",
     "--lossless",
@@ -389,6 +390,38 @@ def webp(  # noqa: PLR0913
     else:
         msg = f"Implementation {implementation!r} is not supported."
         raise NotImplementedError(msg)
+
+
+if is_shapely_available():
+
+    @convert.command("svg")
+    @_get_source_file_argument()
+    @_get_output_file_option()
+    @_get_file_type_option()
+    @_get_style_option()
+    @_get_foreground_option()
+    @_get_background_option()
+    @_get_raster_implementation_option("shapely")
+    def svg(
+        source: str,
+        output: str,
+        file_type: str,
+        style: Optional[str],
+        foreground: Optional[str],
+        background: Optional[str],
+        implementation: str,
+    ) -> None:
+        """Convert Gerber image file to SVG image."""
+        style_obj = _sanitize_style(style, foreground, background)
+        file = GerberFile.from_file(source, file_type=FileTypeEnum(file_type.upper()))
+
+        if implementation.lower() == "shapely":
+            result = file.render_with_shapely(style_obj)
+            result.save(output)
+
+        else:
+            msg = f"Implementation {implementation!r} is not supported."
+            raise NotImplementedError(msg)
 
 
 @gerber.command("project")

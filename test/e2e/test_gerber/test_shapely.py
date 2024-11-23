@@ -7,8 +7,6 @@ from typing import Literal, Type
 
 import pytest
 from PIL import Image
-from reportlab.graphics import renderPM
-from svglib.svglib import svg2rlg
 
 from pygerber.gerber.ast.nodes.file import File
 from pygerber.gerber.compiler import compile
@@ -48,6 +46,9 @@ class ShapelyRender:
     dpmm: int = 20
 
     def create_image(self, source: str) -> Image.Image:
+        from reportlab.graphics import renderPM
+        from svglib.svglib import svg2rlg
+
         ast = parse(source, parser=self.parser)
         rvmc = compile(ast)
         result = render(rvmc, backend="shapely")

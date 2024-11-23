@@ -5,13 +5,14 @@ import logging
 from click.testing import CliRunner
 from PIL import Image
 
-from pygerber.console.gerber import bmp, jpeg, png, tiff, webp
+from pygerber.console.gerber import bmp, jpeg, png, svg, tiff, webp
 from pygerber.examples import ExamplesEnum, get_example_path
-from test.assets.assetlib import ImageAnalyzer
+from test.assets.assetlib import ImageAnalyzer, SvgImageAsset
 from test.assets.reference.pygerber.console.gerber import (
     CONVERT_BMP_REFERENCE_IMAGE,
     CONVERT_JPEG_REFERENCE_IMAGE,
     CONVERT_PNG_REFERENCE_IMAGE,
+    CONVERT_SVG_REFERENCE_IMAGE,
     CONVERT_TIFF_REFERENCE_IMAGE,
     CONVERT_WEBP_LOSSLESS_REFERENCE_IMAGE,
     CONVERT_WEBP_LOSSY_REFERENCE_IMAGE,
@@ -237,6 +238,44 @@ def test_gerber_convert_webp_lossless(*, is_regeneration_enabled: bool) -> None:
             ia.assert_same_size(image)
             (
                 ia.histogram_compare_color(image)
+                .assert_channel_count(3)
+                .assert_greater_or_equal_values(0.9)
+            )
+
+
+MIN_SVG_SSIM = 0.99
+
+
+@tag(Tag.PILLOW, Tag.OPENCV, Tag.SKIMAGE, Tag.SVGLIB)
+def test_gerber_convert_svg(*, is_regeneration_enabled: bool) -> None:
+    runner = CliRunner()
+    with cd_to_tempdir() as temp_path:
+        result = runner.invoke(
+            svg,
+            [
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
+                "-o",
+                "output.svg",
+                "-s",
+                "DEBUG_1_ALPHA",
+            ],
+        )
+        logging.debug(result.output)
+        assert result.exit_code == 0
+        assert (temp_path / "output.svg").exists()
+
+        image = (temp_path / "output.svg").read_text()
+        if is_regeneration_enabled:
+            CONVERT_SVG_REFERENCE_IMAGE.update(image)  # pragma: no cover
+        else:
+            dpi = 72
+            image_png = SvgImageAsset.svg_to_png(image, dpi=dpi)
+
+            ia = ImageAnalyzer(CONVERT_SVG_REFERENCE_IMAGE.load_png(dpi=dpi))
+            assert ia.structural_similarity(image_png) > MIN_SVG_SSIM
+            ia.assert_same_size(image_png)
+            (
+                ia.histogram_compare_color(image_png)
                 .assert_channel_count(3)
                 .assert_greater_or_equal_values(0.9)
             )

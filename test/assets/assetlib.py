@@ -10,6 +10,7 @@ from enum import Enum
 from hashlib import sha1
 from io import BytesIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING, Generic, Optional, Sequence, TypeVar
 
 import dulwich
@@ -304,6 +305,56 @@ class ImageAsset(Asset[SourceT]):
     def new(cls, src: SourceT, image_format: ImageFormat) -> ImageAsset[SourceT]:
         """Create a new ImageAsset instance."""
         return cls(src=src, image_format=image_format)
+
+
+class SvgImageAsset(Asset[SourceT]):
+    """Asset representing an SVG image file."""
+
+    def load(self) -> str:
+        """Load the asset from the source."""
+        return self.src.load().decode("utf-8")
+
+    def load_png(self, dpi: int = 72) -> Image.Image:
+        """Load the asset as a PNG image."""
+        return self.svg_to_png(self.load(), dpi)
+
+    @staticmethod
+    def svg_to_png(src: str, dpi: int) -> Image.Image:
+        """Convert SVG content to a PNG image."""
+        from reportlab.graphics import renderPM
+        from svglib.svglib import svg2rlg
+
+        with TemporaryDirectory() as tempdir:
+            svg_path = Path(tempdir) / "tmp.svg"
+            png_path = Path(tempdir) / "tmp.png"
+
+            svg_path.touch()
+            svg_path.write_text(src, encoding="utf-8")
+
+            drawing = svg2rlg(svg_path.as_posix())
+            assert drawing is not None
+
+            renderPM.drawToFile(
+                drawing,
+                png_path.as_posix(),
+                fmt="PNG",
+                dpi=dpi,
+            )
+            img = Image.open(png_path.as_posix(), formats=["png"])
+            # Pillow images are lazy-loaded and since we are using temporary directory
+            # we have to load image before temp dir is deleted.
+            img.load()
+
+        return img
+
+    def update(self, content: str) -> None:
+        """Update the asset from the source."""
+        self.src.update(content.encode("utf-8"))
+
+    @classmethod
+    def new(cls, src: SourceT) -> SvgImageAsset[SourceT]:
+        """Create a new SvgImageAsset instance."""
+        return cls(src=src)
 
 
 _LONG_ENOUGH_TO_HAVE_ONE_MORE_FRAME = 2

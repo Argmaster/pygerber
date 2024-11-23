@@ -365,6 +365,25 @@ class ShapelyImage(Image):
         """
         self._result.save_svg(destination, self._style)
 
+    def save_svg(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,  # noqa: ARG002
+    ) -> None:
+        """Save result to a file or buffer in SVG format.
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to SVG save implementation.
+
+        """
+        self._result.save_svg(destination, self._style)
+
 
 class GerberFile:
     """Generic representation of Gerber file.
