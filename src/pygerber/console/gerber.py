@@ -105,7 +105,7 @@ def _get_dpmm_option() -> Callable[[click.decorators.FC], click.decorators.FC]:
         "-d",
         "--dpmm",
         type=int,
-        default=20,
+        default=100,
         help="Dots per millimeter.",
     )
 
