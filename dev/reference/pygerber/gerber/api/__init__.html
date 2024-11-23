@@ -2936,6 +2936,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pygerber.gerber.api.ShapelyImage.save_svg" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;save_svg
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -9302,6 +9311,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#pygerber.gerber.api.ShapelyImage.save_svg" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;save_svg
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -12269,6 +12287,52 @@ directly.</p>
           <div class="doc-md-description">
             <p><code>str</code> and <code>Path</code> objects are interpreted as file paths and opened with
 truncation. <code>TextIO</code>-like (files, StringIO) objects are written to directly.</p>
+          </div>
+        </li>
+    </ul>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pygerber.gerber.api.ShapelyImage.save_svg" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">save_svg</span>
+
+
+<a href="#pygerber.gerber.api.ShapelyImage.save_svg" class="headerlink" title="Anchor link to this section for reference">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">save_svg</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">destination</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a></span> <span class="o">|</span> <span class="n"><a class="autorefs autorefs-external" title="typing.BinaryIO" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO">BinaryIO</a></span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Save result to a file or buffer in SVG format.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+          <b><code>destination</code></b>
+              (<code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a> | <a class="autorefs autorefs-external" title="pathlib.Path" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path">Path</a> | <a class="autorefs autorefs-external" title="typing.BinaryIO" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO">BinaryIO</a></code>)
+          –
+          <div class="doc-md-description">
+            <p><code>str</code> and <code>Path</code> objects are interpreted as file paths and opened with
+truncation. <code>BinaryIO</code>-like (files, BytesIO) objects are written to
+directly.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+          <b><code>kwargs</code></b>
+              (<code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>, default:
+                  <code>{}</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Additional keyword arguments to pass to SVG save implementation.</p>
           </div>
         </li>
     </ul>
