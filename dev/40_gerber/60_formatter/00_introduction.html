@@ -12,7 +12,7 @@
         <link rel="prev" href="../40_modify_optimize/30_code_optimization.html">
       
       
-        <link rel="next" href="10_configuration.html">
+        <link rel="next" href="05_api_usage.html">
       
       
       <link rel="icon" href="../../images/pygerber.png">
@@ -890,6 +890,17 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="00_introduction.html" class="md-nav__link md-nav__link--active">
         
   
@@ -899,6 +910,52 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-the-gerber-formatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is the Gerber Formatter?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how" class="md-nav__link">
+    <span class="md-ellipsis">
+      How?
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -912,11 +969,11 @@
   
   
     <li class="md-nav__item">
-      <a href="10_configuration.html" class="md-nav__link">
+      <a href="05_api_usage.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Configuration
+    API usage
   </span>
   
 
@@ -7212,6 +7269,41 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-the-gerber-formatter" class="md-nav__link">
+    <span class="md-ellipsis">
+      What is the Gerber Formatter?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how" class="md-nav__link">
+    <span class="md-ellipsis">
+      How?
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -7234,6 +7326,31 @@
 
 
 <h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Anchor link to this section for reference">&para;</a></h1>
+<p>Welcome to the Gerber Formatter documentation. This documentation is intended to provide
+a comprehensive overview of the Gerber Formatter including usage, options and examples.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Please note that this API is lower-level than one offered by the <code>GerberFile</code> object you
+can find <a href="../20_quick_start/01_single_file.html">here</a>. In many cases <code>GerberFile</code>
+interface will be more intuitive and easier to use, hence it is usually better to stick
+with it unless you have specific needs that are not covered by it.</p>
+</div>
+<h2 id="what-is-the-gerber-formatter">What is the Gerber Formatter?<a class="headerlink" href="#what-is-the-gerber-formatter" title="Anchor link to this section for reference">&para;</a></h2>
+<p>The Gerber Formatter is a tool that can be used to format Gerber files. It can be used
+to reformat Gerber files to make them more readable or the opposite, to compress them to
+save precious disk space. Technically, formatter includes also minor code modernization
+features although less powerful than the Optimizer.</p>
+<h2 id="why">Why?<a class="headerlink" href="#why" title="Anchor link to this section for reference">&para;</a></h2>
+<p>Gerber files are often used just as transfer format and rarely it is necessary to read
+them directly. However, in those rare cases when you have to look into them, it would be
+nice for them to be more readable than what your CAD software of choice happens to spit
+out. This is where the Gerber Formatter comes in handy.</p>
+<h2 id="how">How?<a class="headerlink" href="#how" title="Anchor link to this section for reference">&para;</a></h2>
+<p>The Gerber Formatter can be used both as a command line tool and as a library. The
+command line tool can be accessed via <code>pygerber gerber format</code> subcommand while library
+API is available through <code>pygerber.gerber.formatter</code> module. Command line usage is
+covered in <a href="../25_command_line/20_gerber.html">Gerber</a> command line documentation while
+API usage and configuration options are covered in <a href="05_api_usage.html">API usage</a>.</p>
 
 
 

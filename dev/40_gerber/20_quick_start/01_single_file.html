@@ -1020,11 +1020,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../60_formatter/10_configuration.html" class="md-nav__link">
+      <a href="../60_formatter/05_api_usage.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Configuration
+    API usage
   </span>
   
 
@@ -7433,6 +7433,9 @@ Gerber file as opposed to <a href="02_multi_file.html">Multi file guide</a> guid
 concerned with operating on collections of Gerber files. Most of the functionality is
 exposed as methods on <code>GerberFile</code> class which can be imported from
 <code>pygerber.gerber.api</code> module and we will be using it throughout this document.</p>
+<p>Currently <code>GerberFile</code> class provides means to render Gerber files into raster and
+vector image formats and format Gerber code. Code optimization, cleanup and diagnostics
+are on the roadmap.</p>
 <h2 id="creating-gerberfile-instance">Creating <code>GerberFile</code> instance<a class="headerlink" href="#creating-gerberfile-instance" title="Anchor link to this section for reference">&para;</a></h2>
 <p>To perform any operations on individual Gerber file(s), like rendering or formatting,
 you have to create
@@ -7649,7 +7652,7 @@ maps see <a href="10_custom_color_maps.html">Custom color maps</a>.</p>
 and
 <a href="../../reference/pygerber/gerber/api/__init__.html#pygerber.gerber.api.GerberFile.formats"><code>formats()</code></a>
 methods which format Gerber code. For detailed documentation of formatting options,
-please refer to <a href="../60_formatter/10_configuration.html">Formatter -&gt; Configuration</a>.</p>
+please refer to <a href="../60_formatter/05_api_usage.html">Formatter -&gt; Configuration</a>.</p>
 <p>The difference between <code>format()</code> and <code>formats()</code> methods is that first one writes
 formatted code to <code>TextIO</code>-like object while second one returns it as a <code>str</code> object.</p>
 <div class="language-docspygerberlexer highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">format_file.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1"> 1</a></span>

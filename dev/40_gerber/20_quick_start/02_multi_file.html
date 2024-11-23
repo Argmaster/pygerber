@@ -978,11 +978,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../60_formatter/10_configuration.html" class="md-nav__link">
+      <a href="../60_formatter/05_api_usage.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Configuration
+    API usage
   </span>
   
 
@@ -7344,21 +7344,29 @@
 
 
 <h1 id="multi-file-guide">Multi file guide<a class="headerlink" href="#multi-file-guide" title="Anchor link to this section for reference">&para;</a></h1>
-<p>This guide shows how to use <code>CompositeView</code> class in par with <code>GerberFile</code> class to
-operate on multiple Gerber files at once.</p>
+<p>Welcome to the multi file guide. This guide shows how to use <code>CompositeView</code> class API
+to handle multiple Gerber files at once. <code>CompositeView</code> relies on <code>GerberFile</code>
+instances to provide access to individual Gerber files, hence It might be useful if you
+take a look onto <a href="01_single_file.html">Single file guide</a> before continuing with this
+guide.</p>
 <h2 id="creating-compositeview-instance">Creating <code>CompositeView</code> instance<a class="headerlink" href="#creating-compositeview-instance" title="Anchor link to this section for reference">&para;</a></h2>
 <p><a href="../../reference/pygerber/gerber/api/__init__.html#pygerber.gerber.api.CompositeView"><code>CompositeView</code></a>
 class is a thin wrapper around multiple
 <a href="../../reference/pygerber/gerber/api/__init__.html#pygerber.gerber.api.GerberFile"><code>GerberFile</code></a>
-objects. Usually it does not make sense to operate on all files from project at once,
-since rendering <strong>top</strong> layers on top of <strong>bottom</strong> ones will produce hard to understand
-images. It makes more sense to render them separately. Therefore <code>CompositeView</code> is a
-way to group files that should be rendered together, for example all parts of <strong>top</strong> of
-PCB, silkscreen, solder mask, top copper etc. while parts of <strong>bottom</strong> of PCB are
-grouped in separate <code>CompositeView</code>, so do internal layers.</p>
-<p><code>CompositeView</code> constructor accepts multiple <code>GerberFile</code> objects as arguments. First
-<code>GerberFile</code> is the bottom most, usually copper layer, and last <code>GerberFile</code> is top
-most, usually silk screen. Here is an example:</p>
+objects which can be imported from <code>pygerber.gerber.api</code> module. You may have noticed
+that the name of the class is weirdly generic, instead of being something like Project
+or alike. Well, it turns out that usually it does not make sense to operate on all files
+from project at once, for example, rendering <strong>top</strong> layers on top of <strong>bottom</strong> ones
+will produce hard to understand images. Therefore PyGerbers <code>CompositeView</code> class takes
+an aproach of group files that should be rendered together instead of accumulating all
+the files from the project. With that logic in mind, we would use one instance of
+<code>CompositeView</code> to represent top layer of the design, with silkscreen, solder mask, top
+copper etc. while parts of <strong>bottom</strong> of PCB are grouped in separate <code>CompositeView</code>
+instance.</p>
+<p><code>CompositeView</code> constructor accepts multiple <code>GerberFile</code> objects as arguments. Order of
+files affects order of rendering to shared image. First <code>GerberFile</code> is the bottom most,
+usually copper layer, will be covered with all other layers, and last <code>GerberFile</code> is
+top most, usually silk screen, will not be obscured by any layer. Here is an example:</p>
 <div class="language-docspygerberlexer highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">create_project.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
 <span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
 <span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
