@@ -1,7 +1,10 @@
 # Single file guide
 
-This guide shows how to create and use `GerberFile` class instances to render and format
-individual Gerber files.
+Welcome to the PyGerber single file guide. This guide focuses on tools which take single
+Gerber file as opposed to [Multi file guide](./02_multi_file.md) guide which is
+concerned with operating on collections of Gerber files. Most of the functionality is
+exposed as methods on `GerberFile` class which can be imported from
+`pygerber.gerber.api` module and we will be using it throughout this document.
 
 ## Creating `GerberFile` instance
 
