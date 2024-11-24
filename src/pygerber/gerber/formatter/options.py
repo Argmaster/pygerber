@@ -22,8 +22,6 @@ from pygerber.gerber.formatter.enums import (
 class Options(BaseModel):
     """The `Options` class aggregates configuration options for the Gerber
     formatter.
-
-    For detailed description of individual options, please visit (TODO: Add doc link).
     """
 
     indent_character: Literal[" ", "\t"] = Field(default=" ")

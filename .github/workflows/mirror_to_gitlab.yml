@@ -1,0 +1,31 @@
+---
+name: Mirror to GitLab
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-to-pypi:
+    if: github.repository_owner == 'Argmaster'
+    name: Mirror to GitLab
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Push to GitLab
+        run: |
+          git config user.name github-actions
+          git config user.email argmaster.world@gmail.com
+          git remote add gitlab https://${{ secrets.GITLAB_USERNAME }}:${token}@${{ secrets.GITLAB_URL }}
+          git push gitlab main -f
+          git push --tags gitlab main -f
+        env:
+          token: ${{ secrets.GITLAB_MIRROR_ACCESS }}

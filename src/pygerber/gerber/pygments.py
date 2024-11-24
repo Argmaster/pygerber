@@ -98,9 +98,12 @@ if is_pygments_available():
                 "new_pad": Name.Function,
                 "add_pad": Name.Function,
                 "add_cutout_pad": Name.Function,
-                "add_trace": Name.Function,
+                "add_line_trace": Name.Function,
+                "add_clockwise_arc_trace": Name.Function,
+                "add_counter_clockwise_arc_trace": Name.Function,
                 "get_code": Name.Function,
                 "set_standard_attributes": Name.Function,
+                "new_region": Name.Function,
             },
             **{  # noqa: PIE800
                 "GerberX3Builder": Name.Class,
@@ -136,6 +139,13 @@ if is_pygments_available():
                 "add_polygon": Name.Function,
                 "cut_polygon": Name.Function,
                 "add_thermal": Name.Function,
+            },
+            **{  # noqa: PIE800
+                "RegionCreator": Name.Class,
+                "add_line": Name.Function,
+                "add_clockwise_arc": Name.Function,
+                "add_counter_clockwise_arc": Name.Function,
+                "create": Name.Function,
             },
             **{  # noqa: PIE800
                 "Draw": Name.Class,

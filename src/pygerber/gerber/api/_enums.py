@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from enum import Enum, unique
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from pygerber.vm.types.style import Style
 
@@ -114,6 +114,13 @@ class FileTypeEnum(Enum):
 
     INFER = "INFER"
     """Represents request to identify layer type from file extension or attributes."""
+
+    @classmethod
+    def _missing_(cls, value: object) -> Any:
+        if value == "SOLDERPASTE":
+            return cls.PASTE
+
+        return cls.UNDEFINED
 
     @classmethod
     def infer_from_attributes(cls, file_function: Optional[str] = None) -> FileTypeEnum:

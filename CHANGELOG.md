@@ -5,8 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## Pre-Release 3.0.0a4
+
+- Relaxed `pyparsing` dependency requirements to allow for use of `3.2` and above for
+  supported Python versions.
+- Relaxed `numpy` dependency requirements to allow for use of `2.x` and above for
+  supported Python versions.
+- Relaxed `pydantic` dependency requirements to allow for use of `2.x` and above for
+  supported Python versions.
+- Relaxed `pillow` dependency requirements to allow for use of `8.x` and above for
+  supported Python versions.
+- Relaxed `click` dependency requirements to allow for use of `8.x` and above for
+  supported Python versions.
+- Relaxed Python version requirement to allow for use of `3.8` and above.
+- Removed `pygerber.sequence_tools` module.
+- Removed `pygerber.frozen_general_model` module.
+- Removed `pygerber.gerber.linter.diagnostic` module.
+- Removed `pygerber.warnings` module.
+- Updated documentation links to point to stable release documentation.
+- Renamed `GerberX3Builder.add_trace()` to `GerberX3Builder.add_line_trace()` to be
+  consistent with `GerberX3Builder.add_clockwise_arc_trace()` and
+  `GerberX3Builder.add_counter_clockwise_arc_trace()`.
+- Added support for Altium implied leading zeros omitted. Contributed by @sjgallagher2
+  in #340.
+- Added arc drawing in `GerberX3Builder`.
+- Added region statement generation to `GerberX3Builder`.
+- Added Gerber to PNG, JPEG, TIFF, BMP, WEBP and SVG conversion commands to CLI.
+- Added Gerber format command to CLI.
+- Extended documentation.
+
 ## Pre-Release 3.0.0a3
 
+- Removed legacy error types from `pygerber.gerber.api._errors`.
+- Removed `pygerber.common.general_model` module.
+- Removed `pygerber.common.immutable_map_model` module.
+- Removed `pygerber.common.rgba` module.
+- Rename `Project` class from `pygerber.gerber.api` to `CompositeView`.
+- Changed `source_code` and `file_type` attributes of `GerberFile` to be read-only.
+- Changed return type of `CompositeView.render_with_pillow` to `CompositePillowImage`.
+  Interface of `CompositePillowImage` is the same as previously `CompositeView`.
+- Changed miniatures displayed by language server to be fixed size due to repeating
+  problems with apertures being too small or too large.
+- Added custom `__str__` to `CompositeView` and `GerberFile` classes.
+- Added `GerberJobFile` class for handling `.gbrjob` files.
+- Added `Project` class for grouping multiple `CompositeView` objects.
+- Added documentation for `GerberJobFile` and `Project` classes.
+- Added `pygerber.vm.shapely` package containing implementation of Gerber vm (renderer)
+  using shapely library.
+- Added `render_with_shapely` to `GerberFile` class.
+- Updated `Quick start` guide.
+- Updated many of docstrings in `pygerber.gerber.api` package.
 - Restored `pygerber_language_server` command.
 
 ## Pre-Release 3.0.0a2
@@ -54,6 +102,21 @@ this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
   rendering raster images with Pillow. SVG rendering is planned to be included in 3.0.0
   release.
 - Ported language server to new parser.
+
+## Release 2.4.2
+
+- Relaxed `pyparsing` dependency requirements to allow for use of `3.2` and above for
+  supported Python versions.
+- Relaxed `numpy` dependency requirements to allow for use of `2.x` and above for
+  supported Python versions.
+- Relaxed `pydantic` dependency requirements to allow for use of `2.x` and above for
+  supported Python versions.
+- Relaxed `pillow` dependency requirements to allow for use of `8.x` and above for
+  supported Python versions.
+- Relaxed `click` dependency requirements to allow for use of `8.x` and above for
+  supported Python versions.
+- Relaxed Python version requirement to allow for use of `3.8` and above.
+- Changed documentation deployment flow to include `latest`, `stable` and `dev` links.
 
 ## Release 2.4.1
 

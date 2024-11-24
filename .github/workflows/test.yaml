@@ -1,0 +1,307 @@
+---
+name: Test
+
+on:
+  push:
+    paths:
+      - src/**
+      - test/**
+      - .github/**
+      - pyproject.toml
+      - poetry.lock
+  pull_request:
+    paths:
+      - src/**
+      - test/**
+      - .github/**
+      - pyproject.toml
+      - poetry.lock
+  schedule:
+    - cron: 0 12 * * 6
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.action_path }}-${{ github.ref }}-test
+  cancel-in-progress: true
+
+jobs:
+  all:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, windows-2022, windows-2019]
+        python-version: ["3.8", "3.13"]
+
+    name: All on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install cairo on Ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get install -y libcairo2-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install basic dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for all tests
+        run: poetry run poe prepare-test-all
+
+      - name: Run all tests
+        run: poetry run poe test-all
+
+      - name: Create XML coverage files
+        run: poetry run coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4.6.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: "all/${{ matrix.os }}/${{ matrix.python-version}}"
+          files: ./coverage.xml
+          verbose: true
+
+  unit:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, windows-2022, windows-2019]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    name: Unit on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install cairo on Ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get install -y libcairo2-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install basic dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for unit tests
+        run: poetry run poe prepare-test-unit
+
+      - name: Run unit tests
+        run: poetry run poe test-unit
+
+      - name: Create XML coverage files
+        run: poetry run coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4.6.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: "unit/${{ matrix.os }}/${{ matrix.python-version}}"
+          files: ./coverage.xml
+          verbose: true
+
+  e2e:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    name: E2E on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install cairo on Ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get install -y libcairo2-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install basic dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for e2e tests
+        run: poetry run poe prepare-test-e2e
+
+      - name: Run e2e tests
+        run: poetry run poe test-e2e
+
+      - name: Create XML coverage files
+        run: poetry run coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4.6.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: "e2e/${{ matrix.os }}/${{ matrix.python-version}}"
+          files: ./coverage.xml
+          verbose: true
+
+  style:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+        python-version: ["3.8", "3.13"]
+
+    name: Style on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install cairo on Ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get install -y libcairo2-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install basic dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for style tests
+        run: poetry run poe prepare-test-style
+
+      - name: Run style tests
+        run: poetry run poe test-style
+
+  no-extras:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+        python-version: ["3.8", "3.13"]
+
+    name: No extras on ${{ matrix.os }} with Python ${{ matrix.python-version }}
+
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install cairo on Ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get install -y libcairo2-dev
+
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install basic dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for no extras tests
+        run: poetry run poe prepare-test-all
+
+      - name: Run tests without extras
+        run: poetry run poe test-no-extras
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4.6.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: "no-extras/${{ matrix.os }}/${{ matrix.python-version}}"
+          files: ./coverage.xml
+          verbose: true
+
+  docs:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: "x64"
+
+      - name: Install Poetry
+        run: pip install poetry==1.8.4
+
+      - name: Install base dependencies
+        run: poetry install --no-cache
+
+      - name: Prepare environment for docs deploy
+        run: poetry run poe prepare-deploy-docs
+
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email argmaster.world@gmail.com
+
+      - name: Deploy documentation
+        run: poetry run mkdocs build

@@ -2,23 +2,26 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Any, BinaryIO, ClassVar, Optional, Union
 
 from pygerber.vm.command_visitor import CommandVisitor
 from pygerber.vm.commands import EndLayer, PasteLayer, Shape, StartLayer
 from pygerber.vm.rvmc import RVMC
-from pygerber.vm.types.box import Box
-from pygerber.vm.types.errors import (
+from pygerber.vm.types import (
+    Box,
     EmptyAutoSizedLayerNotAllowedError,
     LayerAlreadyExistsError,
+    LayerID,
     LayerNotFoundError,
     NoLayerSetError,
     NoMainLayerError,
+    Style,
+    Vector,
 )
-from pygerber.vm.types.layer_id import LayerID
-from pygerber.vm.types.vector import Vector
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from typing_extensions import TypeAlias
 
 DrawCmdT: TypeAlias = Union[Shape, PasteLayer]
@@ -35,6 +38,37 @@ class Result:
 
     def __init__(self, main_box: Box) -> None:
         self.main_box = main_box
+
+    def save(
+        self,
+        destination: str | Path | BinaryIO,
+        file_format: str,
+        color: Style = Style.presets.COPPER_ALPHA,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in `file_format`.
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        file_format : str
+            Format to save the image in. Supported formats vary depending on the
+            VirtualMachine used. You can expect though that vector images will support
+            SVG and raster images will support PNG and JPEG formats. Other formats
+            are possible, please check the documentation of the VirtualMachine you are
+            using.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to save implementation.
+
+        """
+        raise NotImplementedError
 
 
 class Layer:

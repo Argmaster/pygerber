@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "addinivalue",
+        "addoption",
         "Altium",
         "AMDONUTCAL",
         "AMDONUTVAR",
@@ -18,6 +20,7 @@
         "dpmm",
         "drawsvg",
         "dtype",
+        "dulwich",
         "ebnf",
         "endwith",
         "EOEX",
@@ -31,6 +34,7 @@
         "indygo",
         "inlinehilite",
         "IPPOS",
+        "is_devrelease",
         "kicad",
         "levelname",
         "linenums",
@@ -39,12 +43,16 @@
         "lspt",
         "mkdocs",
         "mkdocstrings",
+        "modifyitems",
         "Moiré",
         "MOMM",
         "mypy",
         "Netlist",
         "numpy",
         "obround",
+        "OlinuXino",
+        "OPENCV",
+        "pathlib",
         "prec",
         "putpixel",
         "pydantic",
@@ -54,17 +62,26 @@
         "pylance",
         "pymdownx",
         "pyparsing",
+        "pytestconfig",
         "qualname",
+        "quickstart",
         "Refdes",
         "RGBA",
         "Roboto",
+        "rvmc",
+        "shtree",
+        "skimage",
         "SOSTMT",
+        "strtree",
         "superfences",
+        "svglib",
         "tasklist",
         "tobytes",
+        "ucamco",
         "Ucamco's",
         "ungroup",
-        "Xino"
+        "Xino",
+        "xlink"
     ],
     "python.testing.pytestArgs": ["."],
     "ruff.enable": true,
@@ -96,10 +113,6 @@
             "depth": 10
         },
         {
-            "name": "matplotlib",
-            "depth": 2
-        },
-        {
             "name": "pygls",
             "depth": 10
         },
@@ -117,7 +130,6 @@
         }
     ],
     "mypy-type-checker.importStrategy": "fromEnvironment",
-    "black-formatter.importStrategy": "useBundled",
     "cSpell.ignoreWords": ["RRGGBB", "RRGGBBAA"],
     "peacock.color": "#007fff",
     "mypy-type-checker.args": ["--config-file=pyproject.toml"],
@@ -143,15 +155,11 @@
         "titleBar.inactiveBackground": "#007fff99",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "python.analysis.addImport.heuristics": true,
     "python.analysis.diagnosticMode": "workspace",
     "python.analysis.extraCommitChars": true,
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.userFileIndexingLimit": -1,
-    "mypy-type-checker.path": [
-        "mypy",
-        "--config-file=pyproject.toml",
-        "src/pygerber",
-        "test"
-    ]
+    "mypy-type-checker.path": ["mypy"],
+    "mypy-type-checker.cwd": "${workspaceFolder}",
+    "ruff.configurationPreference": "filesystemFirst"
 }

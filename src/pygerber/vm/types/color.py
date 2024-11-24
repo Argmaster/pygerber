@@ -5,6 +5,7 @@ This module contains RGBA class which can be used to provide such color.
 
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
@@ -25,6 +26,13 @@ HSV_Q2_MAX_ANGLE_DEGREES = 180
 HSV_Q3_MAX_ANGLE_DEGREES = 240
 HSV_Q4_MAX_ANGLE_DEGREES = 300
 HSV_Q5_MAX_ANGLE_DEGREES = 360
+
+
+class InvalidHexColorLiteralError(ValueError):
+    """Raised when invalid hexadecimal color literal is provided."""
+
+    def __init__(self, literal: str) -> None:
+        super().__init__(f"Invalid hexadecimal color literal: {literal!r}")
 
 
 class Color(ModelType):
@@ -62,12 +70,22 @@ class Color(ModelType):
             Color built from hexadecimal values.
 
         """
-        if string[0] == "#":
-            string = string[1:]
+        re_match = re.match(
+            r"^#?"
+            r"(?P<R>[A-Fa-f0-9]{2})"
+            r"(?P<G>[A-Fa-f0-9]{2})"
+            r"(?P<B>[A-Fa-f0-9]{2})"
+            r"(?P<A>[A-Fa-f0-9]{2})?"
+            r"$",
+            string,
+        )
+        if re_match is None:
+            raise InvalidHexColorLiteralError(string)
 
-        r, g, b, a = string[:2], string[2:4], string[4:6], string[6:]
-        if len(a) == 0:
-            a = "FF"
+        r = re_match.groupdict()["R"]
+        g = re_match.groupdict()["G"]
+        b = re_match.groupdict()["B"]
+        a = re_match.groupdict()["A"] or "FF"
 
         return cls(
             red=int(r, base=16),

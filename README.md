@@ -78,7 +78,7 @@ pip install git+https://github.com/Argmaster/pygerber
 
 PyGerber has a online documentation hosted on Github Pages. It will be a great starting
 point for your journey with PyGerber.
-[You can it here](https://argmaster.github.io/pygerber/latest). If you are looking for
+[You can it here](https://argmaster.github.io/pygerber/stable). If you are looking for
 documentation of older version of PyGerber, please use version selector dropdown
 available next to the title in top bar menu.
 
@@ -89,7 +89,11 @@ PyGerber is licensed under MIT license. You can find full text of the license in
 directory of the repository.
 
 Some of the testing assets may be licensed under different licenses. License files for
-those assets are available in the same directory as the assets themselves.
+those assets are available alongside those files.
+
+Some of the example files shipped with PyGerber may be licensed under different
+licenses. In particular, files from KiCad demo projects are licensed under
+`CC BY-SA 4.0` license. Copy of the license file is provided alongside those files.
 
 ## 🛠 Tools
 
@@ -170,22 +174,31 @@ To check version of PyGerber available in your environment, you can use:
 pygerber --version
 ```
 
-To access PyGerbers image rendering feature, you can use `render` subcommand. Assuming
-that your Gerber file is named `source.gbr` and you want to render a PNG image of it,
-you can use following command:
+To convert Gerber file to PNG image you can use `pygerber gerber convert png` command.
+Assuming that your Gerber file is named `source.gbr` representing a copper layer and you
+want to convert it to PNG image with DPMM of 600, command would look like this:
 
 ```bash
-pygerber render raster source.gbr -o output.png
+pygerber gerber convert png source.gbr -o output.png -d 600 -s copper_alpha
 ```
 
 This will create `output.png` file in current working directory. Depending on your image
-size you may need to adjust `--dpmm` parameter to raise or lower the resolution of
-image.
+size you may need to adjust `-d` (`--dpmm`) parameter to increase or decrease the
+resolution of image.
 
-![example_pcb_image](https://github.com/Argmaster/pygerber/assets/56170852/9bca28bf-8aa6-4215-aac1-62c386490485)
+Here is an example result of converting a Gerber file to PNG image:
 
-PyGerber has also a lot more options related to rendering available. For extensible
-guide on how to use PyGerber CLI, please refer to documentation.
+![output](https://github.com/user-attachments/assets/0dfc4682-a284-4cb0-8a74-81136e213766)
+
+There are more export target formats available, like JPEG, TIFF or SVG to name some of
+them. Use `--help` flag to get list of available conversion commands:
+
+```bash
+pygerber gerber convert --help
+```
+
+For more detailed command line interface documentation please visit `Gerber` ->
+`Command Line` section in [documentation](https://argmaster.github.io/pygerber/stable/).
 
 ## § Language Server
 
@@ -227,7 +240,7 @@ of the extension, we will move it to PyGerber repository if necessary.
 ## Development
 
 For development guidelines please visit documentation `Development` section
-[here](https://argmaster.github.io/pygerber/latest).
+[here](https://argmaster.github.io/pygerber/stable).
 
 ## Acknowledgments
 

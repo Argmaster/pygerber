@@ -87,6 +87,11 @@ class Style(ModelType):
         BLACK_WHITE_ALPHA: ClassVar[Style]
         """Black and white color scheme with alpha channel."""
 
+        @classmethod
+        def get_styles(cls) -> dict[str, Style]:
+            """Get list of all available styles."""
+            return {k.upper(): getattr(cls, k) for k in cls.__annotations__}
+
 
 Style.presets.SILK = Style(
     background=Color.from_hex("#000000"),

@@ -9,7 +9,15 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from io import StringIO
-from typing import TYPE_CHECKING, Iterable, List, Optional, Sequence, TextIO, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    TextIO,
+    Tuple,
+)
 
 from pydantic import BaseModel, Field
 
@@ -24,6 +32,9 @@ from pygerber.gerber.ast.nodes import (
     D02,
     D03,
     FS,
+    G36,
+    G37,
+    G75,
     LM,
     LP,
     LR,
@@ -58,6 +69,11 @@ from pygerber.gerber.ast.nodes import (
     UnitMode,
     Zeros,
 )
+from pygerber.gerber.ast.nodes.g_codes.G01 import G01
+from pygerber.gerber.ast.nodes.g_codes.G02 import G02
+from pygerber.gerber.ast.nodes.g_codes.G03 import G03
+from pygerber.gerber.ast.nodes.other.coordinate import CoordinateI, CoordinateJ
+from pygerber.gerber.ast.state_tracking_visitor import PlotMode
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
@@ -94,7 +110,7 @@ class GerberX3Builder:
             y_decimal=6,
         )
 
-        self._current_location = (0.0, 0.0)
+        self._current_location: Optional[Loc2D] = None
 
         self._selected_aperture: Optional[ApertureIdStr] = None
         self._rotation: float = 0.0
@@ -103,8 +119,21 @@ class GerberX3Builder:
         self._mirror_y: bool = False
         self._scale: float = 1.0
         self._polarity: Polarity = Polarity.Dark
+        self._plot_mode: Optional[PlotMode] = None
 
         self._trace_pads: dict[float, Pad] = {}
+
+    def _pack_x(self, x: float) -> CoordinateX:
+        return CoordinateX(value=self._coordinate_format.pack_x(x))
+
+    def _pack_y(self, y: float) -> CoordinateY:
+        return CoordinateY(value=self._coordinate_format.pack_y(y))
+
+    def _pack_i(self, i: float) -> CoordinateI:
+        return CoordinateI(value=self._coordinate_format.pack_x(i))
+
+    def _pack_j(self, j: float) -> CoordinateJ:
+        return CoordinateJ(value=self._coordinate_format.pack_y(j))
 
     def _add_draw(self, draw: Draw) -> None:
         self._current_location = draw._new_current_location  # noqa: SLF001
@@ -134,8 +163,8 @@ class GerberX3Builder:
             Previously defined pad object to be used for drawing.
         at : Loc2D | TraceDraw
             Location to flash at. Can be a 2-tuple of floats or TraceDraw object
-            returned from `add_trace()` or `add_arc_trace()`, then the end
-            location of that trace will be used.
+            returned from `add_line_trace()` or `add_clockwise_arc_trace()`, then the
+            end location of that trace will be used.
         rotation : float, optional
             Pad rotation (rotation around pad origin), by default 0.0
         mirror_x : bool, optional
@@ -154,6 +183,8 @@ class GerberX3Builder:
             point for another  trace.
 
         """
+        self._check_pad_not_a_pad_creator(pad)
+
         state_updates = list(
             self._create_state_updates(
                 selected_aperture=pad.aperture_id,
@@ -179,7 +210,11 @@ class GerberX3Builder:
         self._add_draw(draw)
         return draw
 
-    def _create_state_updates(
+    def _check_pad_not_a_pad_creator(self, pad: Pad | PadCreator) -> None:
+        if not isinstance(pad, Pad):
+            raise NotAPadError(pad)
+
+    def _create_state_updates(  # noqa: C901
         self,
         selected_aperture: Optional[ApertureIdStr] = None,
         polarity: Optional[Polarity] = None,
@@ -187,6 +222,7 @@ class GerberX3Builder:
         mirror_x: Optional[bool] = None,
         mirror_y: Optional[bool] = None,
         scale: Optional[float] = None,
+        plot_mode: Optional[PlotMode] = None,
     ) -> Iterable[Node]:
         if (
             selected_aperture is not None
@@ -219,6 +255,17 @@ class GerberX3Builder:
             self._scale = scale
             yield LS(scale=scale)
 
+        if plot_mode is not None and self._plot_mode != plot_mode:
+            if plot_mode == PlotMode.LINEAR:
+                yield G01()
+            elif plot_mode == PlotMode.ARC:
+                yield G02()
+            elif plot_mode == PlotMode.CCW_ARC:
+                yield G03()
+            else:
+                raise NotImplementedError(plot_mode)
+            self._plot_mode = plot_mode
+
     def add_cutout_pad(
         self,
         pad: Pad,
@@ -241,8 +288,8 @@ class GerberX3Builder:
             Previously defined pad object to be used for drawing.
         at : Loc2D | TraceDraw
             Location to flash at. Can be a 2-tuple of floats or TraceDraw object
-            returned from `add_trace()` or `add_arc_trace()`, then the end
-            location of that trace will be used.
+            returned from `add_line_trace()` or `add_clockwise_arc_trace()`, then the
+            end location of that trace will be used.
         rotation : float, optional
             Pad rotation (rotation around pad origin), by default 0.0
         mirror_x : bool, optional
@@ -261,6 +308,8 @@ class GerberX3Builder:
             point for trace.
 
         """
+        self._check_pad_not_a_pad_creator(pad)
+
         state_updates = list(
             self._create_state_updates(
                 selected_aperture=pad.aperture_id,
@@ -286,7 +335,7 @@ class GerberX3Builder:
         self._add_draw(draw)
         return draw
 
-    def add_trace(
+    def add_line_trace(
         self,
         width: float,
         begin: Loc2D | PadDraw | TraceDraw,
@@ -312,31 +361,14 @@ class GerberX3Builder:
         Returns
         -------
         TraceDraw
-            Object which can be used to set attributes of the pad, as start
+            Object which can be used to set attributes of the trace, as start
             point for another trace or a center of a pad.
 
         """
-        if (aperture := self._trace_pads.get(width)) is None:
-            aperture = self.new_pad().circle(width)
-            self._trace_pads[width] = aperture
+        aperture = self._get_trace_aperture(width)
 
-        if isinstance(begin, tuple):
-            begin_location = begin
-        elif isinstance(begin, PadDraw):
-            begin_location = begin.location
-        elif isinstance(begin, TraceDraw):
-            begin_location = begin.end_location
-        else:
-            raise NotImplementedError
-
-        if isinstance(end, tuple):
-            end_location = end
-        elif isinstance(end, PadDraw):
-            end_location = end.location
-        elif isinstance(end, TraceDraw):
-            end_location = end.begin_location
-        else:
-            raise NotImplementedError
+        begin_location = self._dispatch_begin_location(begin)
+        end_location = self._dispatch_end_location(end)
 
         state_updates = list(
             self._create_state_updates(
@@ -346,6 +378,7 @@ class GerberX3Builder:
                 mirror_x=False,
                 mirror_y=False,
                 scale=1.0,
+                plot_mode=PlotMode.LINEAR,
             )
         )
 
@@ -353,19 +386,15 @@ class GerberX3Builder:
         if self._current_location != begin_location:
             draw_ops.append(
                 D02(
-                    x=CoordinateX(
-                        value=self._coordinate_format.pack_x(begin_location[0])
-                    ),
-                    y=CoordinateY(
-                        value=self._coordinate_format.pack_y(begin_location[1])
-                    ),
+                    x=self._pack_x(begin_location[0]),
+                    y=self._pack_y(begin_location[1]),
                 )
             )
 
         draw_ops.append(
             D01(
-                x=CoordinateX(value=self._coordinate_format.pack_x(end_location[0])),
-                y=CoordinateY(value=self._coordinate_format.pack_y(end_location[1])),
+                x=self._pack_x(end_location[0]),
+                y=self._pack_y(end_location[1]),
             )
         )
 
@@ -377,6 +406,209 @@ class GerberX3Builder:
         )
         self._add_draw(draw)
         return draw
+
+    def _dispatch_end_location(self, end: Loc2D | PadDraw | TraceDraw) -> Loc2D:
+        if isinstance(end, tuple):
+            end_location = end
+        elif isinstance(end, PadDraw):
+            end_location = end.location
+        elif isinstance(end, TraceDraw):
+            end_location = end.begin_location
+        else:
+            raise NotImplementedError
+        return end_location
+
+    def _dispatch_begin_location(self, begin: Loc2D | PadDraw | TraceDraw) -> Loc2D:
+        if isinstance(begin, tuple):
+            begin_location = begin
+        elif isinstance(begin, PadDraw):
+            begin_location = begin.location
+        elif isinstance(begin, TraceDraw):
+            begin_location = begin.end_location
+        else:
+            raise NotImplementedError
+        return begin_location
+
+    def _get_trace_aperture(self, width: float) -> Pad:
+        if (aperture := self._trace_pads.get(width)) is None:
+            aperture = self.new_pad().circle(width)
+            self._trace_pads[width] = aperture
+
+        return aperture
+
+    def add_clockwise_arc_trace(
+        self,
+        width: float,
+        begin: Loc2D | PadDraw | TraceDraw,
+        end: Loc2D | PadDraw | TraceDraw,
+        center: Loc2D,
+    ) -> TraceDraw:
+        """Add a clockwise arc trace to the image.
+
+        Parameters
+        ----------
+        width : float
+            Width of a trace.
+        begin : Loc2D | PadDraw | TraceDraw
+            Begin point of the trace. When 2-tuple of floats is provided, it is
+            interpreted as absolute coordinates. When PadDraw is provided, the
+            location of the center of the pad is used. When TraceDraw is provided, the
+            end location of the trace is used.
+        end : Loc2D | PadDraw | TraceDraw
+            End point of the trace. When 2-tuple of floats is provided, it is
+            interpreted as absolute coordinates. When PadDraw is provided, the
+            location of the center of the pad is used. When TraceDraw is provided, the
+            begin location of the trace is used.
+        center : Loc2D
+            Center of the arc.
+
+        Returns
+        -------
+        TraceDraw
+            Object which can be used to set attributes of the trace, as start
+            point for another trace or a center of a pad.
+
+        """
+        aperture = self._get_trace_aperture(width)
+
+        begin_location = self._dispatch_begin_location(begin)
+        end_location = self._dispatch_end_location(end)
+
+        state_updates = list(
+            self._create_state_updates(
+                selected_aperture=aperture.aperture_id,
+                polarity=Polarity.Dark,
+                rotation=0.0,
+                mirror_x=False,
+                mirror_y=False,
+                scale=1.0,
+                plot_mode=PlotMode.ARC,
+            )
+        )
+
+        draw_ops: list[Node] = []
+        if self._current_location != begin_location:
+            draw_ops.append(
+                D02(
+                    x=self._pack_x(begin_location[0]),
+                    y=self._pack_y(begin_location[1]),
+                )
+            )
+
+        draw_ops.append(
+            D01(
+                x=self._pack_x(end_location[0]),
+                y=self._pack_y(end_location[1]),
+                i=self._pack_i(center[0] - begin_location[0]),
+                j=self._pack_j(center[1] - begin_location[1]),
+            )
+        )
+
+        draw = ArcTraceDraw(
+            state_updates=state_updates,
+            draw_ops=draw_ops,
+            begin_location=begin_location,
+            end_location=end_location,
+            center_location=center,
+            is_clockwise=True,
+        )
+        self._add_draw(draw)
+        return draw
+
+    def add_counter_clockwise_arc_trace(
+        self,
+        width: float,
+        begin: Loc2D | PadDraw | TraceDraw,
+        end: Loc2D | PadDraw | TraceDraw,
+        center: Loc2D,
+    ) -> TraceDraw:
+        """Add a counter clockwise arc trace to the image.
+
+        Parameters
+        ----------
+        width : float
+            Width of a trace.
+        begin : Loc2D | PadDraw | TraceDraw
+            Begin point of the trace. When 2-tuple of floats is provided, it is
+            interpreted as absolute coordinates. When PadDraw is provided, the
+            location of the center of the pad is used. When TraceDraw is provided, the
+            end location of the trace is used.
+        end : Loc2D | PadDraw | TraceDraw
+            End point of the trace. When 2-tuple of floats is provided, it is
+            interpreted as absolute coordinates. When PadDraw is provided, the
+            location of the center of the pad is used. When TraceDraw is provided, the
+            begin location of the trace is used.
+        center : Loc2D
+            Center of the arc.
+
+        Returns
+        -------
+        TraceDraw
+            Object which can be used to set attributes of the trace, as start
+            point for another trace or a center of a pad.
+
+        """
+        aperture = self._get_trace_aperture(width)
+
+        begin_location = self._dispatch_begin_location(begin)
+        end_location = self._dispatch_end_location(end)
+
+        state_updates = list(
+            self._create_state_updates(
+                selected_aperture=aperture.aperture_id,
+                polarity=Polarity.Dark,
+                rotation=0.0,
+                mirror_x=False,
+                mirror_y=False,
+                scale=1.0,
+                plot_mode=PlotMode.CCW_ARC,
+            )
+        )
+
+        draw_ops: list[Node] = []
+        if self._current_location != begin_location:
+            draw_ops.append(
+                D02(
+                    x=self._pack_x(begin_location[0]),
+                    y=self._pack_y(begin_location[1]),
+                )
+            )
+
+        draw_ops.append(
+            D01(
+                x=self._pack_x(end_location[0]),
+                y=self._pack_y(end_location[1]),
+                i=self._pack_i(center[0] - begin_location[0]),
+                j=self._pack_j(center[1] - begin_location[1]),
+            )
+        )
+
+        draw = ArcTraceDraw(
+            state_updates=state_updates,
+            draw_ops=draw_ops,
+            begin_location=begin_location,
+            end_location=end_location,
+            center_location=center,
+            is_clockwise=False,
+        )
+        self._add_draw(draw)
+        return draw
+
+    def new_region(self, begin: Loc2D) -> RegionCreator:
+        """Return RegionCreator object ready for creating a region.
+
+        Parameters
+        ----------
+        begin : Optional[Loc2D], optional
+            Location to start the region outline.
+
+        Returns
+        -------
+        RegionCreator
+            Object handling process of region creation.
+
+        """
+        return RegionCreator(self, begin)
 
     def get_code(self) -> GerberCode:
         """Generate Gerber code created with builder until this point."""
@@ -393,6 +625,7 @@ class GerberX3Builder:
         )
         commands.append(MO(mode=UnitMode.METRIC))
         commands.extend(self._pad_creator._get_nodes())  # noqa: SLF001
+        commands.append(G75())
         for draw in self._draws:
             commands.extend(draw._get_nodes())  # noqa: SLF001
         commands.append(M02())
@@ -627,7 +860,11 @@ class PadCreator:
 
 
 class Pad(BaseModel):
-    """Base class for pads."""
+    """The `Pad` class represents a pad object created with `PadCreator` which can be
+    added to the image managed by `GerberX3Builder` with use of `add_pad()` method.
+
+    Do not directly instantiate this class, use methods available on `PadCreator` class.
+    """
 
     node: Node
     aperture_id: ApertureIdStr
@@ -716,7 +953,11 @@ class Pad(BaseModel):
 
 
 class CustomPadCreator:
-    """Custom pad class."""
+    """The `CustomPadCreator` is single use driver of process of creating custom pad.
+
+    Do not directly instantiate this class, instead use `new_pad()` method of
+    `GerberX3Builder`.
+    """
 
     def __init__(self, pad_creator: PadCreator) -> None:
         self._pad_creator = pad_creator
@@ -769,7 +1010,8 @@ class CustomPadCreator:
         center : Loc2D
             Location of circle center relative to pad origin.
         rotation : float, optional
-            Rotation of circle relative to pad origin, by default 0.0
+            Rotation of the circle relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -811,7 +1053,8 @@ class CustomPadCreator:
         center : Loc2D
             Location of circle center relative to pad origin.
         rotation : float, optional
-            Rotation of circle relative to pad origin, by default 0.0
+            Rotation of the circle relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -843,7 +1086,8 @@ class CustomPadCreator:
         end : Loc2D
             End point coordinates relative to origin of the pad.
         rotation : float, optional
-            Line rotation relative to pad origin, by default 0.0
+            Rotation of the vector line relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -896,7 +1140,8 @@ class CustomPadCreator:
         end : Loc2D
             End point coordinates relative to origin of the pad.
         rotation : float, optional
-            Line rotation relative to pad origin, by default 0.0
+            Rotation of the vector line relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -928,7 +1173,8 @@ class CustomPadCreator:
         center : Loc2D
             Line center coordinates relative to origin of the pad.
         rotation : float, optional
-            Line rotation relative to pad origin, by default 0.0
+            Rotation of the center line relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -980,7 +1226,8 @@ class CustomPadCreator:
         center : Loc2D
             Line center coordinates relative to origin of the pad.
         rotation : float, optional
-            Line rotation relative to pad origin, by default 0.0
+            Rotation of the center line relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -1007,7 +1254,8 @@ class CustomPadCreator:
             Points of the outline as coordinates relative to the center of the pad.
             First and last point are implicitly connected.
         rotation : float, optional
-            Outline rotation relative to pad origin, by default 0.0
+            Rotation of the outline relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -1059,7 +1307,8 @@ class CustomPadCreator:
             Points of the outline as coordinates relative to the center of the pad.
             First and last point are implicitly connected.
         rotation : float, optional
-            Outline rotation relative to pad origin, by default 0.0
+            Rotation of the outline relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -1094,7 +1343,8 @@ class CustomPadCreator:
         outer_diameter : float
             Diameter of the circle circumscribed around the polygon.
         rotation : float, optional
-            Rotation of the polygon relative to the pad origin, by default 0.0
+            Rotation of the polygon relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -1146,7 +1396,8 @@ class CustomPadCreator:
         outer_diameter : float
             Diameter of the circle circumscribed around the polygon.
         rotation : float, optional
-            Rotation of the polygon relative to the pad origin, by default 0.0
+            Rotation of the polygon relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -1173,15 +1424,20 @@ class CustomPadCreator:
         Parameters
         ----------
         center : Loc2D
-            _description_
+            Center point coordinates.
         outer_diameter : float
-            _description_
+            Outer diameter > inner diameter
         inner_diameter : float
-            _description_
+            Inner diameter >= 0
         gap_thickness : float
-            _description_
+            Gap thickness < (outer diameter)/√2. Note that if the (gap
+            thickness)*√2 ≥ (inner diameter) the inner circle disappears. This is
+            not invalid.
+            The gaps are on the X and Y axes through the center without
+            rotation. They rotate with the primitive.
         rotation : float, optional
-            _description_, by default 0.0
+            Rotation of the thermal relative to the pad origin in degrees
+            counterclockwise, by default 0.0
 
         Returns
         -------
@@ -1203,8 +1459,212 @@ class CustomPadCreator:
         return self
 
 
+class _OutlineSegment(BaseModel):
+    end: Loc2D
+
+
+class _LineSegment(_OutlineSegment):
+    pass
+
+
+class _CwArcSegment(_OutlineSegment):
+    begin: Loc2D
+    center: Loc2D
+
+
+class _CcwArcSegment(_OutlineSegment):
+    begin: Loc2D
+    center: Loc2D
+
+
+class RegionCreator:
+    """The `RegionCreator` is responsible for managing creation of regions.
+
+    Do not directly instantiate this class, instead use `new_region()` method of
+    `GerberX3Builder`.
+    """
+
+    def __init__(self, builder: GerberX3Builder, begin: Loc2D) -> None:
+        # We don't actually need builder, but we don't want users to create
+        # RegionCreator instances manually, so we require it to be passed to make it
+        # much harder to get wrong.
+        assert isinstance(builder, GerberX3Builder)
+        self._builder = builder
+        self._begin = begin
+        self._outline: list[_OutlineSegment] = []
+        self._previous_end = begin
+
+    def add_line(self, to: tuple[float, float]) -> Self:
+        """Add a line to the region outline.
+
+        Parameters
+        ----------
+        to : tuple[float, float]
+            End point of the line.
+
+        Returns
+        -------
+        Self
+            Same RegionCreator object for method chaining.
+
+        """
+        self._outline.append(_LineSegment(end=to))
+        self._previous_end = to
+        return self
+
+    def add_clockwise_arc(
+        self, to: tuple[float, float], center: tuple[float, float]
+    ) -> Self:
+        """Add a clockwise arc to the region outline.
+
+        Parameters
+        ----------
+        to : tuple[float, float]
+            End point of the arc.
+        center : tuple[float, float]
+            Center of the arc.
+
+        Returns
+        -------
+        Self
+            Same RegionCreator object for method chaining.
+
+        """
+        self._outline.append(
+            _CwArcSegment(begin=self._previous_end, center=center, end=to)
+        )
+        self._previous_end = to
+        return self
+
+    def add_counterclockwise_arc(
+        self, to: tuple[float, float], center: tuple[float, float]
+    ) -> Self:
+        """Add a counterclockwise arc to the region outline.
+
+        Parameters
+        ----------
+        to : tuple[float, float]
+            End point of the arc.
+        center : tuple[float, float]
+            Center of the arc.
+
+        Returns
+        -------
+        Self
+            Same RegionCreator object for method chaining.
+
+        """
+        self._outline.append(
+            _CcwArcSegment(begin=self._previous_end, center=center, end=to)
+        )
+        self._previous_end = to
+        return self
+
+    def create(self) -> Region:  # noqa: C901
+        """Finalize process of creating region and automatically add it to the image.
+
+        This method can be called only once.
+        After calling this method, no more elements can be added to the region.
+        """
+        if len(self._outline) < NUMBER_OF_VERTICES_IN_TRIANGLE:
+            msg = "A region must have at least 3 points"
+            raise InvalidRegionOutlineError(msg)
+
+        def _() -> Iterable[Node]:
+            aperture = self._builder._get_trace_aperture(1)  # noqa: SLF001
+            yield from self._builder._create_state_updates(  # noqa: SLF001
+                selected_aperture=aperture.aperture_id,
+                polarity=Polarity.Dark,
+                rotation=0.0,
+                mirror_x=False,
+                mirror_y=False,
+                scale=1.0,
+            )
+
+            mode: Optional[PlotMode] = None
+
+            yield G36()
+            yield D02(
+                x=self._builder._pack_x(self._begin[0]),  # noqa: SLF001
+                y=self._builder._pack_y(self._begin[1]),  # noqa: SLF001
+            )
+
+            last = self._outline[-1]
+            if last.end != self._begin:
+                self._outline.append(_LineSegment(end=self._begin))
+
+            for segment in self._outline:
+                if isinstance(segment, _LineSegment):
+                    if mode != PlotMode.LINEAR:
+                        yield G01()
+                        mode = PlotMode.LINEAR
+
+                    yield D01(
+                        x=self._builder._pack_x(segment.end[0]),  # noqa: SLF001
+                        y=self._builder._pack_y(segment.end[1]),  # noqa: SLF001
+                    )
+
+                elif isinstance(segment, _CwArcSegment):
+                    if mode != PlotMode.ARC:
+                        yield G02()
+                        mode = PlotMode.ARC
+
+                    yield D01(
+                        x=self._builder._pack_x(segment.end[0]),  # noqa: SLF001
+                        y=self._builder._pack_y(segment.end[1]),  # noqa: SLF001
+                        i=self._builder._pack_i(  # noqa: SLF001
+                            segment.center[0] - segment.begin[0]
+                        ),
+                        j=self._builder._pack_j(  # noqa: SLF001
+                            segment.center[1] - segment.begin[1]
+                        ),
+                    )
+
+                elif isinstance(segment, _CcwArcSegment):
+                    if mode != PlotMode.CCW_ARC:
+                        yield G03()
+                        mode = PlotMode.CCW_ARC
+
+                    yield D01(
+                        x=self._builder._pack_x(segment.end[0]),  # noqa: SLF001
+                        y=self._builder._pack_y(segment.end[1]),  # noqa: SLF001
+                        i=self._builder._pack_i(  # noqa: SLF001
+                            segment.center[0] - segment.begin[0]
+                        ),
+                        j=self._builder._pack_j(  # noqa: SLF001
+                            segment.center[1] - segment.begin[1]
+                        ),
+                    )
+
+                else:
+                    raise NotImplementedError
+
+            yield G37()
+            yield D02(
+                x=self._builder._pack_x(self._begin[0]),  # noqa: SLF001
+                y=self._builder._pack_y(self._begin[1]),  # noqa: SLF001
+            )
+
+        region = Region(nodes=list(_()), attributes=[], location=self._begin)
+        self._builder._add_draw(region)  # noqa: SLF001
+        return region
+
+
 class Draw(BaseModel):
-    """The `Draw` class represents any drawing operation with addison state
+    """The `Draw` class is a base class for all drawing operations."""
+
+    @property
+    @abstractmethod
+    def _new_current_location(self) -> Loc2D:
+        """Get new current location after the draw operation."""
+
+    @abstractmethod
+    def _get_nodes(self) -> Iterable[Node]:
+        """Get nodes representing the draw operation."""
+
+
+class SimpleDraw(Draw):
+    """The `Draw` class represents any drawing operation with additional state
     updating commands and attributes.
     """
 
@@ -1219,13 +1679,8 @@ class Draw(BaseModel):
         if self.attributes:
             yield TD()
 
-    @property
-    @abstractmethod
-    def _new_current_location(self) -> Loc2D:
-        """Get new current location after the draw operation."""
 
-
-class PadDraw(Draw):
+class PadDraw(SimpleDraw):
     """The `PadDraw` represents a drawing operation of creating a pad."""
 
     location: Loc2D
@@ -1236,7 +1691,7 @@ class PadDraw(Draw):
         return self.location
 
 
-class TraceDraw(Draw):
+class TraceDraw(SimpleDraw):
     """The `TraceDraw` represents a drawing operation of creating a trace."""
 
     begin_location: Loc2D
@@ -1246,3 +1701,56 @@ class TraceDraw(Draw):
     def _new_current_location(self) -> Loc2D:
         """Get new current location after the draw operation."""
         return self.end_location
+
+
+class ArcTraceDraw(TraceDraw):
+    """The `ArcTraceDraw` represents a drawing operation of creating an arc trace."""
+
+    center_location: Loc2D
+    is_clockwise: bool
+
+    @property
+    def _new_current_location(self) -> Loc2D:
+        """Get new current location after the draw operation."""
+        return self.end_location
+
+
+class Region(Draw):
+    """The `Region` represents a drawing operation of creating a region."""
+
+    nodes: List[Node] = Field(default_factory=list)
+    attributes: List[Node] = Field(default_factory=list)
+    location: Loc2D
+
+    def _get_nodes(self) -> Iterable[Node]:
+        yield from self.attributes
+        yield from self.nodes
+        if self.attributes:
+            yield TD()
+
+    @property
+    def _new_current_location(self) -> Loc2D:
+        """Get new current location after the draw operation."""
+        return self.location
+
+
+class GerberX3BuilderError(Exception):
+    """Base class for exceptions raised by `GerberX3Builder`."""
+
+
+class NotAPadError(GerberX3BuilderError):
+    """Raised when a pad is expected but different object is provided."""
+
+    def __init__(self, obj: object) -> None:
+        super().__init__(
+            f"Expected a {Pad.__qualname__} class instance, got "
+            f"{type(obj).__qualname__}. Make sure "
+            f"you are calling pad creation method on object returned by new_pad() "
+            "method, eg. `circle()`, `rectangle()`, etc. If you are using custom pad, "
+            "make sure you are calling `create()` method after adding all custom "
+            "aperture elements."
+        )
+
+
+class InvalidRegionOutlineError(GerberX3BuilderError):
+    """Raised when a region outline is invalid."""

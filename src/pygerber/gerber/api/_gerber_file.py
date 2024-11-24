@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, TextIO
+from typing import TYPE_CHECKING, Any, BinaryIO, Literal, Optional, TextIO
 
 import pyparsing as pp
 
@@ -21,6 +21,7 @@ from pygerber.gerber.compiler import compile
 from pygerber.gerber.parser import parse
 from pygerber.vm import render
 from pygerber.vm.pillow.vm import PillowResult
+from pygerber.vm.shapely.vm import ShapelyResult
 from pygerber.vm.types.box import Box
 from pygerber.vm.types.style import Style
 
@@ -189,9 +190,199 @@ class PillowImage(Image):
         super().__init__(image_space=image_space)
         self._image = image
 
+    def save(
+        self,
+        destination: str | Path | BinaryIO,
+        file_format: str,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in `file_format`.
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        file_format : str
+            Format to save the image in. Supported formats vary depending on the
+            VirtualMachine used. You can expect though that vector images will support
+            SVG and raster images will support PNG and JPEG formats. Other formats
+            are possible, please check the documentation of the VirtualMachine you are
+            using.
+        kwargs : Any
+            Additional keyword arguments to pass to save implementation.
+
+        """
+        if file_format.casefold() == "bmp".casefold():
+            self.save_bmp(destination, **kwargs)
+        elif file_format.casefold() == "png".casefold():
+            self.save_png(destination, **kwargs)
+        elif file_format.casefold() == "jpeg".casefold():
+            self.save_jpeg(destination, **kwargs)
+        elif file_format.casefold() == "tiff".casefold():
+            self.save_tiff(destination, **kwargs)
+        elif file_format.casefold() == "webp".casefold():
+            self.save_webp(destination, **kwargs)
+        else:
+            raise NotImplementedError(file_format)
+
+    def save_bmp(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in BMP format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#bmp).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        color : Style, optional
+            Color to use for SVG, background is ignored as it is always rendered as
+            empty space, so only foreground applies, by default
+            Style.presets.COPPER_ALPHA
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().save(fp=destination, format="BMP", **kwargs)
+
+    def save_png(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in PNG format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#png).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().save(fp=destination, format="PNG", **kwargs)
+
+    def save_jpeg(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in JPEG format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#jpeg).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().convert("RGB").save(fp=destination, format="JPEG", **kwargs)
+
+    def save_tiff(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in TIFF format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#tiff).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().save(fp=destination, format="TIFF", **kwargs)
+
+    def save_webp(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,
+    ) -> None:
+        """Save result to a file or buffer in WEBP format.
+
+        See pillow documentation [here](https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#webp).
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to `PIL.Image.save`.
+
+        """
+        self.get_image().convert("RGB").save(fp=destination, format="WEBP", **kwargs)
+
     def get_image(self) -> PIL.Image.Image:
         """Get image object."""
         return self._image
+
+
+class ShapelyImage(Image):
+    """The `ShapelyImage` class is a rendered image returned by
+    `GerberFile.render_with_shapely` method.
+    """
+
+    def __init__(
+        self, image_space: ImageSpace, result: ShapelyResult, style: Style
+    ) -> None:
+        super().__init__(image_space=image_space)
+        self._result = result
+        self._style = style
+
+    def save(self, destination: str | Path | BinaryIO) -> None:
+        """Write rendered image as SVG to location or buffer.
+
+        Parameters
+        ----------
+        destination : str | Path
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `TextIO`-like (files, StringIO) objects are written to directly.
+
+        """
+        self._result.save_svg(destination, self._style)
+
+    def save_svg(
+        self,
+        destination: str | Path | BinaryIO,
+        **kwargs: Any,  # noqa: ARG002
+    ) -> None:
+        """Save result to a file or buffer in SVG format.
+
+        Parameters
+        ----------
+        destination : str | Path | BinaryIO
+            `str` and `Path` objects are interpreted as file paths and opened with
+            truncation. `BinaryIO`-like (files, BytesIO) objects are written to
+            directly.
+        kwargs : Any
+            Additional keyword arguments to pass to SVG save implementation.
+
+        """
+        self._result.save_svg(destination, self._style)
 
 
 class GerberFile:
@@ -200,15 +391,31 @@ class GerberFile:
     This objects provides interface for loading and parsing Gerber files.
     """
 
-    def __init__(self, source_code: str, file_type: FileTypeEnum) -> None:
-        self.source_code = source_code
-        self.file_type = file_type
+    def __init__(
+        self,
+        source_code: str,
+        file_type: FileTypeEnum,
+        source_type_or_path: Literal["@buffer", "@string"] | Path,
+    ) -> None:
+        self._source_code = source_code
+        self._file_type = file_type
         self._parser_options: dict[str, Any] = {}
         self._compiler_options: dict[str, Any] = {}
         self._cached_ast: Optional[File] = None
         self._cached_rvmc: Optional[RVMC] = None
         self._cached_final_state: Optional[State] = None
         self._color_map = DEFAULT_ALPHA_COLOR_MAP
+        self._source_type_or_path = source_type_or_path
+
+    @property
+    def source_code(self) -> str:
+        """Gerber source code."""
+        return self._source_code
+
+    @property
+    def file_type(self) -> FileTypeEnum:
+        """File type classification."""
+        return self._file_type
 
     def _flush_cached(self) -> None:
         self._cached_ast = None
@@ -240,7 +447,7 @@ class GerberFile:
             if file_type == FileTypeEnum.UNDEFINED:
                 file_type = FileTypeEnum.INFER_FROM_ATTRIBUTES
 
-        return cls(file_path.read_text(encoding="utf-8"), file_type)
+        return cls(file_path.read_text(encoding="utf-8"), file_type, file_path)
 
     @classmethod
     def from_str(
@@ -265,7 +472,7 @@ class GerberFile:
         """
         if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
             file_type = FileTypeEnum.UNDEFINED
-        return cls(source_code, file_type)
+        return cls(source_code, file_type, "@string")
 
     @classmethod
     def from_buffer(
@@ -285,7 +492,7 @@ class GerberFile:
         """
         if file_type == FileTypeEnum.INFER_FROM_EXTENSION:
             file_type = FileTypeEnum.UNDEFINED
-        return cls(buffer.read(), file_type)
+        return cls(buffer.read(), file_type, "@buffer")
 
     def set_parser_options(self, **options: Any) -> Self:
         """Set parser options for this Gerber file.
@@ -364,7 +571,7 @@ class GerberFile:
 
     def _get_ast(self) -> File:
         if self._cached_ast is None:
-            self._cached_ast = parse(self.source_code, **self._parser_options)
+            self._cached_ast = parse(self._source_code, **self._parser_options)
 
         assert self._cached_ast is not None
         return self._cached_ast
@@ -389,19 +596,14 @@ class GerberFile:
         Parameters
         ----------
         style : Style, optional
-            Style (color scheme) of rendered image, if value is None, style will be
-            inferred from file_type if it possible to determine file_type
-            (for FileTypeEnum.INFER*) or specific file_type was specified in
-            constructor, by default None
+            Style (color scheme) of rendered image, if value is None, `file_type` will
+            be used. `file_type` was one of `FileTypeEnum.INFER*` attempt will be done
+            to guess `file_type` based on extension and/or attributes, by default None
         dpmm : int, optional
             Resolution of image in dots per millimeter, by default 20
 
         """
-        if self.file_type in (FileTypeEnum.INFER_FROM_ATTRIBUTES, FileTypeEnum.INFER):
-            style = self._get_style_from_file_function()
-
-        if style is None:
-            style = self._color_map[self.file_type]
+        style = self._dispatch_style(style)
 
         rvmc = self._get_rvmc()
         result = render(
@@ -419,20 +621,81 @@ class GerberFile:
             image=result.get_image(style=style),
         )
 
-    def _get_style_from_file_function(self) -> Style:
+    def _dispatch_style(self, style: Optional[Style]) -> Style:
+        if style is not None:
+            return style
+
+        if self._file_type in (FileTypeEnum.INFER_FROM_EXTENSION, FileTypeEnum.INFER):
+            self._file_type = self._get_file_type_from_extension()
+
+        if self._file_type in (FileTypeEnum.INFER_FROM_ATTRIBUTES, FileTypeEnum.INFER):
+            self._file_type = self._get_file_type_from_attributes()
+
+        return self._color_map[self._file_type]
+
+    def _get_file_type_from_extension(self) -> FileTypeEnum:
+        if not isinstance(self._source_type_or_path, Path):
+            if self._file_type == FileTypeEnum.INFER_FROM_EXTENSION:
+                return FileTypeEnum.UNDEFINED
+
+            if self._file_type == FileTypeEnum.INFER:
+                return FileTypeEnum.INFER_FROM_ATTRIBUTES
+
+            raise NotImplementedError(self._file_type)
+
+        file_type = FileTypeEnum.infer_from_extension(self._source_type_or_path.suffix)
+
+        if file_type == FileTypeEnum.UNDEFINED:
+            if self._file_type == FileTypeEnum.INFER_FROM_EXTENSION:
+                return file_type
+
+            if self._file_type == FileTypeEnum.INFER:
+                return FileTypeEnum.INFER_FROM_ATTRIBUTES
+
+            raise NotImplementedError(self._file_type)
+
+        return file_type
+
+    def _get_file_type_from_attributes(self) -> FileTypeEnum:
         file_function_node = self._get_final_state().attributes.file_attributes.get(
             ".FileFunction"
         )
         if file_function_node is None:
-            self.file_type = FileTypeEnum.UNDEFINED
+            return FileTypeEnum.UNDEFINED
 
-        else:
-            assert isinstance(file_function_node, TF_FileFunction)
-            self.file_type = FileTypeEnum.infer_from_attributes(
-                file_function_node.file_function.value
-            )
+        assert isinstance(file_function_node, TF_FileFunction)
+        return FileTypeEnum.infer_from_attributes(
+            file_function_node.file_function.value
+        )
 
-        return self._color_map[self.file_type]
+    def render_with_shapely(self, style: Optional[Style] = None) -> ShapelyImage:
+        """Render Gerber file to vector image using rendering backend based on Shapely
+        library.
+
+        Parameters
+        ----------
+        style : Style, optional
+            Style (color scheme) of rendered image, if value is None, `file_type` will
+            be used. `file_type` was one of `FileTypeEnum.INFER*` attempt will be done
+            to guess `file_type` based on extension and/or attributes, by default None
+            Only foreground color is used, as all operations with clear polarity
+            are performing actual boolean difference operations on geometry.
+
+        """
+        style = self._dispatch_style(style)
+
+        rvmc = self._get_rvmc()
+        result = render(rvmc, backend="shapely")
+        assert isinstance(result, ShapelyResult)
+        return ShapelyImage(
+            image_space=ImageSpace(
+                units=self._get_final_state().unit_mode,
+                box=result.main_box,
+                dpmm=0,
+            ),
+            result=result,
+            style=style,
+        )
 
     def format(self, output: TextIO, options: Optional[formatter.Options]) -> None:
         """Format Gerber code and write it to `output` stream."""
@@ -441,3 +704,22 @@ class GerberFile:
     def formats(self, options: Optional[formatter.Options]) -> str:
         """Format Gerber code and return it as `str` object."""
         return formatter.formats(self._get_ast(), options)
+
+    @pp.cached_property
+    def sha256(self) -> str:
+        """SHA256 hash of Gerber source code."""
+        import hashlib
+
+        return hashlib.sha256(self._source_code.encode("utf-8")).hexdigest()
+
+    def __str__(self) -> str:
+        path = self._source_type_or_path
+        path_string = path.name if isinstance(path, Path) else path
+
+        return (
+            f"{self.__class__.__qualname__}(source={path_string!r}, "
+            f"sha256={self.sha256!r})"
+        )
+
+    def __repr__(self) -> str:
+        return str(self)

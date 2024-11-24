@@ -24,7 +24,6 @@ theme:
 
   features:
     - content.action.edit
-    - navigation.instant
     - navigation.tracking
     - navigation.sections
     - navigation.top
@@ -33,6 +32,7 @@ theme:
     - search.highlight
     - search.share
     - content.code.copy
+    - header.autohide
 
   icon:
     repo: fontawesome/brands/github
@@ -129,6 +129,11 @@ extra:
   version:
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-versioning/
     provider: mike
+  social:
+    - icon: fontawesome/brands/gitlab
+      link: https://gitlab.com/Argmaster/pygerber
+    - icon: fontawesome/brands/github
+      link: https://github.com/Argmaster/pygerber
 
 hooks:
   - docs/hooks.py

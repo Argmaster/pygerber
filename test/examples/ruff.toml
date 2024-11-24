@@ -8,6 +8,7 @@ ignore = [
     "SLF001", # Tests can access private members.
     "E501",   # Sometimes test data cant be truncated to desired line width.
     "T201",   # Prints in example code are more than useful.
+    "T203",   # PPrints in example code are more than useful.
     "I001",
     "I002",
     "N999",

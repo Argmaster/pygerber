@@ -111,7 +111,7 @@ class CoordinateFormat(_StateModel):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-        if self.zeros == Zeros.SKIP_LEADING:
+        if self.zeros in (Zeros.SKIP_LEADING, Zeros.SKIP_LEADING_IMPLIED):
             self.unpack_x = self._unpack_skip_leading(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
             self.unpack_y = self._unpack_skip_leading(self.y_integral, self.y_decimal)  # type: ignore[method-assign]
             self.pack_x = self._pack_skip_leading(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
@@ -122,15 +122,15 @@ class CoordinateFormat(_StateModel):
             self.pack_x = self._pack_skip_trailing(self.x_integral, self.x_decimal)  # type: ignore[method-assign]
             self.pack_y = self._pack_skip_trailing(self.y_integral, self.y_decimal)  # type: ignore[method-assign]
         else:
-            msg = f"Unknown zeros mode: {self.zeros}"
+            msg = f"Unknown zeros mode: {self.zeros}"  # type: ignore[unreachable]
             raise ValueError(msg)
 
-    def unpack_x(self, coordinate: PackedCoordinateStr, /) -> Double:  # noqa: ARG002
+    def unpack_x(self, coordinate: PackedCoordinateStr, /) -> Double:
         """Unpack X coordinate using the current coordinate format."""
         msg = "Coordinate format was not properly set."
         raise NotImplementedError(msg)  # pragma: no cover
 
-    def unpack_y(self, coordinate: PackedCoordinateStr, /) -> Double:  # noqa: ARG002
+    def unpack_y(self, coordinate: PackedCoordinateStr, /) -> Double:
         """Unpack X coordinate using the current coordinate format."""
         msg = "Coordinate format was not properly set."
         raise NotImplementedError(msg)  # pragma: no cover
@@ -185,12 +185,12 @@ class CoordinateFormat(_StateModel):
 
         return sign, coordinate_str
 
-    def pack_x(self, coordinate: Double, /) -> PackedCoordinateStr:  # noqa: ARG002
+    def pack_x(self, coordinate: Double, /) -> PackedCoordinateStr:
         """Unpack X coordinate using the current coordinate format."""
         msg = "Coordinate format was not properly set."
         raise NotImplementedError(msg)  # pragma: no cover
 
-    def pack_y(self, coordinate: Double, /) -> PackedCoordinateStr:  # noqa: ARG002
+    def pack_y(self, coordinate: Double, /) -> PackedCoordinateStr:
         """Pack X coordinate using the current coordinate format."""
         msg = "Coordinate format was not properly set."
         raise NotImplementedError(msg)  # pragma: no cover

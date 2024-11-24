@@ -1,79 +1,45 @@
 from __future__ import annotations
 
-from typing import Iterable, Sequence
+from typing import Iterable
 
-from PIL import Image
-
-from pygerber.gerber.api._gerber_file import GerberFile, PillowImage
-
-
-class CompositeImage:
-    """Image composed of multiple sub-images."""
-
-    def __init__(self, sub_images: list[PillowImage], image: Image.Image) -> None:
-        self._sub_images = sub_images
-        self._image = image
-
-    def get_sub_images(self) -> Sequence[PillowImage]:
-        """Get sequence containing sub-images."""
-        return self._sub_images
-
-    def get_image(self) -> Image.Image:
-        """Get image composed out of sub-images."""
-        return self._image
+from pygerber.gerber.api._composite_view import CompositeView
 
 
 class Project:
-    """Multi file project representation.
+    """The `Project` class is a representation of a project composed out of multiple
+    Gerber files composed into multiple views.
 
-    This object can be used to render multiple Gerber files to single image.
-    It automatically performs alignment and merging of files.
-    Files should be ordered bottom up, topmost layer last, like if adding one layer on
-    top of previous.
+    It is primarily a container object for `CompositeView`.
     """
 
-    def __init__(self, files: Iterable[GerberFile]) -> None:
-        self.files = list(files)
-
-    def render_with_pillow(
+    def __init__(
         self,
-        dpmm: int = 20,
-    ) -> CompositeImage:
-        """Render project to raster image using Pillow."""
-        sub_images: list[PillowImage] = [
-            file.render_with_pillow(dpmm=dpmm) for file in self.files
-        ]
+        *,
+        top: CompositeView,
+        inner: Iterable[CompositeView],
+        bottom: CompositeView,
+    ) -> None:
+        self._top = top
+        self._inner = tuple(inner)
+        self._bottom = bottom
 
-        max_x_image = max(sub_images, key=lambda x: x.get_image_space().max_x)
-        max_y_image = max(sub_images, key=lambda x: x.get_image_space().max_y)
-        min_x_image = min(sub_images, key=lambda x: x.get_image_space().min_x)
-        min_y_image = min(sub_images, key=lambda x: x.get_image_space().min_y)
+    @property
+    def top(self) -> CompositeView:
+        """Get top view."""
+        return self._top
 
-        width_pixels = (
-            max_x_image.get_image_space().max_x_pixels
-            - min_x_image.get_image_space().min_x_pixels
+    @property
+    def inner(self) -> tuple[CompositeView, ...]:
+        """Get inner views."""
+        return self._inner
+
+    @property
+    def bottom(self) -> CompositeView:
+        """Get bottom view."""
+        return self._bottom
+
+    def __str__(self) -> str:
+        return (
+            f"{self.__class__.__qualname__}(top={self._top}, "
+            f"inner={self._inner}, bottom={self._bottom})"
         )
-        height_pixels = (
-            max_y_image.get_image_space().max_y_pixels
-            - min_y_image.get_image_space().min_y_pixels
-        )
-
-        image = Image.new("RGBA", (width_pixels, height_pixels))
-
-        for sub_image in sub_images:
-            image.paste(
-                sub_image.get_image(),
-                (
-                    abs(
-                        min_x_image.get_image_space().min_x_pixels
-                        - sub_image.get_image_space().min_x_pixels
-                    ),
-                    abs(
-                        max_y_image.get_image_space().max_y_pixels
-                        - sub_image.get_image_space().max_y_pixels
-                    ),
-                ),
-                mask=sub_image.get_image().getchannel("A"),
-            )
-
-        return CompositeImage(sub_images, image)
