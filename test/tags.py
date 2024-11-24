@@ -16,6 +16,7 @@ class Tag(Enum):
     OPENCV = "opencv"
     SKIMAGE = "skimage"
     SVGLIB = "svglib"
+    FORMATTER = "formatter"
 
     @classmethod
     def _missing_(cls, value: object) -> Any:

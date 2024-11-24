@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Optional
+import json
+from pathlib import Path
+from typing import Any, Callable, Literal, Optional
 
 import click
 
+from pygerber.gerber import formatter
 from pygerber.gerber.api import Color, FileTypeEnum, GerberFile, Style
 from pygerber.vm.shapely.vm import is_shapely_available
 from pygerber.vm.types.color import InvalidHexColorLiteralError
@@ -422,6 +425,77 @@ if is_shapely_available():
         else:
             msg = f"Implementation {implementation!r} is not supported."
             raise NotImplementedError(msg)
+
+
+@gerber.command("format")
+@click.argument(
+    "source",
+    type=click.Path(file_okay=True, dir_okay=False),
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(file_okay=True, dir_okay=False),
+    default=Path("output.gbr"),
+    help="Path to output file.",
+)
+@click.option(
+    "-c",
+    "--config",
+    type=click.Path(file_okay=True, dir_okay=False),
+    default=None,
+    help="Path to configuration file. Please have a look into documentation in command "
+    "line section to see available formatter options.",
+)
+@click.option(
+    "-i",
+    "--inline-config",
+    type=str,
+    default=None,
+    help="JSON string containing dictionary with configuration options. Please have a "
+    "look into documentation in command line section to see available formatter "
+    "options.",
+)
+def format_cmd(
+    source: str,
+    output: str,
+    config: Optional[str],
+    inline_config: Optional[str],
+) -> None:
+    """Format Gerber file.
+
+    SOURCE - path to file which is supposed to be formatted.
+    """
+    config_type: Literal["json"] = "json"
+
+    if config is not None:
+        if inline_config is not None:
+            msg = (
+                "Both --config and --inline-config options cannot be used at the "
+                "same time."
+            )
+            raise click.BadOptionUsage("inline-config", msg)
+
+        config_path = Path(config)
+        if config_path.suffix == ".json":
+            inline_config = config_path.read_text("utf-8")
+        else:
+            msg = "Only JSON configuration files are supported."
+            raise click.BadOptionUsage("config", msg)
+
+    options: Optional[formatter.Options] = None
+
+    if inline_config is not None:
+        if config_type == "json":
+            options = formatter.Options(**json.loads(inline_config))
+        else:
+            raise NotImplementedError
+
+    output_path = Path(output)
+    file = GerberFile.from_file(source)
+
+    with output_path.open("w") as f:
+        file.format(f, options=options)
 
 
 @gerber.command("project")

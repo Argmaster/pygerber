@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import logging
 
+import pytest
 from click.testing import CliRunner
 from PIL import Image
 
-from pygerber.console.gerber import bmp, jpeg, png, svg, tiff, webp
+from pygerber.console.gerber import bmp, format_cmd, jpeg, png, svg, tiff, webp
 from pygerber.examples import ExamplesEnum, get_example_path
 from test.assets.assetlib import ImageAnalyzer, SvgImageAsset
 from test.assets.reference.pygerber.console.gerber import (
@@ -16,6 +17,7 @@ from test.assets.reference.pygerber.console.gerber import (
     CONVERT_TIFF_REFERENCE_IMAGE,
     CONVERT_WEBP_LOSSLESS_REFERENCE_IMAGE,
     CONVERT_WEBP_LOSSY_REFERENCE_IMAGE,
+    FORMAT_CMD_REFERENCE_CONTENT,
 )
 from test.conftest import cd_to_tempdir
 from test.tags import Tag, tag
@@ -279,3 +281,30 @@ def test_gerber_convert_svg(*, is_regeneration_enabled: bool) -> None:
                 .assert_channel_count(3)
                 .assert_greater_or_equal_values(0.9)
             )
+
+
+@tag(Tag.FORMATTER)
+def test_gerber_format_cmd(*, is_regeneration_enabled: bool) -> None:
+    runner = CliRunner()
+    file_name = "output.formatted.gbr"
+
+    with cd_to_tempdir() as temp_path:
+        result = runner.invoke(
+            format_cmd,
+            [
+                get_example_path(ExamplesEnum.UCAMCO_2_11_2).as_posix(),
+                "-o",
+                file_name,
+            ],
+        )
+        logging.debug(result.output)
+
+        file_path = temp_path / file_name
+        assert result.exit_code == 0
+        assert (file_path).exists()
+
+        if is_regeneration_enabled:
+            FORMAT_CMD_REFERENCE_CONTENT.update(file_path.read_text())
+            pytest.skip("Reference updated")
+        else:
+            assert FORMAT_CMD_REFERENCE_CONTENT.load() == file_path.read_text()
