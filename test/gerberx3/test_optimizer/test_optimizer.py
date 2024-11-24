@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-import pytest
+from typing import TYPE_CHECKING
 
-from pygerber.gerber.optimizer.optimizer_pass.base_pass import BasePass
-from pygerber.gerber.parser import parse
-from test.assets.asset import GerberX3Asset
-from test.assets.gerberx3.A64_OLinuXino_rev_G import A64_OlinuXino_Rev_G
+import pytest
+import test.assets.gerberx3.A64_OLinuXino_rev_G as A64_OlinuXino_Rev_G
 from test.assets.gerberx3.ATMEGA328 import ATMEGA328Assets
 from test.assets.gerberx3.FcPoly_Test import FcPoly_Test
 from test.assets.gerberx3.step_and_repeat import StepAndRepeatAssets
 from test.assets.gerberx3.ucamco import GerberSpecExampleAssets
+
+from pygerber.gerber.optimizer.optimizer_pass.base_pass import BasePass
+from pygerber.gerber.parser import parse
+
+if TYPE_CHECKING:
+    from test.assets.asset import GerberX3Asset
 
 
 @pytest.mark.parametrize(
