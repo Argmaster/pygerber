@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## Pre-Release 3.0.0a4
+
+- Relaxed `pyparsing` dependency requirements to allow for use of `3.2` and above for
+  supported Python versions.
+- Relaxed `numpy` dependency requirements to allow for use of `2.x` and above for
+  supported Python versions.
+- Relaxed `pydantic` dependency requirements to allow for use of `2.x` and above for
+  supported Python versions.
+- Relaxed `pillow` dependency requirements to allow for use of `8.x` and above for
+  supported Python versions.
+- Relaxed `click` dependency requirements to allow for use of `8.x` and above for
+  supported Python versions.
+- Relaxed Python version requirement to allow for use of `3.8` and above.
+- Removed `pygerber.sequence_tools` module.
+- Removed `pygerber.frozen_general_model` module.
+- Removed `pygerber.gerber.linter.diagnostic` module.
+- Removed `pygerber.warnings` module.
+- Updated documentation links to point to stable release documentation.
+- Renamed `GerberX3Builder.add_trace()` to `GerberX3Builder.add_line_trace()` to be
+  consistent with `GerberX3Builder.add_clockwise_arc_trace()` and
+  `GerberX3Builder.add_counter_clockwise_arc_trace()`.
+- Added support for Altium implied leading zeros omitted. Contributed by @sjgallagher2
+  in #340.
+- Added arc drawing in `GerberX3Builder`.
+- Added region statement generation to `GerberX3Builder`.
+- Added Gerber to PNG, JPEG, TIFF, BMP, WEBP and SVG conversion commands to CLI.
+- Added Gerber format command to CLI.
+- Extended documentation.
+
 ## Pre-Release 3.0.0a3
 
 - Removed legacy error types from `pygerber.gerber.api._errors`.
