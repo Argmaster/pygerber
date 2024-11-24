@@ -1,3 +1,4 @@
 # Custom color maps
 
-TODO before 3.0.0
+Unfortunately, this documentation is yet to be written. I am doing my best to provide it
+before release 3.0.0 so stay tuned!

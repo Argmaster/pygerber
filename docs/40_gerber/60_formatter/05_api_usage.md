@@ -20,6 +20,6 @@ string.
 
 The formatter can be configured using `Options` object. The object can be passed to
 `format` and `formats` functions as a optional `options` argument. You can find full
-option reference [here](../reference/pygerber/gerber/formatter/options.html).
+option reference [here](../../reference/pygerber/gerber/formatter/options.md).
 
 {{ include_code("test/examples/gerberx3/formatter/_20_format_with_options.py", "docspygerberlexer", title="options_example.py", linenums="1") }}

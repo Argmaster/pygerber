@@ -29,5 +29,5 @@ out. This is where the Gerber Formatter comes in handy.
 The Gerber Formatter can be used both as a command line tool and as a library. The
 command line tool can be accessed via `pygerber gerber format` subcommand while library
 API is available through `pygerber.gerber.formatter` module. Command line usage is
-covered in [Gerber](../25_command_line/20_gerber.md) command line documentation while
+covered in [Gerber](../../25_command_line/20_gerber.md) command line documentation while
 API usage and configuration options are covered in [API usage](./05_api_usage.md).
