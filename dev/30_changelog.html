@@ -352,6 +352,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pre-release-300a4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-Release 3.0.0a4
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pre-release-300a3" class="md-nav__link">
     <span class="md-ellipsis">
       Pre-Release 3.0.0a3
@@ -7400,6 +7409,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#pre-release-300a4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pre-Release 3.0.0a4
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pre-release-300a3" class="md-nav__link">
     <span class="md-ellipsis">
       Pre-Release 3.0.0a3
@@ -7579,6 +7597,35 @@
 <p>All notable changes to this project will be documented in this file.</p>
 <p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>, and
 this project adheres to <a href="https://semver.org/">Semantic Versioning 2.0.0</a>.</p>
+<h2 id="pre-release-300a4">Pre-Release 3.0.0a4<a class="headerlink" href="#pre-release-300a4" title="Anchor link to this section for reference">&para;</a></h2>
+<ul>
+<li>Relaxed <code>pyparsing</code> dependency requirements to allow for use of <code>3.2</code> and above for
+  supported Python versions.</li>
+<li>Relaxed <code>numpy</code> dependency requirements to allow for use of <code>2.x</code> and above for
+  supported Python versions.</li>
+<li>Relaxed <code>pydantic</code> dependency requirements to allow for use of <code>2.x</code> and above for
+  supported Python versions.</li>
+<li>Relaxed <code>pillow</code> dependency requirements to allow for use of <code>8.x</code> and above for
+  supported Python versions.</li>
+<li>Relaxed <code>click</code> dependency requirements to allow for use of <code>8.x</code> and above for
+  supported Python versions.</li>
+<li>Relaxed Python version requirement to allow for use of <code>3.8</code> and above.</li>
+<li>Removed <code>pygerber.sequence_tools</code> module.</li>
+<li>Removed <code>pygerber.frozen_general_model</code> module.</li>
+<li>Removed <code>pygerber.gerber.linter.diagnostic</code> module.</li>
+<li>Removed <code>pygerber.warnings</code> module.</li>
+<li>Updated documentation links to point to stable release documentation.</li>
+<li>Renamed <code>GerberX3Builder.add_trace()</code> to <code>GerberX3Builder.add_line_trace()</code> to be
+  consistent with <code>GerberX3Builder.add_clockwise_arc_trace()</code> and
+  <code>GerberX3Builder.add_counter_clockwise_arc_trace()</code>.</li>
+<li>Added support for Altium implied leading zeros omitted. Contributed by @sjgallagher2
+  in #340.</li>
+<li>Added arc drawing in <code>GerberX3Builder</code>.</li>
+<li>Added region statement generation to <code>GerberX3Builder</code>.</li>
+<li>Added Gerber to PNG, JPEG, TIFF, BMP, WEBP and SVG conversion commands to CLI.</li>
+<li>Added Gerber format command to CLI.</li>
+<li>Extended documentation.</li>
+</ul>
 <h2 id="pre-release-300a3">Pre-Release 3.0.0a3<a class="headerlink" href="#pre-release-300a3" title="Anchor link to this section for reference">&para;</a></h2>
 <ul>
 <li>Removed legacy error types from <code>pygerber.gerber.api._errors</code>.</li>
