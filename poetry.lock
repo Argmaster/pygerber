@@ -1548,13 +1548,13 @@ test = ["mkdocs-d2-plugin", "mkdocs-include-markdown-plugin", "mkdocs-macros-tes
 
 [[package]]
 name = "mkdocs-material"
-version = "9.5.45"
+version = "9.5.48"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.5.45-py3-none-any.whl", hash = "sha256:a9be237cfd0be14be75f40f1726d83aa3a81ce44808dc3594d47a7a592f44547"},
-    {file = "mkdocs_material-9.5.45.tar.gz", hash = "sha256:286489cf0beca4a129d91d59d6417419c63bceed1ce5cd0ec1fc7e1ebffb8189"},
+    {file = "mkdocs_material-9.5.48-py3-none-any.whl", hash = "sha256:b695c998f4b939ce748adbc0d3bff73fa886a670ece948cf27818fa115dc16f8"},
+    {file = "mkdocs_material-9.5.48.tar.gz", hash = "sha256:a582531e8b34f4c7ed38c29d5c44763053832cf2a32f7409567e0c74749a47db"},
 ]
 
 [package.dependencies]
@@ -3807,4 +3807,4 @@ svg = ["drawsvg"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "5ebe8414864157299bd18f1f0cc3fb31603d6527765ac381773ee75794eaa960"
+content-hash = "88364031572532a2cc648c27a22dd47b61c0bfc127b74a78a6fa3b360b2ce66c"
