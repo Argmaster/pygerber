@@ -135,7 +135,9 @@ class RasterRenderingFrameBuilder:
         self.y_offset = y
         return self
 
-    def build(self, *, with_mask: bool = True) -> RasterRenderingFrame:
+    def build(
+        self, *, with_mask: bool = True, is_base_frame: bool = False
+    ) -> RasterRenderingFrame:
         """Build final rendering frame container."""
         command_buffer = (
             self.command_buffer
@@ -153,8 +155,17 @@ class RasterRenderingFrameBuilder:
             max(custom_round(bbox.height.as_millimeters() * self.dpmm * self.scale), 1)
             + self.y_offset,
         )
+        color_scheme = self.color_scheme or throw(RuntimeError("Missing color schema."))
         image = (
-            Image.new("RGBA", dimensions, (0, 0, 0, 0))
+            Image.new(
+                "RGBA",
+                dimensions,
+                (
+                    color_scheme.background_color.as_rgba_int()
+                    if is_base_frame
+                    else (0, 0, 0, 0)
+                ),
+            )
             if self.image is None
             else self.image
         )
@@ -167,7 +178,6 @@ class RasterRenderingFrameBuilder:
             if with_mask
             else None
         )
-        color_scheme = self.color_scheme or throw(RuntimeError("Missing color schema."))
         polarity = self.polarity or throw(RuntimeError("Missing polarity."))
         # Unset command buffer to prevent unintended reuse.
         self.command_buffer = None
@@ -356,7 +366,7 @@ class RasterRenderer2Hooks(Renderer2HooksABC):
         self.push_render_frame(
             self.frame_builder.set_polarity(Polarity.Dark)
             .set_command_buffer(command_buffer)
-            .build(with_mask=False),
+            .build(with_mask=False, is_base_frame=True),
         )
         self.apertures: dict[str, RasterAperture] = {}
 
