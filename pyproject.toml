@@ -82,7 +82,7 @@ dulwich = "^0.22.1"
 tzlocal = "^5.0.1"
 types-tzlocal = "^5.0.1.1"
 pytest-xdist = { extras = ["psutil"], version = "^3.3.1" }
-pytest = "^8.3.3"
+pytest = "^8.3.4"
 pytest-cov = ">=4.1,<6.0"
 pytest-lsp = "^0.4.2"
 pytest-asyncio = ">=0.23.7,<0.25.0"
