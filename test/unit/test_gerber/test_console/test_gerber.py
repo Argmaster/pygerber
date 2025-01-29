@@ -6,8 +6,9 @@ import pytest
 from click.testing import CliRunner
 from PIL import Image
 
-from pygerber.console.gerber import bmp, format_cmd, jpeg, png, svg, tiff, webp
+from pygerber.console.gerber import bmp, format_cmd, jpeg, png, tiff, webp
 from pygerber.examples import ExamplesEnum, get_example_path
+from pygerber.vm.shapely.vm import is_shapely_available
 from test.assets.assetlib import ImageAnalyzer, SvgImageAsset
 from test.assets.reference.pygerber.console.gerber import (
     CONVERT_BMP_REFERENCE_IMAGE,
@@ -23,6 +24,10 @@ from test.conftest import cd_to_tempdir
 from test.tags import Tag, tag
 
 MIN_PNG_SSIM = 0.99
+
+
+if is_shapely_available():
+    from pygerber.console.gerber import svg
 
 
 @tag(Tag.PILLOW, Tag.OPENCV, Tag.SKIMAGE)
