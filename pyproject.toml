@@ -162,6 +162,7 @@ gerber_lexer = "pygerber.gerber.pygments:GerberLexer"
 [tool.poe.tasks]
 # -------------------------------------------------------------------------------------
 install-hooks = [
+    { cmd = "poetry install --sync --with=docs,style,image_analysis --extras=all --no-ansi" },
     { cmd = "poetry run python -m scripts.install_hooks" },
     { cmd = "poetry run pre-commit install --install-hooks --overwrite" },
 ]
