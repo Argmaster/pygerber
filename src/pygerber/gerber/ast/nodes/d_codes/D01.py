@@ -7,12 +7,10 @@ from typing import TYPE_CHECKING, Callable, Optional
 from pydantic import Field
 
 from pygerber.gerber.ast.nodes.d_codes.D import D
-from pygerber.gerber.ast.nodes.other.coordinate import (
-    CoordinateI,
-    CoordinateJ,
-    CoordinateX,
-    CoordinateY,
-)
+from pygerber.gerber.ast.nodes.other.CoordinateI import CoordinateI
+from pygerber.gerber.ast.nodes.other.CoordinateJ import CoordinateJ
+from pygerber.gerber.ast.nodes.other.CoordinateX import CoordinateX
+from pygerber.gerber.ast.nodes.other.CoordinateY import CoordinateY
 
 if TYPE_CHECKING:
     from typing_extensions import Self

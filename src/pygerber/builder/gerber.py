@@ -21,7 +21,7 @@ from typing import (
 
 from pydantic import BaseModel, Field
 
-from pygerber.gerber.ast import CoordinateFormat
+from pygerber.gerber.ast import CoordinateFormat, PlotMode
 from pygerber.gerber.ast.nodes import (
     ADC,
     ADO,
@@ -32,6 +32,9 @@ from pygerber.gerber.ast.nodes import (
     D02,
     D03,
     FS,
+    G01,
+    G02,
+    G03,
     G36,
     G37,
     G75,
@@ -54,6 +57,8 @@ from pygerber.gerber.ast.nodes import (
     Code20,
     Code21,
     Constant,
+    CoordinateI,
+    CoordinateJ,
     CoordinateNotation,
     CoordinateX,
     CoordinateY,
@@ -69,11 +74,6 @@ from pygerber.gerber.ast.nodes import (
     UnitMode,
     Zeros,
 )
-from pygerber.gerber.ast.nodes.g_codes.G01 import G01
-from pygerber.gerber.ast.nodes.g_codes.G02 import G02
-from pygerber.gerber.ast.nodes.g_codes.G03 import G03
-from pygerber.gerber.ast.nodes.other.coordinate import CoordinateI, CoordinateJ
-from pygerber.gerber.ast.state_tracking_visitor import PlotMode
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
