@@ -16,10 +16,10 @@ from pygerber.vm.shapely.vm import (
 )
 
 __all__ = [
-    "ShapelyVirtualMachine",
-    "ShapelyEagerLayer",
     "ShapelyDeferredLayer",
-    "ShapelyResult",
+    "ShapelyEagerLayer",
     "ShapelyNotInstalledError",
+    "ShapelyResult",
+    "ShapelyVirtualMachine",
     "ShapelyVirtualMachineError",
 ]

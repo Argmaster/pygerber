@@ -19,17 +19,17 @@ from pygerber.vm.types.style import Style
 from pygerber.vm.types.vector import Vector
 
 __all__ = [
-    "Vector",
-    "Matrix3x3",
     "Box",
-    "LayerID",
     "Color",
-    "VirtualMachineError",
     "EmptyAutoSizedLayerNotAllowedError",
-    "NoLayerSetError",
-    "LayerNotFoundError",
     "LayerAlreadyExistsError",
-    "PasteDeferredLayerNotAllowedError",
+    "LayerID",
+    "LayerNotFoundError",
+    "Matrix3x3",
+    "NoLayerSetError",
     "NoMainLayerError",
+    "PasteDeferredLayerNotAllowedError",
     "Style",
+    "Vector",
+    "VirtualMachineError",
 ]

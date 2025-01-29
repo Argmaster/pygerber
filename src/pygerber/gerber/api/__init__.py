@@ -38,14 +38,15 @@ from pygerber.gerber.formatter.options import Options
 from pygerber.vm.types import Color, Style
 
 __all__ = [
+    "DEFAULT_ALPHA_COLOR_MAP",
+    "DEFAULT_COLOR_MAP",
+    "Color",
     "CompositeImage",
     "CompositePillowImage",
     "CompositeView",
-    "DEFAULT_ALPHA_COLOR_MAP",
-    "DEFAULT_COLOR_MAP",
     "DesignRules",
-    "FilesAttributes",
     "FileTypeEnum",
+    "FilesAttributes",
     "GeneralSpecs",
     "GenerationSoftware",
     "GerberFile",
@@ -54,13 +55,12 @@ __all__ = [
     "Image",
     "ImageSpace",
     "MaterialStackup",
+    "Options",
     "PathToGerberJobProjectNotDefinedError",
     "PillowImage",
     "ProjectId",
     "ShapelyImage",
     "Size",
     "Style",
-    "Color",
     "Units",
-    "Options",
 ]

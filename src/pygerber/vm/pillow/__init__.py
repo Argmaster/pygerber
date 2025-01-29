@@ -13,10 +13,10 @@ from pygerber.vm.pillow.vm import (
 )
 
 __all__ = [
-    "PillowVirtualMachineError",
     "DPMMTooSmallError",
-    "PillowVirtualMachine",
-    "PillowResult",
     "PillowDeferredLayer",
     "PillowEagerLayer",
+    "PillowResult",
+    "PillowVirtualMachine",
+    "PillowVirtualMachineError",
 ]

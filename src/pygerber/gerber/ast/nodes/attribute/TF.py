@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import datetime  # noqa: TCH003
+import datetime  # noqa: TC003
 import hashlib
 from typing import TYPE_CHECKING, Callable, List, Literal, Optional
 

@@ -24,20 +24,20 @@ if TYPE_CHECKING:
     from pygerber.gerber.ast.nodes import File
 
 __all__ = [
-    "Formatter",
-    "extra_indent",
-    "balanced",
-    "small_indent",
-    "MacroSplitMode",
-    "MacroEndInNewLine",
-    "FloatTrimTrailingZeros",
     "EmptyLineBeforePolaritySwitch",
+    "ExplicitParenthesis",
+    "FloatTrimTrailingZeros",
+    "Formatter",
     "KeepNonStandaloneCodes",
+    "MacroEndInNewLine",
+    "MacroSplitMode",
+    "Options",
     "RemoveG54",
     "RemoveG55",
-    "ExplicitParenthesis",
     "StripWhitespace",
-    "Options",
+    "balanced",
+    "extra_indent",
+    "small_indent",
 ]
 
 

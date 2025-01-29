@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 if is_language_server_available():
     import lsprotocol.types as lspt
-    from pygls.server import LanguageServer  # noqa: TCH002
+    from pygls.server import LanguageServer  # noqa: TC002
 
 
 class Document:

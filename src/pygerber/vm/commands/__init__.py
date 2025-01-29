@@ -11,12 +11,12 @@ from pygerber.vm.commands.shape import Shape
 from pygerber.vm.commands.shape_segments import Arc, Line, ShapeSegment
 
 __all__ = [
-    "ShapeSegment",
     "Arc",
-    "Line",
-    "Shape",
-    "StartLayer",
-    "EndLayer",
-    "PasteLayer",
     "Command",
+    "EndLayer",
+    "Line",
+    "PasteLayer",
+    "Shape",
+    "ShapeSegment",
+    "StartLayer",
 ]

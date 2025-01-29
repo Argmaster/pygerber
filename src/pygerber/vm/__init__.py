@@ -12,12 +12,12 @@ from pygerber.vm.vm import DeferredLayer, EagerLayer, Layer, Result, VirtualMach
 
 __all__ = [
     "RVMC",
-    "VirtualMachine",
     "CommandVisitor",
-    "Result",
-    "Layer",
-    "EagerLayer",
     "DeferredLayer",
+    "EagerLayer",
+    "Layer",
+    "Result",
+    "VirtualMachine",
 ]
 
 

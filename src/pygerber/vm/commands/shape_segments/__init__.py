@@ -6,4 +6,4 @@ from pygerber.vm.commands.shape_segments.arc import Arc
 from pygerber.vm.commands.shape_segments.line import Line
 from pygerber.vm.commands.shape_segments.shape_segment import ShapeSegment
 
-__all__ = ["ShapeSegment", "Line", "Arc"]
+__all__ = ["Arc", "Line", "ShapeSegment"]
