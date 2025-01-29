@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## Pre-Release 3.0.0b1
+
+- Changed `pygerber.gerber.ast.nodes.aperture.AM_open` to
+  `pygerber.gerber.ast.nodes.aperture.AMopen` for consistency.
+- Changed `pygerber.gerber.ast.nodes.aperture.AM_close` to
+  `pygerber.gerber.ast.nodes.aperture.AMclose` for consistency.
+- Changed `pygerber.gerber.ast.nodes.aperture.AB_open` to
+  `pygerber.gerber.ast.nodes.aperture.ABopen` for consistency.
+- Changed `pygerber.gerber.ast.nodes.aperture.AB_close` to
+  `pygerber.gerber.ast.nodes.aperture.ABclose` for consistency.
+
 ## Pre-Release 3.0.0a4
 
 - Relaxed `pyparsing` dependency requirements to allow for use of `3.2` and above for

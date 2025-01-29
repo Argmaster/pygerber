@@ -8,15 +8,15 @@ import pytest
 import tzlocal
 
 from pygerber.gerber.ast.ast_visitor import AstVisitor
-from pygerber.gerber.ast.nodes.aperture.AB_close import ABclose
-from pygerber.gerber.ast.nodes.aperture.AB_open import ABopen
+from pygerber.gerber.ast.nodes.aperture.ABclose import ABclose
+from pygerber.gerber.ast.nodes.aperture.ABopen import ABopen
 from pygerber.gerber.ast.nodes.aperture.ADC import ADC
 from pygerber.gerber.ast.nodes.aperture.ADmacro import ADmacro
 from pygerber.gerber.ast.nodes.aperture.ADO import ADO
 from pygerber.gerber.ast.nodes.aperture.ADP import ADP
 from pygerber.gerber.ast.nodes.aperture.ADR import ADR
-from pygerber.gerber.ast.nodes.aperture.AM_close import AMclose
-from pygerber.gerber.ast.nodes.aperture.AM_open import AMopen
+from pygerber.gerber.ast.nodes.aperture.AMclose import AMclose
+from pygerber.gerber.ast.nodes.aperture.AMopen import AMopen
 from pygerber.gerber.ast.nodes.aperture.SR_close import SRclose
 from pygerber.gerber.ast.nodes.aperture.SR_open import SRopen
 from pygerber.gerber.ast.nodes.attribute.TA import (

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Callable, List
 
-from pygerber.gerber.ast.nodes.aperture.AM_close import AMclose
-from pygerber.gerber.ast.nodes.aperture.AM_open import AMopen
+from pygerber.gerber.ast.nodes.aperture.AMclose import AMclose
+from pygerber.gerber.ast.nodes.aperture.AMopen import AMopen
 from pygerber.gerber.ast.nodes.base import Node
 
 if TYPE_CHECKING:
