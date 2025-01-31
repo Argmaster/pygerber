@@ -242,10 +242,6 @@ class PillowImage(Image):
             `str` and `Path` objects are interpreted as file paths and opened with
             truncation. `BinaryIO`-like (files, BytesIO) objects are written to
             directly.
-        color : Style, optional
-            Color to use for SVG, background is ignored as it is always rendered as
-            empty space, so only foreground applies, by default
-            Style.presets.COPPER_ALPHA
         kwargs : Any
             Additional keyword arguments to pass to `PIL.Image.save`.
 

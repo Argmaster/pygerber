@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from typing import Iterable, Sequence
+from typing import TYPE_CHECKING, Iterable, Sequence
 
 from PIL import Image
 
+from pygerber.gerber.api._enums import COLOR_MAP_T
 from pygerber.gerber.api._gerber_file import GerberFile, PillowImage
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 class CompositeImage:
@@ -42,6 +46,12 @@ class CompositeView:
 
     def __init__(self, files: Iterable[GerberFile]) -> None:
         self._files = tuple(files)
+
+    def set_color_map(self, color_map: COLOR_MAP_T) -> Self:
+        """Set color map for all files."""
+        for file in self._files:
+            file.set_color_map(color_map)
+        return self
 
     @property
     def files(self) -> tuple[GerberFile, ...]:
