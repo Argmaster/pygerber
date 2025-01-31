@@ -226,6 +226,7 @@ lint.ignore = [
     "EXE002", # Breaks on file systems which do not support executable permissions.
     "EM101",  # Stupid errors when exceptions are parametrized by short strings.
     "A004",   # Import `X` is shadowing a Python builtin
+    "PYI063", # Use PEP 570 syntax for positional-only parameters - too late.
 ]
 show-fixes = true
 target-version = "py38"
