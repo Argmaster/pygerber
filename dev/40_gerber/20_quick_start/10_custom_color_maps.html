@@ -542,6 +542,17 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Custom color maps
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="10_custom_color_maps.html" class="md-nav__link md-nav__link--active">
         
   
@@ -551,6 +562,61 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#single-file-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single file example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-file-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi file example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#partial-override" class="md-nav__link">
+    <span class="md-ellipsis">
+      Partial override
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -7298,6 +7364,50 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" class="md-nav__link">
+    <span class="md-ellipsis">
+      Introduction
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#single-file-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single file example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-file-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi file example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#partial-override" class="md-nav__link">
+    <span class="md-ellipsis">
+      Partial override
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -7320,8 +7430,231 @@
 
 
 <h1 id="custom-color-maps">Custom color maps<a class="headerlink" href="#custom-color-maps" title="Anchor link to this section for reference">&para;</a></h1>
-<p>Unfortunately, this documentation is yet to be written. I am doing my best to provide it
-before release 3.0.0 so stay tuned!</p>
+<h2 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Anchor link to this section for reference">&para;</a></h2>
+<p>In PyGerber Gerber API (<code>pygerber.gerber.api</code> module) term color maps refers to
+dictionaries used to convert type of layer (specified manually or determined
+automatically) to style determining colors which should be used for rendering of that
+layer.</p>
+<p>Layer (file) type is expressed as <code>FileTypeEnum</code> value while style is expressed as
+<code>Style</code> instance. Both classes are defined in <code>pygerber.gerber.api</code> module.</p>
+<p>There are two predefined color maps in <code>pygerber.gerber.api</code>: <code>DEFAULT_COLOR_MAP</code> and
+<code>DEFAULT_ALPHA_COLOR_MAP</code>. By default second one is used in <code>GerberFile</code> class during
+rendering.</p>
+<p>To create custom color map you need to create dictionary with keys being <code>FileTypeEnum</code>
+values and values being <code>Style</code> instances. Then to change color map used by <code>GerberFile</code>
+you need to call <code>set_color_map</code> method with your custom color map as argument.</p>
+<h2 id="single-file-example">Single file example<a class="headerlink" href="#single-file-example" title="Anchor link to this section for reference">&para;</a></h2>
+<div class="language-docspygerberlexer highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">custom_color_map.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-0-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-0-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-0-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-0-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-0-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-0-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-0-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-0-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-0-10">10</a></span>
+<span class="normal"><a href="#__codelineno-0-11">11</a></span>
+<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+<span class="normal"><a href="#__codelineno-0-14">14</a></span>
+<span class="normal"><a href="#__codelineno-0-15">15</a></span>
+<span class="normal"><a href="#__codelineno-0-16">16</a></span>
+<span class="normal"><a href="#__codelineno-0-17">17</a></span>
+<span class="normal"><a href="#__codelineno-0-18">18</a></span>
+<span class="normal"><a href="#__codelineno-0-19">19</a></span>
+<span class="normal"><a href="#__codelineno-0-20">20</a></span>
+<span class="normal"><a href="#__codelineno-0-21">21</a></span>
+<span class="normal"><a href="#__codelineno-0-22">22</a></span>
+<span class="normal"><a href="#__codelineno-0-23">23</a></span>
+<span class="normal"><a href="#__codelineno-0-24">24</a></span>
+<span class="normal"><a href="#__codelineno-0-25">25</a></span>
+<span class="normal"><a href="#__codelineno-0-26">26</a></span>
+<span class="normal"><a href="#__codelineno-0-27">27</a></span>
+<span class="normal"><a href="#__codelineno-0-28">28</a></span>
+<span class="normal"><a href="#__codelineno-0-29">29</a></span>
+<span class="normal"><a href="#__codelineno-0-30">30</a></span>
+<span class="normal"><a href="#__codelineno-0-31">31</a></span>
+<span class="normal"><a href="#__codelineno-0-32">32</a></span>
+<span class="normal"><a href="#__codelineno-0-33">33</a></span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span>
+<span class="normal"><a href="#__codelineno-0-36">36</a></span>
+<span class="normal"><a href="#__codelineno-0-37">37</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">pygerber.gerber.api</span> <span class="kn">import</span> <span class="nc">GerberFile</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="kn">from</span> <span class="nn">pygerber.examples</span> <span class="kn">import</span> <span class="nc">ExamplesEnum</span><span class="p">,</span> <span class="nf">load_example</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="kn">from</span> <span class="nn">pygerber.gerber.api</span> <span class="kn">import</span> <span class="nc">FileTypeEnum</span><span class="p">,</span> <span class="n">Color</span><span class="p">,</span> <span class="n">Style</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5"></a>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="c1"># Define a custom color map as a dictionary. We dont have to map all file types, only</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="c1"># the ones we need. There is no fallback mechanism though, so if you miss a file type</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="c1"># that you need during rendering, KeyError will be raised.</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="n">my_color_map</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a>    <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">COPPER</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a>        <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a>        <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a>    <span class="p">),</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a>    <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">MASK</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a>        <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a>        <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a>    <span class="p">),</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19"></a>    <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">PASTE</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20"></a>        <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21"></a>        <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22"></a>    <span class="p">),</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23"></a>    <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">SILK</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24"></a>        <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_hex</span><span class="p">(</span><span class="s2">&quot;#000000&quot;</span><span class="p">),</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25"></a>        <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_hex</span><span class="p">(</span><span class="s2">&quot;#FFFFFF&quot;</span><span class="p">),</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a>    <span class="p">),</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="p">}</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="n">gerber_source_code</span> <span class="o">=</span> <span class="nf">load_example</span><span class="p">(</span><span class="nc">ExamplesEnum</span><span class="o">.</span><span class="n">carte_test_F_Cu</span><span class="p">)</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="n">file</span> <span class="o">=</span> <span class="nc">GerberFile</span><span class="o">.</span><span class="nf">from_str</span><span class="p">(</span><span class="n">gerber_source_code</span><span class="p">)</span>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="c1"># Set the custom color map with the set_color_map method. If you don&#39;t do that,</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="c1"># nothing will change.</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="n">file</span><span class="o">.</span><span class="n">set_color_map</span><span class="p">(</span><span class="n">my_color_map</span><span class="p">)</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35"></a>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="n">image</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="nf">render_with_pillow</span><span class="p">()</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="n">image</span><span class="o">.</span><span class="nf">get_image</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output.png&quot;</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<h2 id="multi-file-example">Multi file example<a class="headerlink" href="#multi-file-example" title="Anchor link to this section for reference">&para;</a></h2>
+<p>The reason for using dictionaries instead of just a parameter for render function is
+that color map approach scales well for rendering multiple files from a project at once.
+In such case colors will be automatically determined based on file types which can be
+easily inferred from either file extension or file attributes.</p>
+<p>See an example below:</p>
+<div class="language-docspygerberlexer highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">custom_color_map_multi_file.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-1-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-1-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-1-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-1-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-1-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-1-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-1-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-1-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-1-10">10</a></span>
+<span class="normal"><a href="#__codelineno-1-11">11</a></span>
+<span class="normal"><a href="#__codelineno-1-12">12</a></span>
+<span class="normal"><a href="#__codelineno-1-13">13</a></span>
+<span class="normal"><a href="#__codelineno-1-14">14</a></span>
+<span class="normal"><a href="#__codelineno-1-15">15</a></span>
+<span class="normal"><a href="#__codelineno-1-16">16</a></span>
+<span class="normal"><a href="#__codelineno-1-17">17</a></span>
+<span class="normal"><a href="#__codelineno-1-18">18</a></span>
+<span class="normal"><a href="#__codelineno-1-19">19</a></span>
+<span class="normal"><a href="#__codelineno-1-20">20</a></span>
+<span class="normal"><a href="#__codelineno-1-21">21</a></span>
+<span class="normal"><a href="#__codelineno-1-22">22</a></span>
+<span class="normal"><a href="#__codelineno-1-23">23</a></span>
+<span class="normal"><a href="#__codelineno-1-24">24</a></span>
+<span class="normal"><a href="#__codelineno-1-25">25</a></span>
+<span class="normal"><a href="#__codelineno-1-26">26</a></span>
+<span class="normal"><a href="#__codelineno-1-27">27</a></span>
+<span class="normal"><a href="#__codelineno-1-28">28</a></span>
+<span class="normal"><a href="#__codelineno-1-29">29</a></span>
+<span class="normal"><a href="#__codelineno-1-30">30</a></span>
+<span class="normal"><a href="#__codelineno-1-31">31</a></span>
+<span class="normal"><a href="#__codelineno-1-32">32</a></span>
+<span class="normal"><a href="#__codelineno-1-33">33</a></span>
+<span class="normal"><a href="#__codelineno-1-34">34</a></span>
+<span class="normal"><a href="#__codelineno-1-35">35</a></span>
+<span class="normal"><a href="#__codelineno-1-36">36</a></span>
+<span class="normal"><a href="#__codelineno-1-37">37</a></span>
+<span class="normal"><a href="#__codelineno-1-38">38</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">pygerber.examples</span> <span class="kn">import</span> <span class="nc">ExamplesEnum</span><span class="p">,</span> <span class="nf">load_example</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2"></a><span class="kn">from</span> <span class="nn">pygerber.gerber.api</span> <span class="kn">import</span> <span class="n">CompositeView</span><span class="p">,</span> <span class="nc">GerberFile</span><span class="p">,</span> <span class="nc">FileTypeEnum</span><span class="p">,</span> <span class="n">Color</span><span class="p">,</span> <span class="n">Style</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4"></a>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5"></a><span class="n">my_color_map</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6"></a>    <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">COPPER</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7"></a>        <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8"></a>        <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9"></a>    <span class="p">),</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10"></a>    <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">SOLDERMASK</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11"></a>        <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12"></a>        <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13"></a>    <span class="p">),</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14"></a>    <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">PASTE</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15"></a>        <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16"></a>        <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17"></a>    <span class="p">),</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18"></a>    <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">LEGEND</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19"></a>        <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_hex</span><span class="p">(</span><span class="s2">&quot;#00000000&quot;</span><span class="p">),</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20"></a>        <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_hex</span><span class="p">(</span><span class="s2">&quot;#FFFFFFFF&quot;</span><span class="p">),</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21"></a>    <span class="p">),</span>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22"></a><span class="p">}</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23"></a>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24"></a>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25"></a><span class="n">project</span> <span class="o">=</span> <span class="n">CompositeView</span><span class="p">(</span>
+</span><span id="__span-1-26"><a id="__codelineno-1-26" name="__codelineno-1-26"></a>    <span class="p">[</span>
+</span><span id="__span-1-27"><a id="__codelineno-1-27" name="__codelineno-1-27"></a>        <span class="nc">GerberFile</span><span class="o">.</span><span class="nf">from_str</span><span class="p">(</span><span class="nf">load_example</span><span class="p">(</span><span class="nc">ExamplesEnum</span><span class="o">.</span><span class="n">simple_2layer_F_Cu</span><span class="p">)),</span>
+</span><span id="__span-1-28"><a id="__codelineno-1-28" name="__codelineno-1-28"></a>        <span class="nc">GerberFile</span><span class="o">.</span><span class="nf">from_str</span><span class="p">(</span><span class="nf">load_example</span><span class="p">(</span><span class="nc">ExamplesEnum</span><span class="o">.</span><span class="n">simple_2layer_F_Mask</span><span class="p">)),</span>
+</span><span id="__span-1-29"><a id="__codelineno-1-29" name="__codelineno-1-29"></a>        <span class="nc">GerberFile</span><span class="o">.</span><span class="nf">from_str</span><span class="p">(</span><span class="nf">load_example</span><span class="p">(</span><span class="nc">ExamplesEnum</span><span class="o">.</span><span class="n">simple_2layer_F_Paste</span><span class="p">)),</span>
+</span><span id="__span-1-30"><a id="__codelineno-1-30" name="__codelineno-1-30"></a>        <span class="nc">GerberFile</span><span class="o">.</span><span class="nf">from_str</span><span class="p">(</span><span class="nf">load_example</span><span class="p">(</span><span class="nc">ExamplesEnum</span><span class="o">.</span><span class="n">simple_2layer_F_Silkscreen</span><span class="p">)),</span>
+</span><span id="__span-1-31"><a id="__codelineno-1-31" name="__codelineno-1-31"></a>    <span class="p">],</span>
+</span><span id="__span-1-32"><a id="__codelineno-1-32" name="__codelineno-1-32"></a><span class="p">)</span>
+</span><span id="__span-1-33"><a id="__codelineno-1-33" name="__codelineno-1-33"></a><span class="c1"># Calling `set_color_map` on `CompositeView` will propagate the color map to all</span>
+</span><span id="__span-1-34"><a id="__codelineno-1-34" name="__codelineno-1-34"></a><span class="c1"># `GerberFile` objects inside it.</span>
+</span><span id="__span-1-35"><a id="__codelineno-1-35" name="__codelineno-1-35"></a><span class="n">project</span><span class="o">.</span><span class="n">set_color_map</span><span class="p">(</span><span class="n">my_color_map</span><span class="p">)</span>
+</span><span id="__span-1-36"><a id="__codelineno-1-36" name="__codelineno-1-36"></a>
+</span><span id="__span-1-37"><a id="__codelineno-1-37" name="__codelineno-1-37"></a><span class="n">image</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="nf">render_with_pillow</span><span class="p">()</span>
+</span><span id="__span-1-38"><a id="__codelineno-1-38" name="__codelineno-1-38"></a><span class="n">image</span><span class="o">.</span><span class="nf">get_image</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output.png&quot;</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<h2 id="partial-override">Partial override<a class="headerlink" href="#partial-override" title="Anchor link to this section for reference">&para;</a></h2>
+<p>It might be tricky to guess all file types when rendering multiple files, especially if
+we want to change colors only for single file type. In such case we can just copy
+default color map which covers all file types and then override only colors for specific
+file type.</p>
+<div class="language-docspygerberlexer highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">custom_color_map_multi_file.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-2-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-2-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-2-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-2-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-2-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-2-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-2-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-2-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-2-10">10</a></span>
+<span class="normal"><a href="#__codelineno-2-11">11</a></span>
+<span class="normal"><a href="#__codelineno-2-12">12</a></span>
+<span class="normal"><a href="#__codelineno-2-13">13</a></span>
+<span class="normal"><a href="#__codelineno-2-14">14</a></span>
+<span class="normal"><a href="#__codelineno-2-15">15</a></span>
+<span class="normal"><a href="#__codelineno-2-16">16</a></span>
+<span class="normal"><a href="#__codelineno-2-17">17</a></span>
+<span class="normal"><a href="#__codelineno-2-18">18</a></span>
+<span class="normal"><a href="#__codelineno-2-19">19</a></span>
+<span class="normal"><a href="#__codelineno-2-20">20</a></span>
+<span class="normal"><a href="#__codelineno-2-21">21</a></span>
+<span class="normal"><a href="#__codelineno-2-22">22</a></span>
+<span class="normal"><a href="#__codelineno-2-23">23</a></span>
+<span class="normal"><a href="#__codelineno-2-24">24</a></span>
+<span class="normal"><a href="#__codelineno-2-25">25</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="kn">from</span> <span class="nn">pygerber.gerber.api</span> <span class="kn">import</span> <span class="nc">GerberFile</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="kn">from</span> <span class="nn">pygerber.examples</span> <span class="kn">import</span> <span class="nc">ExamplesEnum</span><span class="p">,</span> <span class="nf">load_example</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4"></a><span class="kn">from</span> <span class="nn">pygerber.gerber.api</span> <span class="kn">import</span> <span class="nc">FileTypeEnum</span><span class="p">,</span> <span class="n">Color</span><span class="p">,</span> <span class="n">Style</span><span class="p">,</span> <span class="n">DEFAULT_ALPHA_COLOR_MAP</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5"></a>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7"></a><span class="c1"># We can copy DEFAULT_ALPHA_COLOR_MAP and update it with our custom values to avoid</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8"></a><span class="c1"># missing any file type. The ones we don&#39;t override will keep the default values.</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9"></a><span class="n">my_color_map</span> <span class="o">=</span> <span class="n">DEFAULT_ALPHA_COLOR_MAP</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10"></a><span class="n">my_color_map</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11"></a>    <span class="p">{</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12"></a>        <span class="nc">FileTypeEnum</span><span class="o">.</span><span class="n">COPPER</span><span class="p">:</span> <span class="n">Style</span><span class="p">(</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13"></a>            <span class="n">background</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14"></a>            <span class="n">foreground</span><span class="o">=</span><span class="n">Color</span><span class="o">.</span><span class="n">from_rgba</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15"></a>        <span class="p">),</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16"></a>    <span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17"></a><span class="p">)</span>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18"></a>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19"></a><span class="n">gerber_source_code</span> <span class="o">=</span> <span class="nf">load_example</span><span class="p">(</span><span class="nc">ExamplesEnum</span><span class="o">.</span><span class="n">carte_test_F_Cu</span><span class="p">)</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20"></a>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21"></a><span class="n">file</span> <span class="o">=</span> <span class="nc">GerberFile</span><span class="o">.</span><span class="nf">from_str</span><span class="p">(</span><span class="n">gerber_source_code</span><span class="p">)</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22"></a><span class="n">file</span><span class="o">.</span><span class="n">set_color_map</span><span class="p">(</span><span class="n">my_color_map</span><span class="p">)</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23"></a>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24"></a><span class="n">image</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="nf">render_with_pillow</span><span class="p">()</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25"></a><span class="n">image</span><span class="o">.</span><span class="nf">get_image</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output.png&quot;</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
 
 
 
