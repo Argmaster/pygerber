@@ -79,7 +79,7 @@ class TestVirtualMachine:
     def test_create_eager_layer(self) -> None:
         vm = VirtualMachine()
         layer = vm.create_eager_layer(
-            layer_id=LayerID(id="layer"), box=Box(), origin=Vector(x=0, y=0)
+            layer_id=LayerID(id="layer"), origin=Vector(x=0, y=0), box=Box()
         )
         assert isinstance(layer, EagerLayer)
         assert layer.layer_id == LayerID(id="layer")

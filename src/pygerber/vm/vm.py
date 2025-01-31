@@ -152,7 +152,7 @@ class VirtualMachine(CommandVisitor):
         self._on_shape_handler = self.on_shape_deferred
         self._on_paste_layer_handler = self.on_paste_layer_deferred
 
-    def create_eager_layer(self, layer_id: LayerID, box: Box, origin: Vector) -> Layer:
+    def create_eager_layer(self, layer_id: LayerID, origin: Vector, box: Box) -> Layer:
         """Create new eager layer instances (factory method)."""
         return EagerLayer(layer_id, box, origin)
 
@@ -203,7 +203,7 @@ class VirtualMachine(CommandVisitor):
             self.set_deferred_handlers()
 
         else:
-            layer = self.create_eager_layer(command.id, command.box, command.origin)
+            layer = self.create_eager_layer(command.id, command.origin, command.box)
             self.set_layer(command.id, layer)
             self.set_eager_handlers()
 
@@ -263,7 +263,7 @@ class VirtualMachine(CommandVisitor):
                 raise EmptyAutoSizedLayerNotAllowedError(top_layer.layer_id)
 
             new_layer = self.create_eager_layer(
-                top_layer.layer_id, box, top_layer.origin
+                top_layer.layer_id, top_layer.origin, box
             )
             self.set_layer(top_layer.layer_id, new_layer)
 

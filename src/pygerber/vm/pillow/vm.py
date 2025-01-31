@@ -340,7 +340,7 @@ class PillowVirtualMachine(VirtualMachine):
         """Get current layer."""
         return super().layer  # type: ignore[return-value]
 
-    def create_eager_layer(self, layer_id: LayerID, box: Box, origin: Vector) -> Layer:
+    def create_eager_layer(self, layer_id: LayerID, origin: Vector, box: Box) -> Layer:
         """Create new eager layer instances (factory method)."""
         assert box.width > 0
         assert box.height > 0
