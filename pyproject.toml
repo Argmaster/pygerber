@@ -115,7 +115,7 @@ reportlab = { extras = ["pycairo"], version = "^4.2.5" }
 optional = true
 
 [tool.poetry.group.style.dependencies]
-ruff = "^0.8.1"
+ruff = "^0.9.4"
 mypy = "^1.13.0"
 pre-commit = "^3.3.3"
 
