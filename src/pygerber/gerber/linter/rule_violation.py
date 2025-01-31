@@ -13,3 +13,5 @@ class RuleViolation(BaseModel):
     description: str
     start_offset: int
     end_offset: int
+    line: int
+    column: int

@@ -12,7 +12,7 @@ class StaticRule(Rule):
     """
 
     title: str
-    message: str
+    description: str
     trigger_nodes: tuple[type[Node]]
 
     def get_violation_title(self) -> str:
@@ -21,7 +21,7 @@ class StaticRule(Rule):
 
     def get_violation_description(self) -> str:
         """Return a description of the rule violation."""
-        return self.message
+        return self.description
 
     def get_trigger_nodes(self) -> list[type[Node]]:
         """Return a list of node names that trigger the rule."""
@@ -29,13 +29,4 @@ class StaticRule(Rule):
 
     def node_callback(self, node: Node) -> None:
         """Check the node for violations."""
-        self.report_violation(
-            start_offset=(
-                node.source_info.location if node.source_info is not None else 0
-            ),
-            end_offset=(
-                node.source_info.location + node.source_info.length
-                if node.source_info is not None
-                else 0
-            ),
-        )
+        self.report_violation(node.source_info)

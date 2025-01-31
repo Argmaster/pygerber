@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import ClassVar, Optional, TypeVar
 
-from pygerber.gerber.ast.nodes import Node
+from pygerber.gerber.ast.nodes import Node, SourceInfo
 from pygerber.gerber.linter.event_ast_visitor import EventAstVisitor
 from pygerber.gerber.linter.rule_violation import RuleViolation
 from pygerber.gerber.linter.violation_collector import ViolationCollector
@@ -38,15 +38,21 @@ class Rule(ABC):
         """Bind the rule to the violation collector."""
         self.collector = collector
 
-    def report_violation(self, start_offset: int, end_offset: int) -> None:
+    def report_violation(self, source_info: Optional[SourceInfo]) -> None:
         """Report a violation."""
         if self.collector is not None:
             violation = RuleViolation(
                 rule_id=self.rule_id,
                 title=self.get_violation_title(),
                 description=self.get_violation_description(),
-                start_offset=start_offset,
-                end_offset=end_offset,
+                start_offset=(source_info.location if source_info is not None else 0),
+                end_offset=(
+                    source_info.location + source_info.length
+                    if source_info is not None
+                    else 0
+                ),
+                line=(source_info.line if source_info is not None else 0),
+                column=(source_info.column if source_info is not None else 0),
             )
             self.collector.add_violation(violation)
 

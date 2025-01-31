@@ -12,7 +12,7 @@ class DEP001(StaticRule):
     """Rule DEP001 class implements a specific linting rule."""
 
     rule_id = "DEP001"
-    message = "Use of deprecated G54 code."
+    title = "Use of deprecated G54 code."
     description = (
         "This historic code optionally precedes an aperture "
         "selection Dnn command. It has no effect. "

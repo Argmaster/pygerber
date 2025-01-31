@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional
+from typing import Any, Callable, Iterable, Literal, Optional
 
 import click
 
@@ -514,3 +514,58 @@ def _project(files: str, output: str, dpmm: int) -> None:
     Layers are merged from first to last, thus last layer will be on top.
     """
     raise NotImplementedError
+
+
+@gerber.command("lint")
+@click.argument("files", nargs=-1)
+@click.option(
+    "-r",
+    "--rules",
+    type=str,
+    multiple=True,
+    help=(
+        "Linting rules to be applied. Option can be used multiple times and accepts "
+        "comma separated list of rules, eg. `-r DEP001,DEP002,DEP003 -r DEP004`. "
+        "If not specified, all available rules will be applied."
+    ),
+)
+def lint(files: str, rules: list[str]) -> None:
+    """Lint Gerber files with specified rules."""
+    if len(files) == 0:
+        msg = "At least one file must be specified."
+        raise click.UsageError(msg)
+
+    def _parse_rules(rules: list[str]) -> Iterable[str]:
+        for rule in rules:
+            yield from rule.split(",")
+
+    from pygerber.gerber.linter import RULE_REGISTRY, Linter
+    from pygerber.gerber.parser import parse
+
+    if len(rules) != 0:
+        rule_objects = [RULE_REGISTRY[rule_id]() for rule_id in _parse_rules(rules)]
+    else:
+        rule_objects = [r() for r in RULE_REGISTRY.values()]
+
+    linter = Linter(rule_objects)
+
+    for file in files:
+        path = Path(file).expanduser().resolve()
+
+        ast = parse(path.read_text())
+        violations = linter.lint(ast)
+
+        for violation in violations:
+            click.echo(
+                f"{path.as_posix()}:{violation.line}:{violation.column} "
+                f"{violation.rule_id}: {violation.title}"
+            )
+
+
+@gerber.command("list-lint-rules")
+def list_lint_rules() -> None:
+    """List available linting rules."""
+    from pygerber.gerber.linter.rules import RULE_REGISTRY
+
+    for rule_id in RULE_REGISTRY:
+        click.echo(rule_id)
