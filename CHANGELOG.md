@@ -15,6 +15,15 @@ this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
   `pygerber.gerber.ast.nodes.aperture.ABopen` for consistency.
 - Changed `pygerber.gerber.ast.nodes.aperture.AB_close` to
   `pygerber.gerber.ast.nodes.aperture.ABclose` for consistency.
+- Changed order of box and origin parameters in `create_eager_layer` and
+  `create_deferred_layer` for consistency.
+- Moved `CoordinateX`, `CoordinateY`, `CoordinateI` and `CoordinateJ` to separate
+  modules.
+- Added `pygerber.gerber.lint` package containing linting tools for Gerber files.
+- Added `pygerber gerber lint` command to CLI for linting Gerber files.
+- Changed how empty images are handled in `VirtualMachine`, they no longer throw an
+  exception by default. This can be changed by passing
+  `fail_on_empty_auto_sized_layer=True` to `VirtualMachine` constructor.
 
 ## Pre-Release 3.0.0a4
 
