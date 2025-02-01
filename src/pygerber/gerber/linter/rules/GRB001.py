@@ -15,8 +15,9 @@ class GRB001(Rule):
 
     def get_violation_title(self) -> str:
         """Return a title of message that describes the rule violation."""
-        assert self.last_node is not None
-        return f"""Redundant {self.last_node.__qualname__} command."""
+        if self.last_node is not None:
+            return f"""Redundant {self.last_node.__qualname__} command."""
+        return "Redundant G01/G02/G03 command."
 
     def get_violation_description(self) -> str:
         """Return a description of the rule violation."""

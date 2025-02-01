@@ -563,9 +563,16 @@ def lint(files: str, rules: list[str]) -> None:
 
 
 @gerber.command("list-lint-rules")
-def list_lint_rules() -> None:
+@click.option(
+    "-q", "--quiet", is_flag=True, help="Print only rule names without descriptions."
+)
+def list_lint_rules(*, quiet: bool) -> None:
     """List available linting rules."""
     from pygerber.gerber.linter.rules import RULE_REGISTRY
 
     for rule_id in RULE_REGISTRY:
-        click.echo(rule_id)
+        if quiet:
+            click.echo(rule_id)
+        else:
+            rule = RULE_REGISTRY[rule_id]()
+            click.echo(f"{rule_id}: {rule.get_violation_title()}")
