@@ -210,8 +210,10 @@ class ShapelyVirtualMachine(VirtualMachine):
             int(abs(angle_length) * 0.4 + 24)
         ),
         grid_size: Optional[float] = None,
+        *,
+        fail_on_empty_auto_sized_layer: bool = False,
     ) -> None:
-        super().__init__()
+        super().__init__(fail_on_empty_auto_sized_layer=fail_on_empty_auto_sized_layer)
         if not is_shapely_available():
             raise ShapelyNotInstalledError
 

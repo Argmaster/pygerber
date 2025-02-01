@@ -8,6 +8,7 @@ import pytest
 from pygerber.vm.commands.layer import EndLayer, StartLayer
 from pygerber.vm.commands.paste import PasteLayer
 from pygerber.vm.commands.shape import Shape
+from pygerber.vm.rvmc import RVMC
 from pygerber.vm.types.box import Box
 from pygerber.vm.types.errors import (
     EmptyAutoSizedLayerNotAllowedError,
@@ -233,12 +234,25 @@ class TestVirtualMachine:
         assert len(vm._layer_stack) == 0
 
     def test_on_end_layer_deferred_empty_auto_sized_layer_not_allowed(self) -> None:
-        vm = VirtualMachine()
+        vm = VirtualMachine(fail_on_empty_auto_sized_layer=True)
         vm.on_start_layer(
             StartLayer(id=LayerID(id="layer"), box=None, origin=Vector(x=0, y=0))
         )
         with pytest.raises(EmptyAutoSizedLayerNotAllowedError):
             vm.on_end_layer(EndLayer())
+
+    def test_on_end_layer_deferred_empty_auto_sized_layer(self) -> None:
+        vm = VirtualMachine()
+        vm.run(
+            RVMC(
+                commands=[
+                    StartLayer(
+                        id=LayerID(id="layer"), box=None, origin=Vector(x=0, y=0)
+                    ),
+                    EndLayer(),
+                ]
+            )
+        )
 
     def test_on_end_layer_no_layer_set_error(self) -> None:
         vm = VirtualMachine()

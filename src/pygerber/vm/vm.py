@@ -125,9 +125,10 @@ class VirtualMachine(CommandVisitor):
 
     MAIN_LAYER_ID: ClassVar[LayerID] = LayerID(id="%main%")
 
-    def __init__(self) -> None:
+    def __init__(self, *, fail_on_empty_auto_sized_layer: bool = False) -> None:
         self.set_eager_handlers()
 
+        self._fail_on_empty_auto_sized_layer = fail_on_empty_auto_sized_layer
         self._layers: dict[LayerID, Layer] = {}
         self._layer_stack: list[Layer] = []
 
@@ -259,8 +260,9 @@ class VirtualMachine(CommandVisitor):
         elif isinstance(top_layer, DeferredLayer):
             box = self._calculate_deferred_layer_box(top_layer)
             if box is None:
-                # Empty layers are not retained.
-                raise EmptyAutoSizedLayerNotAllowedError(top_layer.layer_id)
+                if self._fail_on_empty_auto_sized_layer:
+                    raise EmptyAutoSizedLayerNotAllowedError(top_layer.layer_id)
+                return
 
             new_layer = self.create_eager_layer(
                 top_layer.layer_id, top_layer.origin, box
@@ -330,7 +332,9 @@ class VirtualMachine(CommandVisitor):
         layer = self._layers.get(self.MAIN_LAYER_ID, None)
 
         if layer is None:
-            raise NoMainLayerError
+            if self._fail_on_empty_auto_sized_layer:
+                raise NoMainLayerError
+            return Result(Box(min_x=0, min_y=0, max_x=0, max_y=0))
 
         assert isinstance(layer, EagerLayer)
         return Result(layer.box)

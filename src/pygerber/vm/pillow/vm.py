@@ -326,8 +326,10 @@ class PillowVirtualMachine(VirtualMachine):
     `VirtualMachine` which uses Shapely library for rendering commands.
     """
 
-    def __init__(self, dpmm: int) -> None:
-        super().__init__()
+    def __init__(
+        self, dpmm: int, *, fail_on_empty_auto_sized_layer: bool = False
+    ) -> None:
+        super().__init__(fail_on_empty_auto_sized_layer=fail_on_empty_auto_sized_layer)
         self.dpmm = dpmm
         self.angle_length_to_segment_count = lambda angle_length: (
             int(segment_count)
@@ -537,7 +539,11 @@ class PillowVirtualMachine(VirtualMachine):
         layer = self._layers.get(self.MAIN_LAYER_ID, None)
 
         if layer is None:
-            raise NoMainLayerError
+            if self._fail_on_empty_auto_sized_layer:
+                raise NoMainLayerError
+            return PillowResult(
+                Box(min_x=0, min_y=0, max_x=0, max_y=0), Image.new("1", (1, 1), 0)
+            )
 
         assert isinstance(layer, PillowEagerLayer)
         return PillowResult(
