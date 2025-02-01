@@ -1,4 +1,4 @@
-# Introduction
+# 🧭 Introduction
 
 Welcome to the Gerber Formatter documentation. This documentation is intended to provide
 a comprehensive overview of the Gerber Formatter including usage, options and examples.

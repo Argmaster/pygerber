@@ -1,4 +1,4 @@
-# Custom color maps
+# 🧁 Custom color maps
 
 ## Introduction
 

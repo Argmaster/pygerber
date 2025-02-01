@@ -29,6 +29,8 @@ class ExamplesEnum(Enum):
 
     carte_test_gbrjob = "carte_test-job.gbrjob"
 
+    fc_poly_b_cu = "fc_poly_b_cu.grb"
+
 
 DIRECTORY = Path(__file__).parent
 

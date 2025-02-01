@@ -15,15 +15,20 @@ class GRB001(Rule):
 
     def get_violation_title(self) -> str:
         """Return a title of message that describes the rule violation."""
+        node_name = "G01/G02/G03"
         if self.last_node is not None:
-            return f"""Redundant {self.last_node.__qualname__} command."""
-        return "Redundant G01/G02/G03 command."
+            node_name = self.last_node.__qualname__
+
+        return f"Redundant {node_name} command."
 
     def get_violation_description(self) -> str:
         """Return a description of the rule violation."""
-        assert self.last_node is not None
+        node_name = "G01/G02/G03"
+        if self.last_node is not None:
+            node_name = self.last_node.__qualname__
+
         return (
-            f"The {self.last_node.__qualname__} command after once issued "
+            f"The {node_name} command after once issued "
             "remains in effect until different G01/G02/G03 command changes "
             " the interpolation mode. Some software tends to paste G01 command "
             "before each D01 command, significantly increasing the file size."

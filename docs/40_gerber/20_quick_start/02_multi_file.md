@@ -1,4 +1,4 @@
-# Multi file guide
+# 🥞 Multi file guide
 
 Welcome to the multi file guide. This guide shows how to use `CompositeView` class API
 to handle multiple Gerber files at once. `CompositeView` relies on `GerberFile`

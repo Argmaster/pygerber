@@ -1,4 +1,4 @@
-# API usage
+# ☕ API usage
 
 The Gerber Formatter can be used as a library. The main entry point is the
 `pygerber.gerber.formatter` module.

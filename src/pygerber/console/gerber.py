@@ -531,6 +531,9 @@ def _project(files: str, output: str, dpmm: int) -> None:
 )
 def lint(files: str, rules: list[str]) -> None:
     """Lint Gerber files with specified rules."""
+    from pygerber.gerber.linter import lint
+    from pygerber.gerber.parser import parse
+
     if len(files) == 0:
         msg = "At least one file must be specified."
         raise click.UsageError(msg)
@@ -539,21 +542,13 @@ def lint(files: str, rules: list[str]) -> None:
         for rule in rules:
             yield from rule.split(",")
 
-    from pygerber.gerber.linter import RULE_REGISTRY, Linter
-    from pygerber.gerber.parser import parse
-
-    if len(rules) != 0:
-        rule_objects = [RULE_REGISTRY[rule_id]() for rule_id in _parse_rules(rules)]
-    else:
-        rule_objects = [r() for r in RULE_REGISTRY.values()]
-
-    linter = Linter(rule_objects)
+    rules = list(_parse_rules(rules))
 
     for file in files:
         path = Path(file).expanduser().resolve()
 
         ast = parse(path.read_text())
-        violations = linter.lint(ast)
+        violations = lint(ast, rules=rules)
 
         for violation in violations:
             click.echo(

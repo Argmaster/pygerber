@@ -1,4 +1,4 @@
-# Introduction
+# 🧭 Introduction
 
 Welcome to the Gerber code analysis documentation. This documentation is intended to
 provide a friendly guide to the APIs within PyGerber which can be used to analyze Gerber

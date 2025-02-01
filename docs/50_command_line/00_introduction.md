@@ -1,4 +1,4 @@
-# Introduction
+# 🧭 Introduction
 
 Welcome to the PyGerber command line interface documentation. This documentation is
 intended to guide you through the usage of the command line interface of PyGerber.

@@ -1,4 +1,4 @@
-# Single file guide
+# 🥐 Single file guide
 
 Welcome to the PyGerber single file guide. This guide focuses on tools which take single
 Gerber file as opposed to [Multi file guide](./02_multi_file.md) guide which is

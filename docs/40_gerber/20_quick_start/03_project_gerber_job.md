@@ -1,4 +1,4 @@
-# GerberJobFile and Project
+# 🥧 GerberJobFile and Project
 
 This guide shows how to use `GerberJobFile` class and `Project` to represent PCB
 projects.

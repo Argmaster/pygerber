@@ -1,4 +1,4 @@
-# Introduction
+# 🧭 Introduction
 
 Welcome to the Gerber Optimizer documentation. This documentation is intended to provide
 a comprehensive overview of the Gerber Optimizer including usage, options and examples.

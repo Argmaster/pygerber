@@ -91,6 +91,21 @@ def define_env(env: MacrosPlugin) -> None:
 
         return _base64_image_tag(out.get_image())
 
+    @env.macro
+    def gerber_linter_rule_list() -> str:
+        """Generate markdown of list of rules used by the Gerber linter."""
+        from pygerber.gerber.linter import RULE_REGISTRY
+
+        def _():
+            for rule_type in RULE_REGISTRY.values():
+                rule = rule_type()
+                yield (
+                    f"---\n## {rule.rule_id}\n\n{rule.get_violation_title()}\n\n"
+                    f"{rule.get_violation_description()}\n"
+                )
+
+        return "\n".join(_())
+
 
 def _base64_image_tag(image: Image.Image) -> str:
     buffered = io.BytesIO()
