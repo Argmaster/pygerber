@@ -30,3 +30,6 @@ class StaticRule(Rule):
     def node_callback(self, node: Node) -> None:
         """Check the node for violations."""
         self.report_violation(node.source_info)
+
+    def reset(self) -> None:
+        """Reset the rule state."""

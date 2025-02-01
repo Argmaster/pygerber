@@ -29,6 +29,7 @@ class Linter:
         self.event_ast_visitor = EventAstVisitor()
 
         for rule in self.rules:
+            rule.reset()
             self._register_rule(rule)
 
         ast.visit(self.event_ast_visitor)

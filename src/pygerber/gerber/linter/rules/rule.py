@@ -38,6 +38,10 @@ class Rule(ABC):
         """Bind the rule to the violation collector."""
         self.collector = collector
 
+    @abstractmethod
+    def reset(self) -> None:
+        """Reset the rule state."""
+
     def report_violation(self, source_info: Optional[SourceInfo]) -> None:
         """Report a violation."""
         if self.collector is not None:
