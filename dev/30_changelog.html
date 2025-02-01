@@ -8009,6 +8009,15 @@ this project adheres to <a href="https://semver.org/">Semantic Versioning 2.0.0<
   <code>pygerber.gerber.ast.nodes.aperture.ABopen</code> for consistency.</li>
 <li>Changed <code>pygerber.gerber.ast.nodes.aperture.AB_close</code> to
   <code>pygerber.gerber.ast.nodes.aperture.ABclose</code> for consistency.</li>
+<li>Changed order of box and origin parameters in <code>create_eager_layer</code> and
+  <code>create_deferred_layer</code> for consistency.</li>
+<li>Moved <code>CoordinateX</code>, <code>CoordinateY</code>, <code>CoordinateI</code> and <code>CoordinateJ</code> to separate
+  modules.</li>
+<li>Added <code>pygerber.gerber.lint</code> package containing linting tools for Gerber files.</li>
+<li>Added <code>pygerber gerber lint</code> command to CLI for linting Gerber files.</li>
+<li>Changed how empty images are handled in <code>VirtualMachine</code>, they no longer throw an
+  exception by default. This can be changed by passing
+  <code>fail_on_empty_auto_sized_layer=True</code> to <code>VirtualMachine</code> constructor.</li>
 </ul>
 <h2 id="pre-release-300a4">Pre-Release 3.0.0a4<a class="headerlink" href="#pre-release-300a4" title="Anchor link to this section for reference">&para;</a></h2>
 <ul>
