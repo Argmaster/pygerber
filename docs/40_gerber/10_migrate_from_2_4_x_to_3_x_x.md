@@ -1,4 +1,4 @@
-# 🤧 Migrating from 2.4.x to 3.x.x
+# Migrating from 2.4.x to 3.x.x
 
 PyGerber 3.0.0 is a major rewrite of the library. Most of the library was rewritten from
 scratch, a lot of nomenclature has changes and layout of the library has been

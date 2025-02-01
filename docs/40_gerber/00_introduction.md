@@ -1,6 +1,6 @@
 # 🧭 Introduction
 
-## What you will find here
+## Overview
 
 Welcome to the documentation of Gerber tooling within PyGerber library. This part of
 documentation will cover most of the features of PyGerber which have to do with

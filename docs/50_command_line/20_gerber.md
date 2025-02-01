@@ -1,4 +1,4 @@
-# 🥞 Gerber
+# Gerber
 
 Welcome to the Gerber focused part of PyGerber command line interface documentation.
 This documentation is intended to show you how to use Gerber related command line tools
