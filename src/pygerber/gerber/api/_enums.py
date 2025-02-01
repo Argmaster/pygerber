@@ -52,7 +52,7 @@ class FileTypeEnum(Enum):
     PLATED = "PLATED"
     """Plated layer."""
 
-    NON_PLATED = "NON_PLATED"
+    NON_PLATED = "NONPLATED"
     """Non-plated layer."""
 
     PROFILE = "PROFILE"
@@ -99,6 +99,24 @@ class FileTypeEnum(Enum):
 
     PADS = "PADS"
     """Pads layer."""
+
+    DRILLMAP = "DRILLMAP"
+    """Drillmap layer"""
+
+    FABRICATIONDRAWING = "FABRICATIONDRAWING"
+    """FabricationDrawing layer"""
+
+    VCUTMAP = "VCUTMAP"
+    """Vcutmap layer"""
+
+    ASSEMBLYDRAWING = "ASSEMBLYDRAWING"
+    """AssemblyDrawing layer"""
+
+    ARRAYDRAWING = "ARRAYDRAWING"
+    """ArrayDrawing layer"""
+
+    OTHERDRAWING = "OTHERDRAWING"
+    """OtherDrawing layer"""
 
     OTHER = "OTHER"
     """Other layer."""
@@ -193,6 +211,12 @@ DEFAULT_COLOR_MAP: COLOR_MAP_T = {
     FileTypeEnum.VCUT: Style.presets.PASTE_MASK,
     FileTypeEnum.VIAFILL: Style.presets.PASTE_MASK,
     FileTypeEnum.PADS: Style.presets.PASTE_MASK,
+    FileTypeEnum.DRILLMAP: Style.presets.SILK,
+    FileTypeEnum.FABRICATIONDRAWING: Style.presets.SILK,
+    FileTypeEnum.VCUTMAP: Style.presets.SILK,
+    FileTypeEnum.ASSEMBLYDRAWING: Style.presets.SILK,
+    FileTypeEnum.ARRAYDRAWING: Style.presets.SILK,
+    FileTypeEnum.OTHERDRAWING: Style.presets.SILK,
 }
 DEFAULT_ALPHA_COLOR_MAP: COLOR_MAP_T = {
     FileTypeEnum.COPPER: Style.presets.COPPER_ALPHA,
@@ -219,4 +243,9 @@ DEFAULT_ALPHA_COLOR_MAP: COLOR_MAP_T = {
     FileTypeEnum.VCUT: Style.presets.PASTE_MASK_ALPHA,
     FileTypeEnum.VIAFILL: Style.presets.PASTE_MASK_ALPHA,
     FileTypeEnum.PADS: Style.presets.PASTE_MASK_ALPHA,
+    FileTypeEnum.FABRICATIONDRAWING: Style.presets.SILK_ALPHA,
+    FileTypeEnum.VCUTMAP: Style.presets.SILK_ALPHA,
+    FileTypeEnum.ASSEMBLYDRAWING: Style.presets.SILK_ALPHA,
+    FileTypeEnum.ARRAYDRAWING: Style.presets.SILK_ALPHA,
+    FileTypeEnum.OTHERDRAWING: Style.presets.SILK_ALPHA,
 }
