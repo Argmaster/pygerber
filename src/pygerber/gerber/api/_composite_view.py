@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Iterable, Sequence
 from PIL import Image
 
 from pygerber.gerber.api._enums import COLOR_MAP_T
-from pygerber.gerber.api._gerber_file import GerberFile, PillowImage
+from pygerber.gerber.api._gerber_file import GerberFile, PillowImage, _PillowSaveMixin
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -15,7 +15,7 @@ class CompositeImage:
     """Image composed of multiple sub-images."""
 
 
-class CompositePillowImage(CompositeImage):
+class CompositePillowImage(CompositeImage, _PillowSaveMixin):
     """Image composed of multiple sub-images."""
 
     def __init__(self, sub_images: list[PillowImage], image: Image.Image) -> None:

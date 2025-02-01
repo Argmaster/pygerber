@@ -181,14 +181,8 @@ class Image:
         return self._image_space
 
 
-class PillowImage(Image):
-    """The `PillowImage` class is a rendered image returned by
-    `GerberFile.render_with_pillow` method.
-    """
-
-    def __init__(self, image_space: ImageSpace, image: PIL.Image.Image) -> None:
-        super().__init__(image_space=image_space)
-        self._image = image
+class _PillowSaveMixin:
+    """Mixin providing common methods for saving Pillow images."""
 
     def save(
         self,
@@ -331,6 +325,20 @@ class PillowImage(Image):
 
         """
         self.get_image().convert("RGB").save(fp=destination, format="WEBP", **kwargs)
+
+    def get_image(self) -> PIL.Image.Image:
+        """Get image object."""
+        raise NotImplementedError
+
+
+class PillowImage(Image, _PillowSaveMixin):
+    """The `PillowImage` class is a rendered image returned by
+    `GerberFile.render_with_pillow` method.
+    """
+
+    def __init__(self, image_space: ImageSpace, image: PIL.Image.Image) -> None:
+        super().__init__(image_space=image_space)
+        self._image = image
 
     def get_image(self) -> PIL.Image.Image:
         """Get image object."""

@@ -10,6 +10,7 @@ import click
 
 from pygerber.gerber import formatter
 from pygerber.gerber.api import Color, FileTypeEnum, GerberFile, Style
+from pygerber.gerber.api._composite_view import CompositeView
 from pygerber.vm.shapely.vm import is_shapely_available
 from pygerber.vm.types.color import InvalidHexColorLiteralError
 
@@ -498,22 +499,45 @@ def format_cmd(
         file.format(f, options=options)
 
 
-@gerber.command("project")
-@click.argument("files", nargs=-1)
-@click.option(
-    "-o",
-    "--output",
-    type=click.Path(dir_okay=False),
-    default="output.png",
-    help="Path to output file.",
-)
-@click.option("-d", "--dpmm", type=int, default=20, help="Dots per millimeter.")
-def _project(files: str, output: str, dpmm: int) -> None:
-    """Render multiple Gerber files and merge them layer by layer.
-
-    Layers are merged from first to last, thus last layer will be on top.
+@gerber.group("merge-convert")
+def merge_convert() -> None:
+    """Convert multiple Gerber images to different image format and merge them into one
+    image (stack on top of each other).
     """
-    raise NotImplementedError
+
+
+@merge_convert.command("png")
+@click.argument("sources", nargs=-1)
+@_get_output_file_option()
+@_get_dpmm_option()
+@_get_file_type_option()
+@_get_raster_implementation_option("pillow")
+def merge_convert_png(
+    sources: str,
+    output: str,
+    file_type: str,
+    dpmm: int,
+    implementation: str,
+) -> None:
+    """Convert multiple Gerber images to PNG image and merge them into one image.
+
+    Images are merged from first to last, thus fist layer is bottom most, last layer
+    is topmost, unobstructed.
+
+    SOURCES - paths to files which are supposed to be rendered and merged.
+    """
+    view = CompositeView(
+        GerberFile.from_file(source, file_type=FileTypeEnum(file_type.upper()))
+        for source in sources
+    )
+
+    if implementation.lower() == "pillow":
+        result = view.render_with_pillow(dpmm)
+        result.save_png(output)
+
+    else:
+        msg = f"Implementation {implementation!r} is not supported."
+        raise NotImplementedError(msg)
 
 
 @gerber.command("lint")

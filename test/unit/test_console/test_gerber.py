@@ -6,7 +6,15 @@ import pytest
 from click.testing import CliRunner
 from PIL import Image
 
-from pygerber.console.gerber import bmp, format_cmd, jpeg, png, tiff, webp
+from pygerber.console.gerber import (
+    bmp,
+    format_cmd,
+    jpeg,
+    merge_convert_png,
+    png,
+    tiff,
+    webp,
+)
 from pygerber.examples import ExamplesEnum, get_example_path
 from pygerber.vm.shapely.vm import is_shapely_available
 from test.assets.assetlib import ImageAnalyzer, SvgImageAsset
@@ -19,6 +27,7 @@ from test.assets.reference.pygerber.console.gerber import (
     CONVERT_WEBP_LOSSLESS_REFERENCE_IMAGE,
     CONVERT_WEBP_LOSSY_REFERENCE_IMAGE,
     FORMAT_CMD_REFERENCE_CONTENT,
+    MERGE_CONVERT_PNG_REFERENCE_IMAGE,
 )
 from test.conftest import cd_to_tempdir
 from test.tags import Tag, tag
@@ -313,3 +322,40 @@ def test_gerber_format_cmd(*, is_regeneration_enabled: bool) -> None:
             pytest.skip("Reference updated")
         else:
             assert FORMAT_CMD_REFERENCE_CONTENT.load() == file_path.read_text()
+
+
+MIN_MERGE_PNG_SSIM = 0.99
+
+
+@tag(Tag.PILLOW, Tag.OPENCV, Tag.SKIMAGE)
+def test_gerber_merge_convert_png(*, is_regeneration_enabled: bool) -> None:
+    runner = CliRunner()
+    with cd_to_tempdir() as temp_path:
+        result = runner.invoke(
+            merge_convert_png,
+            [
+                get_example_path(ExamplesEnum.carte_test_B_Cu).as_posix(),
+                get_example_path(ExamplesEnum.carte_test_B_Mask).as_posix(),
+                get_example_path(ExamplesEnum.carte_test_B_Silkscreen).as_posix(),
+                "-o",
+                "output.png",
+                "-d",
+                "20",
+            ],
+        )
+        logging.debug(result.output)
+        assert result.exit_code == 0
+        assert (temp_path / "output.png").exists()
+
+        image = Image.open(temp_path / "output.png")
+        if is_regeneration_enabled:
+            MERGE_CONVERT_PNG_REFERENCE_IMAGE.update(image)  # pragma: no cover
+        else:
+            ia = ImageAnalyzer(MERGE_CONVERT_PNG_REFERENCE_IMAGE.load())
+            assert ia.structural_similarity(image) > MIN_MERGE_PNG_SSIM
+            ia.assert_same_size(image)
+            (
+                ia.histogram_compare_color(image)
+                .assert_channel_count(4)
+                .assert_greater_or_equal_values(0.99)
+            )

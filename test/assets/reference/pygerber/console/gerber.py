@@ -43,3 +43,8 @@ FORMAT_CMD_REFERENCE_CONTENT = TextAsset[GitFile].new(
         "reference/pygerber/console/test_gerber_format.formatted.gbr"
     )
 )
+
+MERGE_CONVERT_PNG_REFERENCE_IMAGE = ImageAsset[GitFile].new(
+    REFERENCE_REPOSITORY.file("reference/pygerber/console/merge_convert_png.png"),
+    ImageFormat.PNG,
+)
