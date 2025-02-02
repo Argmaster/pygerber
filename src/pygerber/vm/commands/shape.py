@@ -4,7 +4,7 @@ and arcs filled with solid color.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 import pyparsing as pp
 from pydantic import Field
@@ -29,7 +29,7 @@ class Shape(Command):
     """`Shape` command instructs VM to render a shape described by series of
     lines and arcs into currently active layer.
 
-    Last point of first segment (line or arc) is always connected to the first point
+    Last point of first segment (line or arc) is always connected to the first point of
     first segment, so shapes are implicitly closed. If those points are not overlapping,
     they are connected by a straight line.
     """
@@ -47,9 +47,10 @@ class Shape(Command):
 
     def transform(self, transform: Matrix3x3) -> Self:
         """Transpose shape by vector."""
-        return self.__class__(
-            commands=[segment.transform(transform) for segment in self.commands],
-            is_negative=self.is_negative,
+        return self.model_copy(
+            update={
+                "commands": [segment.transform(transform) for segment in self.commands]
+            }
         )
 
     def visit(self, visitor: CommandVisitor) -> None:
@@ -64,6 +65,7 @@ class Shape(Command):
         height: float,
         *,
         is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> Self:
         """Create polygon in shape of rectangle."""
         half_height = height / 2
@@ -92,6 +94,7 @@ class Shape(Command):
                 ),
             ],
             is_negative=is_negative,
+            metadata=metadata,
         )
 
     @classmethod
@@ -102,6 +105,7 @@ class Shape(Command):
         height: float,
         *,
         is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> Self:
         """Create polygon in shape of rectangle with shorter side rounded."""
         half_height = height / 2
@@ -139,6 +143,7 @@ class Shape(Command):
                     ),
                 ],
                 is_negative=is_negative,
+                metadata=metadata,
             )
 
         delta = half_height
@@ -170,11 +175,17 @@ class Shape(Command):
                 ),
             ],
             is_negative=is_negative,
+            metadata=metadata,
         )
 
     @classmethod
     def new_circle(
-        cls, center: tuple[float, float], diameter: float, *, is_negative: bool
+        cls,
+        center: tuple[float, float],
+        diameter: float,
+        *,
+        is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> Self:
         """Create polygon in shape of circle."""
         radius = diameter / 2
@@ -194,6 +205,7 @@ class Shape(Command):
                 ),
             ],
             is_negative=is_negative,
+            metadata=metadata,
         )
 
     @classmethod
@@ -205,6 +217,7 @@ class Shape(Command):
         base_rotation: float,
         *,
         is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> Self:
         """Create polygon in shape of regular polygon."""
         assert vertices_count >= VERTEX_COUNT_IN_TRIANGLE
@@ -235,7 +248,7 @@ class Shape(Command):
             )
             local_vertex_offset = new_local_vertex_offset
 
-        return cls(commands=commands, is_negative=is_negative)
+        return cls(commands=commands, is_negative=is_negative, metadata=metadata)
 
     @classmethod
     def new_line(
@@ -245,6 +258,7 @@ class Shape(Command):
         thickness: float,
         *,
         is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> Self:
         """Create polygon in shape of line with specified thickness."""
         start_vector = Vector.from_tuple(start)
@@ -264,6 +278,7 @@ class Shape(Command):
                 ),
             ],
             is_negative=is_negative,
+            metadata=metadata,
         )
 
     @classmethod
@@ -275,6 +290,7 @@ class Shape(Command):
         thickness: float,
         *,
         is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> Self:
         """Create polygon in shape of clockwise arc with specified thickness."""
         center_vector = Vector.from_tuple(center)
@@ -303,6 +319,7 @@ class Shape(Command):
                 ),
             ],
             is_negative=is_negative,
+            metadata=metadata,
         )
 
     @classmethod
@@ -314,6 +331,7 @@ class Shape(Command):
         thickness: float,
         *,
         is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> Self:
         """Create polygon in shape of counterclockwise arc with specified thickness."""
         return cls.new_cw_arc(
@@ -322,6 +340,7 @@ class Shape(Command):
             center=center,
             thickness=thickness,
             is_negative=is_negative,
+            metadata=metadata,
         )
 
     @classmethod
@@ -332,6 +351,7 @@ class Shape(Command):
         inner_diameter: float,
         *,
         is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> tuple[Self, Self]:
         """Create polygon in shape of ring."""
         thickness = (outer_diameter - inner_diameter) / 2
@@ -352,6 +372,7 @@ class Shape(Command):
                 center,
                 thickness=thickness,
                 is_negative=is_negative,
+                metadata=metadata,
             ),
             cls.new_cw_arc(
                 point_1,
@@ -359,16 +380,20 @@ class Shape(Command):
                 center,
                 thickness=thickness,
                 is_negative=is_negative,
+                metadata=metadata,
             ),
         )
 
     @classmethod
     def new_connected_points(
-        cls, *points: tuple[float, float], is_negative: bool
+        cls,
+        *points: tuple[float, float],
+        is_negative: bool,
+        metadata: Optional[dict[str, str]] = None,
     ) -> Self:
         """Create polygon from connected points."""
         commands: list[ShapeSegment] = [
             Line.from_tuples(points[i], points[i + 1]) for i in range(len(points) - 1)
         ]
         commands.append(Line.from_tuples(points[-1], points[0]))
-        return cls(commands=commands, is_negative=is_negative)
+        return cls(commands=commands, is_negative=is_negative, metadata=metadata)

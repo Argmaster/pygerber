@@ -19,6 +19,9 @@ from pygerber.gerber.ast.nodes import (
     ADR,
     D01,
     D03,
+    TA,
+    TF,
+    TO,
     ADmacro,
     Assignment,
     Code1,
@@ -69,6 +72,7 @@ if TYPE_CHECKING:
             thickness: float,
             *,
             is_negative: bool,
+            metadata: Optional[dict[str, str]] = None,
         ) -> Shape: ...
 
 
@@ -106,6 +110,15 @@ class CommandBuffer:
         self.commands.append(command)
 
 
+def _convert_attributes_to_metadata(
+    attributes: dict[str, TA] | dict[str, TF] | dict[str, TO],
+) -> dict[str, str]:
+    return {
+        key: value.model_dump_json(serialize_as_any=True)
+        for key, value in attributes.items()
+    }
+
+
 class Compiler(StateTrackingVisitor):
     """Compiler for transforming transforming Gerber (AST) to PyGerber rendering VM
     commands (RVMC).
@@ -113,8 +126,11 @@ class Compiler(StateTrackingVisitor):
 
     MAIN_BUFFER_ID: ClassVar[str] = "%main%"
 
-    def __init__(self, *, ignore_program_stop: bool = False) -> None:
+    def __init__(
+        self, *, ignore_program_stop: bool = False, include_metadata: bool = False
+    ) -> None:
         super().__init__(ignore_program_stop=ignore_program_stop)
+        self._include_metadata = include_metadata
         self._buffers: dict[str, CommandBuffer] = {}
         self._buffer_stack: list[str] = []
         self._contour_buffer: Optional[list[ShapeSegment]] = []
@@ -235,16 +251,25 @@ class Compiler(StateTrackingVisitor):
         self._del_buffer(aperture_buffer.id_str)
         return node
 
+    def _get_aperture_metadata(self) -> Optional[dict[str, str]]:
+        if self._include_metadata:
+            return _convert_attributes_to_metadata(
+                self.state.attributes.aperture_attributes
+            )
+        return None
+
     def on_adc(self, node: ADC) -> ADC:
         """Handle `AD` circle node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+        metadata = self._get_aperture_metadata()
 
         aperture_buffer.append_shape(
             Shape.new_circle(
                 (0.0, 0.0),
                 node.diameter,
                 is_negative=False,
+                metadata=metadata,
             )
         )
         if node.hole_diameter is not None and node.hole_diameter > 0:
@@ -253,6 +278,7 @@ class Compiler(StateTrackingVisitor):
                     (0.0, 0.0),
                     min(node.hole_diameter, node.diameter),
                     is_negative=True,
+                    metadata=metadata,
                 )
             )
         return node
@@ -274,6 +300,7 @@ class Compiler(StateTrackingVisitor):
         """Handle `AD` rectangle node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+        metadata = self._get_aperture_metadata()
 
         aperture_buffer.append_shape(
             Shape.new_rectangle(
@@ -281,6 +308,7 @@ class Compiler(StateTrackingVisitor):
                 node.width,
                 node.height,
                 is_negative=False,
+                metadata=metadata,
             )
         )
         if node.hole_diameter is not None and node.hole_diameter > 0:
@@ -289,6 +317,7 @@ class Compiler(StateTrackingVisitor):
                     (0.0, 0.0),
                     min(node.hole_diameter, node.width, node.height),
                     is_negative=True,
+                    metadata=metadata,
                 )
             )
         return node
@@ -297,6 +326,7 @@ class Compiler(StateTrackingVisitor):
         """Handle `AD` obround node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+        metadata = self._get_aperture_metadata()
 
         aperture_buffer.append_shape(
             Shape.new_obround(
@@ -304,6 +334,7 @@ class Compiler(StateTrackingVisitor):
                 node.width,
                 node.height,
                 is_negative=False,
+                metadata=metadata,
             )
         )
         if node.hole_diameter is not None and node.hole_diameter > 0:
@@ -312,6 +343,7 @@ class Compiler(StateTrackingVisitor):
                     (0.0, 0.0),
                     min(node.hole_diameter, node.width, node.height),
                     is_negative=True,
+                    metadata=metadata,
                 )
             )
         return node
@@ -320,6 +352,7 @@ class Compiler(StateTrackingVisitor):
         """Handle `AD` polygon node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+        metadata = self._get_aperture_metadata()
 
         aperture_buffer.append_shape(
             Shape.new_polygon(
@@ -328,6 +361,7 @@ class Compiler(StateTrackingVisitor):
                 node.vertices,
                 node.rotation or 0.0,
                 is_negative=False,
+                metadata=metadata,
             )
         )
         if node.hole_diameter is not None and node.hole_diameter > 0:
@@ -336,6 +370,7 @@ class Compiler(StateTrackingVisitor):
                     (0.0, 0.0),
                     min(node.hole_diameter, node.outer_diameter),
                     is_negative=True,
+                    metadata=metadata,
                 )
             )
         return node
@@ -344,6 +379,7 @@ class Compiler(StateTrackingVisitor):
         """Handle `AD` macro node."""
         self.on_ad(node)
         aperture_buffer = self._create_aperture_buffer(node.aperture_id)
+        metadata = self._get_aperture_metadata()
 
         if node.params is None:
             scope = {}
@@ -354,11 +390,20 @@ class Compiler(StateTrackingVisitor):
         if macro is None:
             raise MacroNotDefinedError(node.name)
 
-        macro.visit(MacroEvalVisitor(self, aperture_buffer, scope))
+        macro.visit(MacroEvalVisitor(self, aperture_buffer, scope, metadata=metadata))
         return node
+
+    def _get_object_metadata(self) -> Optional[dict[str, str]]:
+        if self._include_metadata:
+            return _convert_attributes_to_metadata(
+                self.state.attributes.object_attributes
+            )
+        return None
 
     def on_draw_line(self, node: D01) -> None:  # noqa: ARG002
         """Handle `D01` node in linear interpolation mode."""
+        metadata = self._get_object_metadata()
+
         start_x = self.state.current_x
         start_y = self.state.current_y
         start_point = (start_x, start_y)
@@ -375,6 +420,7 @@ class Compiler(StateTrackingVisitor):
                 start_point,
                 thickness,
                 is_negative=self.is_negative,
+                metadata=metadata,
             )
         )
         self._append_shape_to_current_buffer(
@@ -383,6 +429,7 @@ class Compiler(StateTrackingVisitor):
                 end_point,
                 thickness=thickness,
                 is_negative=self.is_negative,
+                metadata=metadata,
             ),
         )
         self._append_shape_to_current_buffer(
@@ -390,6 +437,7 @@ class Compiler(StateTrackingVisitor):
                 end_point,
                 thickness,
                 is_negative=self.is_negative,
+                metadata=metadata,
             )
         )
 
@@ -398,6 +446,8 @@ class Compiler(StateTrackingVisitor):
         self._on_draw_arc_mq(Shape.new_cw_arc)
 
     def _on_draw_arc_mq(self, factory_method: _ArcFactory) -> None:
+        metadata = self._get_object_metadata()
+
         start_x = self.state.current_x
         start_y = self.state.current_y
         start_point = (start_x, start_y)
@@ -419,6 +469,7 @@ class Compiler(StateTrackingVisitor):
                 start_point,
                 thickness,
                 is_negative=self.is_negative,
+                metadata=metadata,
             )
         )
         if start_point == end_point:
@@ -433,6 +484,7 @@ class Compiler(StateTrackingVisitor):
                     center,
                     thickness,
                     is_negative=self.is_negative,
+                    metadata=metadata,
                 )
             )
             self._append_shape_to_current_buffer(
@@ -442,6 +494,7 @@ class Compiler(StateTrackingVisitor):
                     center,
                     thickness,
                     is_negative=self.is_negative,
+                    metadata=metadata,
                 )
             )
 
@@ -453,6 +506,7 @@ class Compiler(StateTrackingVisitor):
                     center,
                     thickness,
                     is_negative=self.is_negative,
+                    metadata=metadata,
                 )
             )
         self._append_shape_to_current_buffer(
@@ -460,6 +514,7 @@ class Compiler(StateTrackingVisitor):
                 end_point,
                 thickness,
                 is_negative=self.is_negative,
+                metadata=metadata,
             )
         )
 
@@ -547,14 +602,30 @@ class Compiler(StateTrackingVisitor):
         """
         self._on_in_region_draw_arc_mq(is_clockwise=False)
 
+    def _get_region_metadata(self) -> Optional[dict[str, str]]:
+        if self._include_metadata:
+            metadata = _convert_attributes_to_metadata(
+                self.state.attributes.object_attributes
+            )
+            metadata.update(
+                _convert_attributes_to_metadata(self.state.attributes.object_attributes)
+            )
+        return None
+
     def on_flush_region(self) -> None:
         """Handle flush region after D02 command or after G37."""
+        metadata = self._get_region_metadata()
+
         if self._contour_buffer is None:
             raise ContourBufferNotSetError
 
         if len(self._contour_buffer) > 0:
             self._append_shape_to_current_buffer(
-                Shape(commands=self._contour_buffer, is_negative=self.is_negative)
+                Shape(
+                    commands=self._contour_buffer,
+                    is_negative=self.is_negative,
+                    metadata=metadata,
+                )
             )
 
         self._contour_buffer = []
@@ -569,6 +640,8 @@ class Compiler(StateTrackingVisitor):
         self._on_flash_aperture(aperture.aperture_id)
 
     def _on_flash_aperture(self, aperture_id: ApertureIdStr) -> None:
+        metadata = self._get_object_metadata()
+
         buffer = self._get_aperture_buffer(aperture_id)
 
         self._append_paste_to_current_buffer(
@@ -576,6 +649,7 @@ class Compiler(StateTrackingVisitor):
                 source_layer_id=buffer.layer_id,
                 center=Vector(x=self.coordinate_x, y=self.coordinate_y),
                 is_negative=self.is_negative,
+                metadata=metadata,
             ),
         )
 
@@ -624,6 +698,7 @@ class Compiler(StateTrackingVisitor):
                         source_layer_id=LayerID(id=aperture_buffer.id_str),
                         center=cmd.center.transform(transform_matrix),
                         is_negative=cmd.is_negative,
+                        metadata=cmd.metadata,
                     )
                 )
 
@@ -682,6 +757,7 @@ class Compiler(StateTrackingVisitor):
                         source_layer_id=cmd.source_layer_id,
                         center=cmd.center.transform(transform_matrix),
                         is_negative=cmd.is_negative,
+                        metadata=cmd.metadata,
                     )
                 )
 
@@ -714,6 +790,13 @@ class Compiler(StateTrackingVisitor):
 
         return [self._get_buffer(id_) for id_ in buffer_submit_order]
 
+    def _get_file_metadata(self) -> Optional[dict[str, str]]:
+        if self._include_metadata:
+            return _convert_attributes_to_metadata(
+                self.state.attributes.file_attributes
+            )
+        return None
+
     def _convert_buffers_to_rvmc(self) -> RVMC:
         commands: list[Command] = []
         buffer_submit_order = self._resolve_buffer_submit_order()
@@ -723,7 +806,7 @@ class Compiler(StateTrackingVisitor):
             commands.extend(buffer.commands)
             commands.append(EndLayer())
 
-        return RVMC(commands=commands)
+        return RVMC(commands=commands, metadata=self._get_file_metadata())
 
     def compile(self, ast: File) -> RVMC:
         """Compile Gerber AST to RVMC."""
@@ -740,11 +823,13 @@ class MacroEvalVisitor(AstVisitor):
         compiler: Compiler,
         aperture_buffer: CommandBuffer,
         scope: dict[str, Double],
+        metadata: Optional[dict[str, str]] = None,
     ) -> None:
         self._compiler = compiler
         self._aperture_buffer = aperture_buffer
         self._scope = scope
         self._expression_eval = ExpressionEvalVisitor(self._scope)
+        self._metadata = metadata
 
     def _eval(self, node: Expression) -> float:
         return self._expression_eval.evaluate(node)
@@ -761,6 +846,7 @@ class MacroEvalVisitor(AstVisitor):
             (center_x, center_y),
             diameter,
             is_negative=(exposure == 0),
+            metadata=self._metadata,
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
@@ -785,6 +871,7 @@ class MacroEvalVisitor(AstVisitor):
             end,
             thickness=width,
             is_negative=(exposure == 0),
+            metadata=self._metadata,
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
@@ -802,6 +889,7 @@ class MacroEvalVisitor(AstVisitor):
             start,
             *points,
             is_negative=(exposure == 0),
+            metadata=self._metadata,
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
@@ -824,6 +912,7 @@ class MacroEvalVisitor(AstVisitor):
             number_of_vertices,
             rotation,
             is_negative=(exposure == 0),
+            metadata=self._metadata,
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
@@ -855,6 +944,7 @@ class MacroEvalVisitor(AstVisitor):
                     (center_x, center_y + half_crosshair_length),
                     crosshair_thickness,
                     is_negative=False,
+                    metadata=self._metadata,
                 )
             )
             shapes.append(
@@ -863,6 +953,7 @@ class MacroEvalVisitor(AstVisitor):
                     (center_x + half_crosshair_length, center_y),
                     crosshair_thickness,
                     is_negative=False,
+                    metadata=self._metadata,
                 )
             )
 
@@ -930,7 +1021,13 @@ class MacroEvalVisitor(AstVisitor):
 
         shapes: list[Shape] = []
         shapes.extend(
-            Shape.new_ring((0, 0), outer_diameter, inner_diameter, is_negative=False)
+            Shape.new_ring(
+                (0, 0),
+                outer_diameter,
+                inner_diameter,
+                is_negative=False,
+                metadata=self._metadata,
+            )
         )
 
         # Compensate rounding errors with rotation.
@@ -941,6 +1038,7 @@ class MacroEvalVisitor(AstVisitor):
                 (0 + radius_delta, 0),
                 thickness=gap_thickness,
                 is_negative=True,
+                metadata=self._metadata,
             )
         )
         shapes.append(
@@ -949,6 +1047,7 @@ class MacroEvalVisitor(AstVisitor):
                 (0, 0 + radius_delta),
                 thickness=gap_thickness,
                 is_negative=True,
+                metadata=self._metadata,
             )
         )
 
@@ -990,6 +1089,7 @@ class MacroEvalVisitor(AstVisitor):
             width,
             height,
             is_negative=(exposure == 0),
+            metadata=self._metadata,
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))
@@ -1011,6 +1111,7 @@ class MacroEvalVisitor(AstVisitor):
             width,
             height,
             is_negative=(exposure == 0),
+            metadata=self._metadata,
         )
         if rotation is not None:
             shape = shape.transform(Matrix3x3.new_rotate(rotation))

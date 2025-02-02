@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from typing import Any, Optional, Sequence
 
 from pydantic import BaseModel, Field
 
@@ -12,6 +12,7 @@ from pygerber.vm.commands import Command
 class RVMC(BaseModel):
     """Container class for PyGerber Rendering Virtual Machine Commands (RVMC)."""
 
+    metadata: Optional[dict[str, Any]] = Field(default=None)
     commands: Sequence[Command] = Field(default_factory=list)
 
     def to_json(self, **kwargs: Any) -> str:
