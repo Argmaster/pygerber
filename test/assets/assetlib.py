@@ -438,6 +438,20 @@ class ImageAnalyzer:
         assert abs(self.reference.size[0] - other.size[0]) <= x_tolerance
         assert abs(self.reference.size[1] - other.size[1]) <= y_tolerance
 
+    def assert_same_mode(self, other: Image.Image) -> None:
+        """Compare the mode of two images."""
+        assert self.reference.mode == other.mode
+
+    def exact_match(self, other: Image.Image) -> bool:
+        """Compare two images for exact match."""
+        self.assert_same_size(other)
+        self.assert_same_mode(other)
+
+        img1 = np.array(self.reference)
+        img2 = np.array(other)
+
+        return np.array_equal(img1, img2)
+
 
 @dataclass
 class KeyPointMatches:

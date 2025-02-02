@@ -22,11 +22,11 @@ from test.assets.generated.macro import (
     get_custom_circle_local_2_0_ring_rot_30,
     get_custom_circle_local_2_0_rot_30,
 )
+from test.assets.gerberx3 import flashes
 from test.assets.gerberx3.arc.clockwise import ClockwiseArcAssets
 from test.assets.gerberx3.arc.counterclockwise import CounterClockwiseArcAssets
 from test.assets.gerberx3.ATMEGA328 import ATMEGA328Assets
 from test.assets.gerberx3.FcPoly_Test import FcPoly_Test
-from test.assets.gerberx3.flashes import Flashes
 from test.assets.gerberx3.flashes_with_transform import FlashesWithTransform
 from test.assets.gerberx3.KicadGerberX2 import KiCadGerberX2Assets
 from test.assets.gerberx3.macro.codes import MacroCodeAssets
@@ -65,7 +65,7 @@ class PillowRenderE2E:
         result.get_image_no_style().save(dump_directory / f"{caller_function_name}.png")
 
 
-class PillowRender:
+class PillowRenderNewE2E:
     parser: Literal["pyparsing"] = "pyparsing"
     dpmm: int = 20
 
@@ -92,8 +92,14 @@ class PillowRender:
         )
         assert ia.structural_similarity(image) > ssim_threshold
 
+    def compare_with_reference_exact(
+        self, reference: ImageAsset, image: Image.Image
+    ) -> None:
+        ia = ImageAnalyzer(reference.load())
+        assert ia.exact_match(image)
 
-class TestOLinuXinoRevG(PillowRender):
+
+class TestOLinuXinoRevG(PillowRenderNewE2E):
     dpmm: int = 40
 
     @tag(Tag.PILLOW, Tag.OPENCV, Tag.SKIMAGE)
@@ -140,111 +146,134 @@ class TestFcPolyTest(PillowRenderE2E):
         self._save(result)
 
 
-class TestFlashes(PillowRenderE2E):
+class TestFlashes(PillowRenderNewE2E):
     DPMM: ClassVar[int] = 50
 
-    @tag(Tag.PILLOW)
-    def test_00_circle_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_00_circle_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_00_circle_h_4_tbh_grb(self) -> None:
-        result = self._render(Flashes.asset_00_circle_h_4_tbh_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_00_circle_4_grb(self) -> None:
-        result = self._render(Flashes.asset_00_circle_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_01_rectangle_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_01_rectangle_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_01_rectangle_v_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_01_rectangle_v_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_01_rectangle_v_4_grb(self) -> None:
-        result = self._render(Flashes.asset_01_rectangle_v_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_01_rectangle_4_grb(self) -> None:
-        result = self._render(Flashes.asset_01_rectangle_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_02_obround_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_02_obround_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_02_obround_v_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_02_obround_v_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_02_obround_v_4_grb(self) -> None:
-        result = self._render(Flashes.asset_02_obround_v_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_02_obround_4_grb(self) -> None:
-        result = self._render(Flashes.asset_02_obround_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_03_polygon3_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_03_polygon3_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_03_polygon3_r90_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_03_polygon3_r90_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_03_polygon3_r90_4_grb(self) -> None:
-        result = self._render(Flashes.asset_03_polygon3_r90_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_03_polygon3_4_grb(self) -> None:
-        result = self._render(Flashes.asset_03_polygon3_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_04_polygon6_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_04_polygon6_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_04_polygon6_r90_h_4_grb(self) -> None:
-        result = self._render(Flashes.asset_04_polygon6_r90_h_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_04_polygon6_r90_4_grb(self) -> None:
-        result = self._render(Flashes.asset_04_polygon6_r90_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_04_polygon6_4_grb(self) -> None:
-        result = self._render(Flashes.asset_04_polygon6_4_grb, dpmm=self.DPMM)
-        self._save(result)
-
-    @tag(Tag.PILLOW)
-    def test_05_circle_h_rectangle_h_obround_h_triangle_h_grb(self) -> None:
-        result = self._render(
-            Flashes.asset_05_circle_h_rectangle_h_obround_h_triangle_h_grb,
-            dpmm=self.DPMM,
-        )
-        self._save(result)
+    @tag(Tag.PILLOW, Tag.OPENCV, Tag.SKIMAGE)
+    @pytest.mark.parametrize(
+        ("asset", "reference"),
+        [
+            (
+                flashes.asset_00_circle_h_4_grb,
+                flashes.asset_00_circle_h_4_grb_png,
+            ),
+            (
+                flashes.asset_00_circle_4_grb,
+                flashes.asset_00_circle_4_grb_png,
+            ),
+            (
+                flashes.asset_00_circle_h_4_tbh_grb,
+                flashes.asset_00_circle_h_4_tbh_grb_png,
+            ),
+            (
+                flashes.asset_00_circle_4_node_finder_grb,
+                flashes.asset_00_circle_4_node_finder_grb_png,
+            ),
+            (
+                flashes.asset_01_rectangle_h_4_grb,
+                flashes.asset_01_rectangle_h_4_grb_png,
+            ),
+            (
+                flashes.asset_01_rectangle_v_h_4_grb,
+                flashes.asset_01_rectangle_v_h_4_grb_png,
+            ),
+            (
+                flashes.asset_01_rectangle_v_4_grb,
+                flashes.asset_01_rectangle_v_4_grb_png,
+            ),
+            (
+                flashes.asset_01_rectangle_4_grb,
+                flashes.asset_01_rectangle_4_grb_png,
+            ),
+            (
+                flashes.asset_02_obround_h_4_grb,
+                flashes.asset_02_obround_h_4_grb_png,
+            ),
+            (
+                flashes.asset_02_obround_v_h_4_grb,
+                flashes.asset_02_obround_v_h_4_grb_png,
+            ),
+            (
+                flashes.asset_02_obround_v_4_grb,
+                flashes.asset_02_obround_v_4_grb_png,
+            ),
+            (
+                flashes.asset_02_obround_4_grb,
+                flashes.asset_02_obround_4_grb_png,
+            ),
+            (
+                flashes.asset_03_polygon3_h_4_grb,
+                flashes.asset_03_polygon3_h_4_grb_png,
+            ),
+            (
+                flashes.asset_03_polygon3_r90_h_4_grb,
+                flashes.asset_03_polygon3_r90_h_4_grb_png,
+            ),
+            (
+                flashes.asset_03_polygon3_r90_4_grb,
+                flashes.asset_03_polygon3_r90_4_grb_png,
+            ),
+            (
+                flashes.asset_03_polygon3_4_grb,
+                flashes.asset_03_polygon3_4_grb_png,
+            ),
+            (
+                flashes.asset_04_polygon6_h_4_grb,
+                flashes.asset_04_polygon6_h_4_grb_png,
+            ),
+            (
+                flashes.asset_04_polygon6_r90_h_4_grb,
+                flashes.asset_04_polygon6_r90_h_4_grb_png,
+            ),
+            (
+                flashes.asset_04_polygon6_r90_4_grb,
+                flashes.asset_04_polygon6_r90_4_grb_png,
+            ),
+            (
+                flashes.asset_04_polygon6_4_grb,
+                flashes.asset_04_polygon6_4_grb_png,
+            ),
+            (
+                flashes.asset_05_circle_h_rectangle_h_obround_h_triangle_h_grb,
+                flashes.asset_05_circle_h_rectangle_h_obround_h_triangle_h_grb_png,
+            ),
+        ],
+        ids=[
+            "00_circle_h_4",
+            "00_circle_4",
+            "00_circle_h_4_tbh",
+            "00_circle_4_node_finder",
+            "01_rectangle_h_4",
+            "01_rectangle_v_h_4",
+            "01_rectangle_v_4",
+            "01_rectangle_4",
+            "02_obround_h_4",
+            "02_obround_v_h_4",
+            "02_obround_v_4",
+            "02_obround_4",
+            "03_polygon3_h_4",
+            "03_polygon3_r90_h_4",
+            "03_polygon3_r90_4",
+            "03_polygon3_4",
+            "04_polygon6_h_4",
+            "04_polygon6_r90_h_4",
+            "04_polygon6_r90_4",
+            "04_polygon6_4",
+            "05_circle_h_rectangle_h_obround_h_triangle_h",
+        ],
+    )
+    def test_render_pillow(
+        self,
+        asset: TextAsset,
+        reference: ImageAsset,
+        *,
+        is_regeneration_enabled: bool,
+    ) -> None:
+        image = self.create_image(asset.load())
+        if is_regeneration_enabled:
+            reference.update(image)
+        else:
+            self.compare_with_reference_exact(reference, image)
 
 
 class TestFlashesWithTransform(PillowRenderE2E):
