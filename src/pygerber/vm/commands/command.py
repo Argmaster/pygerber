@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from pydantic import Field
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class Command(ModelType):
     """Base class for drawing commands."""
 
-    metadata: Optional[dict[str, str]] = Field(default=None)
+    metadata: Optional[Dict[str, str]] = Field(default=None)
 
     @abstractmethod
     def visit(self, visitor: CommandVisitor) -> None:
