@@ -262,7 +262,7 @@ class Attributes(_StateModel):
 class ImageAttributes(_StateModel):
     """Legacy attributes of the image."""
 
-    polarity: ImagePolarity = Field(default=None)
+    polarity: Optional[ImagePolarity] = Field(default=None)
     """The name of the image. (Spec reference: 8.1.4)"""
 
     rotation: Double = Field(default=0.0)
