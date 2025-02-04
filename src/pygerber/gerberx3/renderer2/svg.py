@@ -71,6 +71,7 @@ if IS_SVG_BACKEND_AVAILABLE:
         polarity: Optional[Polarity] = None
         is_region: bool = False
         flip_y: bool = True
+        flip_around_center: bool = True
 
         def get_group_or_mask(
             self,
@@ -92,13 +93,15 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         color_scheme: ColorScheme = ColorScheme.DEBUG_1,
         scale: Decimal = Decimal("1"),
         *,
-        flip_y: bool = True,
+        flip_y: bool = True, # AT: Default true, false fixes inversion issue but inverts the entire document.
+        flip_around_center: bool = True #####
     ) -> None:
         if not IS_SVG_BACKEND_AVAILABLE:
             raise DRAWSVGNotAvailableError
         self.color_scheme = color_scheme
         self.scale = scale
         self.flip_y = flip_y
+        self.flip_around_center = flip_around_center #####
 
     def init(
         self,
@@ -116,6 +119,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                 bounding_box=self.command_buffer.get_bounding_box(),
                 normalize_origin_to_0_0=True,
                 flip_y=self.flip_y,
+                flip_around_center=self.flip_around_center, #####
             ),
         ]
         self.apertures: dict[str, drawsvg.Group] = {}
@@ -126,6 +130,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         *,
         normalize_origin_to_0_0: bool,
         flip_y: bool,
+        flip_around_center: bool,
     ) -> None:
         """Push new segment render frame."""
         self.rendering_stack.append(
@@ -133,6 +138,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
                 bounding_box=bbox,
                 normalize_origin_to_0_0=normalize_origin_to_0_0,
                 flip_y=flip_y,
+                flip_around_center=flip_around_center, #####
             ),
         )
 
@@ -244,6 +250,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             y,
             normalize_origin_to_0_0=self.current_frame.normalize_origin_to_0_0,
             flip_y=self.current_frame.flip_y,
+            flip_around_center=self.current_frame.flip_around_center #####
         )
 
     def _convert_y(
@@ -252,6 +259,7 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         *,
         normalize_origin_to_0_0: bool,
         flip_y: bool,
+        flip_around_center: bool = True #####
     ) -> Decimal:
         """Convert y offset to pixel y coordinate."""
         if normalize_origin_to_0_0:
@@ -262,11 +270,15 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
         corrected_position_y = y.as_millimeters() - origin_offset_y
 
         if flip_y:
-            flipped_position_y = (
-                self.current_frame.bounding_box.height.as_millimeters()
-                - corrected_position_y
-            )
+            if flip_around_center: #####
+                flipped_position_y = (
+                    self.current_frame.bounding_box.height.as_millimeters()
+                    - corrected_position_y
+                )
+            else: #####
+                flipped_position_y = -corrected_position_y #####
             return flipped_position_y * self.scale
+
         return corrected_position_y * self.scale
 
     def convert_size(self, diameter: Offset) -> Decimal:
@@ -663,7 +675,8 @@ class SvgRenderer2Hooks(Renderer2HooksABC):
             self.push_render_frame(
                 command.get_bounding_box(),
                 normalize_origin_to_0_0=False,
-                flip_y=False,
+                flip_y=True,
+                flip_around_center=False, #####
             )
             for cmd in aperture.command_buffer:
                 cmd.render(self.renderer)
