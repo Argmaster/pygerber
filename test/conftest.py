@@ -6,9 +6,10 @@ import datetime
 import json
 import logging
 import os
+import shutil
 from contextlib import contextmanager, suppress
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from tempfile import mkdtemp
 from typing import Any, Generator
 
 import pytest
@@ -23,13 +24,20 @@ ASSETS_DIRECTORY = TEST_DIRECTORY / "assets"
 @contextmanager
 def cd_to_tempdir() -> Generator[Path, None, None]:
     original_cwd = Path.cwd().as_posix()
-    with suppress(  # noqa: SIM117
-        FileNotFoundError, NotADirectoryError, FileExistsError, PermissionError
+    temp_dir_path = Path(mkdtemp())
+
+    os.chdir(temp_dir_path.as_posix())
+    yield temp_dir_path
+    os.chdir(original_cwd)
+
+    with suppress(
+        FileNotFoundError,
+        NotADirectoryError,
+        FileExistsError,
+        PermissionError,
+        RecursionError,
     ):
-        with TemporaryDirectory() as tempdir:
-            os.chdir(tempdir)
-            yield Path(tempdir)
-            os.chdir(original_cwd)
+        shutil.rmtree(temp_dir_path.as_posix())
 
 
 class AssetLoader:
