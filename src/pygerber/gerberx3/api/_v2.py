@@ -447,7 +447,7 @@ class ParsedProject:
         self,
         destination: BytesIO | Path | str,
         *,
-        color_map: COLOR_MAP_T = DEFAULT_COLOR_MAP,
+        color_map: COLOR_MAP_T = DEFAULT_ALPHA_COLOR_MAP,
         dpmm: int = 20,
         image_format: ImageFormatEnum = ImageFormatEnum.AUTO,
         pixel_format: PixelFormatEnum = PixelFormatEnum.RGB,

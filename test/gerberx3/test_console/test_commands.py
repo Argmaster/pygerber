@@ -286,6 +286,7 @@ def test_project_render_with_file_type_tags() -> None:
         assert (temp_path / "output.png").exists()
 
         image = Image.open(temp_path / "output.png")
+        image.show()
         assert image.size == (766, 1071)
 
         assert image.getpixel((0, 0)) == (0, 0, 0)
