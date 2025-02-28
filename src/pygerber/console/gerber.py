@@ -540,6 +540,40 @@ def merge_convert_png(
         raise NotImplementedError(msg)
 
 
+@merge_convert.command("jpeg")
+@click.argument("sources", nargs=-1)
+@_get_output_file_option()
+@_get_dpmm_option()
+@_get_file_type_option()
+@_get_raster_implementation_option("pillow")
+def merge_convert_jpeg(
+    sources: str,
+    output: str,
+    file_type: str,
+    dpmm: int,
+    implementation: str,
+) -> None:
+    """Convert multiple Gerber images to JPEG image and merge them into one image.
+
+    Images are merged from first to last, thus fist layer is bottom most, last layer
+    is topmost, unobstructed.
+
+    SOURCES - paths to files which are supposed to be rendered and merged.
+    """
+    view = CompositeView(
+        GerberFile.from_file(source, file_type=FileTypeEnum(file_type.upper()))
+        for source in sources
+    )
+
+    if implementation.lower() == "pillow":
+        result = view.render_with_pillow(dpmm)
+        result.save_jpeg(output)
+
+    else:
+        msg = f"Implementation {implementation!r} is not supported."
+        raise NotImplementedError(msg)
+
+
 @gerber.command("lint")
 @click.argument("files", nargs=-1)
 @click.option(

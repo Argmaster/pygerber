@@ -48,3 +48,8 @@ MERGE_CONVERT_PNG_REFERENCE_IMAGE = ImageAsset[GitFile].new(
     REFERENCE_REPOSITORY.file("reference/pygerber/console/merge_convert_png.png"),
     ImageFormat.PNG,
 )
+
+MERGE_CONVERT_JPEG_REFERENCE_IMAGE = ImageAsset[GitFile].new(
+    REFERENCE_REPOSITORY.file("reference/pygerber/console/merge_convert_jpeg.jpeg"),
+    ImageFormat.JPEG,
+)
