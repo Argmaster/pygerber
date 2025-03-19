@@ -260,7 +260,7 @@ def test_project_render_default() -> None:
         )
         assert (
             image.getpixel((80, 100))
-            == ColorScheme.PASTE_MASK.solid_region_color.as_rgb_int()
+            == ColorScheme.SOLDER_MASK.solid_region_color.as_rgb_int()
         )
         assert (
             image.getpixel((190, 392))
