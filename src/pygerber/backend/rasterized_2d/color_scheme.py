@@ -171,9 +171,9 @@ ColorScheme.PASTE_MASK_ALPHA = ColorScheme(
 ColorScheme.SOLDER_MASK = ColorScheme(
     background_color=RGBA.from_rgba(0, 0, 0, 255),
     clear_color=RGBA.from_rgba(0, 0, 0, 255),
-    solid_color=RGBA.from_rgba(117, 117, 117, 255),
+    solid_color=RGBA.from_rgba(153, 153, 153, 255),
     clear_region_color=RGBA.from_rgba(0, 0, 0, 255),
-    solid_region_color=RGBA.from_rgba(117, 117, 117, 255),
+    solid_region_color=RGBA.from_rgba(153, 153, 153, 255),
 )
 ColorScheme.SOLDER_MASK_ALPHA = ColorScheme(
     background_color=RGBA.from_rgba(0, 0, 0, 0),

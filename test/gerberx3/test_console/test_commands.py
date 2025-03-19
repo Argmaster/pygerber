@@ -295,7 +295,11 @@ def test_project_render_with_file_type_tags() -> None:
             == ColorScheme.COPPER.solid_region_color.as_rgb_int()
         )
         assert (
-            image.getpixel((80, 100))
+            image.getpixel((80, 80))
+            == ColorScheme.SOLDER_MASK.solid_region_color.as_rgb_int()
+        )
+        assert (
+            image.getpixel((235, 505))
             == ColorScheme.PASTE_MASK.solid_region_color.as_rgb_int()
         )
         assert (
