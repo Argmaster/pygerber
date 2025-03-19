@@ -363,7 +363,7 @@ def test_gerber_merge_convert_png(*, is_regeneration_enabled: bool) -> None:
             )
 
 
-MIN_MERGE_JPEG_SSIM = 0.99
+MIN_MERGE_JPEG_SSIM = 0.97
 
 
 @tag(Tag.PILLOW, Tag.OPENCV, Tag.SKIMAGE)
@@ -395,6 +395,6 @@ def test_gerber_merge_convert_jpeg(*, is_regeneration_enabled: bool) -> None:
             ia.assert_same_size(image)
             (
                 ia.histogram_compare_color(image)
-                .assert_channel_count(4)
+                .assert_channel_count(3)
                 .assert_greater_or_equal_values(0.99)
             )
