@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic Versioning 2.0.0](https://semver.org/).
 
+## Release 2.4.3
+
+- Fixed `background_color` parameter being completely ignored in raster renders. Thanks
+  to @totalretribution reporting the issue.
+- Changed default color map used by Project `render_raster()`to
+  `DEFAULT_ALPHA_COLOR_MAP` as `DEFAULT_COLOR_MAP` resulted in images with layers
+  obfuscating each other in counter intuitive way.
+- Unified gray shades of non-alpha and alpha variant of SOLDER_MASK preset color scheme.
+
 ## Release 2.4.2
 
 - Relaxed `pyparsing` dependency requirements to allow for use of `3.2` and above for
