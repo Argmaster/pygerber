@@ -94,12 +94,14 @@ def _get_raster_implementation_option(
     )
 
 
-def _get_output_file_option() -> Callable[[click.decorators.FC], click.decorators.FC]:
+def _get_output_file_option(
+    default: str,
+) -> Callable[[click.decorators.FC], click.decorators.FC]:
     return click.option(
         "-o",
         "--output",
         type=click.Path(dir_okay=False),
-        default="output.png",
+        default=default,
         help="Path to output file.",
     )
 
@@ -123,7 +125,7 @@ def _get_source_file_argument() -> Callable[[click.decorators.FC], click.decorat
 
 @convert.command("png")
 @_get_source_file_argument()
-@_get_output_file_option()
+@_get_output_file_option("output.png")
 @_get_dpmm_option()
 @_get_file_type_option()
 @_get_style_option()
@@ -202,7 +204,7 @@ def _sanitize_style(
 
 @convert.command("jpeg")
 @_get_source_file_argument()
-@_get_output_file_option()
+@_get_output_file_option("output.jpg")
 @_get_dpmm_option()
 @_get_file_type_option()
 @_get_style_option()
@@ -242,7 +244,7 @@ def jpeg(  # noqa: PLR0913
 
 @convert.command("tiff")
 @_get_source_file_argument()
-@_get_output_file_option()
+@_get_output_file_option("output.tiff")
 @_get_dpmm_option()
 @_get_file_type_option()
 @_get_style_option()
@@ -315,7 +317,7 @@ def tiff(  # noqa: PLR0913
 
 @convert.command("bmp")
 @_get_source_file_argument()
-@_get_output_file_option()
+@_get_output_file_option("output.bmp")
 @_get_dpmm_option()
 @_get_file_type_option()
 @_get_style_option()
@@ -347,7 +349,7 @@ def bmp(
 
 @convert.command("webp")
 @_get_source_file_argument()
-@_get_output_file_option()
+@_get_output_file_option("output.webp")
 @_get_dpmm_option()
 @_get_file_type_option()
 @_get_style_option()
@@ -400,7 +402,7 @@ if is_shapely_available():
 
     @convert.command("svg")
     @_get_source_file_argument()
-    @_get_output_file_option()
+    @_get_output_file_option("output.svg")
     @_get_file_type_option()
     @_get_style_option()
     @_get_foreground_option()
@@ -508,7 +510,7 @@ def merge_convert() -> None:
 
 @merge_convert.command("png")
 @click.argument("sources", nargs=-1)
-@_get_output_file_option()
+@_get_output_file_option("output.png")
 @_get_dpmm_option()
 @_get_file_type_option()
 @_get_raster_implementation_option("pillow")
@@ -542,7 +544,7 @@ def merge_convert_png(
 
 @merge_convert.command("jpeg")
 @click.argument("sources", nargs=-1)
-@_get_output_file_option()
+@_get_output_file_option("output.jpg")
 @_get_dpmm_option()
 @_get_file_type_option()
 @_get_raster_implementation_option("pillow")
