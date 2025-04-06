@@ -17,7 +17,7 @@ THIS_DIRECTORY = THIS_FILE.parent
 def benchmark() -> None:
     ast = parse(A64_OlinuXino_Rev_G.A64_OlinuXino_Rev_G_B_Cu.load())
     rvmc = compile(ast)
-    result = cast(PillowResult, render(rvmc, dpmm=100))
+    result = cast("PillowResult", render(rvmc, dpmm=100))
     result.get_image().save(THIS_DIRECTORY / "#A64_OLinuXino_rev_G_bottom_copper.png")
 
 

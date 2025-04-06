@@ -356,7 +356,7 @@ class LayerBuilder:
         self._check_not_finalized_in_add()
         self._commands.append(
             PasteLayer(
-                source_layer_id=layer._layer_id,  # noqa: SLF001
+                source_layer_id=layer._layer_id,
                 center=Vector.from_tuple(at),
                 is_negative=is_negative,
             )

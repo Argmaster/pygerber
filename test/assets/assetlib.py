@@ -461,9 +461,9 @@ class KeyPointMatches:
 
     def assert_count(self, count: int) -> Self:
         """Expect the number of key point matches."""
-        assert (
-            len(self.matches) == count
-        ), f"Expected {count} key point matches found, got {len(self.matches)}"
+        assert len(self.matches) == count, (
+            f"Expected {count} key point matches found, got {len(self.matches)}"
+        )
         return self
 
 
@@ -475,17 +475,17 @@ class HistCompValues:
 
     def assert_channel_count(self, count: int) -> Self:
         """Expect the number of correlation values."""
-        assert (
-            len(self.channel) == count
-        ), f"Expected {count} correlation values, got {len(self.channel)}"
+        assert len(self.channel) == count, (
+            f"Expected {count} correlation values, got {len(self.channel)}"
+        )
         return self
 
     def assert_greater_or_equal_values(self, min_value: float) -> Self:
         """Expect the minimum value of the correlations."""
         for value in self.channel:
-            assert (
-                value >= min_value
-            ), f"Expected correlation value >= {min_value}, got {value}"
+            assert value >= min_value, (
+                f"Expected correlation value >= {min_value}, got {value}"
+            )
 
         return self
 

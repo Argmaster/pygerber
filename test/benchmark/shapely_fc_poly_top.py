@@ -17,7 +17,7 @@ THIS_DIRECTORY = THIS_FILE.parent
 def benchmark() -> None:
     ast = parse(FcPoly_Test.top.load())
     rvmc = compile(ast)
-    result = cast(ShapelyResult, render(rvmc, backend="shapely"))
+    result = cast("ShapelyResult", render(rvmc, backend="shapely"))
     result.save_svg(THIS_DIRECTORY / "#FcPoly_bottom.svg")
 
 

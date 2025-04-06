@@ -1263,9 +1263,9 @@ class CustomPadCreator:
             Same CustomPadCreator object for method chaining.
 
         """
-        assert (
-            len(points) >= NUMBER_OF_VERTICES_IN_TRIANGLE
-        ), "An outline must have at least 3 points"
+        assert len(points) >= NUMBER_OF_VERTICES_IN_TRIANGLE, (
+            "An outline must have at least 3 points"
+        )
         self._outline(1, points, rotation=rotation)
         return self
 
@@ -1316,9 +1316,9 @@ class CustomPadCreator:
             Same CustomPadCreator object for method chaining.
 
         """
-        assert (
-            len(points) >= NUMBER_OF_VERTICES_IN_TRIANGLE
-        ), "An outline must have at least 3 points"
+        assert len(points) >= NUMBER_OF_VERTICES_IN_TRIANGLE, (
+            "An outline must have at least 3 points"
+        )
         self._outline(0, points, rotation=rotation)
         return self
 

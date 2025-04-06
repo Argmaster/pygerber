@@ -115,7 +115,7 @@ reportlab = { extras = ["pycairo"], version = "^4.2.5" }
 optional = true
 
 [tool.poetry.group.style.dependencies]
-ruff = "^0.9.6"
+ruff = "^0.11.4"
 mypy = "^1.13.0"
 pre-commit = "^3.3.3"
 
@@ -216,7 +216,7 @@ lint.ignore = [
     "D213",   # Multi-line docstring summary should start at the second line
     "UP007",  # Use X | Y for type annotations
     "UP006",  # Checks for the use of generics that can be replaced with standard library variants based on PEP 585.
-    "TCH001", # Checks for first-party imports that are only used for type annotations, but aren't defined in a type-checking block.
+    "TC001", # Checks for first-party imports that are only used for type annotations, but aren't defined in a type-checking block.
     "D105",   # Adding docstrings in all magic methods doesn't make sense, as usually they are just boilerplate to support operators.
     "FIX002", # Line contains TODO, consider resolving the issue
     "D107",   # Adding docstring to __init__ doesn't make sense when class already has its docstring.
@@ -227,6 +227,7 @@ lint.ignore = [
     "EM101",  # Stupid errors when exceptions are parametrized by short strings.
     "A004",   # Import `X` is shadowing a Python builtin
     "PYI063", # Use PEP 570 syntax for positional-only parameters - too late.
+    "LOG015", # We are using global logger for now.
 ]
 show-fixes = true
 target-version = "py38"

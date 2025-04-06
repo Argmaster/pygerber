@@ -1244,7 +1244,7 @@ class Grammar:
 
         if self.syntax_switches.allow_non_standalone_d_codes:
             non_standalone_codes: Iterable[pp.ParserElement] = (
-                _non_standalone(cast(Type[Node], cls))
+                _non_standalone(cast("Type[Node]", cls))
                 for cls in reversed(
                     (
                         G01,
@@ -1270,7 +1270,7 @@ class Grammar:
             [
                 g04_comment,
                 *(
-                    _standalone(cast(Type[Node], cls))
+                    _standalone(cast("Type[Node]", cls))
                     for cls in reversed(
                         (
                             G01,

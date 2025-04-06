@@ -127,7 +127,7 @@ def test_radd() -> None:
     box = Box(min_x=min_x, min_y=min_y, max_x=max_x, max_y=max_y)
     vector = Vector(x=1, y=1)
     box_original = box
-    box: Box = cast(Box, vector + box)
+    box: Box = cast("Box", vector + box)
 
     assert box.min_x == min_x + vector.x
     assert id(box_original) != id(box)

@@ -1,4 +1,4 @@
-"""Basic types for AST nodes."""
+"""Basic types for AST nodes."""  # noqa: A005
 
 from __future__ import annotations
 

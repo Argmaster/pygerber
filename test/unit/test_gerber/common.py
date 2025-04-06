@@ -173,8 +173,8 @@ def highlight_differences(first: Image.Image, second: Image.Image) -> Image.Imag
     draw = ImageDraw.Draw(diff_img)
     for x in range(max_width):
         for y in range(max_height):
-            r1, g1, b1, a1 = cast(_RGBA_PIXEL, img1_centered.getpixel((x, y)))
-            r2, g2, b2, a2 = cast(_RGBA_PIXEL, img2_centered.getpixel((x, y)))
+            r1, g1, b1, a1 = cast("_RGBA_PIXEL", img1_centered.getpixel((x, y)))
+            r2, g2, b2, a2 = cast("_RGBA_PIXEL", img2_centered.getpixel((x, y)))
             draw.point(
                 (x, y),
                 fill=(
@@ -248,22 +248,22 @@ class JsonWalker:
             self.on_dict(data)
             for key, value in data.items():
                 data[key] = self._walk_any(value)
-            return cast(T, data)
+            return cast("T", data)
 
         if isinstance(data, list):
             self.on_list(data)
             for i, value in enumerate(data):
                 data[i] = self._walk_any(value)
-            return cast(T, data)
+            return cast("T", data)
 
         if isinstance(data, str):
-            return cast(T, self.on_string(data))
+            return cast("T", self.on_string(data))
 
         if isinstance(data, (int, float)):
-            return cast(T, self.on_number(float(data)))
+            return cast("T", self.on_number(float(data)))
 
         if isinstance(data, bool):
-            return cast(T, self.on_bool(data))
+            return cast("T", self.on_bool(data))
 
         if data is None:
             return self.on_none(data)  # type: ignore[unreachable, no-any-return, func-returns-value]
