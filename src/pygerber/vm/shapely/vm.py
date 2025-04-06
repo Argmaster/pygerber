@@ -320,7 +320,7 @@ class ShapelyVirtualMachine(VirtualMachine):
         segment_count = self.angle_length_to_segment_count(angle_length)
 
         angle_delta = angle_delta / segment_count
-        assert angle_delta > 0
+        assert angle_delta >= 0
 
         angle_generator: Generator[float, None, None]
 
