@@ -410,6 +410,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#release-243" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release 2.4.3
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#release-242" class="md-nav__link">
     <span class="md-ellipsis">
       Release 2.4.2
@@ -8189,6 +8198,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#release-243" class="md-nav__link">
+    <span class="md-ellipsis">
+      Release 2.4.3
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#release-242" class="md-nav__link">
     <span class="md-ellipsis">
       Release 2.4.2
@@ -8347,11 +8365,14 @@ this project adheres to <a href="https://semver.org/">Semantic Versioning 2.0.0<
   <code>create_deferred_layer</code> for consistency.</li>
 <li>Moved <code>CoordinateX</code>, <code>CoordinateY</code>, <code>CoordinateI</code> and <code>CoordinateJ</code> to separate
   modules.</li>
+<li>Added workaround for <a href="https://github.com/Argmaster/pygerber/issues/383">#383</a>.</li>
 <li>Added <code>pygerber.gerber.lint</code> package containing linting tools for Gerber files.</li>
 <li>Added <code>pygerber gerber lint</code> command to CLI for linting Gerber files.</li>
 <li>Changed how empty images are handled in <code>VirtualMachine</code>, they no longer throw an
   exception by default. This can be changed by passing
   <code>fail_on_empty_auto_sized_layer=True</code> to <code>VirtualMachine</code> constructor.</li>
+<li>Fixed default paths used by <code>pygerber gerber convert</code> commands to have extensions
+  matching output file format.</li>
 </ul>
 <h2 id="pre-release-300a4">Pre-Release 3.0.0a4<a class="headerlink" href="#pre-release-300a4" title="Anchor link to this section for reference">&para;</a></h2>
 <ul>
@@ -8450,6 +8471,15 @@ this project adheres to <a href="https://semver.org/">Semantic Versioning 2.0.0<
   rendering raster images with Pillow. SVG rendering is planned to be included in 3.0.0
   release.</li>
 <li>Ported language server to new parser.</li>
+</ul>
+<h2 id="release-243">Release 2.4.3<a class="headerlink" href="#release-243" title="Anchor link to this section for reference">&para;</a></h2>
+<ul>
+<li>Fixed <code>background_color</code> parameter being completely ignored in raster renders. Thanks
+  to @totalretribution reporting the issue.</li>
+<li>Changed default color map used by Project <code>render_raster()</code>to
+  <code>DEFAULT_ALPHA_COLOR_MAP</code> as <code>DEFAULT_COLOR_MAP</code> resulted in images with layers
+  obfuscating each other in counter intuitive way.</li>
+<li>Unified gray shades of non-alpha and alpha variant of SOLDER_MASK preset color scheme.</li>
 </ul>
 <h2 id="release-242">Release 2.4.2<a class="headerlink" href="#release-242" title="Anchor link to this section for reference">&para;</a></h2>
 <ul>
