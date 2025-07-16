@@ -86,7 +86,7 @@ pytest = "^8.3.5"
 pytest-cov = ">=4.1,<6.0"
 pytest-lsp = "^0.4.2"
 pytest-asyncio = ">=0.23.7,<0.25.0"
-pytest-mock = "^3.14.0"
+pytest-mock = "^3.14.1"
 
 [tool.poetry.group.image_analysis]
 optional = true
