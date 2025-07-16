@@ -24,8 +24,6 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email argmaster.world@gmail.com
-          git remote add gitlab https://${{ secrets.GITLAB_USERNAME }}:${token}@${{ secrets.GITLAB_URL }}
+          git remote add gitlab https://GITLAB_MIRROR_ACCESS:${{ secrets.GITLAB_MIRROR_ACCESS }}@gitlab.com/Argmaster/pygerber
           git push gitlab main -f
           git push --tags gitlab main -f
-        env:
-          token: ${{ secrets.GITLAB_MIRROR_ACCESS }}
