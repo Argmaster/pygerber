@@ -231,18 +231,29 @@ class PillowResult(Result):
         )
 
     def get_image(self, style: Style = Style.presets.COPPER_ALPHA) -> Image.Image:
-        """Get image with given color scheme."""
+        """Get image with given color scheme using a fast compositing method."""
         assert isinstance(style, Style)
         if self.image is None:
             msg = "Image is not available."
             raise ValueError(msg)
 
-        image = replace_color(
-            self.image, (255, 255, 255, 255), style.foreground.as_rgba_int()
+        # The original rendered image is black and white ('1' mode). This is our mask.
+        # We need to convert it to grayscale ('L') for the composite function.
+        mask = self.image.convert("L")
+
+        # Create a solid background layer.
+        background_img = Image.new(
+            "RGBA", self.image.size, style.background.as_rgba_int()
         )
-        return replace_color_in_place(
-            image, (0, 0, 0, 255), style.background.as_rgba_int()
+
+        # Create a solid foreground layer.
+        foreground_img = Image.new(
+            "RGBA", self.image.size, style.foreground.as_rgba_int()
         )
+
+        # Composite the foreground onto the background using the render as a mask.
+        # This is a single, highly optimized C operation that replaces the slow loops.
+        return Image.composite(foreground_img, background_img, mask)
 
     def get_image_no_style(self) -> Image.Image:
         """Get image without any color scheme."""
@@ -251,39 +262,6 @@ class PillowResult(Result):
             raise ValueError(msg)
 
         return self.image
-
-
-def replace_color(
-    input_image: Image.Image,
-    original: tuple[int, ...] | int,
-    replacement: tuple[int, ...] | int,
-    *,
-    output_image_mode: str = "RGBA",
-) -> Image.Image:
-    """Replace `original` color from input image with `replacement` color."""
-    if input_image.mode != output_image_mode:
-        output_image = input_image.convert(output_image_mode)
-    else:
-        output_image = input_image.copy()
-
-    replace_color_in_place(output_image, original, replacement)
-
-    return output_image
-
-
-def replace_color_in_place(
-    image: Image.Image,
-    original: tuple[int, ...] | int,
-    replacement: tuple[int, ...] | int,
-) -> Image.Image:
-    """Replace `original` color from input image with `replacement` color."""
-    for x in range(image.width):
-        for y in range(image.height):
-            if image.getpixel((x, y)) == original:
-                image.putpixel((x, y), replacement)
-
-    return image
-
 
 class PillowEagerLayer(EagerLayer):
     """`PillowEagerLayer` class represents drawing space of known fixed size.
