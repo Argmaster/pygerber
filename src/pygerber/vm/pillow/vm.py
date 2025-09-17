@@ -263,6 +263,7 @@ class PillowResult(Result):
 
         return self.image
 
+
 class PillowEagerLayer(EagerLayer):
     """`PillowEagerLayer` class represents drawing space of known fixed size.
 
