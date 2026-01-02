@@ -41,6 +41,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Update local apt index
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update
+
       - name: Install cairo on Ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install -y libcairo2-dev
@@ -93,6 +97,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Update local apt index
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update
+
+
       - name: Install cairo on Ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install -y libcairo2-dev
@@ -145,6 +154,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Update local apt index
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update
+
       - name: Install cairo on Ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install -y libcairo2-dev
@@ -193,6 +206,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Update local apt index
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update
+
       - name: Install cairo on Ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install -y libcairo2-dev
@@ -234,6 +251,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Update local apt index
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update
+
       - name: Install cairo on Ubuntu
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install -y libcairo2-dev
