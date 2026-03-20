@@ -377,7 +377,7 @@ class Formatter(AstVisitor):
         double = f"{value:.{self.float_decimal_places}f}"
         if self.float_trim_trailing_zeros:
             return double.rstrip("0").rstrip(".")
-        return double
+        return double  # type: ignore[unreachable]
 
     def _insert_base_indent(self) -> None:
         self._write(self._base_indent)

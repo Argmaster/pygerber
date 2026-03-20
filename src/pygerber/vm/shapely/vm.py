@@ -276,12 +276,14 @@ class ShapelyVirtualMachine(VirtualMachine):
 
         transformed_shape = sh.transform(
             polygon,
-            lambda p: np.array(
-                [
-                    p[:, 0] + x_offset,
-                    p[:, 1] + y_offset,
-                ]
-            ).T,
+            lambda p: (
+                np.array(
+                    [
+                        p[:, 0] + x_offset,
+                        p[:, 1] + y_offset,
+                    ]
+                ).T
+            ),
         ).buffer(0)
 
         if is_negative:
@@ -384,12 +386,14 @@ class ShapelyVirtualMachine(VirtualMachine):
         transformed_shape = [
             sh.transform(
                 geom,
-                lambda p: np.array(
-                    [
-                        p[:, 0] + x_offset,
-                        p[:, 1] + y_offset,
-                    ]
-                ).T,
+                lambda p: (
+                    np.array(
+                        [
+                            p[:, 0] + x_offset,
+                            p[:, 1] + y_offset,
+                        ]
+                    ).T
+                ),
             )
             for geom in source_layer.shape
         ]

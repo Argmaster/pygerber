@@ -64,7 +64,9 @@ def main(ctx: click.Context, *, quiet: bool, check_only: bool) -> None:  # noqa:
             },
         },
     )
-    from pygerber.gerber.language_server._server.server import get_server
+    from pygerber.gerber.language_server._server.server import (  # noqa: PLC0415
+        get_server,
+    )
 
     server = get_server()
     server.start_io()

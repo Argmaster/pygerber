@@ -18,7 +18,9 @@ def main() -> None:
 
 @main.command("is-language-server-available")
 def _is_language_server_available() -> None:
-    from pygerber.gerber.language_server.status import is_language_server_available
+    from pygerber.gerber.language_server.status import (  # noqa: PLC0415
+        is_language_server_available,
+    )
 
     if is_language_server_available():
         click.echo("Language server is available.")

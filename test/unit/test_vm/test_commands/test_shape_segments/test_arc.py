@@ -167,7 +167,7 @@ class TestArc:
                 box=Box(min_x=0.0, min_y=-sin45, max_x=1.0, max_y=sin45),
             ),
         ],
-        ids=lambda x: str(x),
+        ids=str,
     )
     def test_outer_box(
         self,

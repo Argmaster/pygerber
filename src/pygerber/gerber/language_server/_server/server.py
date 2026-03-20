@@ -18,8 +18,8 @@ def get_server() -> LanguageServer:  # noqa: PLR0915, C901
     """Get the language server instance."""
     throw_if_server_not_available()
 
-    import lsprotocol.types as lspt
-    import pygls.server as pygls_server
+    import lsprotocol.types as lspt  # noqa: PLC0415
+    import pygls.server as pygls_server  # noqa: PLC0415
 
     gls = pygls_server.LanguageServer(
         "pygerber.gerber.language_server",

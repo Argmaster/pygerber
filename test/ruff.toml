@@ -7,4 +7,5 @@ ignore = [
     "D",      # Only limited docstrings are required.
     "SLF001", # Tests can access private members.
     "E501",   # Sometimes test data cant be truncated to desired line width.
+    "PLC0415",# Code samples should be complete, including imports, thus test functions contain imports in local scope.
 ]

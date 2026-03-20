@@ -71,7 +71,10 @@ lsprotocol = { version = ">=2023,<2024", optional = true }
 drawsvg = { version = ">=2.0.0,<3.0.0", optional = true }
 typing-extensions = ">=4.12,<5.0"
 pygments = { version = ">=2.10.0,<3.0.0", optional = true }
-shapely = { version = ">=2.0.0,<3.0.0", optional = true }
+shapely = [
+    { version = ">=2.0.0,<2.1.0", python = "<3.10", optional = true },
+    { version = ">=2.1.0,<3.0.0", python = ">=3.10", optional = true }
+]
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.30.0"
@@ -115,7 +118,7 @@ reportlab = { extras = ["pycairo"], version = "^4.2.5" }
 optional = true
 
 [tool.poetry.group.style.dependencies]
-ruff = "^0.11.4"
+ruff = "^0.15.7"
 mypy = "^1.13.0"
 pre-commit = "^3.3.3"
 
@@ -129,6 +132,7 @@ twine = "^5.1"
 optional = true
 
 [tool.poetry.group.docs.dependencies]
+docutils = "!=0.21.post1"
 mkdocs = "^1.5.2"
 mkdocs-material = "^9.6.5"
 mkdocstrings = { extras = ["python"], version = ">=0.25.1,<0.27" }
@@ -228,6 +232,7 @@ lint.ignore = [
     "A004",   # Import `X` is shadowing a Python builtin
     "PYI063", # Use PEP 570 syntax for positional-only parameters - too late.
     "LOG015", # We are using global logger for now.
+    "PLW1641",# In places where `__hash__` is necessary, its usually implemented by Model type from pydantic.
 ]
 show-fixes = true
 target-version = "py38"
@@ -266,11 +271,18 @@ line-ending = "lf"
 #            https://mypy.readthedocs.io/en/stable/command_line.html           #
 #          https://mypy.readthedocs.io/en/stable/cheat_sheet_py3.html          #
 # ---------------------------------------------------------------------------- #
-python_version = "3.8"
+# Python version setting is not included, as by default current running version
+# is used. When version is hardcoded, we start to have issues due to wide range
+# of version supported. For example when testing on Python 3.10, some libraries
+# already use `match` statement, but then mypy complains that it is not allowed
+# in 3.8 (minimal version supported, a value we would have to hard code)
+# Instead we should just make sure CI tests on oldest and latest and that
+# dependency versions are correct.
+# ---------------------------------------------------------------------------- #
 # A regular expression that matches file names, directory names and paths which
 # mypy should ignore while recursively discovering files to check. Use forward
 #slashes (/) as directory separators on all platforms.
-exclude = ["external/", ".tox/", ".venv/", ".vscode/", "docs/", "scripts/"]
+exclude = ["external/", ".venv/", ".vscode/", "docs/", "scripts/"]
 # ---------------------------------------------------------------------------- #
 #                               Import discovery                               #
 # ---------------------------------------------------------------------------- #

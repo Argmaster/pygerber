@@ -12,4 +12,5 @@ ignore = [
     "I001",
     "I002",
     "N999",
+    "PLC0415", # Samples contain imports in local scope.
 ]

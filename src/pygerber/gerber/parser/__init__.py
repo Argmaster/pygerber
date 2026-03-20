@@ -65,7 +65,7 @@ def parse(
 
     """
     if parser == "pyparsing":
-        from pygerber.gerber.parser.pyparsing.parser import Parser
+        from pygerber.gerber.parser.pyparsing.parser import Parser  # noqa: PLC0415
 
         return Parser(
             resilient=resilient, ast_node_class_overrides=ast_node_class_overrides

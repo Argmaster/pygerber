@@ -66,7 +66,7 @@ def find_latest_stable(versions: list[Version]) -> Version:
 
 
 def find_latest_unstable(versions: list[Version]) -> Version:
-    return max(filter(lambda v: (v.is_devrelease or v.is_prerelease), versions))
+    return max(filter(lambda v: v.is_devrelease or v.is_prerelease, versions))
 
 
 if __name__ == "__main__":

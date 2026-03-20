@@ -390,7 +390,7 @@ NODE_SAMPLES: Dict[Type[Node], Node] = {
 
 class TestAstVisitor:
     @pytest.mark.parametrize(("_type", "instance"), NODE_SAMPLES.items())
-    def test_visit_node(self, _type: Type[Node], instance: Node) -> None:  # noqa: PT019
+    def test_visit_node(self, _type: Type[Node], instance: Node) -> None:
         callback_mock = mock.Mock()
         visitor = AstVisitor()
         setattr(

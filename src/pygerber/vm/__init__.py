@@ -26,12 +26,12 @@ def render(
 ) -> Result:
     """Render RVMC code using given builder."""
     if backend == "pillow":
-        from pygerber.vm.pillow import PillowVirtualMachine
+        from pygerber.vm.pillow import PillowVirtualMachine  # noqa: PLC0415
 
         return PillowVirtualMachine(**options).run(rvmc)
 
     if backend == "shapely":
-        from pygerber.vm.shapely import ShapelyVirtualMachine
+        from pygerber.vm.shapely import ShapelyVirtualMachine  # noqa: PLC0415
 
         return ShapelyVirtualMachine(**options).run(rvmc)
 

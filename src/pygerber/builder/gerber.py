@@ -219,8 +219,8 @@ class GerberX3Builder:
         selected_aperture: Optional[ApertureIdStr] = None,
         polarity: Optional[Polarity] = None,
         rotation: Optional[float] = None,
-        mirror_x: Optional[bool] = None,
-        mirror_y: Optional[bool] = None,
+        mirror_x: Optional[bool] = None,  # noqa: FBT001
+        mirror_y: Optional[bool] = None,  # noqa: FBT001
         scale: Optional[float] = None,
         plot_mode: Optional[PlotMode] = None,
     ) -> Iterable[Node]:
@@ -645,7 +645,7 @@ class GerberCode:
 
     def dump(self, dst: TextIO) -> None:
         """Dump the Gerber code to file or other buffer."""
-        from pygerber.gerber.formatter import Formatter
+        from pygerber.gerber.formatter import Formatter  # noqa: PLC0415
 
         Formatter().format(self._ast, dst)
 

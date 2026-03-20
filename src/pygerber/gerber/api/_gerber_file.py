@@ -712,7 +712,7 @@ class GerberFile:
     @pp.cached_property
     def sha256(self) -> str:
         """SHA256 hash of Gerber source code."""
-        import hashlib
+        import hashlib  # noqa: PLC0415
 
         return hashlib.sha256(self._source_code.encode("utf-8")).hexdigest()
 

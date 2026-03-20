@@ -262,8 +262,11 @@ class Attributes(_StateModel):
 class ImageAttributes(_StateModel):
     """Legacy attributes of the image."""
 
-    polarity: ImagePolarity = Field(default=None)
+    polarity: ImagePolarity = Field(default=ImagePolarity.POSITIVE)
     """The name of the image. (Spec reference: 8.1.4)"""
+    # I haven't found an explicit statement about what is the default polarity, but
+    # in 99% cases assumption is that image is positive (not inverted), thus chosen for
+    # simplicity.
 
     rotation: Double = Field(default=0.0)
     """The rotation of the image. (Spec reference: 8.1.5)"""

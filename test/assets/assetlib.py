@@ -20,7 +20,7 @@ import numpy as np
 from attr import dataclass
 from filelock import FileLock
 from PIL import Image
-from pydantic import BaseModel, DirectoryPath, Field, HttpUrl
+from pydantic import BaseModel, DirectoryPath, Field
 from pydantic_core import Url
 
 if TYPE_CHECKING:
@@ -46,7 +46,7 @@ class Source(BaseModel):
 class GitRepository(BaseModel):
     """Git repository information."""
 
-    remote: Optional[HttpUrl] = Field(default=None)
+    remote: Optional[Url] = Field(default=None)
     """URL of the remote repository."""
 
     checkout_target: str

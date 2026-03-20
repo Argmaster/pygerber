@@ -591,8 +591,8 @@ def merge_convert_jpeg(
 )
 def lint(files: str, rules: list[str]) -> None:
     """Lint Gerber files with specified rules."""
-    from pygerber.gerber.linter import lint
-    from pygerber.gerber.parser import parse
+    from pygerber.gerber.linter import lint  # noqa: PLC0415
+    from pygerber.gerber.parser import parse  # noqa: PLC0415
 
     if len(files) == 0:
         msg = "At least one file must be specified."
@@ -623,7 +623,7 @@ def lint(files: str, rules: list[str]) -> None:
 )
 def list_lint_rules(*, quiet: bool) -> None:
     """List available linting rules."""
-    from pygerber.gerber.linter.rules import RULE_REGISTRY
+    from pygerber.gerber.linter.rules import RULE_REGISTRY  # noqa: PLC0415
 
     for rule_id in RULE_REGISTRY:
         if quiet:
