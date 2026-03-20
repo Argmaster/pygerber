@@ -86,7 +86,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-24.04, ubuntu-22.04, windows-2022, windows-2025]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.13"]
 
     name: Unit on ${{ matrix.os }} with Python ${{ matrix.python-version }}
 
@@ -142,7 +142,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-24.04, windows-2025]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.13"]
 
     name: E2E on ${{ matrix.os }} with Python ${{ matrix.python-version }}
 
