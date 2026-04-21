@@ -70,6 +70,31 @@ prefix:
 pip install git+https://github.com/Argmaster/pygerber
 ```
 
+## 🚀 Quick Example
+
+Render a Gerber file to PNG in a few lines:
+
+```python
+from pygerber.gerber.api import GerberFile
+
+gerber = GerberFile.from_file("board-F_Cu.gbr")
+image = gerber.render_with_pillow(dpmm=40)
+image.save_png("front_copper.png")
+```
+
+Or try it immediately with a built-in example:
+
+```python
+from pygerber.gerber.api import GerberFile
+from pygerber.examples import ExamplesEnum, get_example_path
+
+gerber = GerberFile.from_file(get_example_path(ExamplesEnum.simple_2layer_F_Cu))
+gerber.render_with_pillow(dpmm=40).save_png("output.png")
+```
+
+For multi-file rendering, custom color maps, SVG output, and more, see the
+[Quick Start guide](https://argmaster.github.io/pygerber/stable/40_gerber/20_quick_start/00_introduction/).
+
 ## 📚 Documentation
 
 PyGerber has online documentation hosted on GitHub Pages. It's a great starting point
